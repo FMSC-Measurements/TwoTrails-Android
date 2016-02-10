@@ -1,0 +1,33 @@
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context="com.usda.fmsc.twotrails.activities.PolygonsActivity">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/background_card_view">
+
+        <include layout="@layout/toolbar_default" android:id="@id/toolbar" />
+
+        <android.support.v4.view.ViewPager
+            android:id="@+id/polysViewPager"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_alignParentBottom="true"
+            android:layout_below="@id/toolbar"/>
+
+        <View style="@style/ToolbarElevation"
+            android:layout_below="@id/toolbar"/>
+    </RelativeLayout>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/polysFabNew"
+        style="@style/fabStyle"
+        android:src="@drawable/fab_add"
+        android:onClick="btnNewClick" />
+
+</android.support.design.widget.CoordinatorLayout>

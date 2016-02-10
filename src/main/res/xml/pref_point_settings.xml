@@ -1,0 +1,30 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="@string/menu_x_point_settings">
+
+    <Preference
+        android:title="@string/op_gps"
+        android:key="gpsPointSetup">
+
+        <intent android:action="openSettings" >
+            <extra android:name="@string/set_settings_page" android:value="gpsPointSetup" />
+        </intent>
+    </Preference>
+
+    <Preference
+        android:title="@string/op_take5"
+        android:key="take5PointSetup">
+
+        <intent android:action="openSettings" >
+            <extra android:name="@string/set_settings_page" android:value="take5PointSetup" />
+        </intent>
+    </Preference>
+
+    <Preference
+        android:title="@string/op_walk"
+        android:key="walkPointSetup">
+
+        <intent android:action="openSettings" >
+            <extra android:name="@string/set_settings_page" android:value="walkPointSetup" />
+        </intent>
+    </Preference>
+</PreferenceScreen>

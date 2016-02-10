@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+        <EditTextPreference
+            android:key="ProjectID"
+            android:title="ID"
+            android:summary="Name of Project"
+            android:defaultValue="2" />
+
+        <EditTextPreference
+            android:key="Description"
+            android:title="Description"
+            android:summary="Description of Project" />
+
+        <EditTextPreference
+            android:key="Region"
+            android:title="Region"
+            android:summary="Region of Project" />
+
+        <EditTextPreference
+            android:key="Forest"
+            android:title="Forest"
+            android:summary="Forest of Project" />
+
+        <EditTextPreference
+            android:key="District"
+            android:title="District"
+            android:summary="District of Project" />
+</PreferenceScreen>

@@ -1,0 +1,24 @@
+<preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
+    <header
+        android:fragment="com.usda.fmsc.twotrails.activities.PreferenceActivity$DeviceSetupPreferenceFragment"
+        android:title="@string/menu_x_device_setup" />
+    <!--android:icon="@drawable/ic_info_black_24dp"-->
+
+    <header
+        android:fragment="com.usda.fmsc.twotrails.activities.PreferenceActivity$PointSettingsPreferenceFragment"
+        android:title="Point Settings" />
+
+    <header
+        android:fragment="com.usda.fmsc.twotrails.activities.PreferenceActivity$MapPreferenceFragment"
+        android:title="Map Options" />
+
+    <header
+        android:fragment="com.usda.fmsc.twotrails.activities.PreferenceActivity$DialogPreferenceFragment"
+        android:title="Dialog Options" />
+
+    <header
+        android:fragment="com.usda.fmsc.twotrails.activities.PreferenceActivity$MiscPreferenceFragment"
+        android:title="Misc Settings" />
+
+
+</preference-headers>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="Misc Settings">
+
+    <com.usda.fmsc.android.preferences.SwitchCompatPreference
+        android:title="Open last project on start"
+        android:key="@string/set_AUTO_OPEN_LAST_PROJECT"/>
+
+    <com.usda.fmsc.android.preferences.SwitchCompatPreference
+        android:key="DropZero"
+        android:title="Drop Zeros"
+        android:summary="Drop Empty Points" />
+
+    <Preference
+        android:title="Export Report"
+        android:key="prefExportReport"
+        android:enabled="false"/>
+
+    <Preference
+        android:title="Clear Log"
+        android:key="prefClearLog"/>
+
+    <Preference
+        android:title="Reset Device Settings"
+        android:key="prefResetDevice" />
+</PreferenceScreen>

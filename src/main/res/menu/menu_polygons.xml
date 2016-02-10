@@ -1,0 +1,28 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.usda.fmsc.twotrails.activities.PolygonsActivity">
+
+    <item android:id="@+id/polyMenuLock"
+        android:title="@string/str_unlock"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_action_lock_closed"/>
+
+    <item
+        android:id="@+id/polyMenuDelete"
+        android:title="@string/menu_poly_delete"
+        android:icon="@drawable/ic_delete_black_36dp"
+        app:showAsAction="never"
+        android:enabled="false"/>
+
+    <item android:id="@+id/polyMenuReset"
+        android:title="@string/menu_poly_reset"
+        android:icon="@drawable/ic_refresh_black_36dp"
+        android:enabled="false"
+        app:showAsAction="never" />
+
+    <item android:id="@+id/polyMenuAdjust"
+        android:title="@string/menu_poly_adjust"
+        android:enabled="false"
+        app:showAsAction="never" />
+</menu>

@@ -1,0 +1,31 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.usda.fmsc.twotrails.activities.Take5ActivityOld">
+
+    <item
+        android:id="@+id/take5MenuToBottom"
+        android:title="@string/menu_take5_goto_bottom"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_file_download_white_36dp"
+        android:visible="true"/>
+
+    <item
+        android:id="@+id/take5MenuGps"
+        android:title="@string/menu_x_gps_settings"
+        app:showAsAction="never"
+        android:visible="true"/>
+
+    <item
+        android:id="@+id/take5MenuTake5Settings"
+        android:title="@string/menu_take5_settings"
+        app:showAsAction="never"
+        android:visible="true"/>
+
+    <item
+        android:id="@+id/take5MenuRenameGroup"
+        android:title="@string/menu_rename_group"
+        app:showAsAction="never"/>
+
+
+</menu>

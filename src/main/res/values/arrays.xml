@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="arr_dops">
+        <item>HDOP</item>
+        <item>PDOP</item>
+    </string-array>
+
+    <string-array name="arr_plot_point_loc">
+        <item>Inside</item>
+        <item>Extents</item>
+    </string-array>
+
+    <string-array name="arr_plot_sample_type">
+        <item>Points</item>
+        <item>Percent</item>
+    </string-array>
+
+    <string-array name="arr_extra_map_opts">
+        <item>@string/map_menu_close_adj_bnd</item>
+        <item>@string/map_menu_close_unadj_bnd</item>
+    </string-array>
+</resources>

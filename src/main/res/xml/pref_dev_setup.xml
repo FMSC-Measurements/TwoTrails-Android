@@ -1,0 +1,21 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="@string/menu_x_device_setup">
+
+    <Preference
+        android:title="@string/op_gps"
+        android:key="gpsSetup">
+
+        <intent android:action="openSettings" >
+            <extra android:name="@string/set_settings_page" android:value="gpsSetup" />
+        </intent>
+    </Preference>
+
+    <Preference
+        android:title="@string/menu_x_range_finder_settings"
+        android:key="rfSetup">
+
+        <intent android:action="openSettings" >
+            <extra android:name="@string/set_settings_page" android:value="rfSetup" />
+        </intent>
+    </Preference>
+</PreferenceScreen>

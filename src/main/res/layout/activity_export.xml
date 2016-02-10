@@ -1,0 +1,317 @@
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context="com.usda.fmsc.twotrails.activities.ExportActivity">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/toolbar_height"
+            android:background="@color/primary"
+            android:theme="@style/ToolbarTheme">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <com.usda.fmsc.android.widget.MultiStateTouchCheckBox
+                    android:id="@+id/exportChkAll"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    app:checkedColor="@color/primaryDark"
+                    app:uncheckedColor="@android:color/white"
+                    app:partialCheckedColor="@color/primaryLighter"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginRight="12dp"
+                    android:layout_marginEnd="12dp"/>
+            </RelativeLayout>
+        </android.support.v7.widget.Toolbar>
+
+        <View style="@style/ToolbarElevation" android:layout_below="@id/toolbar"/>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_alignParentBottom="true"
+            android:layout_below="@id/toolbar">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingStart="8dp"
+                android:paddingLeft="8dp"
+                android:paddingEnd="8dp"
+                android:paddingRight="8dp">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.usda.fmsc.android.widget.MultiStateTouchCheckBox
+                        android:id="@+id/exportChkPoints"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        app:checkedColor="@color/primary"
+                        android:layout_gravity="center"
+                        android:layout_margin="5dp"
+                        android:layout_alignParentRight="true"
+                        android:layout_alignParentEnd="true"
+                        app:onCheckStateChange="chkOnChange"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/str_points"
+                        android:layout_centerVertical="true"
+                        android:textSize="22sp"
+                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentStart="true"
+                        android:layout_toLeftOf="@id/exportChkPoints"
+                        android:layout_toStartOf="@id/exportChkPoints"
+                        android:ellipsize="end"/>
+
+                </RelativeLayout>
+
+                <View style="@style/Dividers" />
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.usda.fmsc.android.widget.MultiStateTouchCheckBox
+                        android:id="@+id/exportChkPolys"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        app:checkedColor="@color/primary"
+                        android:layout_gravity="center"
+                        android:layout_margin="5dp"
+                        android:layout_alignParentRight="true"
+                        android:layout_alignParentEnd="true"
+                        app:onCheckStateChange="chkOnChange"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/str_polygons"
+                        android:layout_centerVertical="true"
+                        android:textSize="22sp"
+                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentStart="true"
+                        android:layout_toLeftOf="@id/exportChkPolys"
+                        android:layout_toStartOf="@id/exportChkPolys"/>
+                </RelativeLayout>
+
+                <View style="@style/Dividers" />
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.usda.fmsc.android.widget.MultiStateTouchCheckBox
+                        android:id="@+id/exportChkMeta"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        app:checkedColor="@color/primary"
+                        android:layout_gravity="center"
+                        android:layout_margin="5dp"
+                        android:layout_alignParentRight="true"
+                        android:layout_alignParentEnd="true"
+                        app:onCheckStateChange="chkOnChange"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/str_meta"
+                        android:layout_centerVertical="true"
+                        android:textSize="22sp"
+                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentStart="true"
+                        android:layout_toLeftOf="@id/exportChkMeta"
+                        android:layout_toStartOf="@id/exportChkMeta"/>
+                </RelativeLayout>
+
+                <View style="@style/Dividers" />
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.usda.fmsc.android.widget.MultiStateTouchCheckBox
+                        android:id="@+id/exportChkProject"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        app:checkedColor="@color/primary"
+                        android:layout_gravity="center"
+                        android:layout_margin="5dp"
+                        android:layout_alignParentRight="true"
+                        android:layout_alignParentEnd="true"
+                        app:onCheckStateChange="chkOnChange"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/str_project"
+                        android:layout_centerVertical="true"
+                        android:textSize="22sp"
+                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentStart="true"
+                        android:layout_toLeftOf="@id/exportChkProject"
+                        android:layout_toStartOf="@id/exportChkProject"/>
+                </RelativeLayout>
+
+                <View style="@style/Dividers" />
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.usda.fmsc.android.widget.MultiStateTouchCheckBox
+                        android:id="@+id/exportChkNMEA"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        app:checkedColor="@color/primary"
+                        android:layout_gravity="center"
+                        android:layout_margin="5dp"
+                        android:layout_alignParentRight="true"
+                        android:layout_alignParentEnd="true"
+                        app:onCheckStateChange="chkOnChange" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/str_nmea"
+                        android:layout_centerVertical="true"
+                        android:textSize="22sp"
+                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentStart="true"
+                        android:layout_toLeftOf="@id/exportChkNMEA"
+                        android:layout_toStartOf="@id/exportChkNMEA"/>
+                </RelativeLayout>
+
+                <View style="@style/Dividers" />
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.usda.fmsc.android.widget.MultiStateTouchCheckBox
+                        android:id="@+id/exportChkKMZ"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        app:checkedColor="@color/primary"
+                        android:layout_gravity="center"
+                        android:layout_margin="5dp"
+                        android:layout_alignParentRight="true"
+                        android:layout_alignParentEnd="true"
+                        app:onCheckStateChange="chkOnChange" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/str_kmz"
+                        android:layout_centerVertical="true"
+                        android:textSize="22sp"
+                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentStart="true"
+                        android:layout_toLeftOf="@id/exportChkKMZ"
+                        android:layout_toStartOf="@id/exportChkKMZ"/>
+                </RelativeLayout>
+
+                <View style="@style/Dividers" />
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.usda.fmsc.android.widget.MultiStateTouchCheckBox
+                        android:id="@+id/exportChkGPX"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        app:checkedColor="@color/primary"
+                        android:layout_gravity="center"
+                        android:layout_margin="5dp"
+                        android:layout_alignParentRight="true"
+                        android:layout_alignParentEnd="true"
+                        app:onCheckStateChange="chkOnChange" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/str_gpx"
+                        android:layout_centerVertical="true"
+                        android:textSize="22sp"
+                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentStart="true"
+                        android:layout_toLeftOf="@id/exportChkGPX"
+                        android:layout_toStartOf="@id/exportChkGPX"/>
+                </RelativeLayout>
+
+                <View style="@style/Dividers" />
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.usda.fmsc.android.widget.MultiStateTouchCheckBox
+                        android:id="@+id/exportChkSummary"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        app:checkedColor="@color/primary"
+                        android:layout_gravity="center"
+                        android:layout_margin="5dp"
+                        android:layout_alignParentRight="true"
+                        android:layout_alignParentEnd="true"
+                        app:onCheckStateChange="chkOnChange"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/str_summary"
+                        android:layout_centerVertical="true"
+                        android:textSize="22sp"
+                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentStart="true"
+                        android:layout_toLeftOf="@id/exportChkSummary"
+                        android:layout_toStartOf="@id/exportChkSummary"/>
+                </RelativeLayout>
+
+                <View style="@style/Dividers" />
+            </LinearLayout>
+        </ScrollView>
+    </RelativeLayout>
+
+    <com.usda.fmsc.android.widget.FABProgressCircleEx
+        android:id="@+id/exportFabExportProgressCircle"
+        style="@style/fabProgressHolderStyle"
+        app:finalIcon="@drawable/ic_file_upload_white_36dp"
+        android:layout_margin="0dp"
+        android:layout_marginBottom="0dp"
+        android:layout_marginRight="0dp"
+        android:layout_marginEnd="0dp"
+        app:layout_anchor="@id/parent"
+        app:layout_anchorGravity="bottom|right|end">
+    <!--app:layout_anchor="@id/parent"-->
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/exportFabExport"
+            style="@style/fabProgressStyle"
+            android:src="@drawable/ic_file_upload_white_36dp"
+            android:onClick="btnExport"
+            android:layout_margin="0dp"
+            android:layout_marginBottom="0dp"
+            android:layout_marginRight="0dp"
+            android:layout_marginEnd="0dp" />
+
+    </com.usda.fmsc.android.widget.FABProgressCircleEx>
+</android.support.design.widget.CoordinatorLayout>

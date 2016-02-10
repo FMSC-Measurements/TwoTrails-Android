@@ -1,0 +1,57 @@
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context="com.usda.fmsc.twotrails.activities.WalkActivity"
+    android:background="@color/background_card_view">
+
+    <View
+        android:id="@+id/preFocusView"
+        android:layout_height="0dp"
+        android:layout_width="0dp"
+        android:descendantFocusability="beforeDescendants"
+        android:focusableInTouchMode="true"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <include layout="@layout/toolbar_default" android:id="@id/toolbar"/>
+
+        <View style="@style/ToolbarElevation" android:layout_below="@id/toolbar"/>
+
+        <android.support.v7.widget.CardView
+            android:id="@+id/cardView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/white"
+            android:layout_marginLeft="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginTop="8dp"
+            android:elevation="@dimen/card_elevation"
+            android:layout_below="@id/toolbar">
+
+            <include layout="@layout/control_gps_info"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"/>
+        </android.support.v7.widget.CardView>
+
+        <include android:id="@+id/walkCardWalk"
+                 layout="@layout/card_walk_walk"
+                 android:layout_width="match_parent"
+                 android:layout_height="wrap_content"
+                 android:layout_below="@id/cardView"
+                 android:visibility="gone"/>
+    </RelativeLayout>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/walkFabWalk"
+        style="@style/fabStyle"
+        android:src="@drawable/ic_ttpoint_walk_white"
+        android:onClick="btnWalkClick" />
+
+</android.support.design.widget.CoordinatorLayout>

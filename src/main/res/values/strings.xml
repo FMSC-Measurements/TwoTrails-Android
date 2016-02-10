@@ -1,0 +1,545 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App -->
+    <string name="app_name">TwoTrails</string>
+
+    <!-- Common -->
+    <string name="str_ok">OK</string>
+    <string name="str_delete">Delete</string>
+    <string name="str_yes">Yes</string>
+    <string name="str_no">No</string>
+    <string name="str_move">Move</string>
+    <string name="str_new">New</string>
+    <string name="str_edit">Edit</string>
+    <string name="str_exit">Exit</string>
+    <string name="str_unlock">Unlock</string>
+    <string name="str_lock">Lock</string>
+    <string name="str_internal">Internal</string>
+    <string name="str_external">External</string>
+    <string name="str_cancel">Cancel</string>
+    <string name="str_invalid">Invalid Input</string>
+    <string name="str_link">Linked</string>
+    <string name="str_create">Create</string>
+    <string name="str_empty"> </string>
+    <string name="str_nullvalue">*</string>
+    <string name="str_onbnd">On Boundary</string>
+    <string name="str_offbnd">Off Boundary</string>
+    <string name="str_onbnd_abv">ON BND</string>
+    <string name="str_offbnd_abv">OFF BND</string>
+    <string name="str_op_type">Operation Type</string>
+    <string name="str_vib">Vibrate On Create</string>
+    <string name="str_vib_on">Vibration On</string>
+    <string name="str_vib_off">Vibration Off</string>
+    <string name="str_ring">Ring On Create</string>
+    <string name="str_ring_on">Ring On</string>
+    <string name="str_ring_off">Ring Off</string>
+    <string name="str_poly_adjusting">Polygons Adjusting</string>
+    <string name="str_finish">Finish</string>
+    <string name="str_pause">Pause</string>
+    <string name="str_map">Map</string>
+    <string name="str_convert">Convert</string>
+    <string name="str_acquire">Acquire</string>
+    <string name="str_pid">Point ID</string>
+    <string name="str_deg">Degrees</string>
+    <string name="str_min">Minutes</string>
+    <string name="str_sec">Seconds</string>
+    <string name="str_decdeg">DD</string>
+    <string name="str_dms">DMS</string>
+    <string name="str_lat">Latitude</string>
+    <string name="str_lon">Longitude</string>
+    <string name="str_polygons">Polygons</string>
+    <string name="str_polygon">Polygon</string>
+    <string name="str_meta">Metadata</string>
+    <string name="str_project">Project</string>
+    <string name="str_points">Points</string>
+    <string name="str_point">Point</string>
+    <string name="str_nmea">NMEA</string>
+    <string name="str_kmz">KMZ</string>
+    <string name="str_gpx">GPX</string>
+    <string name="str_summary">Summary</string>
+    <string name="str_vis">Visible</string>
+    <string name="str_nav">Navigate</string>
+    <string name="str_zone">Zone</string>
+    <string name="str_utmx">UTM X</string>
+    <string name="str_utmy">UTM Y</string>
+    <string name="str_elev">Elevation</string>
+    <string name="str_dec">Declination</string>
+    <string name="str_pdop">PDOP</string>
+    <string name="str_hdop">HDOP</string>
+    <string name="str_gps_stat">GPS Status</string>
+    <string name="str_my_loc">My Location</string>
+    <string name="str_from">From</string>
+    <string name="str_to">To</string>
+    <string name="str_dist">Distance</string>
+    <string name="str_az">Azimuth</string>
+    <string name="str_mag">Magnetic</string>
+    <string name="str_true">True</string>
+    <string name="str_false">False</string>
+    <string name="str_open">Open</string>
+    <string name="str_close">Close</string>
+    <string name="str_rename">Rename</string>
+    <string name="str_overwrite">Overwrite</string>
+    <string name="str_settings">Settings</string>
+
+
+    <string name="op_gps">GPS</string>
+    <string name="op_take5">Take 5</string>
+    <string name="op_walk">Walk</string>
+    <string name="op_way">Way Point</string>
+    <string name="op_trav">Traverse</string>
+    <string name="op_ss">Sideshot</string>
+    <string name="op_qndm">Quondam</string>
+
+
+    <!-- Measurements -->
+    <string name="meas_feet">Feet</string>
+    <string name="meas_meters">Meters</string>
+
+
+    <!-- Settings -->
+    <string name="menu_x_gps_settings">GPS Setup</string>
+    <string name="menu_x_range_finder_settings">Range Finder</string>
+    <string name="menu_x_filter">Filter</string>
+    <string name="menu_x_device_setup">Device Setup</string>
+    <string name="menu_x_point_settings">Point Settings</string>
+    <string name="menu_poly_reset">Reset Polygon</string>
+    <string name="menu_poly_delete">Delete Polygon</string>
+    <string name="menu_poly_goto">Go To Polygon</string>
+    <string name="menu_poly_adjust">Adjust Polygons</string>
+    <string name="menu_meta_reset">Reset Metadata</string>
+    <string name="menu_meta_delete">Delete Metadata</string>
+    <string name="menu_meta_default">Set as Default</string>
+    <string name="menu_points_setup_filter">Setup Filter</string>
+    <string name="menu_points_convert_quondam">Convert Quondam</string>
+    <string name="menu_points_change_polygon">Change Polygon</string>
+    <string name="menu_points_setup_gps">GPS Setting</string>
+    <string name="menu_points_goto">Go To Point</string>
+    <string name="menu_points_move">Move Point</string>
+    <string name="menu_points_enter_latlon">Enter Lat/Lon</string>
+    <string name="menu_points_recalc">Recalc NMEA</string>
+    <string name="menu_points_reset">Reset Point</string>
+    <string name="menu_points_delete">Delete Point</string>
+    <string name="menu_take5_cmt">Comment</string>
+    <string name="menu_take5_bnc">On Bnd</string>
+    <string name="menu_take5_settings">Take 5 Settings</string>
+    <string name="menu_take5_goto_bottom">Go To Last Point</string>
+    <string name="menu_walk_settings">Walk Settings</string>
+    <string name="menu_walk_walking">Walking</string>
+    <string name="menu_rename_group">Rename Group</string>
+    <string name="menu_map_settings">Map Settings</string>
+    <string name="menu_map_reset_bnds">Reset Bounds</string>
+    <string name="menu_map_where_is">Where Is</string>
+    <string name="menu_map_show_my_pos">Show My Position</string>
+    <string name="menu_map_tracked_poly">Tracked Polygon</string>
+    <string name="menu_walk_show_all_points">Show All Points</string>
+    <string name="menu_table_edit_filter">Filter</string>
+    <string name="menu_table_edit_columns">Edit Columns</string>
+    <string name="menu_table_edit_reset">Reset</string>
+
+
+    <!-- Device Settings -->
+    <string name="ds_no_dev">No Device</string>
+    <string name="ds_no_bt">Bluetooth Not Available</string>
+    <string name="ds_dev_configured">Device Configured</string>
+    <string name="ds_dev_not_configured">Device Not Configured</string>
+    <string name="ds_gps_recv">Received Data</string>
+    <string name="ds_gps_connected">GPS Connected</string>
+    <string name="ds_gps_not_connected">GPS Not Connected</string>
+    <string name="ds_gps_connecting">Connecting to GPS Receiver..</string>
+
+
+    <!-- Device Settings Consts / Keys -->
+    <string name="set_settings_page">settings_page</string>
+
+    <string name="set_GPS_EXTERNAL">GpsExternal</string>
+    <string name="set_GPS_ALWAYS_ON">GpsAlwaysOn</string>
+    <string name="set_LOG_ALL_GPS">LogAllGps</string>
+    <string name="set_GPS_CONFIGURED">GPSConfigured</string>
+    <string name="set_GPS_DEVICE_ID">GpsDeviceID</string>
+    <string name="set_GPS_DEVICE_NAME">GpsDeviceName</string>
+    <string name="set_LASER_DEVICE_ID">RangeFinderDeviceID</string>
+    <string name="set_LASER_DEVICE_NAME">RangeFinderDeviceName</string>
+
+    <string name="set_GPS_FILTER_DOP_TYPE">GpsFilterDopType</string>
+    <string name="set_GPS_FILTER_DOP_VALUE">GpsFilterDopValue</string>
+    <string name="set_GPS_FILTER_FIX_TYPE">GpsFilterFixType</string>
+
+    <string name="set_TAKE5_FILTER_DOP_TYPE">Take5FilterDopType</string>
+    <string name="set_TAKE5_FILTER_DOP_VALUE">Take5FilterDopValue</string>
+    <string name="set_TAKE5_FILTER_FIX_TYPE">Take5FilterFixType</string>
+    <string name="set_TAKE5_NMEA_AMOUNT">Take5NmeaAmount</string>
+    <string name="set_TAKE5_IGNORE_NMEA">Take5IgnoreNmea</string>
+    <string name="set_TAKE5_IGNORE_NMEA_AMOUNT">Take5IgnoreNmeaAmount</string>
+    <string name="set_TAKE5_FAIL_AMOUNT">Take5FailAmount</string>
+    <string name="set_TAKE5_INCREMENT">Take5Increment</string>
+
+    <string name="set_WALK_FILTER_DOP_TYPE">WalkFilterDopType</string>
+    <string name="set_WALK_FILTER_DOP_VALUE">WalkFilterDopValue</string>
+    <string name="set_WALK_FILTER_FIX_TYPE">WalkFilterFixType</string>
+    <string name="set_WALK_FILTER_ACCURACY">WalkFilterAccuracy</string>
+    <string name="set_WALK_FILTER_FREQUENCY">WalkFilterFrequency</string>
+    <string name="set_WALK_INCREMENT">WalkIncrement</string>
+    <string name="set_WALK_VIB_ON_CREATE_POINT">WalkVibrationOnCreate</string>
+    <string name="set_WALK_RING_ON_CREATE_POINT">WalkRingOnCreate</string>
+    <string name="set_WALK_SHOW_ALL_POINTS_ON_MAP">WalkShowAllPointsOnMap</string>
+
+    <string name="set_AUTO_UPDATE_INDEX">AutoUpdateIndex</string>
+    <string name="set_AUTO_UPDATE_WALK_ONBND_ASK">AutoUpdateWalkOnBndAsk</string>
+    <string name="set_AUTO_OVERWRITE_PLOTGRID_ASK">AutoOverwritePlotGridAsk</string>
+    <string name="set_AUTO_SET_GPS_NAME_TO_META_ASK">AutoSetGpsNameToMetaAsk</string>
+    <string name="set_AUTO_OPEN_LAST_PROJECT">AutoOpenLastProject</string>
+
+    <string name="set_MAP_TRACKING_OPTION">MapTrackingOption</string>
+    <string name="set_MAP_ZOOM_BUTTONS">MapZoomButtons</string>
+    <string name="set_MAP_COMPASS_ENABLED">MapCompassEnabled</string>
+    <string name="set_MAP_MY_POS_BUTTON">MapMyPosButton</string>
+    <string name="set_MAP_SHOW_MY_POS">MapShowMyPos</string>
+    <string name="set_MAP_USE_UTM_NAV">MapUseUtmNav</string>
+
+
+    <!-- Dialogs -->
+    <string name="diag_move_first">Move To First</string>
+    <string name="diag_move_last">Move To Last</string>
+    <string name="diag_adjusting_cancel_title">Cancel Adjusting</string>
+    <string name="diag_adjusting_cancel">Do you want to cancel the adjusting of the polygons?</string>
+    <string name="diag_slow_adjusting_title">Polygons Adjusting Slowly</string>
+    <string name="diag_slow_adjusting">"This Polygons are taking longer to adjust than expected.
+        This may be caused by a large amount of points or other variables. Would you like to continue waiting?"</string>
+    <string name="diag_latlon_latDD">Latitude (XX.XXXXX)</string>
+    <string name="diag_latlon_lonDD">Longitude (XXX.XXXXX)</string>
+
+
+    <!-- Activity Titles -->
+    <string name="title_activity_points">Points</string>
+    <string name="title_activity_acquire_gps">Acquire GPS</string>
+    <string name="title_activity_calculate_gps">Calculate Point</string>
+    <string name="title_activity_take5">Take 5</string>
+    <string name="title_activity_walk">Walk</string>
+    <string name="title_activity_polygons">Polygons</string>
+    <string name="title_activity_metadata">Metadata</string>
+    <string name="title_activity_project">Project Settings</string>
+    <string name="title_activity_table_edit">Table Edit</string>
+    <string name="title_activity_map">Map</string>
+    <string name="title_activity_haid">How Am I Doing</string>
+    <string name="title_activity_gps_logger">GPS Logger</string>
+    <string name="title_activity_settings">Settings</string>
+    <string name="title_activity_main_gps_settings">GPS Settings</string>
+    <string name="title_activity_plot_grid">Generate Plots</string>
+    <string name="title_activity_export">Export</string>
+
+    <!-- Main -->
+    <string name="main_tab_file">FILE</string>
+    <string name="main_tab_data">DATA</string>
+    <string name="main_tab_tools">TOOLS</string>
+    <string name="main_tab_devices">GPS/RangeFinder</string>
+
+    <string name="main_btn_new">New</string>
+    <string name="main_btn_open">Open</string>
+    <string name="main_btn_open_rec">Opened Recently</string>
+    <string name="main_btn_import">Import</string>
+    <string name="main_btn_duplicate">Duplicate</string>
+    <string name="main_btn_exit">Exit</string>
+
+    <string name="main_btn_point_edit">Point Edit</string>
+    <string name="main_btn_poly_edit">Polygon Edit</string>
+    <string name="main_btn_meta_edit">Metadata Edit</string>
+    <string name="main_btn_proj_info">Project Info</string>
+    <string name="main_btn_table_edit">Table Edit</string>
+
+    <string name="main_btn_gearth">Google Earth</string>
+    <string name="main_btn_haid">How am I Doing</string>
+    <string name="main_btn_where_is">Where Is</string>
+    <string name="main_btn_export">Export</string>
+    <string name="main_btn_plot_grid">Plot Grid</string>
+    <string name="main_btn_multi_edit">Multi Point Edit</string>
+    <string name="main_btn_gps_log">GPS Logger</string>
+
+    <string name="main_tv_edited">Last Edited</string>
+    <string name="main_tv_polys">Polygons</string>
+    <string name="main_tv_groups">Groups</string>
+    <string name="main_tv_points">Points</string>
+    <string name="main_tv_meta">Metadata</string>
+
+    <!-- Polygon -->
+    <string name="poly_name">Name</string>
+    <string name="poly_desc">Description</string>
+    <string name="poly_acc">Accuracy</string>
+    <string name="poly_inc">Increment Amount</string>
+    <string name="poly_psi">Point Start Index</string>
+    <string name="poly_firstpoly">Move to first Polygon</string>
+    <string name="poly_lastpoly">Move to last Polygon</string>
+    <string name="poly_reset_diag">This will reset this polygon back to all its original values.</string>
+
+
+    <!-- Metadata -->
+    <string name="meta_firstmeta">Move to first Polygon</string>
+    <string name="meta_lastmeta">Move to last Polygon</string>
+    <string name="meta_name">Name</string>
+    <string name="meta_datum">Datum</string>
+    <string name="meta_slope">Slope</string>
+    <string name="meta_dec_type">Declination Type</string>
+    <string name="meta_gps_rec">GPS Receiver</string>
+    <string name="meta_range_finder">Range Finder</string>
+    <string name="meta_compass">Compass</string>
+    <string name="meta_crew">Crew</string>
+    <string name="meta_cmt">Comment</string>
+    <string name="meta_reset_diag">This will reset this metadata back to all its original values.</string>
+
+
+    <!-- Points -->
+    <string name="points_aqr_gps">Acquire</string>
+    <!--<string name="points_aqr_walk">Walk</string>-->
+    <!--<string name="points_aqr_take5">Take 5</string>-->
+    <string name="points_aqr_diag_title">Current Point has NMEA</string>
+    <string name="points_aqr_diag_gps_msg">The current point has NMEA data associated with it. Would you like to overwrite or add to this data.</string>
+    <string name="points_aqr_diag_add">ADD</string>
+    <string name="points_aqr_diag_overwrite">OVERWRITE</string>
+    <string name="points_aqr_diag_delete">Delete NMEA</string>
+    <string name="points_aqr_diag_del_msg">Continuing will delete the NMEA data for this current point.</string>
+    <string name="points_aqr_diag_t5_msg">The current point has NMEA data associated with it. Would you like to overwrite this data.</string>
+    <string name="points_pid">PID</string>
+    <string name="points_cmt">Comment</string>
+    <string name="points_meta_header">Meta:</string>
+    <string name="points_gps_nssda">NSSDA</string>
+    <string name="points_gps_rmser">RMSEr</string>
+    <string name="points_gps_utm_x">UTM X</string>
+    <string name="points_gps_utm_y">UTM Y</string>
+    <string name="points_gps_elev">Elevation</string>
+    <string name="points_gps_manacc">Mannual Accuracy</string>
+    <string name="point_trav_az_fwd">Fwd</string>
+    <string name="points_trav_az_bk">Back</string>
+    <string name="points_trav_slope">Slope</string>
+    <string name="points_trav_slope_dist">Distance</string>
+    <string name="points_trav_slope_angle">Angle</string>
+    <string name="points_trav_mag">Mag Dec</string>
+    <string name="points_reset_diag">This will reset this point back to all its original values.</string>
+
+
+    <!-- Acquire -->
+    <string name="aqr_log">Log</string>
+    <string name="aqr_log_pause">Pause</string>
+    <string name="aqr_calc">Calcualate</string>
+
+    <!-- Calculate -->
+    <string name="calc_calc">Calcualate</string>
+    <string name="calc_nssda">NSSDA %</string>
+    <string name="calc_group">Group</string>
+    <string name="calc_uvx">00000.00</string>
+    <string name="calc_uvy">000000.00</string>
+    <string name="calc_uvn">00.00</string>
+
+
+    <!-- Take 5 -->
+    <string name="t5_ss">SideShot</string>
+    <string name="t5_t5">Take 5</string>
+    <string name="t5_add_ss">Add SS</string>
+
+
+    <!-- Walk -->
+    <string name="walk_no_fix">No Fix</string>
+
+
+    <!-- HAID -->
+    <string name="haid_menu_name">Polygons</string>
+    <string name="haid_menu_item_help">Help</string>
+    <string name="haid_help_text">-GPS Error can be divided by 2 if an appropriate
+        ANGLE POINT METHOD is used instead of the WALK METHOD.\n\n-Appropriate means that
+        the boundary legs are reasonably long between vertices where the boundary
+        direction changes by 90 degree angles where possible and changes at least
+        more than 30 degrees most of the time.\n\n-If the unit is totally a direction
+        distance traverse. Use only the traverse contribution for area-error.
+        -Points with asterisks are OFF boundary points.</string>
+    <string name="haid_menu_item_increase_font">Font +</string>
+    <string name="haid_menu_item_decrease_font">Font -</string>
+
+
+    <!-- GPS Logger -->
+    <string name="logger_ltf">Log to File</string>
+
+    <!-- Map -->
+    <string name="map_cat_bound">Boundary</string>
+    <string name="map_cat_nav">Navigation</string>
+    <string name="map_cat_other">Other</string>
+
+    <string name="map_adj_bnd">Adjusted Boundary Polygon</string>
+    <string name="map_adj_bnd_pts">Adjusted Boundary Points</string>
+    <string name="map_unadj_bnd">Unadjusted Boundary Polygon</string>
+    <string name="map_unadj_bnd_pts">Unadjusted Boundary Points</string>
+    <string name="map_bnd_menu">More Options</string>
+    <string name="map_menu_close_adj_bnd">Close Adjusted Boundary</string>
+    <string name="map_menu_close_unadj_bnd">Close Unadjusted Boundary</string>
+
+    <string name="map_adj_nav">Adjusted Navigation Polygon</string>
+    <string name="map_adj_nav_pts">Adjusted Navigation Points</string>
+    <string name="map_unadj_nav">Unadjusted Navigation Polygon</string>
+    <string name="map_unadj_nav_pts">Unadjusted Navigation Points</string>
+
+    <string name="map_adj_misc_pts">Adjusted Misc Points</string>
+    <string name="map_unadj_misc_pts">Unadjusted Misc Points</string>
+    <string name="map_way_pts">Way Points</string>
+
+    <string name="map_more_opts">More Map Options</string>
+
+    <!-- Plot Grid -->
+    <string name="pg_points_loc">Points Location</string>
+    <string name="pg_sample_type">Sample Type</string>
+
+
+    <string name="title_section1">Section 1</string>
+    <string name="title_section2">Section 2</string>
+    <string name="title_section3">Section 3</string>
+
+
+    <!-- Example General settings -->
+    <string name="pref_header_general">General</string>
+
+    <string name="pref_title_social_recommendations">Enable social recommendations</string>
+    <string name="pref_description_social_recommendations">Recommendations for people to contact
+        based on your message history
+    </string>
+
+    <string name="pref_title_display_name">Display name</string>
+    <string name="pref_default_display_name">John Smith</string>
+
+    <string name="pref_title_add_friends_to_messages">Add friends to messages</string>
+    <string-array name="pref_example_list_titles">
+        <item>Always</item>
+        <item>When possible</item>
+        <item>Never</item>
+    </string-array>
+    <string-array name="pref_example_list_values">
+        <item>1</item>
+        <item>0</item>
+        <item>-1</item>
+    </string-array>
+
+    <!-- Example settings for Data & Sync -->
+    <string name="pref_header_data_sync">Data &amp; sync</string>
+
+    <string name="pref_title_sync_frequency">Sync frequency</string>
+    <string-array name="pref_sync_frequency_titles">
+        <item>15 minutes</item>
+        <item>30 minutes</item>
+        <item>1 hour</item>
+        <item>3 hours</item>
+        <item>6 hours</item>
+        <item>Never</item>
+    </string-array>
+    <string-array name="pref_sync_frequency_values">
+        <item>15</item>
+        <item>30</item>
+        <item>60</item>
+        <item>180</item>
+        <item>360</item>
+        <item>-1</item>
+    </string-array>
+
+    <string name="pref_title_system_sync_settings">System sync settings</string>
+
+    <!-- Example settings for Notifications -->
+    <string name="pref_header_notifications">Notifications</string>
+
+    <string name="pref_title_new_message_notifications">New message notifications</string>
+
+    <string name="pref_title_ringtone">Ringtone</string>
+    <string name="pref_ringtone_silent">Silent</string>
+
+    <string name="pref_title_vibrate">Vibrate</string>
+    <string name="title_activity_test_maps">Map</string>
+    <string name="title_activity_scrolling">ScrollingActivity</string>
+    <string name="large_text">
+        "Material is the metaphor.\n\n"
+
+        "A material metaphor is the unifying theory of a rationalized space and a system of motion."
+        "The material is grounded in tactile reality, inspired by the study of paper and ink, yet "
+        "technologically advanced and open to imagination and magic.\n"
+        "Surfaces and edges of the material provide visual cues that are grounded in reality. The "
+        "use of familiar tactile attributes helps users quickly understand affordances. Yet the "
+        "flexibility of the material creates new affordances that supercede those in the physical "
+        "world, without breaking the rules of physics.\n"
+        "The fundamentals of light, surface, and movement are key to conveying how objects move, "
+        "interact, and exist in space and in relation to each other. Realistic lighting shows "
+        "seams, divides space, and indicates moving parts.\n\n"
+
+        "Bold, graphic, intentional.\n\n"
+
+        "The foundational elements of print based design typography, grids, space, scale, color, "
+        "and use of imagery guide visual treatments. These elements do far more than please the "
+        "eye. They create hierarchy, meaning, and focus. Deliberate color choices, edge to edge "
+        "imagery, large scale typography, and intentional white space create a bold and graphic "
+        "interface that immerse the user in the experience.\n"
+        "An emphasis on user actions makes core functionality immediately apparent and provides "
+        "waypoints for the user.\n\n"
+
+        "Motion provides meaning.\n\n"
+
+        "Motion respects and reinforces the user as the prime mover. Primary user actions are "
+        "inflection points that initiate motion, transforming the whole design.\n"
+        "All action takes place in a single environment. Objects are presented to the user without "
+        "breaking the continuity of experience even as they transform and reorganize.\n"
+        "Motion is meaningful and appropriate, serving to focus attention and maintain continuity. "
+        "Feedback is subtle yet clear. Transitions are efﬁcient yet coherent.\n\n"
+
+        "3D world.\n\n"
+
+        "The material environment is a 3D space, which means all objects have x, y, and z "
+        "dimensions. The z-axis is perpendicularly aligned to the plane of the display, with the "
+        "positive z-axis extending towards the viewer. Every sheet of material occupies a single "
+        "position along the z-axis and has a standard 1dp thickness.\n"
+        "On the web, the z-axis is used for layering and not for perspective. The 3D world is "
+        "emulated by manipulating the y-axis.\n\n"
+
+        "Light and shadow.\n\n"
+
+        "Within the material environment, virtual lights illuminate the scene. Key lights create "
+        "directional shadows, while ambient light creates soft shadows from all angles.\n"
+        "Shadows in the material environment are cast by these two light sources. In Android "
+        "development, shadows occur when light sources are blocked by sheets of material at "
+        "various positions along the z-axis. On the web, shadows are depicted by manipulating the "
+        "y-axis only. The following example shows the card with a height of 6dp.\n\n"
+
+        "Resting elevation.\n\n"
+
+        "All material objects, regardless of size, have a resting elevation, or default elevation "
+        "that does not change. If an object changes elevation, it should return to its resting "
+        "elevation as soon as possible.\n\n"
+
+        "Component elevations.\n\n"
+
+        "The resting elevation for a component type is consistent across apps (e.g., FAB elevation "
+        "does not vary from 6dp in one app to 16dp in another app).\n"
+        "Components may have different resting elevations across platforms, depending on the depth "
+        "of the environment (e.g., TV has a greater depth than mobile or desktop).\n\n"
+
+        "Responsive elevation and dynamic elevation offsets.\n\n"
+
+        "Some component types have responsive elevation, meaning they change elevation in response "
+        "to user input (e.g., normal, focused, and pressed) or system events. These elevation "
+        "changes are consistently implemented using dynamic elevation offsets.\n"
+        "Dynamic elevation offsets are the goal elevation that a component moves towards, relative "
+        "to the component’s resting state. They ensure that elevation changes are consistent "
+        "across actions and component types. For example, all components that lift on press have "
+        "the same elevation change relative to their resting elevation.\n"
+        "Once the input event is completed or cancelled, the component will return to its resting "
+        "elevation.\n\n"
+
+        "Avoiding elevation interference.\n\n"
+
+        "Components with responsive elevations may encounter other components as they move between "
+        "their resting elevations and dynamic elevation offsets. Because material cannot pass "
+        "through other material, components avoid interfering with one another any number of ways, "
+        "whether on a per component basis or using the entire app layout.\n"
+        "On a component level, components can move or be removed before they cause interference. "
+        "For example, a floating action button (FAB) can disappear or move off screen before a "
+        "user picks up a card, or it can move if a snackbar appears.\n"
+        "On the layout level, design your app layout to minimize opportunities for interference. "
+        "For example, position the FAB to one side of stream of a cards so the FAB won’t interfere "
+        "when a user tries to pick up one of cards.\n\n"
+    </string>
+    <string name="title_activity_multi_edit">Multi Point Edit</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+</resources>

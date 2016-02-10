@@ -1,0 +1,84 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:tools="http://schemas.android.com/tools"
+            tools:context="com.usda.fmsc.twotrails.fragments.main.MainDataFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/main_btn_point_edit"
+                android:id="@+id/mainFragDataBtnPoints"
+                android:layout_gravity="center_horizontal"
+                android:onClick="btnPointsClick"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:layout_marginTop="5dp"
+                android:enabled="false"
+                style="@style/MainActivityButtons"/>
+
+            <View style="@style/Dividers"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/main_btn_poly_edit"
+                android:id="@+id/mainFragDataBtnPolygons"
+                android:layout_gravity="center_horizontal"
+                android:onClick="btnPolygonsClick"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:enabled="false"
+                style="@style/MainActivityButtons"/>
+
+            <View style="@style/Dividers"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/main_btn_meta_edit"
+                android:id="@+id/mainFragDataBtnMetadata"
+                android:layout_gravity="center_horizontal"
+                android:onClick="btnMetadataClick"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:enabled="false"
+                style="@style/MainActivityButtons"/>
+
+            <View style="@style/Dividers"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/main_btn_proj_info"
+                android:id="@+id/mainFragDataBtnProjectInfo"
+                android:layout_gravity="center_horizontal"
+                android:onClick="btnProjectInfoClick"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:enabled="false"
+                style="@style/MainActivityButtons"/>
+
+            <View style="@style/Dividers"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/main_btn_table_edit"
+                android:id="@+id/mainFragDataBtnPointTable"
+                android:layout_gravity="center_horizontal"
+                android:onClick="btnPointTableClick"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:enabled="false"
+                style="@style/MainActivityButtons"/>
+
+            <View style="@style/Dividers"/>
+    </LinearLayout>
+</ScrollView>
+

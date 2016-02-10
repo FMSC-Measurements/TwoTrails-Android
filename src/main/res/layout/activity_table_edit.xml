@@ -1,0 +1,120 @@
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context=".activities.TableEditActivity"
+    android:clipChildren="true">
+
+    <include layout="@layout/toolbar_default" android:id="@id/toolbar" />
+
+    <com.usda.fmsc.android.widget.SpreadsheetView
+        android:id="@+id/teSsvPoints"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_below="@+id/toolbar"
+        android:layout_alignParentBottom="true"
+        android:visibility="invisible" />
+
+    <RelativeLayout
+        android:id="@+id/teLayFilters"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_below="@id/toolbar"
+        android:background="@color/primaryLight"
+        android:elevation="@dimen/toolbar_elevation"
+        android:visibility="gone">
+
+        <ImageButton
+            android:id="@+id/teIbPolys"
+            android:layout_width="@dimen/toolbar_height"
+            android:layout_height="match_parent"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:background="@color/primaryLight"
+            android:elevation="10dp"
+            android:src="@drawable/ic_poly"
+            android:adjustViewBounds="true"
+            android:contentDescription="@string/str_polygons"
+            android:onClick="btnTePolys"/>
+
+        <HorizontalScrollView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_toRightOf="@id/teIbPolys"
+            android:layout_toEndOf="@id/teIbPolys"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <ImageButton
+                    android:id="@+id/teIbOpGps"
+                    style="@style/teFilterbuttonStyle"
+                    android:src="@drawable/ic_ttpoint_gps_white"
+                    android:contentDescription="@string/op_gps"
+                    android:onClick="btnTeGps"/>
+
+                <ImageButton
+                    android:id="@+id/teIbOpTake5"
+                    style="@style/teFilterbuttonStyle"
+                    android:src="@drawable/ic_ttpoint_take5_white"
+                    android:contentDescription="@string/op_take5"
+                    android:onClick="btnTeTake5"/>
+
+                <ImageButton
+                    android:id="@+id/teIbOpTrav"
+                    style="@style/teFilterbuttonStyle"
+                    android:src="@drawable/ic_ttpoint_traverse_white"
+                    android:contentDescription="@string/op_trav"
+                    android:onClick="btnTeTrav"/>
+
+                <ImageButton
+                    android:id="@+id/teIbOpSS"
+                    style="@style/teFilterbuttonStyle"
+                    android:src="@drawable/ic_ttpoint_sideshot_white"
+                    android:contentDescription="@string/op_ss"
+                    android:onClick="btnTeSS"/>
+
+                <ImageButton
+                    android:id="@+id/teIbOpQndm"
+                    style="@style/teFilterbuttonStyle"
+                    android:src="@drawable/ic_ttpoint_quondam_white"
+                    android:contentDescription="@string/op_qndm"
+                    android:onClick="btnTeQndm"/>
+
+                <ImageButton
+                    android:id="@+id/teIbOpWalk"
+                    style="@style/teFilterbuttonStyle"
+                    android:src="@drawable/ic_ttpoint_walk_white"
+                    android:contentDescription="@string/op_walk"
+                    android:onClick="btnTeWalk"/>
+
+                <ImageButton
+                    android:id="@+id/teIbOpWay"
+                    style="@style/teFilterbuttonStyle"
+                    android:src="@drawable/ic_ttpoint_way_white"
+                    android:contentDescription="@string/op_way"
+                    android:onClick="btnTeWay"/>
+            </LinearLayout>
+
+
+        </HorizontalScrollView>
+    </RelativeLayout>
+
+    <View style="@style/ToolbarElevation" android:layout_below="@id/teLayFilters"/>
+
+    <me.zhanghai.android.materialprogressbar.MaterialProgressBar
+        android:id="@+id/teProgress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@style/Widget.MaterialProgressBar.ProgressBar.Large"
+        android:layout_centerInParent="true"
+        android:visibility="visible"/>
+</RelativeLayout>

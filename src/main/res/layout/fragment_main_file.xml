@@ -1,0 +1,157 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.usda.fmsc.twotrails.fragments.main.MainFileFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/main_btn_new"
+            android:id="@+id/mainFragFileBtnNew"
+            android:layout_gravity="center_horizontal"
+            android:onClick="btnNewClick"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginTop="5dp"
+            style="@style/MainActivityButtons"/>
+
+        <View style="@style/Dividers"/>
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/main_btn_open"
+            android:id="@+id/mainFragFileBtnOpen"
+            android:layout_gravity="center_horizontal"
+            android:onClick="btnOpenClick"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            style="@style/MainActivityButtons"/>
+
+        <View style="@style/Dividers"/>
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/main_btn_open_rec"
+            android:id="@+id/mainFragFileBtnOpenRecent"
+            android:layout_gravity="center_horizontal"
+            android:onClick="btnOpenRecClick"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            style="@style/MainActivityButtons"/>
+
+
+        <View style="@style/Dividers"/>
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/main_btn_import"
+            android:id="@+id/mainFragFileBtnImport"
+            android:layout_gravity="center_horizontal"
+            android:onClick="btnImportClick"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:enabled="false"
+            style="@style/MainActivityButtons"/>
+
+        <View style="@style/Dividers"/>
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/main_btn_duplicate"
+            android:id="@+id/mainFragFileBtnDup"
+            android:layout_gravity="center_horizontal"
+            android:onClick="btnDupClick"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:enabled="false"
+            style="@style/MainActivityButtons"/>
+
+        <View style="@style/Dividers"/>
+
+        <TableLayout
+            android:id="@+id/mainFragFileTblInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:stretchColumns="1"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp">
+
+            <TableRow>
+
+                <TextView
+                    android:layout_column="1"
+                    android:text="@string/main_tv_edited"
+                    android:padding="5dip"/>
+
+                <TextView
+                    android:id="@+id/mainFragFileTvDate"
+                    android:gravity="end"
+                    android:padding="5dip"/>
+            </TableRow>
+
+            <TableRow>
+
+                <TextView
+                    android:layout_column="1"
+                    android:text="@string/main_tv_polys"
+                    android:padding="5dip"/>
+
+                <TextView
+                    android:id="@+id/mainFragFileTvPolys"
+                    android:gravity="end"
+                    android:padding="5dip"/>
+            </TableRow>
+
+            <TableRow>
+
+                <TextView
+                    android:layout_column="1"
+                    android:text="@string/main_tv_points"
+                    android:padding="5dip"/>
+
+                <TextView
+                    android:id="@+id/mainFragFileTvPoints"
+                    android:gravity="end"
+                    android:padding="5dip"/>
+            </TableRow>
+
+            <TableRow>
+
+                <TextView
+                    android:layout_column="1"
+                    android:text="@string/main_tv_groups"
+                    android:padding="5dip"/>
+
+                <TextView
+                    android:id="@+id/mainFragFileTvGroups"
+                    android:gravity="end"
+                    android:padding="5dip"/>
+            </TableRow>
+
+            <TableRow>
+
+                <TextView
+                    android:layout_column="1"
+                    android:text="@string/main_tv_meta"
+                    android:padding="5dip"/>
+
+                <TextView
+                    android:id="@+id/mainFragFileTvMeta"
+                    android:gravity="end"
+                    android:padding="5dip"/>
+            </TableRow>
+        </TableLayout>
+    </LinearLayout>
+
+</ScrollView>

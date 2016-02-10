@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <PreferenceCategory
+        android:title="Device Setup">
+
+        <PreferenceScreen
+            android:title="@string/menu_x_gps_settings"
+            android:key="gpsSetup">
+
+            <SwitchPreference
+                android:key="@string/set_GPS_EXTERNAL"
+                android:title="GPS Device"
+                android:summary="Device to use."
+                android:switchTextOff="@string/str_internal"
+                android:switchTextOn="@string/str_external"
+                android:textOff="@string/str_internal"
+                android:textOn="@string/str_external"/>
+
+            <com.usda.fmsc.android.preferences.SwitchCompatPreference
+                android:key="@string/set_GPS_ALWAYS_ON"
+                android:title="Keep GPS ON"
+                android:summary="Run GPS Always"/>
+
+            <PreferenceCategory
+                android:title="External GPS Settings"
+                android:key="exGpsCat">
+
+                <com.usda.fmsc.android.preferences.ListCompatPreference
+                    android:id="@+id/prefLstGpsDevice"
+                    android:key="prefLstGpsDevice"
+                    android:title="External GPS Device"
+                    android:summary="Device: "/>
+
+                <Preference
+                    android:key="prefGpsCheck"
+                    android:title="Check GPS Connection"
+                    android:summary="@string/ds_gps_not_connected"/>
+            </PreferenceCategory>
+        </PreferenceScreen>
+
+        <PreferenceScreen
+            android:title="Range Finder"
+            android:key="rfSetup"
+            android:enabled="false">
+
+            <com.usda.fmsc.android.preferences.SwitchCompatPreference
+                android:id="@+id/swtLaserLocDevice"
+                android:key="rfLocDevice"
+                android:title="Range Finder"
+                android:summary="Device to use."
+                android:switchTextOff="@string/str_internal"
+                android:switchTextOn="@string/str_external"
+                android:textOff="@string/str_internal"
+                android:textOn="@string/str_external"/>
+
+            <PreferenceCategory android:title="External Range Finder Settings">
+                <com.usda.fmsc.android.preferences.ListCompatPreference
+                    android:id="@+id/lstRfDevice"
+                    android:key="rfDevice"
+                    android:title="External Range Finder" />
+            </PreferenceCategory>
+        </PreferenceScreen>
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Point Settings">
+
+        <PreferenceScreen
+            android:title="@string/op_gps"
+            android:key="gpsPointSetup">
+
+            <PreferenceCategory
+                android:title="Filters">
+
+                <com.usda.fmsc.twotrails.preferences.GpsFixPreference
+                    android:title="Fix Type"
+                    android:key="@string/set_GPS_FILTER_FIX_TYPE"/>
+
+                <com.usda.fmsc.twotrails.preferences.DopTypePreference
+                    android:title="DOP Type"
+                    android:key="@string/set_GPS_FILTER_DOP_TYPE"/>
+
+                <com.usda.fmsc.android.preferences.NumberPickerPreference
+                    android:title="DOP Value"
+                    android:key="@string/set_GPS_FILTER_DOP_VALUE"
+                    android:defaultValue="20"
+                    app:valueInSummary="true"/>
+            </PreferenceCategory>
+
+            <!--<PreferenceCategory-->
+                <!--android:title="Misc Settings">-->
+
+            <!--</PreferenceCategory>-->
+        </PreferenceScreen>
+
+        <PreferenceScreen
+            android:title="@string/op_take5"
+            android:key="take5PointSetup">
+
+            <PreferenceCategory
+                android:title="Filters">
+
+                <com.usda.fmsc.twotrails.preferences.GpsFixPreference
+                    android:title="Fix Type"
+                    android:key="@string/set_TAKE5_FILTER_FIX_TYPE"/>
+
+                <com.usda.fmsc.twotrails.preferences.DopTypePreference
+                    android:title="DOP Type"
+                    android:key="@string/set_TAKE5_FILTER_DOP_TYPE"/>
+
+                <com.usda.fmsc.android.preferences.NumberPickerPreference
+                    android:title="DOP Value"
+                    android:key="@string/set_TAKE5_FILTER_DOP_VALUE"
+                    android:defaultValue="20"
+                    app:valueInSummary="true"/>
+            </PreferenceCategory>
+
+            <PreferenceCategory
+                android:title="Misc Settings">
+
+                <com.usda.fmsc.android.preferences.NumberPickerPreference
+                    android:title="Increment Amount"
+                    android:summary="The number to increment PID by in the Take5 tool"
+                    android:key="@string/set_TAKE5_INCREMENT"
+                    android:defaultValue="5" />
+
+                <com.usda.fmsc.android.preferences.NumberPickerPreference
+                    android:title="Take 5 Amount"
+                    android:summary="Amount of Bursts to create a Take5 point"
+                    android:key="@string/set_TAKE5_NMEA_AMOUNT"
+                    android:enabled="false"/>
+
+                <com.usda.fmsc.android.preferences.SwitchCompatPreference
+                    android:title="Ignore First Bursts"
+                    android:summary="Ignore the first X bursts when creating a Take5 point"
+                    android:key="@string/set_TAKE5_IGNORE_NMEA"
+                    android:enabled="false"/>
+
+                <com.usda.fmsc.android.preferences.NumberPickerPreference
+                    android:title="Ignore Furst Bursts Amount"
+                    android:summary="Amount of bursts to ignore when creating a Take5 point"
+                    android:key="@string/set_TAKE5_IGNORE_NMEA_AMOUNT"
+                    android:defaultValue="2"
+                    android:enabled="false"/>
+
+                <com.usda.fmsc.android.preferences.NumberPickerPreference
+                    android:title="NMEA Fail Amount"
+                    android:summary="Amount of failed bursts to wait until canceling a Take5 point"
+                    android:key="@string/set_TAKE5_FAIL_AMOUNT"
+                    android:defaultValue="10"
+                    android:enabled="false"/>
+            </PreferenceCategory>
+        </PreferenceScreen>
+
+        <PreferenceScreen
+            android:title="@string/op_walk"
+            android:key="walkPointSetup">
+
+            <PreferenceCategory
+                android:title="Filters">
+
+                <com.usda.fmsc.twotrails.preferences.GpsFixPreference
+                    android:title="Fix Type"
+                    android:key="@string/set_WALK_FILTER_FIX_TYPE"/>
+
+                <com.usda.fmsc.twotrails.preferences.DopTypePreference
+                    android:title="DOP Type"
+                    android:key="@string/set_WALK_FILTER_DOP_TYPE"/>
+
+                <com.usda.fmsc.android.preferences.NumberPickerPreference
+                    android:title="DOP Value"
+                    android:key="@string/set_WALK_FILTER_DOP_VALUE"
+                    android:defaultValue="20"
+                    app:valueInSummary="true"/>
+
+                <com.usda.fmsc.android.preferences.NumberPickerPreference
+                    android:title="Accuracy"
+                    android:summary="Distance between points (Meters)"
+                    android:key="@string/set_WALK_FILTER_ACCURACY"/>
+
+                <com.usda.fmsc.android.preferences.NumberPickerPreference
+                    android:title="Frequency"
+                    android:summary="Frequency between points (Seconds)"
+                    android:key="@string/set_WALK_FILTER_FREQUENCY"
+                    app:maximumValue="60"/>
+            </PreferenceCategory>
+
+            <PreferenceCategory
+                android:title="Notifications">
+
+                <com.usda.fmsc.android.preferences.SwitchCompatPreference
+                    android:title="Ring On Create"
+                    android:key="@string/set_WALK_RING_ON_CREATE_POINT"/>
+
+                <com.usda.fmsc.android.preferences.SwitchCompatPreference
+                    android:title="Vibrate On Create"
+                    android:key="@string/set_WALK_VIB_ON_CREATE_POINT"/>
+            </PreferenceCategory>
+
+            <PreferenceCategory
+                android:title="Misc Settings">
+
+                <com.usda.fmsc.android.preferences.NumberPickerPreference
+                    android:title="Increment Amount"
+                    android:key="@string/set_WALK_INCREMENT"
+                    android:defaultValue="2"
+                    app:valueInSummary="true" />
+            </PreferenceCategory>
+        </PreferenceScreen>
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Other">
+
+        <PreferenceScreen
+            android:title="Map Options"
+            android:key="mapSetup">
+
+            <PreferenceCategory
+                android:title="Map Options">
+
+                <com.usda.fmsc.android.preferences.SwitchCompatPreference
+                    android:title="Show My Position"
+                    android:key="@string/set_MAP_SHOW_MY_POS"/>
+
+                <com.usda.fmsc.android.preferences.SwitchCompatPreference
+                    android:title="Use UTM Navigation"
+                    android:key="@string/set_MAP_USE_UTM_NAV"/>
+
+                <com.usda.fmsc.twotrails.preferences.MapTrackingPreference
+                    android:title="Map Tracking"
+                    android:key="@string/set_MAP_TRACKING_OPTION"
+                    android:summary="Use UTM instead of Lat/Lon for Navigation"/>
+
+                <com.usda.fmsc.android.preferences.SwitchCompatPreference
+                    android:title="Show Compass"
+                    android:key="@string/set_MAP_COMPASS_ENABLED" />
+
+                <com.usda.fmsc.android.preferences.SwitchCompatPreference
+                    android:title="Show My Position Button"
+                    android:key="@string/set_MAP_MY_POS_BUTTON" />
+
+                <!--<CheckBoxPreference-->
+                    <!--android:title="Show Zoom Buttons"-->
+                    <!--android:key="@string/set_MAP_ZOOM_BUTTONS" />-->
+            </PreferenceCategory>
+        </PreferenceScreen>
+
+        <PreferenceScreen
+            android:title="Dialog Options"
+            android:key="dialogSetup">
+
+            <PreferenceCategory
+                android:title="Dialog Options">
+
+                <com.usda.fmsc.android.preferences.SwitchCompatPreference
+                    android:title="OnBoundary"
+                    android:key="@string/set_AUTO_UPDATE_WALK_ONBND_ASK"
+                    android:summary="Remember walk OnBoundary selection"/>
+
+                <com.usda.fmsc.android.preferences.SwitchCompatPreference
+                    android:title="Update Metadata on GPS"
+                    android:key="@string/set_AUTO_SET_GPS_NAME_TO_META_ASK"
+                    android:summary="Remember to update metadata on GPS receiver change"/>
+
+                <com.usda.fmsc.android.preferences.SwitchCompatPreference
+                    android:title="Overwrite PlotGrid"
+                    android:key="@string/set_AUTO_OVERWRITE_PLOTGRID_ASK"
+                    android:summary="Remember to overwrite the PlotGrid on regenerate"/>
+            </PreferenceCategory>
+        </PreferenceScreen>
+
+        <PreferenceScreen
+            android:title="Misc Settings"
+            android:key="miscSetup">
+
+            <com.usda.fmsc.android.preferences.SwitchCompatPreference
+                android:key="DropZero"
+                android:title="Drop Zeros"
+                android:summary="Drop Empty Points" />
+        </PreferenceScreen>
+
+        <com.usda.fmsc.android.preferences.SwitchCompatPreference
+            android:title="Open last project on start"
+            android:key="@string/set_AUTO_OPEN_LAST_PROJECT"/>
+
+        <Preference
+            android:title="Export Report"
+            android:key="prefExportReport"
+            android:enabled="false"/>
+
+        <Preference
+            android:title="Clear Log"
+            android:key="prefClearLog"/>
+
+        <Preference
+            android:title="Reset Device Settings"
+            android:key="prefResetDevice" />
+    </PreferenceCategory>
+</PreferenceScreen>

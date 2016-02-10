@@ -1,0 +1,215 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.usda.fmsc.twotrails.fragments.polygon.PolygonFragment">
+
+    <View
+        android:id="@+id/preFocusView"
+        android:layout_height="0dp"
+        android:layout_width="0dp"
+        android:descendantFocusability="beforeDescendants"
+        android:focusableInTouchMode="true"/>
+
+    <ScrollView
+        android:id="@+id/polyFragScrollView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:orientation="vertical"
+            android:padding="8dp"
+            android:id="@+id/parentLayout">
+
+            <android.support.v7.widget.CardView
+                style="@style/cardStyle"
+                android:layout_margin="0dp">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <RelativeLayout
+                        android:id="@+id/cardHeader"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/toolbar_height"
+                        android:elevation="3dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:paddingLeft="8dp"
+                        android:paddingRight="8dp"
+                        android:orientation="horizontal">
+
+                        <!--<ImageView-->
+                        <!--android:layout_width="40dp"-->
+                        <!--android:layout_height="40dp"-->
+                        <!--android:src="@drawable/ic_ttpoint_gps_dark"-->
+                        <!--android:background="@android:color/transparent"-->
+                        <!--android:contentDescription="@string/op_gps"-->
+                        <!--android:layout_centerVertical="true" />-->
+
+                        <TextView
+                            android:id="@+id/polyFragTvName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="40sp"
+                            android:layout_centerInParent="true"
+                            android:maxLines="1"
+                            android:ellipsize="end"/>
+                    </RelativeLayout>
+
+                    <View style="@style/ToolbarElevation3" android:layout_below="@id/cardHeader" />
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/cardHeader">
+
+                        <LinearLayout
+                            android:id="@+id/cardContent"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:elevation="3dp"
+                            android:paddingLeft="8dp"
+                            android:paddingStart="8dp"
+                            android:paddingEnd="8dp"
+                            android:paddingRight="8dp"
+                            android:paddingBottom="8dp"
+                            android:layout_alignParentTop="true">
+
+                            <TableLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content">
+
+                                <TableRow>
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="0"
+                                        android:text="Name"
+                                        android:textSize="22sp"
+                                        android:layout_gravity="center_vertical" />
+
+                                    <EditText
+                                        android:id="@+id/polyFragTxtName"
+                                        android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        style="@style/AutoSelectEditTextStyle"
+                                        android:textCursorDrawable="@null"/>
+                                </TableRow>
+
+                                <TableRow>
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:text="Accuracy"
+                                        android:textSize="22sp"
+                                        android:layout_gravity="center_vertical" />
+
+                                    <EditText
+                                        android:id="@+id/polyFragTxtAcc"
+                                        android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:layout_column="2"
+                                        android:inputType="numberDecimal"
+                                        style="@style/AutoSelectEditTextStyle" />
+                                </TableRow>
+
+                                <TableRow>
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:text="Point Start Index"
+                                        android:textSize="22sp"
+                                        android:layout_gravity="center_vertical" />
+
+                                    <EditText
+                                        android:id="@+id/polyFragTxtPsi"
+                                        android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:layout_column="2"
+                                        android:inputType="number"
+                                        style="@style/AutoSelectEditTextStyle" />
+                                </TableRow>
+
+                                <TableRow>
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:text="Increment Amount"
+                                        android:textSize="22sp"
+                                        android:layout_gravity="center_vertical" />
+
+                                    <EditText
+                                        android:id="@+id/polyFragTxtInc"
+                                        android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:layout_column="2"
+                                        android:inputType="number"
+                                        style="@style/AutoSelectEditTextStyle" />
+                                </TableRow>
+                            </TableLayout>
+
+                            <android.support.design.widget.TextInputLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:paddingTop="5dp">
+
+                                <EditText
+                                    android:id="@+id/polyFragTxtDesc"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:inputType="textMultiLine"
+                                    android:hint="@string/poly_desc"
+                                    style="@style/EditTextStyle"/>
+                            </android.support.design.widget.TextInputLayout>
+                        </LinearLayout
+>
+
+                        <!-- Hide when below content is hidden, maybe put in content below amd change padding -->
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@id/cardContent"
+                            android:visibility="gone">
+
+                            <View style="@style/ToolbarElevation3" android:layout_alignParentTop="true" />
+
+                            <RelativeLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:padding="8dp">
+
+                                <!--This is where map will be, either gmap or drawable-->
+                                <RelativeLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="300dp"
+                                    android:background="@color/primary_300">
+
+                                </RelativeLayout>
+                            </RelativeLayout>
+                        </RelativeLayout>
+                    </RelativeLayout>
+                </RelativeLayout>
+            </android.support.v7.widget.CardView>
+        </LinearLayout>
+
+    </ScrollView>
+</FrameLayout>
