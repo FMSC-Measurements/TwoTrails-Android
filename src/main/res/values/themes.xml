@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="AppTheme" parent="AppTheme.Base">
+        <item name="alertDialogTheme">@style/AppCompatAlertDialogStyle</item>
+        <item name="android:alertDialogTheme">@style/AppCompatAlertDialogStyle</item>
+        <item name="alertDialogStyle">@style/AppCompatAlertDialogStyle</item>
+        <item name="android:alertDialogStyle">@style/AppCompatAlertDialogStyle</item>
+
+
+        <item name="actionModeBackground">@color/primary</item>
+
+        <item name="android:editTextStyle">@style/EditTextStyle</item>
+        <item name="android:checkboxStyle">@style/CheckBoxStyle</item>
+
+
+        <item name="android:textSelectHandleLeft">@drawable/apptheme_text_select_handle_left</item>
+        <item name="android:textSelectHandleRight">@drawable/apptheme_text_select_handle_right</item>
+        <item name="android:textSelectHandle">@drawable/apptheme_text_select_handle_middle</item>
+    </style>
+
+    <style name="AppTheme.Base" parent="Theme.AppCompat.Light.NoActionBar">
+
+        <!-- colorPrimary is used, for instance, for the default ActionBar
+             (but not Toolbar) background.-->
+        <item name="colorPrimary">@color/primary</item>
+        <item name="android:colorPrimary" tools:targetApi="21">@color/primary</item>
+
+        <!-- colorPrimaryDark is used for the status bar (with the
+             battery, clock, etc). -->
+        <item name="colorPrimaryDark">@color/primaryDark</item>
+        <item name="android:colorPrimaryDark" tools:targetApi="21">@color/primaryDark</item>
+
+        <item name="colorAccent">@color/accent</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/accent</item>
+
+        <!--<item name="android:itemBackground">@android:color/white</item>-->
+    </style>
+
+    <!-- Dialogs -->
+
+    <style name="AppCompatAlertDialogStyle" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="android:colorPrimary" tools:targetApi="21">@color/primary</item>
+
+        <item name="colorPrimaryDark">@color/primaryDark</item>
+        <item name="android:colorPrimaryDark" tools:targetApi="21">@color/primaryDark</item>
+
+        <item name="colorAccent">@color/accent</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/accent</item>
+
+        <item name="android:elevation" tools:targetApi="21" >@dimen/toolbar_elevation</item>
+        <!--<item name="android:editTextStyle">@style/EditTextStyle</item>-->
+
+
+        <!--<item name="windowFrame">...</item>-->
+        <item name="android:windowTitleStyle">@style/DialogTitleStyle</item>
+        <!--<item name="android:windowBackground">@android:color/transparent</item>-->
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <!--<item name="windowAnimationStyle">...</item>-->
+        <!--<item name="windowSoftInputMode">...</item>-->
+        <!--<item name="windowCloseOnTouchOutside">...</item>-->
+        <!--<item name="windowActionModeOverlay">...</item>-->
+        <!--<item name="colorBackgroundCacheHint">...</item>-->
+        <!--<item name="textAppearance">...</item>-->
+        <!--<item name="textAppearanceInverse">...</item>-->
+        <item name="android:textColorPrimary">@color/textDarkContent</item>
+        <item name="android:textColorSecondary">@color/textDarkDisabled</item>
+        <!--<item name="textColorTertiary">...</item>-->
+        <!--<item name="textColorPrimaryInverse">...</item>-->
+        <!--<item name="textColorSecondaryInverse">...</item>-->
+        <!--<item name="textColorTertiaryInverse">...</item>-->
+        <!--<item name="textColorPrimaryDisableOnly">...</item>-->
+        <!--<item name="textColorPrimaryInverseDisableOnly">...</item>-->
+        <!--<item name="textColorPrimaryNoDisable">...</item>-->
+        <!--<item name="textColorSecondaryNoDisable">...</item>-->
+        <!--<item name="textColorPrimaryInverseNoDisable">...</item>-->
+        <!--<item name="textColorSecondaryInverseNoDisable">...</item>-->
+        <!--<item name="textColorHint">@color/colorPrimaryLight</item>-->
+        <!--<item name="textColorHintInverse">...</item>-->
+        <!--<item name="textColorSearchUrl">...</item>-->
+        <!--<item name="textAppearanceLarge">...</item>-->
+        <!--<item name="textAppearanceMedium">...</item>-->
+        <!--<item name="textAppearanceSmall">...</item>-->
+        <!--<item name="textAppearanceLargeInverse">...</item>-->
+        <!--<item name="textAppearanceMediumInverse">...</item>-->
+        <!--<item name="textAppearanceSmallInverse">...</item>-->
+        <!--<item name="listPreferredItemPaddingLeft">...</item>-->
+        <!--<item name="listPreferredItemPaddingRight">...</item>-->
+        <!--<item name="listPreferredItemPaddingStart">...</item>-->
+        <!--<item name="listPreferredItemPaddingEnd">...</item>-->
+        <!--<item name="preferencePanelStyle">...</item>-->
+    </style>
+
+    <style name="DialogTitleStyle">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+
+    <!-- Toolbar -->
+
+    <style name="ToolbarTheme" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+        <item name="android:colorPrimary" tools:targetApi="21">@color/primary</item>
+        <item name="colorPrimary">@color/primary</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/accent</item>
+        <item name="colorAccent">@color/accent</item>
+        <item name="android:elevation" tools:targetApi="21" >@dimen/toolbar_elevation</item>
+
+        <item name="android:windowContentTransitions" tools:targetApi="21">true</item>
+        <item name="android:windowAllowEnterTransitionOverlap" tools:targetApi="21">true</item>
+        <item name="android:windowAllowReturnTransitionOverlap" tools:targetApi="21">true</item>
+        <item name="android:windowSharedElementEnterTransition" tools:targetApi="21">@android:transition/move</item>
+        <item name="android:windowSharedElementExitTransition" tools:targetApi="21">@android:transition/move</item>
+    </style>
+
+    <style name="PopupTheme" parent="AppTheme.Base">
+        <item name="android:textColor">@android:color/primary_text_light</item>
+    </style>
+</resources>

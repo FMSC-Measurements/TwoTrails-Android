@@ -1,0 +1,82 @@
+<resources>
+    <item name="primary" type="color">@color/primary_500</item>
+    <item name="primaryDark" type="color">@color/primary_600</item>
+    <item name="primaryDarker" type="color">@color/primary_650</item>
+    <item name="primaryLight" type="color">@color/primary_450</item>
+    <item name="primaryLighter" type="color">@color/primary_350</item>
+    <item name="primaryLightest" type="color">@color/primary_200</item>
+    <item name="accent" type="color">@color/primaryLight</item>
+
+
+    <color name="textDark">#de000000</color>
+    <color name="textDarkContent">#7a000000</color>
+    <color name="textDarkDisabled">#60000000</color>
+    <color name="textDarkDivider">#1f000000</color>
+    
+    <color name="textLight">#FFFFFF</color>
+    <color name="textLightContent">#b3ffffff</color>
+    <color name="textLightDisabled">#4dffffff</color>
+    <color name="textLightDivider">#1fffffff</color>
+
+
+    <item name="background" type="color">#55EEEEEE</item>
+    <item name="background_no_trans" type="color">#EEEEEE</item>
+
+
+    <item name="background_card" type="color">@android:color/white</item>
+    <item name="background_card_view" type="color">@color/grey_300</item>
+    <!--<item name="background_card_view" type="color">#f9f9f9</item>-->
+
+
+
+    <!-- Default color to apply onto front view when none is provided -->
+    <color name="fcb__front_color">@color/grey_500</color>
+    <!-- Default color to apply onto rear view when none is provided -->
+    <drawable name="fcb__rear_color">@color/green_500</drawable>
+
+
+
+    <!-- Android Colors -->
+    <item name="primary_100" type="color">#D6DFD7</item>
+    <item name="primary_150" type="color">#C2CFC3</item>
+    <item name="primary_200" type="color">#AEBFAF</item>
+    <item name="primary_250" type="color">#9AAE9A</item>
+    <item name="primary_300" type="color">#859E86</item>
+    <item name="primary_350" type="color">#718E72</item>
+    <item name="primary_400" type="color">#5D7E5E</item>
+    <item name="primary_450" type="color">#486E4A</item>
+    <item name="primary_500" type="color">#345E36</item>
+    <item name="primary_550" type="color">#2F5531</item>
+    <item name="primary_600" type="color">#2A4B2B</item>
+    <item name="primary_650" type="color">#244226</item>
+    <item name="primary_700" type="color">#1F3820</item>
+    <item name="primary_750" type="color">#1A2F1B</item>
+    <item name="primary_800" type="color">#152616</item>
+    <item name="primary_850" type="color">#101C10</item>
+    <item name="primary_900" type="color">#0A130B</item>
+    <item name="primary_950" type="color">#050905</item>
+
+</resources>
+
+
+<!--#000000-->
+<!--#050905-->
+<!--#0A130B-->
+<!--#101C10-->
+<!--#152616-->
+<!--#1A2F1B-->
+<!--#1F3820-->
+<!--#244226	pdd-->
+<!--#2A4B2B	pd-->
+<!--#2F5531-->
+<!--#345E36	primary-->
+<!--#486E4A	pl-->
+<!--#5D7E5E-->
+<!--#718E72	pll-->
+<!--#859E86-->
+<!--#9AAE9A-->
+<!--#AEBFAF-->
+<!--#C2CFC3-->
+<!--#D6DFD7-->
+<!--#EBEFEB-->
+<!--#FFFFFF-->

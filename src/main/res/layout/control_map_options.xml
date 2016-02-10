@@ -1,0 +1,171 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/parentLayout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <RelativeLayout
+        android:id="@+id/mpcLayHeader"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/toolbar_height"
+        android:background="@color/primary_300"
+        android:elevation="5dp">
+
+        <TextView
+            android:id="@+id/mpcTvPolyName"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:textSize="30sp"
+            android:layout_gravity="center_vertical"
+            android:gravity="center_vertical"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginLeft="16dp"
+            android:layout_marginStart="16dp"
+            android:text="@string/str_polygons"/>
+
+        <com.usda.fmsc.android.widget.MultiStateTouchCheckBox
+            android:id="@+id/mpcTcbPoly"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            app:checkedColor="@color/primary"
+            app:partialCheckedColor="@color/grey_700"
+            android:layout_gravity="center"
+            android:layout_marginRight="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:contentDescription="@string/str_vis"
+            android:layout_centerVertical="true"/>
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/mpcLayPolyContent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="5dp"
+        android:background="@color/grey_400"
+        android:layout_below="@id/mpcLayHeader"
+        android:visibility="gone">
+
+        <LinearLayout style="@style/mapOptCatStyle">
+
+            <TextView
+                android:text="@string/map_cat_bound"
+                style="@style/mapOptCatTextStyle"/>
+
+            <View style="@style/Dividers"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <com.usda.fmsc.android.widget.MultiStateTouchCheckBox
+                    android:id="@+id/mpcTcbAdjBnd"
+                    android:contentDescription="@string/map_adj_bnd"
+                    style="@style/mapMultiCheckBoxBndStyle"/>
+
+                <com.usda.fmsc.android.widget.MultiStateTouchCheckBox
+                    android:id="@+id/mpcTcbAdjBndPts"
+                    android:contentDescription="@string/map_adj_bnd_pts"
+                    style="@style/mapMultiCheckBoxBndStyle"/>
+
+                <com.usda.fmsc.android.widget.MultiStateTouchCheckBox
+                    android:id="@+id/mpcTcbUnadjBnd"
+                    android:contentDescription="@string/map_unadj_bnd"
+                    style="@style/mapMultiCheckBoxBndStyle"/>
+
+                <com.usda.fmsc.android.widget.MultiStateTouchCheckBox
+                    android:id="@+id/mpcTcbUnadjBndPts"
+                    android:contentDescription="@string/map_unadj_bnd_pts"
+                    style="@style/mapMultiCheckBoxBndStyle"/>
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"/>
+
+                <!--<ImageButton-->
+                <!--android:id="@+id/mpcIbBndMenu"-->
+                <!--style="@style/mapOptTouchCheckBoxStyle"-->
+                <!--android:src="@drawable/ic_action_overflow"-->
+                <!--android:contentDescription="@string/map_bnd_menu"-->
+                <!--android:background="@android:color/transparent" />-->
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout style="@style/mapOptCatStyle">
+
+            <TextView
+                android:text="@string/map_cat_nav"
+                style="@style/mapOptCatTextStyle"/>
+
+            <View style="@style/Dividers"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <com.usda.fmsc.android.widget.MultiStateTouchCheckBox
+                    android:id="@+id/mpcTcbAdjNav"
+                    android:contentDescription="@string/map_adj_nav"
+                    style="@style/mapMultiCheckBoxNavStyle"
+                    app:rearColor="@color/primaryLight"/>
+
+                <com.usda.fmsc.android.widget.MultiStateTouchCheckBox
+                    android:id="@+id/mpcTcbAdjNavPts"
+                    android:contentDescription="@string/map_adj_nav_pts"
+                    style="@style/mapMultiCheckBoxNavStyle"/>
+
+                <com.usda.fmsc.android.widget.MultiStateTouchCheckBox
+                    android:id="@+id/mpcTcbUnadjNav"
+                    android:contentDescription="@string/map_unadj_nav"
+                    style="@style/mapMultiCheckBoxNavStyle"/>
+
+                <com.usda.fmsc.android.widget.MultiStateTouchCheckBox
+                    android:id="@+id/mpcTcbUnadjNavPts"
+                    android:contentDescription="@string/map_unadj_nav_pts"
+                    style="@style/mapMultiCheckBoxNavStyle"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout style="@style/mapOptCatStyle">
+
+            <TextView
+                android:text="@string/map_cat_other"
+                style="@style/mapOptCatTextStyle"/>
+
+            <View style="@style/Dividers"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <com.usda.fmsc.android.widget.MultiStateTouchCheckBox
+                    android:id="@+id/mpcTcbAdjMiscPts"
+                    android:contentDescription="@string/map_adj_misc_pts"
+                    style="@style/multiCheckBoxStyle"
+                    app:rearColor="@color/primaryLight"/>
+
+                <com.usda.fmsc.android.widget.MultiStateTouchCheckBox
+                    android:id="@+id/mpcTcbUnadjMiscPts"
+                    android:contentDescription="@string/map_unadj_misc_pts"
+                    style="@style/multiCheckBoxStyle"
+                    app:rearColor="@color/primaryLight"/>
+
+                <com.usda.fmsc.android.widget.MultiStateTouchCheckBox
+                    android:id="@+id/mpcTcbWayPts"
+                    android:contentDescription="@string/map_way_pts"
+                    style="@style/multiCheckBoxStyle"
+                    app:rearColor="@color/primaryLight"/>
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <View style="@style/ToolbarElevation2" android:layout_below="@id/mpcLayHeader" />
+
+</RelativeLayout>

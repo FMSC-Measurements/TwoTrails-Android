@@ -1,0 +1,17 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".activities.TableEditActivity">
+
+    <item android:id="@+id/teMenuFilter"
+          android:title="@string/menu_table_edit_filter"
+          android:icon="@drawable/ic_view_list_white_36dp"
+          app:showAsAction="always" />
+
+
+    <item android:id="@+id/teMenuColumns"
+          android:title="@string/menu_table_edit_columns"
+          android:icon="@drawable/ic_view_column_white_36dp"
+          app:showAsAction="always" />
+
+</menu>

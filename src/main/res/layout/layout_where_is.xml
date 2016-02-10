@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_no_trans"
+    android:id="@+id/mapSlidingContent">
+
+    <LinearLayout
+        android:id="@+id/lay1"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:orientation="horizontal"
+        android:elevation="3dp"
+        android:layout_alignParentTop="true">
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_marginStart="5dp"
+            android:layout_marginLeft="5dp">
+
+            <TextView
+                android:id="@+id/mapNavTvPid"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="26sp"
+                android:layout_alignParentTop="true"/>
+
+            <TextView
+                android:id="@+id/mapNavTvPoly"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:layout_alignParentBottom="true"
+                android:layout_marginLeft="2dp"
+                android:layout_marginStart="2dp"
+                android:layout_marginBottom="5dp"/>
+        </RelativeLayout>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"/>
+
+        <ImageView
+            android:id="@+id/mapNavIbArrow"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:src="@drawable/ic_navigation_dark"
+            android:layout_gravity="center"
+            android:layout_marginEnd="5dp"
+            android:layout_marginRight="5dp"
+            android:contentDescription="@string/str_nav"
+            android:background="@android:color/transparent"/>
+    </LinearLayout>
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="8dp"
+        android:stretchColumns="1"
+        android:layout_below="@id/lay1">
+
+        <TableRow android:layout_width="0dp">
+            <TextView
+                android:text="@string/str_from"
+                android:textSize="22sp"
+                android:layout_gravity="center_horizontal"
+                android:gravity="center_horizontal"/>
+
+            <TextView
+                android:text="@string/str_to"
+                android:textSize="22sp"
+                android:layout_gravity="center_horizontal"
+                android:gravity="center_horizontal"/>
+        </TableRow>
+
+        <TableRow android:layout_width="0dp">
+            <RadioGroup
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/mapNavRadPoint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/str_point"
+                    android:checked="true"
+                    android:onClick="radFromClick"/>
+
+                <RadioButton
+                    android:id="@+id/mapNavRadMyLoc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/str_my_loc"
+                    android:onClick="radFromClick"/>
+            </RadioGroup>
+        </TableRow>
+
+        <TableRow android:layout_width="0dp" android:layout_marginBottom="5dp">
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <Button
+                    android:id="@+id/mapNavBtnFromPoly"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/str_polygon"
+                    android:onClick="btnFromPolyClick"/>
+
+                <Button
+                    android:id="@+id/mapNavBtnFromPoint"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/str_point"
+                    android:onClick="btnFromPointClick"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <Button
+                    android:id="@+id/mapNavBtnToPoly"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/str_polygon"
+                    android:onClick="btnToPolyClick"/>
+
+                <Button
+                    android:id="@+id/mapNavBtnToPoint"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/str_point"
+                    android:onClick="btnToPointClick"/>
+            </LinearLayout>
+        </TableRow>
+
+        <TableRow android:layout_width="0dp" android:layout_marginBottom="5dp">
+            <TextView
+                android:layout_height="match_parent"
+                android:text="@string/str_dist"
+                android:layout_gravity="center_vertical"
+                android:gravity="center_vertical"
+                android:textSize="18sp"/>
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/meas_feet"
+                        android:layout_gravity="center_vertical"
+                        android:textSize="18sp"/>
+                    <TextView
+                        android:id="@+id/mapNavTvDistFeet"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginEnd="10dp"
+                        android:layout_marginRight="10dp"
+                        android:layout_gravity="center_vertical"
+                        android:textSize="18sp" />
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/meas_meters"
+                        android:layout_gravity="center_vertical"
+                        android:textSize="18sp"/>
+
+                    <TextView
+                        android:id="@+id/mapNavTvDistMeters"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginEnd="10dp"
+                        android:layout_marginRight="10dp"
+                        android:layout_gravity="center_vertical"
+                        android:textSize="18sp"/>
+                </RelativeLayout>
+            </LinearLayout>
+        </TableRow>
+
+        <TableRow android:layout_width="0dp">
+            <TextView
+                android:layout_height="match_parent"
+                android:text="@string/str_az"
+                android:layout_gravity="center_vertical"
+                android:gravity="center_vertical"
+                android:textSize="18sp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/str_true"
+                        android:layout_gravity="center_vertical"
+                        android:textSize="18sp"/>
+
+                    <TextView
+                        android:id="@+id/mapNavTvAzTrue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginEnd="10dp"
+                        android:layout_marginRight="10dp"
+                        android:layout_gravity="center_vertical"
+                        android:textSize="18sp"/>
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/str_mag"
+                        android:layout_gravity="center_vertical"
+                        android:textSize="18sp"/>
+
+                    <TextView
+                        android:id="@+id/mapNavTvAzMag"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginEnd="10dp"
+                        android:layout_marginRight="10dp"
+                        android:layout_gravity="center_vertical"
+                        android:textSize="18sp"/>
+                </RelativeLayout>
+            </LinearLayout>
+        </TableRow>
+    </TableLayout>
+
+    <View style="@style/ToolbarElevation2" android:layout_below="@id/lay1" />
+</RelativeLayout>

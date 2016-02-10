@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context="com.usda.fmsc.twotrails.activities.PlotGridActivity">
+
+    <View
+        android:id="@+id/preFocusView"
+        android:layout_height="0dp"
+        android:layout_width="0dp"
+        android:descendantFocusability="beforeDescendants"
+        android:focusableInTouchMode="true"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <include
+            android:id="@id/toolbar"
+            layout="@layout/toolbar_default" />
+
+        <View style="@style/ToolbarElevation" android:layout_below="@id/toolbar"/>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_below="@id/toolbar"
+            android:layout_alignParentBottom="true">
+
+            <TableLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:stretchColumns="1"
+                android:padding="8dp">
+
+                <TableRow>
+                    <TextView
+                        android:text="@string/str_polygon"
+                        android:textSize="22sp"
+                        android:gravity="center_vertical"
+                        android:layout_gravity="center_vertical" />
+
+                    <Spinner
+                        android:layout_height="40dp"
+                        android:gravity="center_vertical"
+                        android:layout_gravity="center_vertical"
+                        android:id="@+id/plotSpnPoly" />
+                </TableRow>
+
+                <TableRow>
+
+                    <TextView
+                        android:text="Start Point"
+                        android:textSize="22sp"
+                        android:gravity="center_vertical"
+                        android:layout_gravity="center_vertical" />
+
+                    <Spinner
+                        android:layout_height="40dp"
+                        android:gravity="center_vertical"
+                        android:layout_gravity="center_vertical"
+                        android:id="@+id/plotSpnPoint" />
+                </TableRow>
+
+                <TableRow>
+
+                    <TextView
+                        android:text="Location"
+                        android:textSize="22sp"
+                        android:gravity="center_vertical"
+                        android:layout_gravity="center_vertical" />
+
+                    <Spinner
+                        android:id="@+id/plotSpnLoc"
+                        android:layout_height="40dp"
+                        android:gravity="center_vertical"
+                        android:layout_gravity="center_vertical"
+                        android:prompt="@string/pg_points_loc" />
+                </TableRow>
+
+                <TableRow>
+
+                    <TextView
+                        android:text="@string/str_meta"
+                        android:textSize="22sp"
+                        android:gravity="center_vertical"
+                        android:layout_gravity="center_vertical" />
+
+                    <Spinner
+                        android:id="@+id/plotSpnMeta"
+                        android:layout_height="40dp"
+                        android:gravity="center_vertical"
+                        android:layout_gravity="center_vertical" />
+                </TableRow>
+
+                <TableRow>
+
+                    <TextView
+                        android:text="Grid Interval"
+                        android:textSize="22sp"
+                        android:gravity="center_vertical"
+                        android:layout_gravity="center_vertical" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <EditText
+                            android:id="@+id/plotTxtGridX"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:inputType="number"
+                            style="@style/EditTextStyle"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="X" />
+
+                        <EditText
+                            android:id="@+id/plotTxtGridY"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:inputType="number"
+                            style="@style/EditTextStyle" />
+                    </LinearLayout>
+                </TableRow>
+
+                <TableRow>
+
+                    <TextView
+                        android:text="Tilt"
+                        android:textSize="22sp"
+                        android:gravity="center_vertical"
+                        android:layout_gravity="center_vertical" />
+
+
+                    <EditText
+                        android:id="@+id/plotTxtTilt"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        style="@style/EditTextStyle"
+                        android:inputType="numberSigned" />
+                </TableRow>
+
+                <TableRow>
+
+                    <CheckBox
+                        android:id="@+id/plotChkSubSample"
+                        android:text="SubSample"
+                        android:textSize="22sp"
+                        android:gravity="center_vertical"
+                        style="@style/CheckBoxStyle" />
+                </TableRow>
+
+                <TableRow>
+
+                    <Spinner
+                        android:id="@+id/plotSpnSubsample"
+                        android:prompt="@string/pg_sample_type"
+                        android:layout_height="40dp"
+                        android:gravity="center_vertical"
+                        android:layout_gravity="center_vertical" />
+
+                    <EditText
+                        android:id="@+id/plotTxtSubsample"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        style="@style/EditTextStyle"
+                        android:inputType="number" />
+                </TableRow>
+            </TableLayout>
+        </ScrollView>
+
+        <RelativeLayout
+            android:id="@+id/plotLayOverlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            android:clickable="true"/>
+
+        <me.zhanghai.android.materialprogressbar.MaterialProgressBar
+            android:id="@+id/plotProgress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminate="true"
+            style="@style/Widget.MaterialProgressBar.ProgressBar.Large"
+            android:layout_centerInParent="true"
+            android:visibility="invisible"/>
+    </RelativeLayout>
+
+    <android.support.design.widget.FloatingActionButton
+        android:src="@drawable/fab_add"
+        style="@style/fabStyle"
+        android:onClick="btnPlotCreateClick"/>
+
+</android.support.design.widget.CoordinatorLayout>

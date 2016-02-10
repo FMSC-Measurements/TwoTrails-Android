@@ -1,0 +1,333 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.usda.fmsc.twotrails.fragments.metadata.MetadataFragment"
+    android:paddingLeft="5dp"
+    android:paddingRight="5dp"
+    android:paddingBottom="5dp"
+    android:scrollbars="none">
+
+
+    <LinearLayout
+        android:id="@+id/metafragLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            style="@style/ItemsRelativeLayout"
+            android:paddingTop="5dp"
+            android:onClick="btnNameClick">
+    
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="@string/poly_name"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true" />
+    
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:id="@+id/metaFragTxtName"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentBottom="true"/>
+    
+        </RelativeLayout>
+
+        <View style="@style/Dividers"/>
+
+        <RelativeLayout
+            style="@style/ItemsRelativeLayout"
+            android:onClick="btnZoneClick">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="@string/str_zone"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:id="@+id/metaFragTxtZone"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="false"
+                android:layout_alignParentBottom="true" />
+        </RelativeLayout>
+    
+        <View style="@style/Dividers"/>
+
+        <RelativeLayout
+            style="@style/ItemsRelativeLayout"
+            android:onClick="btnDecClick">
+    
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="@string/str_dec"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true" />
+    
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:id="@+id/metaFragTxtDec"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="false"
+                android:layout_alignParentBottom="true" />
+        </RelativeLayout>
+    
+        <View style="@style/Dividers"/>
+
+        <RelativeLayout
+            style="@style/ItemsRelativeLayout"
+            android:clickable="false" >
+            <!--android:onClick="btnDecTypeClick"-->
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="@string/meta_dec_type"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:id="@+id/metaFragTxtDecType"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="false"
+                android:layout_alignParentBottom="true" />
+        </RelativeLayout>
+
+        <View style="@style/Dividers"/>
+
+        <RelativeLayout
+            style="@style/ItemsRelativeLayout"
+            android:clickable="false">
+            <!--android:onClick="btnDatumClick"-->
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="@string/meta_datum"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:id="@+id/metaFragTxtDatum"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="false"
+                android:layout_alignParentBottom="true" />
+        </RelativeLayout>
+
+        <View style="@style/Dividers"/>
+
+        <RelativeLayout
+            style="@style/ItemsRelativeLayout"
+            android:onClick="btnDistClick">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="@string/str_dist"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:id="@+id/metaFragTxtDist"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="false"
+                android:layout_alignParentBottom="true" />
+        </RelativeLayout>
+
+        <View style="@style/Dividers"/>
+
+        <RelativeLayout
+            style="@style/ItemsRelativeLayout"
+            android:onClick="btnElevClick">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="@string/str_elev"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:id="@+id/metaFragTxtElev"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="false"
+                android:layout_alignParentBottom="true" />
+        </RelativeLayout>
+
+        <View style="@style/Dividers"/>
+
+        <RelativeLayout
+            style="@style/ItemsRelativeLayout"
+            android:onClick="btnSlopeClick">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="@string/meta_slope"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:id="@+id/metaFragTxtSlope"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="false"
+                android:layout_alignParentBottom="true" />
+        </RelativeLayout>
+
+        <View style="@style/Dividers"/>
+
+        <RelativeLayout
+            style="@style/ItemsRelativeLayout"
+            android:onClick="btnGpsRecClick">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="@string/meta_gps_rec"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:id="@+id/metaFragTxtGpsRec"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="false"
+                android:layout_alignParentBottom="true" />
+        </RelativeLayout>
+
+        <View style="@style/Dividers"/>
+
+        <RelativeLayout
+            style="@style/ItemsRelativeLayout"
+            android:onClick="btnRangeFinderClick">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="@string/meta_range_finder"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:id="@+id/metaFragTxtRangeFinder"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="false"
+                android:layout_alignParentBottom="true" />
+        </RelativeLayout>
+
+        <View style="@style/Dividers"/>
+
+        <RelativeLayout
+            style="@style/ItemsRelativeLayout"
+            android:onClick="btnCompassClick">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="@string/meta_compass"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:id="@+id/metaFragTxtCompass"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="false"
+                android:layout_alignParentBottom="true" />
+        </RelativeLayout>
+
+        <View style="@style/Dividers"/>
+
+        <RelativeLayout
+            style="@style/ItemsRelativeLayout"
+            android:onClick="btnCrewClick">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="@string/meta_crew"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:id="@+id/metaFragTxtCrew"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="false"
+                android:layout_alignParentBottom="true" />
+        </RelativeLayout>
+
+        <View style="@style/Dividers"/>
+
+        <LinearLayout
+            android:id="@+id/metafragLayDesc"
+            android:orientation="vertical"
+            style="@style/ItemsRelativeLayout"
+            android:onClick="btnCmtClick">
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="@string/meta_cmt" />
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:id="@+id/metaFragTxtCmt"
+            android:inputType="textMultiLine" />
+
+        </LinearLayout>
+            
+    </LinearLayout>
+
+</ScrollView>

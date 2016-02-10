@@ -1,0 +1,464 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <RelativeLayout
+        android:id="@+id/importFragLayOpts"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="4dp"
+        android:paddingTop="4dp"
+        android:elevation="4dp"
+        android:padding="8dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/importItemTextStyle"
+            android:text="Advanced Import"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"/>
+
+        <android.support.v7.widget.SwitchCompat
+            android:id="@+id/importFragSwtAdvanced"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:background="@null"
+            android:checked="false"/>
+    </RelativeLayout>
+
+    <View style="@style/ToolbarElevation3"
+        android:layout_below="@id/importFragLayOpts"/>
+
+    <ScrollView
+        android:id="@+id/importFragSv"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_below="@+id/importFragLayOpts"
+        android:layout_alignParentBottom="true">
+
+        <TableLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:stretchColumns="1"
+            android:paddingBottom="8dp"
+            android:paddingStart="8dp"
+            android:paddingLeft="8dp"
+            android:paddingEnd="8dp"
+            android:paddingRight="8dp">
+
+            <TableRow android:id="@+id/importFragItemRowX">
+
+                <TextView
+                    style="@style/importItemTextStyle"
+                    android:text="X"/>
+
+                <Spinner
+                    android:id="@+id/importFragSpnX"
+                    style="@style/importItemSpinnerStyle"/>
+            </TableRow>
+
+            <View style="@style/Dividers"/>
+
+            <TableRow android:id="@+id/importFragItemRowY">
+
+                <TextView
+                    style="@style/importItemTextStyle"
+                    android:text="Y"/>
+
+                <Spinner
+                    android:id="@+id/importFragSpnY"
+                    style="@style/importItemSpinnerStyle"/>
+            </TableRow>
+
+            <View style="@style/Dividers"/>
+
+            <TableRow android:id="@+id/importFragItemRowZ">
+
+                <TextView
+                    style="@style/importItemTextStyle"
+                    android:text="Z"/>
+
+                <Spinner
+                    android:id="@+id/importFragSpnZ"
+                    style="@style/importItemSpinnerStyle"/>
+            </TableRow>
+
+            <View style="@style/Dividers"/>
+
+            <TableRow
+                android:id="@+id/importFragItemRowOp"
+                android:visibility="gone">
+
+                <TextView
+                    style="@style/importItemTextStyle"
+                    android:text="Op Type"/>
+
+                <Spinner
+                    android:id="@+id/importFragSpnOp"
+                    style="@style/importItemSpinnerStyle"/>
+            </TableRow>
+
+            <View
+                style="@style/Dividers"
+                android:id="@+id/importFragDivOp"
+                android:visibility="gone"/>
+
+            <TableRow android:id="@+id/importFragItemRowIndex">
+
+                <TextView
+                    style="@style/importItemTextStyle"
+                    android:text="Index"/>
+
+                <Spinner
+                    android:id="@+id/importFragSpnIndex"
+                    style="@style/importItemSpinnerStyle"/>
+            </TableRow>
+
+            <View style="@style/Dividers"/>
+
+            <TableRow
+                android:id="@+id/importFragItemRowCN"
+                android:visibility="gone">
+
+                <TextView
+                    style="@style/importItemTextStyle"
+                    android:text="CN"/>
+
+                <Spinner
+                    android:id="@+id/importFragSpnCN"
+                    style="@style/importItemSpinnerStyle"/>
+            </TableRow>
+
+            <View
+                style="@style/Dividers"
+                android:id="@+id/importFragDivCN"
+                android:visibility="gone"/>
+
+            <TableRow android:id="@+id/importFragItemRowPID">
+
+                <TextView
+                    style="@style/importItemTextStyle"
+                    android:text="PID"/>
+
+                <Spinner
+                    android:id="@+id/importFragSpnPID"
+                    style="@style/importItemSpinnerStyle"/>
+            </TableRow>
+
+            <View style="@style/Dividers"/>
+
+            <TableRow android:id="@+id/importFragItemRowPoly">
+
+                <TextView
+                    style="@style/importItemTextStyle"
+                    android:text="Polygon Name"/>
+
+                <Spinner
+                    android:id="@+id/importFragSpnPoly"
+                    style="@style/importItemSpinnerStyle"/>
+            </TableRow>
+
+            <View style="@style/Dividers"/>
+
+            <TableRow android:id="@+id/importFragItemRowGroup">
+
+                <TextView
+                    style="@style/importItemTextStyle"
+                    android:text="Group Name"/>
+
+                <Spinner
+                    android:id="@+id/importFragSpnGroup"
+                    style="@style/importItemSpinnerStyle"/>
+            </TableRow>
+
+            <View style="@style/Dividers"/>
+
+            <TableRow android:id="@+id/importFragItemRowCmt">
+
+                <TextView
+                    style="@style/importItemTextStyle"
+                    android:text="Comment"/>
+
+                <Spinner
+                    android:id="@+id/importFragSpnCmt"
+                    style="@style/importItemSpinnerStyle"/>
+            </TableRow>
+
+            <View style="@style/Dividers"/>
+
+            <TableRow android:id="@+id/importFragItemRowBnd">
+
+                <TextView
+                    style="@style/importItemTextStyle"
+                    android:text="Boundary"/>
+
+                <Spinner
+                    android:id="@+id/importFragSpnBnd"
+                    style="@style/importItemSpinnerStyle"/>
+            </TableRow>
+
+            <View style="@style/Dividers"/>
+
+            <TableRow android:id="@+id/importFragItemRowTime">
+
+                <TextView
+                    style="@style/importItemTextStyle"
+                    android:text="Time"/>
+
+                <Spinner
+                    android:id="@+id/importFragSpnTime"
+                    style="@style/importItemSpinnerStyle"/>
+            </TableRow>
+
+            <View style="@style/Dividers"/>
+
+            <!--<TableRow android:id="@+id/importFragItemRowMeta">-->
+
+            <!--<TextView-->
+            <!--style="@style/importItemTextStyle"-->
+            <!--android:text="Metadata"/>-->
+
+            <!--<Spinner-->
+            <!--android:id="@+id/importFragSpnMeta"-->
+            <!--style="@style/importItemSpinnerStyle"/>-->
+            <!--</TableRow>-->
+
+            <!--<View style="@style/Dividers" android:id="@+id/importFragDivMeta"/>-->
+
+            <!--<TableRow android:id="@+id/importFragItemRowAcc">-->
+
+            <!--<TextView-->
+            <!--style="@style/importItemTextStyle"-->
+            <!--android:text="Accuracy"/>-->
+
+            <!--<Spinner-->
+            <!--android:id="@+id/importFragSpnAcc"-->
+            <!--style="@style/importItemSpinnerStyle"/>-->
+            <!--</TableRow>-->
+
+            <!--<View style="@style/Dividers" android:id="@+id/importFragDivAcc"/>-->
+
+            <TableRow android:id="@+id/importFragItemRowManAcc">
+
+                <TextView
+                    style="@style/importItemTextStyle"
+                    android:text="Manual Acc (M)"/>
+
+                <Spinner
+                    android:id="@+id/importFragSpnManAcc"
+                    style="@style/importItemSpinnerStyle"/>
+            </TableRow>
+
+            <View
+                style="@style/Dividers"
+                android:id="@+id/importFragDivManAcc"
+                android:visibility="gone"/>
+
+            <TableRow
+                android:id="@+id/importFragItemRowLat"
+                android:visibility="gone">
+
+                <TextView
+                    style="@style/importItemTextStyle"
+                    android:text="Latitude"/>
+
+                <Spinner
+                    android:id="@+id/importFragSpnLat"
+                    style="@style/importItemSpinnerStyle"/>
+            </TableRow>
+
+            <View
+                style="@style/Dividers"
+                android:id="@+id/importFragDivLat"
+                android:visibility="gone"/>
+
+            <TableRow
+                android:id="@+id/importFragItemRowLon"
+                android:visibility="gone">
+
+                <TextView
+                    style="@style/importItemTextStyle"
+                    android:text="Longitide"/>
+
+                <Spinner
+                    android:id="@+id/importFragSpnLon"
+                    style="@style/importItemSpinnerStyle"/>
+            </TableRow>
+
+            <View
+                style="@style/Dividers"
+                android:id="@+id/importFragDivLon"
+                android:visibility="gone"/>
+
+            <TableRow
+                android:id="@+id/importFragItemRowElev"
+                android:visibility="gone">
+
+                <TextView
+                    style="@style/importItemTextStyle"
+                    android:text="Elevation"/>
+
+                <Spinner
+                    android:id="@+id/importFragSpnElev"
+                    style="@style/importItemSpinnerStyle"/>
+            </TableRow>
+
+            <View
+                style="@style/Dividers"
+                android:id="@+id/importFragDivElev"
+                android:visibility="gone"/>
+
+            <TableRow
+                android:id="@+id/importFragItemRowRMSEr"
+                android:visibility="gone">
+
+                <TextView
+                    style="@style/importItemTextStyle"
+                    android:text="RMSEr"/>
+
+                <Spinner
+                    android:id="@+id/importFragSpnRMSEr"
+                    style="@style/importItemSpinnerStyle"/>
+            </TableRow>
+
+            <View
+                style="@style/Dividers"
+                android:id="@+id/importFragDivRMSEr"
+                android:visibility="gone"/>
+
+            <TableRow
+                android:id="@+id/importFragItemRowFwdAz"
+                android:visibility="gone">
+
+                <TextView
+                    style="@style/importItemTextStyle"
+                    android:text="Forward Azimuth"/>
+
+                <Spinner
+                    android:id="@+id/importFragSpnFwdAz"
+                    style="@style/importItemSpinnerStyle"/>
+            </TableRow>
+
+            <View
+                style="@style/Dividers"
+                android:id="@+id/importFragDivFwdAz"
+                android:visibility="gone"/>
+
+            <TableRow
+                android:id="@+id/importFragItemRowBkAz"
+                android:visibility="gone">
+
+                <TextView
+                    style="@style/importItemTextStyle"
+                    android:text="Back Azimuth"/>
+
+                <Spinner
+                    android:id="@+id/importFragSpnBkAz"
+                    style="@style/importItemSpinnerStyle"/>
+            </TableRow>
+
+            <View
+                style="@style/Dividers"
+                android:id="@+id/importFragDivBkAz"
+                android:visibility="gone"/>
+
+            <TableRow
+                android:id="@+id/importFragItemRowSlpDist"
+                android:visibility="gone">
+
+                <TextView
+                    style="@style/importItemTextStyle"
+                    android:text="Slope Distance"/>
+
+                <Spinner
+                    android:id="@+id/importFragSpnSlpDist"
+                    style="@style/importItemSpinnerStyle"/>
+            </TableRow>
+
+            <View
+                style="@style/Dividers"
+                android:id="@+id/importFragDivSlpDist"
+                android:visibility="gone"/>
+
+            <TableRow
+                android:id="@+id/importFragItemRowSlpDistType"
+                android:visibility="gone">
+
+                <TextView
+                    style="@style/importItemTextStyle"
+                    android:text="Slope Dist Type"/>
+
+                <Spinner
+                    android:id="@+id/importFragSpnSlpDistType"
+                    style="@style/importItemSpinnerStyle"/>
+            </TableRow>
+
+            <View
+                style="@style/Dividers"
+                android:id="@+id/importFragDivSlpDistType"
+                android:visibility="gone"/>
+
+            <TableRow
+                android:id="@+id/importFragItemRowSlpAng"
+                android:visibility="gone">
+
+                <TextView
+                    style="@style/importItemTextStyle"
+                    android:text="Slope Angle"/>
+
+                <Spinner
+                    android:id="@+id/importFragSpnSlpAng"
+                    style="@style/importItemSpinnerStyle"/>
+            </TableRow>
+
+            <View
+                style="@style/Dividers"
+                android:id="@+id/importFragDivSlpAng"
+                android:visibility="gone"/>
+
+            <TableRow
+                android:id="@+id/importFragItemRowSlpAngType"
+                android:visibility="gone">
+
+                <TextView
+                    style="@style/importItemTextStyle"
+                    android:text="Slope Angle Type"/>
+
+                <Spinner
+                    android:id="@+id/importFragSpnSlpAngType"
+                    style="@style/importItemSpinnerStyle"/>
+            </TableRow>
+
+            <View
+                style="@style/Dividers"
+                android:id="@+id/importFragDivSlpAngType"
+                android:visibility="gone"/>
+
+            <TableRow
+                android:id="@+id/importFragItemRowParentCN"
+                android:visibility="gone">
+
+                <TextView
+                    style="@style/importItemTextStyle"
+                    android:text="Parent CN"/>
+
+                <Spinner
+                    android:id="@+id/importFragSpnParentCN"
+                    style="@style/importItemSpinnerStyle"
+                    android:visibility="gone"/>
+            </TableRow>
+
+            <View style="@style/Dividers"
+                  android:id="@+id/importFragDivParentCN"/>
+        </TableLayout>
+    </ScrollView
+>
+
+
+</RelativeLayout>

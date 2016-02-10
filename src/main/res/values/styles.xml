@@ -1,0 +1,295 @@
+<resources xmlns:tools="http://schemas.android.com/tools"
+           xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <style name="MainActivityButtons" parent="@android:style/Widget.Holo.Light.Button.Borderless.Small">
+        <item name="android:textAllCaps">true</item>
+    </style>
+
+    <style name="AppButtons" parent="@android:style/Widget.Holo.Light.Button.Borderless.Small">
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textColor">@color/points_button_selector</item>
+    </style>
+
+    <style name="buttonMaterial">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:padding">0dp</item>
+        <item name="android:minWidth">88dp</item>
+        <item name="android:minHeight">36dp</item>
+        <item name="android:layout_margin">3dp</item>
+        <item name="android:elevation" tools:targetApi="21">4dp</item>
+        <item name="android:translationZ" tools:targetApi="21">4dp</item>
+        <item name="android:background">@color/primary</item>
+        <!--<item name="android:background">@drawable/primary_round</item>-->
+    </style>
+
+    <style name="Dividers">
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:background">@android:color/darker_gray</item>
+    </style>
+
+    <style name="DividersPrimary">
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:background">@color/primary</item>
+    </style>
+
+    <style name="DividersPrimaryLight">
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:background">@color/primaryLight</item>
+    </style>
+
+    <style name="DividersVertical">
+        <item name="android:layout_width">1dp</item>
+        <item name="android:layout_height">fill_parent</item>
+        <item name="android:background">@android:color/darker_gray</item>
+    </style>
+
+    <style name="DividersVerticalPrimary">
+        <item name="android:layout_width">1dp</item>
+        <item name="android:layout_height">fill_parent</item>
+        <item name="android:background">@color/primary</item>
+    </style>
+
+    <style name="DividersVerticalPrimaryLight">
+        <item name="android:layout_width">1dp</item>
+        <item name="android:layout_height">fill_parent</item>
+        <item name="android:background">@color/primaryLight</item>
+    </style>
+
+
+    <style name="ItemsRelativeLayout">
+        <item name="android:clickable">true</item>
+        <item name="android:background">?android:attr/selectableItemBackground</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:paddingLeft">10dp</item>
+        <item name="android:paddingRight">10dp</item>
+        <item name="android:paddingTop">2dp</item>
+        <item name="android:paddingBottom">5dp</item>
+        <item name="android:layout_weight">1</item>
+    </style>
+
+
+    <style name="EditTextStyle" parent="@style/Widget.AppCompat.EditText">
+        <item name="android:textColor">@android:color/black</item>
+        <item name="android:textColorHighlight">@color/primary_150</item>
+
+        <item name="colorControlNormal">@android:color/primary_text_dark</item>
+        <item name="colorControlActivated">@color/accent</item>
+        <item name="colorControlHighlight">@color/accent</item>
+
+        <item name="android:textCursorDrawable">@null</item>
+    </style>
+
+    <style name="EditTextDarkStyle" parent="@style/Widget.AppCompat.EditText">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textColorHighlight">@color/primary_650</item>
+
+        <item name="colorControlNormal">@android:color/primary_text_dark</item>
+        <item name="colorControlActivated">@color/accent</item>
+        <item name="colorControlHighlight">@color/accent</item>
+        <item name="android:textCursorDrawable">@null</item>
+    </style>
+
+    <style name="AutoSelectEditTextStyle" parent="style/EditTextStyle">
+        <item name="android:selectAllOnFocus">true</item>
+    </style>
+
+    <style name="PointValueTextStyle" parent="AutoSelectEditTextStyle">
+        <item name="android:textSize">20sp</item>
+        <item name="android:inputType">number|numberDecimal|numberSigned</item>
+    </style>
+
+
+    <style name="CheckBoxStyle" parent="@android:style/Widget.Holo.Light.CompoundButton.CheckBox">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="android:colorPrimary" tools:targetApi="21">@color/primary</item>
+        <item name="colorAccent">@color/accent</item>
+        <item name="android:colorAccent" tools:targetApi="21">@color/accent</item>
+    </style>
+
+
+    <style name="calcStyleTvValues">
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <style name="calcStyleTvHeader">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@android:color/primary_text_light</item>
+    </style>
+
+    <style name="calcStyleTvHeaderFinal">
+        <item name="android:textAlignment" tools:targetApi="17">center</item>
+        <item name="android:gravity">center_horizontal</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">@android:color/primary_text_light</item>
+    </style>
+
+
+    <style name="calcStyleTvValuesFinalValue">
+        <item name="android:textAlignment" tools:targetApi="17">center</item>
+        <item name="android:gravity">center_horizontal</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">@color/primary</item>
+    </style>
+
+
+    <!--Map-->
+    <style name="mapOptCatStyle" parent="pad8088">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">vertical</item>
+    </style>
+
+    <style name="mapOptCatTextStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">20sp</item>
+    </style>
+
+
+    <style name="mapOptFlipCheckBoxStyle">
+        <item name="android:layout_width">50dp</item>
+        <item name="android:layout_height">50dp</item>
+        <item name="android:padding">5dp</item>
+    </style>
+
+
+    <style name="multiCheckBoxStyle">
+        <item name="android:layout_width">50dp</item>
+        <item name="android:layout_height">50dp</item>
+        <item name="android:padding">5dp</item>
+        <item name="checkedColor">@color/primary</item>
+        <item name="partialCheckedColor">@color/primaryLighter</item>
+    </style>
+
+    <style name="mapMultiCheckBoxBndStyle" parent="multiCheckBoxStyle">
+        <item name="checkedColor">@color/red_500</item>
+        <item name="partialCheckedColor">@color/red_300</item>
+    </style>
+
+    <style name="mapMultiCheckBoxNavStyle" parent="multiCheckBoxStyle">
+        <item name="checkedColor">@color/indigo_500</item>
+        <item name="partialCheckedColor">@color/indigo_300</item>
+    </style>
+
+
+    <style name="cardStyle" parent="AppTheme">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_margin">8dp</item>
+        <item name="background">@android:color/white</item>
+    </style>
+
+    <style name="cardHolderStyle">
+        <item name="android:background">#f9f9f9</item>
+    </style>
+
+    <!--<style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />-->
+
+    <!--<style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />-->
+
+    <style name="fabStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">bottom|end</item>
+        <item name="android:layout_margin">@dimen/fab_margin</item>
+
+        <item name="layout_anchorGravity">bottom|end|right</item>
+        <item name="elevation">6dp</item>
+        <item name="pressedTranslationZ">12dp</item>
+        <item name="fab_colorNormal">@color/primaryLight</item>
+        <item name="fab_colorRipple">@color/primaryLighter</item>
+    </style>
+
+    <style name="fabProgressHolderStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <!--<item name="android:layout_gravity">bottom|end</item>-->
+        <!--<item name="layout_anchorGravity">bottom|end|right</item>-->
+
+        <item name="arcColor">@color/green_700</item>
+        <!--<item name="arcColor">@color/primaryLighter</item>-->
+        <item name="arcWidth">3dp</item>
+    </style>
+
+    <style name="fabProgressStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+
+        <item name="android:elevation" tools:targetApi="21">6dp</item>
+        <item name="pressedTranslationZ">12dp</item>
+        <item name="fab_colorNormal">@color/primaryLight</item>
+        <item name="fab_colorRipple">@color/primaryLighter</item>
+    </style>
+
+
+    <style name="teFilterbuttonStyle">
+        <item name="android:background">@color/primaryLighter</item>
+        <item name="android:adjustViewBounds">true</item>
+        <item name="android:layout_width">@dimen/toolbar_height</item>
+        <item name="android:layout_height">match_parent</item>
+    </style>
+
+    <style name="importItemTextStyle">
+        <item name="android:textSize">22sp</item>
+        <item name="android:padding">4dp</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:layout_gravity">center_vertical</item>
+    </style>
+
+    <style name="importItemSpinnerStyle" parent="@style/Base.Widget.AppCompat.Spinner">
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:layout_gravity">center_vertical</item>
+    </style>
+
+
+
+    <!--Toolbars-->
+    <style name="ToolbarElevationBase">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:background">@drawable/shadow</item>
+    </style>
+
+    <style name="ToolbarElevation" parent="ToolbarElevationBase">
+        <item name="android:layout_height">@dimen/toolbar_elevation</item>
+    </style>
+
+    <style name="ToolbarElevation2" parent="ToolbarElevationBase">
+        <item name="android:layout_height">3dp</item>
+    </style>
+
+    <style name="ToolbarElevation3" parent="ToolbarElevationBase">
+        <item name="android:layout_height">3dp</item>
+    </style>
+
+
+    <!-- Common -->
+    <style name="pad8484">
+        <item name="android:layout_marginLeft">8dp</item>
+        <item name="android:layout_marginStart" tools:targetApi="17">8dp</item>
+        <item name="android:layout_marginRight">8dp</item>
+        <item name="android:layout_marginEnd" tools:targetApi="17">8dp</item>
+        <item name="android:layout_marginTop">4dp</item>
+        <item name="android:layout_marginBottom">4dp</item>
+    </style>
+
+    <style name="pad8088">
+        <item name="android:layout_marginLeft">8dp</item>
+        <item name="android:layout_marginStart" tools:targetApi="17">8dp</item>
+        <item name="android:layout_marginRight">8dp</item>
+        <item name="android:layout_marginEnd" tools:targetApi="17">8dp</item>
+        <item name="android:layout_marginBottom">8dp</item>
+    </style>
+
+    <style name="pad8880">
+        <item name="android:layout_marginLeft">8dp</item>
+        <item name="android:layout_marginStart" tools:targetApi="17">8dp</item>
+        <item name="android:layout_marginRight">8dp</item>
+        <item name="android:layout_marginEnd" tools:targetApi="17">8dp</item>
+        <item name="android:layout_marginTop">8dp</item>
+    </style>
+</resources>
+

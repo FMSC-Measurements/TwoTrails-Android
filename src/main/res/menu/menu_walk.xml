@@ -1,0 +1,31 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.usda.fmsc.twotrails.activities.WalkActivity">
+
+    <item
+        android:id="@+id/walkMenuWalking"
+        android:title="@string/menu_walk_walking"
+        android:icon="@drawable/ica_walking"
+        app:showAsAction="always"
+        android:visible="false"
+        android:enabled="false"/>
+
+    <item
+        android:id="@+id/walkMenuGps"
+        android:title="@string/menu_x_gps_settings"
+        app:showAsAction="never"
+        android:visible="true"/>
+
+    <item
+        android:id="@+id/walkMenuWalkSettings"
+        android:title="@string/menu_walk_settings"
+        app:showAsAction="never"
+        android:visible="true"/>
+
+    <item
+        android:id="@+id/walkMenuRenameGroup"
+        android:title="@string/menu_rename_group"
+        app:showAsAction="never"
+        android:visible="true"/>
+</menu>

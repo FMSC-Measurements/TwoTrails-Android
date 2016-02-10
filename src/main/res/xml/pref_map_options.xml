@@ -1,0 +1,28 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="Map Options">
+
+    <com.usda.fmsc.android.preferences.SwitchCompatPreference
+        android:title="Show My Position"
+        android:key="@string/set_MAP_SHOW_MY_POS"/>
+
+    <com.usda.fmsc.android.preferences.SwitchCompatPreference
+        android:title="Use UTM Navigation"
+        android:key="@string/set_MAP_USE_UTM_NAV"/>
+
+    <com.usda.fmsc.twotrails.preferences.MapTrackingPreference
+        android:title="Map Tracking"
+        android:key="@string/set_MAP_TRACKING_OPTION"
+        android:summary="Use UTM instead of Lat/Lon for Navigation"/>
+
+    <com.usda.fmsc.android.preferences.SwitchCompatPreference
+        android:title="Show Compass"
+        android:key="@string/set_MAP_COMPASS_ENABLED" />
+
+    <com.usda.fmsc.android.preferences.SwitchCompatPreference
+        android:title="Show My Position Button"
+        android:key="@string/set_MAP_MY_POS_BUTTON" />
+
+    <!--<com.usda.fmsc.AndroidEx.Preferences.SwitchCompatPreference-->
+    <!--android:title="Show Zoom Buttons"-->
+    <!--android:key="@string/set_MAP_ZOOM_BUTTONS" />-->
+</PreferenceScreen>

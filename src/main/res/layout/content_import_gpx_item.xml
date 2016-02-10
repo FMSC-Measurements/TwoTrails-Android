@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    style="@style/pad8484">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        style="@style/pad8484">
+
+        <com.usda.fmsc.android.widget.MultiStateTouchCheckBox
+            android:id="@+id/importContMcbImport"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            style="@style/multiCheckBoxStyle"/>
+
+        <TextView
+            android:id="@+id/importContTvName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="22sp"
+            android:text="Name"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
+            android:layout_toRightOf="@id/importContMcbImport"
+            android:layout_toEndOf="@id/importContMcbImport"
+            android:ellipsize="end"
+            android:maxLines="1"/>
+
+        <TextView
+            android:id="@+id/text1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:text="Points:"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@id/importContTvName"/>
+
+        <TextView
+            android:id="@+id/importContTvPointCount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:text="123"
+            android:layout_toRightOf="@id/text1"
+            android:layout_toEndOf="@id/text1"
+            android:layout_below="@id/importContTvName"
+            android:paddingStart="4dp"
+            android:paddingLeft="4dp"/>
+    </RelativeLayout>
+</android.support.v7.widget.CardView>

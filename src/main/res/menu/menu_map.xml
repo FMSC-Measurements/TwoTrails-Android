@@ -1,0 +1,47 @@
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.usda.fmsc.twotrails.activities.MapActivity">
+
+    <item
+        android:id="@+id/mapTest"
+        android:title="Test"
+        app:showAsAction="always"
+        android:visible="false"/>
+
+    <item
+        android:id="@+id/mapMenuShowMyPos"
+        android:title="@string/menu_map_show_my_pos"
+        app:showAsAction="never"
+        android:checkable="true"/>
+
+    <item
+        android:id="@+id/mapMenuMapSettings"
+        android:title="@string/menu_map_settings"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/mapMenuGps"
+        android:title="@string/menu_x_gps_settings"
+        app:showAsAction="never"/>
+
+
+    <item
+        android:id="@+id/mapMenuWhereIs"
+        android:title="@string/menu_map_where_is"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/mapMenuResetBounds"
+        android:title="@string/menu_map_reset_bnds"
+        app:showAsAction="never"
+        android:visible="false"/>
+
+    <item
+        android:id="@+id/mapMenuTrackedPoly"
+        android:title="@string/menu_map_tracked_poly"
+        app:showAsAction="never"
+        android:visible="false"/>
+
+</menu>

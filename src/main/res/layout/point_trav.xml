@@ -1,0 +1,164 @@
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <include layout="@layout/pre_focus" />
+
+    <include
+        android:id="@+id/cardHeader"
+        layout="@layout/point_card_header" />
+
+    <View style="@style/ToolbarElevation3" android:layout_below="@id/cardHeader" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_below="@id/cardHeader">
+
+        <TableLayout
+            android:id="@+id/cardContent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:elevation="3dp"
+            android:padding="8dp"
+            android:layout_alignParentTop="true">
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/str_az"
+                    android:textSize="22sp"
+                    android:layout_gravity="center"
+                    android:textAlignment="center"
+                    android:layout_span="4"/>
+            </TableRow>
+
+            <TableRow>
+                <TextView
+                    android:text="@string/point_trav_az_fwd"
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:textSize="20sp" />
+
+                <EditText
+                    android:id="@+id/pointTravTxtAzFwd"
+                    style="@style/PointValueTextStyle"
+                    android:layout_height="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:text="@string/points_trav_az_bk"
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:textSize="20sp"/>
+
+                <EditText
+                    android:id="@+id/pointTravTxtAzBk"
+                    style="@style/PointValueTextStyle"
+                    android:layout_height="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:id="@+id/pointTravAzDiff"
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:textColor="@android:color/holo_red_dark"
+                    android:textSize="20sp"
+                    android:visibility="gone"/>
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/points_trav_slope"
+                    android:textSize="22sp"
+                    android:layout_gravity="center"
+                    android:textAlignment="center"
+                    android:paddingTop="5dp"
+                    android:layout_span="4"/>
+            </TableRow>
+
+            <TableRow>
+                <TextView
+                    android:text="@string/points_trav_slope_dist"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:textSize="20sp" />
+
+                <EditText
+                    android:id="@+id/pointTravTxtSlopeDist"
+                    android:layout_height="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/PointValueTextStyle"
+                    android:inputType="numberDecimal" />
+
+                <TextView
+                    android:text="@string/points_trav_slope_angle"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:textSize="20sp"/>
+
+                <EditText
+                    android:id="@+id/pointTravTxtSlopeAng"
+                    android:layout_height="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    style="@style/PointValueTextStyle" />
+            </TableRow>
+
+            <TableRow>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/points_trav_mag"
+                    android:textSize="20sp"
+                    android:layout_span="1"/>
+
+                <TextView
+                    android:id="@+id/pointTravTvMagDec"
+                    android:layout_height="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:textSize="20sp"
+                    android:textColor="@android:color/black"
+                    android:text="@string/str_nullvalue"
+                    android:paddingLeft="8dp"
+                    android:paddingStart="8dp"/>
+            </TableRow>
+        </TableLayout>
+
+        <View style="@style/ToolbarElevation2" android:layout_below="@id/cardContent" />
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:layout_below="@id/cardContent">
+
+            <EditText
+                android:id="@+id/pointTxtCmt"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/EditTextStyle"
+                android:inputType="textMultiLine"
+                android:hint="@string/points_cmt"
+                android:maxLines="6"/>
+        </android.support.design.widget.TextInputLayout>
+    </RelativeLayout>
+
+</RelativeLayout>

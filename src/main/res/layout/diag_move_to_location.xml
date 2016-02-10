@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingTop="5dp">
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:id="@+id/diagEitableListListValues"
+        android:layout_weight="1"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp" />
+
+    <View style="@style/Dividers"/>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageButton
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/diag_move_first"
+            android:id="@+id/diagMoveToLocFirst"
+            android:layout_weight="1"
+            android:src="@drawable/ic_action_playback_prev_dark"
+            style="@style/AppButtons" />
+
+        <View style="@style/DividersVertical" />
+
+        <ImageButton
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/diag_move_last"
+            android:id="@+id/diagMoveToLocLast"
+            android:layout_weight="1"
+            android:src="@drawable/ic_action_playback_next_dark"
+            style="@style/AppButtons" />
+
+    </LinearLayout>
+
+    <View style="@style/Dividers"/>
+</LinearLayout>

@@ -1,0 +1,36 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.usda.fmsc.twotrails.activities.GpsLoggerActivity"
+    android:orientation="vertical">
+
+    <include android:id="@id/toolbar" layout="@layout/toolbar_default"/>
+
+    <View style="@style/ToolbarElevation" android:layout_below="@id/toolbar"/>
+
+    <ListView
+        android:id="@+id/logLvNmea"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_below="@id/toolbar"
+        android:layout_alignParentBottom="true"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="4dp">
+
+        <View android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="2"/>
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/aqr_log"
+            android:id="@+id/loggerBtnLog"
+            android:layout_weight="1"
+            android:onClick="btnLogClick"
+            style="@style/buttonMaterial" />
+    </LinearLayout>
+</RelativeLayout>

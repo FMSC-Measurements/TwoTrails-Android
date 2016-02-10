@@ -1,0 +1,17 @@
+<animation-list
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:oneshot="true">
+
+    <item android:drawable="@drawable/ic_ttgps_anim_notification_0" android:duration="42" />
+    <item android:drawable="@drawable/ic_ttgps_anim_notification_1" android:duration="42" />
+    <item android:drawable="@drawable/ic_ttgps_anim_notification_2" android:duration="42" />
+    <item android:drawable="@drawable/ic_ttgps_anim_notification_3" android:duration="42" />
+    <item android:drawable="@drawable/ic_ttgps_anim_notification_4" android:duration="42" />
+    <item android:drawable="@drawable/ic_ttgps_anim_notification_5" android:duration="42" />
+    <item android:drawable="@drawable/ic_ttgps_anim_notification_6" android:duration="42" />
+    <item android:drawable="@drawable/ic_ttgps_anim_notification_7" android:duration="42" />
+    <item android:drawable="@drawable/ic_ttgps_anim_notification_8" android:duration="42" />
+    <item android:drawable="@drawable/ic_ttgps_anim_notification_9" android:duration="42" />
+    <item android:drawable="@drawable/ic_ttgps_anim_notification_10" android:duration="42" />
+    <item android:drawable="@drawable/ic_ttgps_anim_notification_11" android:duration="538" />
+</animation-list>
