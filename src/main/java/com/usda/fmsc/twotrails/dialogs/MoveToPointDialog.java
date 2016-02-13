@@ -1,8 +1,10 @@
 package com.usda.fmsc.twotrails.dialogs;
 
+import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.support.v4.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -21,7 +23,7 @@ import java.util.List;
 
 import com.usda.fmsc.utilities.StringEx;
 
-public class MoveToPointDialog extends android.app.DialogFragment {
+public class MoveToPointDialog extends DialogFragment {
 
     private int currentIndex;
     private List<TtPoint> points;
@@ -36,6 +38,7 @@ public class MoveToPointDialog extends android.app.DialogFragment {
     AdapterView.OnItemClickListener onItemClick;
 
 
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());

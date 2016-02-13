@@ -24,6 +24,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.usda.fmsc.android.AndroidUtils;
+import com.usda.fmsc.android.widget.SheetLayoutEx;
 import com.usda.fmsc.android.widget.layoutmanagers.LinearLayoutManagerWithSmoothScroller;
 import com.usda.fmsc.android.widget.RecyclerViewEx;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -86,7 +87,7 @@ public class Take5Activity extends AcquireGpsCustomToolbarActivity implements Gp
     private TtGroup _Group;
 
     private int increment, takeAmount, currentMapIndex = -1, mapOffsetY, nmeaCount = 0;
-    private boolean saved = true, updated, onBnd = true, cancelVisible, ignoreScroll;
+    private boolean saved = true, updated, onBnd = true, cancelVisible, ignoreScroll, useRing, useVib;
 
     private FilterOptions options;
 
@@ -202,6 +203,7 @@ public class Take5Activity extends AcquireGpsCustomToolbarActivity implements Gp
 
 
         if (!isCanceling()) {
+            SheetLayoutEx.enterFromBottomAnimation(this);
             _CurrentPoint = null;
 
             _Points = new ArrayList<>();
@@ -295,6 +297,9 @@ public class Take5Activity extends AcquireGpsCustomToolbarActivity implements Gp
         options.DopValue = Global.Settings.DeviceSettings.getTake5FilterDopValue();
         increment = Global.Settings.DeviceSettings.getTake5Increment();
         takeAmount = Global.Settings.DeviceSettings.getTake5NmeaAmount();
+
+        useVib = Global.Settings.DeviceSettings.getTake5VibrateOnCreate();
+        useRing = Global.Settings.DeviceSettings.getTake5RingOnCreate();
     }
 
     @Override
@@ -374,6 +379,12 @@ public class Take5Activity extends AcquireGpsCustomToolbarActivity implements Gp
         }
 
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    protected void onPause() {
+        SheetLayoutEx.exitToBottomAnimation(this);
+        super.onPause();
     }
 
     @Override
@@ -560,6 +571,14 @@ public class Take5Activity extends AcquireGpsCustomToolbarActivity implements Gp
             fabSS.setEnabled(true);
 
             addMarker(point);
+
+            if (useVib) {
+                AndroidUtils.Device.vibrate(this, Consts.Notifications.VIB_POINT_CREATED);
+            }
+
+            if (useRing) {
+                //AndroidUtils.Device.playSound(this, R.raw.point_created);
+            }
         } else {
             _CurrentPoint = temp;
             Toast.makeText(this, "Point failed to save", Toast.LENGTH_SHORT).show();

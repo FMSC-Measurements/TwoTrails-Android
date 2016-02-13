@@ -95,6 +95,7 @@ public class Consts {
 
         public static class Services {
             public static final int REQUEST_GOOGLE_PLAY_SERVICES = 3000;
+            public static final int REQUEST_GPS_SERVICE = 3001;
         }
 
         public static class Data {

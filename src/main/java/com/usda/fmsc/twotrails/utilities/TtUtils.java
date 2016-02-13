@@ -30,7 +30,6 @@ import com.usda.fmsc.twotrails.objects.Take5Point;
 import com.usda.fmsc.twotrails.objects.TravPoint;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.TtPoint;
-import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.objects.WalkPoint;
 import com.usda.fmsc.twotrails.objects.WayPoint;
 import com.usda.fmsc.twotrails.Units;
@@ -704,47 +703,6 @@ public class TtUtils {
 
         return false;
     }
-
-
-
-    public static double getPointAcc2(TtPoint point, HashMap<String, TtPolygon> polygons) {
-        if (point.getOp() == OpType.Quondam) {
-            QuondamPoint qp = ((QuondamPoint)point);
-
-            if (qp.getManualAccuracy() != null && qp.getManualAccuracy() >= 0)
-                return qp.getManualAccuracy();
-
-            if (pointHasValue(qp.getParentPoint()))
-                return getPointAcc2(qp.getParentPoint(), polygons);
-
-        } else if (point.isGpsType())
-            return getGpsPointAcc((GpsPoint)point, polygons.get(point.getPolyCN()).getAccuracy());
-        else if(point.isTravType())
-            return getTravPointAcc((TravPoint)point, polygons.get(point.getPolyCN()).getAccuracy());
-
-        return Consts.Default_Point_Accuracy;
-    }
-
-    private static double getGpsPointAcc(GpsPoint point, Double polyAcc) {
-        if (point.getManualAccuracy() != null && point.getManualAccuracy() >= 0)
-            return point.getManualAccuracy();
-        else if (polyAcc != null && polyAcc >= 0)
-            return polyAcc;
-        else if (point.getRMSEr() != null && point.getRMSEr() > -1)
-            return point.getRMSEr();
-        else
-            return Consts.Default_Point_Accuracy;
-    }
-
-    private static double getTravPointAcc(TravPoint point, Double polyAcc) {
-            if (point.getAccuracy() != null && point.getAccuracy() >= 0)
-                return point.getAccuracy();
-            else if (polyAcc != null && polyAcc >= 0)
-                return polyAcc;
-            else
-                return Consts.Default_Point_Accuracy;
-    }
-
 
     public static Location getPointLocation(TtPoint point, boolean adjusted, HashMap<String, TtMetadata> metadata) {
         Location location = new Location(StringEx.Empty);

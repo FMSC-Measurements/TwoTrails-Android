@@ -26,6 +26,8 @@ import android.widget.Toast;
 import com.usda.fmsc.android.adapters.FragmentStatePagerAdapterEx;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.listeners.ComplexOnPageChangeListener;
+import com.usda.fmsc.android.widget.SheetFab;
+import com.usda.fmsc.android.widget.SheetLayoutEx;
 import com.usda.fmsc.twotrails.activities.custom.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.adapters.PointDetailsAdapter;
 import com.usda.fmsc.twotrails.Consts;
@@ -49,6 +51,7 @@ import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.Units.OpType;
+import com.usda.fmsc.twotrails.ui.MSFloatingActionButton;
 import com.usda.fmsc.twotrails.utilities.AppUnits;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
@@ -57,8 +60,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import AndroidExOld.UI.Widget.FloatingActionButton;
-import AndroidExOld.UI.Widget.FloatingActionMenu;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.geospatial.utm.UTMTools;
 import com.usda.fmsc.utilities.StringEx;
@@ -68,12 +69,14 @@ public class PointsActivity extends CustomToolbarActivity {
 
     private MenuItem miLock, miLink, miMovePoint, miReset,
             miEnterLatLon, miNmeaRecalc, miDelete, miGoto;
-    private FloatingActionButton fabAqr;
-    private FloatingActionMenu famNew;
-    private View overlay;
+    SheetLayoutEx slexAqr, slexCreate;
+    android.support.design.widget.FloatingActionButton fabAqr;
+    MSFloatingActionButton fabMenu;
+    SheetFab fabSheet;
 
-    private boolean ignorePointChange, adjust, menuCreated, aqrVisible = true;
-    private OpType currentAqrOp = OpType.GPS;
+
+    private boolean ignorePointChange, adjust, menuCreated, aqrVisible = false;
+    private OpType currentAqrOp = OpType.GPS, createOpType;
 
     private ArrayList<TtPoint> _Points;
     private HashMap<String, TtPolygon> _Polygons;
@@ -171,7 +174,6 @@ public class PointsActivity extends CustomToolbarActivity {
         }
     };
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -206,55 +208,52 @@ public class PointsActivity extends CustomToolbarActivity {
 
 
         //region Main Buttons
-        famNew = (FloatingActionMenu)findViewById(R.id.pointsFamNew);
-        fabAqr = (FloatingActionButton)findViewById(R.id.pointsFabAqr);
-        overlay = findViewById(R.id.overlay);
+        fabAqr = (android.support.design.widget.FloatingActionButton)findViewById(R.id.pointsFabAqr);
+        fabMenu = (MSFloatingActionButton)findViewById(R.id.pointsFabMenu);
+        View overlay = findViewById(R.id.overlay);
+        View sheetView = findViewById(R.id.fab_sheet);
 
+        int bc = AndroidUtils.UI.getColor(this, R.color.background_card_view);
+        int fc = AndroidUtils.UI.getColor(this, R.color.primaryLight);
 
-        famNew.setClosedOnTouchOutside(true);
-        famNew.setOnClickListener(new View.OnClickListener() {
+        fabSheet = new SheetFab<>(fabMenu, sheetView, overlay, bc, fc);
+
+        fabSheet.setListener(new SheetFab.SheetFabListener() {
             @Override
-            public void onClick(View v) {
-                if (famNew.isOpened()) {
-                    famNew.closeFast();
-                } else {
-                    createPoint();
+            public void onShowSheet() {
+
+            }
+
+            @Override
+            public void onSheetShown() {
+
+            }
+
+            @Override
+            public void onHideSheet() {
+
+            }
+
+            @Override
+            public void onSheetHidden() {
+                if (createOpType != null) {
+
+                    switch (createOpType) {
+                        case Take5:
+                        case Walk:
+                            slexCreate.expandFab();
+                            break;
+                        default:
+                            createPoint(createOpType);
+                            createOpType = null;
+                            break;
+                    }
+
                 }
             }
         });
 
-        famNew.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                famNew.toggle();
-                return true;
-            }
-        });
-
-        famNew.setOnMenuToggleListener(new FloatingActionMenu.OnMenuToggleListener() {
-            @Override
-            public void onMenuToggle(boolean opened) {
-                overlay.setVisibility(opened ? View.VISIBLE : View.GONE);
-            }
-        });
-
-        overlay.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                famNew.closeFast();
-            }
-        });
-
         AndroidUtils.UI.setContentDescToast(fabAqr, getString(R.string.str_acquire));
-
-        AndroidUtils.UI.setContentDescToast(findViewById(R.id.pointsFabGps));
-        AndroidUtils.UI.setContentDescToast(findViewById(R.id.pointsFabTake5));
-        AndroidUtils.UI.setContentDescToast(findViewById(R.id.pointsFabTrav));
-        AndroidUtils.UI.setContentDescToast(findViewById(R.id.pointsFabSideShot));
-        AndroidUtils.UI.setContentDescToast(findViewById(R.id.pointsFabWalk));
-        AndroidUtils.UI.setContentDescToast(findViewById(R.id.pointsFabQndm));
-        AndroidUtils.UI.setContentDescToast(findViewById(R.id.pointsFabWay));
-
         //endregion
 
         //region ToolBar
@@ -300,6 +299,29 @@ public class PointsActivity extends CustomToolbarActivity {
         });
         //endregion
 
+        slexAqr = (SheetLayoutEx)findViewById(R.id.pointsSLExAqr);
+        slexAqr.setFab(fabAqr);
+        slexAqr.setFabAnimationEndListener(new SheetLayoutEx.OnFabAnimationEndListener() {
+            @Override
+            public void onFabAnimationEnd() {
+                acquireGpsPoint(_CurrentPoint, null);
+            }
+        });
+
+        slexCreate = (SheetLayoutEx)findViewById(R.id.pointsSLExCreate);
+        slexCreate.setFab(fabMenu);
+        slexCreate.setFabAnimationEndListener(new SheetLayoutEx.OnFabAnimationEndListener() {
+            @Override
+            public void onFabAnimationEnd() {
+                if (createOpType == OpType.Take5) {
+                    acquireT5Points(_CurrentPoint);
+                } else if (createOpType == OpType.Walk) {
+                    acquireWalkPoints(_CurrentPoint);
+                }
+
+                createOpType = null;
+            }
+        });
     }
 
     @Override
@@ -394,7 +416,7 @@ public class PointsActivity extends CustomToolbarActivity {
                     mdialog.setItems(_Points, _CurrentIndex);
                     mdialog.setTitle("Jump To Point");
 
-                    mdialog.show(getFragmentManager(), "JUMP_POINTS");
+                    mdialog.show(getSupportFragmentManager(), "JUMP_POINTS");
                 }
                 break;
             }
@@ -508,8 +530,8 @@ public class PointsActivity extends CustomToolbarActivity {
 
     @Override
     public void onBackPressed() {
-        if (famNew.isOpened()) {
-            famNew.close(true);
+        if (fabSheet.isSheetVisible()) {
+            fabSheet.hideSheet();
         } else {
             super.onBackPressed();
         }
@@ -522,11 +544,13 @@ public class PointsActivity extends CustomToolbarActivity {
         switch (requestCode) {
             case Consts.Activities.ACQUIRE:
             case Consts.Activities.CALCULATE: {
+                slexAqr.contractFab();
                 calculateResult(resultCode, data);
                 break;
             }
             case Consts.Activities.TAKE5:
             case Consts.Activities.WALK: {
+                slexCreate.contractFab();
                 addInsertPointsResult(resultCode, data);
                 break;
             }
@@ -1444,21 +1468,12 @@ public class PointsActivity extends CustomToolbarActivity {
 
                             dialog.show();
                         } else {
-                            acquireGpsPoint(_CurrentPoint, null);
+                            slexAqr.expandFab();
                         }
                     } else {
                         configGps();
                     }
                     //endregion
-                    break;
-                }
-                case Walk:
-                case Take5: {
-                    //convert
-                    break;
-                }
-                case Traverse:
-                case SideShot: {
                     break;
                 }
                 case Quondam: {
@@ -1498,45 +1513,47 @@ public class PointsActivity extends CustomToolbarActivity {
     }
 
     //region Add Points
+    public void btnCreatePoint(View view) {
+        createPoint();
+    }
 
     public void btnPointNewGpsClick(View view) {
-        createPoint(OpType.GPS);
-        famNew.closeFast();
+        createOpType = OpType.GPS;
+        fabSheet.hideSheet();
     }
 
     public void btnPointNewTake5Click(View view) {
-        acquireT5Points(_CurrentPoint);
-        famNew.closeFast();
+        createOpType = OpType.Take5;
+        fabSheet.hideSheet();
     }
 
     public void btnPointNewWalkClick(View view) {
-        acquireWalkPoints(_CurrentPoint);
-        famNew.closeFast();
+        createOpType = OpType.Walk;
+        fabSheet.hideSheet();
     }
 
     public void btnPointNewWayClick(View view) {
-        createPoint(OpType.WayPoint);
-        famNew.closeFast();
+        createOpType = OpType.WayPoint;
+        fabSheet.hideSheet();
     }
 
     public void btnPointNewTravclick(View view) {
-        createPoint(OpType.Traverse);
-        famNew.closeFast();
+        createOpType = OpType.Traverse;
+        fabSheet.hideSheet();
     }
 
     public void btnPointNewSideShotClick(View view) {
-        createPoint(OpType.SideShot);
-        famNew.closeFast();
+        createOpType = OpType.SideShot;
+        fabSheet.hideSheet();
     }
 
     public void btnPointNewQuondamClick(View view) {
-        createPoint(OpType.Quondam);
-        famNew.closeFast();
+        createOpType = OpType.Quondam;
+        fabSheet.hideSheet();
     }
 
     //endregion
     //endregion
-
 
     public void register(String pointCN, Listener listener) {
         if (listener != null && !listeners.containsKey(pointCN)) {

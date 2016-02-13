@@ -14,8 +14,12 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.support.v4.app.ActivityCompat;
 
 import com.google.android.gms.maps.LocationSource;
+import com.usda.fmsc.android.AndroidUtils;
+import com.usda.fmsc.twotrails.Consts;
+import com.usda.fmsc.twotrails.Manifest;
 import com.usda.fmsc.twotrails.devices.TtBluetoothManager;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
@@ -43,7 +47,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
     private boolean postAllNmeaStrings = true, logging, logBurstDetails;
     private GeoPosition lastPosition;
 
-    private ConcurrentHashMap<Activity, Listener> activities = new ConcurrentHashMap<Activity, Listener>();
+    private ConcurrentHashMap<Activity, Listener> activities = new ConcurrentHashMap<>();
     private final Binder binder = new GpsBinder();
 
     private TtBluetoothManager bluetoothManager;
@@ -135,6 +139,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
     }
 
 
+
     //region Start / Stop GPS
     private GpsDeviceStatus startGps() {
         GpsDeviceStatus status;
@@ -196,17 +201,24 @@ public class GpsService extends Service implements LocationListener, LocationSou
                 locManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);
 
             if (isInternalGpsEnabled()) {
-
-                locManager.addNmeaListener(this);
-                locManager.addGpsStatusListener(this);
-                locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_UPDATE_INTERVAL, GPS_MINIMUM_DISTANCE, this);
-
-                return GpsDeviceStatus.InternalGpsStarted;
+                if (AndroidUtils.App.checkFineLocationPermission(this)) {
+                    locManager.addNmeaListener(this);
+                    locManager.addGpsStatusListener(this);
+                    locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_UPDATE_INTERVAL, GPS_MINIMUM_DISTANCE, this);
+                    return GpsDeviceStatus.InternalGpsStarted;
+                } else {
+                    ActivityCompat.requestPermissions(Global.getMainActivity(), new String[] {
+                                    android.Manifest.permission.ACCESS_FINE_LOCATION,
+                                    android.Manifest.permission.ACCESS_COARSE_LOCATION
+                            },
+                            Consts.Activities.Services.REQUEST_GPS_SERVICE);
+                    return GpsDeviceStatus.InternalGpsNeedsPermissions;
+                }
             } else {
                 return GpsDeviceStatus.InternalGpsNotEnabled;
             }
         } catch (Exception ex) {
-            //TtReport
+            TtUtils.TtReport.writeError(ex.getMessage(), "GpsService:startInternalGps");
         }
 
         return GpsDeviceStatus.InternalGpsError;
@@ -219,7 +231,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
             locManager.removeUpdates(this);
             locManager = null;
 
-            postGpsStop();  //needs to be triggered manually
+            postGpsStop();
             return GpsDeviceStatus.InternalGpsStopped;
         }
 
@@ -679,6 +691,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
         InternalGpsStarted,
         InternalGpsStopped,
         InternalGpsNotEnabled,
+        InternalGpsNeedsPermissions,
         InternalGpsError,
         ExternalGpsStarted,
         ExternalGpsStopped,
@@ -771,6 +784,10 @@ public class GpsService extends Service implements LocationListener, LocationSou
             GpsService.this.postAllNmeaStrings = postAllStrings;
         }
 
+        public boolean postsAllNmeaStrings() {
+            return GpsService.this.postAllNmeaStrings;
+        }
+
         @Override
         public void startLogging(String fileName) {
             GpsService.this.startLogging(fileName);
@@ -835,9 +852,5 @@ public class GpsService extends Service implements LocationListener, LocationSou
 
         boolean isLogging();
     }
-
-
-
-    //https://android.googlesource.com/platform/development/+/25b6aed7b2e01ce7bdc0dfa1a79eaf009ad178fe/samples/BluetoothChat/src/com/example/android/BluetoothChat
 
 }

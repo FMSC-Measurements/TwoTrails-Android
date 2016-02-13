@@ -23,18 +23,23 @@
                 android:title="Keep GPS ON"
                 android:summary="Run GPS Always"/>
 
+            <Preference
+                android:key="@string/set_GPS_CHECK_NMEA"
+                android:title="Check NMEA"
+                android:summary="@string/ds_gps_check_nmea"/>
+
             <PreferenceCategory
                 android:title="External GPS Settings"
-                android:key="exGpsCat">
+                android:key="@string/set_GPS_CAT">
 
                 <com.usda.fmsc.android.preferences.ListCompatPreference
                     android:id="@+id/prefLstGpsDevice"
-                    android:key="prefLstGpsDevice"
+                    android:key="@string/set_GPS_LIST_DEVICE"
                     android:title="External GPS Device"
                     android:summary="Device: "/>
 
                 <Preference
-                    android:key="prefGpsCheck"
+                    android:key="@string/set_GPS_CHECK"
                     android:title="Check GPS Connection"
                     android:summary="@string/ds_gps_not_connected"/>
             </PreferenceCategory>
@@ -42,12 +47,12 @@
 
         <PreferenceScreen
             android:title="Range Finder"
-            android:key="rfSetup"
+            android:key="@string/set_RF_SETUP"
             android:enabled="false">
 
             <com.usda.fmsc.android.preferences.SwitchCompatPreference
                 android:id="@+id/swtLaserLocDevice"
-                android:key="rfLocDevice"
+                android:key="@string/set_RF_LIST_DEVICE"
                 android:title="Range Finder"
                 android:summary="Device to use."
                 android:switchTextOff="@string/str_internal"
@@ -58,7 +63,7 @@
             <PreferenceCategory android:title="External Range Finder Settings">
                 <com.usda.fmsc.android.preferences.ListCompatPreference
                     android:id="@+id/lstRfDevice"
-                    android:key="rfDevice"
+                    android:key="@string/set_RF_DEVICE"
                     android:title="External Range Finder" />
             </PreferenceCategory>
         </PreferenceScreen>
@@ -115,6 +120,18 @@
                     android:key="@string/set_TAKE5_FILTER_DOP_VALUE"
                     android:defaultValue="20"
                     app:valueInSummary="true"/>
+            </PreferenceCategory>
+
+            <PreferenceCategory
+                android:title="Notifications">
+
+                <com.usda.fmsc.android.preferences.SwitchCompatPreference
+                    android:title="Ring On Create"
+                    android:key="@string/set_TAKE5_RING_ON_CREATE_POINT"/>
+
+                <com.usda.fmsc.android.preferences.SwitchCompatPreference
+                    android:title="Vibrate On Create"
+                    android:key="@string/set_TAKE5_VIB_ON_CREATE_POINT"/>
             </PreferenceCategory>
 
             <PreferenceCategory
@@ -288,15 +305,15 @@
 
         <Preference
             android:title="Export Report"
-            android:key="prefExportReport"
+            android:key="@string/set_EXPORT_REPORT"
             android:enabled="false"/>
 
         <Preference
             android:title="Clear Log"
-            android:key="prefClearLog"/>
+            android:key="@string/set_CLEAR_LOG"/>
 
         <Preference
             android:title="Reset Device Settings"
-            android:key="prefResetDevice" />
+            android:key="@string/set_RESET" />
     </PreferenceCategory>
 </PreferenceScreen>

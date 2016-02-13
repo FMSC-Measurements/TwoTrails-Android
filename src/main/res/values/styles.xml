@@ -226,6 +226,18 @@
     </style>
 
 
+    <style name="pointsTvOptionStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">32sp</item>
+        <item name="android:textColor">@android:color/primary_text_light</item>
+        <item name="android:drawablePadding">4dp</item>
+        <item name="android:padding">8dp</item>
+        <item name="android:clickable">true</item>
+    </style>
+
+
+
     <style name="teFilterbuttonStyle">
         <item name="android:background">@color/primaryLighter</item>
         <item name="android:adjustViewBounds">true</item>

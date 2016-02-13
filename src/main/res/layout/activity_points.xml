@@ -50,135 +50,124 @@
             android:layout_below="@id/toolbar"/>
     </RelativeLayout>
 
+    <com.usda.fmsc.twotrails.ui.MSFloatingActionButton
+        android:id="@+id/pointsFabMenu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/fab_margin"
+        android:src="@drawable/fab_add"
+        app:layout_anchor="@id/pointsViewPager"
+        app:layout_anchorGravity="bottom|end"
+        app:fab_colorNormal="@color/primaryLight"
+        app:fab_colorPressed="@color/primaryLighter"
+        app:fab_colorRipple="@color/primaryLightest"
+        android:onClick="btnCreatePoint"/>
 
-    <AndroidExOld.UI.Widget.FloatingActionButton
+    <com.usda.fmsc.android.widget.DimOverlayFrameLayout
+        android:id="@+id/overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <android.support.design.widget.FloatingActionButton
         android:id="@+id/pointsFabAqr"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
+        android:layout_margin="@dimen/fab_margin"
         android:src="@drawable/ic_ttpoint_gps_white_mini"
         app:layout_anchor="@id/pointsViewPager"
         app:layout_anchorGravity="bottom|center"
         app:fab_colorNormal="@color/primaryLight"
         app:fab_colorPressed="@color/primaryLighter"
         app:fab_colorRipple="@color/primaryLightest"
-        android:onClick="btnAcquireClick" />
+        android:onClick="btnAcquireClick"
+        android:visibility="visible"/>
 
-
-    <View
-        android:id="@+id/overlay"
+    <io.codetail.widget.RevealLinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone"/>
+        android:orientation="vertical"
+        android:gravity="bottom|end"
+        android:layout_margin="@dimen/fab_margin">
 
-
-    <AndroidExOld.UI.Widget.FloatingActionMenu
-        android:id="@+id/pointsFamNew"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        app:layout_anchor="@id/pointsViewPager"
-        app:layout_anchorGravity="bottom|end"
-
-        app:menu_fab_size="normal"
-        app:menu_showShadow="true"
-        app:menu_colorNormal="@color/primaryLight"
-        app:menu_colorPressed="@color/primaryLighter"
-        app:menu_colorRipple="@color/primaryLightest"
-        app:menu_animationDelayPerItem="50"
-        app:menu_buttonSpacing="0dp"
-        app:menu_openDirection="up">
-
-
-        <AndroidExOld.UI.Widget.FloatingActionButton
-            android:id="@+id/pointsFabGps"
+        <android.support.v7.widget.CardView
+            android:id="@+id/fab_sheet"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_ttpoint_gps_white_mini"
-            app:fab_colorNormal="@color/primaryLight"
-            app:fab_shadowRadius="4dp"
-            app:fab_shadowXOffset="0dp"
-            app:fab_shadowYOffset="0dp"
-            app:fab_size="mini"
-            android:onClick="btnPointNewGpsClick"
-            android:contentDescription="@string/op_gps"/>
+            android:layout_height="wrap_content">
 
-        <AndroidExOld.UI.Widget.FloatingActionButton
-            android:id="@+id/pointsFabTake5"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_ttpoint_take5_white_mini"
-            app:fab_colorNormal="@color/primaryLight"
-            app:fab_shadowRadius="4dp"
-            app:fab_shadowXOffset="0dp"
-            app:fab_shadowYOffset="0dp"
-            app:fab_size="mini"
-            android:onClick="btnPointNewTake5Click"
-            android:contentDescription="@string/op_take5"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:background="@color/background_card_view">
 
-        <AndroidExOld.UI.Widget.FloatingActionButton
-            android:id="@+id/pointsFabTrav"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_ttpoint_traverse_white_mini"
-            app:fab_colorNormal="@color/primaryLight"
-            app:fab_shadowRadius="4dp"
-            app:fab_shadowXOffset="0dp"
-            app:fab_shadowYOffset="0dp"
-            app:fab_size="mini"
-            android:onClick="btnPointNewTravclick"
-            android:contentDescription="@string/op_trav"/>
+                <TextView
+                    android:text="@string/op_gps"
+                    android:drawableStart="@drawable/ic_ttpoint_gps_primary"
+                    android:drawableLeft="@drawable/ic_ttpoint_gps_primary"
+                    android:onClick="btnPointNewGpsClick"
+                    style="@style/pointsTvOptionStyle"/>
 
-        <AndroidExOld.UI.Widget.FloatingActionButton
-            android:id="@+id/pointsFabSideShot"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_ttpoint_sideshot_white_mini"
-            app:fab_colorNormal="@color/primaryLight"
-            app:fab_shadowRadius="4dp"
-            app:fab_shadowXOffset="0dp"
-            app:fab_shadowYOffset="0dp"
-            app:fab_size="mini"
-            android:onClick="btnPointNewSideShotClick"
-            android:contentDescription="@string/op_ss"/>
+                <TextView
+                    android:text="@string/op_take5"
+                    android:drawableStart="@drawable/ic_ttpoint_take5_primary"
+                    android:drawableLeft="@drawable/ic_ttpoint_take5_primary"
+                    android:onClick="btnPointNewTake5Click"
+                    style="@style/pointsTvOptionStyle"/>
 
-        <AndroidExOld.UI.Widget.FloatingActionButton
-            android:id="@+id/pointsFabQndm"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_ttpoint_quondam_white_mini"
-            app:fab_colorNormal="@color/primaryLight"
-            app:fab_shadowRadius="4dp"
-            app:fab_shadowXOffset="0dp"
-            app:fab_shadowYOffset="0dp"
-            app:fab_size="mini"
-            android:onClick="btnPointNewQuondamClick"
-            android:contentDescription="@string/op_qndm"/>
+                <TextView
+                    android:text="@string/op_trav"
+                    android:drawableStart="@drawable/ic_ttpoint_traverse_primary"
+                    android:drawableLeft="@drawable/ic_ttpoint_traverse_primary"
+                    android:onClick="btnPointNewTravclick"
+                    style="@style/pointsTvOptionStyle"/>
 
-        <AndroidExOld.UI.Widget.FloatingActionButton
-            android:id="@+id/pointsFabWalk"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_ttpoint_walk_white_mini"
-            app:fab_colorNormal="@color/primaryLight"
-            app:fab_shadowRadius="4dp"
-            app:fab_shadowXOffset="0dp"
-            app:fab_shadowYOffset="0dp"
-            app:fab_size="mini"
-            android:onClick="btnPointNewWalkClick"
-            android:contentDescription="@string/op_walk"/>
+                <TextView
+                    android:text="@string/op_ss"
+                    android:drawableStart="@drawable/ic_ttpoint_sideshot_primary"
+                    android:drawableLeft="@drawable/ic_ttpoint_sideshot_primary"
+                    android:onClick="btnPointNewSideShotClick"
+                    style="@style/pointsTvOptionStyle"/>
 
-        <AndroidExOld.UI.Widget.FloatingActionButton
-            android:id="@+id/pointsFabWay"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_ttpoint_way_white_mini"
-            app:fab_colorNormal="@color/primaryLight"
-            app:fab_shadowRadius="4dp"
-            app:fab_shadowXOffset="0dp"
-            app:fab_shadowYOffset="0dp"
-            app:fab_size="mini"
-            android:onClick="btnPointNewWayClick"
-            android:contentDescription="@string/op_way"/>
-    </AndroidExOld.UI.Widget.FloatingActionMenu>
+                <TextView
+                    android:text="@string/op_qndm"
+                    android:drawableStart="@drawable/ic_ttpoint_quondam_primary"
+                    android:drawableLeft="@drawable/ic_ttpoint_quondam_primary"
+                    android:onClick="btnPointNewQuondamClick"
+                    style="@style/pointsTvOptionStyle"/>
+
+                <TextView
+                    android:text="@string/op_walk"
+                    android:drawableStart="@drawable/ic_ttpoint_walk_primary"
+                    android:drawableLeft="@drawable/ic_ttpoint_walk_primary"
+                    android:onClick="btnPointNewWalkClick"
+                    style="@style/pointsTvOptionStyle"/>
+
+                <TextView
+                    android:text="@string/op_way"
+                    android:drawableStart="@drawable/ic_ttpoint_way_primary"
+                    android:drawableLeft="@drawable/ic_ttpoint_way_primary"
+                    android:onClick="btnPointNewWayClick"
+                    style="@style/pointsTvOptionStyle"/>
+            </LinearLayout>
+
+        </android.support.v7.widget.CardView>
+    </io.codetail.widget.RevealLinearLayout>
+
+    <com.usda.fmsc.android.widget.SheetLayoutEx
+        android:id="@+id/pointsSLExAqr"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="bottom"
+        app:ft_container_gravity="center"
+        app:ft_color="@color/primary"
+        android:elevation="2dp"/>
+
+    <com.usda.fmsc.android.widget.SheetLayoutEx
+        android:id="@+id/pointsSLExCreate"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="bottom"
+        app:ft_container_gravity="center"
+        app:ft_color="@color/primary"
+        android:elevation="2dp"/>
 </android.support.design.widget.CoordinatorLayout>

@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:fitsSystemWindows="true"
     tools:context="com.usda.fmsc.twotrails.activities.WalkActivity"
     android:background="@color/background_card_view">
@@ -15,6 +16,7 @@
         android:focusableInTouchMode="true"/>
 
     <RelativeLayout
+        android:id="@+id/lay1"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -52,6 +54,8 @@
         android:id="@+id/walkFabWalk"
         style="@style/fabStyle"
         android:src="@drawable/ic_ttpoint_walk_white"
+        app:layout_anchor="@id/lay1"
+        app:layout_anchorGravity="bottom|right|end"
         android:onClick="btnWalkClick" />
 
 </android.support.design.widget.CoordinatorLayout>

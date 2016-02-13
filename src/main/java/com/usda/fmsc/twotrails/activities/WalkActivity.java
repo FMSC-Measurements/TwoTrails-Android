@@ -22,6 +22,8 @@ import android.widget.TextView;
 
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.dialogs.InputDialog;
+import com.usda.fmsc.android.widget.SheetLayoutEx;
+import com.usda.fmsc.android.widget.drawables.AnimationDrawableEx;
 import com.usda.fmsc.twotrails.activities.custom.AcquireGpsCustomToolbarActivity;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.Global;
@@ -54,7 +56,7 @@ public class WalkActivity extends AcquireGpsCustomToolbarActivity {
     private EditText txtCmt;
     private ImageButton ibBnd;
     private Drawable dOnBnd, dOffBnd, dWalk, dPause;
-    private AnimationDrawable adWalking;
+    private AnimationDrawableEx adWalking;
 
 
     private WalkPoint _CurrentPoint;
@@ -84,6 +86,7 @@ public class WalkActivity extends AcquireGpsCustomToolbarActivity {
         setUseLostConnectionWarning(true);
 
         if (!isCanceling()) {
+            SheetLayoutEx.enterFromBottomAnimation(this);
             int cancelResult = 0;
 
             Intent intent = getIntent();
@@ -186,7 +189,9 @@ public class WalkActivity extends AcquireGpsCustomToolbarActivity {
 
         miRenameGroup = menu.findItem(R.id.walkMenuRenameGroup);
         miWalking = menu.findItem(R.id.walkMenuWalking);
-        adWalking = (AnimationDrawable)miWalking.getIcon();
+        adWalking = new AnimationDrawableEx((AnimationDrawable)miWalking.getIcon());
+
+        miWalking.setIcon(adWalking);
 
         menuCreated = true;
 
@@ -250,6 +255,12 @@ public class WalkActivity extends AcquireGpsCustomToolbarActivity {
         }
 
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    protected void onPause() {
+        SheetLayoutEx.exitToBottomAnimation(this);
+        super.onPause();
     }
 
     @Override

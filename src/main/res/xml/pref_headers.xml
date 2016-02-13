@@ -19,6 +19,4 @@
     <header
         android:fragment="com.usda.fmsc.twotrails.activities.PreferenceActivity$MiscPreferenceFragment"
         android:title="Misc Settings" />
-
-
 </preference-headers>
