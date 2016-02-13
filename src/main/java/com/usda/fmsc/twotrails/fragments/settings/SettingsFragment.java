@@ -24,6 +24,7 @@ import com.usda.fmsc.android.preferences.ListCompatPreference;
 import com.usda.fmsc.twotrails.activities.SettingsActivity;
 import com.usda.fmsc.twotrails.devices.TtBluetoothManager;
 import com.usda.fmsc.twotrails.Global;
+import com.usda.fmsc.twotrails.dialogs.CheckNmeaDialog;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
@@ -41,7 +42,7 @@ public class SettingsFragment extends PreferenceFragment {
     public static final String CURRENT_PAGE = "CurrentPage";
 
     GpsService.GpsBinder binder;
-    Preference prefGpsCheck, prefExportReport, prefClearLog, prefResetDevice;
+    Preference prefGpsCheck, prefExportReport, prefClearLog, prefResetDevice, prefCheckNmea;
     SwitchPreference swtUseExDev;
     PreferenceCategory exGpsCat;
     ListCompatPreference perfLstGpsDevice;
@@ -80,7 +81,6 @@ public class SettingsFragment extends PreferenceFragment {
                 actionBar.setHomeButtonEnabled(true);
                 actionBar.setDisplayHomeAsUpEnabled(true);
                 actionBar.setDisplayShowTitleEnabled(true);
-                //bar.setHomeAsUpIndicator(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
                 actionBar.setTitle(getPreferenceScreen().getTitle());
 
                 if (moveToPage != null) {
@@ -119,12 +119,13 @@ public class SettingsFragment extends PreferenceFragment {
 
 
         swtUseExDev = (SwitchPreference)findPreference(Global.Settings.DeviceSettings.GPS_EXTERNAL);
-        exGpsCat = (PreferenceCategory)findPreference("exGpsCat");
-        perfLstGpsDevice = (ListCompatPreference)findPreference("prefLstGpsDevice");
-        prefGpsCheck = findPreference("prefGpsCheck");
-        prefClearLog = findPreference("prefClearLog");
-        prefExportReport = findPreference("prefExportReport");
-        prefResetDevice = findPreference("prefResetDevice");
+        exGpsCat = (PreferenceCategory)findPreference(getString(R.string.set_GPS_CAT));
+        perfLstGpsDevice = (ListCompatPreference)findPreference(getString(R.string.set_GPS_LIST_DEVICE));
+        prefGpsCheck = findPreference(getString(R.string.set_GPS_CHECK));
+        prefClearLog = findPreference(getString(R.string.set_CLEAR_LOG));
+        prefExportReport = findPreference(getString(R.string.set_EXPORT_REPORT));
+        prefResetDevice = findPreference(getString(R.string.set_RESET));
+        prefCheckNmea = findPreference(getString(R.string.set_GPS_CHECK_NMEA));
 
         binder = Global.getGpsBinder();
 
@@ -137,6 +138,8 @@ public class SettingsFragment extends PreferenceFragment {
         prefResetDevice.setOnPreferenceClickListener(resetDeviceListener);
 
         prefClearLog.setOnPreferenceClickListener(clearLogListener);
+
+        prefCheckNmea.setOnPreferenceClickListener(checkNmeaListener);
 
         //get initial bluetooth devices
         setBTValues(perfLstGpsDevice);
@@ -336,7 +339,7 @@ public class SettingsFragment extends PreferenceFragment {
                 }).start();
 
             } catch (Exception ex) {
-                TtUtils.TtReport.writeError(ex.getMessage(), "SettingsFragmet:checkGPS");
+                TtUtils.TtReport.writeError(ex.getMessage(), "SettingsFragment:checkGPS");
                 Toast.makeText(getActivity(), "Error", Toast.LENGTH_SHORT).show();
             }
 
@@ -469,6 +472,23 @@ public class SettingsFragment extends PreferenceFragment {
         }
     };
 
+
+    Preference.OnPreferenceClickListener checkNmeaListener = new Preference.OnPreferenceClickListener() {
+        @Override
+        public boolean onPreferenceClick(Preference preference) {
+
+            if (Global.Settings.DeviceSettings.isGpsConfigured()) {
+                CheckNmeaDialog.newInstance().show(((AppCompatActivity) getActivity()).getSupportFragmentManager(), "CHECK_NMEA");
+            } else {
+                new AlertDialog.Builder(getActivity())
+                        .setMessage("GPS needs to be configured before checking for its NMEA configuration.")
+                        .setPositiveButton(R.string.str_ok, null)
+                        .show();
+            }
+
+            return false;
+        }
+    };
 
 
     DontAskAgainDialog.OnClickListener setMetaListener = new DontAskAgainDialog.OnClickListener() {

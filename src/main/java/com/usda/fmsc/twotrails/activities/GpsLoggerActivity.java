@@ -128,11 +128,19 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
         miCheckLtf.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                if (logging) {
-                    if (item.isChecked()) {
-                        Global.getGpsBinder().startLogging(TtUtils.getLogFileName());
-                    } else {
+
+                if (item.isChecked()) {
+                    item.setChecked(false);
+
+                    if (logging) {
                         Global.getGpsBinder().stopLogging();
+                        logging = false;
+                    }
+                } else {
+                    item.setChecked(true);
+
+                    if (logging) {
+                        Global.getGpsBinder().startLogging(TtUtils.getLogFileName());
                     }
                 }
                 return true;

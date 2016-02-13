@@ -21,7 +21,7 @@ public class ProjectActivity extends CustomToolbarActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        getFragmentManager().beginTransaction()
+        getSupportFragmentManager().beginTransaction()
                 .replace(R.id.content2, ProjectFragment.newInstance()).commit();
     }
 

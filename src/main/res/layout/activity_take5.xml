@@ -8,6 +8,7 @@
     tools:context="com.usda.fmsc.twotrails.activities.Take5Activity">
 
     <RelativeLayout
+        android:id="@+id/lay1"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -68,7 +69,9 @@
         android:id="@+id/take5FabT5"
         style="@style/fabStyle"
         android:src="@drawable/ic_ttpoint_take5_white"
-        android:onClick="btnTake5Click" />
+        app:layout_anchor="@id/lay1"
+        app:layout_anchorGravity="bottom|right|end"
+        android:onClick="btnTake5Click"/>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/take5FabSideShot"
@@ -78,6 +81,8 @@
         android:layout_marginEnd="@dimen/fab_margin"
         android:layout_marginRight="@dimen/fab_margin"
         android:layout_marginBottom="86dp"
+        app:layout_anchor="@id/lay1"
+        app:layout_anchorGravity="bottom|right|end"
         android:onClick="btnSideShotClick"/>
 
     <android.support.design.widget.FloatingActionButton

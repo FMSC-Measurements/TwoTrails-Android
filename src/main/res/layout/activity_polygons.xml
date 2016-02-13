@@ -3,13 +3,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:fitsSystemWindows="true"
     tools:context="com.usda.fmsc.twotrails.activities.PolygonsActivity">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/background_card_view">
+        android:background="@color/background_card_view"
+        android:id="@+id/lay1">
 
         <include layout="@layout/toolbar_default" android:id="@id/toolbar" />
 
@@ -28,6 +30,8 @@
         android:id="@+id/polysFabNew"
         style="@style/fabStyle"
         android:src="@drawable/fab_add"
+        android:layout_margin="@dimen/fab_margin"
+        app:layout_anchor="@id/lay1"
         android:onClick="btnNewClick" />
 
 </android.support.design.widget.CoordinatorLayout>

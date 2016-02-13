@@ -146,9 +146,25 @@
     <string name="ds_gps_connected">GPS Connected</string>
     <string name="ds_gps_not_connected">GPS Not Connected</string>
     <string name="ds_gps_connecting">Connecting to GPS Receiver..</string>
+    <string name="ds_gps_check_nmea">See what NMEA strings are coming down from the GPS receiver</string>
 
 
     <!-- Device Settings Consts / Keys -->
+
+    <string name="set_GPS_CAT">exGpsCat</string>
+    <string name="set_GPS_CHECK">prefGpsCheck</string>
+    <string name="set_GPS_LIST_DEVICE">prefLstGpsDevice</string>
+    <string name="set_GPS_CHECK_NMEA">prefGpsCheckNema</string>
+    <string name="set_RF_SETUP">rfSetup</string>
+    <string name="set_RF_LIST_DEVICE">rfLocDevice</string>
+    <string name="set_RF_DEVICE">rfDevice</string>
+
+    <string name="set_CLEAR_LOG">prefClearLog</string>
+    <string name="set_EXPORT_REPORT">prefExportReport</string>
+    <string name="set_RESET">prefResetDevice</string>
+
+
+
     <string name="set_settings_page">settings_page</string>
 
     <string name="set_GPS_EXTERNAL">GpsExternal</string>
@@ -172,6 +188,8 @@
     <string name="set_TAKE5_IGNORE_NMEA_AMOUNT">Take5IgnoreNmeaAmount</string>
     <string name="set_TAKE5_FAIL_AMOUNT">Take5FailAmount</string>
     <string name="set_TAKE5_INCREMENT">Take5Increment</string>
+    <string name="set_TAKE5_VIB_ON_CREATE_POINT">Take5VibrationOnCreate</string>
+    <string name="set_TAKE5_RING_ON_CREATE_POINT">Take5RingOnCreate</string>
 
     <string name="set_WALK_FILTER_DOP_TYPE">WalkFilterDopType</string>
     <string name="set_WALK_FILTER_DOP_VALUE">WalkFilterDopValue</string>

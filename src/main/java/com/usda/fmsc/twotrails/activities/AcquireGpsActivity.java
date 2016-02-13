@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.usda.fmsc.android.widget.SheetLayoutEx;
 import com.usda.fmsc.twotrails.activities.custom.AcquireGpsCustomToolbarActivity;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.gps.GpsService;
@@ -45,6 +46,7 @@ public class AcquireGpsActivity extends AcquireGpsCustomToolbarActivity {
         tvRecv = (TextView)findViewById(R.id.acquireGpsToolbarLblReceivedValue);
 
         if (!isCanceling()) {
+            SheetLayoutEx.enterFromBottomAnimation(this);
             Intent intent = getIntent();
             if (intent != null && intent.getExtras() != null) {
                 _Bursts = new ArrayList<>();
@@ -85,6 +87,7 @@ public class AcquireGpsActivity extends AcquireGpsCustomToolbarActivity {
         }
     }
 
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -100,6 +103,12 @@ public class AcquireGpsActivity extends AcquireGpsCustomToolbarActivity {
         }
     }
 
+
+    @Override
+    protected void onPause() {
+        SheetLayoutEx.exitToBottomAnimation(this);
+        super.onPause();
+    }
 
     @Override
     protected void onDestroy() {

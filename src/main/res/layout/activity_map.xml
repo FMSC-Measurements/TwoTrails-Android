@@ -160,6 +160,7 @@
                     android:id="@+id/mapFabMyPos"
                     style="@style/fabStyle"
                     android:src="@drawable/ic_my_location_white_36dp"
+                    app:layout_anchor="@id/map"
                     android:onClick="btnMyLocClick" />
             </android.support.design.widget.CoordinatorLayout>
 

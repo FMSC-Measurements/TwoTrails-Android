@@ -401,6 +401,8 @@ public class Global {
             public static final String TAKE5_IGNORE_FIRST_NMEA_AMOUNT = "Take5IgnoreNmeaAmount";
             public static final String TAKE5_FAIL_AMOUNT = "Take5FailAmount";
             public static final String TAKE5_INCREMENT = "Take5Increment";
+            public static final String TAKE5_VIBRATE_ON_CREATE = "Take5VibrationOnCreate";
+            public static final String TAKE5_RING_ON_CREATE = "Take5RingOnCreate";
             
             public static final String WALK_FILTER_DOP_TYPE = "WalkFilterDopType";
             public static final String WALK_FILTER_DOP_VALUE = "WalkFilterDopValue";
@@ -451,6 +453,8 @@ public class Global {
             public static final boolean DEFAULT_TAKE5_IGNORE = false;
             public static final int DEFAULT_TAKE5_IGNORE_AMOUNT = 2;
             public static final int DEFAULT_TAKE5_FAIL_AMOUNT = 10;
+            public static final boolean DEFAULT_TAKE5_VIB_ON_CREATE = true;
+            public static final boolean DEFAULT_TAKE5_RING_ON_CREATE = true;
 
             public static final Units.DopType DEFAULT_WALK_DOP_TYPE = Units.DopType.HDOP;
             public static final GGASentence.GpsFixType DEFAULT_WALK_FIX_TYPE = GGASentence.GpsFixType.GPS;
@@ -516,6 +520,8 @@ public class Global {
                 editor.putInt(TAKE5_IGNORE_FIRST_NMEA_AMOUNT, DEFAULT_TAKE5_IGNORE_AMOUNT);
                 editor.putInt(TAKE5_FAIL_AMOUNT, DEFAULT_TAKE5_FAIL_AMOUNT);
                 editor.putInt(TAKE5_INCREMENT, DEFAULT_TAKE5_INCREMENT);
+                editor.putBoolean(TAKE5_RING_ON_CREATE, DEFAULT_TAKE5_RING_ON_CREATE);
+                editor.putBoolean(TAKE5_VIBRATE_ON_CREATE, DEFAULT_TAKE5_VIB_ON_CREATE);
 
                 editor.putInt(WALK_FILTER_DOP_TYPE, DEFAULT_WALK_DOP_TYPE.getValue());
                 editor.putInt(WALK_FILTER_DOP_VALUE, DEFAULT_WALK_DOP_VALUE);
@@ -524,6 +530,8 @@ public class Global {
                 editor.putInt(WALK_FILTER_FREQUENCY, DEFAULT_WALK_FREQUENCY);
                 editor.putInt(WALK_INCREMENT, DEFAULT_WALK_INCREMENT);
                 editor.putBoolean(WALK_SHOW_ALL_POINTS_ON_MAP, DEFAULT_WALK_SHOW_ALL_POINTS_ON_MAP);
+                editor.putBoolean(WALK_RING_ON_CREATE, DEFAULT_WALK_RING_ON_CREATE);
+                editor.putBoolean(WALK_VIBRATE_ON_CREATE, DEFAULT_WALK_VIB_ON_CREATE);
 
                 editor.putInt(AUTO_SET_GPS_NAME_TO_META, DEFAULT_AUTO_SET_GPS_NAME_TO_META);
                 editor.putBoolean(AUTO_SET_GPS_NAME_TO_META_ASK, DEFAULT_AUTO_SET_GPS_NAME_TO_META_ASK);
@@ -801,6 +809,24 @@ public class Global {
 
             public static void setTake5Increment(int value) {
                 setInt(TAKE5_INCREMENT, value);
+            }
+
+
+            public static boolean getTake5VibrateOnCreate() {
+                return getBool(TAKE5_VIBRATE_ON_CREATE, DEFAULT_TAKE5_VIB_ON_CREATE);
+            }
+
+            public static void setTake5VibrateOnCreate(boolean value) {
+                setBool(TAKE5_VIBRATE_ON_CREATE, value);
+            }
+
+
+            public static boolean getTake5RingOnCreate() {
+                return getBool(TAKE5_RING_ON_CREATE, DEFAULT_TAKE5_RING_ON_CREATE);
+            }
+
+            public static void setTake5RingOnCreate(boolean value) {
+                setBool(TAKE5_RING_ON_CREATE, value);
             }
             //endregion
 

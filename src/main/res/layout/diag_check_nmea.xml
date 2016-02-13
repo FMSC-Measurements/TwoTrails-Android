@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/toolbar_height"
+        android:elevation="@dimen/toolbar_elevation">
+
+        <TextView
+            android:id="@+id/diagCheckNmeaTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:textSize="22sp"
+            android:padding="8dp"
+            android:text="Listening to GPS"/>
+
+        <me.zhanghai.android.materialprogressbar.MaterialProgressBar
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            style="@style/Widget.MaterialProgressBar.ProgressBar.Large"
+            android:layout_centerVertical="true"
+            android:visibility="visible"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_margin="8dp"/>
+    </RelativeLayout>
+
+    <View style="@style/ToolbarElevation2" />
+
+    <ListView
+        android:id="@+id/diagCheckNmeaList"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"/>
+</LinearLayout>
