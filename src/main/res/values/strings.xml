@@ -80,6 +80,7 @@
     <string name="str_rename">Rename</string>
     <string name="str_overwrite">Overwrite</string>
     <string name="str_settings">Settings</string>
+    <string name="str_listen_recv">Listening to Receiver</string>
 
 
     <string name="op_gps">GPS</string>
@@ -147,6 +148,8 @@
     <string name="ds_gps_not_connected">GPS Not Connected</string>
     <string name="ds_gps_connecting">Connecting to GPS Receiver..</string>
     <string name="ds_gps_check_nmea">See what NMEA strings are coming down from the GPS receiver</string>
+    <string name="ds_gps_use_internal">Using Internal GPS</string>
+    <string name="ds_gps_use_external">Using External GPS</string>
 
 
     <!-- Device Settings Consts / Keys -->
@@ -244,6 +247,7 @@
     <string name="title_activity_main_gps_settings">GPS Settings</string>
     <string name="title_activity_plot_grid">Generate Plots</string>
     <string name="title_activity_export">Export</string>
+    <string name="title_activity_import">Import</string>
 
     <!-- Main -->
     <string name="main_tab_file">FILE</string>

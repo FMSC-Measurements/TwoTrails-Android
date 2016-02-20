@@ -78,6 +78,28 @@
 
         <View style="@style/Dividers"/>
 
+        <LinearLayout
+            android:id="@+id/mainFragFileCleanDb"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/main_btn_duplicate"
+                android:id="@+id/mainFragFileBtnCleanDb"
+                android:layout_gravity="center_horizontal"
+                android:onClick="btnCleanDb"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:enabled="false"
+                style="@style/MainActivityButtons"/>
+
+            <View style="@style/Dividers"/>
+        </LinearLayout>
+
         <TableLayout
             android:id="@+id/mainFragFileTblInfo"
             android:layout_width="match_parent"

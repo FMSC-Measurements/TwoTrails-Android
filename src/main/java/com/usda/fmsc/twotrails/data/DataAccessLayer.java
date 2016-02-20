@@ -1789,7 +1789,7 @@ public class DataAccessLayer {
 
                     nmeas.add(new TtNmeaBurst(cn, timeCreated, pointCN, used, new GeoPosition(lat, latDir, lon, lonDir, elev, uomelev), fixTime, groundSpeed,
                             trackAngle, magVar, magVarDir, mode, fix, satsUsed, pdop, hdop, vdop, fixQuality,
-                            trackedSatellites, horizDilution, geoidHeight, geoUom, numberOfSatellitesInView, satellites));
+                            trackedSatellites, horizDilution, geoidHeight, geoUom, numberOfSatellitesInView));//, satellites
                 } while (c.moveToNext());
             }
 
@@ -1885,6 +1885,7 @@ public class DataAccessLayer {
 
             cvs.put(TwoTrailsSchema.TtNmeaSchema.UsedSatPRNS, burst.getUsedSatelliteIDsString());
 
+            /*
             int i = 0;
             for (Satellite sat : burst.getSatellitesInView()) {
                 cvs.put(TwoTrailsSchema.TtNmeaSchema.SatIDs[i], sat.getID());
@@ -1893,6 +1894,7 @@ public class DataAccessLayer {
                 cvs.put(TwoTrailsSchema.TtNmeaSchema.SatSRNs[i], sat.getSRN());
                 i++;
             }
+            */
 
             _db.insert(TwoTrailsSchema.TtNmeaSchema.TableName, null, cvs);
 
@@ -1982,6 +1984,7 @@ public class DataAccessLayer {
 
             cvs.put(TwoTrailsSchema.TtNmeaSchema.UsedSatPRNS, burst.getUsedSatelliteIDsString());
 
+            /*
             int i = 0;
             for (Satellite sat : burst.getSatellitesInView()) {
                 cvs.put(TwoTrailsSchema.TtNmeaSchema.SatIDs[i], sat.getID());
@@ -1990,6 +1993,7 @@ public class DataAccessLayer {
                 cvs.put(TwoTrailsSchema.TtNmeaSchema.SatSRNs[i], sat.getSRN());
                 i++;
             }
+            */
 
             success = _db.update(TwoTrailsSchema.TtNmeaSchema.TableName, cvs,
                     String.format("%s = '%s'", TwoTrailsSchema.SharedSchema.CN, burst.getCN()), null);

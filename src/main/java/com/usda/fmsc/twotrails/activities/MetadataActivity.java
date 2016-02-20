@@ -216,7 +216,7 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
                         }
                     });
 
-                    alert.setNegativeButton(R.string.str_cancel, null);
+                    alert.setNeutralButton(R.string.str_cancel, null);
 
                     alert.create().show();
                 }
@@ -336,7 +336,7 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
                 }
             });
 
-            dialog.setNegativeButton(getString(R.string.str_cancel), null);
+            dialog.setNeutralButton(R.string.str_cancel, null);
 
             dialog.show();
         }
@@ -500,7 +500,7 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
                 }
             });
 
-            inputDialog.setNegativeButton(R.string.str_cancel, null);
+            inputDialog.setNeutralButton(R.string.str_cancel, null);
 
             inputDialog.show();
         }
@@ -699,7 +699,7 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
                 }
             });
 
-            inputDialog.setNegativeButton(R.string.str_cancel, null);
+            inputDialog.setNeutralButton(R.string.str_cancel, null);
 
             inputDialog.show();
         }
@@ -856,7 +856,7 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
                 }
             });
 
-            inputDialog.setNegativeButton(R.string.str_cancel, null);
+            inputDialog.setNeutralButton(R.string.str_cancel, null);
 
             inputDialog.show();
         }
@@ -878,7 +878,7 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
                 }
             });
 
-            inputDialog.setNegativeButton(R.string.str_cancel, null);
+            inputDialog.setNeutralButton(R.string.str_cancel, null);
 
             inputDialog.show();
         }
@@ -900,7 +900,7 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
                 }
             });
 
-            inputDialog.setNegativeButton(R.string.str_cancel, null);
+            inputDialog.setNeutralButton(R.string.str_cancel, null);
 
             inputDialog.show();
         }

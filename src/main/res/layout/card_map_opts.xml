@@ -76,25 +76,33 @@
                             android:id="@+id/pmcFcbAdjBnd"
                             android:contentDescription="@string/map_adj_bnd"
                             style="@style/mapOptFlipCheckBoxStyle"
-                            app:rearColor="@color/primaryLight"/>
+                            app:acceptColor="@color/red_500"
+                            app:acceptImage="@drawable/ic_poly"
+                            app:declineImage="@drawable/ic_poly"/>
 
                         <com.usda.fmsc.android.widget.FlipCheckBoxEx
                             android:id="@+id/pmcFcbAdjBndPts"
                             android:contentDescription="@string/map_adj_bnd_pts"
                             style="@style/mapOptFlipCheckBoxStyle"
-                            app:rearColor="@color/primaryLight"/>
+                            app:acceptColor="@color/red_500"
+                            app:acceptImage="@drawable/ic_location_white_36dp"
+                            app:declineImage="@drawable/ic_location_white_36dp"/>
 
                         <com.usda.fmsc.android.widget.FlipCheckBoxEx
                             android:id="@+id/pmcFcbUnadjBnd"
                             android:contentDescription="@string/map_unadj_bnd"
                             style="@style/mapOptFlipCheckBoxStyle"
-                            app:rearColor="@color/primaryLight"/>
+                            app:acceptColor="@color/red_800"
+                            app:acceptImage="@drawable/ic_unpoly"
+                            app:declineImage="@drawable/ic_unpoly"/>
 
                         <com.usda.fmsc.android.widget.FlipCheckBoxEx
                             android:id="@+id/pmcFcbUnadjBndPts"
                             android:contentDescription="@string/map_unadj_bnd_pts"
                             style="@style/mapOptFlipCheckBoxStyle"
-                            app:rearColor="@color/primaryLight"/>
+                            app:acceptColor="@color/red_800"
+                            app:acceptImage="@drawable/ic_location_white_36dp"
+                            app:declineImage="@drawable/ic_location_white_36dp"/>
 
                         <View
                             android:layout_width="0dp"
@@ -130,25 +138,33 @@
                             android:id="@+id/pmcFcbAdjNav"
                             android:contentDescription="@string/map_adj_nav"
                             style="@style/mapOptFlipCheckBoxStyle"
-                            app:rearColor="@color/primaryLight"/>
+                            app:acceptColor="@color/indigo_500"
+                            app:acceptImage="@drawable/ic_poly"
+                            app:declineImage="@drawable/ic_poly"/>
 
                         <com.usda.fmsc.android.widget.FlipCheckBoxEx
                             android:id="@+id/pmcFcbAdjNavPts"
                             android:contentDescription="@string/map_adj_nav_pts"
                             style="@style/mapOptFlipCheckBoxStyle"
-                            app:rearColor="@color/primaryLight"/>
+                            app:acceptColor="@color/indigo_500"
+                            app:acceptImage="@drawable/ic_location_white_36dp"
+                            app:declineImage="@drawable/ic_location_white_36dp"/>
 
                         <com.usda.fmsc.android.widget.FlipCheckBoxEx
                             android:id="@+id/pmcFcbUnadjNav"
                             android:contentDescription="@string/map_unadj_nav"
                             style="@style/mapOptFlipCheckBoxStyle"
-                            app:rearColor="@color/primaryLight"/>
+                            app:acceptColor="@color/indigo_800"
+                            app:acceptImage="@drawable/ic_unpoly"
+                            app:declineImage="@drawable/ic_unpoly"/>
 
                         <com.usda.fmsc.android.widget.FlipCheckBoxEx
                             android:id="@+id/pmcFcbUnadjNavPts"
                             android:contentDescription="@string/map_unadj_nav_pts"
                             style="@style/mapOptFlipCheckBoxStyle"
-                            app:rearColor="@color/primaryLight"/>
+                            app:acceptColor="@color/indigo_800"
+                            app:acceptImage="@drawable/ic_location_white_36dp"
+                            app:declineImage="@drawable/ic_location_white_36dp"/>
                     </LinearLayout>
                 </LinearLayout>
 
@@ -171,19 +187,21 @@
                             android:id="@+id/pmcFcbAdjMiscPts"
                             android:contentDescription="@string/map_adj_misc_pts"
                             style="@style/mapOptFlipCheckBoxStyle"
-                            app:rearColor="@color/primaryLight"/>
+                            app:acceptColor="@color/primaryLight"/>
 
                         <com.usda.fmsc.android.widget.FlipCheckBoxEx
                             android:id="@+id/pmcFcbUnadjMiscPts"
                             android:contentDescription="@string/map_unadj_misc_pts"
                             style="@style/mapOptFlipCheckBoxStyle"
-                            app:rearColor="@color/primaryLight"/>
+                            app:acceptColor="@color/primaryLight"/>
 
                         <com.usda.fmsc.android.widget.FlipCheckBoxEx
                             android:id="@+id/pmcFcbWayPts"
                             android:contentDescription="@string/map_way_pts"
                             style="@style/mapOptFlipCheckBoxStyle"
-                            app:rearColor="@color/primaryLight"/>
+                            app:acceptColor="@color/primaryLight"
+                            app:acceptImage="@drawable/ic_ttpoint_way_white"
+                            app:declineImage="@drawable/ic_ttpoint_way_white"/>
                     </LinearLayout>
                 </LinearLayout>
 

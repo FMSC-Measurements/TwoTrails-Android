@@ -20,13 +20,14 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.android.gms.maps.GoogleMap;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.dialogs.InputDialog;
 import com.usda.fmsc.android.widget.SheetLayoutEx;
 import com.usda.fmsc.android.widget.drawables.AnimationDrawableEx;
-import com.usda.fmsc.twotrails.activities.custom.AcquireGpsCustomToolbarActivity;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.Global;
+import com.usda.fmsc.twotrails.activities.custom.AcquireGpsMapActivity;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
 import com.usda.fmsc.twotrails.R;
@@ -47,7 +48,7 @@ import com.usda.fmsc.geospatial.nmea.NmeaBurst;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.utilities.StringEx;
 
-public class WalkActivity extends AcquireGpsCustomToolbarActivity {
+public class WalkActivity extends AcquireGpsMapActivity {
     private MenuItem miRenameGroup, miWalking;
     private FloatingActionButton fabWalk;
     private View walkCardView, preFocusView;
@@ -168,6 +169,8 @@ public class WalkActivity extends AcquireGpsCustomToolbarActivity {
             getSettings();
 
             lockPoint(true);
+
+            setupMap();
         }
     }
 
@@ -214,7 +217,7 @@ public class WalkActivity extends AcquireGpsCustomToolbarActivity {
                             finish();
                         }
                     })
-                            .setNegativeButton(R.string.str_cancel, null);
+                    .setNeutralButton(R.string.str_cancel, null);
 
                     dialog.show();
                 } else {
@@ -284,6 +287,14 @@ public class WalkActivity extends AcquireGpsCustomToolbarActivity {
     }
 
 
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        super.onMapReady(googleMap);
+
+        setMyLocationEnabled(true);
+        setFollowMyPosition(true);
+    }
+
     private void updateGroupName() {
         final InputDialog dialog = new InputDialog(this);
 
@@ -314,7 +325,7 @@ public class WalkActivity extends AcquireGpsCustomToolbarActivity {
                 }
             }
         })
-        .setNegativeButton(R.string.str_cancel, null);
+        .setNeutralButton(R.string.str_cancel, null);
 
         dialog.show();
     }
@@ -440,6 +451,8 @@ public class WalkActivity extends AcquireGpsCustomToolbarActivity {
         walkCardView.startAnimation(animOut);
 
         Global.TtNotifyManager.showPointAquired();
+
+        addMarker(_CurrentPoint, _Metadata, false);
     }
 
     private void setStartWalkingDrawable(boolean startAquring) {

@@ -201,7 +201,7 @@ public class PolygonsActivity extends CustomToolbarActivity {
                         }
                     });
 
-                    alert.setNegativeButton(R.string.str_cancel, null);
+                    alert.setNeutralButton(R.string.str_cancel, null);
 
                     alert.create().show();
                 }
@@ -330,7 +330,7 @@ public class PolygonsActivity extends CustomToolbarActivity {
                 }
             });
 
-            dialog.setNegativeButton(getString(R.string.str_cancel), null);
+            dialog.setNeutralButton(R.string.str_cancel, null);
 
             dialog.show();
         }

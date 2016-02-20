@@ -1,5 +1,4 @@
-<resources xmlns:tools="http://schemas.android.com/tools"
-           xmlns:app="http://schemas.android.com/apk/res-auto">
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <style name="MainActivityButtons" parent="@android:style/Widget.Holo.Light.Button.Borderless.Small">
         <item name="android:textAllCaps">true</item>
@@ -19,7 +18,6 @@
         <item name="android:elevation" tools:targetApi="21">4dp</item>
         <item name="android:translationZ" tools:targetApi="21">4dp</item>
         <item name="android:background">@color/primary</item>
-        <!--<item name="android:background">@drawable/primary_round</item>-->
     </style>
 
     <style name="Dividers">
@@ -165,14 +163,24 @@
         <item name="partialCheckedColor">@color/primaryLighter</item>
     </style>
 
-    <style name="mapMultiCheckBoxBndStyle" parent="multiCheckBoxStyle">
+    <style name="mapMultiCheckBoxAdjBndStyle" parent="multiCheckBoxStyle">
         <item name="checkedColor">@color/red_500</item>
         <item name="partialCheckedColor">@color/red_300</item>
     </style>
 
-    <style name="mapMultiCheckBoxNavStyle" parent="multiCheckBoxStyle">
+    <style name="mapMultiCheckBoxUnAdjBndStyle" parent="multiCheckBoxStyle">
+        <item name="checkedColor">@color/red_800</item>
+        <item name="partialCheckedColor">@color/red_600</item>
+    </style>
+
+    <style name="mapMultiCheckBoxAdjNavStyle" parent="multiCheckBoxStyle">
         <item name="checkedColor">@color/indigo_500</item>
         <item name="partialCheckedColor">@color/indigo_300</item>
+    </style>
+
+    <style name="mapMultiCheckBoxUnAdjNavStyle" parent="multiCheckBoxStyle">
+        <item name="checkedColor">@color/indigo_800</item>
+        <item name="partialCheckedColor">@color/indigo_600</item>
     </style>
 
 
@@ -200,8 +208,8 @@
         <item name="layout_anchorGravity">bottom|end|right</item>
         <item name="elevation">6dp</item>
         <item name="pressedTranslationZ">12dp</item>
-        <item name="fab_colorNormal">@color/primaryLight</item>
-        <item name="fab_colorRipple">@color/primaryLighter</item>
+        <!--<item name="fab_colorNormal">@color/primaryLight</item>-->
+        <!--<item name="fab_colorRipple">@color/primaryLighter</item>-->
     </style>
 
     <style name="fabProgressHolderStyle">
@@ -221,8 +229,8 @@
 
         <item name="android:elevation" tools:targetApi="21">6dp</item>
         <item name="pressedTranslationZ">12dp</item>
-        <item name="fab_colorNormal">@color/primaryLight</item>
-        <item name="fab_colorRipple">@color/primaryLighter</item>
+        <!--<item name="fab_colorNormal">@color/primaryLight</item>-->
+        <!--<item name="fab_colorRipple">@color/primaryLighter</item>-->
     </style>
 
 
@@ -302,6 +310,14 @@
         <item name="android:layout_marginRight">8dp</item>
         <item name="android:layout_marginEnd" tools:targetApi="17">8dp</item>
         <item name="android:layout_marginTop">8dp</item>
+    </style>
+
+    <style name="pad4440">
+        <item name="android:layout_marginLeft">4dp</item>
+        <item name="android:layout_marginStart" tools:targetApi="17">4dp</item>
+        <item name="android:layout_marginRight">4dp</item>
+        <item name="android:layout_marginEnd" tools:targetApi="17">4dp</item>
+        <item name="android:layout_marginTop">4dp</item>
     </style>
 </resources>
 

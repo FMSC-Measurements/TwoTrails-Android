@@ -205,83 +205,83 @@ public class TwoTrailsSchema {
         public static final String SatellitesInViewCount = "SatInViewCount";
         public static final String UsedSatPRNS = "PRNS";
 
-        //region Satellite Information Fields 1-12
-        public static final String Sat1ID = "Sat1ID";
-        public static final String Sat1Elev = "Sat1Elev";
-        public static final String Sat1Az = "Sat1Az";
-        public static final String Sat1SRN = "Sat1SRN";
-        public static final String Sat2ID = "Sat2ID";
-        public static final String Sat2Elev = "Sat2Elev";
-        public static final String Sat2Az = "Sat2Az";
-        public static final String Sat2SRN = "Sat2SRN";
-        public static final String Sat3ID = "Sat3ID";
-        public static final String Sat3Elev = "Sat3Elev";
-        public static final String Sat3Az = "Sat3Az";
-        public static final String Sat3SRN = "Sat3SRN";
-        public static final String Sat4ID = "Sat4ID";
-        public static final String Sat4Elev = "Sat4Elev";
-        public static final String Sat4Az = "Sat4Az";
-        public static final String Sat4SRN = "Sat4SRN";
-        public static final String Sat5ID = "Sat5ID";
-        public static final String Sat5Elev = "Sat5Elev";
-        public static final String Sat5Az = "Sat5Az";
-        public static final String Sat5SRN = "Sat5SRN";
-        public static final String Sat6ID = "Sat6ID";
-        public static final String Sat6Elev = "Sat6Elev";
-        public static final String Sat6Az = "Sat6Az";
-        public static final String Sat6SRN = "Sat6SRN";
-        public static final String Sat7ID = "Sat7ID";
-        public static final String Sat7Elev = "Sat7Elev";
-        public static final String Sat7Az = "Sat7Az";
-        public static final String Sat7SRN = "Sat7SRN";
-        public static final String Sat8ID = "Sat8ID";
-        public static final String Sat8Elev = "Sat8Elev";
-        public static final String Sat8Az = "Sat8Az";
-        public static final String Sat8SRN = "Sat8SRN";
-        public static final String Sat9ID = "Sat9ID";
-        public static final String Sat9Elev = "Sat9Elev";
-        public static final String Sat9Az = "Sat9Az";
-        public static final String Sat9SRN = "Sat9SRN";
-        public static final String Sat10ID = "Sat10ID";
-        public static final String Sat10Elev = "Sat10Elev";
-        public static final String Sat10Az = "Sat10Az";
-        public static final String Sat10SRN = "Sat10SRN";
-        public static final String Sat11ID = "Sat11ID";
-        public static final String Sat11Elev = "Sat11Elev";
-        public static final String Sat11Az = "Sat11Az";
-        public static final String Sat11SRN = "Sat11SRN";
-        public static final String Sat12ID = "Sat12ID";
-        public static final String Sat12Elev = "Sat12Elev";
-        public static final String Sat12Az = "Sat12Az";
-        public static final String Sat12SRN = "Sat12SRN";
-        //endregion
-
-        public static final String[] SatIDs = new String[] {
-                Sat1ID, Sat2ID, Sat3ID, Sat4ID, Sat5ID, Sat6ID,
-                Sat7ID, Sat8ID, Sat9ID, Sat10ID, Sat11ID, Sat12ID
-        };
-
-        public static final String[] SatElevs = new String[] {
-                Sat1Elev, Sat2Elev, Sat3Elev, Sat4Elev, Sat5Elev, Sat6Elev,
-                Sat7Elev, Sat8Elev, Sat9Elev, Sat10Elev, Sat11Elev, Sat12Elev
-        };
-
-        public static final String[] SatAzs = new String[] {
-                Sat1Az, Sat2Az, Sat3Az, Sat4Az, Sat5Az, Sat6Az,
-                Sat7Az, Sat8Az, Sat9Az, Sat10Az, Sat11Az, Sat12Az
-        };
-
-        public static final String[] SatSRNs = new String[] {
-                Sat1SRN, Sat2SRN, Sat3SRN, Sat4SRN, Sat5SRN, Sat6SRN,
-                Sat7SRN, Sat8SRN, Sat9SRN, Sat10SRN, Sat11SRN, Sat12SRN
-        };
+//        //region Satellite Information Fields 1-12
+//        public static final String Sat1ID = "Sat1ID";
+//        public static final String Sat1Elev = "Sat1Elev";
+//        public static final String Sat1Az = "Sat1Az";
+//        public static final String Sat1SRN = "Sat1SRN";
+//        public static final String Sat2ID = "Sat2ID";
+//        public static final String Sat2Elev = "Sat2Elev";
+//        public static final String Sat2Az = "Sat2Az";
+//        public static final String Sat2SRN = "Sat2SRN";
+//        public static final String Sat3ID = "Sat3ID";
+//        public static final String Sat3Elev = "Sat3Elev";
+//        public static final String Sat3Az = "Sat3Az";
+//        public static final String Sat3SRN = "Sat3SRN";
+//        public static final String Sat4ID = "Sat4ID";
+//        public static final String Sat4Elev = "Sat4Elev";
+//        public static final String Sat4Az = "Sat4Az";
+//        public static final String Sat4SRN = "Sat4SRN";
+//        public static final String Sat5ID = "Sat5ID";
+//        public static final String Sat5Elev = "Sat5Elev";
+//        public static final String Sat5Az = "Sat5Az";
+//        public static final String Sat5SRN = "Sat5SRN";
+//        public static final String Sat6ID = "Sat6ID";
+//        public static final String Sat6Elev = "Sat6Elev";
+//        public static final String Sat6Az = "Sat6Az";
+//        public static final String Sat6SRN = "Sat6SRN";
+//        public static final String Sat7ID = "Sat7ID";
+//        public static final String Sat7Elev = "Sat7Elev";
+//        public static final String Sat7Az = "Sat7Az";
+//        public static final String Sat7SRN = "Sat7SRN";
+//        public static final String Sat8ID = "Sat8ID";
+//        public static final String Sat8Elev = "Sat8Elev";
+//        public static final String Sat8Az = "Sat8Az";
+//        public static final String Sat8SRN = "Sat8SRN";
+//        public static final String Sat9ID = "Sat9ID";
+//        public static final String Sat9Elev = "Sat9Elev";
+//        public static final String Sat9Az = "Sat9Az";
+//        public static final String Sat9SRN = "Sat9SRN";
+//        public static final String Sat10ID = "Sat10ID";
+//        public static final String Sat10Elev = "Sat10Elev";
+//        public static final String Sat10Az = "Sat10Az";
+//        public static final String Sat10SRN = "Sat10SRN";
+//        public static final String Sat11ID = "Sat11ID";
+//        public static final String Sat11Elev = "Sat11Elev";
+//        public static final String Sat11Az = "Sat11Az";
+//        public static final String Sat11SRN = "Sat11SRN";
+//        public static final String Sat12ID = "Sat12ID";
+//        public static final String Sat12Elev = "Sat12Elev";
+//        public static final String Sat12Az = "Sat12Az";
+//        public static final String Sat12SRN = "Sat12SRN";
+//        //endregion
+//
+//        public static final String[] SatIDs = new String[] {
+//                Sat1ID, Sat2ID, Sat3ID, Sat4ID, Sat5ID, Sat6ID,
+//                Sat7ID, Sat8ID, Sat9ID, Sat10ID, Sat11ID, Sat12ID
+//        };
+//
+//        public static final String[] SatElevs = new String[] {
+//                Sat1Elev, Sat2Elev, Sat3Elev, Sat4Elev, Sat5Elev, Sat6Elev,
+//                Sat7Elev, Sat8Elev, Sat9Elev, Sat10Elev, Sat11Elev, Sat12Elev
+//        };
+//
+//        public static final String[] SatAzs = new String[] {
+//                Sat1Az, Sat2Az, Sat3Az, Sat4Az, Sat5Az, Sat6Az,
+//                Sat7Az, Sat8Az, Sat9Az, Sat10Az, Sat11Az, Sat12Az
+//        };
+//
+//        public static final String[] SatSRNs = new String[] {
+//                Sat1SRN, Sat2SRN, Sat3SRN, Sat4SRN, Sat5SRN, Sat6SRN,
+//                Sat7SRN, Sat8SRN, Sat9SRN, Sat10SRN, Sat11SRN, Sat12SRN
+//        };
 
 
         public static final String CreateTable =
         "CREATE TABLE " + TableName + " (" +
-        SharedSchema.CN   + " TEXT, " +
-        PointCN     + " TEXT, " +
-        Used        + " BOOLEAN, " +
+        SharedSchema.CN + " TEXT, " +
+        PointCN         + " TEXT, " +
+        Used            + " BOOLEAN, " +
         TimeCreated     + " TEXT, " +
         FixTime         + " TEXT, " +
         Latitude        + " REAL, " +
@@ -309,66 +309,66 @@ public class TwoTrailsSchema {
 
         //region PRNS
         UsedSatPRNS + " TEXT, " +
-        
-        Sat1ID + " TEXT, " +
-        Sat1Elev + " REAL, " +
-        Sat1Az + " REAL, " +
-        Sat1SRN + " REAL, " +
-
-        Sat2ID + " TEXT, " +
-        Sat2Elev + " REAL, " +
-        Sat2Az + " REAL, " +
-        Sat2SRN + " REAL, " +
-
-        Sat3ID + " TEXT, " +
-        Sat3Elev + " REAL, " +
-        Sat3Az + " REAL, " +
-        Sat3SRN + " REAL, " +
-
-        Sat4ID + " TEXT, " +
-        Sat4Elev + " REAL, " +
-        Sat4Az + " REAL, " +
-        Sat4SRN + " REAL, " +
-
-        Sat5ID + " TEXT, " +
-        Sat5Elev + " REAL, " +
-        Sat5Az + " REAL, " +
-        Sat5SRN + " REAL, " +
-
-        Sat6ID + " TEXT, " +
-        Sat6Elev + " REAL, " +
-        Sat6Az + " REAL, " +
-        Sat6SRN + " REAL, " +
-
-        Sat7ID + " TEXT, " +
-        Sat7Elev + " REAL, " +
-        Sat7Az + " REAL, " +
-        Sat7SRN + " REAL, " +
-
-        Sat8ID + " TEXT, " +
-        Sat8Elev + " REAL, " +
-        Sat8Az + " REAL, " +
-        Sat8SRN + " REAL, " +
-
-        Sat9ID + " TEXT, " +
-        Sat9Elev + " REAL, " +
-        Sat9Az + " REAL, " +
-        Sat9SRN + " REAL, " +
-
-        Sat10ID + " TEXT, " +
-        Sat10Elev + " REAL, " +
-        Sat10Az + " REAL, " +
-        Sat10SRN + " REAL, " +
-
-        Sat11ID + " TEXT, " +
-        Sat11Elev + " REAL, " +
-        Sat11Az + " REAL, " +
-        Sat11SRN + " REAL, " +
-
-        Sat12ID + " TEXT, " +
-        Sat12Elev + " REAL, " +
-        Sat12Az + " REAL, " +
-        Sat12SRN + " REAL, " +
+//
+//        Sat1ID + " TEXT, " +
+//        Sat1Elev + " REAL, " +
+//        Sat1Az + " REAL, " +
+//        Sat1SRN + " REAL, " +
+//
+//        Sat2ID + " TEXT, " +
+//        Sat2Elev + " REAL, " +
+//        Sat2Az + " REAL, " +
+//        Sat2SRN + " REAL, " +
+//
+//        Sat3ID + " TEXT, " +
+//        Sat3Elev + " REAL, " +
+//        Sat3Az + " REAL, " +
+//        Sat3SRN + " REAL, " +
+//
+//        Sat4ID + " TEXT, " +
+//        Sat4Elev + " REAL, " +
+//        Sat4Az + " REAL, " +
+//        Sat4SRN + " REAL, " +
+//
+//        Sat5ID + " TEXT, " +
+//        Sat5Elev + " REAL, " +
+//        Sat5Az + " REAL, " +
+//        Sat5SRN + " REAL, " +
+//
+//        Sat6ID + " TEXT, " +
+//        Sat6Elev + " REAL, " +
+//        Sat6Az + " REAL, " +
+//        Sat6SRN + " REAL, " +
+//
+//        Sat7ID + " TEXT, " +
+//        Sat7Elev + " REAL, " +
+//        Sat7Az + " REAL, " +
+//        Sat7SRN + " REAL, " +
+//
+//        Sat8ID + " TEXT, " +
+//        Sat8Elev + " REAL, " +
+//        Sat8Az + " REAL, " +
+//        Sat8SRN + " REAL, " +
+//
+//        Sat9ID + " TEXT, " +
+//        Sat9Elev + " REAL, " +
+//        Sat9Az + " REAL, " +
+//        Sat9SRN + " REAL, " +
+//
+//        Sat10ID + " TEXT, " +
+//        Sat10Elev + " REAL, " +
+//        Sat10Az + " REAL, " +
+//        Sat10SRN + " REAL, " +
+//
+//        Sat11ID + " TEXT, " +
+//        Sat11Elev + " REAL, " +
+//        Sat11Az + " REAL, " +
+//        Sat11SRN + " REAL, " +
+//
+//        Sat12ID + " TEXT, " +
+//        Sat12Elev + " REAL, " +
+//        Sat12Az + " REAL, " +
+//        Sat12SRN + " REAL, " +
         //endregion
 
         "PRIMARY KEY (" + SharedSchema.CN + "));";

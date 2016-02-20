@@ -13,8 +13,7 @@
 
     <Preference
         android:title="Export Report"
-        android:key="prefExportReport"
-        android:enabled="false"/>
+        android:key="prefExportReport"/>
 
     <Preference
         android:title="Clear Log"

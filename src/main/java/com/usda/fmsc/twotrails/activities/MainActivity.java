@@ -1,6 +1,7 @@
 package com.usda.fmsc.twotrails.activities;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -546,7 +547,6 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     //endregion
 
 
-
     //region Dialogs
     private void CreateFileDialog() {
         final InputDialog inputDialog = new InputDialog(this);
@@ -593,6 +593,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     }
     //endregion
 
+
     //region Fragment Controls
     //region File
     public void btnNewClick(View view) {
@@ -601,18 +602,6 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
         } else {
             CreateFileDialog();
         }
- /*
-        Intent fileIntent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
-        fileIntent.setType("file/*");
-        startActivityForResult(fileIntent, CREATE_TT_FILE);
-
-        Context context = view.getContext();
-        CharSequence text = "New Pressed";
-        int duration = Toast.LENGTH_SHORT;
-
-        Toast toast = Toast.makeText(context, text, duration);
-        toast.show();
-*/
     }
 
     public void btnOpenClick(View view) {
@@ -703,9 +692,30 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
                             duplicateFile(filename);
                         }
                     })
-                    .setNegativeButton(R.string.str_cancel, null)
+                    .setNeutralButton(R.string.str_cancel, null)
                     .show();
         }
+    }
+
+    public void btnCleanDb(View view) {
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+        dialog.setMessage("This operation will remove data that is not properly connected within the database. Points, Polygons, Groups and NMEA may be deleted. "+
+                            "It is suggested that you backup your project before continuing.")
+                .setPositiveButton("Clean", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        ProgressDialog pd = new ProgressDialog(getBaseContext());
+                        pd.setTitle("Cleaning..");
+                        pd.setMessage("This operation may take a few minutes.");
+
+                        pd.show();
+
+                        Global.DAL.clean();
+
+                        pd.cancel();
+                    }
+                })
+                .setNeutralButton(R.string.str_cancel, null);
     }
     //endregion
 
@@ -776,7 +786,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
                     AndroidUtils.Device.navigateAppStore(activity, gEarth);
                 }
             })
-            .setNegativeButton(R.string.str_cancel, null)
+            .setNeutralButton(R.string.str_cancel, null)
             .show();
         }
     }

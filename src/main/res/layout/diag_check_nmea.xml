@@ -17,7 +17,7 @@
             android:layout_centerVertical="true"
             android:textSize="22sp"
             android:padding="8dp"
-            android:text="Listening to GPS"/>
+            android:text="@string/str_listen_recv"/>
 
         <me.zhanghai.android.materialprogressbar.MaterialProgressBar
             android:layout_width="42dp"

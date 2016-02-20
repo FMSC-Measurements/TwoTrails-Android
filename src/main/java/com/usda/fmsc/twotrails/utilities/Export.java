@@ -492,6 +492,7 @@ public class Export {
                 values.add(StringEx.toString(burst.getUsedSatellitesCount()));
                 values.add(burst.getUsedSatelliteIDsString());
 
+                /*
                 for (Satellite sat : burst.getSatellitesInView()) {
                     values.add(StringEx.toString(sat.getID()));
                     values.add(StringEx.toString(sat.getElevation()));
@@ -503,6 +504,7 @@ public class Export {
                 for (int i = 0; i < remaining * 4; i++) {
                     values.add(StringEx.Empty);
                 }
+                */
 
                 writer.writeNext(values);
                 values.clear();

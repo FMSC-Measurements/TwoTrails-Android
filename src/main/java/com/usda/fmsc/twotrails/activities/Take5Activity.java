@@ -1,9 +1,7 @@
 package com.usda.fmsc.twotrails.activities;
 
-import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
@@ -17,25 +15,16 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.common.GoogleApiAvailability;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.widget.SheetLayoutEx;
 import com.usda.fmsc.android.widget.layoutmanagers.LinearLayoutManagerWithSmoothScroller;
 import com.usda.fmsc.android.widget.RecyclerViewEx;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
+import com.usda.fmsc.twotrails.activities.custom.AcquireGpsMapActivity;
 import com.usda.fmsc.utilities.StringEx;
-import com.usda.fmsc.twotrails.activities.custom.AcquireGpsCustomToolbarActivity;
 import com.usda.fmsc.twotrails.adapters.Take5PointsEditRvAdapter;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.Global;
@@ -44,7 +33,6 @@ import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.logic.PointNamer;
 import com.usda.fmsc.twotrails.objects.FilterOptions;
-import com.usda.fmsc.twotrails.objects.GpsPoint;
 import com.usda.fmsc.twotrails.objects.SideShotPoint;
 import com.usda.fmsc.twotrails.objects.Take5Point;
 import com.usda.fmsc.twotrails.objects.TtGroup;
@@ -62,11 +50,7 @@ import com.usda.fmsc.geospatial.nmea.NmeaBurst;
 import jp.wasabeef.recyclerview.animators.SlideInUpAnimator;
 import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
 
-public class Take5Activity extends AcquireGpsCustomToolbarActivity implements GpsService.Listener, OnMapReadyCallback  {
-
-    private GoogleMap map;
-    private ArrayList<Marker> _Markers;
-
+public class Take5Activity extends AcquireGpsMapActivity {
     private RecyclerViewEx rvPoints;
     private Take5PointsEditRvAdapter t5pAdapter;
     private LinearLayoutManagerWithSmoothScroller linearLayoutManager;
@@ -74,7 +58,6 @@ public class Take5Activity extends AcquireGpsCustomToolbarActivity implements Gp
     private LinearLayout lay;
 
     RelativeLayout progLay;
-    //ProgressBar prog;
     MaterialProgressBar prog;
     TextView tvProg;
 
@@ -86,7 +69,7 @@ public class Take5Activity extends AcquireGpsCustomToolbarActivity implements Gp
     private TtPolygon _Polygon;
     private TtGroup _Group;
 
-    private int increment, takeAmount, currentMapIndex = -1, mapOffsetY, nmeaCount = 0;
+    private int increment, takeAmount, nmeaCount = 0;
     private boolean saved = true, updated, onBnd = true, cancelVisible, ignoreScroll, useRing, useVib;
 
     private FilterOptions options;
@@ -175,7 +158,7 @@ public class Take5Activity extends AcquireGpsCustomToolbarActivity implements Gp
                                 }
 
                                 if (pos > -1 && pos < _Points.size()) {
-                                    selectMapPoint(pos);
+                                    moveToMapPoint(pos);
                                 }
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
@@ -209,9 +192,6 @@ public class Take5Activity extends AcquireGpsCustomToolbarActivity implements Gp
             _Points = new ArrayList<>();
             _Bursts = new ArrayList<>();
             _UsedBursts = new ArrayList<>();
-
-            _Markers = new ArrayList<>();
-
             int cancelResult = 0;
 
             Intent intent = getIntent();
@@ -280,14 +260,7 @@ public class Take5Activity extends AcquireGpsCustomToolbarActivity implements Gp
             options = new FilterOptions();
             getSettings();
 
-            // check google play services and setup map
-            Integer code = AndroidUtils.App.checkPlayServices(this, Consts.Activities.Services.REQUEST_GOOGLE_PLAY_SERVICES);
-            if (code == null) {
-                startMap();
-            } else {
-                String str = GoogleApiAvailability.getInstance().getErrorString(code);
-                Toast.makeText(this, str, Toast.LENGTH_LONG).show();
-            }
+            setupMap();
         }
     }
 
@@ -329,7 +302,7 @@ public class Take5Activity extends AcquireGpsCustomToolbarActivity implements Gp
                             finish();
                         }
                     })
-                    .setNegativeButton(R.string.str_cancel, null);
+                    .setNeutralButton(R.string.str_cancel, null);
 
                     dialog.show();
                 } else {
@@ -341,7 +314,7 @@ public class Take5Activity extends AcquireGpsCustomToolbarActivity implements Gp
                 if (_Points.size() > 0) {
                     ignoreScroll = true;
                     rvPoints.smoothScrollToPosition(_Points.size() - 1);
-                    selectMapPoint(_Markers.size() -1);
+                    moveToMapPoint(getMarkers().size() - 1);
                 }
                 break;
             }
@@ -371,11 +344,6 @@ public class Take5Activity extends AcquireGpsCustomToolbarActivity implements Gp
                 getSettings();
                 break;
             }
-            case Consts.Activities.Services.REQUEST_GOOGLE_PLAY_SERVICES: {
-                if (resultCode == Activity.RESULT_OK) {
-                    startMap();
-                }
-            }
         }
 
         super.onActivityResult(requestCode, resultCode, data);
@@ -401,16 +369,6 @@ public class Take5Activity extends AcquireGpsCustomToolbarActivity implements Gp
 
         super.finish();
     }
-
-
-    @Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        super.onWindowFocusChanged(hasFocus);
-
-        RelativeLayout gpsInfoLay = (RelativeLayout)findViewById(R.id.gpsInfoParent);
-        mapOffsetY = gpsInfoLay.getHeight();
-    }
-
 
 
     public void updatePoint(TtPoint point) {
@@ -442,8 +400,6 @@ public class Take5Activity extends AcquireGpsCustomToolbarActivity implements Gp
 
         return true;
     }
-
-
 
 
     private void setupTake5() {
@@ -526,7 +482,7 @@ public class Take5Activity extends AcquireGpsCustomToolbarActivity implements Gp
 
                         if (tmp.getOp().isGpsType()) {
                             ssp.calculatePoint(_Polygon, tmp);
-                            addMarker(ssp);
+                            addMarker(ssp, _Metadata, true);
                             break;
                         }
                     }
@@ -570,7 +526,7 @@ public class Take5Activity extends AcquireGpsCustomToolbarActivity implements Gp
             fabT5.setEnabled(true);
             fabSS.setEnabled(true);
 
-            addMarker(point);
+            addMarker(point, _Metadata, true);
 
             if (useVib) {
                 AndroidUtils.Device.vibrate(this, Consts.Notifications.VIB_POINT_CREATED);
@@ -750,88 +706,6 @@ public class Take5Activity extends AcquireGpsCustomToolbarActivity implements Gp
                 break;
             case Unkown:
                 break;
-        }
-    }
-    //endregion
-
-
-    //region Map
-    private void startMap() {
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-    }
-
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        GpsService.GpsBinder binder = Global.getGpsBinder();
-        if (Global.Settings.DeviceSettings.isGpsConfigured() &&
-                binder.getGpsProvider() == GpsService.GpsProvider.External) {
-            googleMap.setLocationSource(binder.getService());
-        }
-
-        googleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
-        googleMap.getUiSettings().setAllGesturesEnabled(false);
-
-        map = googleMap;
-
-        map.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
-            @Override
-            public void onCameraChange(CameraPosition cameraPosition) {
-                map.moveCamera(CameraUpdateFactory.newLatLngZoom(Consts.GoogleMaps.USA_CENTER, 3));
-                map.setOnCameraChangeListener(null);
-            }
-        });
-    }
-
-
-    private void selectMapPoint(int position) {
-        if (currentMapIndex != position && position < _Markers.size()) {
-            currentMapIndex = position;
-
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    LatLng llp = _Markers.get(currentMapIndex).getPosition();
-
-                    Point point = map.getProjection().toScreenLocation(llp);
-                    point.offset(0, -mapOffsetY);
-                    llp = map.getProjection().fromScreenLocation(point);
-
-                    map.animateCamera(CameraUpdateFactory.newLatLngZoom(
-                            new LatLng(llp.latitude, llp.longitude),
-                            Consts.GoogleMaps.ZOOM_CLOSE
-                    ));
-                }
-            });
-        }
-    }
-
-    private void addMarker(TtPoint point) {
-        Marker marker;
-        if (point.isGpsType()) {
-            marker = map.addMarker(TtUtils.GMap.createMarkerOptions((GpsPoint)point, false, _Metadata));
-        } else {
-            marker = map.addMarker(TtUtils.GMap.createMarkerOptions((SideShotPoint)point, false, _Metadata));
-        }
-
-        if (marker != null) {
-            _Markers.add(marker);
-
-            if (_Markers.size() == 1) {
-                map.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                        new LatLng(marker.getPosition().latitude, marker.getPosition().longitude),
-                        Consts.GoogleMaps.ZOOM_CLOSE
-                ));
-
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        selectMapPoint(_Markers.size() - 1);
-                    }
-                }, 250);
-            } else {
-                selectMapPoint(_Markers.size() - 1);
-            }
         }
     }
     //endregion

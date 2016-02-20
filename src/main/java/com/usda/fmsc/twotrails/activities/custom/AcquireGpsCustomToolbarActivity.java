@@ -32,11 +32,8 @@ public class AcquireGpsCustomToolbarActivity extends CustomToolbarActivity imple
 
     private GpsService.GpsBinder binder;
     private Integer zone = null;
-
-    private boolean logging;
-    private int loggedCount = 0, receivedCount = 0;
-
     private boolean canceling = false, useLostConnectionWarning = false;
+    private boolean logging;
 
 
 
@@ -100,71 +97,71 @@ public class AcquireGpsCustomToolbarActivity extends CustomToolbarActivity imple
 
     protected void setNmeaData(final NmeaBurst burst) {
         //if (burst.isFull()) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if (burst.hasPosition()) {
-                        UTMCoords coords = zone != null ? burst.getUTM(zone) : burst.getTrueUTM();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (burst.hasPosition()) {
+                    UTMCoords coords = zone != null ? burst.getUTM(zone) : burst.getTrueUTM();
 
-                        tvLat.setText(String.format("%.4f", burst.getLatitude()));
-                        tvLon.setText(String.format("%.4f", burst.getLongitude()));
+                    tvLat.setText(String.format("%.4f", burst.getLatitude()));
+                    tvLon.setText(String.format("%.4f", burst.getLongitude()));
 
-                        tvUtmX.setText(String.format("%.3f", coords.getX()));
-                        tvUtmY.setText(String.format("%.3f", coords.getY()));
+                    tvUtmX.setText(String.format("%.3f", coords.getX()));
+                    tvUtmY.setText(String.format("%.3f", coords.getY()));
 
-                        if (zone == null) {
-                            tvZone.setText(StringEx.toString(coords.getZone()));
-                        } else {
-                            tvZone.setText(StringEx.toString(zone));
-                        }
-
-                        tvElev.setText(String.format("%.2f", burst.getElevation()));
+                    if (zone == null) {
+                        tvZone.setText(StringEx.toString(coords.getZone()));
                     } else {
-                        tvLat.setText(nVal);
-                        tvLon.setText(nVal);
-                        tvUtmX.setText(nVal);
-                        tvUtmY.setText(nVal);
-                        tvElev.setText(nVal);
-
-                        if (zone == null) {
-                            tvZone.setText(nVal);
-                        } else {
-                            tvZone.setText(StringEx.toString(zone));
-                        }
+                        tvZone.setText(StringEx.toString(zone));
                     }
 
-                    if (burst.getRMC().hasMagVar()) {
-                        tvDec.setText(String.format("%.2f %s", burst.getMagVar(), burst.getMagVarDir().toStringAbv()));
-                    } else {
-                        tvDec.setText(nVal);
-                    }
+                    tvElev.setText(String.format("%.2f", burst.getElevation()));
+                } else {
+                    tvLat.setText(nVal);
+                    tvLon.setText(nVal);
+                    tvUtmX.setText(nVal);
+                    tvUtmY.setText(nVal);
+                    tvElev.setText(nVal);
 
-                    if (burst.getGGA().isValid()) {
-                        tvGpsMode.setText(burst.getFixQuality().toStringX());
+                    if (zone == null) {
+                        tvZone.setText(nVal);
                     } else {
-                        tvGpsMode.setText(GGASentence.GpsFixType.NoFix.toString());
-                    }
-
-                    if (burst.getGSA().isValid()) {
-                        tvGpsStatus.setText(burst.getFix().toString());
-                        tvPdop.setText(String.format("%.2f", burst.getPDOP()));
-                        tvHdop.setText(String.format("%.2f", burst.getHDOP()));
-                    } else {
-                        tvGpsStatus.setText(nVal);
-                        tvHdop.setText(nVal);
-                        tvPdop.setText(nVal);
-                    }
-
-                    if (burst.getGSV().isValid() && burst.getGSA().isValid() && burst.getGGA().isValid()) {
-                        tvSat.setText(String.format("%d/%d/%d",
-                                burst.getUsedSatellitesCount(),
-                                burst.getTrackedSatellitesCount(),
-                                burst.getSatellitesInViewCount()));
-                    } else {
-                        tvSat.setText(nVal);
+                        tvZone.setText(StringEx.toString(zone));
                     }
                 }
-            });
+
+                if (burst.getRMC().hasMagVar()) {
+                    tvDec.setText(String.format("%.2f %s", burst.getMagVar(), burst.getMagVarDir().toStringAbv()));
+                } else {
+                    tvDec.setText(nVal);
+                }
+
+                if (burst.getGGA().isValid()) {
+                    tvGpsMode.setText(burst.getFixQuality().toStringX());
+                } else {
+                    tvGpsMode.setText(GGASentence.GpsFixType.NoFix.toString());
+                }
+
+                if (burst.getGSA().isValid()) {
+                    tvGpsStatus.setText(burst.getFix().toString());
+                    tvPdop.setText(String.format("%.2f", burst.getPDOP()));
+                    tvHdop.setText(String.format("%.2f", burst.getHDOP()));
+                } else {
+                    tvGpsStatus.setText(nVal);
+                    tvHdop.setText(nVal);
+                    tvPdop.setText(nVal);
+                }
+
+                if (burst.getGSV().isValid() && burst.getGSA().isValid() && burst.getGGA().isValid()) {
+                    tvSat.setText(String.format("%d/%d/%d",
+                            burst.getUsedSatellitesCount(),
+                            burst.getTrackedSatellitesCount(),
+                            burst.getSatellitesInViewCount()));
+                } else {
+                    tvSat.setText(nVal);
+                }
+            }
+        });
         //}
     }
 
@@ -174,39 +171,12 @@ public class AcquireGpsCustomToolbarActivity extends CustomToolbarActivity imple
         tvZone.setText(zone != null ? Integer.toString(zone) : getText(R.string.str_nullvalue));
     }
 
-
-    protected void onLoggedNmeaBurst(NmeaBurst burst) {
-    }
-
-
     protected void startLogging() {
         logging = true;
     }
-
     protected void stopLogging() {
         logging = false;
     }
-
-    protected void resetLoggedCount() {
-        loggedCount = 0;
-    }
-
-    protected void setLoggedCount(int count) {
-        loggedCount = count;
-    }
-
-    protected int getLoggedCount() {
-        return loggedCount;
-    }
-
-    protected int getReceivedCount() {
-        return receivedCount;
-    }
-
-    protected void resetReceivedCount() {
-        receivedCount = 0;
-    }
-
 
     protected boolean isLogging() {
         return logging;
@@ -266,12 +236,6 @@ public class AcquireGpsCustomToolbarActivity extends CustomToolbarActivity imple
 
     @Override
     public void nmeaBurstReceived(NmeaBurst nmeaBurst) {
-        if (logging && nmeaBurst.hasPosition()) {
-            onLoggedNmeaBurst(nmeaBurst);
-            loggedCount++;
-        }
-
-        receivedCount++;
 
         setNmeaData(nmeaBurst);
     }

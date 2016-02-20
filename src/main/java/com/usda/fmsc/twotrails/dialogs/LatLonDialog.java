@@ -177,7 +177,7 @@ public class LatLonDialog extends DialogFragment {
                     listener.onEdited(cn, lat, lon);
                 }
             }
-        }).setNegativeButton(R.string.str_cancel, null);
+        }).setNeutralButton(R.string.str_cancel, null);
 
         final Dialog d =  dialog.create();
 

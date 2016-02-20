@@ -4,16 +4,22 @@ package com.usda.fmsc.twotrails.activities;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.Preference;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
 import android.preference.PreferenceFragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Toast;
 
+import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.twotrails.activities.custom.AppCompatPreferenceActivity;
 import com.usda.fmsc.twotrails.fragments.settings.PreferenceFragmentEx;
 import com.usda.fmsc.twotrails.Global;
@@ -142,14 +148,15 @@ public class PreferenceActivity extends AppCompatPreferenceActivity {
             addPreferencesFromResource(R.xml.pref_misc_settings);
             setHasOptionsMenu(true);
 
-            prefClearLog = findPreference("prefClearLog");
-            prefExportReport = findPreference("prefExportReport");
-            prefResetDevice = findPreference("prefResetDevice");
-
+            prefClearLog = findPreference(getString(R.string.set_CLEAR_LOG));
+            prefExportReport = findPreference(getString(R.string.set_EXPORT_REPORT));
+            prefResetDevice = findPreference(getString(R.string.set_RESET));
 
             prefResetDevice.setOnPreferenceClickListener(resetDeviceListener);
 
             prefClearLog.setOnPreferenceClickListener(clearLogListener);
+
+            prefExportReport.setOnPreferenceClickListener(exportReportListener);
         }
 
         Preference.OnPreferenceClickListener resetDeviceListener = new Preference.OnPreferenceClickListener() {
@@ -167,7 +174,7 @@ public class PreferenceActivity extends AppCompatPreferenceActivity {
                     }
                 });
 
-                alert.setNegativeButton(R.string.str_cancel, null);
+                alert.setNeutralButton(R.string.str_cancel, null);
 
                 alert.show();
 
@@ -191,7 +198,7 @@ public class PreferenceActivity extends AppCompatPreferenceActivity {
                     }
                 });
 
-                alert.setNegativeButton(R.string.str_cancel, null);
+                alert.setNeutralButton(R.string.str_cancel, null);
 
                 alert.show();
 
@@ -199,5 +206,59 @@ public class PreferenceActivity extends AppCompatPreferenceActivity {
             }
         };
 
+
+        Preference.OnPreferenceClickListener exportReportListener = new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity());
+
+                if (Global.DAL != null) {
+                    dialog.setMessage("Would you like to include the current project into the report?")
+                            .setPositiveButton(R.string.str_yes, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    onExportReportComplete(TtUtils.exportReport(Global.DAL));
+                                }
+                            })
+                            .setNegativeButton(R.string.str_no, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    onExportReportComplete(TtUtils.exportReport(null));
+                                }
+                            })
+                            .setNeutralButton(R.string.str_cancel, null)
+                            .show();
+                } else {
+                    onExportReportComplete(TtUtils.exportReport(null));
+                }
+
+                return false;
+            }
+        };
+
+        Snackbar snackbar;
+        private void onExportReportComplete(String filepath) {
+            if (filepath != null) {
+                snackbar = Snackbar.make(getActivity().findViewById(android.R.id.content), "Report Exported", Snackbar.LENGTH_LONG)
+                        .setAction("View", new View.OnClickListener() {
+
+                            @Override
+                            public void onClick(View v) {
+                                Intent intent = new Intent(Intent.ACTION_VIEW);
+                                intent.setDataAndType(Uri.parse(TtUtils.getTtFileDir()), "resource/folder");
+
+                                if (snackbar != null)
+                                    snackbar.dismiss();
+
+                                startActivity(Intent.createChooser(intent, "Open folder"));
+                            }
+                        })
+                        .setActionTextColor(AndroidUtils.UI.getColor(getActivity(), R.color.primaryLighter));
+
+                snackbar.show();
+            } else {
+                Toast.makeText(getActivity(), "Report failed to export", Toast.LENGTH_LONG).show();
+            }
+        }
     }
 }
