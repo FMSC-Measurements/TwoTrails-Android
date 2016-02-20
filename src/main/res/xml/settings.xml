@@ -9,7 +9,7 @@
             android:title="@string/menu_x_gps_settings"
             android:key="gpsSetup">
 
-            <SwitchPreference
+            <com.usda.fmsc.android.preferences.SwitchCompatPreference
                 android:key="@string/set_GPS_EXTERNAL"
                 android:title="GPS Device"
                 android:summary="Device to use."
@@ -305,8 +305,7 @@
 
         <Preference
             android:title="Export Report"
-            android:key="@string/set_EXPORT_REPORT"
-            android:enabled="false"/>
+            android:key="@string/set_EXPORT_REPORT"/>
 
         <Preference
             android:title="Clear Log"

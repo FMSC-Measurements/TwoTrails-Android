@@ -17,9 +17,11 @@ import com.usda.fmsc.geospatial.nmea.NmeaIDs;
 import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
+import com.usda.fmsc.twotrails.adapters.NmeaDetailsAdapter;
 import com.usda.fmsc.twotrails.gps.GpsService;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class CheckNmeaDialog extends DialogFragment implements GpsService.Listener {
@@ -28,16 +30,20 @@ public class CheckNmeaDialog extends DialogFragment implements GpsService.Listen
     GpsService.GpsBinder binder;
     ListView lvNmea;
 
-    List<NmeaIDs.TalkerID> talkerIDs = new ArrayList<>();
-    List<String> unknTid = new ArrayList<>();
-    ArrayAdapter<String> tidStrings;
+    List<String> tids = new ArrayList<>();
+    NmeaDetailsAdapter adapter;
+    List<NmeaDetailsAdapter.NmeaDetails> nmeaDetails;
+    HashMap<String, NmeaDetailsAdapter.NmeaDetails> nmeaDetailsMap;
 
 
     public static CheckNmeaDialog newInstance() {
         return new CheckNmeaDialog();
     }
 
-
+    public CheckNmeaDialog() {
+        nmeaDetails = new ArrayList<>();
+        nmeaDetailsMap = new HashMap<>();
+    }
 
     @NonNull
     @Override
@@ -47,8 +53,8 @@ public class CheckNmeaDialog extends DialogFragment implements GpsService.Listen
         final View view = inflater.inflate(R.layout.diag_check_nmea, null);
 
         lvNmea = (ListView)view.findViewById(R.id.diagCheckNmeaList);
-        tidStrings = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1);
-        lvNmea.setAdapter(tidStrings);
+        adapter = new NmeaDetailsAdapter(getContext(), nmeaDetails);
+        lvNmea.setAdapter(adapter);
 
         return new AlertDialog.Builder(getActivity())
                 .setView(view)
@@ -92,23 +98,39 @@ public class CheckNmeaDialog extends DialogFragment implements GpsService.Listen
     @Override
     public void nmeaStringReceived(final String nmeaString) {
         final NmeaIDs.TalkerID tid = NmeaIDs.TalkerID.parse(nmeaString);
+        final NmeaIDs.SentenceID sid = NmeaIDs.SentenceID.parse(nmeaString);
 
         if (lvNmea != null) {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    if (tid != NmeaIDs.TalkerID.Unknown && !talkerIDs.contains(tid)) {
-                        talkerIDs.add(tid);
-                        tidStrings.add(String.format("(%s) %s", tid.toStringCode(), tid.toString()));
-                        lvNmea.deferNotifyDataSetChanged();
-                    } else if (tid == NmeaIDs.TalkerID.Unknown){
-                        String unkn = nmeaString.substring(0, nmeaString.indexOf(','));
-
-                        if (!unknTid.contains(unkn)) {
-                            unknTid.add(unkn);
-                            tidStrings.add(String.format("(%s) Unknown", unkn));
-                            lvNmea.deferNotifyDataSetChanged();
+                    try {
+                        String tidStr, sidStr;
+                        if (tid == NmeaIDs.TalkerID.Unknown) {
+                            tidStr = String.format("(%s) Unknown", nmeaString.substring(0, nmeaString.indexOf(',')));
+                        } else {
+                            tidStr = String.format("(%s) %s", tid.toStringCode(), tid.toString());
                         }
+
+                        if (sid == NmeaIDs.SentenceID.Unknown) {
+                            sidStr = nmeaString.substring(2, 5);
+                        } else {
+                            sidStr = sid.toString();
+                        }
+
+                        if (nmeaDetailsMap.containsKey(tidStr)) {
+                            if (nmeaDetailsMap.get(tidStr).addId(sidStr)) {
+                                lvNmea.deferNotifyDataSetChanged();
+                            }
+                        } else {
+                            NmeaDetailsAdapter.NmeaDetails details = new NmeaDetailsAdapter.NmeaDetails(tidStr);
+                            details.addId(sidStr);
+                            nmeaDetails.add(details);
+                            nmeaDetailsMap.put(tidStr, details);
+                            adapter.notifyDataSetChanged();
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                 }
             });

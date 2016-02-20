@@ -16,7 +16,6 @@ import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.geospatial.nmea.NmeaBurst;
 import com.usda.fmsc.geospatial.nmea.sentences.GGASentence;
 import com.usda.fmsc.geospatial.nmea.sentences.GSASentence;
-import com.usda.fmsc.geospatial.nmea.Satellite;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.geospatial.utm.UTMTools;
 import com.usda.fmsc.geospatial.Units;
@@ -56,7 +55,7 @@ public class TtNmeaBurst implements INmeaBurst, Serializable {
 
     //gsv
     private int numberOfSatellitesInView;
-    private List<Satellite> satellites;
+    //private List<Satellite> satellites;
     //endregion
 
     public TtNmeaBurst(String cn, DateTime timeCreated, String pointCN, boolean used,
@@ -64,7 +63,7 @@ public class TtNmeaBurst implements INmeaBurst, Serializable {
                        double magVar, Units.EastWest magVarDir, GSASentence.Mode mode, GSASentence.Fix fix,
                        List<Integer> satsUsed, double pdop, double hdop, double vdop, GGASentence.GpsFixType fixQuality,
                        int trackedSatellites, double horizDilution, double geoidHeight, Units.UomElevation geoUom,
-                       int numberOfSatellitesInView, List<Satellite> satellites) {
+                       int numberOfSatellitesInView) {//, List<Satellite> satellites) {
         this.cn = cn;
         this.timeCreated = timeCreated;
         this.pointCN = pointCN;
@@ -94,7 +93,7 @@ public class TtNmeaBurst implements INmeaBurst, Serializable {
         this.geoUom = geoUom;
 
         this.numberOfSatellitesInView = numberOfSatellitesInView;
-        this.satellites = satellites;
+        //this.satellites = satellites;
     }
     
     public static TtNmeaBurst create(String pointCN, boolean used, NmeaBurst burst) {
@@ -119,8 +118,9 @@ public class TtNmeaBurst implements INmeaBurst, Serializable {
                 burst.getHorizDilution(),
                 burst.getGeoidHeight(),
                 burst.getGeoUom(),
-                burst.getSatellitesInViewCount(),
-                burst.getSatellitesInView());
+                burst.getSatellitesInViewCount());
+                //burst.getSatellitesInView()
+
     }
 
 
@@ -265,9 +265,9 @@ public class TtNmeaBurst implements INmeaBurst, Serializable {
         return trackedSatellites;
     }
 
-    public List<Satellite> getSatellitesInView() {
-        return satellites;
-    }
+    //public List<Satellite> getSatellitesInView() {
+    //    return satellites;
+    //}
 
     public int getSatellitesInViewCount() {
         return numberOfSatellitesInView;
@@ -321,8 +321,6 @@ public class TtNmeaBurst implements INmeaBurst, Serializable {
     public boolean hasDifferential() {
         return fixQuality == GGASentence.GpsFixType.DGPS;
     }
-
-
 
 
     public static byte[] burstsToByteArray(List<TtNmeaBurst> bursts) throws IOException {

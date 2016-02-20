@@ -478,7 +478,7 @@ public class PointsActivity extends CustomToolbarActivity {
                         }
                     });
 
-                    alert.setNegativeButton(R.string.str_cancel, null);
+                    alert.setNeutralButton(R.string.str_cancel, null);
 
                     alert.create().show();
                 }
@@ -913,7 +913,7 @@ public class PointsActivity extends CustomToolbarActivity {
                 }
             });
 
-            dialog.setNegativeButton(getString(R.string.str_cancel), null);
+            dialog.setNeutralButton(getString(R.string.str_cancel), null);
 
             dialog.show();
         }
@@ -1059,7 +1059,7 @@ public class PointsActivity extends CustomToolbarActivity {
                     }
                 });
 
-                dialog.setNegativeButton(R.string.str_cancel, null);
+                dialog.setNeutralButton(R.string.str_cancel, null);
 
                 dialog.show();
             }
@@ -1310,7 +1310,7 @@ public class PointsActivity extends CustomToolbarActivity {
             }
         });
 
-        dialog.setNegativeButton(R.string.str_cancel, null);
+        dialog.setNeutralButton(R.string.str_cancel, null);
 
         dialog.show();
     }
@@ -1414,7 +1414,7 @@ public class PointsActivity extends CustomToolbarActivity {
                     }
                 });
 
-                alert.setNegativeButton(R.string.str_cancel, null);
+                alert.setNeutralButton(R.string.str_cancel, null);
 
                 alert.show();
             }
@@ -1443,7 +1443,7 @@ public class PointsActivity extends CustomToolbarActivity {
                                 }
                             });
 
-                            dialog.setNeutralButton(R.string.points_aqr_diag_overwrite, new DialogInterface.OnClickListener() {
+                            dialog.setNegativeButton(R.string.points_aqr_diag_overwrite, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     AlertDialog.Builder dialogA = new AlertDialog.Builder(getBaseContext());
@@ -1458,13 +1458,13 @@ public class PointsActivity extends CustomToolbarActivity {
                                         }
                                     });
 
-                                    dialogA.setNegativeButton(R.string.str_cancel, null);
+                                    dialogA.setNeutralButton(R.string.str_cancel, null);
 
                                     dialogA.show();
                                 }
                             });
 
-                            dialog.setNegativeButton(R.string.str_cancel, null);
+                            dialog.setNeutralButton(R.string.str_cancel, null);
 
                             dialog.show();
                         } else {

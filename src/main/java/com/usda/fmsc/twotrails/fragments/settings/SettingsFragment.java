@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
@@ -13,14 +14,18 @@ import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
 import android.preference.SwitchPreference;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
 import android.widget.Toast;
 
+import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.dialogs.DontAskAgainDialog;
 import com.usda.fmsc.android.preferences.ListCompatPreference;
+import com.usda.fmsc.android.preferences.SwitchCompatPreference;
 import com.usda.fmsc.twotrails.activities.SettingsActivity;
 import com.usda.fmsc.twotrails.devices.TtBluetoothManager;
 import com.usda.fmsc.twotrails.Global;
@@ -43,7 +48,7 @@ public class SettingsFragment extends PreferenceFragment {
 
     GpsService.GpsBinder binder;
     Preference prefGpsCheck, prefExportReport, prefClearLog, prefResetDevice, prefCheckNmea;
-    SwitchPreference swtUseExDev;
+    SwitchCompatPreference swtUseExDev;
     PreferenceCategory exGpsCat;
     ListCompatPreference perfLstGpsDevice;
 
@@ -118,7 +123,7 @@ public class SettingsFragment extends PreferenceFragment {
 
 
 
-        swtUseExDev = (SwitchPreference)findPreference(Global.Settings.DeviceSettings.GPS_EXTERNAL);
+        swtUseExDev = (SwitchCompatPreference)findPreference(Global.Settings.DeviceSettings.GPS_EXTERNAL);
         exGpsCat = (PreferenceCategory)findPreference(getString(R.string.set_GPS_CAT));
         perfLstGpsDevice = (ListCompatPreference)findPreference(getString(R.string.set_GPS_LIST_DEVICE));
         prefGpsCheck = findPreference(getString(R.string.set_GPS_CHECK));
@@ -130,6 +135,7 @@ public class SettingsFragment extends PreferenceFragment {
         binder = Global.getGpsBinder();
 
         swtUseExDev.setOnPreferenceChangeListener(useExternalListener);
+        swtUseExDev.setSummary(getString(swtUseExDev.isChecked() ? R.string.ds_gps_use_external : R.string.ds_gps_use_internal));
 
         prefGpsCheck.setOnPreferenceClickListener(gpsCheckListener);
 
@@ -140,6 +146,8 @@ public class SettingsFragment extends PreferenceFragment {
         prefClearLog.setOnPreferenceClickListener(clearLogListener);
 
         prefCheckNmea.setOnPreferenceClickListener(checkNmeaListener);
+
+        prefExportReport.setOnPreferenceClickListener(exportReportListener);
 
         //get initial bluetooth devices
         setBTValues(perfLstGpsDevice);
@@ -353,6 +361,7 @@ public class SettingsFragment extends PreferenceFragment {
         @Override
         public boolean onPreferenceChange(Preference preference, Object newValue) {
             boolean useExternal = (boolean)newValue;
+            swtUseExDev.setSummary(getString(useExternal ? R.string.ds_gps_use_external : R.string.ds_gps_use_internal));
 
             if (useExternal) {
                 TtBluetoothManager btm = Global.getBluetoothManager();
@@ -363,10 +372,6 @@ public class SettingsFragment extends PreferenceFragment {
                     if (btm.isEnabled()) {
                         setBTValues(perfLstGpsDevice);
                         exGpsCat.setEnabled(true);
-
-                        //only checking can enable
-                        //Global.Settings.DeviceSettings.setGpsConfigured();
-
                         return true;
                     } else {
                         //bluetooth isnt turned on, request that it should be
@@ -391,6 +396,7 @@ public class SettingsFragment extends PreferenceFragment {
         }
     };
     //endregion
+
 
     //region External GPS List
     Preference.OnPreferenceChangeListener btGPSList = new Preference.OnPreferenceChangeListener() {
@@ -424,6 +430,7 @@ public class SettingsFragment extends PreferenceFragment {
     };
     //endregion
 
+
     Preference.OnPreferenceClickListener resetDeviceListener = new Preference.OnPreferenceClickListener() {
         @Override
         public boolean onPreferenceClick(Preference preference) {
@@ -439,13 +446,14 @@ public class SettingsFragment extends PreferenceFragment {
                 }
             });
 
-            alert.setNegativeButton(R.string.str_cancel, null);
+            alert.setNeutralButton(R.string.str_cancel, null);
 
             alert.show();
 
             return false;
         }
     };
+
 
     Preference.OnPreferenceClickListener clearLogListener = new Preference.OnPreferenceClickListener() {
         @Override
@@ -464,7 +472,7 @@ public class SettingsFragment extends PreferenceFragment {
                 }
             });
 
-            alert.setNegativeButton(R.string.str_cancel, null);
+            alert.setNeutralButton(R.string.str_cancel, null);
 
             alert.show();
 
@@ -489,6 +497,62 @@ public class SettingsFragment extends PreferenceFragment {
             return false;
         }
     };
+
+
+    Preference.OnPreferenceClickListener exportReportListener = new Preference.OnPreferenceClickListener() {
+        @Override
+        public boolean onPreferenceClick(Preference preference) {
+            AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity());
+
+            if (Global.DAL != null) {
+                dialog.setMessage("Would you like to include the current project into the report?")
+                        .setPositiveButton(R.string.str_yes, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                onExportReportComplete(TtUtils.exportReport(Global.DAL));
+                            }
+                        })
+                        .setNegativeButton(R.string.str_no, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                onExportReportComplete(TtUtils.exportReport(null));
+                            }
+                        })
+                        .setNeutralButton(R.string.str_cancel, null)
+                        .show();
+            } else {
+                onExportReportComplete(TtUtils.exportReport(null));
+            }
+
+            return false;
+        }
+    };
+
+
+    Snackbar snackbar;
+    private void onExportReportComplete(String filepath) {
+        if (filepath != null) {
+            snackbar = Snackbar.make(getActivity().findViewById(android.R.id.content), "Report Exported", Snackbar.LENGTH_LONG)
+                    .setAction("View", new View.OnClickListener() {
+
+                        @Override
+                        public void onClick(View v) {
+                            Intent intent = new Intent(Intent.ACTION_VIEW);
+                            intent.setDataAndType(Uri.parse(TtUtils.getTtFileDir()), "resource/folder");
+
+                            if (snackbar != null)
+                                snackbar.dismiss();
+
+                            startActivity(Intent.createChooser(intent, "Open folder"));
+                        }
+                    })
+            .setActionTextColor(AndroidUtils.UI.getColor(getActivity(), R.color.primaryLighter));
+
+            snackbar.show();
+        } else {
+            Toast.makeText(getActivity(), "Report failed to export", Toast.LENGTH_LONG).show();
+        }
+    }
 
 
     DontAskAgainDialog.OnClickListener setMetaListener = new DontAskAgainDialog.OnClickListener() {

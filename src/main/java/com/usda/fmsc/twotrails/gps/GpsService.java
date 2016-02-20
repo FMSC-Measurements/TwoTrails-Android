@@ -18,6 +18,7 @@ import android.support.v4.app.ActivityCompat;
 
 import com.google.android.gms.maps.LocationSource;
 import com.usda.fmsc.android.AndroidUtils;
+import com.usda.fmsc.geospatial.nmea.NmeaIDs;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.Manifest;
 import com.usda.fmsc.twotrails.devices.TtBluetoothManager;
@@ -60,6 +61,8 @@ public class GpsService extends Service implements LocationListener, LocationSou
 
     private NmeaParser parser;
 
+    private GpsSyncer gpsSyncer;
+
 
     public GpsService() {
     }
@@ -71,7 +74,11 @@ public class GpsService extends Service implements LocationListener, LocationSou
 
         bluetoothManager = Global.getBluetoothManager();
 
+        gpsSyncer = new GpsSyncer();
+
         parser = new NmeaParser();
+        parser.addTalkerID(NmeaIDs.TalkerID.GL);
+        parser.addTalkerID(NmeaIDs.TalkerID.GN);
         parser.addListener(this);
 
 
@@ -145,6 +152,9 @@ public class GpsService extends Service implements LocationListener, LocationSou
         GpsDeviceStatus status;
 
         if (!isGpsRunning()) {
+            parser.reset();
+            gpsSyncer.reset();
+
             status = (_deviceUUID == null) ?
                     startInternalGps() : startExternalGps();
 
@@ -152,8 +162,6 @@ public class GpsService extends Service implements LocationListener, LocationSou
                     status == GpsDeviceStatus.InternalGpsStarted) {
                 //started
                 Global.TtNotifyManager.setGpsOn();
-
-                parser.reset();
 
                 if (logging) {
                     writeStartLog();
@@ -226,13 +234,18 @@ public class GpsService extends Service implements LocationListener, LocationSou
 
     private GpsDeviceStatus stopInternalGps() {
         if(locManager != null) {
-            locManager.removeNmeaListener(this);
-            locManager.removeGpsStatusListener(this);
-            locManager.removeUpdates(this);
-            locManager = null;
+            if (AndroidUtils.App.checkFineLocationPermission(this)) {
+                locManager.removeNmeaListener(this);
+                locManager.removeGpsStatusListener(this);
+                locManager.removeUpdates(this);
 
-            postGpsStop();
-            return GpsDeviceStatus.InternalGpsStopped;
+                locManager = null;
+                postGpsStop();
+                return GpsDeviceStatus.InternalGpsStopped;
+            } else {
+                locManager = null;
+                return GpsDeviceStatus.InternalGpsNeedsPermissions;
+            }
         }
 
         return GpsDeviceStatus.InternalGpsNotEnabled;
@@ -270,6 +283,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
         return GpsDeviceStatus.ExternalGpsError;
     }
     //endregion
+
 
     //region Logging
     public void startLogging(String fileName) {
@@ -440,9 +454,13 @@ public class GpsService extends Service implements LocationListener, LocationSou
         if (nmeaString != null) {
             nmeaString = nmeaString.trim();
 
-            boolean validTalkerID = parser.parse(nmeaString);
+            boolean parsed = false;
 
-            if (postAllNmeaStrings || validTalkerID) {
+            if (gpsSyncer.isSynced() || gpsSyncer.sync(nmeaString)) {
+                parsed = parser.parse(nmeaString);
+            }
+
+            if (postAllNmeaStrings || parsed) {
                 postNmeaString(nmeaString);
             }
 

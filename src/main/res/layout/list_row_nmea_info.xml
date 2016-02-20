@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/listRowTalkerId"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="@style/pad4440"
+        android:textSize="22sp"
+        android:maxLines="1"
+        android:ellipsize="end"/>
+
+    <TextView
+        android:id="@+id/listRowNmeaIds"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="@style/pad4440"
+        android:textSize="18sp"
+        android:maxLines="2"
+        android:ellipsize="end"/>
+
+</LinearLayout>

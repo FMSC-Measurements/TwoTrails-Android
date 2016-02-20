@@ -47,8 +47,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
+import com.usda.fmsc.android.widget.drawables.FadeBitmapProgressDrawable;
 import com.usda.fmsc.android.widget.drawables.PolygonProgressDrawable;
-import com.usda.fmsc.android.widget.drawables.RevealBitmapProgressDrawable;
 import com.usda.fmsc.twotrails.activities.custom.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.adapters.PointDetailsAdapter;
 import com.usda.fmsc.twotrails.adapters.PolyMarkerMapRvAdapter;
@@ -864,13 +864,23 @@ public class MapActivity extends CustomToolbarActivity implements GpsService.Lis
         PolyMarkerMap markerMap;
         String trackedPolyCN = Global.Settings.ProjectSettings.getTrackedPolyCN();
 
+        PolyMarkerMap.PolygonGraphicOptions graphicOptions = new PolyMarkerMap.PolygonGraphicOptions(
+                AndroidUtils.UI.getColor(this, R.color.red_500),
+                AndroidUtils.UI.getColor(this, R.color.red_800),
+                AndroidUtils.UI.getColor(this, R.color.indigo_500),
+                AndroidUtils.UI.getColor(this, R.color.indigo_800),
+                7,
+                16
+        );
+
         for (TtPolygon polygon : getSortedPolys()) {
             markerMap =  new PolyMarkerMap(
                     map,
                     Global.MapSettings.PolyOptions.get(polygon.getCN()),
                     polyPoints.get(polygon),
                     polygon,
-                    meta);
+                    meta,
+                    graphicOptions);
 
             polyMarkerMaps.add(markerMap);
             _MarkerData.putAll(markerMap.getMarkerData());
@@ -944,14 +954,19 @@ public class MapActivity extends CustomToolbarActivity implements GpsService.Lis
         tcbAdjBnd.setCheckBoxDrawable(new PolygonProgressDrawable(5, 90));
         tcbUnAdjBnd.setCheckBoxDrawable(new UnadjustedDrawable());
 
-
-        Bitmap b = BitmapFactory.decodeResource(getResources(), R.drawable.ic_my_location_white_36dp);
-
-        tcbAdjBndPts.setCheckBoxDrawable(new RevealBitmapProgressDrawable(b));
-
-
         tcbAdjNav.setCheckBoxDrawable(new PolygonProgressDrawable(5, 90));
         tcbUnAdjNav.setCheckBoxDrawable(new UnadjustedDrawable());
+
+        Bitmap b = BitmapFactory.decodeResource(getResources(), R.drawable.ic_location_white_36dp);
+
+        tcbAdjBndPts.setCheckBoxDrawable(new FadeBitmapProgressDrawable(b));
+        tcbUnAdjBndPts.setCheckBoxDrawable(new FadeBitmapProgressDrawable(b));
+        tcbAdjNavPts.setCheckBoxDrawable(new FadeBitmapProgressDrawable(b));
+        tcbUnAdjNavPts.setCheckBoxDrawable(new FadeBitmapProgressDrawable(b));
+
+        b = BitmapFactory.decodeResource(getResources(), R.drawable.ic_ttpoint_way_white);
+
+        tcbWayPts.setCheckBoxDrawable(new FadeBitmapProgressDrawable(b));
 
         try {
             Class c = PolyDrawOptions.class;

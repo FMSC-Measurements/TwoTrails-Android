@@ -58,10 +58,10 @@
         android:src="@drawable/fab_add"
         app:layout_anchor="@id/pointsViewPager"
         app:layout_anchorGravity="bottom|end"
-        app:fab_colorNormal="@color/primaryLight"
-        app:fab_colorPressed="@color/primaryLighter"
-        app:fab_colorRipple="@color/primaryLightest"
         android:onClick="btnCreatePoint"/>
+    <!--app:fab_colorNormal="@color/primaryLight"-->
+    <!--app:fab_colorPressed="@color/primaryLighter"-->
+    <!--app:fab_colorRipple="@color/primaryLightest"-->
 
     <com.usda.fmsc.android.widget.DimOverlayFrameLayout
         android:id="@+id/overlay"
@@ -76,11 +76,11 @@
         android:src="@drawable/ic_ttpoint_gps_white_mini"
         app:layout_anchor="@id/pointsViewPager"
         app:layout_anchorGravity="bottom|center"
-        app:fab_colorNormal="@color/primaryLight"
-        app:fab_colorPressed="@color/primaryLighter"
-        app:fab_colorRipple="@color/primaryLightest"
         android:onClick="btnAcquireClick"
-        android:visibility="visible"/>
+        android:visibility="gone"/>
+    <!--app:fab_colorNormal="@color/primaryLight"-->
+    <!--app:fab_colorPressed="@color/primaryLighter"-->
+    <!--app:fab_colorRipple="@color/primaryLightest"-->
 
     <io.codetail.widget.RevealLinearLayout
         android:layout_width="match_parent"

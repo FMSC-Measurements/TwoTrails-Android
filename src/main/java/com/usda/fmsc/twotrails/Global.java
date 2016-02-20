@@ -3,6 +3,7 @@ package com.usda.fmsc.twotrails;
 import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
@@ -72,7 +73,7 @@ public class Global {
 
         Settings.DeviceSettings.init();
 
-        _LogFilePath = Environment.getDataDirectory().getAbsolutePath(); //TtUtils.getTtFileDir();
+        _LogFilePath = _ApplicationContext.getApplicationInfo().dataDir;// Environment.getDataDirectory().getAbsolutePath(); //TtUtils.getTtFileDir();
         _DefaultMeta = Settings.MetaDataSetting.getDefaultmetaData();
 
         TtUtils.TtReport.changeFilePath(_LogFilePath);
@@ -374,6 +375,7 @@ public class Global {
         public static class DeviceSettings extends PreferenceHelper {
             //region Preference Names
             private static final String SETTINGS_CREATED = "SettingsCreated";
+            private static final String DEVELOPER_OPTIONS = "DeveloperOptions";
 
             public static final String DROP_ZERO = "DropZero";
             public static final String ROUND_POINTS = "RoundPoints";
@@ -504,6 +506,8 @@ public class Global {
                 }
 
                 SharedPreferences.Editor editor = getEditor();
+
+                editor.putBoolean(DEVELOPER_OPTIONS, false);
 
                 editor.putBoolean(DROP_ZERO, DEFAULT_DROP_ZERO);
                 editor.putBoolean(ROUND_POINTS, DEFAULT_ROUND_POINTS);
@@ -941,6 +945,14 @@ public class Global {
             //endregion
 
             //region Other
+            public static boolean isDeveloperOptionsEnabled() {
+                return getBool(DEVELOPER_OPTIONS, false);
+            }
+
+            public static void enabledDevelopterOptions(boolean value) {
+                setBool(DEVELOPER_OPTIONS, value);
+            }
+
 
             public static boolean getDropZeros() {
                 return getBool(DROP_ZERO, true);

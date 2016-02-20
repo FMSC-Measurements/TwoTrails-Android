@@ -55,6 +55,7 @@ import com.usda.fmsc.geospatial.GeoPosition;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.geospatial.utm.UTMTools;
 import com.usda.fmsc.geospatial.Units.UomElevation;
+import com.usda.fmsc.utilities.FileTools;
 import com.usda.fmsc.utilities.StringEx;
 
 
@@ -1046,6 +1047,7 @@ public class TtUtils {
     }
     //endregion
 
+
     //region Device Info
     public static String getDeviceName() {
         return String.format("%s %s %s",
@@ -1053,6 +1055,22 @@ public class TtUtils {
     }
 
 
+    public static String exportReport(DataAccessLayer dal) {
+        String filename = String.format("%s%sTwoTrailsReport_%s.zip",
+                TtUtils.getTtLogFileDir(),
+                File.separator,
+                DateTime.now().toString());
+
+        boolean exported;
+
+        if (dal != null) {
+            exported = FileTools.zipFiles(filename, TtReport.getFilePath(), dal.getFilePath());
+        } else {
+            exported = FileTools.zipFiles(filename, TtReport.getFilePath());
+        }
+
+        return exported ? filename : null;
+    }
     //endregion
 
 
@@ -1360,9 +1378,16 @@ public class TtUtils {
         public static MarkerOptions createMarkerOptions(GpsPoint point, boolean adjusted, TtMetadata meta) {
 
             try {
-                double x = adjusted ? point.getAdjX() : point.getUnAdjX();
-                double y = adjusted ? point.getAdjY() : point.getUnAdjY();
-                double z = adjusted ? point.getAdjZ() : point.getUnAdjZ();
+                Double x = adjusted ? point.getAdjX() : point.getUnAdjX();
+                Double y = adjusted ? point.getAdjY() : point.getUnAdjY();
+                Double z = adjusted ? point.getAdjZ() : point.getUnAdjZ();
+
+                if (x == null) {
+                    x = point.getUnAdjX();
+                    y = point.getUnAdjY();
+                    z =  point.getUnAdjZ();
+                }
+
                 z = TtUtils.Convert.distance(z, meta.getElevation(), UomElevation.Meters);
 
                 double lat, lon;
@@ -1381,10 +1406,20 @@ public class TtUtils {
                         x, y, meta.getElevation().toStringAbv(), z, lat, lon);
 
 
-                return new MarkerOptions()
-                        .title(String.format("%d (%s)", point.getPID(), adjusted ? "Adj" : "UnAdj"))
-                        .snippet(String.format("%s\n\n%s", point.getOp(), snippet))
-                        .position(new LatLng(lat, lon));
+                MarkerOptions options = new MarkerOptions();
+
+                options.title(String.format("%d (%s)", point.getPID(), adjusted ? "Adj" : "UnAdj"));
+                options.snippet(String.format("%s\n\n%s", point.getOp().toString(), snippet));
+
+                LatLng ll = new LatLng(lat, lon);
+
+                try {
+                    options.position(ll);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                return options;
             } catch (Exception ex) {
 
                 TtReport.writeError(ex.getMessage(), "TtUtils:createMarkerOptions");

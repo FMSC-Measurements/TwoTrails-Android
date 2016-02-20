@@ -7,9 +7,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.google.android.gms.maps.GoogleMap;
+import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.widget.SheetLayoutEx;
-import com.usda.fmsc.twotrails.activities.custom.AcquireGpsCustomToolbarActivity;
 import com.usda.fmsc.twotrails.Consts;
+import com.usda.fmsc.twotrails.activities.custom.AcquireGpsMapActivity;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
 import com.usda.fmsc.twotrails.R;
@@ -22,7 +24,7 @@ import java.util.List;
 import com.usda.fmsc.geospatial.nmea.NmeaBurst;
 import com.usda.fmsc.utilities.StringEx;
 
-public class AcquireGpsActivity extends AcquireGpsCustomToolbarActivity {
+public class AcquireGpsActivity extends AcquireGpsMapActivity {
     private TextView tvLogged, tvRecv;
 
     private GpsPoint _Point;
@@ -30,6 +32,8 @@ public class AcquireGpsActivity extends AcquireGpsCustomToolbarActivity {
     private List<TtNmeaBurst> _Bursts;
 
     Button btnLog, btnCalc;
+
+    private int loggedCount = 0, receivedCount = 0;
 
 
     @Override
@@ -82,8 +86,10 @@ public class AcquireGpsActivity extends AcquireGpsCustomToolbarActivity {
             if (_Bursts.size() > 0) {
                 btnCalc.setEnabled(true);
             } else {
-                btnCalc.setAlpha(Consts.DISABLED_ALPHA);
+                btnCalc.setBackgroundColor(AndroidUtils.UI.getColor(this, R.color.primaryLighter));
             }
+
+            setupMap();
         }
     }
 
@@ -119,21 +125,58 @@ public class AcquireGpsActivity extends AcquireGpsCustomToolbarActivity {
         }
     }
 
-    @Override
-    protected void onLoggedNmeaBurst(NmeaBurst burst) {
-        super.onLoggedNmeaBurst(burst);
 
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        super.onMapReady(googleMap);
+
+        setMyLocationEnabled(true);
+        setFollowMyPosition(true);
+    }
+
+    @Override
+    protected void startLogging() {
+        super.startLogging();
+        btnLog.setText(R.string.aqr_log_pause);
+    }
+
+    protected void stopLogging() {
+        super.stopLogging();
+        btnLog.setText(R.string.aqr_log);
+    }
+
+    protected void setLoggedCount(int count) {
+        loggedCount = count;
+    }
+
+    protected int getLoggedCount() {
+        return loggedCount;
+    }
+
+    protected int getReceivedCount() {
+        return receivedCount;
+    }
+
+
+    protected void onLoggedNmeaBurst(NmeaBurst burst) {
         _Bursts.add(TtNmeaBurst.create(_Point.getCN(), false, burst));
 
         if (!btnCalc.isEnabled() && getLoggedCount() > 0) {
             btnCalc.setEnabled(true);
-            btnCalc.setAlpha(Consts.ENABLED_ALPHA);
+            btnCalc.setBackgroundColor(AndroidUtils.UI.getColor(this, R.color.primary));
         }
     }
 
     @Override
-    public void nmeaBurstReceived(NmeaBurst nmeaBurst) {
+    public void nmeaBurstReceived(final NmeaBurst nmeaBurst) {
         super.nmeaBurstReceived(nmeaBurst);
+
+        if (isLogging() && nmeaBurst.hasPosition()) {
+            onLoggedNmeaBurst(nmeaBurst);
+            loggedCount++;
+        }
+
+        receivedCount++;
 
         tvRecv.setText(StringEx.toString(getReceivedCount()));
         tvLogged.setText(StringEx.toString(getLoggedCount()));
@@ -152,19 +195,6 @@ public class AcquireGpsActivity extends AcquireGpsCustomToolbarActivity {
         }
 
         super.gpsError(error);
-    }
-
-
-    @Override
-    protected void startLogging() {
-        super.startLogging();
-        btnLog.setText(R.string.aqr_log_pause);
-    }
-
-    @Override
-    protected void stopLogging() {
-        super.stopLogging();
-        btnLog.setText(R.string.aqr_log);
     }
 
 

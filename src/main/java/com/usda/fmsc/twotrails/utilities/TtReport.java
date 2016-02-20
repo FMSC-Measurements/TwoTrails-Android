@@ -40,7 +40,7 @@ public class TtReport {
     }
 
     public String getFilePath() {
-        return _fileName;
+        return filePath;
     }
 
     public void closeReport() {

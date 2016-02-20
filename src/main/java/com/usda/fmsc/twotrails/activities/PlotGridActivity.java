@@ -393,7 +393,7 @@ public class PlotGridActivity extends CustomToolbarActivity {
                     }
                 });
 
-                dialog.setNegativeButton(R.string.str_cancel, new DialogInterface.OnClickListener() {
+                dialog.setNeutralButton(R.string.str_cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         generating = false;

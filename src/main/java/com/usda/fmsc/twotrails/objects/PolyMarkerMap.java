@@ -31,15 +31,16 @@ public class PolyMarkerMap {
     private HashMap<String, MarkerData> _MarkerData;
 
 
-    public PolyMarkerMap(GoogleMap map, PolyDrawOptions options, List<TtPoint> points, TtPolygon polygon, HashMap<String, TtMetadata> meta) {
+    public PolyMarkerMap(GoogleMap map, PolyDrawOptions options, List<TtPoint> points, TtPolygon polygon,
+                         HashMap<String, TtMetadata> meta, PolygonGraphicOptions graphicOptions) {
         this.map = map;
         this.options = options;
         this.polygon = polygon;
 
-        init(points, meta);
+        init(points, meta, graphicOptions);
     }
 
-    private void init(List<TtPoint> points, HashMap<String, TtMetadata> meta) {
+    private void init(List<TtPoint> points, HashMap<String, TtMetadata> meta, PolygonGraphicOptions graphicOptions) {
         _MarkerData = new HashMap<>();
 
         _AllAdjPts = new ArrayList<>();
@@ -139,11 +140,19 @@ public class PolyMarkerMap {
         }
 
         if (_AdjBndPts.size() > 0) {
+            adjBndPLO.color(graphicOptions.AdjBndColor).width(graphicOptions.AdjWidth).zIndex(4);
+            unadjBndPLO.color(graphicOptions.UnAdjBndColor).width(graphicOptions.UnAdjWidth).zIndex(3);
+
             _AdjBnd = map.addPolyline(adjBndPLO.visible(false));
             _UnadjBnd = map.addPolyline(unadjBndPLO.visible(false));
-            
+
+
+            adjBndPO.strokeColor(graphicOptions.AdjBndColor).strokeWidth(graphicOptions.AdjWidth).zIndex(6);
+            unadjBndPO.strokeColor(graphicOptions.UnAdjBndColor).strokeWidth(graphicOptions.UnAdjWidth).zIndex(5);
+
             _AdjBndCB = map.addPolygon(adjBndPO.visible(false));
             _UnadjBndCB = map.addPolygon(unadjBndPO.visible(false));
+
 
             if (options.Visible) {
                 if (options.AdjBnd) {
@@ -165,6 +174,9 @@ public class PolyMarkerMap {
         }
         
         if (_AdjNavPts.size() > 0) {
+            adjNavPLO.color(graphicOptions.AdjNavColor).width(graphicOptions.AdjWidth).zIndex(2);
+            unadjNavPLO.color(graphicOptions.UnAdjNavColor).width(graphicOptions.UnAdjWidth).zIndex(1);
+
             _AdjNav = map.addPolyline(adjNavPLO.visible(false));
             _UnadjNav = map.addPolyline(unadjNavPLO.visible(false));
             
@@ -420,7 +432,7 @@ public class PolyMarkerMap {
         this.listener = listener;
     }
 
-    public void remvoeListener() {
+    public void removeListener() {
         this.listener = null;
     }
 
@@ -444,6 +456,22 @@ public class PolyMarkerMap {
         public MarkerData(TtPoint point, boolean adjusted) {
             Point = point;
             Adjusted = adjusted;
+        }
+    }
+
+
+    public static class PolygonGraphicOptions {
+        public int AdjBndColor, UnAdjBndColor;
+        public int AdjNavColor, UnAdjNavColor;
+        public float AdjWidth, UnAdjWidth;
+
+        public PolygonGraphicOptions(int AdjBndColor, int UnAdjBndColor, int AdjNavColor, int UnAdjNavColor, float AdjWidth, float UnAdjWidth) {
+            this.AdjBndColor = AdjBndColor;
+            this.UnAdjBndColor = UnAdjBndColor;
+            this.AdjNavColor = AdjNavColor;
+            this.UnAdjNavColor = UnAdjNavColor;
+            this.AdjWidth = AdjWidth;
+            this.UnAdjWidth = UnAdjWidth;
         }
     }
 }

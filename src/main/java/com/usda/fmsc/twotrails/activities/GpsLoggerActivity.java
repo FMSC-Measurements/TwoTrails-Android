@@ -99,7 +99,7 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
                 }
             });
 
-            alert.setNeutralButton("Stop", new DialogInterface.OnClickListener() {
+            alert.setNegativeButton("Stop", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
                     if (!Global.Settings.DeviceSettings.isGpsAlwaysOn()) {
@@ -109,7 +109,7 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
                 }
             });
 
-            alert.setNegativeButton(R.string.str_cancel, null);
+            alert.setNeutralButton(R.string.str_cancel, null);
         } else {
             if (!Global.Settings.DeviceSettings.isGpsAlwaysOn()) {
                 binder.stopGps();
@@ -213,7 +213,7 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
             }
         });
 
-        dialog.setNegativeButton(R.string.str_cancel, null);
+        dialog.setNeutralButton(R.string.str_cancel, null);
 
         dialog.show();
     }

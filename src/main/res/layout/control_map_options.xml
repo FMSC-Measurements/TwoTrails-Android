@@ -65,22 +65,22 @@
                 <com.usda.fmsc.android.widget.MultiStateTouchCheckBox
                     android:id="@+id/mpcTcbAdjBnd"
                     android:contentDescription="@string/map_adj_bnd"
-                    style="@style/mapMultiCheckBoxBndStyle"/>
+                    style="@style/mapMultiCheckBoxAdjBndStyle"/>
 
                 <com.usda.fmsc.android.widget.MultiStateTouchCheckBox
                     android:id="@+id/mpcTcbAdjBndPts"
                     android:contentDescription="@string/map_adj_bnd_pts"
-                    style="@style/mapMultiCheckBoxBndStyle"/>
+                    style="@style/mapMultiCheckBoxAdjBndStyle"/>
 
                 <com.usda.fmsc.android.widget.MultiStateTouchCheckBox
                     android:id="@+id/mpcTcbUnadjBnd"
                     android:contentDescription="@string/map_unadj_bnd"
-                    style="@style/mapMultiCheckBoxBndStyle"/>
+                    style="@style/mapMultiCheckBoxUnAdjBndStyle"/>
 
                 <com.usda.fmsc.android.widget.MultiStateTouchCheckBox
                     android:id="@+id/mpcTcbUnadjBndPts"
                     android:contentDescription="@string/map_unadj_bnd_pts"
-                    style="@style/mapMultiCheckBoxBndStyle"/>
+                    style="@style/mapMultiCheckBoxUnAdjBndStyle"/>
 
                 <View
                     android:layout_width="0dp"
@@ -112,23 +112,23 @@
                 <com.usda.fmsc.android.widget.MultiStateTouchCheckBox
                     android:id="@+id/mpcTcbAdjNav"
                     android:contentDescription="@string/map_adj_nav"
-                    style="@style/mapMultiCheckBoxNavStyle"
-                    app:rearColor="@color/primaryLight"/>
+                    style="@style/mapMultiCheckBoxAdjNavStyle"
+                    app:acceptColor="@color/primaryLight"/>
 
                 <com.usda.fmsc.android.widget.MultiStateTouchCheckBox
                     android:id="@+id/mpcTcbAdjNavPts"
                     android:contentDescription="@string/map_adj_nav_pts"
-                    style="@style/mapMultiCheckBoxNavStyle"/>
+                    style="@style/mapMultiCheckBoxAdjNavStyle"/>
 
                 <com.usda.fmsc.android.widget.MultiStateTouchCheckBox
                     android:id="@+id/mpcTcbUnadjNav"
                     android:contentDescription="@string/map_unadj_nav"
-                    style="@style/mapMultiCheckBoxNavStyle"/>
+                    style="@style/mapMultiCheckBoxUnAdjNavStyle"/>
 
                 <com.usda.fmsc.android.widget.MultiStateTouchCheckBox
                     android:id="@+id/mpcTcbUnadjNavPts"
                     android:contentDescription="@string/map_unadj_nav_pts"
-                    style="@style/mapMultiCheckBoxNavStyle"/>
+                    style="@style/mapMultiCheckBoxUnAdjNavStyle"/>
             </LinearLayout>
         </LinearLayout>
 
@@ -149,19 +149,19 @@
                     android:id="@+id/mpcTcbAdjMiscPts"
                     android:contentDescription="@string/map_adj_misc_pts"
                     style="@style/multiCheckBoxStyle"
-                    app:rearColor="@color/primaryLight"/>
+                    app:acceptColor="@color/primaryLight"/>
 
                 <com.usda.fmsc.android.widget.MultiStateTouchCheckBox
                     android:id="@+id/mpcTcbUnadjMiscPts"
                     android:contentDescription="@string/map_unadj_misc_pts"
                     style="@style/multiCheckBoxStyle"
-                    app:rearColor="@color/primaryLight"/>
+                    app:acceptColor="@color/primaryLight"/>
 
                 <com.usda.fmsc.android.widget.MultiStateTouchCheckBox
                     android:id="@+id/mpcTcbWayPts"
                     android:contentDescription="@string/map_way_pts"
                     style="@style/multiCheckBoxStyle"
-                    app:rearColor="@color/primaryLight"/>
+                    app:acceptColor="@color/primaryLight"/>
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

@@ -19,7 +19,7 @@ import com.usda.fmsc.utilities.StringEx;
 
 
 public class MainFileFragment extends Fragment {
-    Button btnImport, btnDup;
+    Button btnImport, btnDup, btnCleanDb;
     TableLayout tblInfo;
     TextView tvDate, tvPolys, tvPoints, tvGroups, tvMeta;
     DataAccessLayer _dal;
@@ -54,6 +54,7 @@ public class MainFileFragment extends Fragment {
 
         btnImport = (Button)view.findViewById(R.id.mainFragFileBtnImport);
         btnDup = (Button)view.findViewById(R.id.mainFragFileBtnDup);
+        btnCleanDb = (Button)view.findViewById(R.id.mainFragFileBtnCleanDb);
 
         enableButtons(enabled);
 
@@ -77,6 +78,7 @@ public class MainFileFragment extends Fragment {
         if(viewExists) {
             btnImport.setEnabled(enable);
             btnDup.setEnabled(enable);
+            btnCleanDb.setEnabled(enable);
 
             tblInfo.setVisibility(enable ? View.VISIBLE : View.INVISIBLE);
         }
