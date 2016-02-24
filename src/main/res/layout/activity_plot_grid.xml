@@ -198,7 +198,7 @@
     </RelativeLayout>
 
     <android.support.design.widget.FloatingActionButton
-        android:src="@drawable/fab_add"
+        android:src="@drawable/ic_add_white"
         style="@style/fabStyle"
         app:layout_anchor="@id/lay1"
         app:layout_anchorGravity="bottom|right|end"

@@ -29,7 +29,7 @@
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/polysFabNew"
         style="@style/fabStyle"
-        android:src="@drawable/fab_add"
+        android:src="@drawable/ic_add_white"
         android:layout_margin="@dimen/fab_margin"
         app:layout_anchor="@id/lay1"
         android:onClick="btnNewClick" />
