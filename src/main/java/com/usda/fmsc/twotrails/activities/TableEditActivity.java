@@ -584,12 +584,13 @@ public class TableEditActivity extends CustomToolbarActivity {
         Context context;
         LayoutInflater inflater;
 
-        int pidHeaderSize;
+        int pidHeaderSize, cellHeight;
 
         public PointsTableAdapter(Context context) {
             this.context = context;
             inflater = LayoutInflater.from(context);
             pidHeaderSize = AndroidUtils.Convert.dpToPx(context, 50);
+            cellHeight = AndroidUtils.Convert.dpToPx(context, 20);
         }
 
         @Override
@@ -747,7 +748,7 @@ public class TableEditActivity extends CustomToolbarActivity {
 
         @Override
         public int getHeight(int row) {
-            return 40;
+            return cellHeight;
         }
 
         @Override

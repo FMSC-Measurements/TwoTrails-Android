@@ -15,7 +15,8 @@
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
         android:orientation="vertical"
-        android:layout_below="@id/cardHeader">
+        android:layout_below="@id/cardHeader"
+        android:elevation="0dp">
 
         <LinearLayout
             android:id="@+id/cardContent"
@@ -26,8 +27,9 @@
             android:paddingStart="8dp"
             android:paddingEnd="8dp"
             android:paddingRight="8dp"
-            android:elevation="3dp"
-            android:layout_alignParentTop="true">
+            android:elevation="1dp"
+            android:layout_alignParentTop="true"
+            android:background="@android:color/white">
 
             <TableLayout
                 android:id="@+id/pointsFragLayGps"

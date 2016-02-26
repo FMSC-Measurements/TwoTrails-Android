@@ -20,7 +20,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.usda.fmsc.android.AndroidUtils;
-import com.usda.fmsc.twotrails.activities.custom.AppCompatPreferenceActivity;
+import com.usda.fmsc.android.preferences.AppCompatPreferenceActivity;
 import com.usda.fmsc.twotrails.fragments.settings.PreferenceFragmentEx;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
@@ -40,6 +40,21 @@ import java.util.List;
  * API Guide</a> for more information on developing a Settings UI.
  */
 public class PreferenceActivity extends AppCompatPreferenceActivity {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
+
+        if (toolbar != null) {
+            setSupportActionBar(toolbar);
+
+            if (Build.VERSION.SDK_INT  < Build.VERSION_CODES.LOLLIPOP) {
+                getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_arrow_back_white_24dp);
+            }
+        }
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {

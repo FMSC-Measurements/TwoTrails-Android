@@ -1,6 +1,8 @@
 package com.usda.fmsc.twotrails.activities.custom;
 
+import android.os.Build;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
@@ -9,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.twotrails.R;
 
 public class CustomToolbarActivity extends AppCompatActivity {
@@ -48,6 +51,15 @@ public class CustomToolbarActivity extends AppCompatActivity {
     private void setupToolbar() {
         toolbar = (Toolbar)findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        if (Build.VERSION.SDK_INT  < Build.VERSION_CODES.LOLLIPOP) {
+            AndroidUtils.UI.setHomeIndicatorIcon(this, R.drawable.ic_arrow_back_white_24dp);
+        }
+
+        ActionBar ab = getSupportActionBar();
+        if (ab != null) {
+            ab.setDisplayHomeAsUpEnabled(false);
+        }
     }
 
     protected Toolbar getToolbar() {

@@ -533,7 +533,7 @@ public class Take5Activity extends AcquireGpsMapActivity {
             }
 
             if (useRing) {
-                //AndroidUtils.Device.playSound(this, R.raw.point_created);
+                AndroidUtils.Device.playSound(this, R.raw.ring);
             }
         } else {
             _CurrentPoint = temp;

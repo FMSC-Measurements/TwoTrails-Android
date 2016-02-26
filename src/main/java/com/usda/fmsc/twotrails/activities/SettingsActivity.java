@@ -5,10 +5,11 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
+import com.usda.fmsc.twotrails.activities.custom.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.fragments.settings.SettingsFragment;
 import com.usda.fmsc.twotrails.R;
 
-public class SettingsActivity extends AppCompatActivity {
+public class SettingsActivity extends CustomToolbarActivity {
     public static final String SETTINGS_PAGE = "settings_page";
 
     public static final String MAIN_SETTINGS_PAGE = "main";

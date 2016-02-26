@@ -438,7 +438,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
                 }
 
                 if (useRing) {
-                    //AndroidUtils.Device.playSound(ctx, R.raw.point_created);
+                    AndroidUtils.Device.playSound(ctx, R.raw.ring);
                 }
             }
 

@@ -1,5 +1,4 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-
     <style name="MainActivityButtons" parent="@android:style/Widget.Holo.Light.Button.Borderless.Small">
         <item name="android:textAllCaps">true</item>
     </style>
@@ -24,6 +23,7 @@
         <item name="android:layout_width">fill_parent</item>
         <item name="android:layout_height">1dp</item>
         <item name="android:background">@android:color/darker_gray</item>
+        <item name="background">@android:color/darker_gray</item>
     </style>
 
     <style name="DividersPrimary">
@@ -42,6 +42,7 @@
         <item name="android:layout_width">1dp</item>
         <item name="android:layout_height">fill_parent</item>
         <item name="android:background">@android:color/darker_gray</item>
+        <item name="background">@android:color/darker_gray</item>
     </style>
 
     <style name="DividersVerticalPrimary">
@@ -319,5 +320,19 @@
         <item name="android:layout_marginEnd" tools:targetApi="17">4dp</item>
         <item name="android:layout_marginTop">4dp</item>
     </style>
+
+
+
+
+
+
+
+    <style name="FilePickerAlertDialogTheme" parent="Theme.AppCompat.Dialog.Alert">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryDark">@color/primaryDark</item>
+        <item name="colorAccent">@color/accent</item>
+    </style>
+
+
 </resources>
 
