@@ -9,7 +9,8 @@
     android:paddingRight="10dp"
     android:orientation="horizontal"
     android:clickable="true"
-    android:onClick="btnPointInfo">
+    android:onClick="btnPointInfo"
+    android:background="@android:color/white">
 
     <ImageView
         android:id="@+id/pointHeaderIvOp"

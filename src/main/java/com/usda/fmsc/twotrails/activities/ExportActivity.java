@@ -1,21 +1,24 @@
 package com.usda.fmsc.twotrails.activities;
 
+import android.content.ClipData;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.devpaul.filepickerlibrary.FilePickerActivity;
-import com.devpaul.filepickerlibrary.enums.ThemeType;
+//import com.devpaul.filepickerlibrary.FilePickerActivity;
+//import com.devpaul.filepickerlibrary.enums.ThemeType;
+import com.nononsenseapps.filepicker.FilePickerActivity;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.dialogs.DontAskAgainDialog;
 import com.usda.fmsc.android.widget.FABProgressCircleEx;
@@ -27,9 +30,11 @@ import com.usda.fmsc.twotrails.utilities.Export;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.io.File;
-import java.lang.reflect.Field;
+import java.util.ArrayList;
 
 public class ExportActivity extends CustomToolbarActivity {
+
+    private static final int FOLDER_REQUEST = 5001;
 
     private MultiStateTouchCheckBox chkAll, chkPoints, chkPolys, chkMeta, chkProj, chkNmea, chkKmz, chkGpx, chkSum;
     private FloatingActionButton fabExport;
@@ -87,13 +92,6 @@ public class ExportActivity extends CustomToolbarActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_export, menu);
-
-        return true;
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home: {
@@ -106,13 +104,21 @@ public class ExportActivity extends CustomToolbarActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(requestCode == FilePickerActivity.REQUEST_DIRECTORY && resultCode == RESULT_OK) {
-            String directory = data.getStringExtra(FilePickerActivity.FILE_EXTRA_DATA_PATH);
+        if(requestCode == FOLDER_REQUEST && resultCode == RESULT_OK) {
+            String directory = data.getData().getPath();
 
             if(directory != null) {
                 startExport(directory);
             }
         }
+
+//        if(requestCode == FilePickerActivity.REQUEST_DIRECTORY && resultCode == RESULT_OK) {
+//            String directory = data.getStringExtra(FilePickerActivity.FILE_EXTRA_DATA_PATH);
+//
+//            if(directory != null) {
+//                startExport(directory);
+//            }
+//        }
 
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -217,14 +223,32 @@ public class ExportActivity extends CustomToolbarActivity {
     }
 
     private void selectDirectory(String initDir) {
-        Intent filePickerDialogIntent = new Intent(this, FilePickerActivity.class);
-        filePickerDialogIntent.putExtra(FilePickerActivity.THEME_TYPE, ThemeType.DIALOG);
-        filePickerDialogIntent.putExtra(FilePickerActivity.INTENT_EXTRA_COLOR_ID, R.color.primary);
-        filePickerDialogIntent.putExtra(FilePickerActivity.INTENT_EXTRA_FAB_COLOR_ID, R.color.primaryLight);
-        //filePickerDialogIntent.putExtra(FilePickerActivity.SCOPE_TYPE, FileScopeType.DIRECTORIES);
-        filePickerDialogIntent.putExtra(FilePickerActivity.REQUEST_CODE, FilePickerActivity.REQUEST_DIRECTORY);
-        filePickerDialogIntent.putExtra(FilePickerActivity.FILE_EXTRA_DATA_PATH, initDir);
-        startActivityForResult(filePickerDialogIntent, FilePickerActivity.REQUEST_DIRECTORY);
+//        Intent filePickerDialogIntent = new Intent(this, FilePickerActivity.class);
+//        filePickerDialogIntent.putExtra(FilePickerActivity.THEME_TYPE, ThemeType.DIALOG);
+//        filePickerDialogIntent.putExtra(FilePickerActivity.INTENT_EXTRA_COLOR_ID, R.color.primary);
+//        filePickerDialogIntent.putExtra(FilePickerActivity.INTENT_EXTRA_FAB_COLOR_ID, R.color.primaryLight);
+//        //filePickerDialogIntent.putExtra(FilePickerActivity.SCOPE_TYPE, FileScopeType.DIRECTORIES);
+//        filePickerDialogIntent.putExtra(FilePickerActivity.REQUEST_CODE, FilePickerActivity.REQUEST_DIRECTORY);
+//        filePickerDialogIntent.putExtra(FilePickerActivity.FILE_EXTRA_DATA_PATH, initDir);
+//        startActivityForResult(filePickerDialogIntent, FilePickerActivity.REQUEST_DIRECTORY);
+
+        // This always works
+        Intent i = new Intent(this, FilePickerActivity.class);
+        // This works if you defined the intent filter
+        // Intent i = new Intent(Intent.ACTION_GET_CONTENT);
+
+        // Set these depending on your use case. These are the defaults.
+        i.putExtra(FilePickerActivity.EXTRA_ALLOW_MULTIPLE, false);
+        i.putExtra(FilePickerActivity.EXTRA_ALLOW_CREATE_DIR, false);
+        i.putExtra(FilePickerActivity.EXTRA_MODE, FilePickerActivity.MODE_DIR);
+
+        i.putExtra(FilePickerActivity.EXTRA_START_PATH, initDir);
+
+        try {
+            startActivityForResult(i, FOLDER_REQUEST);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     Snackbar snackbar;

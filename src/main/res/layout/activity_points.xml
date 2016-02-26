@@ -29,13 +29,12 @@
                 android:paddingEnd="8dp"
                 android:paddingRight="8dp"
                 android:paddingLeft="0dp"
-                android:paddingStart="0dp"
-                android:background="@color/primary">
+                android:paddingStart="0dp">
 
-                <Spinner
+                <android.support.v7.widget.AppCompatSpinner
                     android:id="@+id/pointsToolBarSpinnerPoly"
-                    android:layout_width="125dp"
-                    android:layout_height="wrap_content"/>
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"/>
             </LinearLayout>
         </android.support.v7.widget.Toolbar>
 
@@ -50,24 +49,6 @@
             android:layout_below="@id/toolbar"/>
     </RelativeLayout>
 
-    <com.usda.fmsc.twotrails.ui.MSFloatingActionButton
-        android:id="@+id/pointsFabMenu"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/fab_margin"
-        android:src="@drawable/ic_add_white"
-        app:layout_anchor="@id/pointsViewPager"
-        app:layout_anchorGravity="bottom|end"
-        android:onClick="btnCreatePoint"/>
-    <!--app:fab_colorNormal="@color/primaryLight"-->
-    <!--app:fab_colorPressed="@color/primaryLighter"-->
-    <!--app:fab_colorRipple="@color/primaryLightest"-->
-
-    <com.usda.fmsc.android.widget.DimOverlayFrameLayout
-        android:id="@+id/overlay"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/pointsFabAqr"
         android:layout_width="wrap_content"
@@ -77,17 +58,36 @@
         app:layout_anchor="@id/pointsViewPager"
         app:layout_anchorGravity="bottom|center"
         android:onClick="btnAcquireClick"
-        android:visibility="gone"/>
+        android:visibility="gone"
+        android:elevation="4dp"/>
+
+    <com.usda.fmsc.twotrails.ui.MSFloatingActionButton
+        android:id="@+id/pointsFabMenu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/fab_margin"
+        android:src="@drawable/ic_add_white"
+        app:layout_anchor="@id/pointsViewPager"
+        app:layout_anchorGravity="bottom|end"
+        android:onClick="btnCreatePoint"
+        android:elevation="8dp"/>
     <!--app:fab_colorNormal="@color/primaryLight"-->
     <!--app:fab_colorPressed="@color/primaryLighter"-->
     <!--app:fab_colorRipple="@color/primaryLightest"-->
+
+    <com.usda.fmsc.android.widget.DimOverlayFrameLayout
+        android:id="@+id/overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:elevation="7dp"/>
 
     <io.codetail.widget.RevealLinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:gravity="bottom|end"
-        android:layout_margin="@dimen/fab_margin">
+        android:layout_margin="@dimen/fab_margin"
+        android:elevation="9dp">
 
         <android.support.v7.widget.CardView
             android:id="@+id/fab_sheet"
@@ -160,7 +160,7 @@
         android:layout_gravity="bottom"
         app:ft_container_gravity="center"
         app:ft_color="@color/primary"
-        android:elevation="2dp"/>
+        android:elevation="10dp"/>
 
     <com.usda.fmsc.android.widget.SheetLayoutEx
         android:id="@+id/pointsSLExCreate"
@@ -169,5 +169,5 @@
         android:layout_gravity="bottom"
         app:ft_container_gravity="center"
         app:ft_color="@color/primary"
-        android:elevation="2dp"/>
+        android:elevation="10dp"/>
 </android.support.design.widget.CoordinatorLayout>

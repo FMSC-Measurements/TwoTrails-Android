@@ -15,15 +15,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_below="@id/cardHeader">
+        android:layout_below="@id/cardHeader"
+        android:background="@android:color/white">
 
         <TableLayout
             android:id="@+id/cardContent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:elevation="3dp"
+            android:elevation="1dp"
             android:padding="8dp"
-            android:layout_alignParentTop="true">
+            android:layout_alignParentTop="true"
+            android:background="@android:color/white">
 
             <TableRow
                 android:layout_width="match_parent"

@@ -10,7 +10,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.usda.fmsc.twotrails.activities.custom.AppCompatPreferenceActivity;
+import com.usda.fmsc.android.preferences.AppCompatPreferenceActivity;
 import com.usda.fmsc.twotrails.R;
 
 public class PreferenceFragmentEx extends PreferenceFragment {
@@ -36,7 +36,7 @@ public class PreferenceFragmentEx extends PreferenceFragment {
             bar.setHomeButtonEnabled(true);
             bar.setDisplayHomeAsUpEnabled(true);
             bar.setDisplayShowTitleEnabled(true);
-            //bar.setHomeAsUpIndicator(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
+            bar.setHomeAsUpIndicator(R.drawable.ic_arrow_back_white_24dp);
             bar.setTitle(getPreferenceScreen().getTitle());
         }
         return layout;

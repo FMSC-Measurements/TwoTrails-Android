@@ -96,7 +96,6 @@ public class AcquireGpsCustomToolbarActivity extends CustomToolbarActivity imple
     }
 
     protected void setNmeaData(final NmeaBurst burst) {
-        //if (burst.isFull()) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -152,17 +151,16 @@ public class AcquireGpsCustomToolbarActivity extends CustomToolbarActivity imple
                     tvPdop.setText(nVal);
                 }
 
-                if (burst.getGSV().isValid() && burst.getGSA().isValid() && burst.getGGA().isValid()) {
+                if (burst.getGSV().isValid()) {
                     tvSat.setText(String.format("%d/%d/%d",
-                            burst.getUsedSatellitesCount(),
-                            burst.getTrackedSatellitesCount(),
+                            burst.getGSA().isValid() ? burst.getUsedSatellitesCount() : 0,
+                            burst.getGGA().isValid() ? burst.getTrackedSatellitesCount() : 0,
                             burst.getSatellitesInViewCount()));
                 } else {
                     tvSat.setText(nVal);
                 }
             }
         });
-        //}
     }
 
 

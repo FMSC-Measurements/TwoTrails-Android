@@ -73,9 +73,8 @@ public class SettingsFragment extends PreferenceFragment {
 
         addPreferencesFromResource(R.xml.settings);
 
-        Toolbar toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
-        ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
-
+        //Toolbar toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
+        //((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
 
         if (bundle != null && bundle.containsKey(CURRENT_PAGE)) {
             moveToPage = bundle.getString(CURRENT_PAGE);
