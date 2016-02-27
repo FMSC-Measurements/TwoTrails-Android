@@ -302,7 +302,7 @@ public class MapActivity extends CustomToolbarActivity implements GpsService.Lis
         miResetBounds = menu.findItem(R.id.mapMenuResetBounds);
         miResetBounds.setVisible(mapTracking != Units.MapTracking.FOLLOW);
 
-        miTrackedPoly = menu.findItem(R.id.mapMenuTrackedPoly);
+        miTrackedPoly = menu.findItem(R.id.mapMenuZoomToPoly);
         miTrackedPoly.setVisible(mapTracking == Units.MapTracking.POLY_BOUNDS);
 
         miShowMyPos = menu.findItem(R.id.mapMenuShowMyPos);
@@ -356,7 +356,7 @@ public class MapActivity extends CustomToolbarActivity implements GpsService.Lis
                 updateMapView(lastPosition);
                 break;
             }
-            case R.id.mapMenuTrackedPoly: {
+            case R.id.mapMenuZoomToPoly: {
                 if (polyMarkerMaps.size() > 0) {
                     final String[] polyStrs = new String[polyPoints.size()];
 
@@ -501,14 +501,14 @@ public class MapActivity extends CustomToolbarActivity implements GpsService.Lis
 
         map.clear();
 
-        map.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+        map.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
         map.setInfoWindowAdapter(new MultiLineInfoWindowAdapter(this));
         map.setOnMyLocationButtonClickListener(this);
         map.setOnMapClickListener(this);
         map.setOnMarkerClickListener(this);
 
         map.getUiSettings().setMapToolbarEnabled(false);
-        map.setPadding(0, AndroidUtils.Convert.dpToPx(this, getResources().getDimension(R.dimen.toolbar_height)), 0, 0);
+        map.setPadding(0, (int)(getResources().getDimension(R.dimen.toolbar_height)), 0, 0);
 
         setMapSettings();
 

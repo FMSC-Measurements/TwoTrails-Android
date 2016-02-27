@@ -47,21 +47,26 @@
         <uses-library android:name="com.google.android.maps"/>
 
         <!-- Samsung Multi Window Support -->
-        <uses-library android:required="false" android:name="com.sec.android.app.multiwindow" />
-        <meta-data android:name="com.sec.android.support.multiwindow" android:value="true" />
-        <meta-data android:name="com.samsung.android.sdk.multiwindow.enable" android:value="true" />
+        <uses-library
+            android:name="com.sec.android.app.multiwindow"
+            android:required="false"/>
 
+        <meta-data
+            android:name="com.sec.android.support.multiwindow"
+            android:value="true"/>
+        <meta-data
+            android:name="com.samsung.android.sdk.multiwindow.enable"
+            android:value="true"/>
 
         <service
             android:name=".gps.GpsService"
             android:enabled="true"
-            android:exported="true" />
+            android:exported="true"/>
 
         <activity
             android:name=".activities.MainActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -109,7 +114,6 @@
                 <data android:pathPattern="/.*\\.tt"/>
             </intent-filter>
         </activity>
-
         <activity
             android:name=".activities.SettingsActivity"
             android:label="@string/title_activity_settings">
@@ -119,86 +123,74 @@
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>
-
         <activity
             android:name=".activities.PreferenceActivity"
             android:label="@string/title_activity_settings"/>
-
         <activity
             android:name=".activities.PointsActivity"
             android:label="@string/title_activity_points"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan"/>
-
         <activity
             android:name=".activities.AcquireGpsActivity"
             android:label="@string/title_activity_acquire_gps"
             android:screenOrientation="portrait"/>
-
         <activity
             android:name=".activities.CalculateGpsActivity"
             android:label="@string/title_activity_calculate_gps"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan"/>
-
         <activity
             android:name=".activities.Take5Activity"
             android:label="@string/title_activity_take5"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan"/>
-
         <activity
             android:name=".activities.WalkActivity"
             android:label="@string/title_activity_walk"
             android:screenOrientation="portrait"/>
-
         <activity
             android:name=".activities.PolygonsActivity"
             android:label="@string/title_activity_polygons"
             android:screenOrientation="portrait"/>
-
         <activity
             android:name=".activities.MetadataActivity"
             android:label="@string/title_activity_metadata"
             android:screenOrientation="portrait"/>
-
         <activity
             android:name=".activities.ProjectActivity"
             android:label="@string/title_activity_project"/>
-
         <activity
             android:name=".activities.TableEditActivity"
             android:label="@string/title_activity_table_edit"/>
-
         <activity
             android:name=".activities.MapActivity"
             android:label="@string/title_activity_map"/>
         <activity
             android:name=".activities.HaidActivity"
             android:label="@string/title_activity_haid"/>
-
         <activity
             android:name=".activities.PlotGridActivity"
             android:label="@string/title_activity_plot_grid"/>
-
         <activity
             android:name=".activities.GpsLoggerActivity"
             android:label="@string/title_activity_gps_logger"/>
-
         <activity
             android:name=".activities.ExportActivity"
             android:label="@string/title_activity_export"/>
-
-        <activity android:name=".activities.ImportActivity"
-                  android:label="@string/title_activity_import"/>
-
+        <activity
+            android:name=".activities.ImportActivity"
+            android:label="@string/title_activity_import"/>
         <activity
             android:name="com.nononsenseapps.filepicker.FilePickerActivity"
             android:label="@string/app_name">
             <intent-filter>
-                <action android:name="android.intent.action.GET_CONTENT" />
-                <category android:name="android.intent.category.DEFAULT" />
+                <action android:name="android.intent.action.GET_CONTENT"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
+        </activity>
+        <activity android:name=".activities.TestActivity">
         </activity>
     </application>
 

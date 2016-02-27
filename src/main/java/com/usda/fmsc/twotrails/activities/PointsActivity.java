@@ -569,8 +569,6 @@ public class PointsActivity extends CustomToolbarActivity {
 
     private void addInsertPointsResult(int resultCode, Intent data) {
         if (resultCode == Consts.Activities.Results.POINT_CREATED) {
-
-
             Bundle bundle = data.getExtras();
             int created = 1;
 
@@ -611,6 +609,8 @@ public class PointsActivity extends CustomToolbarActivity {
             } else {
                 moveToPoint(pointSize - 1);
             }
+
+            adjust = true;
         }
     }
     //endregion

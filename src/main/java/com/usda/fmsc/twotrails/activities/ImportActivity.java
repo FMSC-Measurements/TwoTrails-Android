@@ -2,6 +2,7 @@ package com.usda.fmsc.twotrails.activities;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
@@ -54,15 +55,18 @@ public class ImportActivity extends TtAjusterCustomToolbarActivity {
             switch (code) {
                 case Success:
                     fabProgCircle.beginFinalAnimation();
-                    Snackbar.make(findViewById(R.id.parent), "File Imported", Snackbar.LENGTH_LONG)
+                    Snackbar snackbar = Snackbar.make(findViewById(R.id.parent), "File Imported", Snackbar.LENGTH_LONG)
                             .setAction("View Map", new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
                                     PolygonAdjuster.adjust(Global.DAL, activity);
                                 }
                             })
-                            .setActionTextColor(AndroidUtils.UI.getColor(getBaseContext(), R.color.primaryLighter))
-                            .show();
+                            .setActionTextColor(AndroidUtils.UI.getColor(getBaseContext(), R.color.primaryLighter));
+
+                    AndroidUtils.UI.setSnackbarTextColor(snackbar, Color.WHITE);
+
+                    snackbar.show();
 
                     adjust = true;
                     return;

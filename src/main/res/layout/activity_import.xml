@@ -89,10 +89,6 @@
         android:id="@+id/importFabImportProgressCircle"
         style="@style/fabProgressHolderStyle"
         app:finalIcon="@drawable/ic_file_download_white_36dp"
-        android:layout_margin="0dp"
-        android:layout_marginBottom="0dp"
-        android:layout_marginRight="0dp"
-        android:layout_marginEnd="0dp"
         app:layout_anchor="@id/parent"
         app:layout_anchorGravity="bottom|right|end">
 
@@ -101,10 +97,7 @@
             style="@style/fabProgressStyle"
             android:src="@drawable/ic_file_download_white_36dp"
             android:onClick="btnImport"
-            android:layout_margin="0dp"
-            android:layout_marginBottom="0dp"
-            android:layout_marginRight="0dp"
-            android:layout_marginEnd="0dp"
+            android:layout_margin="@dimen/fab_margin"
             android:visibility="invisible"/>
 
     </com.usda.fmsc.android.widget.FABProgressCircleEx>

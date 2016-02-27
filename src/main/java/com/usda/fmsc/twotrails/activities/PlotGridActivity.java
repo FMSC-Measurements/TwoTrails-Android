@@ -305,7 +305,7 @@ public class PlotGridActivity extends CustomToolbarActivity {
 
         for (final TtPolygon poly : allPolys) {
             if (poly.getName().equals(polyName)) {
-                if (!Global.Settings.DeviceSettings.getAutoOverwritePlotGridAsk()) {
+                if (Global.Settings.DeviceSettings.getAutoOverwritePlotGridAsk()) {
                     DontAskAgainDialog dialog = new DontAskAgainDialog(
                             this,
                             Global.Settings.DeviceSettings.AUTO_OVERWRITE_PLOTGRID_ASK,

@@ -171,7 +171,7 @@ public class Take5PointsEditRvAdapter extends RecyclerViewEx.AdapterEx<ViewHolde
                     @Override
                     public void afterTextChanged(Editable s) {
                         if (s.length() > 0) {
-                            ssp.setSlopeDistance(ParseEx.parseDouble(s.toString()));
+                            ssp.setSlopeDistance(TtUtils.Convert.distance(ParseEx.parseDouble(s.toString()), Units.Dist.Meters, metadata.getDistance()));
                         } else {
                             ssp.setSlopeDistance(0);
                         }

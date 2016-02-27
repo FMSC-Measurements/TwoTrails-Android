@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.ListPreference;
@@ -264,7 +265,7 @@ public class SettingsFragment extends PreferenceFragment {
                                                 binder.stopGps();
                                             }
 
-                                            if (!Global.Settings.DeviceSettings.getAutoSetGpsNameToMetaAsk()) {
+                                            if (Global.Settings.DeviceSettings.getAutoSetGpsNameToMetaAsk()) {
 
                                                 DontAskAgainDialog dialog = new DontAskAgainDialog(getActivity(),
                                                         Global.Settings.DeviceSettings.AUTO_SET_GPS_NAME_TO_META_ASK,
@@ -546,6 +547,8 @@ public class SettingsFragment extends PreferenceFragment {
                         }
                     })
             .setActionTextColor(AndroidUtils.UI.getColor(getActivity(), R.color.primaryLighter));
+
+            AndroidUtils.UI.setSnackbarTextColor(snackbar, Color.WHITE);
 
             snackbar.show();
         } else {

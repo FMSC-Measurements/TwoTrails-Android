@@ -81,8 +81,8 @@ public class PolygonCalculator {
     public Boundaries getPointBoundaries() {
         double top, bottom, left, right, x, y;
 
-        top = bottom = polyX[0];
-        left = right = polyY[0];
+        left = right = polyX[0];
+        top = bottom = polyY[0];
 
         for (int i = 1; i < polyCorners; i++) {
             x = polyX[i];

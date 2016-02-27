@@ -112,5 +112,27 @@
             style="@style/MainActivityButtons"/>
 
         <View style="@style/Dividers"/>
+
+        <LinearLayout
+            android:id="@+id/mainFragToolsTest"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="visible">
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Test"
+                android:id="@+id/mainFragToolsBtnTest"
+                android:layout_gravity="center_horizontal"
+                android:onClick="btnTest"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:enabled="true"
+                style="@style/MainActivityButtons"/>
+
+            <View style="@style/Dividers"/>
+        </LinearLayout>
     </LinearLayout>
 </ScrollView>

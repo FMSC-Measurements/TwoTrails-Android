@@ -11,6 +11,13 @@
         android:visible="true"/>
 
     <item
+        android:id="@+id/take5MenuMode"
+        android:title="@string/menu_take5_map_mode"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_map_white"
+        android:visible="true"/>
+
+    <item
         android:id="@+id/take5MenuGps"
         android:title="@string/menu_x_gps_settings"
         app:showAsAction="never"

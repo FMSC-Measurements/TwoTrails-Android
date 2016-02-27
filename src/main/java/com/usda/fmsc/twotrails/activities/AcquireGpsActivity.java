@@ -130,8 +130,8 @@ public class AcquireGpsActivity extends AcquireGpsMapActivity {
     public void onMapReady(GoogleMap googleMap) {
         super.onMapReady(googleMap);
 
-        setMyLocationEnabled(true);
-        setFollowMyPosition(true);
+        setMapMyLocationEnabled(true);
+        setMapFollowMyPosition(true);
     }
 
     @Override

@@ -26,8 +26,9 @@
             android:text="@string/diag_move_first"
             android:id="@+id/diagMoveToLocFirst"
             android:layout_weight="1"
-            android:src="@drawable/ic_action_playback_prev_dark"
-            style="@style/AppButtons" />
+            android:src="@drawable/ic_first_page_primary_36dp"
+            style="@style/AppButtons"
+            android:contentDescription="@string/diag_move_first"/>
 
         <View style="@style/DividersVertical" />
 
@@ -37,8 +38,9 @@
             android:text="@string/diag_move_last"
             android:id="@+id/diagMoveToLocLast"
             android:layout_weight="1"
-            android:src="@drawable/ic_action_playback_next_dark"
-            style="@style/AppButtons" />
+            android:src="@drawable/ic_last_page_primary_36dp"
+            style="@style/AppButtons"
+            android:contentDescription="@string/diag_move_last"/>
 
     </LinearLayout>
 

@@ -2,6 +2,7 @@ package com.usda.fmsc.twotrails.activities;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.graphics.Color;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -345,8 +346,8 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
             Global.Settings.ProjectSettings.initProjectSettings(null);
 
             //for test values *****
-            testDAL(Global.DAL);
-            Global.DAL.setProjectID(new File(filePath).getName());
+            //testDAL(Global.DAL);
+            //Global.DAL.setProjectID(new File(filePath).getName());
             //******
 
 
@@ -533,13 +534,17 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
     private void duplicateFile(final String fileName) {
         if (Global.DAL.duplicate(fileName)) {
-            Snackbar.make(findViewById(R.id.parent), "File duplicated", Snackbar.LENGTH_LONG).setAction("Open", new View.OnClickListener() {
+            Snackbar snackbar = Snackbar.make(findViewById(R.id.parent), "File duplicated", Snackbar.LENGTH_LONG).setAction("Open", new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     openFile(fileName);
                 }
             })
-                    .setActionTextColor(AndroidUtils.UI.getColor(getBaseContext(), R.color.primaryLighter)).show();
+            .setActionTextColor(AndroidUtils.UI.getColor(getBaseContext(), R.color.primaryLighter));
+
+            AndroidUtils.UI.setSnackbarTextColor(snackbar, Color.WHITE);
+
+            snackbar.show();
         } else {
             Toast.makeText(this, "File failed to duplicate", Toast.LENGTH_SHORT).show();
         }
@@ -829,6 +834,9 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
         startActivity(new Intent(this, GpsLoggerActivity.class));
     }
 
+    public void btnTest(View view) {
+        startActivity(new Intent(this, TestActivity.class));
+    }
     //endregion
     //endregion
 }
