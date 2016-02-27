@@ -92,6 +92,7 @@
         android:src="@drawable/ic_clear_white_36dp"
         android:layout_gravity="bottom|start"
         app:layout_anchorGravity="bottom|start"
+        android:layout_margin="@dimen/fab_margin"
         android:onClick="btnCancelClick"/>
     
     <RelativeLayout

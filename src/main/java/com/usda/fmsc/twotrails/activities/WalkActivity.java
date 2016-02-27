@@ -58,7 +58,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
     private ImageButton ibBnd;
     private Drawable dOnBnd, dOffBnd, dWalk, dPause;
     private AnimationDrawableEx adWalking;
-
+    private MenuItem miMode;
 
     private WalkPoint _CurrentPoint;
     private TtPoint _PrevPoint;
@@ -68,7 +68,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
 
 
     private int pointsCreated = 0, increment, frequency, minWalkDist;
-    private boolean updated, onBnd = true, walking, useRing, useVib, menuCreated;
+    private boolean updated, onBnd = true, walking, useRing, useVib, menuCreated, mapViewMode;
     private long lastPointCreationTime = 0;
 
     private FilterOptions options;
@@ -190,6 +190,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_walk, menu);
 
+        miMode = menu.findItem(R.id.walkMenuMode);
         miRenameGroup = menu.findItem(R.id.walkMenuRenameGroup);
         miWalking = menu.findItem(R.id.walkMenuWalking);
         adWalking = new AnimationDrawableEx((AnimationDrawable)miWalking.getIcon());
@@ -239,6 +240,17 @@ public class WalkActivity extends AcquireGpsMapActivity {
             }
             case R.id.walkMenuRenameGroup: {
                 updateGroupName();
+                break;
+            }
+            case R.id.walkMenuMode: {
+                mapViewMode = !mapViewMode;
+                setMapGesturesEnabled(mapViewMode);
+                setMapFollowMyPosition(!mapViewMode);
+                txtCmt.setEnabled(!mapViewMode);
+                walkCardView.setEnabled(!mapViewMode && _CurrentPoint != null);
+                walkCardView.setVisibility(mapViewMode || _CurrentPoint == null ? View.GONE : View.VISIBLE);
+                walkCardView.setAlpha(mapViewMode || _CurrentPoint == null ? 0f : 1f);
+                miMode.setIcon(mapViewMode ? R.drawable.ic_add_location_white_36dp : R.drawable.ic_map_white);
                 break;
             }
         }
@@ -291,8 +303,8 @@ public class WalkActivity extends AcquireGpsMapActivity {
     public void onMapReady(GoogleMap googleMap) {
         super.onMapReady(googleMap);
 
-        setMyLocationEnabled(true);
-        setFollowMyPosition(true);
+        setMapMyLocationEnabled(true);
+        setMapFollowMyPosition(true);
     }
 
     private void updateGroupName() {
@@ -390,69 +402,90 @@ public class WalkActivity extends AcquireGpsMapActivity {
     }
 
     private void onPointCreated() {
-        Animation animOut = AnimationUtils.loadAnimation(this, R.anim.push_down_out_fast);
-        final Animation animIn = AnimationUtils.loadAnimation(this, R.anim.push_up_in_fast);
+        if (!mapViewMode) {
+            Animation animOut = AnimationUtils.loadAnimation(this, R.anim.push_down_out_fast);
+            final Animation animIn = AnimationUtils.loadAnimation(this, R.anim.push_up_in_fast);
 
-        final Context ctx = this;
+            final Context ctx = this;
 
-        animOut.setAnimationListener(new Animation.AnimationListener() {
-            @Override
-            public void onAnimationStart(Animation animation) {
-            }
-
-            @Override
-            public void onAnimationEnd(Animation animation) {
-                preFocusView.requestFocus();
-
-                tvPID.setText(StringEx.toString(_CurrentPoint.getPID()));
-                ibBnd.setImageDrawable(_CurrentPoint.isOnBnd() ? dOnBnd : dOffBnd);
-
-                tvX.setText(StringEx.toString(TtUtils.Math.round(_CurrentPoint.getUnAdjX(), Consts.Minimum_Point_Display_Digits)));
-                tvY.setText(StringEx.toString(TtUtils.Math.round(_CurrentPoint.getUnAdjY(), Consts.Minimum_Point_Display_Digits)));
-                tvElev.setText(StringEx.toString(TtUtils.Math.round(_CurrentPoint.getUnAdjZ(), Consts.Minimum_Point_Display_Digits)));
-
-                txtCmt.setText(_CurrentPoint.getComment());
-
-                walkCardView.setVisibility(View.VISIBLE);
-
-                walkCardView.clearAnimation();
-                walkCardView.startAnimation(animIn);
-            }
-
-            @Override
-            public void onAnimationRepeat(Animation animation) {
-
-            }
-        });
-
-        animIn.setAnimationListener(new Animation.AnimationListener() {
-            @Override
-            public void onAnimationStart(Animation animation) {
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animation animation) {
-                if (useVib) {
-                    AndroidUtils.Device.vibrate(ctx, Consts.Notifications.VIB_POINT_CREATED);
+            animOut.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
                 }
 
-                if (useRing) {
-                    AndroidUtils.Device.playSound(ctx, R.raw.ring);
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    preFocusView.requestFocus();
+
+                    tvPID.setText(StringEx.toString(_CurrentPoint.getPID()));
+                    ibBnd.setImageDrawable(_CurrentPoint.isOnBnd() ? dOnBnd : dOffBnd);
+
+                    tvX.setText(StringEx.toString(TtUtils.Math.round(_CurrentPoint.getUnAdjX(), Consts.Minimum_Point_Display_Digits)));
+                    tvY.setText(StringEx.toString(TtUtils.Math.round(_CurrentPoint.getUnAdjY(), Consts.Minimum_Point_Display_Digits)));
+                    tvElev.setText(StringEx.toString(TtUtils.Math.round(_CurrentPoint.getUnAdjZ(), Consts.Minimum_Point_Display_Digits)));
+
+                    txtCmt.setText(_CurrentPoint.getComment());
+
+                    walkCardView.setVisibility(View.VISIBLE);
+
+                    walkCardView.clearAnimation();
+                    walkCardView.startAnimation(animIn);
                 }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+
+                }
+            });
+
+            animIn.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    if (useVib) {
+                        AndroidUtils.Device.vibrate(ctx, Consts.Notifications.VIB_POINT_CREATED);
+                    }
+
+                    if (useRing) {
+                        AndroidUtils.Device.playSound(ctx, R.raw.ring);
+                    }
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+
+                }
+            });
+
+            walkCardView.startAnimation(animOut);
+        } else {
+            preFocusView.requestFocus();
+
+            tvPID.setText(StringEx.toString(_CurrentPoint.getPID()));
+            ibBnd.setImageDrawable(_CurrentPoint.isOnBnd() ? dOnBnd : dOffBnd);
+
+            tvX.setText(StringEx.toString(TtUtils.Math.round(_CurrentPoint.getUnAdjX(), Consts.Minimum_Point_Display_Digits)));
+            tvY.setText(StringEx.toString(TtUtils.Math.round(_CurrentPoint.getUnAdjY(), Consts.Minimum_Point_Display_Digits)));
+            tvElev.setText(StringEx.toString(TtUtils.Math.round(_CurrentPoint.getUnAdjZ(), Consts.Minimum_Point_Display_Digits)));
+
+            txtCmt.setText(_CurrentPoint.getComment());
+
+            if (useVib) {
+                AndroidUtils.Device.vibrate(this, Consts.Notifications.VIB_POINT_CREATED);
             }
 
-            @Override
-            public void onAnimationRepeat(Animation animation) {
-
+            if (useRing) {
+                AndroidUtils.Device.playSound(this, R.raw.ring);
             }
-        });
-
-        walkCardView.startAnimation(animOut);
+        }
 
         Global.TtNotifyManager.showPointAquired();
 
-        addMarker(_CurrentPoint, _Metadata, false);
+        addMapMarker(_CurrentPoint, _Metadata, false);
     }
 
     private void setStartWalkingDrawable(boolean startAquring) {

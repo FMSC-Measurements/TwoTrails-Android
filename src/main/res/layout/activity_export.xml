@@ -309,7 +309,6 @@
         android:id="@+id/exportFabExportProgressCircle"
         style="@style/fabProgressHolderStyle"
         app:finalIcon="@drawable/ic_file_upload_white_36dp"
-        android:layout_margin="@dimen/fab_margin"
         app:layout_anchor="@id/lay1"
         app:layout_anchorGravity="bottom|right|end">
 
@@ -318,7 +317,7 @@
             style="@style/fabProgressStyle"
             android:src="@drawable/ic_file_upload_white_36dp"
             android:onClick="btnExport"
-            android:layout_margin="0dp" />
+            android:layout_margin="@dimen/fab_margin" />
 
     </com.usda.fmsc.android.widget.FABProgressCircleEx>
 </android.support.design.widget.CoordinatorLayout>

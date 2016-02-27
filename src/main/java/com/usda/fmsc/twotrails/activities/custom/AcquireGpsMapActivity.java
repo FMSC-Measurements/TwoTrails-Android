@@ -12,10 +12,12 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.usda.fmsc.android.AndroidUtils;
+import com.usda.fmsc.android.adapters.MultiLineInfoWindowAdapter;
 import com.usda.fmsc.geospatial.nmea.NmeaBurst;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.Global;
@@ -29,15 +31,15 @@ import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.util.ArrayList;
 
-public class AcquireGpsMapActivity extends AcquireGpsCustomToolbarActivity implements GpsService.Listener, OnMapReadyCallback {
+public class AcquireGpsMapActivity extends AcquireGpsCustomToolbarActivity implements IAcquireMapActivity, GpsService.Listener, OnMapReadyCallback {
     private GoogleMap map;
     private ArrayList<Marker> _Markers;
 
     private int currentMapIndex = -1, mapOffsetY;
     boolean followPosition = false;
 
-
-    protected void setupMap() {
+    @Override
+    public void setupMap() {
         _Markers = new ArrayList<>();
 
         // check google play services and setup map
@@ -50,7 +52,8 @@ public class AcquireGpsMapActivity extends AcquireGpsCustomToolbarActivity imple
         }
     }
 
-    private void startMap() {
+    @Override
+    public void startMap() {
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
     }
@@ -67,7 +70,7 @@ public class AcquireGpsMapActivity extends AcquireGpsCustomToolbarActivity imple
 
 
     @Override
-    public void onMapReady(GoogleMap googleMap) {
+    public void onMapReady(final GoogleMap googleMap) {
         GpsService.GpsBinder binder = Global.getGpsBinder();
         if (Global.Settings.DeviceSettings.isGpsConfigured() &&
                 binder.getGpsProvider() == GpsService.GpsProvider.External) {
@@ -75,20 +78,28 @@ public class AcquireGpsMapActivity extends AcquireGpsCustomToolbarActivity imple
         }
 
         googleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
-        googleMap.getUiSettings().setAllGesturesEnabled(false);
+        googleMap.setInfoWindowAdapter(new MultiLineInfoWindowAdapter(this));
+        googleMap.setPadding(0, AndroidUtils.Convert.dpToPx(this, 260), 0, 0);
 
-        map = googleMap;
+        UiSettings uiSettings = googleMap.getUiSettings();
+        uiSettings.setAllGesturesEnabled(false);
+        uiSettings.setMyLocationButtonEnabled(false);
+        uiSettings.setMapToolbarEnabled(false);
+        uiSettings.setZoomControlsEnabled(false);
 
-        map.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
+        googleMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
             @Override
             public void onCameraChange(CameraPosition cameraPosition) {
-                map.moveCamera(CameraUpdateFactory.newLatLngZoom(Consts.GoogleMaps.USA_CENTER, 3));
-                map.setOnCameraChangeListener(null);
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(Consts.GoogleMaps.USA_CENTER, 3));
+                googleMap.setOnCameraChangeListener(null);
             }
         });
+
+        map = googleMap;
     }
 
-    protected void moveToMapPoint(int position) {
+    @Override
+    public void moveToMapPoint(int position) {
         if (currentMapIndex != position && position < _Markers.size()) {
             currentMapIndex = position;
 
@@ -111,11 +122,13 @@ public class AcquireGpsMapActivity extends AcquireGpsCustomToolbarActivity imple
     }
 
 
-    protected void addMarker(TtPoint point, TtMetadata metadata) {
-        addMarker(point, metadata, false);
+    @Override
+    public void addMapMarker(TtPoint point, TtMetadata metadata) {
+        addMapMarker(point, metadata, false);
     }
 
-    protected void addMarker(TtPoint point, TtMetadata metadata, boolean moveToPointAfterAdd) {
+    @Override
+    public void addMapMarker(TtPoint point, TtMetadata metadata, boolean moveToPointAfterAdd) {
         Marker marker;
         if (point.isGpsType()) {
             marker = map.addMarker(TtUtils.GMap.createMarkerOptions((GpsPoint)point, false, metadata));
@@ -164,16 +177,6 @@ public class AcquireGpsMapActivity extends AcquireGpsCustomToolbarActivity imple
         return map;
     }
 
-    protected void setMyLocationEnabled(boolean enabled) {
-        if (AndroidUtils.App.checkFineLocationPermission(this)) {
-            map.setMyLocationEnabled(enabled);
-        }
-    }
-
-    protected void setFollowMyPosition(boolean followPosition) {
-        this.followPosition = followPosition;
-    }
-
     @Override
     public void nmeaBurstReceived(final NmeaBurst nmeaBurst) {
         super.nmeaBurstReceived(nmeaBurst);
@@ -189,5 +192,22 @@ public class AcquireGpsMapActivity extends AcquireGpsCustomToolbarActivity imple
                 }
             });
         }
+    }
+
+    @Override
+    public void setMapMyLocationEnabled(boolean enabled) {
+        if (AndroidUtils.App.checkFineLocationPermission(this)) {
+            map.setMyLocationEnabled(enabled);
+        }
+    }
+
+    @Override
+    public void setMapFollowMyPosition(boolean followPosition) {
+        this.followPosition = followPosition;
+    }
+
+    @Override
+    public void setMapGesturesEnabled(boolean enabled) {
+        map.getUiSettings().setAllGesturesEnabled(enabled);
     }
 }

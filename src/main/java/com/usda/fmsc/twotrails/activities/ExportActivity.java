@@ -3,6 +3,7 @@ package com.usda.fmsc.twotrails.activities;
 import android.content.ClipData;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -14,6 +15,7 @@ import android.support.v7.app.ActionBar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 //import com.devpaul.filepickerlibrary.FilePickerActivity;
@@ -182,7 +184,7 @@ public class ExportActivity extends CustomToolbarActivity {
         final File dir = new File(String.format("%s/%s/", directory, Global.DAL.getProjectID()));
 
         if (dir.exists()) {
-            if (!Global.Settings.DeviceSettings.getAutoOverwriteExportAsk()) {
+            if (Global.Settings.DeviceSettings.getAutoOverwriteExportAsk()) {
                 DontAskAgainDialog dialog = new DontAskAgainDialog(this,
                         Global.Settings.DeviceSettings.AUTO_OVERWRITE_EXPORT_ASK,
                         Global.Settings.DeviceSettings.AUTO_OVERWRITE_EXPORT,
@@ -204,7 +206,7 @@ public class ExportActivity extends CustomToolbarActivity {
                     }
                 }, 1);
 
-                dialog.setNegativeButton("Cancel", null, 0);
+                dialog.setNegativeButton("Cancel", null, null);
 
                 dialog.show();
             } else {
@@ -212,7 +214,7 @@ public class ExportActivity extends CustomToolbarActivity {
                     case 2:
                         export(dir);
                         break;
-                    case 1:
+                    default:
                         selectDirectory(directory);
                         break;
                 }
@@ -281,6 +283,8 @@ public class ExportActivity extends CustomToolbarActivity {
                                     }
                                 })
                                 .setActionTextColor(AndroidUtils.UI.getColor(getBaseContext(), R.color.primaryLighter));
+
+                                AndroidUtils.UI.setSnackbarTextColor(snackbar, Color.WHITE);
 
                                 snackbar.show();
 

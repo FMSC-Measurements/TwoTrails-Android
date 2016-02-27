@@ -125,6 +125,12 @@ public class CalculateGpsActivity extends CustomToolbarActivity {
         txtRange = (EditText)findViewById(R.id.calcTxtRange);
         //endregion
 
+
+
+        if (_Bursts.size() > 0) {
+            txtRange.setText(String.format("1-%d", _Bursts.size()));
+        }
+
         //region Control Init
         ArrayAdapter<CharSequence> dopAdapter = ArrayAdapter.createFromResource(this, R.array.arr_dops, android.R.layout.simple_spinner_item);
         ArrayAdapter<CharSequence> fixAdapter = new ArrayAdapter<CharSequence>(this, android.R.layout.simple_spinner_item, EnumEx.getNames(GGASentence.GpsFixType.class));

@@ -34,7 +34,8 @@
                 <android.support.v7.widget.AppCompatSpinner
                     android:id="@+id/pointsToolBarSpinnerPoly"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"/>
+                    android:layout_height="match_parent"
+                    android:popupTheme="@style/PopupTheme"/>
             </LinearLayout>
         </android.support.v7.widget.Toolbar>
 

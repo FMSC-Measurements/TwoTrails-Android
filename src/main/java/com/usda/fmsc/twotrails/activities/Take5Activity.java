@@ -48,18 +48,17 @@ import com.usda.fmsc.geospatial.GeoPosition;
 import com.usda.fmsc.geospatial.GeoTools;
 import com.usda.fmsc.geospatial.nmea.NmeaBurst;
 import jp.wasabeef.recyclerview.animators.SlideInUpAnimator;
-import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
 
 public class Take5Activity extends AcquireGpsMapActivity {
     private RecyclerViewEx rvPoints;
     private Take5PointsEditRvAdapter t5pAdapter;
     private LinearLayoutManagerWithSmoothScroller linearLayoutManager;
     private FloatingActionButton fabT5, fabSS, fabCancel;
-    private LinearLayout lay;
+    private LinearLayout layCardInfo;
 
-    RelativeLayout progLay;
-    MaterialProgressBar prog;
-    TextView tvProg;
+    private RelativeLayout progLay;
+    private TextView tvProg;
+    private MenuItem miMode, miMoveToEnd;
 
     private ArrayList<TtPoint> _Points;
     private ArrayList<TtNmeaBurst> _Bursts, _UsedBursts;
@@ -70,12 +69,12 @@ public class Take5Activity extends AcquireGpsMapActivity {
     private TtGroup _Group;
 
     private int increment, takeAmount, nmeaCount = 0;
-    private boolean saved = true, updated, onBnd = true, cancelVisible, ignoreScroll, useRing, useVib;
+    private boolean saved = true, updated, onBnd = true, cancelVisible, ignoreScroll, useRing, useVib, mapViewMode;
 
     private FilterOptions options;
 
 
-    private AlphaAnimation anim = new AlphaAnimation(1f, .03f);
+    private AlphaAnimation animFadePartial = new AlphaAnimation(1f, .03f);
 
     private RecyclerView.OnScrollListener scrollListener = new RecyclerView.OnScrollListener() {
         boolean invisible = false, handling;
@@ -90,15 +89,15 @@ public class Take5Activity extends AcquireGpsMapActivity {
                         @Override
                         public void run() {
                             try {
-                                anim.cancel();
-                                lay.clearAnimation();
+                                animFadePartial.cancel();
+                                layCardInfo.clearAnimation();
 
-                                anim = new AlphaAnimation(.3f, 1f);
-                                anim.setDuration(250);
-                                anim.setFillEnabled(true);
-                                anim.setFillAfter(true);
+                                animFadePartial = new AlphaAnimation(.3f, 1f);
+                                animFadePartial.setDuration(250);
+                                animFadePartial.setFillEnabled(true);
+                                animFadePartial.setFillAfter(true);
 
-                                anim.setAnimationListener(new Animation.AnimationListener() {
+                                animFadePartial.setAnimationListener(new Animation.AnimationListener() {
                                     @Override
                                     public void onAnimationStart(Animation animation) {
 
@@ -106,8 +105,8 @@ public class Take5Activity extends AcquireGpsMapActivity {
 
                                     @Override
                                     public void onAnimationEnd(Animation animation) {
-                                        lay.setAlpha(1f);
-                                        lay.clearAnimation();
+                                        layCardInfo.setAlpha(1f);
+                                        layCardInfo.clearAnimation();
                                     }
 
                                     @Override
@@ -120,7 +119,7 @@ public class Take5Activity extends AcquireGpsMapActivity {
                                     Thread.sleep(350);
 
                                     if (recyclerView.getScrollState() == RecyclerView.SCROLL_STATE_IDLE) {
-                                        lay.startAnimation(anim);
+                                        layCardInfo.startAnimation(animFadePartial);
                                         invisible = false;
                                         handling = false;
                                     }
@@ -134,14 +133,14 @@ public class Take5Activity extends AcquireGpsMapActivity {
 
                 ignoreScroll = false;
             } else if (newState == RecyclerView.SCROLL_STATE_DRAGGING && !ignoreScroll && !invisible) {
-                anim.cancel();
+                animFadePartial.cancel();
 
-                anim = new AlphaAnimation(lay.getAlpha(), .3f);
-                anim.setDuration(250);
-                anim.setFillEnabled(true);
-                anim.setFillAfter(true);
+                animFadePartial = new AlphaAnimation(layCardInfo.getAlpha(), .3f);
+                animFadePartial.setDuration(250);
+                animFadePartial.setFillEnabled(true);
+                animFadePartial.setFillAfter(true);
 
-                lay.startAnimation(anim);
+                layCardInfo.startAnimation(animFadePartial);
 
                 invisible = true;
                 new Thread(new Runnable() {
@@ -240,7 +239,7 @@ public class Take5Activity extends AcquireGpsMapActivity {
             fabCancel = (FloatingActionButton)findViewById(R.id.take5FabCancel);
 
 
-            lay = (LinearLayout)findViewById(R.id.take5LayInfo);
+            layCardInfo = (LinearLayout)findViewById(R.id.take5LayInfo);
 
             t5pAdapter = new Take5PointsEditRvAdapter(this, _Points, _Metadata);
             linearLayoutManager = new LinearLayoutManagerWithSmoothScroller(this);
@@ -254,7 +253,6 @@ public class Take5Activity extends AcquireGpsMapActivity {
             rvPoints.addOnScrollListener(scrollListener);
 
             progLay = (RelativeLayout)findViewById(R.id.progressLayout);
-            prog = (MaterialProgressBar)findViewById(R.id.progress);
             tvProg = (TextView)findViewById(R.id.take5ProgressText);
 
             options = new FilterOptions();
@@ -279,8 +277,8 @@ public class Take5Activity extends AcquireGpsMapActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_take5, menu);
 
-        MenuItem item = menu.findItem(R.id.take5MenuToBottom);
-        item.getIcon().setAlpha(178);
+        miMoveToEnd = menu.findItem(R.id.take5MenuToBottom);
+        miMode = menu.findItem(R.id.take5MenuMode);
 
         return true;
     }
@@ -328,6 +326,17 @@ public class Take5Activity extends AcquireGpsMapActivity {
                 startActivityForResult(new Intent(this, SettingsActivity.class)
                                 .putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.FILTER_TAKE5_SETTINGS_PAGE),
                         Consts.Activities.SETTINGS);
+                break;
+            }
+            case R.id.take5MenuMode: {
+                mapViewMode = !mapViewMode;
+                miMoveToEnd.setVisible(!mapViewMode);
+                setMapGesturesEnabled(mapViewMode);
+                layCardInfo.setEnabled(!mapViewMode);
+                layCardInfo.setVisibility(mapViewMode ? View.GONE : View.VISIBLE);
+                fabSS.setVisibility(mapViewMode ? View.GONE : View.VISIBLE);
+                miMode.setIcon(mapViewMode ? R.drawable.ic_add_location_white_36dp : R.drawable.ic_map_white);
+                break;
             }
         }
 
@@ -411,10 +420,8 @@ public class Take5Activity extends AcquireGpsMapActivity {
         _AddTake5 = new Take5Point();
         setupPoint(_AddTake5);
 
-
         _Bursts = new ArrayList<>();
         _UsedBursts = new ArrayList<>();
-
 
         //progressBar.setProgress(0);
         startLogging();
@@ -482,7 +489,7 @@ public class Take5Activity extends AcquireGpsMapActivity {
 
                         if (tmp.getOp().isGpsType()) {
                             ssp.calculatePoint(_Polygon, tmp);
-                            addMarker(ssp, _Metadata, true);
+                            addMapMarker(ssp, _Metadata, true);
                             break;
                         }
                     }
@@ -526,7 +533,7 @@ public class Take5Activity extends AcquireGpsMapActivity {
             fabT5.setEnabled(true);
             fabSS.setEnabled(true);
 
-            addMarker(point, _Metadata, true);
+            addMapMarker(point, _Metadata, !mapViewMode);
 
             if (useVib) {
                 AndroidUtils.Device.vibrate(this, Consts.Notifications.VIB_POINT_CREATED);
