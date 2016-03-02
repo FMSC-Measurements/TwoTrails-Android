@@ -7,12 +7,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
 
 
 public class MainToolsFragment extends Fragment {
     Button btnMap, btnGEarth, btnHAID, btnExport,
             btnPlotGrid, btnMultiPoint, btnGpsLogger;
+    View viewTest;
 
     boolean enabled = false, viewExists = false;
 
@@ -41,6 +43,7 @@ public class MainToolsFragment extends Fragment {
         btnPlotGrid = (Button)view.findViewById(R.id.mainFragToolsBtnPlotGrid);
         btnMultiPoint = (Button)view.findViewById(R.id.mainFragToolsBtnMultiEdit);
         btnGpsLogger = (Button)view.findViewById(R.id.mainFragToolsBtnGpsLogger);
+        viewTest = view.findViewById(R.id.mainFragToolsTest);
 
         enableButtons(enabled);
 
@@ -57,7 +60,7 @@ public class MainToolsFragment extends Fragment {
     public void enableButtons(boolean enable) {
         enabled = enable;
 
-        if(viewExists) {
+        if (viewExists) {
             btnMap.setEnabled(enable);
             btnGEarth.setEnabled(enable);
             btnHAID.setEnabled(enable);
@@ -65,6 +68,12 @@ public class MainToolsFragment extends Fragment {
             btnPlotGrid.setEnabled(enable);
             //btnMultiPoint.setEnabled(enable);
             btnGpsLogger.setEnabled(enable);
+
+            if (Global.Settings.DeviceSettings.isDeveloperOptionsEnabled()) {
+                viewTest.setVisibility(View.VISIBLE);
+            } else {
+                viewTest.setVisibility(View.GONE);
+            }
         }
     }
 }

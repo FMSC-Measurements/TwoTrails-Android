@@ -9,6 +9,7 @@ import android.widget.Button;
 import android.widget.TableLayout;
 import android.widget.TextView;
 
+import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
 import com.usda.fmsc.twotrails.data.TwoTrailsSchema;
 import com.usda.fmsc.twotrails.R;
@@ -23,6 +24,7 @@ public class MainFileFragment extends Fragment {
     TableLayout tblInfo;
     TextView tvDate, tvPolys, tvPoints, tvGroups, tvMeta;
     DataAccessLayer _dal;
+    View viewCleanDb;
 
     boolean enabled = false, viewExists = false;
 
@@ -55,6 +57,7 @@ public class MainFileFragment extends Fragment {
         btnImport = (Button)view.findViewById(R.id.mainFragFileBtnImport);
         btnDup = (Button)view.findViewById(R.id.mainFragFileBtnDup);
         btnCleanDb = (Button)view.findViewById(R.id.mainFragFileBtnCleanDb);
+        viewCleanDb = view.findViewById(R.id.mainFragFileCleanDb);
 
         enableButtons(enabled);
 
@@ -75,12 +78,18 @@ public class MainFileFragment extends Fragment {
     public void enableButtons(boolean enable) {
         enabled = enable;
 
-        if(viewExists) {
+        if (viewExists) {
             btnImport.setEnabled(enable);
             btnDup.setEnabled(enable);
             btnCleanDb.setEnabled(enable);
 
             tblInfo.setVisibility(enable ? View.VISIBLE : View.INVISIBLE);
+
+            if (Global.Settings.DeviceSettings.isDeveloperOptionsEnabled()) {
+                viewCleanDb.setVisibility(View.VISIBLE);
+            } else {
+                viewCleanDb.setVisibility(View.GONE);
+            }
         }
     }
 

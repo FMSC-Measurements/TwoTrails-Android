@@ -22,6 +22,7 @@ import android.widget.Toast;
 
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.dialogs.InputDialog;
+import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.activities.custom.TtAjusterCustomToolbarActivity;
 import com.usda.fmsc.twotrails.adapters.RecentProjectAdapter;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
@@ -157,7 +158,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
         switch (item.getItemId()) {
             case R.id.mainMenuSettings:
-                startActivity(new Intent(this, PreferenceActivity.class));
+                startActivityForResult(new Intent(this, PreferenceActivity.class), Consts.Activities.SETTINGS);
                 break;
             case R.id.mainMenuGpsSettings:
                 startActivity(new Intent(this, SettingsActivity.class).
@@ -254,13 +255,6 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
                 openFile(data.getData());
                 break;
             }
-            /*
-            case CREATE_TT_FILE: {
-                if(data == null)
-                    return;
-                createFile();
-            }
-            */
             case UPDATE_INFO_AND_GOTO_DATA_TAB:
                 gotoDataTab();
             case UPDATE_INFO: {
@@ -271,16 +265,14 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
                 gotoDataTab();
                 break;
             }
-
-
-            case OPEN_SHP_FILE:
-                //Tester.testShape(data.getData().getPath());
+            case Consts.Activities.SETTINGS: {
+                updateAppInfo();
                 break;
+            }
 
             default:
                 break;
         }
-        //}
     }
 
 

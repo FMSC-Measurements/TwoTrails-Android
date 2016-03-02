@@ -1609,12 +1609,20 @@ public class DataAccessLayer {
 
             if (c.moveToFirst()) {
                 do {
-                    String cn; DateTime timeCreated; String pointCN; boolean used;
-                    DateTime fixTime; double groundSpeed; double trackAngle;
-                    double magVar; EastWest magVarDir; GSASentence.Mode mode; GSASentence.Fix fix;
-                    List<Integer> satsUsed; double pdop; double hdop; double vdop; GGASentence.GpsFixType fixQuality;
-                    int trackedSatellites; double horizDilution; double geoidHeight; UomElevation geoUom;
-                    int numberOfSatellitesInView; List<Satellite> satellites;
+                    String cn;
+                    DateTime timeCreated;
+                    String pointCN;
+                    boolean used;
+                    DateTime fixTime;
+                    double groundSpeed, trackAngle, magVar, pdop, hdop, vdop, horizDilution, geoidHeight;
+                    EastWest magVarDir;
+                    GSASentence.Mode mode;
+                    GSASentence.Fix fix;
+                    List<Integer> satsUsed;
+                    GGASentence.GpsFixType fixQuality;
+                    int trackedSatellites, numberOfSatellitesInView;
+                    UomElevation geoUom;
+                    //List<Satellite> satellites;
 
                     double lat, lon, elev;
                     NorthSouth latDir;
@@ -1769,22 +1777,22 @@ public class DataAccessLayer {
                         }
                     }
 
-                    satellites = new ArrayList<>();
-
-                    try {
-                        for (int i = 28; i < 76; i += 4) {
-                            if (!c.isNull(i) && !c.isNull(i + 1) && !c.isNull(i + 2) && !c.isNull(i + 3)) {
-                                satellites.add(new Satellite(
-                                    c.getInt(i),
-                                    c.getDouble(i + 1),
-                                    c.getDouble(i + 2),
-                                    c.getDouble(i + 3)
-                                ));
-                            }
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+//                    satellites = new ArrayList<>();
+//
+//                    try {
+//                        for (int i = 28; i < 76; i += 4) {
+//                            if (!c.isNull(i) && !c.isNull(i + 1) && !c.isNull(i + 2) && !c.isNull(i + 3)) {
+//                                satellites.add(new Satellite(
+//                                    c.getInt(i),
+//                                    c.getFloat(i + 1),
+//                                    c.getFloat(i + 2),
+//                                    c.getFloat(i + 3)
+//                                ));
+//                            }
+//                        }
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                    }
                     //endregion
 
                     nmeas.add(new TtNmeaBurst(cn, timeCreated, pointCN, used, new GeoPosition(lat, latDir, lon, lonDir, elev, uomelev), fixTime, groundSpeed,
@@ -1888,7 +1896,7 @@ public class DataAccessLayer {
             /*
             int i = 0;
             for (Satellite sat : burst.getSatellitesInView()) {
-                cvs.put(TwoTrailsSchema.TtNmeaSchema.SatIDs[i], sat.getID());
+                cvs.put(TwoTrailsSchema.TtNmeaSchema.SatIDs[i], sat.getNmeaID());
                 cvs.put(TwoTrailsSchema.TtNmeaSchema.SatElevs[i], sat.getElevation());
                 cvs.put(TwoTrailsSchema.TtNmeaSchema.SatAzs[i], sat.getAzimuth());
                 cvs.put(TwoTrailsSchema.TtNmeaSchema.SatSRNs[i], sat.getSRN());
@@ -1987,7 +1995,7 @@ public class DataAccessLayer {
             /*
             int i = 0;
             for (Satellite sat : burst.getSatellitesInView()) {
-                cvs.put(TwoTrailsSchema.TtNmeaSchema.SatIDs[i], sat.getID());
+                cvs.put(TwoTrailsSchema.TtNmeaSchema.SatIDs[i], sat.getNmeaID());
                 cvs.put(TwoTrailsSchema.TtNmeaSchema.SatElevs[i], sat.getElevation());
                 cvs.put(TwoTrailsSchema.TtNmeaSchema.SatAzs[i], sat.getAzimuth());
                 cvs.put(TwoTrailsSchema.TtNmeaSchema.SatSRNs[i], sat.getSRN());

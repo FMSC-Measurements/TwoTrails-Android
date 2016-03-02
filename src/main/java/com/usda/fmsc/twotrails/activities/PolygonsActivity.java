@@ -185,7 +185,8 @@ public class PolygonsActivity extends CustomToolbarActivity {
                                                 ignorePolyChange = true;
                                                 moveToPolygon(_CurrentIndex);
                                             } else {
-                                                deletePolygon(_deletePolygon, _CurrentIndex);
+                                                deletePolygon(_CurrentPolygon, _CurrentIndex);
+                                                lockPolygon(true);
                                             }
                                         }
                                     });
