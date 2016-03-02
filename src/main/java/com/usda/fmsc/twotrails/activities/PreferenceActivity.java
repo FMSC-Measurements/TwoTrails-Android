@@ -21,6 +21,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.usda.fmsc.android.AndroidUtils;
+import com.usda.fmsc.android.dialogs.InputDialog;
 import com.usda.fmsc.android.preferences.AppCompatPreferenceActivity;
 import com.usda.fmsc.twotrails.fragments.settings.PreferenceFragmentEx;
 import com.usda.fmsc.twotrails.Global;
@@ -156,7 +157,7 @@ public class PreferenceActivity extends AppCompatPreferenceActivity {
 
     public static class MiscPreferenceFragment extends PreferenceFragmentEx {
 
-        Preference prefExportReport, prefClearLog, prefResetDevice;
+        Preference prefExportReport, prefClearLog, prefResetDevice, prefCode;
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
@@ -167,12 +168,15 @@ public class PreferenceActivity extends AppCompatPreferenceActivity {
             prefClearLog = findPreference(getString(R.string.set_CLEAR_LOG));
             prefExportReport = findPreference(getString(R.string.set_EXPORT_REPORT));
             prefResetDevice = findPreference(getString(R.string.set_RESET));
+            prefCode = findPreference(getString(R.string.set_CODE));
 
             prefResetDevice.setOnPreferenceClickListener(resetDeviceListener);
 
             prefClearLog.setOnPreferenceClickListener(clearLogListener);
 
             prefExportReport.setOnPreferenceClickListener(exportReportListener);
+
+            prefCode.setOnPreferenceClickListener(enterCodeListener);
         }
 
         Preference.OnPreferenceClickListener resetDeviceListener = new Preference.OnPreferenceClickListener() {
@@ -278,5 +282,37 @@ public class PreferenceActivity extends AppCompatPreferenceActivity {
                 Toast.makeText(getActivity(), "Report failed to export", Toast.LENGTH_LONG).show();
             }
         }
+
+
+
+        Preference.OnPreferenceClickListener enterCodeListener = new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                final InputDialog idialog = new InputDialog(getActivity());
+
+                idialog.setPositiveButton(R.string.str_ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (idialog.getText().toLowerCase()) {
+                            case "dev": {
+                                Global.Settings.DeviceSettings.enabledDevelopterOptions(true);
+                                Toast.makeText(getActivity(), "Developer Mode Enabled", Toast.LENGTH_LONG).show();
+                                break;
+                            }
+                            case "disable dev": {
+                                Global.Settings.DeviceSettings.enabledDevelopterOptions(false);
+                                Toast.makeText(getActivity(), "Developer Mode Disabled", Toast.LENGTH_LONG).show();
+                                break;
+                            }
+                        }
+
+                    }
+                })
+                .setNeutralButton(R.string.str_cancel, null)
+                        .show();
+
+                return false;
+            }
+        };
     }
 }

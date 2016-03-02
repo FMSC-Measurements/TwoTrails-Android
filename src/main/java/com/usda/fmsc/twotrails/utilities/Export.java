@@ -494,7 +494,7 @@ public class Export {
 
                 /*
                 for (Satellite sat : burst.getSatellitesInView()) {
-                    values.add(StringEx.toString(sat.getID()));
+                    values.add(StringEx.toString(sat.getNmeaID()));
                     values.add(StringEx.toString(sat.getElevation()));
                     values.add(StringEx.toString(sat.getAzimuth()));
                     values.add(StringEx.toString(sat.getSRN()));

@@ -7,19 +7,23 @@
         android:key="@string/set_AUTO_OPEN_LAST_PROJECT"/>
 
     <com.usda.fmsc.android.preferences.SwitchCompatPreference
-        android:key="DropZero"
+        android:key="@string/set_DROP"
         android:title="Drop Zeros"
         android:summary="Drop Empty Points" />
 
     <Preference
         android:title="Export Report"
-        android:key="prefExportReport"/>
+        android:key="@string/set_EXPORT_REPORT"/>
 
     <Preference
         android:title="Clear Log"
-        android:key="prefClearLog"/>
+        android:key="@string/set_CLEAR_LOG"/>
 
     <Preference
         android:title="Reset Device Settings"
-        android:key="prefResetDevice" />
+        android:key="@string/set_RESET" />
+
+    <Preference
+        android:title="Enter Code"
+        android:key="@string/set_CODE" />
 </PreferenceScreen>

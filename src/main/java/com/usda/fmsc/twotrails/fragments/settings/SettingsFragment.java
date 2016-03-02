@@ -25,6 +25,7 @@ import android.widget.Toast;
 
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.dialogs.DontAskAgainDialog;
+import com.usda.fmsc.android.dialogs.InputDialog;
 import com.usda.fmsc.android.preferences.ListCompatPreference;
 import com.usda.fmsc.android.preferences.SwitchCompatPreference;
 import com.usda.fmsc.twotrails.activities.SettingsActivity;
@@ -48,7 +49,7 @@ public class SettingsFragment extends PreferenceFragment {
     public static final String CURRENT_PAGE = "CurrentPage";
 
     GpsService.GpsBinder binder;
-    Preference prefGpsCheck, prefExportReport, prefClearLog, prefResetDevice, prefCheckNmea;
+    Preference prefGpsCheck, prefExportReport, prefClearLog, prefResetDevice, prefCheckNmea, prefCode;
     SwitchCompatPreference swtUseExDev;
     PreferenceCategory exGpsCat;
     ListCompatPreference perfLstGpsDevice;
@@ -131,6 +132,7 @@ public class SettingsFragment extends PreferenceFragment {
         prefExportReport = findPreference(getString(R.string.set_EXPORT_REPORT));
         prefResetDevice = findPreference(getString(R.string.set_RESET));
         prefCheckNmea = findPreference(getString(R.string.set_GPS_CHECK_NMEA));
+        prefCode = findPreference(getString(R.string.set_CODE));
 
         binder = Global.getGpsBinder();
 
@@ -148,6 +150,8 @@ public class SettingsFragment extends PreferenceFragment {
         prefCheckNmea.setOnPreferenceClickListener(checkNmeaListener);
 
         prefExportReport.setOnPreferenceClickListener(exportReportListener);
+
+        prefCode.setOnPreferenceClickListener(enterCodeListener);
 
         //get initial bluetooth devices
         setBTValues(perfLstGpsDevice);
@@ -528,6 +532,35 @@ public class SettingsFragment extends PreferenceFragment {
         }
     };
 
+    Preference.OnPreferenceClickListener enterCodeListener = new Preference.OnPreferenceClickListener() {
+        @Override
+        public boolean onPreferenceClick(Preference preference) {
+            final InputDialog idialog = new InputDialog(getActivity());
+
+            idialog.setPositiveButton(R.string.str_ok, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    switch (idialog.getText().toLowerCase()) {
+                        case "dev": {
+                            Global.Settings.DeviceSettings.enabledDevelopterOptions(true);
+                            Toast.makeText(getActivity(), "Developer Mode Enabled", Toast.LENGTH_LONG).show();
+                            break;
+                        }
+                        case "disable dev": {
+                            Global.Settings.DeviceSettings.enabledDevelopterOptions(false);
+                            Toast.makeText(getActivity(), "Developer Mode Disabled", Toast.LENGTH_LONG).show();
+                            break;
+                        }
+                    }
+
+                }
+            })
+            .setNeutralButton(R.string.str_cancel, null)
+            .show();
+
+            return false;
+        }
+    };
 
     Snackbar snackbar;
     private void onExportReportComplete(String filepath) {

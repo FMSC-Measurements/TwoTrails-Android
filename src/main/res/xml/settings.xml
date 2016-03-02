@@ -294,7 +294,7 @@
             android:key="miscSetup">
 
             <com.usda.fmsc.android.preferences.SwitchCompatPreference
-                android:key="DropZero"
+                android:key="@string/set_DROP"
                 android:title="Drop Zeros"
                 android:summary="Drop Empty Points" />
         </PreferenceScreen>
@@ -314,5 +314,9 @@
         <Preference
             android:title="Reset Device Settings"
             android:key="@string/set_RESET" />
+
+        <Preference
+            android:title="Enter Code"
+            android:key="@string/set_CODE" />
     </PreferenceCategory>
 </PreferenceScreen>

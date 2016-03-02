@@ -164,9 +164,11 @@
     <string name="set_RF_LIST_DEVICE">rfLocDevice</string>
     <string name="set_RF_DEVICE">rfDevice</string>
 
+    <string name="set_DROP">prefDropZero</string>
     <string name="set_CLEAR_LOG">prefClearLog</string>
     <string name="set_EXPORT_REPORT">prefExportReport</string>
     <string name="set_RESET">prefResetDevice</string>
+    <string name="set_CODE">prefEnterCode</string>
 
 
     <string name="set_settings_page">settings_page</string>
@@ -262,6 +264,7 @@
     <string name="main_btn_import">Import</string>
     <string name="main_btn_duplicate">Duplicate</string>
     <string name="main_btn_exit">Exit</string>
+    <string name="main_btn_clean">Clean DB</string>
 
     <string name="main_btn_point_edit">Point Edit</string>
     <string name="main_btn_poly_edit">Polygon Edit</string>
