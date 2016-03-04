@@ -250,7 +250,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
                 walkCardView.setEnabled(!mapViewMode && _CurrentPoint != null);
                 walkCardView.setVisibility(mapViewMode || _CurrentPoint == null ? View.GONE : View.VISIBLE);
                 walkCardView.setAlpha(mapViewMode || _CurrentPoint == null ? 0f : 1f);
-                miMode.setIcon(mapViewMode ? R.drawable.ic_add_location_white_36dp : R.drawable.ic_map_white);
+                miMode.setIcon(mapViewMode ? R.drawable.ic_add_location_white_36dp : R.drawable.ic_map_white_36dp);
                 break;
             }
         }

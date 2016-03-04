@@ -1,19 +1,26 @@
 package com.usda.fmsc.twotrails.activities.custom;
 
+import android.animation.Animator;
 import android.app.Activity;
 import android.support.v7.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.view.View;
+import android.view.ViewTreeObserver;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.usda.fmsc.android.AndroidUtils;
+import com.usda.fmsc.android.animation.ViewAnimator;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.R;
 
 import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
+import com.usda.fmsc.twotrails.ui.GpsStatusSatView;
+import com.usda.fmsc.twotrails.ui.GpsStatusSkyView;
 import com.usda.fmsc.utilities.StringEx;
 
 import com.usda.fmsc.geospatial.nmea.NmeaBurst;
@@ -29,11 +36,14 @@ public class AcquireGpsCustomToolbarActivity extends CustomToolbarActivity imple
     private TextView tvGpsStatus, tvGpsMode, tvLat, tvLon, tvUtmX, tvUtmY,
             tvZone, tvDec, tvSat, tvElev, tvPdop, tvHdop;
 
+    private View viewGpsInfoLaySatInfo;
+    private GpsStatusSkyView skyView;
+    private GpsStatusSatView statusView;
 
     private GpsService.GpsBinder binder;
     private Integer zone = null;
     private boolean canceling = false, useLostConnectionWarning = false;
-    private boolean logging;
+    private boolean logging, gpsExtraVisable = true, animating, gpsExtraLayoutSet;
 
 
 
@@ -80,6 +90,20 @@ public class AcquireGpsCustomToolbarActivity extends CustomToolbarActivity imple
         tvHdop = (TextView)findViewById(R.id.gpsInfoTvHdop);
 
         tvGpsMode.setText(GGASentence.GpsFixType.NoFix.toString());
+
+        viewGpsInfoLaySatInfo = findViewById(R.id.gpsInfoLaySatInfo);
+
+        skyView = (GpsStatusSkyView)findViewById(R.id.gpsInfoSatSky);
+        statusView = (GpsStatusSatView)findViewById(R.id.gpsInfoSatStatus);
+
+        final ViewTreeObserver observer = skyView.getViewTreeObserver();
+        observer.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                skyView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                hideExtraGpsStatus(false);
+            }
+        });
     }
 
     @Override
@@ -92,6 +116,24 @@ public class AcquireGpsCustomToolbarActivity extends CustomToolbarActivity imple
             if (!Global.Settings.DeviceSettings.isGpsAlwaysOn()) {
                 binder.stopGps();
             }
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        if (skyView != null) {
+            skyView.pause();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (skyView != null) {
+            skyView.resume();
         }
     }
 
@@ -158,6 +200,11 @@ public class AcquireGpsCustomToolbarActivity extends CustomToolbarActivity imple
                             burst.getSatellitesInViewCount()));
                 } else {
                     tvSat.setText(nVal);
+                }
+
+                if (gpsExtraVisable) {
+                    skyView.update(burst);
+                    statusView.update(burst);
                 }
             }
         });
@@ -234,7 +281,6 @@ public class AcquireGpsCustomToolbarActivity extends CustomToolbarActivity imple
 
     @Override
     public void nmeaBurstReceived(NmeaBurst nmeaBurst) {
-
         setNmeaData(nmeaBurst);
     }
 
@@ -272,5 +318,73 @@ public class AcquireGpsCustomToolbarActivity extends CustomToolbarActivity imple
 
     protected boolean isCanceling() {
         return canceling;
+    }
+
+
+    protected void hideExtraGpsStatus() {
+        hideExtraGpsStatus(true);
+    }
+
+    protected void hideExtraGpsStatus(boolean animate) {
+        if (gpsExtraVisable) {
+            if (!gpsExtraLayoutSet) {
+                RelativeLayout lay = (RelativeLayout) findViewById(R.id.gpsInfoLaySatInfoSub);
+
+                lay.getLayoutParams().width = lay.getWidth();
+                lay.getLayoutParams().height = lay.getHeight();
+                lay.requestLayout();
+                gpsExtraLayoutSet = true;
+            }
+
+            if (animate) {
+                if (!animating) {
+                    animating = true;
+
+                    ViewAnimator.collapseView(viewGpsInfoLaySatInfo, new ViewAnimator.SimpleAnimatorListener() {
+                        @Override
+                        public void onAnimationEnd(Animator animator) {
+                            super.onAnimationEnd(animator);
+                            gpsExtraVisable = false;
+                            animating = false;
+                        }
+                    });
+
+                    animating = true;
+                }
+            } else {
+                viewGpsInfoLaySatInfo.getLayoutParams().height = 0;
+                viewGpsInfoLaySatInfo.requestLayout();
+                viewGpsInfoLaySatInfo.setVisibility(View.GONE);
+                gpsExtraVisable = false;
+            }
+        }
+    }
+
+    protected void showExtraGpsStatus() {
+        if (!animating && !gpsExtraVisable) {
+            ViewAnimator.expandView(viewGpsInfoLaySatInfo, new ViewAnimator.SimpleAnimatorListener() {
+                @Override
+                public void onAnimationEnd(Animator animator) {
+                    super.onAnimationEnd(animator);
+                    gpsExtraVisable = true;
+                    animating = false;
+                }
+            });
+
+            animating = true;
+        }
+    }
+
+    protected boolean isGpsExtraInfoVisible() {
+        return gpsExtraVisable;
+    }
+
+
+    public void btnGpsInfoClick(View view) {
+        if (gpsExtraVisable) {
+            hideExtraGpsStatus();
+        } else {
+            showExtraGpsStatus();
+        }
     }
 }

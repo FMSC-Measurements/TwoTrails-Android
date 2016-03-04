@@ -81,6 +81,8 @@
     <string name="str_overwrite">Overwrite</string>
     <string name="str_settings">Settings</string>
     <string name="str_listen_recv">Listening to Receiver</string>
+    <string name="str_satellites">Satellites</string>
+    <string name="str_mode">Mode</string>
 
 
     <string name="op_gps">GPS</string>

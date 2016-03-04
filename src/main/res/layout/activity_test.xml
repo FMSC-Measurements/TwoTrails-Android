@@ -6,8 +6,17 @@
     android:layout_height="match_parent"
     tools:context="com.usda.fmsc.twotrails.activities.TestActivity">
 
-    <com.usda.fmsc.twotrails.ui.GpsStatusView
-        android:id="@+id/testGpsStatusView"
+    <com.usda.fmsc.twotrails.ui.GpsStatusSatView
+        android:id="@+id/testGpsStatusSatView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="50dp"
+        android:layout_alignParentBottom="true"/>
+
+    <com.usda.fmsc.twotrails.ui.GpsStatusSkyView
+        android:id="@+id/testGpsStatusSkyView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_alignParentTop="true"
+        android:layout_above="@id/testGpsStatusSatView"/>
+
 </RelativeLayout>

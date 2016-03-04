@@ -335,7 +335,7 @@ public class Take5Activity extends AcquireGpsMapActivity {
                 layCardInfo.setEnabled(!mapViewMode);
                 layCardInfo.setVisibility(mapViewMode ? View.GONE : View.VISIBLE);
                 fabSS.setVisibility(mapViewMode ? View.GONE : View.VISIBLE);
-                miMode.setIcon(mapViewMode ? R.drawable.ic_add_location_white_36dp : R.drawable.ic_map_white);
+                miMode.setIcon(mapViewMode ? R.drawable.ic_add_location_white_36dp : R.drawable.ic_map_white_36dp);
                 break;
             }
         }
@@ -731,6 +731,9 @@ public class Take5Activity extends AcquireGpsMapActivity {
         if (!validateSideShot()) {
             return;
         }
+
+        if (isGpsExtraInfoVisible())
+            hideExtraGpsStatus();
 
         setupSideShot();
     }
