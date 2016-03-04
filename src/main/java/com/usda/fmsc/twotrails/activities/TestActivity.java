@@ -8,11 +8,13 @@ import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.gps.GpsService;
-import com.usda.fmsc.twotrails.ui.GpsStatusView;
+import com.usda.fmsc.twotrails.ui.GpsStatusSatView;
+import com.usda.fmsc.twotrails.ui.GpsStatusSkyView;
 
 public class TestActivity extends AppCompatActivity implements GpsService.Listener {
     GpsService.GpsBinder binder;
-    GpsStatusView gsv;
+    GpsStatusSkyView gskyv;
+    GpsStatusSatView gsatv;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,7 +22,8 @@ public class TestActivity extends AppCompatActivity implements GpsService.Listen
         setContentView(R.layout.activity_test);
 
 
-        gsv = (GpsStatusView)findViewById(R.id.testGpsStatusView);
+        gskyv = (GpsStatusSkyView)findViewById(R.id.testGpsStatusSkyView);
+        gsatv = (GpsStatusSatView)findViewById(R.id.testGpsStatusSatView);
 
         binder = Global.getGpsBinder();
 
@@ -31,6 +34,9 @@ public class TestActivity extends AppCompatActivity implements GpsService.Listen
                 binder.startGps();
             }
         }
+
+
+        gskyv.lockCompass(true);
     }
 
     @Override
@@ -47,9 +53,28 @@ public class TestActivity extends AppCompatActivity implements GpsService.Listen
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (gskyv != null) {
+            gskyv.resume();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        if (gskyv != null) {
+            gskyv.pause();
+        }
+    }
+
+    @Override
     public void nmeaBurstReceived(NmeaBurst nmeaBurst) {
-        if (gsv != null) {
-            gsv.update(nmeaBurst);
+        if (gskyv != null) {
+            gskyv.update(nmeaBurst);
+            gsatv.update(nmeaBurst);
         }
     }
 
@@ -87,4 +112,5 @@ public class TestActivity extends AppCompatActivity implements GpsService.Listen
     public void gpsError(GpsService.GpsError error) {
 
     }
+
 }

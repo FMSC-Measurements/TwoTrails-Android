@@ -4,7 +4,9 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="10dp"
-    android:id="@+id/gpsInfoParent">
+    android:id="@+id/gpsInfoParent"
+    android:clickable="true"
+    android:onClick="btnGpsInfoClick">
 
     <TableLayout
         android:id="@+id/gpsInfoLayStats"
@@ -18,7 +20,9 @@
                 android:layout_height="wrap_content"
                 android:text="@string/str_gps_stat"
                 android:paddingEnd="3dp"
-                android:paddingRight="3dp"/>
+                android:paddingRight="3dp"
+                android:paddingStart="0dp"
+                android:paddingLeft="0dp"/>
 
             <TextView
                 android:id="@+id/gpsInfoTvGpsStatus"
@@ -29,7 +33,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Mode"/>
+                android:text="@string/str_mode"/>
 
             <TextView
                 android:id="@+id/gpsInfoTvGpsMode"
@@ -64,7 +68,9 @@
                 android:id="@+id/gpsInfoTvUtmX"
                 android:text="@string/str_nullvalue"
                 android:paddingEnd="5dp"
-                android:paddingRight="5dp"/>
+                android:paddingRight="5dp"
+                android:paddingStart="0dp"
+                android:paddingLeft="0dp"/>
             <TextView
                 android:text="@string/str_utmy"/>
             <TextView
@@ -77,7 +83,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content">
             <TextView
-                android:text="Satellites"/>
+                android:text="@string/str_satellites"/>
             <TextView
                 android:id="@+id/gpsInfoTvSats"
                 android:text="@string/str_nullvalue"/>
@@ -100,7 +106,9 @@
             <TextView
                 android:text="@string/str_dec"
                 android:paddingEnd="3dp"
-                android:paddingRight="3dp"/>
+                android:paddingRight="3dp"
+                android:paddingStart="0dp"
+                android:paddingLeft="0dp"/>
             <TextView
                 android:id="@+id/gpsInfoTvDec"
                 android:text="@string/str_nullvalue"/>
@@ -121,4 +129,31 @@
                 android:text="@string/str_nullvalue"/>
         </TableRow>
     </TableLayout>
+
+    <FrameLayout
+        android:id="@+id/gpsInfoLaySatInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/gpsInfoLayStats">
+
+        <RelativeLayout
+            android:id="@+id/gpsInfoLaySatInfoSub"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingTop="8dp">
+
+            <com.usda.fmsc.twotrails.ui.GpsStatusSatView
+                android:id="@+id/gpsInfoSatStatus"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/toolbar_height"
+                android:layout_alignParentBottom="true"/>
+
+            <com.usda.fmsc.twotrails.ui.GpsStatusSkyView
+                android:id="@+id/gpsInfoSatSky"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_alignParentTop="true"
+                android:layout_above="@id/gpsInfoSatStatus"/>
+        </RelativeLayout>
+    </FrameLayout>
 </RelativeLayout>
