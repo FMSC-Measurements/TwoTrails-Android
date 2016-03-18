@@ -54,9 +54,6 @@ public class PointEditorDialog extends DialogFragment {
         args.putString(METACN, metacn);
         args.putString(CN, cn);
 
-        ArrayList<String> names = new ArrayList<>(metas.size());
-        ArrayList<String> cns = new ArrayList<>(metas.size());
-
         args.putByteArray(META, TtUtils.Convert.listToByteArray(new ArrayList(metas.values())));
 
         f.setArguments(args);

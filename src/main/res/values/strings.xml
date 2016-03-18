@@ -418,6 +418,129 @@
     <string name="title_section3">Section 3</string>
 
 
+    <!-- ArcGIS Values -->
+    <string name="agmap_NatGeo_World_Map_name">NatGeo World Map</string>
+    <string name="agmap_NatGeo_World_Map_url">http://services.arcgisonline.com/arcgis/rest/services/NatGeo_World_Map/MapServer</string>
+    <string name="agmap_NatGeo_World_Map_desc">This map is designed to be used as a general reference map for informational and educational
+        purposes as well as a base map by GIS professionals and other users for creating web maps and web mapping applications. The map was
+        developed by National Geographic and Esri and reflects the distinctive National Geographic cartographic style in a multi-scale
+        reference map of the world. The map was authored using data from a variety of leading data providers, including DeLorme, HERE,
+        UNEP-WCMC, NASA, ESA, USGS, and others. This reference map includes administrative boundaries, cities, protected areas, highways,
+        roads, railways, water features, buildings and landmarks, overlaid on shaded relief and land cover imagery for added context. The
+        map currently includes global coverage down to ~1:144k scale and more detailed coverage for North America down to ~1:9k scale. For
+        more information on this map, including our terms of use, visit us online at http://goto.arcgisonline.com/maps/NatGeo_World_Map</string>
+
+    <string name="agmap_NGS_Topo_US_2D_name">NGS Topo US 2D</string>
+    <string name="agmap_NGS_Topo_US_2D_url">http://services.arcgisonline.com/arcgis/rest/services/NGS_Topo_US_2D/MapServer</string>
+    <string name="agmap_NGS_Topo_US_2D_desc">This map presents land cover imagery for the world and detailed topographic maps for the
+        United States. The map includes the National Park Service (NPS) Natural Earth physical map at 1.24km per pixel for the world at
+        small scales, i-cubed eTOPO 1:250,000-scale maps for the contiguous United States at medium scales, and National Geographic TOPO!
+        1:100,000 and 1:24,000-scale maps (1:250,000 and 1:63,000 in Alaska) for the United States at large scales. The TOPO! maps are
+        seamless, scanned images of United States Geological Survey (USGS) paper topographic maps. For more information on this map,
+        including our terms of use, visit us online at http://goto.arcgisonline.com/maps/NGS_Topo_US_2D</string>
+
+
+    <string name="agmap_Ocean_Basemap_name">Ocean Basemap</string>
+    <string name="agmap_Ocean_Basemap_url">http://services.arcgisonline.com/arcgis/rest/services/Ocean_Basemap/MapServer</string>
+    <string name="agmap_Ocean_Basemap_desc">This map is designed to be used as a base map by marine GIS professionals and as a reference
+        map by anyone interested in ocean data. The base map includes bathymetry, marine water body names, undersea feature names, and
+        derived depth values in meters. Land features include administrative boundaries, cities, inland waters, roads, overlaid on land
+        cover and shaded relief imagery. The map was compiled from a variety of best available sources from several data providers,
+        including General Bathymetric Chart of the Oceans GEBCO_08 Grid, IHO-IOC GEBCO Gazetteer of Undersea Feature Names, National
+        Oceanic and Atmospheric Administration (NOAA), and National Geographic, DeLorme, NAVTEQ, Geonames.org, and Esri, and various
+        other contributors. The base map currently provides coverage for the world down to a scale of ~1:577k, and coverage down to
+        1:72k in US coastal areas, and various other areas. Coverage down to ~ 1:9k is available limited areas based on regional
+        hydrographic survey data. The base map was designed and developed by Esri. NOTE: Data from the GEBCO_08 grid shall not to be used
+        for navigation or for any other purpose relating to safety at sea. The GEBCO_08 Grid is largely based on a database of
+        ship-track soundings with interpolation between soundings guided by satellite-derived gravity data. In some areas, data from
+        existing grids are included. The GEBCO_08 Grid does not contain detailed information in shallower water areas, information
+        concerning the generation of the grid can be found on GEBCO\'s web site: http://www.gebco.net/data_and_products/gridded_bathymetry_data.
+        The GEBCO_08 Grid is accompanied by a Source Identifier (SID) Grid which indicates which cells in the GEBCO_08 Grid are based
+        on soundings or existing grids and which have been interpolated. The latest version of both grids and accompanying documentation
+        is available to download, on behalf of GEBCO, from the British Oceanographic Data Centre (BODC)
+        https://www.bodc.ac.uk/data/online_delivery/gebco. The names of the IHO (International Hydrographic Organization), IOC
+        (intergovernmental Oceanographic Commission), GEBCO (General Bathymetric Chart of the Oceans), NERC (Natural Environment Research
+        Council) or BODC (British Oceanographic Data Centre) may not be used in any way to imply, directly or otherwise, endorsement or
+        support of either the Licensee or their mapping system. For more information on this map, including our terms of use, visit us
+        online at http://goto.arcgisonline.com/maps/Ocean_Basemap</string>
+
+
+    <string name="agmap_USA_Topo_Maps_name">USA Topo Maps</string>
+    <string name="agmap_USA_Topo_Maps_url">http://services.arcgisonline.com/arcgis/rest/services/USA_Topo_Maps/MapServer</string>
+    <string name="agmap_USA_Topo_Maps_desc">This map presents land cover imagery for the world and detailed topographic maps for the United States.
+        The map includes the National Park Service (NPS) Natural Earth physical map at 1.24km per pixel for the world at small scales, i-cubed
+        eTOPO 1:250,000-scale maps for the contiguous United States at medium scales, and National Geographic TOPO! 1:100,000 and 1:24,000-scale
+        maps (1:250,000 and 1:63,000 in Alaska) for the United States at large scales. The TOPO! maps are seamless, scanned images of United States
+        Geological Survey (USGS) paper topographic maps. For more information on this map, including our terms of use, visit us online at
+        http://goto.arcgisonline.com/maps/USA_Topo_Maps</string>
+
+
+    <string name="agmap_World_Imagery_name">World Imagery</string>
+    <string name="agmap_World_Imagery_url">http://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer</string>
+    <string name="agmap_World_Imagery_desc">World Imagery provides one meter or better satellite and aerial imagery in many parts of the world
+        and lower resolution satellite imagery worldwide. The map includes 15m TerraColor imagery at small and mid-scales (591M down to 72k)
+        and 2.5m SPOT Imagery (288k to 72k) for the world, and USGS 15m Landsat imagery for Antarctica. The map features 0.3m resolution imagery
+        in the continental United States and 0.6m resolution imagery in parts of Western Europe from Digital Globe. Recent 1m USDA NAIP imagery
+        is available in select states of the US. In other parts of the world, 1 meter resolution imagery is available from GeoEye IKONOS,
+        Getmapping, AeroGRID, IGN Spain, and IGP Portugal. Additionally, imagery at different resolutions has been contributed by the GIS User
+        Community. For more information on this map, including the terms of use, visit us online at http://goto.arcgisonline.com/maps/World_Imagery</string>
+
+
+    <string name="agmap_World_Physical_Map_name">World Physical Map</string>
+    <string name="agmap_World_Physical_Map_url">http://services.arcgisonline.com/arcgis/rest/services/World_Physical_Map/MapServer</string>
+    <string name="agmap_World_Physical_Map_desc">This map presents the Natural Earth physical map at 1.24km per pixel for the world and 500m for
+        the coterminous United States. For more information on this map, including our terms of use, visit us online at
+        http://goto.arcgisonline.com/maps/World_Physical_Map</string>
+
+
+    <string name="agmap_World_Shaded_Relief_name">World Shaded Relief</string>
+    <string name="agmap_World_Shaded_Relief_url">http://services.arcgisonline.com/arcgis/rest/services/World_Shaded_Relief/MapServer</string>
+    <string name="agmap_World_Shaded_Relief_desc">This map portrays surface elevation as shaded relief. This map is used as a basemap layer to
+        add shaded relief to other GIS maps, such as the ArcGIS Online World Street Map. It is especially useful in maps that do not contain
+        orthoimagery. The map resolution (cell size) is as follows: 30 Meters for the U.S. 90 Meters for all land areas between 60° north
+        and 56° south latitude. 1 KM resolution above 60° north and 56° south. The shaded relief imagery was developed by Esri using GTOPO30,
+        Shuttle Radar Topography Mission (SRTM), and National Elevation Data (NED) data from the USGS. For more information on this map,
+        including our terms of use, visit us online at http://goto.arcgisonline.com/maps/World_Shaded_Relief</string>
+
+
+    <string name="agmap_World_Street_Map_name">World Street Map</string>
+    <string name="agmap_World_Street_Map_url">http://services.arcgisonline.com/arcgis/rest/services/World_Street_Map/MapServer</string>
+    <string name="agmap_World_Street_Map_desc">This worldwide street map presents highway-level data for the world. Street-level data includes
+        the United States; much of Canada; Mexico; Europe; Japan; Australia and New Zealand; India; South America and Central America; Africa;
+        and most of the Middle East. This comprehensive street map includes highways, major roads, minor roads, one-way arrow indicators,
+        railways, water features, administrative boundaries, cities, parks, and landmarks, overlaid on shaded relief imagery for added context.
+        The map also includes building footprints for selected areas. Coverage is provided down to ~1:4k with ~1:1k and ~1:2k data available
+        in select urban areas. The street map was developed by Esri using Esri basemap data, DeLorme basemap layers, U.S. Geological Survey
+        (USGS) elevation data, Intact Forest Landscape (IFL) data for the world; HERE data for Europe, Australia and New Zealand, North America,
+        South America and Central America, Africa, and most of the Middle East; OpenStreetMap contributors for select countries in Africa;
+        MapmyIndia data in India; and select data from the GIS user community. For more information on this map, including the terms of use,
+        visit us online at http://goto.arcgisonline.com/maps/World_Street_Map</string>
+
+
+    <string name="agmap_World_Terrain_Base_name">World Terrain Base</string>
+    <string name="agmap_World_Terrain_Base_url">http://services.arcgisonline.com/arcgis/rest/services/World_Terrain_Base/MapServer</string>
+    <string name="agmap_World_Terrain_Base_desc">This map is designed to be used as a base map by GIS professionals to overlay other thematic
+        layers such as demographics or land cover. The base map features shaded relief imagery, bathymetry, and coastal water features designed
+        to provide a neutral background for other data layers. The map was compiled from a variety of sources from several data providers,
+        including the U.S. Geological Survey, NOAA, and Esri. The base map currently provides coverage for the world down to a scale of ~1:1m
+        and coverage for the continental United States and Hawaii to a scale of ~1:70k. For more information on this map, including our terms
+        of use, visit us online at http://goto.arcgisonline.com/maps/World_Terrain_Base</string>
+
+
+    <string name="agmap_World_Topo_Map_name">World Topo Map</string>
+    <string name="agmap_World_Topo_Map_url">http://services.arcgisonline.com/arcgis/rest/services/World_Topo_Map/MapServer</string>
+    <string name="agmap_World_Topo_Map_desc">This map is designed to be used as a basemap by GIS professionals and as a reference map by anyone.
+        The map includes administrative boundaries, cities, water features, physiographic features, parks, landmarks, highways, roads, railways,
+        and airports overlaid on land cover and shaded relief imagery for added context. The map provides coverage for the world down to a
+        scale of ~1:72k. Coverage is provided down to ~1:4k for the following areas: Australia and New Zealand; India; Europe; Canada; Mexico;
+        the continental United States and Hawaii; South America and Central America; Africa; and most of the Middle East. Coverage down to ~1:1k
+        and ~1:2k is available in select urban areas. This basemap was compiled from a variety of best available sources from several data
+        providers, including the U.S. Geological Survey (USGS), U.S. Environmental Protection Agency (EPA), U.S. National Park Service (NPS),
+        Food and Agriculture Organization of the United Nations (FAO), Department of Natural Resources Canada (NRCAN), GeoBase, Agriculture and
+        Agri-Food Canada, DeLorme, HERE, Esri, OpenStreetMap contributors, and the GIS User Community. For more information on this map,
+        including our terms of use, visit us online at http://goto.arcgisonline.com/maps/World_Topo_Map</string>
+
+
     <!-- Example General settings -->
     <string name="pref_header_general">General</string>
 

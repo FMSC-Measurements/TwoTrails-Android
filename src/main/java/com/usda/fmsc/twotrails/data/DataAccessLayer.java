@@ -28,7 +28,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.usda.fmsc.geospatial.GeoPosition;
-import com.usda.fmsc.geospatial.nmea.Satellite;
 import com.usda.fmsc.geospatial.nmea.sentences.GGASentence;
 import com.usda.fmsc.geospatial.nmea.sentences.GSASentence;
 import com.usda.fmsc.geospatial.Units.*;

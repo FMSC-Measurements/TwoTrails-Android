@@ -3,13 +3,11 @@ package com.usda.fmsc.twotrails;
 import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.res.Resources;
-import android.os.Environment;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
@@ -21,6 +19,7 @@ import com.usda.fmsc.twotrails.activities.MainActivity;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
 import com.usda.fmsc.twotrails.devices.TtBluetoothManager;
 import com.usda.fmsc.twotrails.gps.GpsService;
+import com.usda.fmsc.twotrails.objects.ArcGisMapLayer;
 import com.usda.fmsc.twotrails.objects.PolyDrawOptions;
 import com.usda.fmsc.twotrails.objects.RecentProject;
 import com.usda.fmsc.twotrails.objects.TtGroup;
@@ -30,6 +29,7 @@ import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
@@ -437,6 +437,10 @@ public class Global {
             public static final String MAP_SHOW_MY_POS = "MapShowMyPos";
             public static final String MAP_DISPLAY_GPS_LOCATION = "MapDisplayGpsLocation";
             public static final String MAP_USE_UTM_NAV = "MapUseUtmNav";
+            public static final String MAP_TYPE = "MapType";
+            public static final String MAP_ID = "MapTerrainType";
+            public static final String ARC_GIS_MAPS = "ArcGISMaps";
+            public static final String ARC_GIS_MAP_ID_COUNTER = "ArcGISMapIdCounter";
             //endregion
 
             //region Default Values
@@ -492,6 +496,10 @@ public class Global {
             public static final boolean DEFAULT_MAP_SHOW_MY_POS = true;
             public static final boolean DEFAULT_MAP_DISPLAY_GPS_LOCATION = true;
             public static final boolean DEFAULT_MAP_USE_UTM_NAV = true;
+            public static final int DEFAULT_MAP_TYPE = 1;
+            public static final int DEFAULT_MAP_ID = 1;
+            public static final String DEFAULT_ARC_GIS_MAPS = StringEx.Empty;
+            public static final int DEFAULT_ARC_GIS_MAP_ID_COUNTER = 0;
             //endregion
 
             public static void init() {
@@ -556,6 +564,10 @@ public class Global {
                 editor.putBoolean(MAP_SHOW_MY_POS, DEFAULT_MAP_SHOW_MY_POS);
                 editor.putBoolean(MAP_DISPLAY_GPS_LOCATION, DEFAULT_MAP_DISPLAY_GPS_LOCATION);
                 editor.putBoolean(MAP_USE_UTM_NAV, DEFAULT_MAP_USE_UTM_NAV);
+                editor.putInt(MAP_TYPE, DEFAULT_MAP_TYPE);
+                editor.putInt(MAP_ID, DEFAULT_MAP_ID);
+                editor.putString(ARC_GIS_MAPS, DEFAULT_ARC_GIS_MAPS);
+                editor.putInt(ARC_GIS_MAP_ID_COUNTER, DEFAULT_ARC_GIS_MAP_ID_COUNTER);
 
                 editor.putBoolean(SETTINGS_CREATED, true);
 
@@ -942,6 +954,59 @@ public class Global {
             public static void setMapUseUtmNav(boolean value) {
                 setBool(MAP_USE_UTM_NAV, value);
             }
+
+
+            public static Units.MapType getMapType() {
+                return Units.MapType.parse(getInt(MAP_TYPE, DEFAULT_MAP_TYPE));
+            }
+
+            public static void setMapType(Units.MapType value) {
+                setInt(MAP_TYPE, value.getValue());
+            }
+
+
+            public static int getMapId() {
+                return getInt(MAP_ID, DEFAULT_MAP_ID);
+            }
+
+            public static void setMapId(int value) {
+                setInt(MAP_ID, value);
+            }
+
+
+
+            //region ArcGIS
+
+            public static int getArcGisIdCounter() {
+                return getInt(ARC_GIS_MAP_ID_COUNTER, DEFAULT_ARC_GIS_MAP_ID_COUNTER);
+            }
+
+            public static void setArcGisMapIdCounter(int value) {
+                setInt(ARC_GIS_MAP_ID_COUNTER, value);
+            }
+
+            public static ArrayList<ArcGisMapLayer> getArcGisMayLayers() {
+                if(getPrefs() == null)
+                    loadPrefs();
+
+                Gson gson = new Gson();
+                String json = getPrefs().getString(ARC_GIS_MAPS, null);
+
+                if(json == null)
+                    return new ArrayList<>();
+
+                return gson.fromJson(json, new TypeToken<ArrayList<ArcGisMapLayer>>() { }.getType());
+            }
+
+            public static boolean setArcGisMayLayers(Collection<ArcGisMapLayer> recentProjects) {
+                if(getEditor() == null)
+                    loadPrefs();
+
+                return getEditor().putString(ARC_GIS_MAPS, new Gson().toJson(recentProjects)).commit();
+            }
+            //endregion
+
+
             //endregion
 
             //region Other
@@ -1167,15 +1232,9 @@ public class Global {
                 String json = getPrefs().getString(RECENT_PROJS, null);
 
                 if(json == null)
-                    return new ArrayList<RecentProject>();
+                    return new ArrayList<>();
 
-                return gson.fromJson(json, new TypeToken<ArrayList<RecentProject>>() {
-                }.getType());
-
-                //return new Gson().fromJson(
-                //        getPrefs().getString(RECENT_PROJS, null),
-                //        new TypeToken<ArrayList<RecentProject>>() {
-                //        }.getType());
+                return gson.fromJson(json, new TypeToken<ArrayList<RecentProject>>() { }.getType());
             }
 
             public static boolean setRecentProjects(List<RecentProject> recentProjects) {

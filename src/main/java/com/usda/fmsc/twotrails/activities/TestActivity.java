@@ -1,29 +1,23 @@
 package com.usda.fmsc.twotrails.activities;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 
 import com.usda.fmsc.geospatial.nmea.NmeaBurst;
 import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
+import com.usda.fmsc.twotrails.activities.custom.MultiMapTypeActivity;
 import com.usda.fmsc.twotrails.gps.GpsService;
-import com.usda.fmsc.twotrails.ui.GpsStatusSatView;
-import com.usda.fmsc.twotrails.ui.GpsStatusSkyView;
 
-public class TestActivity extends AppCompatActivity implements GpsService.Listener {
+public class TestActivity extends MultiMapTypeActivity implements GpsService.Listener {
     GpsService.GpsBinder binder;
-    GpsStatusSkyView gskyv;
-    GpsStatusSatView gsatv;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test);
-
-
-        gskyv = (GpsStatusSkyView)findViewById(R.id.testGpsStatusSkyView);
-        gsatv = (GpsStatusSatView)findViewById(R.id.testGpsStatusSatView);
 
         binder = Global.getGpsBinder();
 
@@ -31,12 +25,24 @@ public class TestActivity extends AppCompatActivity implements GpsService.Listen
             binder.registerActiviy(this, this);
 
             if (!binder.isGpsRunning()) {
-                binder.startGps();
+                //binder.startGps();
             }
         }
+    }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.mmSelectMap) {
+            selectMapType();
+        }
 
-        gskyv.lockCompass(true);
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_test, menu);
+        return true;
     }
 
     @Override
@@ -52,30 +58,10 @@ public class TestActivity extends AppCompatActivity implements GpsService.Listen
         }
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        if (gskyv != null) {
-            gskyv.resume();
-        }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-        if (gskyv != null) {
-            gskyv.pause();
-        }
-    }
 
     @Override
     public void nmeaBurstReceived(NmeaBurst nmeaBurst) {
-        if (gskyv != null) {
-            gskyv.update(nmeaBurst);
-            gsatv.update(nmeaBurst);
-        }
+
     }
 
     @Override

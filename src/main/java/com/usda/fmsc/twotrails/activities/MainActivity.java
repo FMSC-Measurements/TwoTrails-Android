@@ -72,7 +72,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
-        TabsPageAdapter mTabsPagerAdapter = new TabsPageAdapter(getSupportFragmentManager());
+        TabsPagerAdapter mTabsPagerAdapter = new TabsPagerAdapter(getSupportFragmentManager());
 
         mFragFile = MainFileFragment.newInstance();
         mFragData = MainDataFragment.newInstance();
@@ -193,9 +193,9 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
 
     //region Tabs
-    public class TabsPageAdapter extends FragmentPagerAdapter {
+    public class TabsPagerAdapter extends FragmentPagerAdapter {
 
-        public TabsPageAdapter(FragmentManager fm) {
+        public TabsPagerAdapter(FragmentManager fm) {
             super(fm);
         }
 
