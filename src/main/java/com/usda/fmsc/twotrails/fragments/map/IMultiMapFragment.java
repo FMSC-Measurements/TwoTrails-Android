@@ -1,17 +1,25 @@
 package com.usda.fmsc.twotrails.fragments.map;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import com.google.android.gms.common.internal.safeparcel.SafeParcelable;
+import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.twotrails.Units;
 
 public interface IMultiMapFragment {
+    String MAP_OPTIONS_EXTRA = "MapOptionsEx";
 
     void setMap(int mapType);
 
     void moveToLocation(float lat, float lon, boolean animate);
 
+    void onMapLocationChanged();
+
     Position getLatLon();
 
-    int getZoomLevel();
+    Extent getExtents();
 
 
     interface MultiMapListener {
@@ -20,5 +28,166 @@ public interface IMultiMapFragment {
         void onMapTypeChanged(Units.MapType mapType, int mapId);
         void onMapLocationChanged();
 
+    }
+
+
+    class MapOptions implements SafeParcelable {
+        private int MapId;
+        private Double North, East, South, West;
+        private Double Latitude, Longitide;
+        private Float ZoomLevel;
+
+        public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+            @Override
+            public Object createFromParcel(Parcel source) {
+                return new MapOptions(source);
+            }
+
+            @Override
+            public MapOptions[] newArray(int size) {
+                return new MapOptions[size];
+            }
+        };
+
+
+        public MapOptions(Parcel in) {
+            MapId = in.readInt();
+            North = in.readDouble();
+            East = in.readDouble();
+            South = in.readDouble();
+            West = in.readDouble();
+            Latitude = in.readDouble();
+            Longitide = in.readDouble();
+            ZoomLevel = in.readFloat();
+        }
+
+        public MapOptions(int mapId, Extent extent) {
+            this.MapId = mapId;
+
+            this.North = extent.getNorth();
+            this.East = extent.getEast();
+            this.South = extent.getSouth();
+            this.West = extent.getWest();
+        }
+
+        public MapOptions(int mapId, Position northEast, Position southWest) {
+            this.MapId = mapId;
+
+            this.North = northEast.getLatitudeSignedDecimal();
+            this.East = northEast.getLongitudeSignedDecimal();
+            this.South = southWest.getLatitudeSignedDecimal();
+            this.West = southWest.getLongitudeSignedDecimal();
+        }
+
+        public MapOptions(int mapId, Position position) {
+            this(mapId, position.getLatitudeSignedDecimal(), position.getLongitudeSignedDecimal(), null);
+        }
+
+        public MapOptions(int mapId, Position position, Float zoomLevel) {
+            this(mapId, position.getLatitudeSignedDecimal(), position.getLongitudeSignedDecimal(), zoomLevel);
+        }
+
+        public MapOptions(int mapId, Double latitude, Double longitide) {
+            this(mapId, latitude, longitide, null);
+        }
+
+        public MapOptions(int mapId, Double latitude, Double longitide, Float zoomLevel) {
+            this.MapId = mapId;
+            this.Latitude = latitude;
+            this.Longitide = longitide;
+            this.ZoomLevel = zoomLevel;
+        }
+
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(MapId);
+            dest.writeDouble(North);
+            dest.writeDouble(East);
+            dest.writeDouble(South);
+            dest.writeDouble(West);
+            dest.writeDouble(Latitude);
+            dest.writeDouble(Longitide);
+            dest.writeFloat(ZoomLevel);
+        }
+
+
+        public boolean hasExtents() {
+            return North != null && South != null && West != null && East != null;
+        }
+
+        public boolean hasLocation() {
+            return Latitude != null && Longitide != null;
+        }
+
+
+        public int getMapId() {
+            return MapId;
+        }
+
+        public void setMapId(int mapId) {
+            MapId = mapId;
+        }
+
+        public Double getNorth() {
+            return North;
+        }
+
+        public void setNorth(Double north) {
+            North = north;
+        }
+
+        public Double getEast() {
+            return East;
+        }
+
+        public void setEast(Double east) {
+            East = east;
+        }
+
+        public Double getSouth() {
+            return South;
+        }
+
+        public void setSouth(Double south) {
+            South = south;
+        }
+
+        public Double getWest() {
+            return West;
+        }
+
+        public void setWest(Double west) {
+            West = west;
+        }
+
+        public Double getLatitude() {
+            return Latitude;
+        }
+
+        public void setLatitude(Double latitude) {
+            Latitude = latitude;
+        }
+
+        public Double getLongitide() {
+            return Longitide;
+        }
+
+        public void setLongitide(Double longitide) {
+            Longitide = longitide;
+        }
+
+        public Float getZoomLevel() {
+            return ZoomLevel;
+        }
+
+        public void setZoomLevel(Float zoomLevel) {
+            ZoomLevel = zoomLevel;
+        }
     }
 }

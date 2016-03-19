@@ -3,9 +3,15 @@ package com.usda.fmsc.twotrails.utilities;
 import android.content.Context;
 
 import com.esri.android.map.Layer;
+import com.esri.android.map.MapView;
 import com.esri.android.map.ags.ArcGISLocalTiledLayer;
 import com.esri.android.map.ags.ArcGISTiledMapServiceLayer;
+import com.esri.core.geometry.Envelope;
+import com.esri.core.geometry.GeometryEngine;
+import com.esri.core.geometry.Point;
+import com.esri.core.geometry.SpatialReference;
 import com.esri.core.io.UserCredentials;
+import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.objects.ArcGisMapLayer;
@@ -14,6 +20,8 @@ import java.util.Collection;
 import java.util.HashMap;
 
 public class ArcGISTools {
+    private static SpatialReference LatLonSpatialReference = SpatialReference.create(4326);
+
     private static HashMap<Integer, ArcGisMapLayer> mapLayers;
     private static int idCounter = 0;
 
@@ -203,5 +211,23 @@ public class ArcGISTools {
 
         mapLayers.remove(id);
         Global.Settings.DeviceSettings.setArcGisMayLayers(mapLayers.values());
+    }
+
+
+
+    public static Point pointToLatLng(Point point, MapView mapView) {
+        return (Point) GeometryEngine.project(point, mapView.getSpatialReference(), LatLonSpatialReference);
+    }
+
+    public static Point latLngToMapSpatial(Point point, MapView mapView) {
+        return (Point) GeometryEngine.project(point, LatLonSpatialReference, mapView.getSpatialReference());
+    }
+
+    public static Envelope getEnvelopFromLatLng(double n, double e, double s, double w, MapView mapView) {
+
+        Point ne = latLngToMapSpatial(new Point(e, n), mapView);
+        Point sw = latLngToMapSpatial(new Point(w, s), mapView);
+
+        return new Envelope(sw.getX(), sw.getY(), ne.getX(), ne.getY());
     }
 }

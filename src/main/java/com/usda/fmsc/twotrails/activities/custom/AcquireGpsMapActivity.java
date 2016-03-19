@@ -90,7 +90,7 @@ public class AcquireGpsMapActivity extends AcquireGpsCustomToolbarActivity imple
         googleMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
             @Override
             public void onCameraChange(CameraPosition cameraPosition) {
-                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(Consts.GoogleMaps.USA_CENTER, 3));
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(Consts.LocationInfo.GoogleMaps.USA_CENTER, 3));
                 googleMap.setOnCameraChangeListener(null);
             }
         });
@@ -114,7 +114,7 @@ public class AcquireGpsMapActivity extends AcquireGpsCustomToolbarActivity imple
 
                     map.animateCamera(CameraUpdateFactory.newLatLngZoom(
                             new LatLng(llp.latitude, llp.longitude),
-                            Consts.GoogleMaps.ZOOM_CLOSE
+                            Consts.LocationInfo.GoogleMaps.ZOOM_CLOSE
                     ));
                 }
             });
@@ -143,7 +143,7 @@ public class AcquireGpsMapActivity extends AcquireGpsCustomToolbarActivity imple
                 if (_Markers.size() == 1) {
                     map.moveCamera(CameraUpdateFactory.newLatLngZoom(
                             new LatLng(marker.getPosition().latitude, marker.getPosition().longitude),
-                            Consts.GoogleMaps.ZOOM_CLOSE
+                            Consts.LocationInfo.GoogleMaps.ZOOM_CLOSE
                     ));
 
                     new Handler().postDelayed(new Runnable() {
@@ -187,7 +187,7 @@ public class AcquireGpsMapActivity extends AcquireGpsCustomToolbarActivity imple
                 public void run() {
                     getMap().moveCamera(CameraUpdateFactory.newLatLngZoom(
                             new LatLng(nmeaBurst.getLatitude(), nmeaBurst.getLongitude()),
-                            Consts.GoogleMaps.ZOOM_CLOSE
+                            Consts.LocationInfo.GoogleMaps.ZOOM_CLOSE
                     ));
                 }
             });

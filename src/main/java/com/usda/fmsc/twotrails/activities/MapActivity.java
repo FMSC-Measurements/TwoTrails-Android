@@ -518,7 +518,7 @@ public class MapActivity extends CustomToolbarActivity implements GpsService.Lis
             if (mapTracking == Units.MapTracking.FOLLOW && lastPosition != null) {
                 map.animateCamera(CameraUpdateFactory.newLatLngZoom(
                         new LatLng(lastPosition.getLatitudeSignedDecimal(), lastPosition.getLongitudeSignedDecimal()),
-                        Consts.GoogleMaps.ZOOM_CLOSE
+                        Consts.LocationInfo.GoogleMaps.ZOOM_CLOSE
                 ));
 
                 mapMoved = true;
@@ -530,7 +530,7 @@ public class MapActivity extends CustomToolbarActivity implements GpsService.Lis
                 if (zone != null) {
                     map.moveCamera(CameraUpdateFactory.newLatLngBounds(TtUtils.GMap.getStartPosInZone(zone), 0));
                 } else {
-                    map.moveCamera(CameraUpdateFactory.newLatLngBounds(Consts.GoogleMaps.USA_BOUNDS, 0));
+                    map.moveCamera(CameraUpdateFactory.newLatLngBounds(Consts.LocationInfo.GoogleMaps.USA_BOUNDS, 0));
                 }
 
                 mapMoved = true;
@@ -553,7 +553,7 @@ public class MapActivity extends CustomToolbarActivity implements GpsService.Lis
         if (lastPosition != null) {
             map.animateCamera(CameraUpdateFactory.newLatLngZoom(
                     new LatLng(lastPosition.getLatitudeSignedDecimal(), lastPosition.getLongitudeSignedDecimal()),
-                    Consts.GoogleMaps.ZOOM_CLOSE
+                    Consts.LocationInfo.GoogleMaps.ZOOM_CLOSE
             ));
         }
         return true;
@@ -622,10 +622,10 @@ public class MapActivity extends CustomToolbarActivity implements GpsService.Lis
 
         if (mapMoved) {
             if (mapTracking == Units.MapTracking.POLY_BOUNDS && trackedPoly != null) {
-                map.animateCamera(CameraUpdateFactory.newLatLngBounds(trackedPoly, Consts.GoogleMaps.PADDING));
+                map.animateCamera(CameraUpdateFactory.newLatLngBounds(trackedPoly, Consts.LocationInfo.GoogleMaps.PADDING));
                 mapMoved = false;
             } else if (mapTracking == Units.MapTracking.COMPLETE_BOUNDS && completeBnds != null) {
-                map.animateCamera(CameraUpdateFactory.newLatLngBounds(completeBnds, Consts.GoogleMaps.PADDING));
+                map.animateCamera(CameraUpdateFactory.newLatLngBounds(completeBnds, Consts.LocationInfo.GoogleMaps.PADDING));
                 mapMoved = false;
             }
         }

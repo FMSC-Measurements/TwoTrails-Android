@@ -2,6 +2,8 @@ package com.usda.fmsc.twotrails;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.usda.fmsc.geospatial.Extent;
+import com.usda.fmsc.geospatial.Position;
 
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -108,20 +110,31 @@ public class Consts {
 
     }
 
-    public static class GoogleMaps {
-        public static final LatLngBounds USA_BOUNDS =
-                new LatLngBounds(
-                    new LatLng(-124.7844079, -124.7844079),
-                    new LatLng(49.3457868, -66.9513812)
-                );
+    public static class LocationInfo {
+        private static final double north = 49.384359;
+        private static final double east = -66.885666;
+        private static final double south = 25.837377;
+        private static final double west = -124.327629;
 
-        public static final LatLng USA_CENTER = new LatLng(39.8282, -98.5795);
+        private static final double center_lat = 39.8282;
+        private static final double center_lon = -98.5795;
 
-        public static final int PADDING = 30;
-        public static final float DEFAULT_ZOOM_CLOSE = 20f;
-        public static final float DEFAULT_ZOOM_GENERAL = 10f;
+        public static final Position USA_CENTER = new Position(center_lat, center_lon);
+        public static final Extent USA_BOUNDS = new Extent(north, east, south, west);
 
-        public static float ZOOM_CLOSE = 20;
-        public static float ZOOM_GENERAL = 10;
+        public static class GoogleMaps {
+            public static final LatLng USA_CENTER = new LatLng(center_lat, center_lon);
+
+            public static final LatLngBounds USA_BOUNDS =
+                    new LatLngBounds(
+                            new LatLng(south, west),
+                            new LatLng(north, east)
+                    );
+
+            public static final int PADDING = 30;
+            public static final float ZOOM_GENERAL = 10f;
+            public static final float ZOOM_CLOSE = 20f;
+        }
+
     }
 }
