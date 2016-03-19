@@ -2,30 +2,32 @@ package com.usda.fmsc.twotrails.fragments.map;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.esri.android.map.Layer;
-import com.esri.android.map.MapOptions;
 import com.esri.android.map.MapView;
+import com.esri.android.map.event.OnPanListener;
 import com.esri.android.map.event.OnStatusChangedListener;
+import com.esri.android.map.event.OnZoomListener;
 import com.esri.android.toolkit.map.MapViewHelper;
-import com.google.android.gms.common.internal.safeparcel.SafeParcelable;
+import com.esri.core.geometry.Envelope;
+import com.esri.core.geometry.Latlon;
+import com.esri.core.geometry.Point;
+import com.esri.core.geometry.Polygon;
+import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.geospatial.Position;
+import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.Units;
 import com.usda.fmsc.twotrails.ui.ArcMapCompass;
 import com.usda.fmsc.twotrails.utilities.ArcGISTools;
 
 
-public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, OnStatusChangedListener {
-    private static final String ARC_GIS_MAP_OPTIONS = "param1";
-
-    private ArcGisMapOptions mapOptions;
+public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, OnStatusChangedListener, OnZoomListener, OnPanListener {
+    private MapOptions startUpMapOptions;
     private MultiMapListener mmListener;
 
     private MapViewHelper mapViewHelper;
@@ -40,24 +42,26 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, On
         return new ArcGisMapFragment();
     }
 
-    public static ArcGisMapFragment newInstance(ArcGisMapOptions options) {
+    public static ArcGisMapFragment newInstance(MapOptions options) {
         ArcGisMapFragment fragment = new ArcGisMapFragment();
         Bundle args = new Bundle();
-        args.putParcelable(ARC_GIS_MAP_OPTIONS, options);
+        args.putParcelable(MAP_OPTIONS_EXTRA, options);
         fragment.setArguments(args);
         return fragment;
     }
 
-    public ArcGisMapFragment() {
-        // Required empty public constructor
-    }
+    boolean centerOnLoad = false;
 
+
+    public ArcGisMapFragment() { }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mapOptions = getArguments().getParcelable(ARC_GIS_MAP_OPTIONS);
+            startUpMapOptions = getArguments().getParcelable(MAP_OPTIONS_EXTRA);
+        } else {
+            startUpMapOptions = new MapOptions(0, Consts.LocationInfo.USA_BOUNDS);
         }
     }
 
@@ -73,28 +77,21 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, On
 
         //mMapView = (MapView) view.findViewById(R.id.mMapView);
         mMapView.setOnStatusChangedListener(this);
-
+        mMapView.setOnZoomListener(this);
+        mMapView.setOnPanListener(this);
 
         ArcMapCompass compass = (ArcMapCompass)view.findViewById(R.id.compass);
         compass.setMapView(mMapView);
 
+        basemapId = startUpMapOptions.getMapId();
 
-        if (mapOptions != null) {
-            basemapId = mapOptions.BaseMap;
-
-            //mMapView.centerAt(40.56, -105.08, false);
-        }
-
-        if (mBasemapLayer == null) {
-            if (basemapId == null) {
-                basemapId = 0;
-            }
-
-            mBasemapLayer = ArcGISTools.getMapLayer(basemapId);
-        }
+        mBasemapLayer = ArcGISTools.getMapLayer(basemapId);
 
         mMapView.addLayer(mBasemapLayer);
 
+        if (startUpMapOptions.hasExtents() || startUpMapOptions.hasLocation()) {
+            centerOnLoad = true;
+        }
 
         return view;
     }
@@ -111,21 +108,55 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, On
         mMapView = null;
     }
 
+
     @Override
     public void onStatusChanged(Object o, STATUS status) {
         if (status == STATUS.LAYER_LOADED) {
-            //mMapView.centerAt(40.56, -105.08, false);
-
             if (mmListener != null) {
                 mmListener.onMapReady();
+            }
+        } else if (status == STATUS.INITIALIZED) {
+            if (centerOnLoad) {
+
+                if (startUpMapOptions.hasExtents()) {
+                    Envelope e = ArcGISTools.getEnvelopFromLatLng(
+                            startUpMapOptions.getNorth(),
+                            startUpMapOptions.getEast(),
+                            startUpMapOptions.getSouth(),
+                            startUpMapOptions.getWest(),
+                            mMapView);
+
+                    mMapView.setExtent(e, 0, false);
+                } else {
+                    mMapView.centerAt(startUpMapOptions.getLatitude(), startUpMapOptions.getLongitide(), false);
+                }
+
+                centerOnLoad = false;
             }
         }
     }
 
+    @Override
+    public void postPointerUp(float v, float v1, float v2, float v3) {
+        onMapLocationChanged();
+    }
+
+    @Override
+    public void postAction(float v, float v1, double v2) {
+        onMapLocationChanged();
+    }
+
+    @Override
+    public void postPointerMove(float v, float v1, float v2, float v3) { }
+    @Override
+    public void prePointerMove(float v, float v1, float v2, float v3) { }
+    @Override
+    public void prePointerUp(float v, float v1, float v2, float v3) { }
+    @Override
+    public void preAction(float v, float v1, double v2) { }
 
 
-
-    public void changeBasemap(int basemapId) {
+    private void changeBasemap(int basemapId) {
         this.basemapId = basemapId;
 
         if (mMapView == null) {
@@ -143,17 +174,6 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, On
     }
 
 
-
-    private void zoomToLevel(double lat, double lon, int level) {
-        mMapView.setMapOptions(new MapOptions(MapOptions.MapType.SATELLITE,
-                lat,
-                lon,
-                level)
-        );
-    }
-
-
-
     @Override
     public void setMap(int mapId) {
         if (mapId != basemapId) {
@@ -163,22 +183,39 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, On
 
     @Override
     public void moveToLocation(float lat, float lon, boolean animate) {
-
+        mMapView.centerAt(lat, lon, animate);
+        onMapLocationChanged();
     }
 
+    @Override
+    public void onMapLocationChanged() {
+        if (mmListener != null) {
+            mmListener.onMapLocationChanged();
+        }
+    }
 
     @Override
     public Position getLatLon() {
-        return null;
-    }
+        Point point = ArcGISTools.pointToLatLng(mMapView.getCenter(), mMapView);
 
+        return new Position(point.getY(), point.getX());
+    }
 
     @Override
-    public int getZoomLevel() {
-        return 0;
+    public Extent getExtents() {
+        Polygon polygon = mMapView.getExtent();
+
+
+        Point ne = ArcGISTools.pointToLatLng(polygon.getPoint(1), mMapView);
+        Point sw = ArcGISTools.pointToLatLng(polygon.getPoint(3), mMapView);
+
+
+        return new Extent(sw.getY(), ne.getX(), ne.getY(), sw.getX());
     }
 
-
+    public double getScale() {
+        return mMapView.getScale();
+    }
 
 
     @Override
@@ -215,49 +252,5 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, On
     public void onDetach() {
         super.onDetach();
         mmListener = null;
-    }
-
-
-    public static class ArcGisMapOptions implements SafeParcelable {
-        private int BaseMap;
-        private Double Latitude, Longitude;
-
-        public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
-            @Override
-            public Object createFromParcel(Parcel source) {
-                return new ArcGisMapOptions(source);
-            }
-
-            @Override
-            public ArcGisMapOptions[] newArray(int size) {
-                return new ArcGisMapOptions[size];
-            }
-        };
-
-
-        public ArcGisMapOptions(Parcel in) {
-            BaseMap = in.readInt();
-            Latitude = in.readDouble();
-            Longitude = in.readDouble();
-        }
-
-        public ArcGisMapOptions(int baseMap, Double latitude, Double longitude) {
-            this.BaseMap = baseMap;
-            this.Latitude = latitude;
-            this.Longitude = longitude;
-        }
-
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(BaseMap);
-            dest.writeDouble(Latitude);
-            dest.writeDouble(Longitude);
-        }
     }
 }
