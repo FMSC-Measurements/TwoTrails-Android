@@ -122,6 +122,8 @@ public class Consts {
         public static final Position USA_CENTER = new Position(center_lat, center_lon);
         public static final Extent USA_BOUNDS = new Extent(north, east, south, west);
 
+        public static final int PADDING = 30;
+
         public static class GoogleMaps {
             public static final LatLng USA_CENTER = new LatLng(center_lat, center_lon);
 
@@ -131,7 +133,6 @@ public class Consts {
                             new LatLng(north, east)
                     );
 
-            public static final int PADDING = 30;
             public static final float ZOOM_GENERAL = 10f;
             public static final float ZOOM_CLOSE = 20f;
         }

@@ -28,8 +28,7 @@ public class TtReport {
         }
 
         try {
-            logWriter = new PrintWriter(new FileOutputStream(
-                    new File(path), true));
+            logWriter = new PrintWriter(new FileOutputStream(new File(path), true));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -50,8 +49,7 @@ public class TtReport {
     public void clearReport() {
         closeReport();
         try {
-            logWriter = new PrintWriter(new FileOutputStream(
-                    new File(filePath), false));
+            logWriter = new PrintWriter(new FileOutputStream(new File(filePath), false));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -88,14 +86,13 @@ public class TtReport {
     }
 
     public void writeError(String msg, String codePage) {
-        inst.writeToReport(String.format("ERR[%s][%s]: %s",
-                new Date(), codePage, msg));
+        inst.writeToReport(String.format("ERR[%s][%s]: %s", new Date(), codePage, msg));
     }
 
     public void writeError(String msg, String codePage, StackTraceElement[] stack) {
-        inst.writeToReport(String.format("ERR[%s][%s]: %s",
-                new Date(), codePage, msg));
+        inst.writeToReport(String.format("ERR[%s][%s]: %s", new Date(), codePage, msg));
         inst.writeToReport(String.format("Stack Trace: %n"));
+
         if(stack != null) {
             for (StackTraceElement ste : stack)
                 inst.writeToReport(String.format("%-5s%s", StringEx.Empty, ste.toString()));
@@ -108,13 +105,11 @@ public class TtReport {
     }
 
     public void writeMessage(String msg, String codePage, String adv) {
-        inst.writeToReport(String.format("MSG[%s][%s]: %s",
-                new Date(), codePage, msg));
+        inst.writeToReport(String.format("MSG[%s][%s]: %s",  new Date(), codePage, msg));
         inst.writeToReport(String.format("%-5s%s", StringEx.Empty, adv));
     }
 
     public void writeEvent(String event) {
-        inst.writeToReport(String.format("EVT[%s]: %s",
-                new Date(), event));
+        inst.writeToReport(String.format("EVT[%s]: %s", new Date(), event));
     }
 }

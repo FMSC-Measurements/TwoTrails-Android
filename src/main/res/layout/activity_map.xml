@@ -29,11 +29,16 @@
                 android:layout_height="match_parent"
                 xmlns:app="http://schemas.android.com/apk/res-auto">
 
-                <fragment
-                    android:id="@+id/map"
+                <FrameLayout
+                    android:id="@+id/mapContainer"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    class="com.google.android.gms.maps.SupportMapFragment" />
+                    android:layout_height="match_parent"/>
+
+                <!--<fragment-->
+                    <!--android:id="@+id/map"-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="match_parent"-->
+                    <!--class="com.google.android.gms.maps.SupportMapFragment" />-->
 
                 <RelativeLayout
                     android:layout_width="match_parent"
@@ -160,7 +165,7 @@
                     android:id="@+id/mapFabMyPos"
                     style="@style/fabStyle"
                     android:src="@drawable/ic_my_location_white_36dp"
-                    app:layout_anchor="@id/map"
+                    app:layout_anchor="@id/mapContainer"
                     android:onClick="btnMyLocClick" />
             </android.support.design.widget.CoordinatorLayout>
 

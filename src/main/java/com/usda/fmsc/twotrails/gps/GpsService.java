@@ -20,7 +20,6 @@ import com.google.android.gms.maps.LocationSource;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.geospatial.nmea.NmeaIDs;
 import com.usda.fmsc.twotrails.Consts;
-import com.usda.fmsc.twotrails.Manifest;
 import com.usda.fmsc.twotrails.devices.TtBluetoothManager;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
@@ -29,7 +28,7 @@ import org.joda.time.DateTime;
 
 import java.io.File;
 import java.io.PrintWriter;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.ArrayList;
 
 import com.usda.fmsc.geospatial.GeoPosition;
 import com.usda.fmsc.geospatial.nmea.NmeaBurst;
@@ -48,7 +47,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
     private boolean postAllNmeaStrings = true, logging, logBurstDetails;
     private GeoPosition lastPosition;
 
-    private ConcurrentHashMap<Activity, Listener> activities = new ConcurrentHashMap<>();
+    private ArrayList<Listener> listeners = new ArrayList<>();
     private final Binder binder = new GpsBinder();
 
     private TtBluetoothManager bluetoothManager;
@@ -520,16 +519,13 @@ public class GpsService extends Service implements LocationListener, LocationSou
 
     //region Post Events
     private void postNmeaBurst(final NmeaBurst burst) {
-        for(final Activity client : activities.keySet()) {
+        for(final Listener listener : listeners) {
             try {
                 Handler handler = new Handler(Looper.getMainLooper());
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        Listener callback = activities.get(client);
-                        if (callback != null) {
-                            callback.nmeaBurstReceived(burst);
-                        }
+                        listener.nmeaBurstReceived(burst);
                     }
                 });
 
@@ -540,16 +536,13 @@ public class GpsService extends Service implements LocationListener, LocationSou
     }
 
     private void postNmeaString(final String nmeaString) {
-        for (final Activity client : activities.keySet()) {
+        for (final Listener listener : listeners) {
             try {
                 Handler handler = new Handler(Looper.getMainLooper());
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        Listener callback = activities.get(client);
-                        if (callback != null) {
-                            callback.nmeaStringReceived(nmeaString);
-                        }
+                        listener.nmeaStringReceived(nmeaString);
                     }
                 });
 
@@ -560,16 +553,13 @@ public class GpsService extends Service implements LocationListener, LocationSou
     }
 
     private void postNmeaSentence(final NmeaSentence sentence) {
-        for (final Activity client : activities.keySet()) {
+        for (final Listener listener : listeners) {
             try {
                 Handler handler = new Handler(Looper.getMainLooper());
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        Listener callback = activities.get(client);
-                        if (callback != null) {
-                            callback.nmeaSentenceReceived(sentence);
-                        }
+                        listener.nmeaSentenceReceived(sentence);
                     }
                 });
 
@@ -580,16 +570,13 @@ public class GpsService extends Service implements LocationListener, LocationSou
     }
 
     private void postGpsStart() {
-        for(final Activity client : activities.keySet()) {
+        for(final Listener listener : listeners) {
             try {
                 Handler handler = new Handler(Looper.getMainLooper());
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        Listener callback = activities.get(client);
-                        if (callback != null) {
-                            callback.gpsStarted();
-                        }
+                        listener.gpsStarted();
                     }
                 });
             } catch (Exception ex) {
@@ -599,16 +586,13 @@ public class GpsService extends Service implements LocationListener, LocationSou
     }
 
     private void postGpsStop() {
-        for(final Activity client : activities.keySet()) {
+        for(final Listener listener : listeners) {
             try {
                 Handler handler = new Handler(Looper.getMainLooper());
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        Listener callback = activities.get(client);
-                        if (callback != null) {
-                            callback.gpsStopped();
-                        }
+                        listener.gpsStopped();
                     }
                 });
             } catch (Exception ex) {
@@ -618,16 +602,13 @@ public class GpsService extends Service implements LocationListener, LocationSou
     }
 
     private void postServiceStart() {
-        for(final Activity client : activities.keySet()) {
+        for(final Listener listener : listeners) {
             try {
                 Handler handler = new Handler(Looper.getMainLooper());
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        Listener callback = activities.get(client);
-                        if (callback != null) {
-                            callback.gpsServiceStarted();
-                        }
+                        listener.gpsServiceStarted();
                     }
                 });
             } catch (Exception ex) {
@@ -637,16 +618,13 @@ public class GpsService extends Service implements LocationListener, LocationSou
     }
 
     private void postServiceStop() {
-        for(final Activity client : activities.keySet()) {
+        for(final Listener listener : listeners) {
             try {
                 Handler handler = new Handler(Looper.getMainLooper());
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        Listener callback = activities.get(client);
-                        if (callback != null) {
-                            callback.gpsServiceStopped();
-                        }
+                        listener.gpsServiceStopped();
                     }
                 });
             } catch (Exception ex) {
@@ -656,16 +634,13 @@ public class GpsService extends Service implements LocationListener, LocationSou
     }
 
     private void postError(final GpsError error) {
-        for(final Activity client : activities.keySet()) {
+        for(final Listener listener : listeners) {
             try {
                 Handler handler = new Handler(Looper.getMainLooper());
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        Listener callback = activities.get(client);
-                        if (callback != null) {
-                            callback.gpsError(error);
-                        }
+                        listener.gpsError(error);
                     }
                 });
 
@@ -735,22 +710,20 @@ public class GpsService extends Service implements LocationListener, LocationSou
         }
 
         //@Override
-        public void registerActiviy(Activity activity, Listener callback) {
-            activities.put(activity, callback);
+        public void addListener(Listener callback) {
+            if (!listeners.contains(callback)) {
+                listeners.add(callback);
+            }
         }
 
         @Override
-        public void unregisterActivity(Activity activity) {
+        public void removeListener(Listener callback) {
             try {
-                activities.remove(activity);
-
-                for (Activity a : activities.keySet()) {
-                    if (activities.get(a) == null) {
-                        activities.remove(a);
-                    }
+                if (listeners.contains(callback)) {
+                    listeners.remove(callback);
                 }
             } catch (Exception e) {
-                TtUtils.TtReport.writeError(e.getMessage(), "GpsService:unregisterActivity", e.getStackTrace());
+                TtUtils.TtReport.writeError(e.getMessage(), "GpsService:removeListener", e.getStackTrace());
             }
         }
 
@@ -842,9 +815,9 @@ public class GpsService extends Service implements LocationListener, LocationSou
 
 
     public interface Controller {
-        void registerActiviy(Activity activity, Listener callback);
+        void addListener(Listener callback);
 
-        void unregisterActivity(Activity activity);
+        void removeListener(Listener callback);
 
         GpsDeviceStatus startGps();
 

@@ -22,7 +22,7 @@ public class TestActivity extends MultiMapTypeActivity implements GpsService.Lis
         binder = Global.getGpsBinder();
 
         if (binder != null) {
-            binder.registerActiviy(this, this);
+            binder.addListener(this);
 
             if (!binder.isGpsRunning()) {
                 //binder.startGps();
@@ -50,7 +50,7 @@ public class TestActivity extends MultiMapTypeActivity implements GpsService.Lis
         super.onDestroy();
 
         if (binder != null) {
-            binder.unregisterActivity(this);
+            binder.removeListener(this);
 
             if (!Global.Settings.DeviceSettings.isGpsAlwaysOn()) {
                 binder.stopGps();

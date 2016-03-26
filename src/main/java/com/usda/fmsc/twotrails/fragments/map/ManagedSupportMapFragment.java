@@ -2,6 +2,8 @@ package com.usda.fmsc.twotrails.fragments.map;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.view.View;
+import android.view.ViewTreeObserver;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -9,15 +11,30 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMapOptions;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
+import com.usda.fmsc.android.AndroidUtils;
+import com.usda.fmsc.android.adapters.MultiLineInfoWindowAdapter;
 import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.geospatial.Position;
+import com.usda.fmsc.geospatial.nmea.NmeaBurst;
 import com.usda.fmsc.twotrails.Consts;
+import com.usda.fmsc.twotrails.Global;
+import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.Units;
+import com.usda.fmsc.twotrails.activities.custom.MultiMapTypeActivity;
+import com.usda.fmsc.twotrails.gps.GpsService;
+import com.usda.fmsc.twotrails.objects.GoogleMapsPolygonGrahpic;
+import com.usda.fmsc.twotrails.objects.PolygonDrawOptions;
+import com.usda.fmsc.twotrails.objects.PolygonGraphicManager;
 
-public class ManagedSupportMapFragment extends SupportMapFragment implements IMultiMapFragment, OnMapReadyCallback, GoogleMap.OnCameraChangeListener {
+import java.util.HashMap;
+
+public class ManagedSupportMapFragment extends SupportMapFragment implements IMultiMapFragment,
+        OnMapReadyCallback, GoogleMap.OnMapLoadedCallback, GoogleMap.OnCameraChangeListener, GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener {
 
     MultiMapListener mmlistener;
 
@@ -25,7 +42,9 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
 
     MapOptions startUpMapOptions;
 
+    private HashMap<String, MarkerData> _MarkerData = new HashMap<>();
 
+    private Marker currentMarker;
 
 
     public static ManagedSupportMapFragment newInstance() {
@@ -54,14 +73,26 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
         if (bundle != null && bundle.containsKey(MAP_OPTIONS_EXTRA)) {
             startUpMapOptions = bundle.getParcelable(MAP_OPTIONS_EXTRA);
         } else {
-            startUpMapOptions = new MapOptions(0, Consts.LocationInfo.USA_BOUNDS);
+            startUpMapOptions = new MapOptions(0, Consts.LocationInfo.USA_BOUNDS, Consts.LocationInfo.PADDING);
         }
 
         getMapAsync(this);
     }
 
 
+    int fragWidth, fragHeight;
+    @Override
+    public void onViewCreated(final View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
+        view.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                fragWidth = view.getWidth();
+                fragHeight = view.getHeight();
+            }
+        });
+    }
 
     @Override
     public void setMap(int mapId) {
@@ -76,9 +107,29 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
+        //use external GPS if available
+        if (Global.Settings.DeviceSettings.isGpsConfigured() && Global.Settings.DeviceSettings.getGpsExternal()) {
+            GpsService.GpsBinder binder = Global.getGpsBinder();
+            GpsService service = binder.getService();
+
+            map.setLocationSource(service);
+        }
+
         map = googleMap;
 
+        map.setOnMapLoadedCallback(this);
         map.setOnCameraChangeListener(this);
+
+        map.setInfoWindowAdapter(new MultiLineInfoWindowAdapter(getContext()));
+        map.setOnMapClickListener(this);
+        map.setOnMarkerClickListener(this);
+
+        UiSettings uiSettings = map.getUiSettings();
+
+        uiSettings.setMapToolbarEnabled(false);
+        uiSettings.setMyLocationButtonEnabled(false);
+
+        map.setPadding(0, (int) (getResources().getDimension(R.dimen.toolbar_height)), 0, 0);
 
         if (startUpMapOptions != null) {
             if (startUpMapOptions.hasExtents()) {
@@ -86,7 +137,10 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
                         new LatLngBounds(
                                 new LatLng(startUpMapOptions.getSouth(), startUpMapOptions.getWest()),
                                 new LatLng(startUpMapOptions.getNorth(), startUpMapOptions.getEast())
-                        ), 0
+                        ),
+                        fragWidth - startUpMapOptions.getPadding() / 2,
+                        fragHeight - startUpMapOptions.getPadding() / 2,
+                        startUpMapOptions.getPadding()
                 ));
             } else if (startUpMapOptions.hasLocation()) {
                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(
@@ -97,13 +151,23 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
                         startUpMapOptions.getZoomLevel() != null ? startUpMapOptions.getZoomLevel() : Consts.LocationInfo.GoogleMaps.ZOOM_GENERAL));
             } else {
                 map.moveCamera(CameraUpdateFactory.newLatLngBounds(
-                        Consts.LocationInfo.GoogleMaps.USA_BOUNDS, Consts.LocationInfo.GoogleMaps.PADDING
+                        Consts.LocationInfo.GoogleMaps.USA_BOUNDS,
+                        fragWidth,
+                        fragHeight,
+                        Consts.LocationInfo.PADDING
                 ));
             }
         }
 
         if (mmlistener != null) {
             mmlistener.onMapReady();
+        }
+    }
+
+    @Override
+    public void onMapLoaded() {
+        if (mmlistener != null) {
+            mmlistener.onMapLoaded();
         }
     }
 
@@ -120,10 +184,27 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
     }
 
     @Override
-    public void moveToLocation(float lat, float lon, boolean animate) {
+    public void onMapClick(LatLng latLng) {
+        if (mmlistener != null) {
+            mmlistener.onMapClick(new Position(latLng.latitude, latLng.longitude));
+        }
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        currentMarker = marker;
+
+        if (mmlistener != null) {
+            mmlistener.onMarkerClick(_MarkerData.get(marker.getId()));
+        }
+        return false;
+    }
+
+    @Override
+    public void moveToLocation(float lat, float lon, float zoomLevel, boolean animate) {
         CameraUpdate cu = CameraUpdateFactory.newLatLngZoom(
                 new LatLng(lat, lon),
-                Consts.LocationInfo.GoogleMaps.ZOOM_CLOSE
+                zoomLevel
         );
 
         if (animate) {
@@ -133,16 +214,33 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
         }
     }
 
+    @Override
+    public void moveToLocation(Extent extents, int padding, boolean animate) {
+        CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(new LatLngBounds(
+                new LatLng(extents.getSouth(), extents.getWest()),
+                new LatLng(extents.getNorth(), extents.getEast())
+            ),
+            padding
+        );
+
+        if (animate) {
+            map.animateCamera(cu);
+        } else {
+            map.moveCamera(cu);
+        }
+    }
+
+    @Override
+    public void hideSelectedMarkerInfo() {
+        if (currentMarker != null) {
+            currentMarker.hideInfoWindow();
+        }
+    }
 
     @Override
     public Position getLatLon() {
         LatLng ll = map.getCameraPosition().target;
         return new Position(ll.latitude, ll.longitude);
-    }
-
-    public LatLngBounds getBounds() {
-        return map.getProjection().getVisibleRegion().latLngBounds;
-
     }
 
     @Override
@@ -154,6 +252,11 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
                 bounds.northeast.longitude,
                 bounds.southwest.latitude,
                 bounds.southwest.longitude);
+    }
+
+    @Override
+    public MarkerData getMarkerData(String id) {
+        return null;
     }
 
     public float getZoomLevel() {
@@ -175,5 +278,27 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
     public void onDetach() {
         super.onDetach();
         mmlistener = null;
+    }
+
+
+
+    @Override
+    public void setLocationEnabled(boolean enabled) {
+        if (map != null && AndroidUtils.App.checkLocationPermission(getContext())) {
+            map.setMyLocationEnabled(enabled);
+        }
+    }
+
+    @Override
+    public void setCompassEnabled(boolean enabled) {
+        if (map != null) {
+            map.getUiSettings().setCompassEnabled(enabled);
+        }
+    }
+
+    @Override
+    public void addGraphic(PolygonGraphicManager graphicManager, PolygonDrawOptions drawOptions) {
+        graphicManager.setPolygonGraphic(new GoogleMapsPolygonGrahpic(map), drawOptions);
+        _MarkerData.putAll(graphicManager.getMarkerData());
     }
 }

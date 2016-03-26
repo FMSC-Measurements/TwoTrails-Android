@@ -131,6 +131,7 @@
     <string name="menu_walk_walking">Walking</string>
     <string name="menu_walk_map_mode">Map Mode</string>
     <string name="menu_rename_group">Rename Group</string>
+    <string name="menu_map_select_type">Select Map Type</string>
     <string name="menu_map_settings">Map Settings</string>
     <string name="menu_map_reset_bnds">Reset Bounds</string>
     <string name="menu_map_where_is">Where Is</string>

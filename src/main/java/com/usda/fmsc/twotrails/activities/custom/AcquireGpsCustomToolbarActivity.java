@@ -53,7 +53,7 @@ public class AcquireGpsCustomToolbarActivity extends CustomToolbarActivity imple
         binder = Global.getGpsBinder();
 
         if (binder != null) {
-            binder.registerActiviy(this, this);
+            binder.addListener(this);
 
             if (!Global.Settings.DeviceSettings.isGpsConfigured()) {
                 canceling = true;
@@ -111,7 +111,7 @@ public class AcquireGpsCustomToolbarActivity extends CustomToolbarActivity imple
         super.onDestroy();
 
         if (binder != null) {
-            binder.unregisterActivity(this);
+            binder.removeListener(this);
 
             if (!Global.Settings.DeviceSettings.isGpsAlwaysOn()) {
                 binder.stopGps();
