@@ -50,6 +50,8 @@ import com.usda.fmsc.utilities.StringEx;
 public class MetadataActivity extends TtAjusterCustomToolbarActivity {
     HashMap<String, Listener> listeners;
 
+    GpsService.Listener listener;
+
     private MenuItem miLock, miReset, miDelete;
 
     private List<TtMetadata> _Metadata;
@@ -571,7 +573,7 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
 
                                 binder.startGps();
 
-                                binder.registerActiviy(mContext, new GpsService.Listener() {
+                                listener = new GpsService.Listener() {
                                     @Override
                                     public void nmeaBurstReceived(NmeaBurst nmeaBurst) {
                                         if (!Global.Settings.DeviceSettings.isGpsAlwaysOn()) {
@@ -581,6 +583,10 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
                                         inputDialog.getInput().setText(StringEx.toString(nmeaBurst.getTrueUTM().getZone()));
 
                                         gotNmea = true;
+
+                                        if (listener != null) {
+                                            binder.removeListener(listener);
+                                        }
                                     }
 
                                     @Override
@@ -618,8 +624,14 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
                                         if (!Global.Settings.DeviceSettings.isGpsAlwaysOn()) {
                                             binder.stopGps();
                                         }
+
+                                        if (listener != null) {
+                                            binder.removeListener(listener);
+                                        }
                                     }
-                                });
+                                };
+
+                                binder.addListener(listener);
 
                                 final Handler mHandler = new Handler();
 

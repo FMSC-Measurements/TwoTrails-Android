@@ -58,7 +58,7 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
         binder = Global.getGpsBinder();
 
         if (Global.Settings.DeviceSettings.isGpsConfigured()) {
-            binder.registerActiviy(this, this);
+            binder.addListener(this);
             binder.startGps();
         }
 

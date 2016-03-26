@@ -14,12 +14,10 @@ import android.preference.Preference;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
-import android.preference.SwitchPreference;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Toast;
 
@@ -253,7 +251,7 @@ public class SettingsFragment extends PreferenceFragment {
                             @Override
                             public void nmeaStringReceived(String nmeaString) {
                                 try {
-                                    binder.unregisterActivity(activity);
+                                    binder.removeListener(this);
 
                                     Global.Settings.DeviceSettings.setGpsConfigured(true);
 
@@ -344,7 +342,7 @@ public class SettingsFragment extends PreferenceFragment {
                             }
                         };
 
-                        binder.registerActiviy(activity, listener);
+                        binder.addListener(listener);
 
                         binder.startGps();
                     }

@@ -20,7 +20,7 @@ import com.usda.fmsc.twotrails.data.DataAccessLayer;
 import com.usda.fmsc.twotrails.devices.TtBluetoothManager;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.objects.ArcGisMapLayer;
-import com.usda.fmsc.twotrails.objects.PolyDrawOptions;
+import com.usda.fmsc.twotrails.objects.PolygonDrawOptions;
 import com.usda.fmsc.twotrails.objects.RecentProject;
 import com.usda.fmsc.twotrails.objects.TtGroup;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
@@ -1426,16 +1426,16 @@ public class Global {
 
 
     public static class MapSettings {
-        public static HashMap<String, PolyDrawOptions> PolyOptions;
-        public static PolyDrawOptions MasterPolyOptions;
+        public static HashMap<String, PolygonDrawOptions> PolyOptions;
+        public static PolygonDrawOptions MasterPolyOptions;
 
         //initial values
         public static void init(ArrayList<TtPolygon> polys) {
-            HashMap<String, PolyDrawOptions> polyOptions = new HashMap<>();
+            HashMap<String, PolygonDrawOptions> polyOptions = new HashMap<>();
 
 
             if (MasterPolyOptions == null) {
-                MasterPolyOptions = new PolyDrawOptions();
+                MasterPolyOptions = new PolygonDrawOptions();
             }
 
             boolean polyOptsCreated = PolyOptions != null;
@@ -1447,7 +1447,7 @@ public class Global {
                 if (polyOptsCreated && PolyOptions.containsKey(key)) {
                     polyOptions.put(key, PolyOptions.get(key));
                 } else {
-                    polyOptions.put(key, new PolyDrawOptions(MasterPolyOptions));
+                    polyOptions.put(key, new PolygonDrawOptions(MasterPolyOptions));
                 }
             }
 

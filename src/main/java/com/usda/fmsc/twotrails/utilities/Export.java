@@ -234,6 +234,8 @@ public class Export {
                 writer.writeNext(values);
                 values.clear();
             }
+
+            writer.close();
             //endregion
         } catch (Exception ex) {
             pointsFilename = null;

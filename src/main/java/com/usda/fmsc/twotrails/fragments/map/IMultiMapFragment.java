@@ -6,36 +6,57 @@ import android.os.Parcelable;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelable;
 import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.geospatial.Position;
+import com.usda.fmsc.geospatial.nmea.NmeaBurst;
 import com.usda.fmsc.twotrails.Units;
+import com.usda.fmsc.twotrails.gps.GpsService;
+import com.usda.fmsc.twotrails.objects.PolygonDrawOptions;
+import com.usda.fmsc.twotrails.objects.PolygonGraphicManager;
+import com.usda.fmsc.twotrails.objects.TtMetadata;
+import com.usda.fmsc.twotrails.objects.TtPoint;
+
+import java.lang.reflect.Method;
 
 public interface IMultiMapFragment {
     String MAP_OPTIONS_EXTRA = "MapOptionsEx";
 
     void setMap(int mapType);
 
-    void moveToLocation(float lat, float lon, boolean animate);
+    void setLocationEnabled(boolean enabled);
+
+    void setCompassEnabled(boolean enabled);
+
+    void moveToLocation(float lat, float lon, float zoomLevel, boolean animate);
+    void moveToLocation(Extent extents, int padding, boolean animate);
 
     void onMapLocationChanged();
+
+    void addGraphic(PolygonGraphicManager graphicManager, PolygonDrawOptions drawOptions);
+
+    void hideSelectedMarkerInfo();
 
     Position getLatLon();
 
     Extent getExtents();
 
+    MarkerData getMarkerData(String id);
+
 
     interface MultiMapListener {
-
         void onMapReady();
+        void onMapLoaded();
         void onMapTypeChanged(Units.MapType mapType, int mapId);
         void onMapLocationChanged();
-
+        void onMapClick(Position position);
+        void onMarkerClick(MarkerData markerData);
     }
 
 
     class MapOptions implements SafeParcelable {
         private int MapId;
-        private Double North, East, South, West;
-        private Double Latitude, Longitide;
-        private Float ZoomLevel;
+        private double North = 0, East = 0, South = 0, West = 0;
+        private double Latitude = 0, Longitide = 0;
+        private float ZoomLevel = 0f;
+        private int Padding = 0;
 
         public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
             @Override
@@ -56,27 +77,38 @@ public interface IMultiMapFragment {
             East = in.readDouble();
             South = in.readDouble();
             West = in.readDouble();
+            Padding = in.readInt();
             Latitude = in.readDouble();
             Longitide = in.readDouble();
             ZoomLevel = in.readFloat();
         }
 
         public MapOptions(int mapId, Extent extent) {
+            this(mapId, extent, 0);
+        }
+
+        public MapOptions(int mapId, Extent extent, int padding) {
             this.MapId = mapId;
 
             this.North = extent.getNorth();
             this.East = extent.getEast();
             this.South = extent.getSouth();
             this.West = extent.getWest();
+            this.Padding = padding;
         }
 
         public MapOptions(int mapId, Position northEast, Position southWest) {
+            this(mapId, northEast, southWest, 0);
+        }
+
+        public MapOptions(int mapId, Position northEast, Position southWest, int padding) {
             this.MapId = mapId;
 
             this.North = northEast.getLatitudeSignedDecimal();
             this.East = northEast.getLongitudeSignedDecimal();
             this.South = southWest.getLatitudeSignedDecimal();
             this.West = southWest.getLongitudeSignedDecimal();
+            this.Padding = padding;
         }
 
         public MapOptions(int mapId, Position position) {
@@ -93,6 +125,7 @@ public interface IMultiMapFragment {
 
         public MapOptions(int mapId, Double latitude, Double longitide, Float zoomLevel) {
             this.MapId = mapId;
+
             this.Latitude = latitude;
             this.Longitide = longitide;
             this.ZoomLevel = zoomLevel;
@@ -111,6 +144,7 @@ public interface IMultiMapFragment {
             dest.writeDouble(East);
             dest.writeDouble(South);
             dest.writeDouble(West);
+            dest.writeInt(Padding);
             dest.writeDouble(Latitude);
             dest.writeDouble(Longitide);
             dest.writeFloat(ZoomLevel);
@@ -118,11 +152,11 @@ public interface IMultiMapFragment {
 
 
         public boolean hasExtents() {
-            return North != null && South != null && West != null && East != null;
+            return North != 0 || South != 0 || West != 0 || East != 0;
         }
 
         public boolean hasLocation() {
-            return Latitude != null && Longitide != null;
+            return Latitude != 0 || Longitide != 0;
         }
 
 
@@ -166,6 +200,14 @@ public interface IMultiMapFragment {
             West = west;
         }
 
+        public Integer getPadding() {
+            return Padding;
+        }
+
+        public void setPadding(Integer padding) {
+            Padding = padding;
+        }
+
         public Double getLatitude() {
             return Latitude;
         }
@@ -188,6 +230,18 @@ public interface IMultiMapFragment {
 
         public void setZoomLevel(Float zoomLevel) {
             ZoomLevel = zoomLevel;
+        }
+    }
+
+    class MarkerData {
+        public TtPoint Point;
+        public TtMetadata Metadata;
+        public boolean Adjusted;
+
+        public MarkerData(TtPoint point, TtMetadata metadata, boolean adjusted) {
+            Point = point;
+            Metadata = metadata;
+            Adjusted = adjusted;
         }
     }
 }

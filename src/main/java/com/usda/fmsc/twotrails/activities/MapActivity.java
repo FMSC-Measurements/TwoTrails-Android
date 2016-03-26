@@ -40,8 +40,6 @@ import com.usda.fmsc.android.animation.ViewAnimator;
 import com.usda.fmsc.android.widget.MultiStateTouchCheckBox;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
@@ -49,15 +47,21 @@ import com.google.android.gms.maps.model.Marker;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import com.usda.fmsc.android.widget.drawables.FadeBitmapProgressDrawable;
 import com.usda.fmsc.android.widget.drawables.PolygonProgressDrawable;
-import com.usda.fmsc.twotrails.activities.custom.CustomToolbarActivity;
+import com.usda.fmsc.geospatial.Extent;
+import com.usda.fmsc.geospatial.Position;
+import com.usda.fmsc.twotrails.activities.custom.MultiMapTypeActivity;
 import com.usda.fmsc.twotrails.adapters.PointDetailsAdapter;
 import com.usda.fmsc.twotrails.adapters.PolyMarkerMapRvAdapter;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.Global;
+import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.objects.PolyDrawOptions;
-import com.usda.fmsc.twotrails.objects.PolyMarkerMap;
+import com.usda.fmsc.twotrails.objects.IPolygonGraphic;
+import com.usda.fmsc.twotrails.objects.PolygonDrawOptions;
+import com.usda.fmsc.twotrails.objects.PolygonDrawOptions.GraphicCode;
+import com.usda.fmsc.twotrails.objects.GoogleMapsPolygonGrahpic;
+import com.usda.fmsc.twotrails.objects.PolygonGraphicManager;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
@@ -78,10 +82,7 @@ import com.usda.fmsc.geospatial.utm.UTMTools;
 import com.usda.fmsc.utilities.StringEx;
 import jp.wasabeef.recyclerview.animators.SlideInUpAnimator;
 
-public class MapActivity extends CustomToolbarActivity implements GpsService.Listener, SensorEventListener, OnMapReadyCallback,
-        GoogleMap.OnMyLocationButtonClickListener, PolyMarkerMapRvAdapter.Listener, GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener {
-
-    private GpsService.GpsBinder binder;
+public class MapActivity extends MultiMapTypeActivity implements GpsService.Listener, SensorEventListener, PolyMarkerMapRvAdapter.Listener {
 
     private SensorManager mSensorManager;
     private Sensor accelerometer, magnetometer;
@@ -89,7 +90,6 @@ public class MapActivity extends CustomToolbarActivity implements GpsService.Lis
     private ActionBarDrawerToggle drawerToggle;
     private MenuItem miResetBounds, miShowMyPos, miTrackedPoly;
     private SlidingUpPanelLayout slidingLayout;
-    private GoogleMap map;
     private RecyclerView rvPolyOptions;
     private TextView tvNavPid, tvNavPoly, tvLocX, tvLocY, tvLocZone, tvLocXType, tvLocYType, tvZoneLbl,
                     tvNavDistMt, tvNavDistFt, tvNavAzTrue, tvNavAzMag;
@@ -102,7 +102,7 @@ public class MapActivity extends CustomToolbarActivity implements GpsService.Lis
     boolean fromMyLoc;
 
     private boolean myPosBtn, compass, dispLoc, locUtm;
-    private boolean mapMoved = true, showMyPos;
+    private boolean mapMoved = true, showMyPos, polysCreated;
     private Units.MapTracking mapTracking = Units.MapTracking.FOLLOW;
     private Integer zone;
 
@@ -112,16 +112,13 @@ public class MapActivity extends CustomToolbarActivity implements GpsService.Lis
 
     //private TtPoint currentPoint;
     private Location currentLocation, targetLocation;
-    private Marker currentMarker;
 
     private HashMap<TtPolygon, ArrayList<TtPoint>> polyPoints;
     private HashMap<String, TtPolygon> polygons;
-    private ArrayList<PolyMarkerMap> polyMarkerMaps;
     private HashMap<String, TtMetadata> _Metadata;
-    private HashMap<String, PolyMarkerMap.MarkerData> _MarkerData;
 
     private GeoPosition lastPosition;
-    private LatLngBounds completeBnds, trackedPoly;
+    private Extent completeBnds, trackedPoly;
 
     private PolyMarkerMapRvAdapter pmmAdapter;
 
@@ -141,10 +138,7 @@ public class MapActivity extends CustomToolbarActivity implements GpsService.Lis
         LinearLayoutManager llm = new LinearLayoutManager(this);
         rvPolyOptions.setLayoutManager(llm);
 
-        polyMarkerMaps = new ArrayList<>();
-
-
-        pmmAdapter = new PolyMarkerMapRvAdapter(this, polyMarkerMaps, this);
+        pmmAdapter = new PolyMarkerMapRvAdapter(this, getGraphicManagers(), this);
         rvPolyOptions.setItemAnimator(new SlideInUpAnimator());
 
 
@@ -164,11 +158,13 @@ public class MapActivity extends CustomToolbarActivity implements GpsService.Lis
                 if (!firstOpened) {
                     rvPolyOptions.setAdapter(pmmAdapter);
 
-                    if (polyMarkerMaps.size() > 0) {
-                        if (polyMarkerMaps.size() < 2) {
+                    int size = getGraphicManagers().size();
+
+                    if (size > 0) {
+                        if (size < 2) {
                             pmmAdapter.notifyItemInserted(0);
                         } else {
-                            pmmAdapter.notifyItemRangeInserted(0, polyMarkerMaps.size());
+                            pmmAdapter.notifyItemRangeInserted(0, size);
                         }
                     }
 
@@ -177,7 +173,7 @@ public class MapActivity extends CustomToolbarActivity implements GpsService.Lis
             }
         };
 
-        polyDrawer.setDrawerListener(drawerToggle);
+        polyDrawer.addDrawerListener(drawerToggle);
 
         slidingLayout = (SlidingUpPanelLayout)findViewById(R.id.mapSlidingPanelLayout);
 
@@ -185,7 +181,6 @@ public class MapActivity extends CustomToolbarActivity implements GpsService.Lis
             _Metadata = Global.DAL.getMetadataMap();
             zone = _Metadata.get(Consts.EmptyGuid).getZone();
         }
-
 
         tvNavPid = (TextView)findViewById(R.id.mapNavTvPid);
         tvNavPoly = (TextView)findViewById(R.id.mapNavTvPoly);
@@ -214,14 +209,16 @@ public class MapActivity extends CustomToolbarActivity implements GpsService.Lis
 
         getSettings();
 
+
+
         // check google play services and setup map
-        Integer code = AndroidUtils.App.checkPlayServices(this, Consts.Activities.Services.REQUEST_GOOGLE_PLAY_SERVICES);
-        if (code == null) {
-            startMap();
-        } else {
-            String str = GoogleApiAvailability.getInstance().getErrorString(code);
-            Toast.makeText(this, str, Toast.LENGTH_LONG).show();
-        }
+//        Integer code = AndroidUtils.App.checkPlayServices(this, Consts.Activities.Services.REQUEST_GOOGLE_PLAY_SERVICES);
+//        if (code == null) {
+//            startMap();
+//        } else {
+//            String str = GoogleApiAvailability.getInstance().getErrorString(code);
+//            Toast.makeText(this, str, Toast.LENGTH_LONG).show();
+//        }
 
         //get Polys and init settings
         polyPoints = new HashMap<>();
@@ -234,12 +231,16 @@ public class MapActivity extends CustomToolbarActivity implements GpsService.Lis
 
         Global.MapSettings.init(new ArrayList<>(polyPoints.keySet()));
 
-        binder = Global.getGpsBinder();
-        binder.registerActiviy(this, this);
+//        binder = Global.getGpsBinder();
+//        binder.addListener(this, this);
 
         mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
         accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         magnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+
+        if (Global.Settings.DeviceSettings.isGpsConfigured()) {
+            Global.getGpsBinder().startGps();
+        }
 
         System.gc();
     }
@@ -260,18 +261,18 @@ public class MapActivity extends CustomToolbarActivity implements GpsService.Lis
     protected void onDestroy() {
         super.onDestroy();
 
-        if (map != null) {
-            map.setLocationSource(null);
-        }
+//        if (map != null) {
+//            map.setLocationSource(null);
+//        }
 
 
-        if (binder != null) {
-            binder.unregisterActivity(this);
-
-            if (!Global.Settings.DeviceSettings.isGpsAlwaysOn()) {
-                binder.stopGps();
-            }
-        }
+//        if (binder != null) {
+//            binder.removeListener(this);
+//
+//            if (!Global.Settings.DeviceSettings.isGpsAlwaysOn()) {
+//                binder.stopGps();
+//            }
+//        }
 
         System.gc();
     }
@@ -325,13 +326,19 @@ public class MapActivity extends CustomToolbarActivity implements GpsService.Lis
                     Global.getGpsBinder().stopGps();
                 }
 
-                if (map != null) {
-                    if (AndroidUtils.App.checkLocationPermission(this)) {
-                        map.setMyLocationEnabled(showMyPos);
-                    } else {
-                        Toast.makeText(this, "Unable to use location services.", Toast.LENGTH_LONG).show();
-                    }
-                }
+                setLocationEnabled(showMyPos);
+
+//                if (map != null) {
+//                    if (AndroidUtils.App.checkLocationPermission(this)) {
+//                        map.setMyLocationEnabled(showMyPos);
+//                    } else {
+//                        Toast.makeText(this, "Unable to use location services.", Toast.LENGTH_LONG).show();
+//                    }
+//                }
+                break;
+            }
+            case R.id.mmSelectMap: {
+                selectMapType();
                 break;
             }
             case R.id.mapMenuGps: {
@@ -347,6 +354,7 @@ public class MapActivity extends CustomToolbarActivity implements GpsService.Lis
                 break;
             }
             case R.id.mapMenuWhereIs: {
+                fabMyPos.hide();
                 calculate();
                 slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
                 break;
@@ -357,11 +365,12 @@ public class MapActivity extends CustomToolbarActivity implements GpsService.Lis
                 break;
             }
             case R.id.mapMenuZoomToPoly: {
-                if (polyMarkerMaps.size() > 0) {
+                int gSize = getGraphicManagers().size();
+                if (gSize > 0) {
                     final String[] polyStrs = new String[polyPoints.size()];
 
-                    for (int i = 0; i < polyMarkerMaps.size(); i++) {
-                        polyStrs[i] = polyMarkerMaps.get(i).getPolyName();
+                    for (int i = 0; i < gSize; i++) {
+                        polyStrs[i] = getGraphicManagers().get(i).getPolyName();
                     }
 
                     AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
@@ -371,9 +380,9 @@ public class MapActivity extends CustomToolbarActivity implements GpsService.Lis
                     dialogBuilder.setItems(polyStrs, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            PolyMarkerMap pmm = polyMarkerMaps.get(which);
-                            trackedPoly = pmm.getPolyBounds();
-                            Global.Settings.ProjectSettings.setTrackedPolyCN(pmm.getPolyCN());
+                            PolygonGraphicManager pmm = getGraphicManagers().get(which);
+                            trackedPoly = pmm.getExtents();
+                            Global.Settings.ProjectSettings.setTrackedPolyCN(pmm.getId());
                             mapMoved = true;
                             updateMapView(null);
                         }
@@ -402,11 +411,11 @@ public class MapActivity extends CustomToolbarActivity implements GpsService.Lis
                 getSettings();
                 break;
             }
-            case Consts.Activities.Services.REQUEST_GOOGLE_PLAY_SERVICES: {
-                if (resultCode == Activity.RESULT_OK) {
-                    startMap();
-                }
-            }
+//            case Consts.Activities.Services.REQUEST_GOOGLE_PLAY_SERVICES: {
+//                if (resultCode == Activity.RESULT_OK) {
+//                    startMap();
+//                }
+//            }
 
         }
 
@@ -432,11 +441,12 @@ public class MapActivity extends CustomToolbarActivity implements GpsService.Lis
             }
             case COLLAPSED: {
                 slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
-                if (currentMarker != null) {
-                    currentMarker.hideInfoWindow();
-                    currentMarker = null;
-                    targetLocation = null;
-                }
+//                if (currentMarker != null) {
+//                    currentMarker.hideInfoWindow();
+//                    currentMarker = null;
+//                    targetLocation = null;
+//                }
+                hideSelectedMarkerInfo();
                 break;
             }
             case HIDDEN: {
@@ -468,109 +478,79 @@ public class MapActivity extends CustomToolbarActivity implements GpsService.Lis
 
         setMapSettings();
 
-        if (binder == null) {
-            binder = Global.getGpsBinder();
-            binder.registerActiviy(this, this);
-
-            if (showMyPos) {
-                binder.startGps();
-            }
-        }
+//        if (binder == null) {
+//            binder = Global.getGpsBinder();
+//            binder.addListener(this, this);
+//
+//            if (showMyPos) {
+//                binder.startGps();
+//            }
+//        }
     }
     //endregion
 
-
-    //region Google Map
-    private void startMap() {
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
+    @Override
+    protected IMultiMapFragment.MapOptions getMapStartLocation(Units.MapType mapType, int terrainType) {
+        //        try {
+//            if (mapTracking == Units.MapTracking.FOLLOW && lastPosition != null) {
+//                map.animateCamera(CameraUpdateFactory.newLatLngZoom(
+//                        new LatLng(lastPosition.getLatitudeSignedDecimal(), lastPosition.getLongitudeSignedDecimal()),
+//                        Consts.LocationInfo.GoogleMaps.ZOOM_CLOSE
+//                ));
+//
+//                mapMoved = true;
+//            } else if (mapTracking == Units.MapTracking.POLY_BOUNDS ||
+//                    mapTracking == Units.MapTracking.COMPLETE_BOUNDS) {
+//                mapMoved = true;
+//                updateMapView(null);
+//            } else {
+//                if (zone != null) {
+//                    map.moveCamera(CameraUpdateFactory.newLatLngBounds(TtUtils.GMap.getStartPosInZone(zone), 0));
+//                } else {
+//                    map.moveCamera(CameraUpdateFactory.newLatLngBounds(Consts.LocationInfo.GoogleMaps.USA_BOUNDS, 0));
+//                }
+//
+//                mapMoved = true;
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+        return super.getMapStartLocation(mapType, terrainType);
     }
 
     @Override
-    public void onMapReady(GoogleMap googleMap) {
-        map = googleMap;
+    public void onMapReady() {
+        super.onMapReady();
 
-        //use external GPS if available
-        if (Global.Settings.DeviceSettings.isGpsConfigured()) {
-            map.setLocationSource(binder.getService());
+        setCompassEnabled(compass);
+        setLocationEnabled(showMyPos);
 
-            if (showMyPos) {
-                binder.startGps();
-            }
-        }
-
-        map.clear();
-
-        map.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
-        map.setInfoWindowAdapter(new MultiLineInfoWindowAdapter(this));
-        map.setOnMyLocationButtonClickListener(this);
-        map.setOnMapClickListener(this);
-        map.setOnMarkerClickListener(this);
-
-        map.getUiSettings().setMapToolbarEnabled(false);
-        map.setPadding(0, (int)(getResources().getDimension(R.dimen.toolbar_height)), 0, 0);
-
-        setMapSettings();
-
-        setupPolygons();
-
-        try {
-            if (mapTracking == Units.MapTracking.FOLLOW && lastPosition != null) {
-                map.animateCamera(CameraUpdateFactory.newLatLngZoom(
-                        new LatLng(lastPosition.getLatitudeSignedDecimal(), lastPosition.getLongitudeSignedDecimal()),
-                        Consts.LocationInfo.GoogleMaps.ZOOM_CLOSE
-                ));
-
-                mapMoved = true;
-            } else if (mapTracking == Units.MapTracking.POLY_BOUNDS ||
-                    mapTracking == Units.MapTracking.COMPLETE_BOUNDS) {
-                mapMoved = true;
-                updateMapView(null);
-            } else {
-                if (zone != null) {
-                    map.moveCamera(CameraUpdateFactory.newLatLngBounds(TtUtils.GMap.getStartPosInZone(zone), 0));
-                } else {
-                    map.moveCamera(CameraUpdateFactory.newLatLngBounds(Consts.LocationInfo.GoogleMaps.USA_BOUNDS, 0));
-                }
-
-                mapMoved = true;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (!polysCreated) {
+            setupPolygons();
+            polysCreated = true;
         }
     }
 
     public void btnMyLocClick(View view) {
-        onMyLocationButtonClick();
-    }
+        //onMyLocationButtonClick();
 
-    @Override
-    public boolean onMyLocationButtonClick() {
         if (lastPosition == null) {
             lastPosition = Global.getGpsBinder().getLastPosition();
         }
 
         if (lastPosition != null) {
-            map.animateCamera(CameraUpdateFactory.newLatLngZoom(
-                    new LatLng(lastPosition.getLatitudeSignedDecimal(), lastPosition.getLongitudeSignedDecimal()),
-                    Consts.LocationInfo.GoogleMaps.ZOOM_CLOSE
-            ));
+            moveToLocation(lastPosition, true);
         }
-        return true;
     }
 
     @Override
-    public void onMapClick(LatLng latLng) {
+    public void onMapClick(Position position) {
         slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
         fabMyPos.show();
     }
 
     @Override
-    public boolean onMarkerClick(Marker marker) {
-        currentMarker = marker;
-
-        PolyMarkerMap.MarkerData md = _MarkerData.get(marker.getId());
-
+    public void onMarkerClick(IMultiMapFragment.MarkerData md) {
         TtPoint currentPoint = md.Point;
 
         targetLocation = TtUtils.getPointLocation(currentPoint, md.Adjusted, _Metadata);
@@ -587,45 +567,29 @@ public class MapActivity extends CustomToolbarActivity implements GpsService.Lis
         slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
 
         fabMyPos.hide();
-
-        return false;
     }
 
     private void setMapSettings() {
-        if (map != null) {
-            UiSettings uiSettings = map.getUiSettings();
 
-            uiSettings.setMyLocationButtonEnabled(false);
-            uiSettings.setCompassEnabled(compass);
-
-            fabMyPos.setVisibility(myPosBtn ? View.VISIBLE : View.GONE);
-
-            if (AndroidUtils.App.checkLocationPermission(this)) {
-                map.setMyLocationEnabled(showMyPos);
-            } else {
-                Toast.makeText(this, "Unable to use location services.", Toast.LENGTH_LONG).show();
-            }
-        }
+        setCompassEnabled(compass);
+        fabMyPos.setVisibility(myPosBtn ? View.VISIBLE : View.GONE);
+        setLocationEnabled(showMyPos);
 
         setDisplayLocInfoVisible();
     }
 
     private void updateMapView(GeoPosition position) {
         if (mapTracking == Units.MapTracking.FOLLOW && position != null) {
-            map.animateCamera(CameraUpdateFactory.newLatLng(
-                    new LatLng(position.getLatitudeSignedDecimal(),
-                            position.getLongitudeSignedDecimal())
-            ));
-
+            moveToLocation(position, true);
             mapMoved = true;
         }
 
         if (mapMoved) {
             if (mapTracking == Units.MapTracking.POLY_BOUNDS && trackedPoly != null) {
-                map.animateCamera(CameraUpdateFactory.newLatLngBounds(trackedPoly, Consts.LocationInfo.GoogleMaps.PADDING));
+                moveToLocation(trackedPoly, Consts.LocationInfo.PADDING, true);
                 mapMoved = false;
             } else if (mapTracking == Units.MapTracking.COMPLETE_BOUNDS && completeBnds != null) {
-                map.animateCamera(CameraUpdateFactory.newLatLngBounds(completeBnds, Consts.LocationInfo.GoogleMaps.PADDING));
+                moveToLocation(completeBnds, Consts.LocationInfo.PADDING, true);
                 mapMoved = false;
             }
         }
@@ -636,20 +600,10 @@ public class MapActivity extends CustomToolbarActivity implements GpsService.Lis
     //region GPS
     @Override
     public void nmeaBurstReceived(NmeaBurst nmeaBurst) {
+        super.nmeaBurstReceived(nmeaBurst);
+
         if (nmeaBurst.hasPosition()) {
-            lastPosition = nmeaBurst.getPosition();
-
             updateMapView(lastPosition);
-
-            if (currentLocation == null) {
-                currentLocation = new Location(StringEx.Empty);
-            } else {
-                currentLocation.reset();
-            }
-
-            currentLocation.setLatitude(lastPosition.getLatitudeSignedDecimal());
-            currentLocation.setLongitude(lastPosition.getLongitudeSignedDecimal());
-            currentLocation.setAltitude(lastPosition.getElevation());
 
             setDisplayLocInfo();
 
@@ -658,50 +612,17 @@ public class MapActivity extends CustomToolbarActivity implements GpsService.Lis
             }
         }
     }
-
-    @Override
-    public void gpsError(GpsService.GpsError error) {
-        switch (error) {
-            case LostDeviceConnection:
-                break;
-            case NoExternalGpsSocket:
-                break;
-            case Unkown:
-                break;
-        }
-    }
-
-    @Override
-    public void nmeaStringReceived(String nmeaString) {
-
-    }
-
-    @Override
-    public void nmeaSentenceReceived(NmeaSentence nmeaSentence) {
-        //
-    }
-
-    @Override
-    public void gpsStarted() {
-
-    }
-
-    @Override
-    public void gpsStopped() {
-
-    }
-
-    @Override
-    public void gpsServiceStarted() {
-
-    }
-
-    @Override
-    public void gpsServiceStopped() {
-
-    }
     //endregion
 
+
+
+    @Override
+    public void onMapTypeChanged(Units.MapType mapType, int mapId) {
+        super.onMapTypeChanged(mapType, mapId);
+
+        setCompassEnabled(compass);
+        setLocationEnabled(showMyPos);
+    }
 
     private void setDisplayLocInfo() {
         if (dispLoc && lastPosition != null) {
@@ -859,12 +780,10 @@ public class MapActivity extends CustomToolbarActivity implements GpsService.Lis
     private void setupPolygons() {
         HashMap<String, TtMetadata> meta = Global.DAL.getMetadataMap();
 
-        _MarkerData = new HashMap<>();
-
-        PolyMarkerMap markerMap;
+        PolygonGraphicManager polygonGraphicManager;
         String trackedPolyCN = Global.Settings.ProjectSettings.getTrackedPolyCN();
 
-        PolyMarkerMap.PolygonGraphicOptions graphicOptions = new PolyMarkerMap.PolygonGraphicOptions(
+        IPolygonGraphic.PolygonGraphicOptions graphicOptions = new IPolygonGraphic.PolygonGraphicOptions(
                 AndroidUtils.UI.getColor(this, R.color.red_500),
                 AndroidUtils.UI.getColor(this, R.color.red_800),
                 AndroidUtils.UI.getColor(this, R.color.indigo_500),
@@ -874,41 +793,39 @@ public class MapActivity extends CustomToolbarActivity implements GpsService.Lis
         );
 
         for (TtPolygon polygon : getSortedPolys()) {
-            markerMap =  new PolyMarkerMap(
-                    map,
-                    Global.MapSettings.PolyOptions.get(polygon.getCN()),
-                    polyPoints.get(polygon),
+            polygonGraphicManager =  new PolygonGraphicManager(
                     polygon,
+                    polyPoints.get(polygon),
                     meta,
                     graphicOptions);
 
-            polyMarkerMaps.add(markerMap);
-            _MarkerData.putAll(markerMap.getMarkerData());
+            addGraphic(polygonGraphicManager, Global.MapSettings.PolyOptions.get(polygon.getCN()));
 
             if (polygon.getCN().equals(trackedPolyCN)) {
-                trackedPoly = markerMap.getPolyBounds();
+                trackedPoly = polygonGraphicManager.getExtents();
             }
         }
 
-        if (polyMarkerMaps.size() > 0) {
+        if (getGraphicManagers().size() > 0) {
             if (trackedPoly == null) {
-                PolyMarkerMap pmm = polyMarkerMaps.get(0);
-                trackedPoly = pmm.getPolyBounds();
-                Global.Settings.ProjectSettings.setTrackedPolyCN(pmm.getPolyCN());
+                PolygonGraphicManager pgm = getGraphicManagers().get(0);
+                trackedPoly = pgm.getExtents();
+                Global.Settings.ProjectSettings.setTrackedPolyCN(pgm.getId());
             }
 
-            LatLngBounds.Builder builder = new LatLngBounds.Builder();
-            LatLngBounds tmp;
+            Extent.Builder builder = new Extent.Builder();
+            Extent tmp;
 
             int usedBounds = 0;
-            for (PolyMarkerMap map : polyMarkerMaps) {
-                tmp = map.getPolyBounds();
+            for (PolygonGraphicManager pgm : getGraphicManagers()) {
+                tmp = pgm.getExtents();
 
                 if (tmp == null)
                     continue;
 
-                builder.include(tmp.northeast);
-                builder.include(tmp.southwest);
+                builder.include(tmp.getNorthEast());
+                builder.include(tmp.getSouthWest());
+                
                 usedBounds++;
             }
 
@@ -927,11 +844,11 @@ public class MapActivity extends CustomToolbarActivity implements GpsService.Lis
     MultiStateTouchCheckBox tcbPoly, tcbAdjBnd, tcbAdjNav, tcbUnAdjBnd, tcbUnAdjNav,
             tcbAdjBndPts, tcbAdjNavPts, tcbUnAdjBndPts, tcbUnAdjNavPts,
             tcbAdjMiscPts, tcbUnadjMiscPts, tcbWayPts;
-    //ImageButton ibBndMenu;
+
     boolean masterCardExpanded;
 
     private void setupMasterPolyControl() {
-        PolyDrawOptions mopt = Global.MapSettings.MasterPolyOptions;
+        PolygonDrawOptions mopt = Global.MapSettings.MasterPolyOptions;
 
         layHeader = findViewById(R.id.mpcLayHeader);
         layContent = findViewById(R.id.mpcLayPolyContent);
@@ -968,16 +885,20 @@ public class MapActivity extends CustomToolbarActivity implements GpsService.Lis
 
         tcbWayPts.setCheckBoxDrawable(new FadeBitmapProgressDrawable(b));
 
-        try {
-            Class c = PolyDrawOptions.class;
-            for (Field f : c.getFields()) {
-                if (f.getType().equals(String.class)) {
-                    onHolderOptionChanged(null, (String)f.get(mopt));
-                }
-            }
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
+
+        for (GraphicCode code : GraphicCode.values()) {
+            onHolderOptionChanged(null, code);
         }
+//        try {
+//            Class c = PolygonDrawOptions.class;
+//            for (Field f : c.getFields()) {
+//                if (f.getType().equals(GraphicCode.class)) {
+//                    onHolderOptionChanged(null, (GraphicCode)f.get(mopt));
+//                }
+//            }
+//        } catch (IllegalAccessException e) {
+//            e.printStackTrace();
+//        }
 
         layHeader.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -995,103 +916,99 @@ public class MapActivity extends CustomToolbarActivity implements GpsService.Lis
         tcbPoly.setOnCheckedStateChangeListener(new MultiStateTouchCheckBox.OnCheckedStateChangeListener() {
             @Override
             public void onCheckedStateChanged(View buttonView, boolean isChecked, MultiStateTouchCheckBox.CheckedState state) {
-                updatePolyOptions(PolyDrawOptions.VISIBLE, isChecked);
+                updatePolyOptions(GraphicCode.VISIBLE, isChecked);
             }
         });
 
         tcbAdjBnd.setOnCheckedStateChangeListener(new MultiStateTouchCheckBox.OnCheckedStateChangeListener() {
             @Override
             public void onCheckedStateChanged(View buttonView, boolean isChecked, MultiStateTouchCheckBox.CheckedState state) {
-                updatePolyOptions(PolyDrawOptions.ADJBND, isChecked);
+                updatePolyOptions(GraphicCode.ADJBND, isChecked);
             }
         });
 
         tcbAdjNav.setOnCheckedStateChangeListener(new MultiStateTouchCheckBox.OnCheckedStateChangeListener() {
             @Override
             public void onCheckedStateChanged(View buttonView, boolean isChecked, MultiStateTouchCheckBox.CheckedState state) {
-                updatePolyOptions(PolyDrawOptions.ADJNAV, isChecked);
+                updatePolyOptions(GraphicCode.ADJNAV, isChecked);
             }
         });
 
         tcbUnAdjBnd.setOnCheckedStateChangeListener(new MultiStateTouchCheckBox.OnCheckedStateChangeListener() {
             @Override
             public void onCheckedStateChanged(View buttonView, boolean isChecked, MultiStateTouchCheckBox.CheckedState state) {
-                updatePolyOptions(PolyDrawOptions.UNADJBND, isChecked);
+                updatePolyOptions(GraphicCode.UNADJBND, isChecked);
             }
         });
 
         tcbUnAdjNav.setOnCheckedStateChangeListener(new MultiStateTouchCheckBox.OnCheckedStateChangeListener() {
             @Override
             public void onCheckedStateChanged(View buttonView, boolean isChecked, MultiStateTouchCheckBox.CheckedState state) {
-                updatePolyOptions(PolyDrawOptions.UNADJNAV, isChecked);
+                updatePolyOptions(GraphicCode.UNADJNAV, isChecked);
             }
         });
 
         tcbAdjBndPts.setOnCheckedStateChangeListener(new MultiStateTouchCheckBox.OnCheckedStateChangeListener() {
             @Override
             public void onCheckedStateChanged(View buttonView, boolean isChecked, MultiStateTouchCheckBox.CheckedState state) {
-                updatePolyOptions(PolyDrawOptions.ADJBNDPTS, isChecked);
+                updatePolyOptions(GraphicCode.ADJBNDPTS, isChecked);
             }
         });
 
         tcbAdjNavPts.setOnCheckedStateChangeListener(new MultiStateTouchCheckBox.OnCheckedStateChangeListener() {
             @Override
             public void onCheckedStateChanged(View buttonView, boolean isChecked, MultiStateTouchCheckBox.CheckedState state) {
-                updatePolyOptions(PolyDrawOptions.ADJNAVPTS, isChecked);
+                updatePolyOptions(GraphicCode.ADJNAVPTS, isChecked);
             }
         });
 
         tcbUnAdjBndPts.setOnCheckedStateChangeListener(new MultiStateTouchCheckBox.OnCheckedStateChangeListener() {
             @Override
             public void onCheckedStateChanged(View buttonView, boolean isChecked, MultiStateTouchCheckBox.CheckedState state) {
-                updatePolyOptions(PolyDrawOptions.UNADJBNDPTS, isChecked);
+                updatePolyOptions(GraphicCode.UNADJBNDPTS, isChecked);
             }
         });
 
         tcbUnAdjNavPts.setOnCheckedStateChangeListener(new MultiStateTouchCheckBox.OnCheckedStateChangeListener() {
             @Override
             public void onCheckedStateChanged(View buttonView, boolean isChecked, MultiStateTouchCheckBox.CheckedState state) {
-                updatePolyOptions(PolyDrawOptions.UNADJNAVPTS, isChecked);
+                updatePolyOptions(GraphicCode.UNADJNAVPTS, isChecked);
             }
         });
 
         tcbAdjMiscPts.setOnCheckedStateChangeListener(new MultiStateTouchCheckBox.OnCheckedStateChangeListener() {
             @Override
             public void onCheckedStateChanged(View buttonView, boolean isChecked, MultiStateTouchCheckBox.CheckedState state) {
-                updatePolyOptions(PolyDrawOptions.ADJMISCPTS, isChecked);
+                updatePolyOptions(GraphicCode.ADJMISCPTS, isChecked);
             }
         });
 
         tcbUnadjMiscPts.setOnCheckedStateChangeListener(new MultiStateTouchCheckBox.OnCheckedStateChangeListener() {
             @Override
             public void onCheckedStateChanged(View buttonView, boolean isChecked, MultiStateTouchCheckBox.CheckedState state) {
-                updatePolyOptions(PolyDrawOptions.UNADJMISCPTS, isChecked);
+                updatePolyOptions(GraphicCode.UNADJMISCPTS, isChecked);
             }
         });
 
         tcbWayPts.setOnCheckedStateChangeListener(new MultiStateTouchCheckBox.OnCheckedStateChangeListener() {
             @Override
             public void onCheckedStateChanged(View buttonView, boolean isChecked, MultiStateTouchCheckBox.CheckedState state) {
-                updatePolyOptions(PolyDrawOptions.WAYPTS, isChecked);
+                updatePolyOptions(GraphicCode.WAYPTS, isChecked);
             }
         });
     }
 
     //change master
     @Override
-    public void onHolderOptionChanged(PolyMarkerMapRvAdapter.PolyMarkerMapViewHolder holder, String option) {
+    public void onHolderOptionChanged(PolyMarkerMapRvAdapter.PolyMarkerMapViewHolder holder, PolygonDrawOptions.GraphicCode code) {
         boolean vis = false, invis = false;
 
         MultiStateTouchCheckBox tcb = null;
 
-
         try {
-            Field field = PolyDrawOptions.class.getField(option);
-            boolean value;
+            for (PolygonGraphicManager map : getGraphicManagers()) {
 
-            for (PolyMarkerMap map : polyMarkerMaps) {
-
-                value = field.getBoolean(map.getOptions());
+                boolean value = map.getDrawOptions().getValue(code);
 
                 if (value) {
                     vis = true;
@@ -1104,41 +1021,41 @@ public class MapActivity extends CustomToolbarActivity implements GpsService.Lis
                 }
             }
 
-            switch (option) {
-                case PolyDrawOptions.VISIBLE:
+            switch (code) {
+                case VISIBLE:
                     tcb = tcbPoly;
                     break;
-                case PolyDrawOptions.ADJBND:
+                case ADJBND:
                     tcb = tcbAdjBnd;
                     break;
-                case PolyDrawOptions.UNADJBND:
+                case UNADJBND:
                     tcb = tcbUnAdjBnd;
                     break;
-                case PolyDrawOptions.ADJBNDPTS:
+                case ADJBNDPTS:
                     tcb = tcbAdjBndPts;
                     break;
-                case PolyDrawOptions.UNADJBNDPTS:
+                case UNADJBNDPTS:
                     tcb = tcbUnAdjBndPts;
                     break;
-                case PolyDrawOptions.ADJNAV:
+                case ADJNAV:
                     tcb = tcbAdjNav;
                     break;
-                case PolyDrawOptions.UNADJNAV:
+                case UNADJNAV:
                     tcb = tcbUnAdjNav;
                     break;
-                case PolyDrawOptions.ADJNAVPTS:
+                case ADJNAVPTS:
                     tcb = tcbAdjNavPts;
                     break;
-                case PolyDrawOptions.UNADJNAVPTS:
+                case UNADJNAVPTS:
                     tcb = tcbUnAdjNavPts;
                     break;
-                case PolyDrawOptions.ADJMISCPTS:
+                case ADJMISCPTS:
                     tcb = tcbAdjMiscPts;
                     break;
-                case PolyDrawOptions.UNADJMISCPTS:
+                case UNADJMISCPTS:
                     tcb = tcbUnadjMiscPts;
                     break;
-                case PolyDrawOptions.WAYPTS:
+                case WAYPTS:
                     tcb = tcbWayPts;
                     break;
             }
@@ -1147,14 +1064,14 @@ public class MapActivity extends CustomToolbarActivity implements GpsService.Lis
             if (tcb != null) {
                 if (vis && invis) {
                     tcb.setCheckedStateNoEvent(MultiStateTouchCheckBox.CheckedState.PartialChecked);
-                    field.setBoolean(Global.MapSettings.MasterPolyOptions, true);
+                    Global.MapSettings.MasterPolyOptions.setValue(code, true);
                 } else {
                     if (vis) {
                         tcb.setCheckedStateNoEvent(MultiStateTouchCheckBox.CheckedState.Checked);
-                        field.setBoolean(Global.MapSettings.MasterPolyOptions, true);
+                        Global.MapSettings.MasterPolyOptions.setValue(code, true);
                     } else {
                         tcb.setCheckedStateNoEvent(MultiStateTouchCheckBox.CheckedState.NotChecked);
-                        field.setBoolean(Global.MapSettings.MasterPolyOptions, false);
+                        Global.MapSettings.MasterPolyOptions.setValue(code, false);
                     }
                 }
             }
@@ -1164,54 +1081,54 @@ public class MapActivity extends CustomToolbarActivity implements GpsService.Lis
     }
 
     //change options for all drawoptions and display
-    private void updatePolyOptions(String option, boolean value) {
-        for (PolyMarkerMap map : polyMarkerMaps) {
-            switch (option) {
-                case PolyDrawOptions.VISIBLE:
-                    map.setVisible(value);
+    private void updatePolyOptions(GraphicCode code, boolean value) {
+        for (PolygonGraphicManager gm : getGraphicManagers()) {
+            switch (code) {
+                case VISIBLE:
+                    gm.setVisible(value);
                     break;
-                case PolyDrawOptions.ADJBND:
-                    map.setAdjBndVisible(value);
+                case ADJBND:
+                    gm.setAdjBndVisible(value);
                     break;
-                case PolyDrawOptions.UNADJBND:
-                    map.setUnadjBndVisible(value);
+                case UNADJBND:
+                    gm.setUnadjBndVisible(value);
                     break;
-                case PolyDrawOptions.ADJBNDPTS:
-                    map.setAdjBndPtsVisible(value);
+                case ADJBNDPTS:
+                    gm.setAdjBndPtsVisible(value);
                     break;
-                case PolyDrawOptions.UNADJBNDPTS:
-                    map.setUnadjBndPtsVisible(value);
+                case UNADJBNDPTS:
+                    gm.setUnadjBndPtsVisible(value);
                     break;
-                case PolyDrawOptions.ADJBNDCLOSE:
-                    map.setAdjBndClose(value);
+                case ADJBNDCLOSE:
+                    gm.setAdjBndClose(value);
                     break;
-                case PolyDrawOptions.UNADJBNDCLOSE:
-                    map.setUnadjBndClose(value);
+                case UNADJBNDCLOSE:
+                    gm.setUnadjBndClose(value);
                     break;
-                case PolyDrawOptions.ADJNAV:
-                    map.setAdjNavVisible(value);
+                case ADJNAV:
+                    gm.setAdjNavVisible(value);
                     break;
-                case PolyDrawOptions.UNADJNAV:
-                    map.setUnadjNavVisible(value);
+                case UNADJNAV:
+                    gm.setUnadjNavVisible(value);
                     break;
-                case PolyDrawOptions.ADJNAVPTS:
-                    map.setAdjNavPtsVisible(value);
+                case ADJNAVPTS:
+                    gm.setAdjNavPtsVisible(value);
                     break;
-                case PolyDrawOptions.UNADJNAVPTS:
-                    map.setUnadjNavPtsVisible(value);
+                case UNADJNAVPTS:
+                    gm.setUnadjNavPtsVisible(value);
                     break;
-                case PolyDrawOptions.ADJMISCPTS:
-                    map.setAdjMiscPtsVisible(value);
+                case ADJMISCPTS:
+                    gm.setAdjMiscPtsVisible(value);
                     break;
-                case PolyDrawOptions.UNADJMISCPTS:
-                    map.setUnadjMiscPtsVisible(value);
+                case UNADJMISCPTS:
+                    gm.setUnadjMiscPtsVisible(value);
                     break;
-                case PolyDrawOptions.WAYPTS:
-                    map.setWayPtsVisible(value);
+                case WAYPTS:
+                    gm.setWayPtsVisible(value);
                     break;
             }
 
-            map.onOptionChange(option, value);
+            gm.onOptionChanged(code, value);
         }
     }
     //endregion
@@ -1389,9 +1306,11 @@ public class MapActivity extends CustomToolbarActivity implements GpsService.Lis
 
                     calculate();
 
-                    if (currentMarker != null) {
-                        currentMarker.hideInfoWindow();
-                    }
+//                    if (currentMarker != null) {
+//                        currentMarker.hideInfoWindow();
+//                    }
+
+                    hideSelectedMarkerInfo();
 
                     targetLocation = TtUtils.getPointLocation(toPoint, false, _Metadata);
 

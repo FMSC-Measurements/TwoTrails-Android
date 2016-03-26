@@ -9,38 +9,38 @@ import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.twotrails.Units;
+import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment;
+import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment.MarkerData;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class PolyMarkerMap {
+public class GoogleMapsPolygonGrahpic implements IPolygonGraphic {
     private TtPolygon polygon;
-    private PolyDrawOptions options;
-
-    private Listener listener;
+    private PolygonDrawOptions drawOptions;
 
     private GoogleMap map;
 
     private ArrayList<Marker> _AllAdjPts, _AllUnadjPts, _AdjBndPts, _UnadjBndPts, _AdjNavPts, _UnadjNavPts, _WayPts, _AdjMiscPts, _UnadjMiscPts;
     private Polygon _AdjBndCB, _UnadjBndCB;
     private Polyline _AdjBnd, _UnadjBnd, _AdjNav, _UnadjNav;
-    private LatLngBounds polyBounds;
+    private Extent polyBounds;
     private HashMap<String, MarkerData> _MarkerData;
 
 
-    public PolyMarkerMap(GoogleMap map, PolyDrawOptions options, List<TtPoint> points, TtPolygon polygon,
-                         HashMap<String, TtMetadata> meta, PolygonGraphicOptions graphicOptions) {
+    public GoogleMapsPolygonGrahpic(GoogleMap map) {
         this.map = map;
-        this.options = options;
-        this.polygon = polygon;
-
-        init(points, meta, graphicOptions);
     }
 
-    private void init(List<TtPoint> points, HashMap<String, TtMetadata> meta, PolygonGraphicOptions graphicOptions) {
+    @Override
+    public void build(TtPolygon polygon, List<TtPoint> points, HashMap<String, TtMetadata> meta, PolygonGraphicOptions graphicOptions, PolygonDrawOptions drawOptions) {
+        this.polygon = polygon;
+        this.drawOptions = drawOptions;
+
         _MarkerData = new HashMap<>();
 
         _AllAdjPts = new ArrayList<>();
@@ -66,10 +66,15 @@ public class PolyMarkerMap {
         MarkerOptions adj, unadj;
         Marker adjmk, unadjmk;
         LatLng adjLL, unadjLL;
-        boolean isWway, isMisc;
+        boolean isWay, isMisc;
+
+        TtMetadata metadata;
+
 
         for (TtPoint point : points) {
-            isWway = isMisc = false;
+            isWay = isMisc = false;
+
+            metadata = meta.get(point.getMetadataCN());
             
             adj = TtUtils.GMap.createMarkerOptions(point, true, meta);
             unadj = TtUtils.GMap.createMarkerOptions(point, false, meta);
@@ -77,8 +82,8 @@ public class PolyMarkerMap {
             adjmk = map.addMarker(adj.visible(false));
             unadjmk = map.addMarker(unadj.visible(false));
 
-            _MarkerData.put(adjmk.getId(), new MarkerData(point, true));
-            _MarkerData.put(unadjmk.getId(), new MarkerData(point, false));
+            _MarkerData.put(adjmk.getId(), new MarkerData(point, metadata, true));
+            _MarkerData.put(unadjmk.getId(), new MarkerData(point, metadata, false));
 
             _AllAdjPts.add(adjmk);
             _AllUnadjPts.add(unadjmk);
@@ -107,7 +112,7 @@ public class PolyMarkerMap {
 
             if (point.getOp() == Units.OpType.WayPoint) {
                 _WayPts.add(unadjmk);
-                isWway = true;
+                isWay = true;
             }
 
             if (point.getOp() == Units.OpType.SideShot && !point.isOnBnd()) {
@@ -117,24 +122,26 @@ public class PolyMarkerMap {
                 isMisc = true;
             }
             
-            adjmk.setVisible(options.Visible && (
-                    options.AdjBndPts ||
-                    options.AdjNavPts ||
-                    (isMisc && options.AdjMiscPts)
+            adjmk.setVisible(drawOptions.Visible && (
+                    drawOptions.AdjBndPts ||
+                    drawOptions.AdjNavPts ||
+                    (isMisc && drawOptions.AdjMiscPts)
             ));
             
-            unadjmk.setVisible(options.Visible && (
-                    options.UnadjBndPts ||
-                    options.UnadjNavPts ||
-                    (isMisc && options.UnadjMiscPts) ||
-                    (isWway && options.WayPts)
+            unadjmk.setVisible(drawOptions.Visible && (
+                    drawOptions.UnadjBndPts ||
+                    drawOptions.UnadjNavPts ||
+                    (isMisc && drawOptions.UnadjMiscPts) ||
+                    (isWay && drawOptions.WayPts)
             ));
 
             llBuilder.include(adjLL);
         }
 
         if (points.size() > 0) {
-            polyBounds = llBuilder.build();
+            LatLngBounds bounds = llBuilder.build();
+            polyBounds = new Extent(bounds.northeast.latitude, bounds.northeast.longitude,
+                    bounds.southwest.latitude, bounds.southwest.longitude) ;
         } else {
             polyBounds = null;
         }
@@ -154,17 +161,17 @@ public class PolyMarkerMap {
             _UnadjBndCB = map.addPolygon(unadjBndPO.visible(false));
 
 
-            if (options.Visible) {
-                if (options.AdjBnd) {
-                    if (options.AdjBndClose) {
+            if (drawOptions.Visible) {
+                if (drawOptions.AdjBnd) {
+                    if (drawOptions.AdjBndClose) {
                         _AdjBndCB.setVisible(true);
                     } else {
                         _AdjBnd.setVisible(true);
                     }
                 }
 
-                if (options.UnadjBnd) {
-                    if (options.UnadjBndClose) {
+                if (drawOptions.UnadjBnd) {
+                    if (drawOptions.UnadjBndClose) {
                         _UnadjBndCB.setVisible(true);
                     } else {
                         _UnadjBnd.setVisible(true);
@@ -180,12 +187,12 @@ public class PolyMarkerMap {
             _AdjNav = map.addPolyline(adjNavPLO.visible(false));
             _UnadjNav = map.addPolyline(unadjNavPLO.visible(false));
             
-            if (options.Visible) {
-                if (options.AdjNav) {
+            if (drawOptions.Visible) {
+                if (drawOptions.AdjNav) {
                     _AdjNav.setVisible(true);
                 }
                 
-                if (options.UnadjNav) {
+                if (drawOptions.UnadjNav) {
                     _UnadjNav.setVisible(true);
                 }
             }
@@ -193,60 +200,43 @@ public class PolyMarkerMap {
     }
 
 
-    public String getPolyName() {
-        return polygon.getName();
-    }
-
-    public String getPolyCN() { return polygon.getCN();}
-
-    public PolyDrawOptions getOptions() {
-        return options;
-    }
-
-    public LatLngBounds getPolyBounds() {
-        return polyBounds;
-    }
-
-    public HashMap<String, MarkerData> getMarkerData() {
-        return _MarkerData;
-    }
-
-
+    //region Setters
+    @Override
     public void setVisible(boolean visible) {
-        options.Visible = visible;
+        drawOptions.Visible = visible;
 
         if (visible) {
             for (Marker m : _AllAdjPts) {
-                m.setVisible(options.AdjBndPts || options.AdjNavPts);
+                m.setVisible(drawOptions.AdjBndPts || drawOptions.AdjNavPts);
             }
             
             for (Marker m : _AllUnadjPts) {
-                m.setVisible(options.UnadjBndPts || options.UnadjNavPts);
+                m.setVisible(drawOptions.UnadjBndPts || drawOptions.UnadjNavPts);
             }
             
-            if (options.AdjMiscPts) {
+            if (drawOptions.AdjMiscPts) {
                 for (Marker m : _AdjMiscPts) {
                     m.setVisible(true);
                 }
             }
             
-            if (options.WayPts) {
+            if (drawOptions.WayPts) {
                 for (Marker m : _WayPts) {
                     m.setVisible(true);
                 }
             }
 
             if (_AdjBnd != null) {
-                if (options.AdjBnd) {
-                    if (options.AdjBndClose) {
+                if (drawOptions.AdjBnd) {
+                    if (drawOptions.AdjBndClose) {
                         _AdjBndCB.setVisible(true);
                     } else {
                         _AdjBnd.setVisible(true);
                     }
                 }
 
-                if (options.UnadjBnd) {
-                    if (options.UnadjBndClose) {
+                if (drawOptions.UnadjBnd) {
+                    if (drawOptions.UnadjBndClose) {
                         _UnadjBndCB.setVisible(true);
                     } else {
                         _UnadjBnd.setVisible(true);
@@ -255,11 +245,11 @@ public class PolyMarkerMap {
             }
 
             if (_AdjNav != null) {
-                if (options.AdjNav) {
+                if (drawOptions.AdjNav) {
                     _AdjNav.setVisible(true);
                 }
 
-                if (options.UnadjNav) {
+                if (drawOptions.UnadjNav) {
                     _UnadjNav.setVisible(true);
                 }
             }
@@ -286,14 +276,15 @@ public class PolyMarkerMap {
         }
     }
 
-    
+
+    @Override
     public void setAdjBndVisible(boolean visible) {
-        options.AdjBnd = visible;
+        drawOptions.AdjBnd = visible;
 
         if (_AdjBnd != null) {
-            visible &= options.Visible;
+            visible &= drawOptions.Visible;
 
-            if (options.AdjBndClose) {
+            if (drawOptions.AdjBndClose) {
                 _AdjBndCB.setVisible(visible);
             } else {
                 _AdjBnd.setVisible(visible);
@@ -301,23 +292,25 @@ public class PolyMarkerMap {
         }
     }
 
+    @Override
     public void setAdjBndPtsVisible(boolean visible) {
-        options.AdjBndPts = visible;
+        drawOptions.AdjBndPts = visible;
 
-        visible &= options.Visible;
+        visible &= drawOptions.Visible;
         for (Marker m : _AdjBndPts) {
             m.setVisible(visible);
         }
     }
 
 
+    @Override
     public void setUnadjBndVisible(boolean visible) {
-        options.UnadjBnd = visible;
+        drawOptions.UnadjBnd = visible;
 
         if (_UnadjBnd != null) {
-            visible &= options.Visible;
+            visible &= drawOptions.Visible;
 
-            if (options.AdjBndClose) {
+            if (drawOptions.AdjBndClose) {
                 _UnadjBndCB.setVisible(visible);
             } else {
                 _UnadjBnd.setVisible(visible);
@@ -325,72 +318,81 @@ public class PolyMarkerMap {
         }
     }
 
+    @Override
     public void setUnadjBndPtsVisible(boolean visible) {
-        options.UnadjBndPts = visible;
+        drawOptions.UnadjBndPts = visible;
 
-        visible &= options.Visible;
+        visible &= drawOptions.Visible;
         for (Marker m : _UnadjBndPts) {
             m.setVisible(visible);
         }
     }
 
-    
+
+    @Override
     public void setAdjNavVisible(boolean visible) {
-        options.AdjNav = visible;
+        drawOptions.AdjNav = visible;
 
         if (_AdjNav != null) {
-            _AdjNav.setVisible(visible && options.Visible);
+            _AdjNav.setVisible(visible && drawOptions.Visible);
         }
     }
-    
-    public void setAdjNavPtsVisible(boolean visible) {
-        options.AdjNavPts = visible;
 
-        visible &= options.Visible;
+    @Override
+    public void setAdjNavPtsVisible(boolean visible) {
+        drawOptions.AdjNavPts = visible;
+
+        visible &= drawOptions.Visible;
         for (Marker m : _AdjNavPts) {
             m.setVisible(visible);
         }
     }
 
 
+    @Override
     public void setUnadjNavVisible(boolean visible) {
-        options.UnadjNav = visible;
+        drawOptions.UnadjNav = visible;
 
         if (_UnadjNav != null) {
-            _UnadjNav.setVisible(visible && options.Visible);
+            _UnadjNav.setVisible(visible && drawOptions.Visible);
         }
     }
 
+    @Override
     public void setUnadjNavPtsVisible(boolean visible) {
-        options.UnadjNavPts = visible;
+        drawOptions.UnadjNavPts = visible;
 
-        visible &= options.Visible;
+        visible &= drawOptions.Visible;
         for (Marker m : _UnadjNavPts) {
             m.setVisible(visible);
         }
     }
 
 
+    @Override
     public void setAdjMiscPtsVisible(boolean visible) {
-        options.AdjMiscPts = visible;
+        drawOptions.AdjMiscPts = visible;
 
+        visible &= drawOptions.Visible;
         for (Marker m : _AdjMiscPts) {
-            m.setVisible(visible && options.Visible);
+            m.setVisible(visible && drawOptions.Visible);
         }
     }
 
+    @Override
     public void setUnadjMiscPtsVisible(boolean visible) {
-        options.UnadjMiscPts = visible;
+        drawOptions.UnadjMiscPts = visible;
 
-        visible &= options.Visible;
+        visible &= drawOptions.Visible;
         for (Marker m : _UnadjMiscPts) {
             m.setVisible(visible);
         }
     }
 
 
+    @Override
     public void setWayPtsVisible(boolean visible) {
-        options.WayPts = visible;
+        drawOptions.WayPts = visible;
 
         for (Marker m : _WayPts) {
             m.setVisible(visible);
@@ -398,80 +400,128 @@ public class PolyMarkerMap {
     }
 
 
+    @Override
     public void setAdjBndClose(boolean close) {
-        if (options.AdjBndClose != close) {
-            boolean isvis = options.AdjBnd;
+        if (drawOptions.AdjBndClose != close) {
+            boolean isvis = drawOptions.AdjBnd;
 
             setAdjBndVisible(false);
 
-            options.AdjBndClose = close;
+            drawOptions.AdjBndClose = close;
 
-            if (options.Visible && isvis) {
+            if (drawOptions.Visible && isvis) {
                 setAdjBndVisible(true);
             }
         }
     }
 
+    @Override
     public void setUnadjBndClose(boolean close) {
-        if (options.UnadjBndClose != close) {
-            boolean isvis = options.AdjBnd;
+        if (drawOptions.UnadjBndClose != close) {
+            boolean isvis = drawOptions.AdjBnd;
 
             setUnadjBndVisible(false);
 
-            options.UnadjBndClose = close;
+            drawOptions.UnadjBndClose = close;
 
-            if (options.Visible && isvis) {
+            if (drawOptions.Visible && isvis) {
                 setUnadjBndVisible(true);
             }
         }
     }
+    //endregion
 
 
-
-    public void setListener(Listener listener) {
-        this.listener = listener;
+    //region Getters
+    @Override
+    public HashMap<String, MarkerData> getMarkerData() {
+        return _MarkerData;
     }
 
-    public void removeListener() {
-        this.listener = null;
+    @Override
+    public TtPolygon getPolygon() {
+        return polygon;
     }
 
-
-    public void onOptionChange(String option, boolean value) {
-        if (listener != null) {
-            listener.onOptionChanged(option, value);
-        }
+    @Override
+    public PolygonDrawOptions getDrawOptions() {
+        return drawOptions;
     }
 
-
-    public interface Listener {
-        void onOptionChanged(String option, boolean value);
+    @Override
+    public Extent getExtents() {
+        return polyBounds;
     }
 
-
-    public class MarkerData {
-        public TtPoint Point;
-        public boolean Adjusted;
-
-        public MarkerData(TtPoint point, boolean adjusted) {
-            Point = point;
-            Adjusted = adjusted;
-        }
+    @Override
+    public boolean isVisible() {
+        return drawOptions.Visible;
     }
 
-
-    public static class PolygonGraphicOptions {
-        public int AdjBndColor, UnAdjBndColor;
-        public int AdjNavColor, UnAdjNavColor;
-        public float AdjWidth, UnAdjWidth;
-
-        public PolygonGraphicOptions(int AdjBndColor, int UnAdjBndColor, int AdjNavColor, int UnAdjNavColor, float AdjWidth, float UnAdjWidth) {
-            this.AdjBndColor = AdjBndColor;
-            this.UnAdjBndColor = UnAdjBndColor;
-            this.AdjNavColor = AdjNavColor;
-            this.UnAdjNavColor = UnAdjNavColor;
-            this.AdjWidth = AdjWidth;
-            this.UnAdjWidth = UnAdjWidth;
-        }
+    @Override
+    public boolean isAdjBndVisible() {
+        return drawOptions.AdjBnd;
     }
+
+    @Override
+    public boolean isAdjBndPtsVisible() {
+        return drawOptions.AdjBndPts;
+    }
+
+    @Override
+    public boolean isUnadjBndVisible() {
+        return drawOptions.UnadjBnd;
+    }
+
+    @Override
+    public boolean isUnadjBndPtsVisible() {
+        return drawOptions.UnadjBndPts;
+    }
+
+    @Override
+    public boolean isAdjNavVisible() {
+        return drawOptions.AdjNav;
+    }
+
+    @Override
+    public boolean isAdjNavPtsVisible() {
+        return drawOptions.AdjNavPts;
+    }
+
+    @Override
+    public boolean isUnadjNavVisible() {
+        return drawOptions.UnadjNav;
+    }
+
+    @Override
+    public boolean isUnadjNavPtsVisible() {
+        return drawOptions.UnadjNavPts;
+    }
+
+    @Override
+    public boolean isAdjMiscPtsVisible() {
+        return drawOptions.AdjMiscPts;
+    }
+
+    @Override
+    public boolean isUnadjMiscPtsVisible() {
+        return drawOptions.UnadjMiscPts;
+    }
+
+    @Override
+    public boolean isWayPtsVisible() {
+        return drawOptions.WayPts;
+    }
+
+    @Override
+    public boolean isAdjBndClose() {
+        return drawOptions.AdjBndClose;
+    }
+
+    @Override
+    public boolean isUnadjBndClose() {
+        return drawOptions.UnadjBndClose;
+    }
+    //endregion
+
 }

@@ -7,9 +7,15 @@ import android.location.Location;
 import android.os.Build;
 import android.os.Environment;
 import android.support.annotation.Nullable;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
+import com.esri.android.map.MapView;
+import com.esri.core.map.Graphic;
+import com.esri.core.symbol.SimpleMarkerSymbol;
 import com.usda.fmsc.android.AndroidUtils;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
@@ -19,10 +25,12 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
+import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment;
 import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.objects.FilterOptions;
 import com.usda.fmsc.twotrails.objects.GpsPoint;
+import com.usda.fmsc.twotrails.objects.IPolygonGraphic;
 import com.usda.fmsc.twotrails.objects.PointD;
 import com.usda.fmsc.twotrails.objects.QuondamPoint;
 import com.usda.fmsc.twotrails.objects.SideShotPoint;
@@ -1363,8 +1371,7 @@ public class TtUtils {
                     double x = adjusted ? point.getAdjX() : point.getUnAdjX();
                     double y = adjusted ? point.getAdjY() : point.getUnAdjY();
                     double z = adjusted ? point.getAdjZ() : point.getUnAdjZ();
-                    z = TtUtils.Convert.distance(z, metadata.getElevation(), UomElevation.Meters);
-                    GeoPosition position = UTMTools.convertUTMtoLatLonSignedDec(x, y, metadata.getZone());
+                    GeoPosition position = getLatLonFromPoint(point, adjusted, metadata);
 
                     return new MarkerOptions()
                             .title(Integer.toString(point.getPID()))
@@ -1426,7 +1433,6 @@ public class TtUtils {
                 return null;
             }
         }
-
 
         public static MarkerOptions createMarkerOptions(TravPoint point, boolean adjusted, TtMetadata meta) {
             double x = adjusted ? point.getAdjX() : point.getUnAdjX();
@@ -1614,5 +1620,108 @@ public class TtUtils {
 
             return builder.build();
         }
+    }
+
+    public static class ArcMap {
+
+        public static View createInfoWindow(LayoutInflater inflater, IMultiMapFragment.MarkerData markerData) {
+            View view = inflater.inflate(R.layout.content_map_popup, null);
+
+            TextView title = (TextView)view.findViewById(R.id.title);
+            TextView content = (TextView)view.findViewById(R.id.text1);
+
+            title.setText(String.format("%d", markerData.Point.getPID()));
+            content.setText(getInfoWindowSnippet(markerData.Point, markerData.Adjusted, markerData.Metadata));
+
+            return view;
+        }
+
+
+
+        private static String getInfoWindowSnippet(TtPoint point, boolean adjusted, TtMetadata meta) {
+            switch (point.getOp()) {
+                case GPS:
+                case Take5:
+                case Walk:
+                case WayPoint:
+                    return getInfoWindowSnippet((GpsPoint) point, adjusted, meta);
+                case Traverse:
+                case SideShot:
+                    return getInfoWindowSnippet((TravPoint) point, adjusted, meta);
+                case Quondam:
+                    return getInfoWindowSnippet((QuondamPoint) point, adjusted, meta);
+                default: {
+                    double x = adjusted ? point.getAdjX() : point.getUnAdjX();
+                    double y = adjusted ? point.getAdjY() : point.getUnAdjY();
+                    double z = adjusted ? point.getAdjZ() : point.getUnAdjZ();
+
+                    return String.format("UTM X: %.3f\nUTM Y: %.3f\nElev (%s): %.1f",
+                            x, y, meta.getElevation().toStringAbv(), z);
+                }
+            }
+        }
+
+        private static String getInfoWindowSnippet(GpsPoint point, boolean adjusted, TtMetadata meta) {
+
+            try {
+                Double x = adjusted ? point.getAdjX() : point.getUnAdjX();
+                Double y = adjusted ? point.getAdjY() : point.getUnAdjY();
+                Double z = adjusted ? point.getAdjZ() : point.getUnAdjZ();
+
+                if (x == null) {
+                    x = point.getUnAdjX();
+                    y = point.getUnAdjY();
+                    z =  point.getUnAdjZ();
+                }
+
+                z = TtUtils.Convert.distance(z, meta.getElevation(), UomElevation.Meters);
+
+                double lat, lon;
+
+                //if (point.hasLatLon() && !adjusted) {
+                if (point.hasLatLon()) { //ignore adjust since gps dont adjust to new positions
+                    lat = point.getLatitude();
+                    lon = point.getLongitude();
+                } else {
+                    GeoPosition position = UTMTools.convertUTMtoLatLonSignedDec(x, y, meta.getZone());
+                    lat = position.getLatitudeSignedDecimal();
+                    lon = position.getLongitudeSignedDecimal();
+                }
+
+                return String.format("%s\n\nUTM X: %.3f\nUTM Y: %.3f\nElev (%s): %.1f\n\nLat: %.4f\nLon: %.4f",
+                        point.getOp().toString(),
+                        x, y, meta.getElevation().toStringAbv(), z, lat, lon);
+            } catch (Exception ex) {
+                TtReport.writeError(ex.getMessage(), "TtUtils:getInfoWindowSnippet");
+                return null;
+            }
+        }
+
+        private static String getInfoWindowSnippet(TravPoint point, boolean adjusted, TtMetadata meta) {
+            double x = adjusted ? point.getAdjX() : point.getUnAdjX();
+            double y = adjusted ? point.getAdjY() : point.getUnAdjY();
+            double z = adjusted ? point.getAdjZ() : point.getUnAdjZ();
+            z = TtUtils.Convert.distance(z, meta.getElevation(), UomElevation.Meters);
+
+            Double faz = point.getFwdAz();
+            Double baz = point.getBkAz();
+
+            String sFaz = faz == null ? StringEx.Empty : String.format("%.2f", faz);
+            String sBaz = baz == null ? StringEx.Empty : String.format("%.2f", baz);
+
+            return String.format("%s\n\nUTM X: %.3f\nUTM Y: %.3f\nElev (%s): %.1f\n\nFwd Az: %s\nBk Az:   %s\nSlpDist (%s): %.2f\nSlope (%s): %.2f",
+                    point.getOp(),
+                    x, y, meta.getElevation().toStringAbv(), z,
+                    sFaz, sBaz, meta.getDistance().toString(), point.getSlopeAngle(),
+                    meta.getSlope().toStringAbv(), point.getSlopeAngle());
+        }
+
+        private static String getInfoWindowSnippet(QuondamPoint point, boolean adjusted, TtMetadata meta) {
+            return String.format("%s -> %d %s",
+                point.getOp().toString(),
+                point.getParentPID(),
+                getInfoWindowSnippet(point.getParentPoint(), adjusted, meta));
+        }
+
     }
 }
