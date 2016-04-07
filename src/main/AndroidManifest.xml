@@ -192,6 +192,16 @@
         </activity>
         <activity android:name=".activities.TestActivity">
         </activity>
+        <activity
+            android:name=".activities.MapManagerActivity"
+            android:label="@string/title_activity_offline_map_manager"
+            android:theme="@style/AppTheme">
+        </activity>
+        <activity
+            android:name=".activities.GetMapExtentsActivity"
+            android:label="@string/title_activity_get_map_extents"
+            android:theme="@style/AppTheme">
+        </activity>
     </application>
 
 </manifest>

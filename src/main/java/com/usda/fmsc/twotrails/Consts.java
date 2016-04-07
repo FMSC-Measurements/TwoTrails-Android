@@ -85,6 +85,8 @@ public class Consts {
         public static final int EXPORT = 1014;
         public static final int MULTI_POINT = 1015;
         public static final int PLOT_GRID = 1016;
+        public static final int GET_MAP_EXTENTS = 1017;
+        public static final int MAP_MANAGER = 1018;
 
         public static class Results {
             public static final int ERROR = 2000;
@@ -92,6 +94,8 @@ public class Consts {
             public static final int NO_POINT_DATA = 2002;
             public static final int NO_POLYGON_DATA = 2003;
             public static final int NO_METDATA_DATA = 2004;
+            public static final int MAP_CREATED = 2005;
+            public static final int DOWNLOADING_MAP = 2006;
 
         }
 

@@ -2,6 +2,7 @@ package com.usda.fmsc.twotrails.dialogs;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
@@ -9,6 +10,7 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,6 +30,7 @@ import java.util.List;
 
 public class SelectMapTypeDialog extends DialogFragment {
     private static final String ARC_MAP_LAYERS = "ArcMapLayers";
+    private static final String SELECT_ONLINE_ARC = "SelectOnlineArc";
 
     OnMapSelectedListener listener;
 
@@ -37,13 +40,28 @@ public class SelectMapTypeDialog extends DialogFragment {
 
     Units.MapType mapType, defaultMapType;
     int mapId = -1, defaultMapId;
+    boolean selectOnlineArc;
+
+
+
+    LayoutInflater inflater;
+    View arcView, gmapView;
+    ListView lvArcMap, lvGmap;
+    ArcGisMapSelectionAdapter arcMapAdapter;
+    GoogleMapSelectionAdapter gMapAdapter;
+
 
     public static SelectMapTypeDialog newInstance(List<ArcGisMapLayer> layers) {
+        return newInstance(layers, false);
+    }
+
+    public static SelectMapTypeDialog newInstance(List<ArcGisMapLayer> layers, boolean selectOnlineArc) {
         SelectMapTypeDialog dialog = new SelectMapTypeDialog();
 
         Bundle bundle = new Bundle();
 
         try {
+            bundle.putBoolean(SELECT_ONLINE_ARC, selectOnlineArc);
             bundle.putByteArray(ARC_MAP_LAYERS, TtUtils.Convert.listToByteArray(layers));
         } catch (IOException e) {
             e.printStackTrace();
@@ -66,6 +84,7 @@ public class SelectMapTypeDialog extends DialogFragment {
         if (bundle != null && bundle.containsKey(ARC_MAP_LAYERS)) {
             try {
                 mapLayers = (List<ArcGisMapLayer>) TtUtils.Convert.bytesToList(bundle.getByteArray(ARC_MAP_LAYERS));
+                selectOnlineArc = bundle.getBoolean(SELECT_ONLINE_ARC, false);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -79,33 +98,51 @@ public class SelectMapTypeDialog extends DialogFragment {
 
         LayoutInflater inflater = LayoutInflater.from(getContext());
 
-        AndroidUtils.UI.setOverscrollColor(getResources(), getContext(), getResources().getColor(R.color.primary));
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            AndroidUtils.UI.setOverscrollColor(getResources(), getContext(), R.color.primary);
+        }
 
         FrameLayout fl = new FrameLayout(getActivity());
 
-        View view = inflater.inflate(R.layout.diag_select_map, fl);
+        View view = inflater.inflate(selectOnlineArc ? R.layout.diag_select_map_arc_map : R.layout.diag_select_map, fl);
 
-        final MapTypePagerAdapter pagerAdapter = new MapTypePagerAdapter(inflater);
+        if (selectOnlineArc) {
+            Toolbar toolbar = (Toolbar)view.findViewById(R.id.toolbar);
+            toolbar.setTitle("Online Arc Maps");
 
-        // Set up the ViewPager with the sections arcMapAdapter.
-        viewPager = (ViewPager)view.findViewById(R.id.diagViewPager);
-        viewPager.setAdapter(pagerAdapter);
+            lvArcMap = (ListView)view.findViewById(R.id.diagSelectArcMapListView);
+            arcMapAdapter = new ArcGisMapSelectionAdapter(getContext(), mapLayers, -1, new ArcGisMapSelectionAdapter.IArcGisMapAdapterListener() {
+                @Override
+                public void onArcGisMapSelected(ArcGisMapLayer map) {
+                    mapType = Units.MapType.ArcGIS;
+                    mapId = map.getId();
 
-        //Setup Tabs
-        final TabLayout tabLayout = (TabLayout)view.findViewById(R.id.tabs);
-        tabLayout.setupWithViewPager(viewPager);
-
-        dialog.setView(fl);
-
-        dialog.setPositiveButton("Set Map", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                if (listener != null && (mapType != null && mapId != -1 &&
-                        (mapType != defaultMapType || mapId != defaultMapId))) {
-                    listener.mapSelected(mapType, mapId);
+                    onMapSelected();
                 }
-            }
-        })
+            });
+            lvArcMap.setAdapter(arcMapAdapter);
+        } else {
+            final MapTypePagerAdapter pagerAdapter = new MapTypePagerAdapter();
+
+            // Set up the ViewPager with the sections arcMapAdapter.
+            viewPager = (ViewPager)view.findViewById(R.id.diagViewPager);
+            viewPager.setAdapter(pagerAdapter);
+
+            //Setup Tabs
+            final TabLayout tabLayout = (TabLayout)view.findViewById(R.id.tabs);
+            tabLayout.setupWithViewPager(viewPager);
+        }
+
+        dialog.setView(fl)
+//                .setPositiveButton("Set Map", new DialogInterface.OnClickListener() {
+//            @Override
+//            public void onClick(DialogInterface dialog, int which) {
+//                if (listener != null && (mapType != null && mapId != -1 &&
+//                        (mapType != defaultMapType || mapId != defaultMapId))) {
+//                    listener.mapSelected(mapType, mapId);
+//                }
+//            }
+//        })
         .setNeutralButton(R.string.str_cancel, null);
 
         return dialog.create();
@@ -116,20 +153,20 @@ public class SelectMapTypeDialog extends DialogFragment {
     }
 
 
+    private void onMapSelected() {
+        if (listener != null && (mapType != null && mapId != -1 &&
+                (mapType != defaultMapType || mapId != defaultMapId))) {
+            listener.mapSelected(mapType, mapId);
+        }
+
+        dismiss();
+    }
+
+
     //Change to PagerAdapter instead of Fragment
     private class MapTypePagerAdapter extends PagerAdapter implements
             ArcGisMapSelectionAdapter.IArcGisMapAdapterListener,
             GoogleMapSelectionAdapter.IGoogleMapAdapterListener {
-
-        LayoutInflater inflater;
-        View arcView, gmapView;
-        ListView lvArcMap, lvGmap;
-        ArcGisMapSelectionAdapter arcMapAdapter;
-        GoogleMapSelectionAdapter gMapAdapter;
-
-        public MapTypePagerAdapter(LayoutInflater inflater) {
-            this.inflater = inflater;
-        }
 
         @Override
         public boolean isViewFromObject(View view, Object object) {
@@ -193,6 +230,8 @@ public class SelectMapTypeDialog extends DialogFragment {
             mapId = map.getId();
 
             gMapAdapter.deselectMap();
+
+            onMapSelected();
         }
 
         @Override
@@ -201,6 +240,8 @@ public class SelectMapTypeDialog extends DialogFragment {
             mapId = map.getValue();
 
             arcMapAdapter.deselectMap();
+
+            onMapSelected();
         }
     }
 

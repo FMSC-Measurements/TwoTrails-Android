@@ -30,27 +30,27 @@ public class PolygonGraphicManager implements IGraphicManager, PolygonDrawOption
         this.graphicOptions = graphicOptions;
 
         if (polygonGraphic != null) {
-            setPolygonGraphic(polygonGraphic, drawOptions, graphicOptions);
+            setGraphic(polygonGraphic, drawOptions, graphicOptions);
         }
     }
 
-    public void setPolygonGraphic(IPolygonGraphic polygonGraphic) {
-        setPolygonGraphic(polygonGraphic, null);
+    public void setGraphic(IPolygonGraphic polygonGraphic) {
+        setGraphic(polygonGraphic, null);
     }
 
-    public void setPolygonGraphic(IPolygonGraphic polygonGraphic, PolygonDrawOptions drawOptions) {
+    public void setGraphic(IPolygonGraphic polygonGraphic, PolygonDrawOptions drawOptions) {
         if (this.graphicOptions != null) {
             if (this.polygonGraphic != null && drawOptions == null) {
-                setPolygonGraphic(polygonGraphic, this.polygonGraphic.getDrawOptions(), this.graphicOptions);
+                setGraphic(polygonGraphic, this.polygonGraphic.getDrawOptions(), this.graphicOptions);
             } else {
-                setPolygonGraphic(polygonGraphic, drawOptions, this.graphicOptions);
+                setGraphic(polygonGraphic, drawOptions, this.graphicOptions);
             }
         } else {
             throw new RuntimeException("No graphic options set");
         }
     }
 
-    public void setPolygonGraphic(IPolygonGraphic polygonGraphic, PolygonDrawOptions drawOptions, IPolygonGraphic.PolygonGraphicOptions graphicOptions) {
+    public void setGraphic(IPolygonGraphic polygonGraphic, PolygonDrawOptions drawOptions, IPolygonGraphic.PolygonGraphicOptions graphicOptions) {
         this.polygonGraphic = polygonGraphic;
         this.graphicOptions = graphicOptions;
 

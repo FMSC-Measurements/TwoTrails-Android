@@ -245,6 +245,7 @@ public class Take5Activity extends AcquireGpsMapActivity {
             linearLayoutManager = new LinearLayoutManagerWithSmoothScroller(this);
 
             rvPoints = (RecyclerViewEx)findViewById(R.id.take5RvPoints);
+            rvPoints.setViewHasFooter(true);
             rvPoints.setLayoutManager(linearLayoutManager);
             rvPoints.setHasFixedSize(true);
             rvPoints.setItemAnimator(new SlideInUpAnimator());
