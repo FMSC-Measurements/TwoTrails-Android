@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:fitsSystemWindows="true"
+    tools:context="com.usda.fmsc.twotrails.activities.GetMapExtentsActivity">
+
+    <FrameLayout
+        android:id="@+id/mapContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/polysFabNew"
+        style="@style/fabStyle"
+        android:src="@drawable/ic_map_white_36dp"
+        android:layout_margin="@dimen/fab_margin"
+        app:layout_anchor="@id/mapContainer"
+        android:onClick="btnCreateClick" />
+
+</android.support.design.widget.CoordinatorLayout>

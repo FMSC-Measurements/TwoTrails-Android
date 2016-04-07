@@ -11,5 +11,4 @@ public interface IGraphicManager {
     Extent getExtents();
 
     HashMap<String, IMultiMapFragment.MarkerData> getMarkerData();
-
 }

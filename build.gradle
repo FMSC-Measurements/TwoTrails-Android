@@ -77,6 +77,8 @@ android {
         exclude 'META-INF/dependencies.txt'
         exclude 'META-INF/LGPL2.1'
     }
+
+    useLibrary 'org.apache.http.legacy'
 }
 
 dependencies {
@@ -98,4 +100,5 @@ dependencies {
     compile 'jp.wasabeef:recyclerview-animators:2.2.0'
     compile 'me.zhanghai.android.materialprogressbar:library:1.1.4'
     compile 'com.nononsenseapps:filepicker:2.5.2'
+    compile 'com.mcxiaoke.volley:library:1.0.19'
 }

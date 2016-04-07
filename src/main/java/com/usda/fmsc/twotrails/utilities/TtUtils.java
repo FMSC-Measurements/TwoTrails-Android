@@ -1030,7 +1030,7 @@ public class TtUtils {
         return getTtFileDir() + File.separator + fileName;
     }
 
-    public static String getTtFileDir() {
+    public static String getDocumentsDir() {
         File dir;
 
         if (Build.VERSION.SDK_INT < 19) {
@@ -1039,7 +1039,19 @@ public class TtUtils {
             dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
         }
 
-        return String.format("%s%s%s", dir, File.separator, "TwoTrailsFiles");
+        return dir.toString();
+    }
+
+    public static String getOfflineMapsDir() {
+        return String.format("%s%s%s", getDocumentsDir(), File.separator, "OfflineMaps");
+    }
+
+    public static String getOfflineMapsRecoveryDir() {
+        return String.format("%s%s%s", getOfflineMapsDir(), File.separator, "Recovery");
+    }
+
+    public static String getTtFileDir() {
+        return String.format("%s%s%s", getDocumentsDir(), File.separator, "TwoTrailsFiles");
     }
 
     public static String getTtLogFileDir() {

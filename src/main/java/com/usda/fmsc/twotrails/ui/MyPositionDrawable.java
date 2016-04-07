@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
+import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 
 import com.usda.fmsc.android.AndroidUtils;
@@ -53,6 +54,7 @@ public class MyPositionDrawable extends Drawable {
     }
 
 
+
     @Override
     public void draw(Canvas canvas) {
         canvas.drawCircle(outerXY, outerXY, outerRadius, paintColorOuter);
@@ -73,7 +75,7 @@ public class MyPositionDrawable extends Drawable {
 
     @Override
     public int getOpacity() {
-        return alpha;
+        return PixelFormat.TRANSLUCENT;
     }
 
 

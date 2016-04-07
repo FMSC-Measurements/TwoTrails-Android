@@ -147,15 +147,15 @@ public class GoogleMapsPolygonGrahpic implements IPolygonGraphic {
         }
 
         if (_AdjBndPts.size() > 0) {
-            adjBndPLO.color(graphicOptions.AdjBndColor).width(graphicOptions.AdjWidth).zIndex(4);
-            unadjBndPLO.color(graphicOptions.UnAdjBndColor).width(graphicOptions.UnAdjWidth).zIndex(3);
+            adjBndPLO.color(graphicOptions.getAdjBndColor()).width(graphicOptions.getAdjWidth()).zIndex(4);
+            unadjBndPLO.color(graphicOptions.getUnAdjBndColor()).width(graphicOptions.getUnAdjWidth()).zIndex(3);
 
             _AdjBnd = map.addPolyline(adjBndPLO.visible(false));
             _UnadjBnd = map.addPolyline(unadjBndPLO.visible(false));
 
 
-            adjBndPO.strokeColor(graphicOptions.AdjBndColor).strokeWidth(graphicOptions.AdjWidth).zIndex(6);
-            unadjBndPO.strokeColor(graphicOptions.UnAdjBndColor).strokeWidth(graphicOptions.UnAdjWidth).zIndex(5);
+            adjBndPO.strokeColor(graphicOptions.getAdjBndColor()).strokeWidth(graphicOptions.getAdjWidth()).zIndex(6);
+            unadjBndPO.strokeColor(graphicOptions.getUnAdjBndColor()).strokeWidth(graphicOptions.getUnAdjWidth()).zIndex(5);
 
             _AdjBndCB = map.addPolygon(adjBndPO.visible(false));
             _UnadjBndCB = map.addPolygon(unadjBndPO.visible(false));
@@ -181,8 +181,8 @@ public class GoogleMapsPolygonGrahpic implements IPolygonGraphic {
         }
         
         if (_AdjNavPts.size() > 0) {
-            adjNavPLO.color(graphicOptions.AdjNavColor).width(graphicOptions.AdjWidth).zIndex(2);
-            unadjNavPLO.color(graphicOptions.UnAdjNavColor).width(graphicOptions.UnAdjWidth).zIndex(1);
+            adjNavPLO.color(graphicOptions.getAdjNavColor()).width(graphicOptions.getAdjWidth()).zIndex(2);
+            unadjNavPLO.color(graphicOptions.getUnAdjNavColor()).width(graphicOptions.getUnAdjWidth()).zIndex(1);
 
             _AdjNav = map.addPolyline(adjNavPLO.visible(false));
             _UnadjNav = map.addPolyline(unadjNavPLO.visible(false));

@@ -268,7 +268,6 @@ public class SettingsFragment extends PreferenceFragment {
                                             }
 
                                             if (Global.Settings.DeviceSettings.getAutoSetGpsNameToMetaAsk()) {
-
                                                 DontAskAgainDialog dialog = new DontAskAgainDialog(getActivity(),
                                                         Global.Settings.DeviceSettings.AUTO_SET_GPS_NAME_TO_META_ASK,
                                                         Global.Settings.DeviceSettings.AUTO_SET_GPS_NAME_TO_META,
@@ -276,9 +275,12 @@ public class SettingsFragment extends PreferenceFragment {
 
                                                 dialog.setMessage("Do you want to update metadata with the current GPS receiver?");
 
-                                                dialog.setPositiveButton("Default", null, 2);
-                                                dialog.setNeutralButton("All", null, 1);
-                                                dialog.setNegativeButton("None", null, 0);
+                                                dialog.setPositiveButton("Default", setMetaListener, 1);
+
+                                                if (Global.DAL != null)
+                                                    dialog.setNegativeButton("All", setMetaListener, 2);
+
+                                                dialog.setNeutralButton("None", null, 0);
 
                                                 dialog.show();
                                             } else {
@@ -599,6 +601,7 @@ public class SettingsFragment extends PreferenceFragment {
                 if (metadata != null) {
                     metadata.setGpsReceiver(receiver);
                     Global.DAL.updateMetadata(metadata);
+                    Global.Settings.MetaDataSetting.setReceiver(receiver);
                 }
             } else if (value == 2) {
                 List<TtMetadata> metas = Global.DAL.getMetadata();

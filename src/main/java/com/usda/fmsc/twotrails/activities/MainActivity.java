@@ -826,6 +826,10 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
         startActivity(new Intent(this, GpsLoggerActivity.class));
     }
 
+    public void btnMapManagerClick(View view) {
+        startActivity(new Intent(this, MapManagerActivity.class));
+    }
+
     public void btnTest(View view) {
         startActivity(new Intent(this, TestActivity.class));
     }

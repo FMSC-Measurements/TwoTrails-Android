@@ -8,6 +8,7 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.res.Resources;
+import android.os.Build;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
@@ -88,9 +89,19 @@ public class Global {
 
         TtNotifyManager.init(applicationContext);
 
-        File ttFileDir = new File(TtUtils.getTtFileDir());
-        if(!ttFileDir.exists()) {
-            ttFileDir.mkdirs();
+        File dir = new File(TtUtils.getTtFileDir());
+        if(!dir.exists()) {
+            dir.mkdirs();
+        }
+
+        dir = new File(TtUtils.getOfflineMapsDir());
+        if(!dir.exists()) {
+            dir.mkdirs();
+        }
+
+        dir = new File(TtUtils.getOfflineMapsRecoveryDir());
+        if(!dir.exists()) {
+            dir.mkdirs();
         }
 
         _ApplicationContext.startService(new Intent(_ApplicationContext, GpsService.class));
@@ -102,8 +113,9 @@ public class Global {
     }
 
     private static void initUI() {
-        Resources res = _ApplicationContext.getResources();
-        AndroidUtils.UI.setOverscrollColor(res, _ApplicationContext, res.getColor(R.color.primary));
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            AndroidUtils.UI.setOverscrollColor(_ApplicationContext.getResources(), _ApplicationContext, R.color.primary);
+        }
     }
 
     public static void destroy() {
@@ -150,20 +162,24 @@ public class Global {
         return _MainActivity;
     }
 
-
+    public static Context getApplicationContext() {
+        return _ApplicationContext;
+    }
 
     public static class TtNotifyManager {
         public static int GPS_NOTIFICATION_ID = 123;
 
         protected static NotificationManager _NotificationManager;
-        private static NotificationCompat.Builder _Builder;
+        private static NotificationCompat.Builder _GpsBuilder;
         private static int _UsedDrawable;
         private static String _UsedText;
+        private static HashMap<Integer, NotificationCompat.Builder> _DownloadingNotifs;
 
         public static void init(Context ctx) {
             _NotificationManager = (NotificationManager)ctx.getSystemService(Context.NOTIFICATION_SERVICE);
-            _Builder = new NotificationCompat.Builder(ctx);
-            _Builder.setOngoing(true);
+            _GpsBuilder = new NotificationCompat.Builder(ctx);
+            _GpsBuilder.setOngoing(true);
+            _DownloadingNotifs = new HashMap<>();
         }
 
         public static NotificationManager getNotificationManager() {
@@ -171,16 +187,16 @@ public class Global {
         }
 
         public static void setGpsOn() {
-            if(_NotificationManager != null && _Builder != null) {
-                _Builder.setContentTitle(Consts.ServiceTitle);
+            if(_NotificationManager != null && _GpsBuilder != null) {
+                _GpsBuilder.setContentTitle(Consts.ServiceTitle);
 
                 _UsedText = Consts.ServiceContent;
-                _Builder.setContentText(_UsedText);
+                _GpsBuilder.setContentText(_UsedText);
 
                 _UsedDrawable = R.drawable.ic_ttgps_holo_dark_enabled;
-                _Builder.setSmallIcon(_UsedDrawable);
+                _GpsBuilder.setSmallIcon(_UsedDrawable);
 
-                _NotificationManager.notify(GPS_NOTIFICATION_ID, _Builder.build());
+                _NotificationManager.notify(GPS_NOTIFICATION_ID, _GpsBuilder.build());
             }
         }
 
@@ -192,16 +208,16 @@ public class Global {
 
 
         public static void startWalking() {
-            if (_NotificationManager != null && _Builder != null) {
-                _Builder.setContentTitle(Consts.ServiceTitle);
+            if (_NotificationManager != null && _GpsBuilder != null) {
+                _GpsBuilder.setContentTitle(Consts.ServiceTitle);
 
                 _UsedText = Consts.ServiceWalking;
-                _Builder.setContentText(_UsedText);
+                _GpsBuilder.setContentText(_UsedText);
 
                 _UsedDrawable = R.drawable.ic_ttgps_holo_dark_enabled; //switch to walking anim
-                _Builder.setSmallIcon(_UsedDrawable);
+                _GpsBuilder.setSmallIcon(_UsedDrawable);
 
-                _NotificationManager.notify(GPS_NOTIFICATION_ID, _Builder.build());
+                _NotificationManager.notify(GPS_NOTIFICATION_ID, _GpsBuilder.build());
             }
         }
 
@@ -214,13 +230,13 @@ public class Global {
         }
 
         public static void showPointAquired() {
-            if(_NotificationManager != null && _Builder != null) {
+            if(_NotificationManager != null && _GpsBuilder != null) {
 
-                _Builder.setContentTitle(Consts.ServiceTitle);
-                _Builder.setContentText(Consts.ServiceAcquiringPoint);
-                _Builder.setSmallIcon(R.drawable.ica_capturepoint);
+                _GpsBuilder.setContentTitle(Consts.ServiceTitle);
+                _GpsBuilder.setContentText(Consts.ServiceAcquiringPoint);
+                _GpsBuilder.setSmallIcon(R.drawable.ica_capturepoint);
 
-                _NotificationManager.notify(GPS_NOTIFICATION_ID, _Builder.build());
+                _NotificationManager.notify(GPS_NOTIFICATION_ID, _GpsBuilder.build());
 
                 Thread thread = new Thread() {
                     @Override
@@ -228,11 +244,11 @@ public class Global {
                         try {
                             sleep(1000);
 
-                            _Builder.setContentTitle(Consts.ServiceTitle);
-                            _Builder.setContentText(_UsedText);
-                            _Builder.setSmallIcon(_UsedDrawable);
+                            _GpsBuilder.setContentTitle(Consts.ServiceTitle);
+                            _GpsBuilder.setContentText(_UsedText);
+                            _GpsBuilder.setSmallIcon(_UsedDrawable);
 
-                            _NotificationManager.notify(GPS_NOTIFICATION_ID, _Builder.build());
+                            _NotificationManager.notify(GPS_NOTIFICATION_ID, _GpsBuilder.build());
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
@@ -241,6 +257,27 @@ public class Global {
 
                 thread.start();
             }
+        }
+
+
+        public static void startMapDownload(int id, String name) {
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(_ApplicationContext);
+            builder.setOngoing(true)
+                    .setContentTitle(String.format("Downloading Map %s", name))
+                    .setProgress(100, 0, false);
+
+            _DownloadingNotifs.put(id, builder);
+
+            _NotificationManager.notify(id, builder.build());
+        }
+
+        public static void updateMapDownload(int id, int progress) {
+            _NotificationManager.notify(id, _DownloadingNotifs.get(id).setProgress(100, progress, false).build());
+        }
+
+        public static void endMapDownload(int id) {
+            _NotificationManager.cancel(id);
+            _DownloadingNotifs.remove(id);
         }
     }
 
@@ -992,7 +1029,7 @@ public class Global {
                 Gson gson = new Gson();
                 String json = getPrefs().getString(ARC_GIS_MAPS, null);
 
-                if(json == null)
+                if(StringEx.isEmpty(json))
                     return new ArrayList<>();
 
                 return gson.fromJson(json, new TypeToken<ArrayList<ArcGisMapLayer>>() { }.getType());

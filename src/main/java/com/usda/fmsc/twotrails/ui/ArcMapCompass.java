@@ -56,7 +56,7 @@ public class ArcMapCompass extends View implements View.OnClickListener {
         mMatrix = new Matrix();
 
         // Create the bitmap of the compass from a resource.
-        mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_ttpoint_gps_darker);
+        mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_compass_36dp);
 
         setOnClickListener(this);
     }

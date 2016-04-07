@@ -1,37 +1,44 @@
 package com.usda.fmsc.twotrails.utilities;
 
 import android.content.Context;
-import android.os.AsyncTask;
+import android.widget.Toast;
 
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.esri.android.map.Layer;
 import com.esri.android.map.MapView;
 import com.esri.android.map.ags.ArcGISLocalTiledLayer;
 import com.esri.android.map.ags.ArcGISTiledMapServiceLayer;
-import com.esri.core.ags.FeatureServiceInfo;
 import com.esri.core.geometry.Envelope;
 import com.esri.core.geometry.GeometryEngine;
 import com.esri.core.geometry.Point;
-import com.esri.core.geometry.Polygon;
 import com.esri.core.geometry.SpatialReference;
 import com.esri.core.io.UserCredentials;
-import com.esri.core.map.CallbackListener;
-import com.esri.core.tasks.geodatabase.GenerateGeodatabaseParameters;
-import com.esri.core.tasks.geodatabase.GeodatabaseStatusCallback;
-import com.esri.core.tasks.geodatabase.GeodatabaseStatusInfo;
-import com.esri.core.tasks.geodatabase.GeodatabaseSyncTask;
+import com.esri.core.tasks.ags.geoprocessing.GPJobResource;
+import com.esri.core.tasks.tilecache.ExportTileCacheStatus;
+import com.usda.fmsc.android.utilities.WebRequest;
 import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.objects.ArcGisMapLayer;
+import com.usda.fmsc.utilities.StringEx;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 
 public class ArcGISTools {
     private static SpatialReference LatLonSpatialReference = SpatialReference.create(4326);
 
     private static HashMap<Integer, ArcGisMapLayer> mapLayers;
     private static int idCounter = 0;
+
+    private static List<IArcToolsListener> listeners = new ArrayList<>();
 
 
     private static void init() {
@@ -49,6 +56,7 @@ public class ArcGISTools {
                     0,
                     context.getString(R.string.agmap_World_Imagery_name),
                     context.getString(R.string.agmap_World_Imagery_desc),
+                    context.getString(R.string.str_world_map),
                     context.getString(R.string.agmap_World_Imagery_url),
                     true);
 
@@ -58,6 +66,7 @@ public class ArcGISTools {
                 getId(),
                 context.getString(R.string.agmap_NatGeo_World_Map_name),
                 context.getString(R.string.agmap_NatGeo_World_Map_desc),
+                context.getString(R.string.str_world_map),
                 context.getString(R.string.agmap_NatGeo_World_Map_url),
                 true);
 
@@ -67,15 +76,7 @@ public class ArcGISTools {
                     getId(),
                     context.getString(R.string.agmap_NGS_Topo_US_2D_name),
                     context.getString(R.string.agmap_NGS_Topo_US_2D_desc),
-                    context.getString(R.string.agmap_NGS_Topo_US_2D_url),
-                    true);
-
-            mapLayers.put(layer.getId(), layer);
-
-            layer = new ArcGisMapLayer(
-                    getId(),
-                    context.getString(R.string.agmap_NGS_Topo_US_2D_name),
-                    context.getString(R.string.agmap_NGS_Topo_US_2D_desc),
+                    context.getString(R.string.str_world_map),
                     context.getString(R.string.agmap_NGS_Topo_US_2D_url),
                     true);
 
@@ -85,6 +86,7 @@ public class ArcGISTools {
                     getId(),
                     context.getString(R.string.agmap_Ocean_Basemap_name),
                     context.getString(R.string.agmap_Ocean_Basemap_desc),
+                    context.getString(R.string.str_world_map),
                     context.getString(R.string.agmap_Ocean_Basemap_url),
                     true);
 
@@ -94,6 +96,7 @@ public class ArcGISTools {
                     getId(),
                     context.getString(R.string.agmap_USA_Topo_Maps_name),
                     context.getString(R.string.agmap_USA_Topo_Maps_desc),
+                    context.getString(R.string.str_world_map),
                     context.getString(R.string.agmap_USA_Topo_Maps_url),
                     true);
 
@@ -103,6 +106,7 @@ public class ArcGISTools {
                     getId(),
                     context.getString(R.string.agmap_World_Physical_Map_name),
                     context.getString(R.string.agmap_World_Physical_Map_desc),
+                    context.getString(R.string.str_world_map),
                     context.getString(R.string.agmap_World_Physical_Map_url),
                     true);
 
@@ -112,6 +116,7 @@ public class ArcGISTools {
                     getId(),
                     context.getString(R.string.agmap_World_Shaded_Relief_name),
                     context.getString(R.string.agmap_World_Shaded_Relief_desc),
+                    context.getString(R.string.str_world_map),
                     context.getString(R.string.agmap_World_Shaded_Relief_url),
                     true);
 
@@ -121,6 +126,7 @@ public class ArcGISTools {
                     getId(),
                     context.getString(R.string.agmap_World_Street_Map_name),
                     context.getString(R.string.agmap_World_Street_Map_desc),
+                    context.getString(R.string.str_world_map),
                     context.getString(R.string.agmap_World_Street_Map_url),
                     true);
 
@@ -130,6 +136,7 @@ public class ArcGISTools {
                     getId(),
                     context.getString(R.string.agmap_World_Terrain_Base_name),
                     context.getString(R.string.agmap_World_Terrain_Base_desc),
+                    context.getString(R.string.str_world_map),
                     context.getString(R.string.agmap_World_Terrain_Base_url),
                     true);
 
@@ -139,6 +146,7 @@ public class ArcGISTools {
                     getId(),
                     context.getString(R.string.agmap_World_Topo_Map_name),
                     context.getString(R.string.agmap_World_Topo_Map_desc),
+                    context.getString(R.string.str_world_map),
                     context.getString(R.string.agmap_World_Topo_Map_url),
                     true);
 
@@ -147,6 +155,21 @@ public class ArcGISTools {
             Global.Settings.DeviceSettings.setArcGisMayLayers(mapLayers.values());
         }
     }
+
+
+
+    public static void addListener(IArcToolsListener listener) {
+        if (!listeners.contains(listener)) {
+            listeners.add(listener);
+        }
+    }
+
+    public static void removeListener(IArcToolsListener listener) {
+        if (listeners.contains(listener)) {
+            listeners.remove(listener);
+        }
+    }
+
 
 
     private static int getId() {
@@ -158,6 +181,10 @@ public class ArcGISTools {
         return idCounter;
     }
 
+
+    public static ArcGisMapLayer createMapLayer(String name, String description, String location, String uri, boolean online) {
+        return new ArcGisMapLayer(getId(), name, description, location, uri, online);
+    }
 
 
     public static Collection<ArcGisMapLayer> getLayers() {
@@ -181,36 +208,40 @@ public class ArcGISTools {
             init();
         }
 
-        ArcGisMapLayer agml = mapLayers.get(id);
-        Layer layer = null;
+        return getBaseLayer(mapLayers.get(id));
+    }
 
+    public static Layer getBaseLayer(ArcGisMapLayer agml) {
+        return getBaseLayer(agml, agml.isOnline());
+    }
+
+    public static Layer getBaseLayer(ArcGisMapLayer agml, boolean isOnline) {
         UserCredentials credentials = null; //Global.Settings.DeviceSettings.getArcGisUserCredentials();
 
-        if (agml.isOnline()) {
-            layer = new ArcGISTiledMapServiceLayer(agml.getLocation(), credentials);
+        Layer layer = null;
+
+        if (isOnline) {
+            layer = new ArcGISTiledMapServiceLayer(agml.getUri(), credentials);
         } else {
-            layer = new ArcGISLocalTiledLayer(agml.getLocation());
+            layer = new ArcGISLocalTiledLayer(agml.getUri());
         }
 
         return layer;
     }
 
 
-    public static void addOfflineLayer(String name, String description, String filePath) {
-        addLayer(new ArcGisMapLayer(getId(), name, description, filePath, false));
-    }
-
-    public static void addOnlineLayer(String name, String description, String url) {
-        addLayer(new ArcGisMapLayer(getId(), name, description, url, true));
-    }
-
-    private static void addLayer(ArcGisMapLayer layer) {
+    public static void addLayer(ArcGisMapLayer layer) {
         if (mapLayers == null) {
             init();
         }
 
         mapLayers.put(layer.getId(), layer);
         Global.Settings.DeviceSettings.setArcGisMayLayers(mapLayers.values());
+
+        for (IArcToolsListener l : listeners) {
+            if (l != null)
+                l.arcLayerAdded(layer);
+        }
     }
 
 
@@ -254,143 +285,133 @@ public class ArcGISTools {
     }
 
 
+    public static void getLayerFromUrl(final String url, Context context, final IGetArcMapLayerListener listener) {
+        if (listener == null)
+            throw new RuntimeException("Listener is null");
 
-    //static GeodatabaseSyncTask gdbSyncTask;
+        String jUrl = url;
+        if (!jUrl.endsWith("?f=pjson")) {
+            jUrl = String.format("%s?f=pjson", jUrl);
+        }
 
-    /**
-     * Create the GeodatabaseTask from the feature service URL w/o credentials.
-     */
-    public static void downloadOfflineMap(final String name, final String desc, String url, final String filePath,
-                                          final Polygon extents, final SpatialReference spatialReference,
-                                          final OfflineMapDownloadListener listener) {
-        //Log.i(TAG, "Create GeoDatabase");
-        // create a dialog to update user on progress
-        //dialog = ProgressDialog.show(context, "Download Data", "Create local runtime geodatabase");
-        //dialog.show();
-
-        // create the GeodatabaseTask
-        final GeodatabaseSyncTask gdbSyncTask = new GeodatabaseSyncTask(url, null);
-        gdbSyncTask.fetchFeatureServiceInfo(new CallbackListener<FeatureServiceInfo>() {
-
+        WebRequest.getJson(jUrl, context, new Response.Listener<JSONObject>() {
             @Override
-            public void onError(Throwable arg0) {
-                if (listener != null) {
-                    listener.onError("Error fetching FeatureServiceInfo");
-                }
-                //Log.e(TAG, "Error fetching FeatureServiceInfo");
-            }
-
-            @Override
-            public void onCallback(FeatureServiceInfo fsInfo) {
-                if (fsInfo.isSyncEnabled()) {
-                    createGeodatabase(gdbSyncTask, fsInfo, name, desc, filePath, extents, spatialReference, listener);
+            public void onResponse(JSONObject response) {
+                if (response.has("currentVersion")) {
+                    listener.onComplete(new ArcGisMapLayer(
+                                    getId(),
+                                    null,
+                                    response.optString("description", StringEx.Empty),
+                                    null,
+                                    url,
+                                    response.optDouble("minScale", 0),
+                                    response.optDouble("maxScale", 0),
+                                    getDetailLevelsFromJson(response),
+                                    false)
+                    );
                 } else {
-                    if (listener != null) {
-                        listener.onError("Sync not enabled");
+                    listener.onBadUrl();
+                }
+            }
+        },
+        new Response.ErrorListener(){
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                listener.onBadUrl();
+            }
+        });
+    }
+
+
+    private static ArcGisMapLayer.DetailLevel[] getDetailLevelsFromJson(JSONObject jobj) {
+        ArrayList<ArcGisMapLayer.DetailLevel> detailLevels = new ArrayList<>();
+
+        try {
+            if (jobj.has("tileInfo")) {
+                jobj = jobj.getJSONObject("tileInfo");
+
+                if (jobj.has("lods")) {
+                    try {
+                        JSONArray array = jobj.getJSONArray("lods");
+                        JSONObject o;
+
+                        int level;
+                        double res, scale;
+
+                        for (int i = 0; i < array.length(); i++) {
+                            o = array.getJSONObject(i);
+
+                            level = o.getInt("level");
+                            res = o.getDouble("resolution");
+                            scale = o.getDouble("scale");
+
+                            detailLevels.add(new ArcGisMapLayer.DetailLevel(level, res, scale));
+                        }
+                    } catch (JSONException e) {
+
                     }
                 }
             }
+        } catch (JSONException e) {
+
+        }
+
+        return detailLevels.toArray(new ArcGisMapLayer.DetailLevel[detailLevels.size()]);
+    }
+
+
+
+    private static HashMap<Integer, DownloadOfflineArcGISMapTask> tasks = new HashMap<>();
+
+    public static void startOfflineMapDownload(DownloadOfflineArcGISMapTask task) {
+        final ArcGisMapLayer layer = task.getLayer();
+
+        tasks.put(task.getLayer().getId(), task);
+
+        Global.TtNotifyManager.startMapDownload(layer.getId(), layer.getName());
+
+        task.startDownload(new DownloadOfflineArcGISMapTask.DownloadListener() {
+            @Override
+            public void onMapDownloaded(ArcGisMapLayer layer) {
+                addLayer(layer);
+
+                Global.TtNotifyManager.endMapDownload(layer.getId());
+                //Toast.makeText(Global.getApplicationContext(), String.format("%s Downloaded", layer.getName()), Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onTaskUpdate(ExportTileCacheStatus status) {
+                if (status.getStatus() == GPJobResource.JobStatus.EXECUTING) {
+                    int progress = (int) (100 * status.getTotalBytesDownloaded() / status.getDownloadSize());
+
+                    Global.TtNotifyManager.updateMapDownload(layer.getId(), progress);
+                } else {
+                    //Toast.makeText(Global.getApplicationContext(), status.getStatus().toString(), Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onStatusError(String message) {
+                tasks.remove(layer.getId());
+                Global.TtNotifyManager.endMapDownload(layer.getId());
+                //Toast.makeText(Global.getApplicationContext(), "Error creating offline map", Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onDownloadError(String message) {
+                tasks.remove(layer.getId());
+                Global.TtNotifyManager.endMapDownload(layer.getId());
+                //Toast.makeText(Global.getApplicationContext(), "Error downloading offline map", Toast.LENGTH_LONG).show();
+            }
         });
-
     }
 
-    /**
-     * Set up parameters to pass the the submitTask() method. A
-     * CallbackListener is used for the response.
-     */
-    private static void createGeodatabase(GeodatabaseSyncTask task, FeatureServiceInfo featureServerInfo, final String name, final String desc,
-                                          final String filePath, Polygon extents, SpatialReference spatialReference, final OfflineMapDownloadListener listener) {
-        // set up the parameters to generate a geodatabase
-        GenerateGeodatabaseParameters params = new GenerateGeodatabaseParameters(featureServerInfo, extents, spatialReference);
-
-        // a callback which fires when the task has completed or failed.
-        CallbackListener<String> gdbResponseCallback = new CallbackListener<String>() {
-            @Override
-            public void onError(final Throwable e) {
-                //Log.e(TAG, "Error creating geodatabase");
-                //dialog.dismiss();
-
-                if (listener != null) {
-                    listener.onError("Error creating geodatabase");
-                }
-            }
-
-            @Override
-            public void onCallback(String path) {
-                //Log.i(TAG, "Geodatabase is: " + path);
-                //dialog.dismiss();
-                // update map with local feature layer from geodatabase
-                //updateFeatureLayer(path);
-
-                addOfflineLayer(name, desc, path);
-
-                if (listener != null) {
-                    listener.onComplete(path);
-                }
-            }
-        };
-
-        // a callback which updates when the status of the task changes
-        GeodatabaseStatusCallback statusCallback = new GeodatabaseStatusCallback() {
-            @Override
-            public void statusUpdated(GeodatabaseStatusInfo status) {
-                //Log.i(TAG, status.getStatus().toString());
-
-                if (listener != null) {
-                    listener.onUpdate(status);
-                }
-            }
-        };
-
-        // create the fully qualified path for geodatabase file
-        //localGdbFilePath = createGeodatabaseFilePath();
-
-        // get geodatabase based on params
-        //submitTask(params, filePath, statusCallback, gdbResponseCallback);
-        task.generateGeodatabase(params, filePath, false, statusCallback, gdbResponseCallback);
+    public interface IGetArcMapLayerListener {
+        void onComplete(ArcGisMapLayer layer);
+        void onBadUrl();
     }
 
-
-    /**
-     * Request database, poll server to get status, and download the file
-     */
-//    private static void submitTask(GenerateGeodatabaseParameters params, String file,
-//                                   GeodatabaseStatusCallback statusCallback, CallbackListener<String> gdbResponseCallback) {
-//        // submit task
-//        gdbSyncTask.generateGeodatabase(params, file, false, statusCallback, gdbResponseCallback);
-//    }
-
-    /**
-     * Add feature layer from local geodatabase to map
-     */
-//        private void updateFeatureLayer(String featureLayerPath) {
-//            // create a new geodatabase
-//            Geodatabase localGdb = null;
-//            try {
-//                localGdb = new Geodatabase(featureLayerPath);
-//            } catch (FileNotFoundException e) {
-//                e.printStackTrace();
-//            }
-//
-//            // Geodatabase contains GdbFeatureTables representing attribute data
-//            // and/or spatial data. If GdbFeatureTable has geometry add it to
-//            // the MapView as a Feature Layer
-//            if (localGdb != null) {
-//                for (GeodatabaseFeatureTable gdbFeatureTable : localGdb.getGeodatabaseTables()) {
-//                    if (gdbFeatureTable.hasGeometry())
-//                        mMapView.addLayer(new FeatureLayer(gdbFeatureTable));
-//                }
-//            }
-//            // display the path to local geodatabase
-//            //pathView.setText(featureLayerPath);
-//
-//        }
-
-
-
-    public interface OfflineMapDownloadListener {
-        void onError(String error);
-        void onUpdate(GeodatabaseStatusInfo statusInfo);
-        void onComplete(String filePath);
+    public interface IArcToolsListener {
+        void arcLayerAdded(ArcGisMapLayer layer);
     }
 }

@@ -20,16 +20,16 @@ import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.adapters.MultiLineInfoWindowAdapter;
 import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.geospatial.Position;
-import com.usda.fmsc.geospatial.nmea.NmeaBurst;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.Units;
-import com.usda.fmsc.twotrails.activities.custom.MultiMapTypeActivity;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.objects.GoogleMapsPolygonGrahpic;
+import com.usda.fmsc.twotrails.objects.GoogleMapsTrailGraphic;
 import com.usda.fmsc.twotrails.objects.PolygonDrawOptions;
 import com.usda.fmsc.twotrails.objects.PolygonGraphicManager;
+import com.usda.fmsc.twotrails.objects.TrailGraphicManager;
 
 import java.util.HashMap;
 
@@ -297,8 +297,24 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
     }
 
     @Override
-    public void addGraphic(PolygonGraphicManager graphicManager, PolygonDrawOptions drawOptions) {
-        graphicManager.setPolygonGraphic(new GoogleMapsPolygonGrahpic(map), drawOptions);
+    public void addPolygon(PolygonGraphicManager graphicManager, PolygonDrawOptions drawOptions) {
+        graphicManager.setGraphic(new GoogleMapsPolygonGrahpic(map), drawOptions);
         _MarkerData.putAll(graphicManager.getMarkerData());
+    }
+
+    @Override
+    public void addTrail(TrailGraphicManager graphicManager) {
+        graphicManager.setGraphic(new GoogleMapsTrailGraphic(map));
+        _MarkerData.putAll(graphicManager.getMarkerData());
+    }
+
+    @Override
+    public void updateTrail(TrailGraphicManager graphicManager) {
+        HashMap<String, MarkerData> mds = graphicManager.getMarkerData();
+        for (String key : mds.keySet()) {
+            if (!_MarkerData.containsKey(key)) {
+                _MarkerData.put(key, mds.get(key));
+            }
+        }
     }
 }

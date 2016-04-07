@@ -11,6 +11,7 @@ import com.usda.fmsc.twotrails.Units;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.objects.PolygonDrawOptions;
 import com.usda.fmsc.twotrails.objects.PolygonGraphicManager;
+import com.usda.fmsc.twotrails.objects.TrailGraphicManager;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.TtPoint;
 
@@ -30,7 +31,11 @@ public interface IMultiMapFragment {
 
     void onMapLocationChanged();
 
-    void addGraphic(PolygonGraphicManager graphicManager, PolygonDrawOptions drawOptions);
+    void addPolygon(PolygonGraphicManager graphicManager, PolygonDrawOptions drawOptions);
+
+    void addTrail(TrailGraphicManager graphicManager);
+
+    void updateTrail(TrailGraphicManager graphicManager);
 
     void hideSelectedMarkerInfo();
 

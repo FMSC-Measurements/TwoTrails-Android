@@ -6,9 +6,9 @@
         <item name="android:visibility">gone</item>
     </style>
 
-    <style name="ToolbarElevation" parent="ToolbarElevationBase" />
+    <style name="ToolbarElevation" parent="ToolbarElevationBase"/>
 
-    <style name="ToolbarElevation2" parent="ToolbarElevationBase" />
+    <style name="ToolbarElevation2" parent="ToolbarElevationBase"/>
 
-    <style name="ToolbarElevation3" parent="ToolbarElevationBase" />
+    <style name="ToolbarElevation3" parent="ToolbarElevationBase"/>
 </resources>

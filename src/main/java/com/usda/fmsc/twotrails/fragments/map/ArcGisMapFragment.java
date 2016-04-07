@@ -22,10 +22,11 @@ import com.esri.core.geometry.Envelope;
 import com.esri.core.geometry.Geometry;
 import com.esri.core.geometry.Point;
 import com.esri.core.geometry.Polygon;
+import com.esri.core.geometry.SpatialReference;
 import com.esri.core.map.Graphic;
+import com.esri.core.symbol.PictureMarkerSymbol;
 import com.esri.core.symbol.SimpleFillSymbol;
 import com.esri.core.symbol.SimpleLineSymbol;
-import com.google.android.gms.maps.model.Marker;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.geospatial.Position;
@@ -36,10 +37,14 @@ import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.Units;
 import com.usda.fmsc.twotrails.gps.GpsService;
+import com.usda.fmsc.twotrails.objects.ArcGisMapLayer;
 import com.usda.fmsc.twotrails.objects.ArcGisPolygonGraphic;
+import com.usda.fmsc.twotrails.objects.ArcGisTrailGraphic;
 import com.usda.fmsc.twotrails.objects.PolygonDrawOptions;
 import com.usda.fmsc.twotrails.objects.PolygonGraphicManager;
+import com.usda.fmsc.twotrails.objects.TrailGraphicManager;
 import com.usda.fmsc.twotrails.ui.ArcMapCompass;
+import com.usda.fmsc.twotrails.ui.MyPositionDrawable;
 import com.usda.fmsc.twotrails.utilities.ArcGISTools;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
@@ -48,6 +53,8 @@ import java.util.HashMap;
 
 
 public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, GpsService.Listener, OnStatusChangedListener, OnZoomListener, OnPanListener {
+    private static final String START_ARC_OPTIONS = "StartupArcOptions";
+
     private static final int TOLERANCE = 30;
 
     private MapOptions startUpMapOptions;
@@ -59,6 +66,7 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
 
     private HashMap<String, MarkerData> _MarkerData = new HashMap<>();
     private ArrayList<ArcGisPolygonGraphic> polygonGraphics = new ArrayList<>();
+    private ArrayList<ArcGisTrailGraphic> trailGraphics = new ArrayList<>();
 
     private MapView mMapView;
     private Callout callout;
@@ -70,10 +78,12 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
 
     private LayoutInflater inflater;
 
-    private Graphic locationCircle;
+    private Graphic locationGraphic;
     private float locGraphicRadius;
 
-    private boolean mapReady, showPosition;
+    private boolean mapReady, showPosition, centerOnLoad = false;
+
+    private ArcGisMapLayer startArcOpts;
 
 
     public static ArcGisMapFragment newInstance() {
@@ -88,7 +98,14 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
         return fragment;
     }
 
-    boolean centerOnLoad = false;
+    public static ArcGisMapFragment newInstance(MapOptions options, ArcGisMapLayer arcOptions) {
+        ArcGisMapFragment fragment = new ArcGisMapFragment();
+        Bundle args = new Bundle();
+        args.putParcelable(MAP_OPTIONS_EXTRA, options);
+        args.putParcelable(START_ARC_OPTIONS, arcOptions);
+        fragment.setArguments(args);
+        return fragment;
+    }
 
 
     public ArcGisMapFragment() { }
@@ -99,8 +116,14 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
 
         inflater = LayoutInflater.from(getContext());
 
-        if (getArguments() != null) {
-            startUpMapOptions = getArguments().getParcelable(MAP_OPTIONS_EXTRA);
+        Bundle bundle = getArguments();
+
+        if (bundle != null) {
+            startUpMapOptions = bundle.getParcelable(MAP_OPTIONS_EXTRA);
+
+            if (bundle.containsKey(START_ARC_OPTIONS)) {
+                startArcOpts = bundle.getParcelable(START_ARC_OPTIONS);
+            }
         } else {
             startUpMapOptions = new MapOptions(0, Consts.LocationInfo.USA_BOUNDS);
         }
@@ -119,10 +142,6 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
         mMapView = (MapView)view.findViewById(R.id.map);
         mMapView.enableWrapAround(true);
         mMapView.setAllowRotationByPinch(true);
-
-        mMapView.setMaxScale(1000);
-        mMapView.setMinScale(591657550.5);
-
         mapViewHelper = new MapViewHelper(mMapView);
 
         //mMapView = (MapView) view.findViewById(R.id.mMapView);
@@ -131,14 +150,25 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
         mMapView.setOnPanListener(this);
         mMapView.setOnTouchListener(new TouchListener(getContext(), mMapView));
 
-
         compass = (ArcMapCompass)view.findViewById(R.id.compass);
         compass.setMapView(mMapView);
 
-        basemapId = startUpMapOptions.getMapId();
+        if (startArcOpts != null) {
+            changeBasemap(startArcOpts);
+        } else {
+            changeBasemap(startUpMapOptions.getMapId());
+        }
+//        basemapId = startUpMapOptions.getMapId();
 
-        mBasemapLayer = ArcGISTools.getBaseLayer(basemapId);
-        mMapView.addLayer(mBasemapLayer);
+//        mBasemapLayer = ArcGISTools.getBaseLayer(basemapId);
+
+//        mMapView.setMaxScale(1000);
+//        mMapView.setMinScale(591657550.5);
+
+//        mMapView.setMaxScale(mBasemapLayer.getMaxScale());
+//        mMapView.setMinScale(mBasemapLayer.getMinScale());
+
+//        mMapView.addLayer(mBasemapLayer);
 
         mMapView.addLayer(locationLayer);
 
@@ -225,15 +255,28 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
 
 
     private void changeBasemap(int basemapId) {
-        this.basemapId = basemapId;
+        changeBasemap(ArcGISTools.getMapLayer(basemapId));
+    }
+
+    public void changeBasemap(ArcGisMapLayer agml) {
+        this.basemapId = agml.getId();
 
         if (mMapView == null) {
             mBasemapLayer = null;
         } else {
-            // Remove old basemap layer and add a new one as the first layer to be drawn
-            mMapView.removeLayer(mBasemapLayer);
-            mBasemapLayer = ArcGISTools.getBaseLayer(basemapId);
+            if (mBasemapLayer != null)
+                mMapView.removeLayer(mBasemapLayer);
+
+            mBasemapLayer = ArcGISTools.getBaseLayer(agml);
             mMapView.addLayer(mBasemapLayer, 0);
+
+            if (agml.hasScales()) {
+                mMapView.setMaxScale(agml.getMaxScale());
+                mMapView.setMinScale(agml.getMinScale());
+            } else {
+                mMapView.setMaxScale(1000);
+                mMapView.setMinScale(591657550.5);
+            }
 
             if (mmListener != null) {
                 mmListener.onMapTypeChanged(Units.MapType.ArcGIS, basemapId);
@@ -300,6 +343,16 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
         return new Extent(sw.getY(), ne.getX(), ne.getY(), sw.getX());
     }
 
+    public Envelope getArcExtents() {
+        Envelope extents = new Envelope();
+        mMapView.getExtent().queryEnvelope(extents);
+        return extents;
+    }
+
+    public SpatialReference getSpatialReference() {
+        return mMapView.getSpatialReference();
+    }
+
     public double getScale() {
         return mMapView.getScale();
     }
@@ -329,9 +382,6 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
         super.onAttach(context);
         if (context instanceof MultiMapListener) {
             mmListener = (MultiMapListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement MultiMapListener");
         }
     }
 
@@ -355,13 +405,34 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
     }
 
     @Override
-    public void addGraphic(PolygonGraphicManager graphicManager, PolygonDrawOptions drawOptions) {
+    public void addPolygon(PolygonGraphicManager graphicManager, PolygonDrawOptions drawOptions) {
         ArcGisPolygonGraphic polygonGraphic = new ArcGisPolygonGraphic(mMapView);
         polygonGraphics.add(polygonGraphic);
 
-        graphicManager.setPolygonGraphic(polygonGraphic, drawOptions);
+        graphicManager.setGraphic(polygonGraphic, drawOptions);
 
         _MarkerData.putAll(graphicManager.getMarkerData());
+    }
+
+    @Override
+    public void addTrail(TrailGraphicManager graphicManager) {
+        ArcGisTrailGraphic trailGraphic = new ArcGisTrailGraphic(mMapView);
+        trailGraphics.add(trailGraphic);
+
+        graphicManager.setGraphic(trailGraphic);
+
+        _MarkerData.putAll(graphicManager.getMarkerData());
+    }
+
+    @Override
+    public void updateTrail(TrailGraphicManager graphicManager) {
+        HashMap<String, MarkerData> mds = graphicManager.getMarkerData();
+
+        for (String key : mds.keySet()) {
+            if (!_MarkerData.containsKey(key)) {
+                _MarkerData.put(key, mds.get(key));
+            }
+        }
     }
 
     @Override
@@ -394,11 +465,19 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
 
     Point lastPoint;
     int gid;
+    MyPositionDrawable mpd;
+    PictureMarkerSymbol pms;
 
     @Override
     public void nmeaBurstReceived(NmeaBurst nmeaBurst) {
         if (showPosition && nmeaBurst.hasPosition()) {
             Point point = ArcGISTools.latLngToMapSpatial(nmeaBurst.getLatitude(), nmeaBurst.getLongitude(), mMapView);
+
+
+//            if (mpd == null) {
+//                mpd = new MyPositionDrawable(getContext());
+//                pms = new PictureMarkerSymbol(mpd);
+//            }
 
             SimpleLineSymbol outline = new SimpleLineSymbol(Color.WHITE, 1, SimpleLineSymbol.STYLE.SOLID);
             SimpleFillSymbol fill = new SimpleFillSymbol(Color.BLUE, SimpleFillSymbol.STYLE.SOLID);
@@ -423,13 +502,15 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
                 }
             }
 
-            if (locationCircle != null) {
+            if (locationGraphic != null) {
                 locationLayer.removeGraphic(gid);
             }
 
-            locationCircle = new Graphic(polygon, fill);
+            locationGraphic = new Graphic(polygon, fill);
 
-            gid = locationLayer.addGraphic(locationCircle);
+//            locationGraphic = new Graphic(point, pms);
+
+            gid = locationLayer.addGraphic(locationGraphic);
 
             lastPoint = point;
         }

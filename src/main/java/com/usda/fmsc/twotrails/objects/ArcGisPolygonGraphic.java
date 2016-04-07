@@ -74,8 +74,8 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic {
         Polyline adjNavPLO = null;
         Polyline unadjNavPLO = null;
 
-        SimpleMarkerSymbol adjMkOpts = new SimpleMarkerSymbol(graphicOptions.AdjBndColor, 20, SimpleMarkerSymbol.STYLE.DIAMOND);
-        SimpleMarkerSymbol unAdjMkOpts = new SimpleMarkerSymbol(graphicOptions.UnAdjBndColor, 20, SimpleMarkerSymbol.STYLE.SQUARE);
+        SimpleMarkerSymbol adjMkOpts = new SimpleMarkerSymbol(graphicOptions.getAdjBndColor(), 20, SimpleMarkerSymbol.STYLE.DIAMOND);
+        SimpleMarkerSymbol unAdjMkOpts = new SimpleMarkerSymbol(graphicOptions.getUnAdjBndColor(), 20, SimpleMarkerSymbol.STYLE.SQUARE);
 
         GeoPosition adjPos, unAdjPos;
         Point adjLL, unadjLL;
@@ -160,23 +160,23 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic {
             polyBounds = null;
         }
 
-        SimpleLineSymbol outline = new SimpleLineSymbol(graphicOptions.AdjBndColor, graphicOptions.AdjWidth, SimpleLineSymbol.STYLE.SOLID);
+        SimpleLineSymbol outline = new SimpleLineSymbol(graphicOptions.getAdjBndColor(), graphicOptions.getAdjWidth(), SimpleLineSymbol.STYLE.SOLID);
         //SimpleFillSymbol fill = new SimpleFillSymbol(Color.TRANSPARENT, SimpleFillSymbol.STYLE.NULL);
         //fill.setOutline(outline);
         _AdjBnd.addGraphic(new Graphic(adjBndPLO, outline));
         _AdjBndCB.addGraphic(new Graphic(adjBndPO, outline));
 
         
-        outline = new SimpleLineSymbol(graphicOptions.UnAdjBndColor, graphicOptions.UnAdjWidth, SimpleLineSymbol.STYLE.SOLID);
+        outline = new SimpleLineSymbol(graphicOptions.getUnAdjBndColor(), graphicOptions.getUnAdjWidth(), SimpleLineSymbol.STYLE.SOLID);
         _UnadjBnd.addGraphic(new Graphic(unadjBndPLO, outline));
         _UnadjBndCB.addGraphic(new Graphic(unadjBndPO, outline));
 
         
-        outline = new SimpleLineSymbol(graphicOptions.AdjNavColor, graphicOptions.AdjWidth, SimpleLineSymbol.STYLE.SOLID);
+        outline = new SimpleLineSymbol(graphicOptions.getAdjNavColor(), graphicOptions.getAdjWidth(), SimpleLineSymbol.STYLE.SOLID);
         _AdjNav.addGraphic(new Graphic(adjNavPLO, outline));
 
 
-        outline = new SimpleLineSymbol(graphicOptions.UnAdjNavColor, graphicOptions.UnAdjWidth, SimpleLineSymbol.STYLE.SOLID);
+        outline = new SimpleLineSymbol(graphicOptions.getUnAdjNavColor(), graphicOptions.getUnAdjWidth(), SimpleLineSymbol.STYLE.SOLID);
         _UnadjNav.addGraphic(new Graphic(unadjNavPLO, outline));
 
         if (drawOptions.Visible) {

@@ -36,12 +36,12 @@ public class MultiMapTypeActivity extends CustomToolbarActivity implements IMult
 
     private static final String SELECT_MAP = "selectMap";
 
-    GpsService.GpsBinder binder;
+    private GpsService.GpsBinder binder;
 
-    Units.MapType mapType = Units.MapType.None;
-    int mapId;
-    Fragment mapFragment;
-    IMultiMapFragment mmFrag;
+    private Units.MapType mapType = Units.MapType.None;
+    private int mapId;
+    protected Fragment mapFragment;
+    private IMultiMapFragment mmFrag;
 
     private ArrayList<PolygonGraphicManager> graphicManagers = new ArrayList<>();
 
@@ -65,7 +65,7 @@ public class MultiMapTypeActivity extends CustomToolbarActivity implements IMult
                     // check google play services and setup map
                     Integer code = AndroidUtils.App.checkPlayServices(this, Consts.Activities.Services.REQUEST_GOOGLE_PLAY_SERVICES);
                     if (code == null) {
-                        mapFragment = getMapFragment(mapType, getMapOptions(mapType, mapId));
+                        mapFragment = createMapFragment(mapType, getMapOptions(mapType, mapId));
                         mmFrag = (IMultiMapFragment)mapFragment;
                         getSupportFragmentManager().beginTransaction().add(R.id.mapContainer, mapFragment).commit();
                     } else {
@@ -74,7 +74,7 @@ public class MultiMapTypeActivity extends CustomToolbarActivity implements IMult
                     }
                     break;
                 case ArcGIS:
-                    mapFragment = getMapFragment(mapType, getMapOptions(mapType, mapId));
+                    mapFragment = createMapFragment(mapType, getMapOptions(mapType, mapId));
                     mmFrag = (IMultiMapFragment)mapFragment;
                     getSupportFragmentManager().beginTransaction().add(R.id.mapContainer, mapFragment).commit();
                     break;
@@ -95,7 +95,7 @@ public class MultiMapTypeActivity extends CustomToolbarActivity implements IMult
                     if (mapFragment == null) {
                         getSupportFragmentManager().beginTransaction().add(R.id.mapContainer, mapFragment).commit();
                     } else {
-                        mapFragment = getMapFragment(mapType, getMapOptions(mapType, mapId));
+                        mapFragment = createMapFragment(mapType, getMapOptions(mapType, mapId));
                         mmFrag = (IMultiMapFragment)mapFragment;
                     }
                 }
@@ -134,7 +134,7 @@ public class MultiMapTypeActivity extends CustomToolbarActivity implements IMult
     }
 
 
-    protected Fragment getMapFragment(Units.MapType mapType, IMultiMapFragment.MapOptions options) {
+    protected Fragment createMapFragment(Units.MapType mapType, IMultiMapFragment.MapOptions options) {
         Fragment f = null;
         switch (mapType) {
             case Google:
@@ -196,7 +196,7 @@ public class MultiMapTypeActivity extends CustomToolbarActivity implements IMult
                 mmFrag.setMap(mapId);
             }
         } else {
-            mapFragment = getMapFragment(mapType, getMapOptions(mapType, mapId));
+            mapFragment = createMapFragment(mapType, getMapOptions(mapType, mapId));
             mmFrag = (IMultiMapFragment)mapFragment;
             getSupportFragmentManager().beginTransaction().replace(R.id.mapContainer, mapFragment).commit();
             onMapTypeChanged(mapType, mapId);
@@ -236,7 +236,7 @@ public class MultiMapTypeActivity extends CustomToolbarActivity implements IMult
     public void onMapReady() {
         if (mmFrag != null) {
             for (PolygonGraphicManager pgm : graphicManagers) {
-                mmFrag.addGraphic(pgm, null);
+                mmFrag.addPolygon(pgm, null);
             }
         }
     }
@@ -271,7 +271,7 @@ public class MultiMapTypeActivity extends CustomToolbarActivity implements IMult
 
     protected void addGraphic(PolygonGraphicManager graphicManager, PolygonDrawOptions drawOptions) {
         if (mmFrag != null) {
-            mmFrag.addGraphic(graphicManager, drawOptions);
+            mmFrag.addPolygon(graphicManager, drawOptions);
         }
 
         graphicManagers.add(graphicManager);

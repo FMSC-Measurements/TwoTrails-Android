@@ -65,9 +65,9 @@ public interface IPolygonGraphic {
 
 
     class PolygonGraphicOptions {
-        public int AdjBndColor, UnAdjBndColor;
-        public int AdjNavColor, UnAdjNavColor;
-        public float AdjWidth, UnAdjWidth;
+        private int AdjBndColor, UnAdjBndColor;
+        private int AdjNavColor, UnAdjNavColor;
+        private float AdjWidth, UnAdjWidth;
 
         public PolygonGraphicOptions(int AdjBndColor, int UnAdjBndColor, int AdjNavColor, int UnAdjNavColor, float AdjWidth, float UnAdjWidth) {
             this.AdjBndColor = AdjBndColor;
@@ -76,6 +76,30 @@ public interface IPolygonGraphic {
             this.UnAdjNavColor = UnAdjNavColor;
             this.AdjWidth = AdjWidth;
             this.UnAdjWidth = UnAdjWidth;
+        }
+
+        public int getAdjBndColor() {
+            return AdjBndColor;
+        }
+
+        public int getUnAdjBndColor() {
+            return UnAdjBndColor;
+        }
+
+        public int getAdjNavColor() {
+            return AdjNavColor;
+        }
+
+        public int getUnAdjNavColor() {
+            return UnAdjNavColor;
+        }
+
+        public float getAdjWidth() {
+            return AdjWidth;
+        }
+
+        public float getUnAdjWidth() {
+            return UnAdjWidth;
         }
     }
 }

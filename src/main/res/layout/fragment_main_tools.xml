@@ -101,6 +101,21 @@
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:text="@string/main_btn_map_manager"
+            android:id="@+id/mainFragToolsBtnMapManager"
+            android:layout_gravity="center_horizontal"
+            android:onClick="btnMapManagerClick"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginBottom="5dp"
+            android:enabled="true"
+            style="@style/MainActivityButtons"/>
+
+        <View style="@style/Dividers"/>
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:text="@string/main_btn_gps_log"
             android:id="@+id/mainFragToolsBtnGpsLogger"
             android:layout_gravity="center_horizontal"

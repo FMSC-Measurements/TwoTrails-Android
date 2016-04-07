@@ -83,6 +83,13 @@
     <string name="str_listen_recv">Listening to Receiver</string>
     <string name="str_satellites">Satellites</string>
     <string name="str_mode">Mode</string>
+    <string name="str_online_map">Online Map</string>
+    <string name="str_offline_map">Offline Map</string>
+    <string name="str_name">Name</string>
+    <string name="str_location">Location</string>
+    <string name="str_url">Url</string>
+    <string name="str_desc">Description</string>
+    <string name="str_world_map">World Map</string>
 
 
     <string name="op_gps">GPS</string>
@@ -254,6 +261,7 @@
     <string name="title_activity_plot_grid">Generate Plots</string>
     <string name="title_activity_export">Export</string>
     <string name="title_activity_import">Import</string>
+    <string name="title_activity_offline_map_manager">Map Manager</string>
 
     <!-- Main -->
     <string name="main_tab_file">FILE</string>
@@ -282,6 +290,8 @@
     <string name="main_btn_plot_grid">Plot Grid</string>
     <string name="main_btn_multi_edit">Multi Point Edit</string>
     <string name="main_btn_gps_log">GPS Logger</string>
+    <string name="main_btn_map_manager">Map Manager</string>
+
 
     <string name="main_tv_edited">Last Edited</string>
     <string name="main_tv_polys">Polygons</string>
@@ -697,4 +707,5 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_get_map_extents">GetMapExtentsActivity</string>
 </resources>
