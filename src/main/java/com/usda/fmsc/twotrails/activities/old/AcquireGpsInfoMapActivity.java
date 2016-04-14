@@ -1,4 +1,4 @@
-package com.usda.fmsc.twotrails.activities.custom;
+package com.usda.fmsc.twotrails.activities.old;
 
 import android.animation.Animator;
 import android.app.Activity;
@@ -13,8 +13,10 @@ import android.widget.Toast;
 
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.animation.ViewAnimator;
+import com.usda.fmsc.geospatial.nmea.NmeaIDs;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.Global;
+import com.usda.fmsc.twotrails.activities.custom.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.R;
 
@@ -23,11 +25,11 @@ import com.usda.fmsc.twotrails.ui.GpsStatusSatView;
 import com.usda.fmsc.twotrails.ui.GpsStatusSkyView;
 import com.usda.fmsc.utilities.StringEx;
 
-import com.usda.fmsc.geospatial.nmea.NmeaBurst;
+import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.geospatial.nmea.sentences.GGASentence;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 
-public class AcquireGpsCustomToolbarActivity extends CustomToolbarActivity implements GpsService.Listener {
+public class AcquireGpsInfoMapActivity extends CustomToolbarActivity implements GpsService.Listener {
     public static final int GPS_NOT_FOUND = 1910;
     public static final int GPS_NOT_CONFIGURED = 1911;
 
@@ -137,7 +139,7 @@ public class AcquireGpsCustomToolbarActivity extends CustomToolbarActivity imple
         }
     }
 
-    protected void setNmeaData(final NmeaBurst burst) {
+    protected void setNmeaData(final INmeaBurst burst) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -171,19 +173,19 @@ public class AcquireGpsCustomToolbarActivity extends CustomToolbarActivity imple
                     }
                 }
 
-                if (burst.getRMC().hasMagVar()) {
+                if (burst.isValid(NmeaIDs.SentenceID.RMC)) {
                     tvDec.setText(String.format("%.2f %s", burst.getMagVar(), burst.getMagVarDir().toStringAbv()));
                 } else {
                     tvDec.setText(nVal);
                 }
 
-                if (burst.getGGA().isValid()) {
+                if (burst.isValid(NmeaIDs.SentenceID.GGA)) {
                     tvGpsMode.setText(burst.getFixQuality().toStringX());
                 } else {
                     tvGpsMode.setText(GGASentence.GpsFixType.NoFix.toString());
                 }
 
-                if (burst.getGSA().isValid()) {
+                if (burst.isValid(NmeaIDs.SentenceID.GSA)) {
                     tvGpsStatus.setText(burst.getFix().toString());
                     tvPdop.setText(String.format("%.2f", burst.getPDOP()));
                     tvHdop.setText(String.format("%.2f", burst.getHDOP()));
@@ -193,10 +195,12 @@ public class AcquireGpsCustomToolbarActivity extends CustomToolbarActivity imple
                     tvPdop.setText(nVal);
                 }
 
-                if (burst.getGSV().isValid()) {
+                if (burst.isValid(NmeaIDs.SentenceID.GSV)) {
+                    boolean gsaValid = burst.isValid(NmeaIDs.SentenceID.GSA);
+
                     tvSat.setText(String.format("%d/%d/%d",
-                            burst.getGSA().isValid() ? burst.getUsedSatellitesCount() : 0,
-                            burst.getGGA().isValid() ? burst.getTrackedSatellitesCount() : 0,
+                            gsaValid ? burst.getUsedSatellitesCount() : 0,
+                            gsaValid ? burst.getTrackedSatellitesCount() : 0,
                             burst.getSatellitesInViewCount()));
                 } else {
                     tvSat.setText(nVal);
@@ -280,8 +284,8 @@ public class AcquireGpsCustomToolbarActivity extends CustomToolbarActivity imple
     }
 
     @Override
-    public void nmeaBurstReceived(NmeaBurst nmeaBurst) {
-        setNmeaData(nmeaBurst);
+    public void nmeaBurstReceived(INmeaBurst INmeaBurst) {
+        setNmeaData(INmeaBurst);
     }
 
     @Override

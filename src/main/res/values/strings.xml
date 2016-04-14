@@ -379,8 +379,9 @@
 
 
     <!-- HAID -->
-    <string name="haid_menu_name">Polygons</string>
     <string name="haid_menu_item_help">Help</string>
+    <string name="haid_menu_show_points">Show Points</string>
+    <string name="haid_menu_name">Polygons</string>
     <string name="haid_help_text">-GPS Error can be divided by 2 if an appropriate
         ANGLE POINT METHOD is used instead of the WALK METHOD.\n\n-Appropriate means that
         the boundary legs are reasonably long between vertices where the boundary

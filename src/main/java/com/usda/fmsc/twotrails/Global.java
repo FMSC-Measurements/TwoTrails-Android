@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
-import android.content.res.Resources;
 import android.os.Build;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
@@ -20,8 +19,8 @@ import com.usda.fmsc.twotrails.activities.MainActivity;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
 import com.usda.fmsc.twotrails.devices.TtBluetoothManager;
 import com.usda.fmsc.twotrails.gps.GpsService;
-import com.usda.fmsc.twotrails.objects.ArcGisMapLayer;
-import com.usda.fmsc.twotrails.objects.PolygonDrawOptions;
+import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
+import com.usda.fmsc.twotrails.objects.map.PolygonDrawOptions;
 import com.usda.fmsc.twotrails.objects.RecentProject;
 import com.usda.fmsc.twotrails.objects.TtGroup;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
@@ -1469,7 +1468,6 @@ public class Global {
         //initial values
         public static void init(ArrayList<TtPolygon> polys) {
             HashMap<String, PolygonDrawOptions> polyOptions = new HashMap<>();
-
 
             if (MasterPolyOptions == null) {
                 MasterPolyOptions = new PolygonDrawOptions();

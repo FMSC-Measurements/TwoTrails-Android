@@ -1,21 +1,23 @@
-package com.usda.fmsc.twotrails.objects;
+package com.usda.fmsc.twotrails.objects.map;
 
 import com.usda.fmsc.geospatial.Extent;
-import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment;
+import com.usda.fmsc.twotrails.objects.TtMetadata;
+import com.usda.fmsc.twotrails.objects.TtPoint;
+import com.usda.fmsc.twotrails.objects.TtPolygon;
 
 import java.util.HashMap;
 import java.util.List;
 
-public class PolygonGraphicManager implements IGraphicManager, PolygonDrawOptions.Listener {
+public class PolygonGraphicManager implements IGraphicManager {
 
-    TtPolygon polygon;
-    List<TtPoint> points;
-    HashMap<String, TtMetadata> meta;
+    private Listener listener;
 
-    IPolygonGraphic polygonGraphic;
-    IPolygonGraphic.PolygonGraphicOptions graphicOptions;
+    private TtPolygon polygon;
+    private List<TtPoint> points;
+    private HashMap<String, TtMetadata> meta;
 
-    Extent extents;
+    private IPolygonGraphic polygonGraphic;
+    private IPolygonGraphic.PolygonGraphicOptions graphicOptions;
 
 
     public PolygonGraphicManager(TtPolygon polygon, List<TtPoint> points, HashMap<String, TtMetadata> meta, IPolygonGraphic.PolygonGraphicOptions graphicOptions) {
@@ -58,8 +60,6 @@ public class PolygonGraphicManager implements IGraphicManager, PolygonDrawOption
             drawOptions = new PolygonDrawOptions();
 
         this.polygonGraphic.build(polygon, points, meta, graphicOptions, drawOptions);
-
-        this.extents = this.polygonGraphic.getExtents();
     }
 
 
@@ -131,7 +131,7 @@ public class PolygonGraphicManager implements IGraphicManager, PolygonDrawOption
 
     //region Getters
     @Override
-    public String getId() { return polygon.getCN();}
+    public String getPolygonCN() { return polygon.getCN();}
 
     public String getPolyName() {
         return polygon.getName();
@@ -145,10 +145,6 @@ public class PolygonGraphicManager implements IGraphicManager, PolygonDrawOption
         return polygonGraphic.getDrawOptions();
     }
 
-    @Override
-    public HashMap<String, IMultiMapFragment.MarkerData> getMarkerData() {
-        return polygonGraphic.getMarkerData();
-    }
 
     public boolean isVisible() {
         return polygonGraphic.isVisible();
@@ -210,11 +206,68 @@ public class PolygonGraphicManager implements IGraphicManager, PolygonDrawOption
 
     @Override
     public Extent getExtents() {
-        return extents;
+        return polygonGraphic.getExtents();
     }
 
-    @Override
-    public void onOptionChanged(PolygonDrawOptions.GraphicCode code, boolean value) {
 
+    public void setListener(Listener listener) {
+        this.listener = listener;
+    }
+
+    
+    public void update(PolygonDrawOptions.GraphicCode code, boolean value) {
+        switch (code) {
+            case VISIBLE:
+                setVisible(value);
+                break;
+            case ADJBND:
+                setAdjBndVisible(value);
+                break;
+            case UNADJBND:
+                setUnadjBndVisible(value);
+                break;
+            case ADJBNDPTS:
+                setAdjBndPtsVisible(value);
+                break;
+            case UNADJBNDPTS:
+                setUnadjBndPtsVisible(value);
+                break;
+            case ADJBNDCLOSE:
+                setAdjBndClose(value);
+                break;
+            case UNADJBNDCLOSE:
+                setUnadjBndClose(value);
+                break;
+            case ADJNAV:
+                setAdjNavVisible(value);
+                break;
+            case UNADJNAV:
+                setUnadjNavVisible(value);
+                break;
+            case ADJNAVPTS:
+                setAdjNavPtsVisible(value);
+                break;
+            case UNADJNAVPTS:
+                setUnadjNavPtsVisible(value);
+                break;
+            case ADJMISCPTS:
+                setAdjMiscPtsVisible(value);
+                break;
+            case UNADJMISCPTS:
+                setUnadjMiscPtsVisible(value);
+                break;
+            case WAYPTS:
+                setWayPtsVisible(value);
+                break;
+        }
+
+        if (listener != null) {
+            listener.onOptionChanged(code, value);
+        }
+    }
+
+
+    public interface Listener {
+        void onOptionChanged(PolygonDrawOptions.GraphicCode code, boolean value);
     }
 }

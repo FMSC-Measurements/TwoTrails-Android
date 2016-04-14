@@ -7,9 +7,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.google.android.gms.maps.GoogleMap;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.widget.SheetLayoutEx;
+import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.activities.custom.AcquireGpsMapActivity;
 import com.usda.fmsc.twotrails.gps.GpsService;
@@ -21,7 +21,6 @@ import com.usda.fmsc.twotrails.objects.TtMetadata;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.usda.fmsc.geospatial.nmea.NmeaBurst;
 import com.usda.fmsc.utilities.StringEx;
 
 public class AcquireGpsActivity extends AcquireGpsMapActivity {
@@ -45,9 +44,6 @@ public class AcquireGpsActivity extends AcquireGpsMapActivity {
         setUseLostConnectionWarning(true);
 
         setResult(RESULT_CANCELED);
-
-        tvLogged = (TextView)findViewById(R.id.acquireGpsToolbarLblLoggedValue);
-        tvRecv = (TextView)findViewById(R.id.acquireGpsToolbarLblReceivedValue);
 
         if (!isCanceling()) {
             SheetLayoutEx.enterFromBottomAnimation(this);
@@ -80,6 +76,9 @@ public class AcquireGpsActivity extends AcquireGpsMapActivity {
                 actionBar.setDisplayShowTitleEnabled(false);
             }
 
+            tvLogged = (TextView)findViewById(R.id.acquireGpsToolbarLblLoggedValue);
+            tvRecv = (TextView)findViewById(R.id.acquireGpsToolbarLblReceivedValue);
+
             btnLog = (Button)findViewById(R.id.aqrBtnLog);
             btnCalc = (Button)findViewById(R.id.aqrBtnCalc);
 
@@ -89,7 +88,7 @@ public class AcquireGpsActivity extends AcquireGpsMapActivity {
                 btnCalc.setBackgroundColor(AndroidUtils.UI.getColor(this, R.color.primaryLighter));
             }
 
-            setupMap();
+            //setupMap();
         }
     }
 
@@ -126,13 +125,13 @@ public class AcquireGpsActivity extends AcquireGpsMapActivity {
     }
 
 
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        super.onMapReady(googleMap);
-
-        setMapMyLocationEnabled(true);
-        setMapFollowMyPosition(true);
-    }
+//    @Override
+//    public void onMapReady(GoogleMap googleMap) {
+//        super.onMapReady(googleMap);
+//
+//        setMapMyLocationEnabled(true);
+//        setMapFollowMyPosition(true);
+//    }
 
     @Override
     protected void startLogging() {
@@ -158,7 +157,7 @@ public class AcquireGpsActivity extends AcquireGpsMapActivity {
     }
 
 
-    protected void onLoggedNmeaBurst(NmeaBurst burst) {
+    protected void onLoggedNmeaBurst(INmeaBurst burst) {
         _Bursts.add(TtNmeaBurst.create(_Point.getCN(), false, burst));
 
         if (!btnCalc.isEnabled() && getLoggedCount() > 0) {
@@ -168,7 +167,7 @@ public class AcquireGpsActivity extends AcquireGpsMapActivity {
     }
 
     @Override
-    public void nmeaBurstReceived(final NmeaBurst nmeaBurst) {
+    public void nmeaBurstReceived(final INmeaBurst nmeaBurst) {
         super.nmeaBurstReceived(nmeaBurst);
 
         if (isLogging() && nmeaBurst.hasPosition()) {

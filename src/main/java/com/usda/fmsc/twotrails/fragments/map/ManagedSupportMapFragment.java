@@ -25,26 +25,36 @@ import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.Units;
 import com.usda.fmsc.twotrails.gps.GpsService;
-import com.usda.fmsc.twotrails.objects.GoogleMapsPolygonGrahpic;
-import com.usda.fmsc.twotrails.objects.GoogleMapsTrailGraphic;
-import com.usda.fmsc.twotrails.objects.PolygonDrawOptions;
-import com.usda.fmsc.twotrails.objects.PolygonGraphicManager;
-import com.usda.fmsc.twotrails.objects.TrailGraphicManager;
+import com.usda.fmsc.twotrails.objects.map.GoogleMapsPolygonGrahpic;
+import com.usda.fmsc.twotrails.objects.map.GoogleMapsTrailGraphic;
+import com.usda.fmsc.twotrails.objects.map.IMarkerDataGraphic;
+import com.usda.fmsc.twotrails.objects.map.PolygonDrawOptions;
+import com.usda.fmsc.twotrails.objects.map.PolygonGraphicManager;
+import com.usda.fmsc.twotrails.objects.map.TrailGraphicManager;
+import com.usda.fmsc.utilities.Tuple;
 
-import java.util.HashMap;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Queue;
 
 public class ManagedSupportMapFragment extends SupportMapFragment implements IMultiMapFragment,
         OnMapReadyCallback, GoogleMap.OnMapLoadedCallback, GoogleMap.OnCameraChangeListener, GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener {
 
-    MultiMapListener mmlistener;
+    private MultiMapListener mmlistener;
 
-    GoogleMap map;
+    private GoogleMap map;
 
-    MapOptions startUpMapOptions;
+    private MapOptions startUpMapOptions;
 
-    private HashMap<String, MarkerData> _MarkerData = new HashMap<>();
+    private ArrayList<IMarkerDataGraphic> _MarkerDataGraphics = new ArrayList<>();
 
     private Marker currentMarker;
+
+    int fragWidth, fragHeight;
+
+    Queue<CameraUpdate> cameraQueue = new ArrayDeque<>();
+
+    boolean cameraQueueEnabled = true, isMoving;
 
 
     public static ManagedSupportMapFragment newInstance() {
@@ -61,6 +71,7 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
 
         return mapFragment;
     }
+
 
     public ManagedSupportMapFragment() { }
 
@@ -80,7 +91,6 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
     }
 
 
-    int fragWidth, fragHeight;
     @Override
     public void onViewCreated(final View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -129,7 +139,7 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
         uiSettings.setMapToolbarEnabled(false);
         uiSettings.setMyLocationButtonEnabled(false);
 
-        map.setPadding(0, (int) (getResources().getDimension(R.dimen.toolbar_height)), 0, 0);
+        setMapPadding(0, (int) (getResources().getDimension(R.dimen.toolbar_height)), 0, 0);
 
         if (startUpMapOptions != null) {
             if (startUpMapOptions.hasExtents()) {
@@ -195,38 +205,88 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
         currentMarker = marker;
 
         if (mmlistener != null) {
-            mmlistener.onMarkerClick(_MarkerData.get(marker.getId()));
+            MarkerData md = getMarkerData(marker.getId());
+
+            if (md != null)
+                mmlistener.onMarkerClick(md);
         }
         return false;
     }
 
     @Override
+    public void moveToLocation(float lat, float lon, boolean animate) {
+        moveToLocation(CameraUpdateFactory.newLatLng(new LatLng(lat, lon)), animate);
+    }
+
+    @Override
     public void moveToLocation(float lat, float lon, float zoomLevel, boolean animate) {
-        CameraUpdate cu = CameraUpdateFactory.newLatLngZoom(
+        moveToLocation(CameraUpdateFactory.newLatLngZoom(
                 new LatLng(lat, lon),
                 zoomLevel
-        );
-
-        if (animate) {
-            map.animateCamera(cu);
-        } else {
-            map.moveCamera(cu);
-        }
+        ), animate);
     }
 
     @Override
     public void moveToLocation(Extent extents, int padding, boolean animate) {
-        CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(new LatLngBounds(
-                new LatLng(extents.getSouth(), extents.getWest()),
-                new LatLng(extents.getNorth(), extents.getEast())
-            ),
-            padding
-        );
+        moveToLocation(CameraUpdateFactory.newLatLngBounds(
+                new LatLngBounds(
+                    new LatLng(extents.getSouth(), extents.getWest()),
+                    new LatLng(extents.getNorth(), extents.getEast())
+                ),
+                padding
+            ), animate);
+    }
 
+    private void moveToLocation(CameraUpdate cu, boolean animate) {
         if (animate) {
-            map.animateCamera(cu);
+            if (cameraQueueEnabled) {
+                if (isMoving) {
+                    cameraQueue.add(cu);
+                } else {
+                    isMoving = true;
+                    map.animateCamera(cu, cancelableCallback);
+                }
+            } else {
+                map.animateCamera(cu);
+            }
         } else {
+            cameraQueue.clear();
+            isMoving = false;
             map.moveCamera(cu);
+        }
+    }
+
+    GoogleMap.CancelableCallback cancelableCallback = new GoogleMap.CancelableCallback() {
+        @Override
+        public void onFinish() {
+            if (cameraQueue.peek() != null) {
+                moveToLocation(cameraQueue.poll(), true);
+            } else {
+                isMoving = false;
+            }
+        }
+
+        @Override
+        public void onCancel() {
+            cameraQueue.clear();
+            isMoving = false;
+        }
+    };
+
+    @Override
+    public void setEnableCameraQueue(boolean enabled) {
+        cameraQueueEnabled = enabled;
+
+        if (!cameraQueueEnabled) {
+            if (cameraQueue.peek() != null) {
+                CameraUpdate cu = cameraQueue.poll();
+
+                while (cameraQueue.peek() != null) {
+                    cu = cameraQueue.poll();
+                }
+
+                map.animateCamera(cu);
+            }
         }
     }
 
@@ -256,6 +316,12 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
 
     @Override
     public MarkerData getMarkerData(String id) {
+        for (IMarkerDataGraphic mdg : _MarkerDataGraphics) {
+            if (mdg.getMarkerData().containsKey(id)) {
+                return mdg.getMarkerData().get(id);
+            }
+        }
+
         return null;
     }
 
@@ -281,7 +347,6 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
     }
 
 
-
     @Override
     public void setLocationEnabled(boolean enabled) {
         if (map != null && AndroidUtils.App.checkLocationPermission(getContext())) {
@@ -297,24 +362,30 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
     }
 
     @Override
+    public void setMapPadding(int left, int top, int right, int bottom) {
+        if (map != null) {
+            map.setPadding(left, top, right, bottom);
+        }
+    }
+
+    @Override
+    public void setGesturesEnabled(boolean enabled) {
+        if (map != null) {
+            map.getUiSettings().setAllGesturesEnabled(enabled);
+        }
+    }
+
+    @Override
     public void addPolygon(PolygonGraphicManager graphicManager, PolygonDrawOptions drawOptions) {
-        graphicManager.setGraphic(new GoogleMapsPolygonGrahpic(map), drawOptions);
-        _MarkerData.putAll(graphicManager.getMarkerData());
+        GoogleMapsPolygonGrahpic gmpg = new GoogleMapsPolygonGrahpic(map);
+        graphicManager.setGraphic(gmpg, drawOptions);
+        _MarkerDataGraphics.add(gmpg);
     }
 
     @Override
     public void addTrail(TrailGraphicManager graphicManager) {
-        graphicManager.setGraphic(new GoogleMapsTrailGraphic(map));
-        _MarkerData.putAll(graphicManager.getMarkerData());
-    }
-
-    @Override
-    public void updateTrail(TrailGraphicManager graphicManager) {
-        HashMap<String, MarkerData> mds = graphicManager.getMarkerData();
-        for (String key : mds.keySet()) {
-            if (!_MarkerData.containsKey(key)) {
-                _MarkerData.put(key, mds.get(key));
-            }
-        }
+        GoogleMapsTrailGraphic gmtg = new GoogleMapsTrailGraphic(map);
+        graphicManager.setGraphic(gmtg);
+        _MarkerDataGraphics.add(gmtg);
     }
 }

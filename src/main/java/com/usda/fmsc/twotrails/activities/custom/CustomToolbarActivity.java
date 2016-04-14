@@ -33,32 +33,35 @@ public class CustomToolbarActivity extends AppCompatActivity {
     @Override
     public void setContentView(int layoutResID) {
         super.setContentView(layoutResID);
-        setupToolbar();
+        setupToolbar(findViewById(android.R.id.content));
     }
 
     @Override
     public void setContentView(View view) {
         super.setContentView(view);
-        setupToolbar();
+        setupToolbar(view);
     }
 
     @Override
     public void setContentView(View view, ViewGroup.LayoutParams params) {
         super.setContentView(view, params);
-        setupToolbar();
+        setupToolbar(view);
     }
 
-    private void setupToolbar() {
-        toolbar = (Toolbar)findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+    protected void setupToolbar(View view) {
+        toolbar = (Toolbar)view.findViewById(R.id.toolbar);
 
-        if (Build.VERSION.SDK_INT  < Build.VERSION_CODES.LOLLIPOP) {
-            AndroidUtils.UI.setHomeIndicatorIcon(this, R.drawable.ic_arrow_back_white_24dp);
-        }
+        if (toolbar != null) {
+            setSupportActionBar(toolbar);
 
-        ActionBar ab = getSupportActionBar();
-        if (ab != null) {
-            ab.setDisplayHomeAsUpEnabled(false);
+            if (Build.VERSION.SDK_INT  < Build.VERSION_CODES.LOLLIPOP) {
+                AndroidUtils.UI.setHomeIndicatorIcon(this, R.drawable.ic_arrow_back_white_24dp);
+            }
+
+            ActionBar ab = getSupportActionBar();
+            if (ab != null) {
+                ab.setDisplayHomeAsUpEnabled(false);
+            }
         }
     }
 

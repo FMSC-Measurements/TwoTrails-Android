@@ -1,4 +1,4 @@
-package com.usda.fmsc.twotrails.objects;
+package com.usda.fmsc.twotrails.objects.map;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
@@ -11,15 +11,17 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.twotrails.Units;
-import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment;
 import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment.MarkerData;
+import com.usda.fmsc.twotrails.objects.TtMetadata;
+import com.usda.fmsc.twotrails.objects.TtPoint;
+import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class GoogleMapsPolygonGrahpic implements IPolygonGraphic {
+public class GoogleMapsPolygonGrahpic implements IPolygonGraphic, IMarkerDataGraphic {
     private TtPolygon polygon;
     private PolygonDrawOptions drawOptions;
 

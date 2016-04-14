@@ -1,7 +1,6 @@
 package com.usda.fmsc.twotrails.utilities;
 
 import android.content.Context;
-import android.widget.Toast;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -20,7 +19,7 @@ import com.usda.fmsc.android.utilities.WebRequest;
 import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.objects.ArcGisMapLayer;
+import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
 import com.usda.fmsc.utilities.StringEx;
 
 import org.json.JSONArray;

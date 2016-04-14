@@ -1,4 +1,4 @@
-package com.usda.fmsc.twotrails.objects;
+package com.usda.fmsc.twotrails.objects.map;
 
 import android.os.Parcel;
 import android.os.Parcelable;

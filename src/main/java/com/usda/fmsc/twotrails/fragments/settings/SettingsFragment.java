@@ -26,6 +26,7 @@ import com.usda.fmsc.android.dialogs.DontAskAgainDialog;
 import com.usda.fmsc.android.dialogs.InputDialog;
 import com.usda.fmsc.android.preferences.ListCompatPreference;
 import com.usda.fmsc.android.preferences.SwitchCompatPreference;
+import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.twotrails.activities.SettingsActivity;
 import com.usda.fmsc.twotrails.devices.TtBluetoothManager;
 import com.usda.fmsc.twotrails.Global;
@@ -244,7 +245,7 @@ public class SettingsFragment extends PreferenceFragment {
 
                         GpsService.Listener listener = new GpsService.Listener() {
                             @Override
-                            public void nmeaBurstReceived(NmeaBurst nmeaBurst) {
+                            public void nmeaBurstReceived(INmeaBurst nmeaBurst) {
 
                             }
 

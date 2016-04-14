@@ -86,30 +86,43 @@ public class TtReport {
     }
 
     public void writeError(String msg, String codePage) {
-        inst.writeToReport(String.format("ERR[%s][%s]: %s", new Date(), codePage, msg));
+        String error = String.format("ERR[%s][%s]: %s", new Date(), codePage, msg);
+        Log.e(Consts.LOG_TAG, error);
+        inst.writeToReport(error);
     }
 
     public void writeError(String msg, String codePage, StackTraceElement[] stack) {
-        inst.writeToReport(String.format("ERR[%s][%s]: %s", new Date(), codePage, msg));
-        inst.writeToReport(String.format("Stack Trace: %n"));
+        writeError(msg, codePage);
 
-        if(stack != null) {
-            for (StackTraceElement ste : stack)
-                inst.writeToReport(String.format("%-5s%s", StringEx.Empty, ste.toString()));
+        String error = String.format("Stack Trace: %n");
+        Log.d(Consts.LOG_TAG, error);
+        inst.writeToReport(error);
+
+        if (stack != null) {
+            for (StackTraceElement ste : stack) {
+                error = String.format("%-5s%s", StringEx.Empty, ste.toString());
+                Log.d(Consts.LOG_TAG, error);
+                inst.writeToReport(error);
+            }
         }
     }
 
     public void writeMessage(String msg, String codePage) {
-        inst.writeToReport(String.format("MSG[%s][%s]: %s",
-                new Date(), codePage, msg));
+        String msgStr = String.format("MSG[%s][%s]: %s", new Date(), codePage, msg);
+        Log.d(Consts.LOG_TAG, msgStr);
+        inst.writeToReport(msgStr);
     }
 
     public void writeMessage(String msg, String codePage, String adv) {
-        inst.writeToReport(String.format("MSG[%s][%s]: %s",  new Date(), codePage, msg));
-        inst.writeToReport(String.format("%-5s%s", StringEx.Empty, adv));
+        writeMessage(msg, codePage);
+        String msgStr = String.format("%-5s%s", StringEx.Empty, adv);
+        Log.d(Consts.LOG_TAG, msgStr);
+        inst.writeToReport(msgStr);
     }
 
     public void writeEvent(String event) {
-        inst.writeToReport(String.format("EVT[%s]: %s", new Date(), event));
+        String eStr = String.format("EVT[%s]: %s", new Date(), event);
+        Log.i(Consts.LOG_TAG, eStr);
+        inst.writeToReport(eStr);
     }
 }

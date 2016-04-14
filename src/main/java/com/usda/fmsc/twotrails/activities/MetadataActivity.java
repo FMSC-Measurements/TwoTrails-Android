@@ -23,6 +23,7 @@ import com.usda.fmsc.android.dialogs.EnumSelectionDialog;
 import com.usda.fmsc.android.dialogs.InputDialog;
 import com.usda.fmsc.android.dialogs.NumericInputDialog;
 import com.usda.fmsc.android.listeners.ComplexOnPageChangeListener;
+import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.twotrails.activities.custom.TtAjusterCustomToolbarActivity;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.data.TwoTrailsSchema;
@@ -575,7 +576,7 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
 
                                 listener = new GpsService.Listener() {
                                     @Override
-                                    public void nmeaBurstReceived(NmeaBurst nmeaBurst) {
+                                    public void nmeaBurstReceived(INmeaBurst nmeaBurst) {
                                         if (!Global.Settings.DeviceSettings.isGpsAlwaysOn()) {
                                             binder.stopGps();
                                         }

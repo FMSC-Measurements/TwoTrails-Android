@@ -1,27 +1,32 @@
-package com.usda.fmsc.twotrails.objects;
+package com.usda.fmsc.twotrails.objects.map;
 
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.usda.fmsc.geospatial.Extent;
+import com.usda.fmsc.geospatial.GeoPosition;
 import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment;
+import com.usda.fmsc.twotrails.objects.TtMetadata;
+import com.usda.fmsc.twotrails.objects.TtPoint;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class GoogleMapsTrailGraphic implements ITrailGraphic {
+public class GoogleMapsTrailGraphic implements ITrailGraphic, IMarkerDataGraphic {
     private GoogleMap map;
 
     private ArrayList<Marker> _Markers;
     private Extent polyBounds;
     private HashMap<String, IMultiMapFragment.MarkerData> _MarkerData;
     private LatLngBounds.Builder llBuilder;
-
-    private PolylineOptions plo = new PolylineOptions();
+    private ArrayList<LatLng> latLngs;
+    private Polyline polyline;
 
     private boolean visible = true, trailVisible = true, markersVisible = true;
 
@@ -38,37 +43,52 @@ public class GoogleMapsTrailGraphic implements ITrailGraphic {
 
         llBuilder = new LatLngBounds.Builder();
 
+        PolylineOptions plo = new PolylineOptions();
         plo.width(graphicOptions.getTrailWidth());
         plo.color(graphicOptions.getTrailColor());
+
+        polyline = map.addPolyline(plo);
+        latLngs = new ArrayList<>();
 
         for (TtPoint point : points) {
             addPoint(point, meta);
         }
 
-        LatLngBounds bounds = llBuilder.build();
-        polyBounds = new Extent(bounds.northeast.latitude, bounds.northeast.longitude,
-                bounds.southwest.latitude, bounds.southwest.longitude) ;
+        if (points.size() > 0) {
+            LatLngBounds bounds = llBuilder.build();
+            polyBounds = new Extent(bounds.northeast.latitude, bounds.northeast.longitude,
+                    bounds.southwest.latitude, bounds.southwest.longitude);
+        } else {
+            polyBounds = null;
+        }
     }
 
     @Override
-    public void add(TtPoint point, HashMap<String, TtMetadata> meta) {
-        addPoint(point, meta);
+    public GeoPosition add(TtPoint point, HashMap<String, TtMetadata> meta) {
+        GeoPosition pos = addPoint(point, meta);
 
         LatLngBounds bounds = llBuilder.build();
         polyBounds = new Extent(bounds.northeast.latitude, bounds.northeast.longitude,
                 bounds.southwest.latitude, bounds.southwest.longitude) ;
+
+        return pos;
     }
 
-    private void addPoint(TtPoint point, HashMap<String, TtMetadata> meta) {
+    private GeoPosition addPoint(TtPoint point, HashMap<String, TtMetadata> meta) {
         MarkerOptions markerOptions = TtUtils.GMap.createMarkerOptions(point, false, meta);
         Marker marker = map.addMarker(markerOptions.visible(markersVisible));
 
+        TtMetadata metadata = meta.get(point.getMetadataCN());
+
         _Markers.add(marker);
-        _MarkerData.put(marker.getId(), new IMultiMapFragment.MarkerData(point, meta.get(point.getMetadataCN()), true));
+        _MarkerData.put(marker.getId(), new IMultiMapFragment.MarkerData(point, metadata, true));
 
         llBuilder.include(marker.getPosition());
 
-        plo.add(marker.getPosition());
+        latLngs.add(marker.getPosition());
+        polyline.setPoints(latLngs);
+
+        return new GeoPosition(markerOptions.getPosition().latitude, markerOptions.getPosition().longitude, point.getUnAdjZ(), metadata.getElevation());
     }
 
     @Override
@@ -116,7 +136,7 @@ public class GoogleMapsTrailGraphic implements ITrailGraphic {
     public void setTrailVisible(boolean visible) {
         this.trailVisible = visible;
 
-        plo.visible(visible);
+        polyline.setVisible(visible);
     }
 
     @Override

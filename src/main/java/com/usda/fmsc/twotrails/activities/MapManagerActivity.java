@@ -8,6 +8,8 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -22,7 +24,7 @@ import com.usda.fmsc.twotrails.Units;
 import com.usda.fmsc.twotrails.activities.custom.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.dialogs.ArcMapFromUrlDialog;
 import com.usda.fmsc.twotrails.dialogs.SelectMapTypeDialog;
-import com.usda.fmsc.twotrails.objects.ArcGisMapLayer;
+import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
 import com.usda.fmsc.twotrails.ui.MSFloatingActionButton;
 import com.usda.fmsc.twotrails.utilities.ArcGISTools;
 
@@ -38,7 +40,7 @@ public class MapManagerActivity extends CustomToolbarActivity {
     SheetFab fabSheet;
 
     ArcGisMapAdapter adapter;
-    List<ArcGisMapLayer> maps, visibleMaps, onlineMaps, offlineMaps;
+    ArrayList<ArcGisMapLayer> maps, visibleMaps, onlineMaps, offlineMaps;
 
 
     @Override
@@ -92,22 +94,16 @@ public class MapManagerActivity extends CustomToolbarActivity {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    public void other() {
-
-        SelectMapTypeDialog dialog = SelectMapTypeDialog.newInstance(new ArrayList<>(ArcGISTools.getLayers()), true);
-
-        dialog.setOnMapSelectedListener(new SelectMapTypeDialog.OnMapSelectedListener() {
-            @Override
-            public void mapSelected(Units.MapType mapType, int mapId) {
-                //setMapType(mapType, mapId);
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home: {
+                finish();
             }
-        });
+        }
 
-        dialog.show(getSupportFragmentManager(), SELECT_MAP);
+        return super.onOptionsItemSelected(item);
     }
-
-
-
 
     public void btnMmAddClick(View view) {
         fabSheet.showSheet();

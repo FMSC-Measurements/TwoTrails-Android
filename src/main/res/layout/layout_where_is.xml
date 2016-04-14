@@ -85,18 +85,19 @@
                 android:orientation="horizontal">
 
                 <RadioButton
-                    android:id="@+id/mapNavRadPoint"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/str_point"
-                    android:checked="true"
-                    android:onClick="radFromClick"/>
-
-                <RadioButton
                     android:id="@+id/mapNavRadMyLoc"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/str_my_loc"
+                    android:checked="true"
+                    android:onClick="radFromClick"/>
+
+                <RadioButton
+                    android:id="@+id/mapNavRadPoint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/str_point"
+                    android:checked="false"
                     android:onClick="radFromClick"/>
             </RadioGroup>
         </TableRow>
@@ -112,14 +113,16 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/str_polygon"
-                    android:onClick="btnFromPolyClick"/>
+                    android:onClick="btnFromPolyClick"
+                    android:enabled="false"/>
 
                 <Button
                     android:id="@+id/mapNavBtnFromPoint"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/str_point"
-                    android:onClick="btnFromPointClick"/>
+                    android:onClick="btnFromPointClick"
+                    android:enabled="false"/>
             </LinearLayout>
 
             <LinearLayout

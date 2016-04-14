@@ -30,6 +30,7 @@ import com.esri.core.symbol.SimpleLineSymbol;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.geospatial.Position;
+import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.geospatial.nmea.NmeaBurst;
 import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
 import com.usda.fmsc.twotrails.Consts;
@@ -37,19 +38,19 @@ import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.Units;
 import com.usda.fmsc.twotrails.gps.GpsService;
-import com.usda.fmsc.twotrails.objects.ArcGisMapLayer;
-import com.usda.fmsc.twotrails.objects.ArcGisPolygonGraphic;
-import com.usda.fmsc.twotrails.objects.ArcGisTrailGraphic;
-import com.usda.fmsc.twotrails.objects.PolygonDrawOptions;
-import com.usda.fmsc.twotrails.objects.PolygonGraphicManager;
-import com.usda.fmsc.twotrails.objects.TrailGraphicManager;
+import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
+import com.usda.fmsc.twotrails.objects.map.ArcGisPolygonGraphic;
+import com.usda.fmsc.twotrails.objects.map.ArcGisTrailGraphic;
+import com.usda.fmsc.twotrails.objects.map.IMarkerDataGraphic;
+import com.usda.fmsc.twotrails.objects.map.PolygonDrawOptions;
+import com.usda.fmsc.twotrails.objects.map.PolygonGraphicManager;
+import com.usda.fmsc.twotrails.objects.map.TrailGraphicManager;
 import com.usda.fmsc.twotrails.ui.ArcMapCompass;
 import com.usda.fmsc.twotrails.ui.MyPositionDrawable;
 import com.usda.fmsc.twotrails.utilities.ArcGISTools;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 
 public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, GpsService.Listener, OnStatusChangedListener, OnZoomListener, OnPanListener {
@@ -64,7 +65,8 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
 
     private MapViewHelper mapViewHelper;
 
-    private HashMap<String, MarkerData> _MarkerData = new HashMap<>();
+
+    private ArrayList<IMarkerDataGraphic> _MarkerDataGraphics = new ArrayList<>();
     private ArrayList<ArcGisPolygonGraphic> polygonGraphics = new ArrayList<>();
     private ArrayList<ArcGisTrailGraphic> trailGraphics = new ArrayList<>();
 
@@ -83,7 +85,7 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
 
     private boolean mapReady, showPosition, centerOnLoad = false;
 
-    private ArcGisMapLayer startArcOpts;
+    private ArcGisMapLayer startArcOpts, currentGisMapLayer;
 
 
     public static ArcGisMapFragment newInstance() {
@@ -144,7 +146,6 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
         mMapView.setAllowRotationByPinch(true);
         mapViewHelper = new MapViewHelper(mMapView);
 
-        //mMapView = (MapView) view.findViewById(R.id.mMapView);
         mMapView.setOnStatusChangedListener(this);
         mMapView.setOnZoomListener(this);
         mMapView.setOnPanListener(this);
@@ -260,6 +261,7 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
 
     public void changeBasemap(ArcGisMapLayer agml) {
         this.basemapId = agml.getId();
+        this.currentGisMapLayer = agml;
 
         if (mMapView == null) {
             mBasemapLayer = null;
@@ -293,14 +295,39 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
     }
 
     @Override
+    public void moveToLocation(float lat, float lon, boolean animate) {
+        moveToLocation(lat, lon, -1, animate);
+    }
+
+    @Override
     public void moveToLocation(float lat, float lon, float zoomLevel, boolean animate) {
-        mMapView.centerAt(lat, lon, animate);
-        onMapLocationChanged();
+        if (animate) {
+            float zLevel = -1;
+            int level = (int)zoomLevel;
+
+            if (currentGisMapLayer != null && level > -1 && currentGisMapLayer.getNumberOfLevels() > level) {
+                zLevel = (float)currentGisMapLayer.getLevelsOfDetail()[level].getResolution();
+            }
+
+            if (zLevel > -1) {
+                mMapView.centerAndZoom(lat, lon, zLevel);
+            } else {
+                mMapView.centerAt(lat, lon, true);
+            }
+        } else {
+            mMapView.centerAt(lat, lon, false);
+        }
     }
 
     @Override
     public void moveToLocation(Extent extents, int padding, boolean animate) {
         mMapView.setExtent(ArcGISTools.getEnvelopFromLatLngExtents(extents, mMapView), padding, animate);
+    }
+
+
+    @Override
+    public void setEnableCameraQueue(boolean enabled) {
+
     }
 
     @Override
@@ -313,14 +340,16 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
     private void onMarkerClick(int graphicId, Geometry geometry) {
         MarkerData markerData = getMarkerData(Integer.toHexString(graphicId));
 
-        if (Geometry.Type.POINT.equals(geometry.getType())) {
-            Point point = (Point)geometry;
-            showSelectedMarkerInfo(markerData, point);
-            mMapView.centerAt(point, true);
-        }
+        if (markerData != null) {
+            if (Geometry.Type.POINT.equals(geometry.getType())) {
+                Point point = (Point)geometry;
+                showSelectedMarkerInfo(markerData, point);
+                mMapView.centerAt(point, true);
+            }
 
-        if (mmListener != null) {
-            mmListener.onMarkerClick(markerData);
+            if (mmListener != null) {
+                mmListener.onMarkerClick(markerData);
+            }
         }
     }
 
@@ -404,6 +433,17 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
         compass.setVisibility(enabled ? View.GONE : View.VISIBLE);
     }
 
+    //TODO arcgis map padding
+    @Override
+    public void setMapPadding(int left, int top, int right, int bottom) {
+
+    }
+
+    @Override
+    public void setGesturesEnabled(boolean enabled) {
+        mMapView.setEnabled(enabled);
+    }
+
     @Override
     public void addPolygon(PolygonGraphicManager graphicManager, PolygonDrawOptions drawOptions) {
         ArcGisPolygonGraphic polygonGraphic = new ArcGisPolygonGraphic(mMapView);
@@ -411,7 +451,7 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
 
         graphicManager.setGraphic(polygonGraphic, drawOptions);
 
-        _MarkerData.putAll(graphicManager.getMarkerData());
+        _MarkerDataGraphics.add(polygonGraphic);
     }
 
     @Override
@@ -421,26 +461,19 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
 
         graphicManager.setGraphic(trailGraphic);
 
-        _MarkerData.putAll(graphicManager.getMarkerData());
-    }
-
-    @Override
-    public void updateTrail(TrailGraphicManager graphicManager) {
-        HashMap<String, MarkerData> mds = graphicManager.getMarkerData();
-
-        for (String key : mds.keySet()) {
-            if (!_MarkerData.containsKey(key)) {
-                _MarkerData.put(key, mds.get(key));
-            }
-        }
+        _MarkerDataGraphics.add(trailGraphic);
     }
 
     @Override
     public MarkerData getMarkerData(String id) {
-        return _MarkerData.get(id);
+        for (IMarkerDataGraphic mdg : _MarkerDataGraphics) {
+            if (mdg.getMarkerData().containsKey(id)) {
+                return mdg.getMarkerData().get(id);
+            }
+        }
+
+        return null;
     }
-
-
 
 
     @Override
@@ -468,8 +501,9 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
     MyPositionDrawable mpd;
     PictureMarkerSymbol pms;
 
+    //TODO my position drawable
     @Override
-    public void nmeaBurstReceived(NmeaBurst nmeaBurst) {
+    public void nmeaBurstReceived(INmeaBurst nmeaBurst) {
         if (showPosition && nmeaBurst.hasPosition()) {
             Point point = ArcGISTools.latLngToMapSpatial(nmeaBurst.getLatitude(), nmeaBurst.getLongitude(), mMapView);
 

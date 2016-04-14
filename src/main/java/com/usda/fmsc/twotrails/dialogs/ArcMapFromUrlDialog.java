@@ -4,7 +4,6 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
@@ -19,17 +18,12 @@ import android.widget.ImageView;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.listeners.SimpleTextWatcher;
 import com.usda.fmsc.android.utilities.PostDelayHandler;
-import com.usda.fmsc.geospatial.Extent;
-import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.activities.GetMapExtentsActivity;
-import com.usda.fmsc.twotrails.objects.ArcGisMapLayer;
+import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
 import com.usda.fmsc.twotrails.ui.CheckMarkAnimatedView;
 import com.usda.fmsc.twotrails.utilities.ArcGISTools;
 import com.usda.fmsc.utilities.StringEx;
-
-import java.net.MalformedURLException;
-import java.net.URL;
 
 import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
 

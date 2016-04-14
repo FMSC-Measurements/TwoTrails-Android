@@ -1,7 +1,6 @@
 package com.usda.fmsc.twotrails.dialogs;
 
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -22,10 +21,11 @@ import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.Units;
 import com.usda.fmsc.twotrails.adapters.ArcGisMapSelectionAdapter;
 import com.usda.fmsc.twotrails.adapters.GoogleMapSelectionAdapter;
-import com.usda.fmsc.twotrails.objects.ArcGisMapLayer;
+import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class SelectMapTypeDialog extends DialogFragment {
@@ -51,19 +51,19 @@ public class SelectMapTypeDialog extends DialogFragment {
     GoogleMapSelectionAdapter gMapAdapter;
 
 
-    public static SelectMapTypeDialog newInstance(List<ArcGisMapLayer> layers) {
+    public static SelectMapTypeDialog newInstance(ArrayList<ArcGisMapLayer> layers) {
         return newInstance(layers, false);
     }
 
-    public static SelectMapTypeDialog newInstance(List<ArcGisMapLayer> layers, boolean selectOnlineArc) {
+    public static SelectMapTypeDialog newInstance(ArrayList<ArcGisMapLayer> layers, boolean selectOnlineArc) {
         SelectMapTypeDialog dialog = new SelectMapTypeDialog();
 
         Bundle bundle = new Bundle();
 
         try {
             bundle.putBoolean(SELECT_ONLINE_ARC, selectOnlineArc);
-            bundle.putByteArray(ARC_MAP_LAYERS, TtUtils.Convert.listToByteArray(layers));
-        } catch (IOException e) {
+            bundle.putParcelableArrayList(ARC_MAP_LAYERS, layers);
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -83,7 +83,7 @@ public class SelectMapTypeDialog extends DialogFragment {
 
         if (bundle != null && bundle.containsKey(ARC_MAP_LAYERS)) {
             try {
-                mapLayers = (List<ArcGisMapLayer>) TtUtils.Convert.bytesToList(bundle.getByteArray(ARC_MAP_LAYERS));
+                mapLayers = bundle.getParcelableArrayList(ARC_MAP_LAYERS);
                 selectOnlineArc = bundle.getBoolean(SELECT_ONLINE_ARC, false);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -96,7 +96,7 @@ public class SelectMapTypeDialog extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder dialog = new AlertDialog.Builder(getContext());
 
-        LayoutInflater inflater = LayoutInflater.from(getContext());
+        inflater = LayoutInflater.from(getContext());
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             AndroidUtils.UI.setOverscrollColor(getResources(), getContext(), R.color.primary);
@@ -104,7 +104,7 @@ public class SelectMapTypeDialog extends DialogFragment {
 
         FrameLayout fl = new FrameLayout(getActivity());
 
-        View view = inflater.inflate(selectOnlineArc ? R.layout.diag_select_map_arc_map : R.layout.diag_select_map, fl);
+        View view = inflater.inflate(selectOnlineArc ? R.layout.diag_select_map_online_arc : R.layout.diag_select_map, fl);
 
         if (selectOnlineArc) {
             Toolbar toolbar = (Toolbar)view.findViewById(R.id.toolbar);
@@ -179,9 +179,9 @@ public class SelectMapTypeDialog extends DialogFragment {
 
             if (position == 0) {
                 if (arcView == null) {
-                    arcView = inflater.inflate(R.layout.diag_select_map_arc_map, null);
+                    arcView = inflater.inflate(R.layout.content_list_view, null);
 
-                    lvArcMap = (ListView)arcView.findViewById(R.id.diagSelectArcMapListView);
+                    lvArcMap = (ListView)arcView.findViewById(R.id.listView);
                     arcMapAdapter = new ArcGisMapSelectionAdapter(getContext(), mapLayers, -1, this);
                     lvArcMap.setAdapter(arcMapAdapter);
                 }
@@ -189,9 +189,9 @@ public class SelectMapTypeDialog extends DialogFragment {
                 view = arcView;
             } else {
                 if (gmapView == null) {
-                    gmapView = inflater.inflate(R.layout.diag_select_map_google_map, null);
+                    gmapView = inflater.inflate(R.layout.content_list_view, null);
 
-                    lvGmap = (ListView)gmapView.findViewById(R.id.diagSelectGoogleMapListView);
+                    lvGmap = (ListView)gmapView.findViewById(R.id.listView);
                     gMapAdapter = new GoogleMapSelectionAdapter(getContext(), -1, this);
                     lvGmap.setAdapter(gMapAdapter);
                 }

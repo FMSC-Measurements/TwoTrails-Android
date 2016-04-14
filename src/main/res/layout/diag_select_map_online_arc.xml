@@ -5,7 +5,6 @@
 
     <include layout="@layout/toolbar_default" android:id="@+id/toolbar" />
 
-
     <ListView
         android:id="@+id/diagSelectArcMapListView"
         android:layout_width="match_parent"

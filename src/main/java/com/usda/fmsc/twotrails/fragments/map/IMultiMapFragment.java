@@ -6,16 +6,12 @@ import android.os.Parcelable;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelable;
 import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.geospatial.Position;
-import com.usda.fmsc.geospatial.nmea.NmeaBurst;
 import com.usda.fmsc.twotrails.Units;
-import com.usda.fmsc.twotrails.gps.GpsService;
-import com.usda.fmsc.twotrails.objects.PolygonDrawOptions;
-import com.usda.fmsc.twotrails.objects.PolygonGraphicManager;
-import com.usda.fmsc.twotrails.objects.TrailGraphicManager;
+import com.usda.fmsc.twotrails.objects.map.PolygonDrawOptions;
+import com.usda.fmsc.twotrails.objects.map.PolygonGraphicManager;
+import com.usda.fmsc.twotrails.objects.map.TrailGraphicManager;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.TtPoint;
-
-import java.lang.reflect.Method;
 
 public interface IMultiMapFragment {
     String MAP_OPTIONS_EXTRA = "MapOptionsEx";
@@ -26,16 +22,25 @@ public interface IMultiMapFragment {
 
     void setCompassEnabled(boolean enabled);
 
+    void setMapPadding(int left, int top, int right, int bottom);
+
+    void setGesturesEnabled(boolean enabled);
+
+    void setEnableCameraQueue(boolean enabled);
+
+
+    void moveToLocation(float lat, float lon, boolean animate);
+
     void moveToLocation(float lat, float lon, float zoomLevel, boolean animate);
+
     void moveToLocation(Extent extents, int padding, boolean animate);
+
 
     void onMapLocationChanged();
 
     void addPolygon(PolygonGraphicManager graphicManager, PolygonDrawOptions drawOptions);
 
     void addTrail(TrailGraphicManager graphicManager);
-
-    void updateTrail(TrailGraphicManager graphicManager);
 
     void hideSelectedMarkerInfo();
 

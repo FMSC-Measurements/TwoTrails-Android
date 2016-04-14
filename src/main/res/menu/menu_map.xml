@@ -11,12 +11,12 @@
         android:checkable="true"/>
 
     <item
-        android:id="@+id/mmSelectMap"
+        android:id="@+id/mmMenuSelectMap"
         android:title="@string/menu_map_select_type"
         app:showAsAction="never"/>
 
     <item
-        android:id="@+id/mapMenuMapSettings"
+        android:id="@+id/mmMenuMapSettings"
         android:title="@string/menu_map_settings"
         app:showAsAction="never"/>
 
