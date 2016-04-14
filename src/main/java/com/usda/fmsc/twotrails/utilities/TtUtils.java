@@ -13,9 +13,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.esri.android.map.MapView;
-import com.esri.core.map.Graphic;
-import com.esri.core.symbol.SimpleMarkerSymbol;
 import com.usda.fmsc.android.AndroidUtils;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
@@ -30,7 +27,6 @@ import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.objects.FilterOptions;
 import com.usda.fmsc.twotrails.objects.GpsPoint;
-import com.usda.fmsc.twotrails.objects.IPolygonGraphic;
 import com.usda.fmsc.twotrails.objects.PointD;
 import com.usda.fmsc.twotrails.objects.QuondamPoint;
 import com.usda.fmsc.twotrails.objects.SideShotPoint;
@@ -988,6 +984,32 @@ public class TtUtils {
 
     //region NMEA
     public static boolean isUsableNmeaBurst(INmeaBurst nmeaBurst, FilterOptions options) {
+        boolean valid = false;
+
+        if (options == null) {
+            if (nmeaBurst.getFixQuality().getValue() > 0) {
+                valid = true;
+            }
+        } else {
+            int value = options.Fix.getValue();
+
+            //reverse RTK and FRTK
+            if (value == 4)
+                value = 5;
+            else if (value == 5)
+                value = 4;
+
+            if (value >= options.Fix.getValue() &&
+                    (options.DopType == Units.DopType.HDOP && nmeaBurst.getHDOP() <= options.DopValue) ||
+                    (options.DopType == Units.DopType.PDOP && nmeaBurst.getPDOP() <= options.DopValue)) {
+                valid = true;
+            }
+        }
+
+        return valid;
+    }
+
+    public static boolean isUsableNmeaBurst(TtNmeaBurst nmeaBurst, FilterOptions options) {
         boolean valid = false;
 
         if (options == null) {

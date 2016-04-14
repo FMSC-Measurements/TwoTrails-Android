@@ -20,11 +20,11 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.google.android.gms.maps.GoogleMap;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.dialogs.InputDialog;
 import com.usda.fmsc.android.widget.SheetLayoutEx;
 import com.usda.fmsc.android.widget.drawables.AnimationDrawableEx;
+import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.activities.custom.AcquireGpsMapActivity;
@@ -44,7 +44,6 @@ import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.util.List;
 
-import com.usda.fmsc.geospatial.nmea.NmeaBurst;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.utilities.StringEx;
 
@@ -71,7 +70,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
     private boolean updated, onBnd = true, walking, useRing, useVib, menuCreated, mapViewMode;
     private long lastPointCreationTime = 0;
 
-    private FilterOptions options;
+    private FilterOptions options = new FilterOptions();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,8 +109,6 @@ public class WalkActivity extends AcquireGpsMapActivity {
                             cancelResult = Consts.Activities.Results.NO_POLYGON_DATA;
                         }
                     }
-
-
                 } catch (Exception e) {
                     cancelResult = Consts.Activities.Results.ERROR;
                     e.printStackTrace();
@@ -165,16 +162,14 @@ public class WalkActivity extends AcquireGpsMapActivity {
                 }
             });
 
-            options = new FilterOptions();
-            getSettings();
-
             lockPoint(true);
-
-            setupMap();
         }
     }
 
-    private void getSettings() {
+    @Override
+    protected void getSettings() {
+        super.getSettings();
+
         options.Fix = Global.Settings.DeviceSettings.getWalkFilterFixType();
         options.DopType = Global.Settings.DeviceSettings.getWalkFilterDopType();
         options.DopValue = Global.Settings.DeviceSettings.getWalkFilterDopValue();
@@ -199,7 +194,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
 
         menuCreated = true;
 
-        return true;
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
@@ -298,15 +293,6 @@ public class WalkActivity extends AcquireGpsMapActivity {
         super.finish();
     }
 
-
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        super.onMapReady(googleMap);
-
-        setMapMyLocationEnabled(true);
-        setMapFollowMyPosition(true);
-    }
-
     private void updateGroupName() {
         final InputDialog dialog = new InputDialog(this);
 
@@ -352,7 +338,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
     }
 
 
-    private void createPoint(NmeaBurst nmeaBurst, UTMCoords utmCoords) {
+    private void createPoint(INmeaBurst nmeaBurst, UTMCoords utmCoords) {
         if (updated) {
             Global.DAL.updatePoint(_CurrentPoint);
             updated = false;
@@ -485,7 +471,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
 
         Global.TtNotifyManager.showPointAquired();
 
-        addMapMarker(_CurrentPoint, _Metadata, false);
+        addPosition(_CurrentPoint, false);
     }
 
     private void setStartWalkingDrawable(boolean startAquring) {
@@ -546,7 +532,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
     }
 
     @Override
-    public void nmeaBurstReceived(NmeaBurst nmeaBurst) {
+    public void nmeaBurstReceived(INmeaBurst nmeaBurst) {
         super.nmeaBurstReceived(nmeaBurst);
 
         if (walking) {
@@ -567,11 +553,6 @@ public class WalkActivity extends AcquireGpsMapActivity {
         }
     }
 
-    @Override
-    public void gpsError(GpsService.GpsError error) {
-        super.gpsError(error);
-    }
-
 
     public void btnWalkClick(View view) {
         if (walking) {
@@ -583,5 +564,11 @@ public class WalkActivity extends AcquireGpsMapActivity {
 
     public void btnPointInfo(View view) {
 
+    }
+
+
+    @Override
+    protected Units.MapTracking getMapTracking() {
+        return mapViewMode ? Units.MapTracking.NONE : Units.MapTracking.FOLLOW;
     }
 }

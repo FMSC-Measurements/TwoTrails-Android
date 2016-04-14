@@ -3,6 +3,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.usda.fmsc.twotrails.activities.HaidActivity">
 
-    <item android:id="@+id/menu_haid_help" android:title="@string/haid_menu_item_help"
-        android:orderInCategory="100" app:showAsAction="never" />
+    <item
+        android:id="@+id/haidMenuShowPoints"
+        android:title="@string/haid_menu_show_points"
+        app:showAsAction="never"
+        android:checkable="true"/>
+
+    <item android:id="@+id/haidMenuHelp" android:title="@string/haid_menu_item_help"
+          android:orderInCategory="100" app:showAsAction="never" />
 </menu>

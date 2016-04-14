@@ -9,10 +9,8 @@ import com.esri.core.map.CallbackListener;
 import com.esri.core.tasks.tilecache.ExportTileCacheParameters;
 import com.esri.core.tasks.tilecache.ExportTileCacheStatus;
 import com.esri.core.tasks.tilecache.ExportTileCacheTask;
-import com.usda.fmsc.twotrails.objects.ArcGisMapLayer;
+import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
 import com.usda.fmsc.utilities.StringEx;
-
-import java.io.File;
 
 public class DownloadOfflineArcGISMapTask {
     //true create as tile package, false to create as compact cache

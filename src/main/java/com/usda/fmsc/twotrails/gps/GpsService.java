@@ -1,6 +1,5 @@
 package com.usda.fmsc.twotrails.gps;
 
-import android.app.Activity;
 import android.app.Service;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
@@ -19,6 +18,7 @@ import android.support.v4.app.ActivityCompat;
 import com.google.android.gms.maps.LocationSource;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.geospatial.nmea.NmeaIDs;
+import com.usda.fmsc.geospatial.nmea.sentences.NmeaBurstEx;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.devices.TtBluetoothManager;
 import com.usda.fmsc.twotrails.Global;
@@ -31,7 +31,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 
 import com.usda.fmsc.geospatial.GeoPosition;
-import com.usda.fmsc.geospatial.nmea.NmeaBurst;
+import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.geospatial.nmea.NmeaParser;
 import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
 import com.usda.fmsc.utilities.StringEx;
@@ -75,7 +75,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
 
         gpsSyncer = new GpsSyncer();
 
-        parser = new NmeaParser();
+        parser = new NmeaParser<>(NmeaBurstEx.class);
         parser.addTalkerID(NmeaIDs.TalkerID.GL);
         parser.addTalkerID(NmeaIDs.TalkerID.GN);
         parser.addListener(this);
@@ -475,8 +475,8 @@ public class GpsService extends Service implements LocationListener, LocationSou
     }
 
     @Override
-    public void onBurstReceived(NmeaBurst burst) {
-        postNmeaBurst(burst);
+    public void onBurstReceived(INmeaBurst burst) {
+        postINmeaBurst(burst);
 
         if (burst.hasPosition()) {
             lastPosition = burst.getPosition();
@@ -518,7 +518,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
 
 
     //region Post Events
-    private void postNmeaBurst(final NmeaBurst burst) {
+    private void postINmeaBurst(final INmeaBurst burst) {
         for(final Listener listener : listeners) {
             try {
                 Handler handler = new Handler(Looper.getMainLooper());
@@ -801,7 +801,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
 
 
     public interface Listener {
-        void nmeaBurstReceived(NmeaBurst nmeaBurst);
+        void nmeaBurstReceived(INmeaBurst INmeaBurst);
         void nmeaStringReceived(String nmeaString);
         void nmeaSentenceReceived(NmeaSentence nmeaSentence);
 

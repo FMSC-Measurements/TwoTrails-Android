@@ -23,6 +23,7 @@ import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.widget.SheetLayoutEx;
 import com.usda.fmsc.android.widget.layoutmanagers.LinearLayoutManagerWithSmoothScroller;
 import com.usda.fmsc.android.widget.RecyclerViewEx;
+import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.twotrails.activities.custom.AcquireGpsMapActivity;
 import com.usda.fmsc.utilities.StringEx;
 import com.usda.fmsc.twotrails.adapters.Take5PointsEditRvAdapter;
@@ -46,7 +47,7 @@ import java.util.ArrayList;
 
 import com.usda.fmsc.geospatial.GeoPosition;
 import com.usda.fmsc.geospatial.GeoTools;
-import com.usda.fmsc.geospatial.nmea.NmeaBurst;
+
 import jp.wasabeef.recyclerview.animators.SlideInUpAnimator;
 
 public class Take5Activity extends AcquireGpsMapActivity {
@@ -71,7 +72,7 @@ public class Take5Activity extends AcquireGpsMapActivity {
     private int increment, takeAmount, nmeaCount = 0;
     private boolean saved = true, updated, onBnd = true, cancelVisible, ignoreScroll, useRing, useVib, mapViewMode;
 
-    private FilterOptions options;
+    private FilterOptions options = new FilterOptions();
 
 
     private AlphaAnimation animFadePartial = new AlphaAnimation(1f, .03f);
@@ -256,14 +257,16 @@ public class Take5Activity extends AcquireGpsMapActivity {
             progLay = (RelativeLayout)findViewById(R.id.progressLayout);
             tvProg = (TextView)findViewById(R.id.take5ProgressText);
 
-            options = new FilterOptions();
-            getSettings();
+            //getSettings();
 
-            setupMap();
+            //setupMap();
         }
     }
 
-    private void getSettings() {
+    @Override
+    protected void getSettings() {
+        super.getSettings();
+
         options.Fix = Global.Settings.DeviceSettings.getTake5FilterFixType();
         options.DopType = Global.Settings.DeviceSettings.getTake5FilterDopType();
         options.DopValue = Global.Settings.DeviceSettings.getTake5FilterDopValue();
@@ -281,7 +284,7 @@ public class Take5Activity extends AcquireGpsMapActivity {
         miMoveToEnd = menu.findItem(R.id.take5MenuToBottom);
         miMode = menu.findItem(R.id.take5MenuMode);
 
-        return true;
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
@@ -313,7 +316,8 @@ public class Take5Activity extends AcquireGpsMapActivity {
                 if (_Points.size() > 0) {
                     ignoreScroll = true;
                     rvPoints.smoothScrollToPosition(_Points.size() - 1);
-                    moveToMapPoint(getMarkers().size() - 1);
+
+                    moveToMapPoint(getPositionsCount() - 1);
                 }
                 break;
             }
@@ -490,7 +494,8 @@ public class Take5Activity extends AcquireGpsMapActivity {
 
                         if (tmp.getOp().isGpsType()) {
                             ssp.calculatePoint(_Polygon, tmp);
-                            addMapMarker(ssp, _Metadata, true);
+                            addPosition(ssp);
+                            //addMapMarker(ssp, _Metadata, true);
                             break;
                         }
                     }
@@ -534,7 +539,8 @@ public class Take5Activity extends AcquireGpsMapActivity {
             fabT5.setEnabled(true);
             fabSS.setEnabled(true);
 
-            addMapMarker(point, _Metadata, !mapViewMode);
+            addPosition(point, true);
+            //addMapMarker(point, _Metadata, !mapViewMode);
 
             if (useVib) {
                 AndroidUtils.Device.vibrate(this, Consts.Notifications.VIB_POINT_CREATED);
@@ -633,7 +639,7 @@ public class Take5Activity extends AcquireGpsMapActivity {
 
     //region GPS
     @Override
-    public void nmeaBurstReceived(NmeaBurst nmeaBurst) {
+    public void nmeaBurstReceived(INmeaBurst nmeaBurst) {
         super.nmeaBurstReceived(nmeaBurst);
 
         if (isLogging() && nmeaBurst.isValid()) {
@@ -719,7 +725,6 @@ public class Take5Activity extends AcquireGpsMapActivity {
     //endregion
 
 
-
     public void btnTake5Click(View view) {
         if (!validateSideShot()) {
             return;
@@ -775,5 +780,11 @@ public class Take5Activity extends AcquireGpsMapActivity {
 
     public void btnPointInfo(View view) {
 
+    }
+
+
+    @Override
+    protected Units.MapTracking getMapTracking() {
+        return mapViewMode ? Units.MapTracking.NONE : Units.MapTracking.FOLLOW;
     }
 }

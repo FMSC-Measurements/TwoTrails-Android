@@ -1,213 +1,502 @@
 package com.usda.fmsc.twotrails.activities.custom;
 
+import android.animation.Animator;
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Point;
-import android.os.Handler;
+import android.graphics.Rect;
+import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
+import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.RelativeLayout;
+import android.widget.TableLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.UiSettings;
-import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.usda.fmsc.android.AndroidUtils;
-import com.usda.fmsc.android.adapters.MultiLineInfoWindowAdapter;
-import com.usda.fmsc.geospatial.nmea.NmeaBurst;
+import com.usda.fmsc.android.animation.ViewAnimator;
+import com.usda.fmsc.android.utilities.PostDelayHandler;
+import com.usda.fmsc.geospatial.Extent;
+import com.usda.fmsc.geospatial.GeoPosition;
+import com.usda.fmsc.geospatial.Position;
+import com.usda.fmsc.geospatial.nmea.INmeaBurst;
+import com.usda.fmsc.geospatial.nmea.NmeaIDs;
+import com.usda.fmsc.geospatial.nmea.sentences.GGASentence;
+import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
+import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
+import com.usda.fmsc.twotrails.Units;
+import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment;
 import com.usda.fmsc.twotrails.gps.GpsService;
-import com.usda.fmsc.twotrails.objects.GpsPoint;
-import com.usda.fmsc.twotrails.objects.TravPoint;
-import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.TtPoint;
-import com.usda.fmsc.twotrails.utilities.TtUtils;
+import com.usda.fmsc.twotrails.objects.TtPolygon;
+import com.usda.fmsc.twotrails.objects.map.ITrailGraphic;
+import com.usda.fmsc.twotrails.objects.map.TrailGraphicManager;
+import com.usda.fmsc.twotrails.ui.GpsStatusSatView;
+import com.usda.fmsc.twotrails.ui.GpsStatusSkyView;
+import com.usda.fmsc.utilities.StringEx;
 
 import java.util.ArrayList;
+import java.util.List;
 
-public class AcquireGpsMapActivity extends AcquireGpsCustomToolbarActivity implements IAcquireMapActivity, GpsService.Listener, OnMapReadyCallback {
-    private GoogleMap map;
-    private ArrayList<Marker> _Markers;
+public class AcquireGpsMapActivity extends BaseMapActivity {
+    public static final int GPS_NOT_FOUND = 1910;
+    public static final int GPS_NOT_CONFIGURED = 1911;
+
+    private static final String nVal = "*";
+
+    private TextView tvGpsStatus, tvGpsMode, tvLat, tvLon, tvUtmX, tvUtmY,
+            tvZone, tvDec, tvSat, tvElev, tvPdop, tvHdop;
+
+    private View viewGpsInfoLaySatInfo;
+    private GpsStatusSkyView skyView;
+    private GpsStatusSatView statusView;
+
+    private Integer zone = null;
+    private boolean canceling = false, useLostConnectionWarning = false;
+    private boolean logging, gpsExtraVisable = true, animating, gpsExtraLayoutSet;
+
+    private ArrayList<TtPolygon> polygonsToMap;
+
 
     private int currentMapIndex = -1, mapOffsetY;
-    boolean followPosition = false;
+
+    private TtPolygon polygon;
+
+    private TrailGraphicManager trailGraphicManager;
+
+    private PostDelayHandler moveDelayer = new PostDelayHandler(250);
+
 
     @Override
-    public void setupMap() {
-        _Markers = new ArrayList<>();
+    protected void onCreate(Bundle savedInstanceState) {
 
-        // check google play services and setup map
-        Integer code = AndroidUtils.App.checkPlayServices(this, Consts.Activities.Services.REQUEST_GOOGLE_PLAY_SERVICES);
-        if (code == null) {
-            startMap();
+        if (!Global.Settings.DeviceSettings.isGpsConfigured()) {
+            canceling = true;
+            setResult(GPS_NOT_CONFIGURED);
+            finish();
+            return;
+        }
+
+        Intent intent = getIntent();
+
+        if (intent != null) {
+            polygon = (TtPolygon) intent.getSerializableExtra(Consts.Activities.Data.POLYGON_DATA);
+
+            if (polygon == null) {
+                setResult(Consts.Activities.Results.NO_POLYGON_DATA);
+                canceling = true;
+                return;
+            }
+
+            super.onCreate(savedInstanceState);
+
+            ArrayList<TtPoint> points = Global.DAL.getPointsInPolygon(polygon.getCN());
+
+            trailGraphicManager = new TrailGraphicManager(polygon, points, getMetadata(),
+                    new ITrailGraphic.TrailGraphicOptions(
+                            AndroidUtils.UI.getColor(this, R.color.indigo_800),
+                            14
+                    )
+            );
         } else {
-            String str = GoogleApiAvailability.getInstance().getErrorString(code);
-            Toast.makeText(this, str, Toast.LENGTH_LONG).show();
+            canceling = true;
         }
     }
 
     @Override
-    public void startMap() {
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-    }
+    public void setContentView(int layoutResID) {
+        super.setContentView(layoutResID);
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == Consts.Activities.Services.REQUEST_GOOGLE_PLAY_SERVICES &&
-                resultCode == Activity.RESULT_OK) {
-            startMap();
-        }
+        tvGpsStatus = (TextView)findViewById(R.id.gpsInfoTvGpsStatus);
+        tvGpsMode = (TextView)findViewById(R.id.gpsInfoTvGpsMode);
+        tvLat = (TextView)findViewById(R.id.gpsInfoTvLat);
+        tvLon = (TextView)findViewById(R.id.gpsInfoTvLon);
+        tvUtmX = (TextView)findViewById(R.id.gpsInfoTvUtmX);
+        tvUtmY = (TextView)findViewById(R.id.gpsInfoTvUtmY);
+        tvZone = (TextView)findViewById(R.id.gpsInfoTvZone);
+        tvDec = (TextView)findViewById(R.id.gpsInfoTvDec);
+        tvSat = (TextView)findViewById(R.id.gpsInfoTvSats);
+        tvElev = (TextView)findViewById(R.id.gpsInfoTvElev);
+        tvPdop = (TextView)findViewById(R.id.gpsInfoTvPdop);
+        tvHdop = (TextView)findViewById(R.id.gpsInfoTvHdop);
 
-        super.onActivityResult(requestCode, resultCode, data);
-    }
+        tvGpsMode.setText(GGASentence.GpsFixType.NoFix.toString());
 
+        viewGpsInfoLaySatInfo = findViewById(R.id.gpsInfoLaySatInfo);
 
-    @Override
-    public void onMapReady(final GoogleMap googleMap) {
-        GpsService.GpsBinder binder = Global.getGpsBinder();
-        if (Global.Settings.DeviceSettings.isGpsConfigured() &&
-                binder.getGpsProvider() == GpsService.GpsProvider.External) {
-            googleMap.setLocationSource(binder.getService());
-        }
+        skyView = (GpsStatusSkyView)findViewById(R.id.gpsInfoSatSky);
+        statusView = (GpsStatusSatView)findViewById(R.id.gpsInfoSatStatus);
 
-        googleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
-        googleMap.setInfoWindowAdapter(new MultiLineInfoWindowAdapter(this));
-        googleMap.setPadding(0, AndroidUtils.Convert.dpToPx(this, 260), 0, 0);
-
-        UiSettings uiSettings = googleMap.getUiSettings();
-        uiSettings.setAllGesturesEnabled(false);
-        uiSettings.setMyLocationButtonEnabled(false);
-        uiSettings.setMapToolbarEnabled(false);
-        uiSettings.setZoomControlsEnabled(false);
-
-        googleMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
+        final ViewTreeObserver observer = skyView.getViewTreeObserver();
+        observer.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
-            public void onCameraChange(CameraPosition cameraPosition) {
-                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(Consts.LocationInfo.GoogleMaps.USA_CENTER, 3));
-                googleMap.setOnCameraChangeListener(null);
+            public void onGlobalLayout() {
+                skyView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                hideExtraGpsStatus(false);
+
+                TableLayout gpsInfoLayStats = (TableLayout) findViewById(R.id.gpsInfoLayStats);
+
+                if (gpsInfoLayStats != null) {
+                    mapOffsetY = AndroidUtils.Convert.dpToPx(getBaseContext(), 80) + gpsInfoLayStats.getHeight();
+                }
             }
         });
-
-        map = googleMap;
     }
 
+
     @Override
-    public void moveToMapPoint(int position) {
-        if (currentMapIndex != position && position < _Markers.size()) {
-            currentMapIndex = position;
+    public void onMapReady() {
+        super.onMapReady();
+        setMapGesturesEnabled(false);
 
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    LatLng llp = _Markers.get(currentMapIndex).getPosition();
+        if (mapOffsetY > 0) {
+            setMapPadding(0, mapOffsetY, 0, 0);
+        }
 
-                    Point point = map.getProjection().toScreenLocation(llp);
-                    point.offset(0, -mapOffsetY);
-                    llp = map.getProjection().fromScreenLocation(point);
+        addTrailGraphic(trailGraphicManager);
+    }
 
-                    map.animateCamera(CameraUpdateFactory.newLatLngZoom(
-                            new LatLng(llp.latitude, llp.longitude),
-                            Consts.LocationInfo.GoogleMaps.ZOOM_CLOSE
-                    ));
-                }
-            });
+    public void moveToMapPoint(int positionIndex) {
+        if (currentMapIndex != positionIndex && positionIndex < trailGraphicManager.getPositionsCount()) {
+            currentMapIndex = positionIndex;
+
+            moveToLocation(trailGraphicManager.getPosition(currentMapIndex), true);
         }
     }
 
 
-    @Override
-    public void addMapMarker(TtPoint point, TtMetadata metadata) {
-        addMapMarker(point, metadata, false);
+    public void addPosition(TtPoint point) {
+        addPosition(point, false);
     }
 
-    @Override
-    public void addMapMarker(TtPoint point, TtMetadata metadata, boolean moveToPointAfterAdd) {
-        Marker marker;
-        if (point.isGpsType()) {
-            marker = map.addMarker(TtUtils.GMap.createMarkerOptions((GpsPoint)point, false, metadata));
-        } else {
-            marker = map.addMarker(TtUtils.GMap.createMarkerOptions((TravPoint)point, false, metadata));
-        }
+    public void addPosition(TtPoint point, boolean moveToPointAfterAdd) {
 
-        if (marker != null) {
-            _Markers.add(marker);
+        final GeoPosition position = trailGraphicManager.addPoint(point);
 
+        if (position != null) {
             if (moveToPointAfterAdd) {
-                if (_Markers.size() == 1) {
-                    map.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                            new LatLng(marker.getPosition().latitude, marker.getPosition().longitude),
-                            Consts.LocationInfo.GoogleMaps.ZOOM_CLOSE
-                    ));
+                currentMapIndex++;
 
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            moveToMapPoint(_Markers.size() - 1);
-                        }
-                    }, 250);
-                } else {
-                    moveToMapPoint(_Markers.size() - 1);
-                }
+                moveToLocation(position, true);
             }
         }
     }
 
 
     @Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        super.onWindowFocusChanged(hasFocus);
+    protected ArrayList<TtPolygon> getPolygonsToMap() {
+        if (polygonsToMap == null) {
+            polygonsToMap = new ArrayList<>();
 
-        RelativeLayout gpsInfoLay = (RelativeLayout)findViewById(R.id.gpsInfoParent);
-        mapOffsetY = gpsInfoLay.getHeight();
-    }
+            for (TtPolygon p : getPolygons().values()) {
+                if (!p.getCN().equals(getTrackedPolyCN())) {
+                    polygonsToMap.add(p);
+                }
+            }
+        }
 
-
-    protected ArrayList<Marker> getMarkers() {
-        return _Markers;
-    }
-
-    protected GoogleMap getMap() {
-        return map;
+        return polygonsToMap;
     }
 
     @Override
-    public void nmeaBurstReceived(final NmeaBurst nmeaBurst) {
-        super.nmeaBurstReceived(nmeaBurst);
+    protected String getTrackedPolyCN() {
+        return polygon.getCN();
+    }
 
-        if (followPosition && nmeaBurst.hasPosition()) {
-            runOnUiThread(new Runnable() {
+    @Override
+    protected Extent getTrackedPoly() {
+        return trailGraphicManager.getExtents();
+    }
+
+    @Override
+    protected Extent getCompleteBounds() {
+        if (trailGraphicManager != null) {
+            Extent.Builder builder = new Extent.Builder();
+            builder.include(super.getCompleteBounds());
+            builder.include(trailGraphicManager.getExtents());
+            return builder.build();
+        } else {
+            return super.getCompleteBounds();
+        }
+    }
+
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        if (skyView != null) {
+            skyView.pause();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (skyView != null) {
+            skyView.resume();
+        }
+    }
+
+    protected void setNmeaData(final INmeaBurst burst) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (burst.hasPosition()) {
+                    UTMCoords coords = zone != null ? burst.getUTM(zone) : burst.getTrueUTM();
+
+                    tvLat.setText(String.format("%.4f", burst.getLatitude()));
+                    tvLon.setText(String.format("%.4f", burst.getLongitude()));
+
+                    tvUtmX.setText(String.format("%.3f", coords.getX()));
+                    tvUtmY.setText(String.format("%.3f", coords.getY()));
+
+                    if (zone == null) {
+                        tvZone.setText(StringEx.toString(coords.getZone()));
+                    } else {
+                        tvZone.setText(StringEx.toString(zone));
+                    }
+
+                    tvElev.setText(String.format("%.2f", burst.getElevation()));
+                } else {
+                    tvLat.setText(nVal);
+                    tvLon.setText(nVal);
+                    tvUtmX.setText(nVal);
+                    tvUtmY.setText(nVal);
+                    tvElev.setText(nVal);
+
+                    if (zone == null) {
+                        tvZone.setText(nVal);
+                    } else {
+                        tvZone.setText(StringEx.toString(zone));
+                    }
+                }
+
+                if (burst.isValid(NmeaIDs.SentenceID.RMC)) {
+                    tvDec.setText(String.format("%.2f %s", burst.getMagVar(), burst.getMagVarDir().toStringAbv()));
+                } else {
+                    tvDec.setText(nVal);
+                }
+
+                if (burst.isValid(NmeaIDs.SentenceID.GGA)) {
+                    tvGpsMode.setText(burst.getFixQuality().toStringX());
+                } else {
+                    tvGpsMode.setText(GGASentence.GpsFixType.NoFix.toString());
+                }
+
+                if (burst.isValid(NmeaIDs.SentenceID.GSA)) {
+                    tvGpsStatus.setText(burst.getFix().toString());
+                    tvPdop.setText(String.format("%.2f", burst.getPDOP()));
+                    tvHdop.setText(String.format("%.2f", burst.getHDOP()));
+                } else {
+                    tvGpsStatus.setText(nVal);
+                    tvHdop.setText(nVal);
+                    tvPdop.setText(nVal);
+                }
+
+                if (burst.isValid(NmeaIDs.SentenceID.GSV)) {
+
+                    tvSat.setText(String.format("%d/%d/%d",
+                            burst.isValid(NmeaIDs.SentenceID.GSA) ? burst.getUsedSatellitesCount() : 0,
+                            burst.isValid(NmeaIDs.SentenceID.GGA) ? burst.getTrackedSatellitesCount() : 0,
+                            burst.getSatellitesInViewCount()));
+                } else {
+                    tvSat.setText(nVal);
+                }
+
+                if (gpsExtraVisable) {
+                    skyView.update(burst);
+                    statusView.update(burst);
+                }
+            }
+        });
+    }
+
+
+    public void setZone(Integer zone) {
+        this.zone = zone;
+        tvZone.setText(zone != null ? Integer.toString(zone) : getText(R.string.str_nullvalue));
+    }
+
+    protected void startLogging() {
+        logging = true;
+    }
+    protected void stopLogging() {
+        logging = false;
+    }
+
+    protected boolean isLogging() {
+        return logging;
+    }
+
+
+    protected void setUseLostConnectionWarning(boolean useLostConnectionWarning) {
+        this.useLostConnectionWarning = useLostConnectionWarning;
+    }
+
+
+    //region GPS
+    @Override
+    public void nmeaBurstReceived(INmeaBurst nmeaBurst) {
+        super.nmeaBurstReceived(nmeaBurst);
+        setNmeaData(nmeaBurst);
+    }
+
+    @Override
+    public void gpsError(GpsService.GpsError error) {
+        switch (error) {
+            case LostDeviceConnection: {
+                if (useLostConnectionWarning) {
+                    AndroidUtils.Device.vibrate(this, Consts.Notifications.VIB_PATTERN_GPS_LOST_CONNECTED);
+
+                    AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+
+                    final Activity activity = this;
+
+                    dialog.setTitle("GPS Connection Lost");
+                    dialog.setMessage("The GPS bluetooth connection has been broken. Would you like to try and reestablith the connection?");
+
+                    dialog.setPositiveButton("Connect", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            GpsService.GpsDeviceStatus status = Global.getGpsBinder().startGps();
+
+                            if (status != GpsService.GpsDeviceStatus.ExternalGpsStarted &&
+                                    status != GpsService.GpsDeviceStatus.InternalGpsStarted) {
+                                Toast.makeText(Global.getMainActivity(), "Unabled to conenct to GPS.", Toast.LENGTH_SHORT).show();
+                                activity.setResult(RESULT_CANCELED);
+                                activity.finish();
+                            } else {
+                                AndroidUtils.Device.vibrate(getApplicationContext(), Consts.Notifications.VIB_PATTERN_GPS_CONNECTED);
+                            }
+                        }
+                    });
+
+                    dialog.setNegativeButton(R.string.str_exit, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            activity.setResult(RESULT_CANCELED);
+                            activity.finish();
+                        }
+                    });
+
+                    dialog.show();
+                }
+                break;
+            }
+        }
+    }
+    //endregion
+
+
+    @Override
+    protected void onFirstPositionReceived(GeoPosition position) {
+        moveToLocation(position, Consts.LocationInfo.GoogleMaps.ZOOM_CLOSE, true);
+    }
+
+    protected boolean isCanceling() {
+        return canceling;
+    }
+
+
+    protected void hideExtraGpsStatus() {
+        hideExtraGpsStatus(true);
+    }
+
+    protected void hideExtraGpsStatus(boolean animate) {
+        if (gpsExtraVisable) {
+            if (!gpsExtraLayoutSet) {
+                RelativeLayout lay = (RelativeLayout) findViewById(R.id.gpsInfoLaySatInfoSub);
+
+                lay.getLayoutParams().width = lay.getWidth();
+                lay.getLayoutParams().height = lay.getHeight();
+                lay.requestLayout();
+                gpsExtraLayoutSet = true;
+            }
+
+            if (animate) {
+                if (!animating) {
+                    animating = true;
+
+                    ViewAnimator.collapseView(viewGpsInfoLaySatInfo, new ViewAnimator.SimpleAnimatorListener() {
+                        @Override
+                        public void onAnimationEnd(Animator animator) {
+                            super.onAnimationEnd(animator);
+                            gpsExtraVisable = false;
+                            animating = false;
+                        }
+                    });
+
+                    animating = true;
+                }
+            } else {
+                viewGpsInfoLaySatInfo.getLayoutParams().height = 0;
+                viewGpsInfoLaySatInfo.requestLayout();
+                viewGpsInfoLaySatInfo.setVisibility(View.GONE);
+                gpsExtraVisable = false;
+            }
+        }
+    }
+
+    protected void showExtraGpsStatus() {
+        if (!animating && !gpsExtraVisable) {
+            ViewAnimator.expandView(viewGpsInfoLaySatInfo, new ViewAnimator.SimpleAnimatorListener() {
                 @Override
-                public void run() {
-                    getMap().moveCamera(CameraUpdateFactory.newLatLngZoom(
-                            new LatLng(nmeaBurst.getLatitude(), nmeaBurst.getLongitude()),
-                            Consts.LocationInfo.GoogleMaps.ZOOM_CLOSE
-                    ));
+                public void onAnimationEnd(Animator animator) {
+                    super.onAnimationEnd(animator);
+                    gpsExtraVisable = true;
+                    animating = false;
                 }
             });
+
+            animating = true;
         }
     }
 
-    @Override
-    public void setMapMyLocationEnabled(boolean enabled) {
-        if (AndroidUtils.App.checkFineLocationPermission(this)) {
-            map.setMyLocationEnabled(enabled);
+    protected boolean isGpsExtraInfoVisible() {
+        return gpsExtraVisable;
+    }
+
+
+    protected int getPositionsCount() {
+        return trailGraphicManager.getPositionsCount();
+    }
+
+
+    public void btnGpsInfoClick(View view) {
+        if (gpsExtraVisable) {
+            hideExtraGpsStatus();
+        } else {
+            showExtraGpsStatus();
         }
     }
 
+
     @Override
-    public void setMapFollowMyPosition(boolean followPosition) {
-        this.followPosition = followPosition;
+    protected boolean shouldStartGps() {
+        return true;
     }
 
     @Override
-    public void setMapGesturesEnabled(boolean enabled) {
-        map.getUiSettings().setAllGesturesEnabled(enabled);
+    protected boolean shouldStopGps() {
+        return false;
+    }
+
+    @Override
+    protected boolean getShowMyPos() {
+        return true;
+    }
+
+    @Override
+    protected void onCreateGraphicManagers() {
+        addTrailGraphic(trailGraphicManager);
+
+        super.onCreateGraphicManagers();
     }
 }

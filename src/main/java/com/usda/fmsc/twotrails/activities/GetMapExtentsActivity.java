@@ -5,11 +5,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
 import com.usda.fmsc.twotrails.Consts;
-import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.fragments.map.ArcGisMapFragment;
 import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment;
-import com.usda.fmsc.twotrails.objects.ArcGisMapLayer;
+import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
 import com.usda.fmsc.twotrails.utilities.ArcGISTools;
 import com.usda.fmsc.twotrails.utilities.DownloadOfflineArcGISMapTask;
 import com.usda.fmsc.twotrails.utilities.TtUtils;

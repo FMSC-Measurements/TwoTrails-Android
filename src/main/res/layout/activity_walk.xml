@@ -1,30 +1,17 @@
 <android.support.design.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:fitsSystemWindows="true"
-    tools:context="com.usda.fmsc.twotrails.activities.WalkActivity"
-    android:background="@color/background_card_view">
+    tools:context="com.usda.fmsc.twotrails.activities.WalkActivity">
 
-    <View
-        android:id="@+id/preFocusView"
-        android:layout_height="0dp"
-        android:layout_width="0dp"
-        android:descendantFocusability="beforeDescendants"
-        android:focusableInTouchMode="true"/>
+    <include layout="@layout/pre_focus" />
 
     <RelativeLayout
         android:id="@+id/lay1"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-
-        <fragment
-            android:id="@+id/map"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            class="com.google.android.gms.maps.SupportMapFragment"/>
 
         <include layout="@layout/toolbar_default" android:id="@id/toolbar"/>
 

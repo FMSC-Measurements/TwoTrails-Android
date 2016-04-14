@@ -1,4 +1,4 @@
-package com.usda.fmsc.twotrails.objects;
+package com.usda.fmsc.twotrails.objects.map;
 
 public class PolygonDrawOptions {
     public enum GraphicCode {
@@ -132,9 +132,5 @@ public class PolygonDrawOptions {
                 WayPts = value;
                 break;
         }
-    }
-
-    public interface Listener {
-        void onOptionChanged(GraphicCode code, boolean value);
     }
 }

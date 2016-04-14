@@ -202,6 +202,8 @@
             android:label="@string/title_activity_get_map_extents"
             android:theme="@style/AppTheme">
         </activity>
+        <activity android:name=".activities.custom.AcquireGpsMapActivity">
+        </activity>
     </application>
 
 </manifest>

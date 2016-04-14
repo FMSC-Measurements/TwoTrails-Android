@@ -1325,6 +1325,7 @@ public class PointsActivity extends CustomToolbarActivity {
         } else {
             Intent intent = new Intent(this, AcquireGpsActivity.class);
             intent.putExtra(Consts.Activities.Data.POINT_DATA, TtUtils.clonePoint(point));
+            intent.putExtra(Consts.Activities.Data.POLYGON_DATA, _CurrentPolygon);
             intent.putExtra(Consts.Activities.Data.METADATA_DATA, _MetaData.get(point.getMetadataCN()));
 
             if (bursts != null) {

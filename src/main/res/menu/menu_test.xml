@@ -3,7 +3,7 @@
       xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/mmSelectMap"
+        android:id="@+id/mmMenuSelectMap"
         android:title="@string/menu_map_select_type"
         app:showAsAction="never"/>
 </menu>

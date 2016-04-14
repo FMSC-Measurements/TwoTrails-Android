@@ -1,7 +1,9 @@
-package com.usda.fmsc.twotrails.objects;
+package com.usda.fmsc.twotrails.objects.map;
 
 import com.usda.fmsc.geospatial.Extent;
-import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment;
+import com.usda.fmsc.twotrails.objects.TtMetadata;
+import com.usda.fmsc.twotrails.objects.TtPoint;
+import com.usda.fmsc.twotrails.objects.TtPolygon;
 
 import java.util.HashMap;
 import java.util.List;
@@ -13,8 +15,6 @@ public interface IPolygonGraphic {
     TtPolygon getPolygon();
 
     PolygonDrawOptions getDrawOptions();
-
-    HashMap<String, IMultiMapFragment.MarkerData> getMarkerData();
 
     Extent getExtents();
 

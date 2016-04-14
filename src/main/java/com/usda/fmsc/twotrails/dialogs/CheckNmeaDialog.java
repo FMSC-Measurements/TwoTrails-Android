@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ListView;
 
+import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.geospatial.nmea.NmeaBurst;
 import com.usda.fmsc.geospatial.nmea.NmeaIDs;
 import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
@@ -89,7 +90,7 @@ public class CheckNmeaDialog extends DialogFragment implements GpsService.Listen
     }
 
     @Override
-    public void nmeaBurstReceived(NmeaBurst nmeaBurst) {
+    public void nmeaBurstReceived(INmeaBurst nmeaBurst) {
 
     }
 

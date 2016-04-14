@@ -1,6 +1,4 @@
-package com.usda.fmsc.twotrails.objects;
-
-import android.graphics.Color;
+package com.usda.fmsc.twotrails.objects.map;
 
 import com.esri.android.map.GraphicsLayer;
 import com.esri.android.map.MapView;
@@ -8,25 +6,22 @@ import com.esri.core.geometry.Point;
 import com.esri.core.geometry.Polygon;
 import com.esri.core.geometry.Polyline;
 import com.esri.core.map.Graphic;
-import com.esri.core.symbol.PictureMarkerSymbol;
-import com.esri.core.symbol.SimpleFillSymbol;
 import com.esri.core.symbol.SimpleLineSymbol;
 import com.esri.core.symbol.SimpleMarkerSymbol;
-import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.geospatial.GeoPosition;
-import com.usda.fmsc.geospatial.Position;
-import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.Units;
 import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment;
+import com.usda.fmsc.twotrails.objects.TtMetadata;
+import com.usda.fmsc.twotrails.objects.TtPoint;
+import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.utilities.ArcGISTools;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class ArcGisPolygonGraphic implements IPolygonGraphic {
+public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic {
     private TtPolygon polygon;
     private PolygonDrawOptions drawOptions;
     private HashMap<String, IMultiMapFragment.MarkerData> _MarkerData;
@@ -247,6 +242,7 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic {
 
             _WayPts.setVisible(false);
         }
+
         map.addLayer(_AdjBnd);
         map.addLayer(_AdjBndCB);
 

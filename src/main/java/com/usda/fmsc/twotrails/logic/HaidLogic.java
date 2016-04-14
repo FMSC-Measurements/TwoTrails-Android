@@ -53,41 +53,49 @@ public class HaidLogic {
             List<TtPoint> points = dal.getPointsInPolygon(polygon.getCN());
 
             if (points.size() > 0) {
-                points = TtUtils.filterOut(points, Units.OpType.WayPoint);
+                if (points.size() > 2) {
+                    points = TtUtils.filterOut(points, Units.OpType.WayPoint);
 
-                if (points.size() > 0) {
-                    for (TtPoint point : points) {
-                        pointStats.append(getPointSummary(point, false, showPoints));
-                    }
+                    if (points.size() > 0) {
+                        if (points.size() > 2) {
+                            for (TtPoint point : points) {
+                                pointStats.append(getPointSummary(point, false, showPoints));
+                            }
 
-                    TtPoint pt = points.get(0);
-                    for (TtPoint point : points) {
-                        if (point.isOnBnd()) {
-                            pt = point;
-                            break;
+                            TtPoint pt = points.get(0);
+                            for (TtPoint point : points) {
+                                if (point.isOnBnd()) {
+                                    pt = point;
+                                    break;
+                                }
+                            }
+
+                            if (!pt.sameAdjLocation(_LastTtPoint)) {
+                                _Legs.add(new Leg(_LastTtPoint, pt, _Polygons));
+                            }
+
+                            for (Leg leg : _Legs) {
+                                totalGpsError += leg.getAreaError();
+                            }
+
+                            //totalError = totalGpsError + totalTravError;
+
+                            sb.append(getPolygonSummary(polygon, false));
+                            sb.append(pointStats);
+                        } else {
+                            sb.append("There are not enough valid points in the polygon.");
                         }
+                    } else {
+                        sb.append("There are only WayPoints in the polygon.");
                     }
-
-                    if (!pt.sameAdjLocation(_LastTtPoint)) {
-                        _Legs.add(new Leg(_LastTtPoint, pt, _Polygons));
-                    }
-
-                    for (Leg leg : _Legs) {
-                        totalGpsError += leg.getAreaError();
-                    }
-
-                    //totalError = totalGpsError + totalTravError;
-
-                    sb.append(getPolygonSummary(polygon, false));
-                    sb.append(pointStats);
                 } else {
-                    sb.append("There are only WayPoints in the polygon.");
+                    sb.append("There are not enough points in the polygon.");
                 }
             } else {
                 sb.append("There are no points in the polygon.");
             }
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "HaidLogic:generatePolyStats");
+            TtUtils.TtReport.writeError(ex.getMessage(), "HaidLogic:generatePolyStats", ex.getStackTrace());
             return "Error generating polygon info";
         }
 

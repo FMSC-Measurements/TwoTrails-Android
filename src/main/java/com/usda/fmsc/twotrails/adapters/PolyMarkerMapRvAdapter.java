@@ -15,9 +15,9 @@ import com.usda.fmsc.android.widget.FlipCheckBoxEx;
 import com.usda.fmsc.android.widget.MultiStateTouchCheckBox;
 import com.usda.fmsc.android.widget.MultiStateTouchCheckBox.CheckedState;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.objects.PolygonDrawOptions;
-import com.usda.fmsc.twotrails.objects.PolygonDrawOptions.GraphicCode;
-import com.usda.fmsc.twotrails.objects.PolygonGraphicManager;
+import com.usda.fmsc.twotrails.objects.map.PolygonDrawOptions;
+import com.usda.fmsc.twotrails.objects.map.PolygonDrawOptions.GraphicCode;
+import com.usda.fmsc.twotrails.objects.map.PolygonGraphicManager;
 
 import java.util.List;
 
@@ -50,11 +50,11 @@ public class PolyMarkerMapRvAdapter extends RecyclerView.Adapter<PolyMarkerMapRv
 
     @Override
     public void onBindViewHolder(final PolyMarkerMapViewHolder holder, int position) {
-        final PolygonGraphicManager markerMap = markerMaps.get(position);
-        final PolygonDrawOptions opt = markerMap.getDrawOptions();
+        final PolygonGraphicManager graphicManager = markerMaps.get(position);
+        final PolygonDrawOptions opt = graphicManager.getDrawOptions();
 
 
-        holder.tvPolyName.setText(markerMap.getPolyName());
+        holder.tvPolyName.setText(graphicManager.getPolyName());
 
         holder.tcbPoly.setCheckedState(opt.Visible ? CheckedState.Checked : CheckedState.NotChecked);
         holder.fcbAdjBnd.setChecked(opt.AdjBnd);
@@ -73,7 +73,7 @@ public class PolyMarkerMapRvAdapter extends RecyclerView.Adapter<PolyMarkerMapRv
         holder.tcbPoly.setOnCheckedStateChangeListener(new MultiStateTouchCheckBox.OnCheckedStateChangeListener() {
             @Override
             public void onCheckedStateChanged(View buttonView, boolean isChecked, CheckedState state) {
-                markerMap.setVisible(isChecked);
+                graphicManager.setVisible(isChecked);
                 onOptionChanged(holder, GraphicCode.VISIBLE);
             }
         });
@@ -81,7 +81,7 @@ public class PolyMarkerMapRvAdapter extends RecyclerView.Adapter<PolyMarkerMapRv
         holder.fcbAdjBnd.setOnFlipCheckedChangeListener(new FlipCheckBoxEx.OnFlipCheckedChangeListener() {
             @Override
             public void onCheckedChanged(FlipCheckBoxEx flipCardView, boolean isChecked) {
-                markerMap.setAdjBndVisible(isChecked);
+                graphicManager.setAdjBndVisible(isChecked);
                 onOptionChanged(holder, GraphicCode.ADJBND);
             }
         });
@@ -89,7 +89,7 @@ public class PolyMarkerMapRvAdapter extends RecyclerView.Adapter<PolyMarkerMapRv
         holder.fcbUnAdjBnd.setOnFlipCheckedChangeListener(new FlipCheckBoxEx.OnFlipCheckedChangeListener() {
             @Override
             public void onCheckedChanged(FlipCheckBoxEx flipCardView, boolean isChecked) {
-                markerMap.setUnadjBndVisible(isChecked);
+                graphicManager.setUnadjBndVisible(isChecked);
                 onOptionChanged(holder, GraphicCode.UNADJBND);
             }
         });
@@ -97,7 +97,7 @@ public class PolyMarkerMapRvAdapter extends RecyclerView.Adapter<PolyMarkerMapRv
         holder.fcbAdjBndPts.setOnFlipCheckedChangeListener(new FlipCheckBoxEx.OnFlipCheckedChangeListener() {
             @Override
             public void onCheckedChanged(FlipCheckBoxEx flipCardView, boolean isChecked) {
-                markerMap.setAdjBndPtsVisible(isChecked);
+                graphicManager.setAdjBndPtsVisible(isChecked);
                 onOptionChanged(holder, GraphicCode.ADJBNDPTS);
             }
         });
@@ -105,7 +105,7 @@ public class PolyMarkerMapRvAdapter extends RecyclerView.Adapter<PolyMarkerMapRv
         holder.fcbUnAdjBndPts.setOnFlipCheckedChangeListener(new FlipCheckBoxEx.OnFlipCheckedChangeListener() {
             @Override
             public void onCheckedChanged(FlipCheckBoxEx flipCardView, boolean isChecked) {
-                markerMap.setUnadjBndPtsVisible(isChecked);
+                graphicManager.setUnadjBndPtsVisible(isChecked);
                 onOptionChanged(holder, GraphicCode.UNADJBNDPTS);
             }
         });
@@ -113,7 +113,7 @@ public class PolyMarkerMapRvAdapter extends RecyclerView.Adapter<PolyMarkerMapRv
         holder.fcbAdjNav.setOnFlipCheckedChangeListener(new FlipCheckBoxEx.OnFlipCheckedChangeListener() {
             @Override
             public void onCheckedChanged(FlipCheckBoxEx flipCardView, boolean isChecked) {
-                markerMap.setAdjNavVisible(isChecked);
+                graphicManager.setAdjNavVisible(isChecked);
                 onOptionChanged(holder, GraphicCode.ADJNAV);
             }
         });
@@ -121,7 +121,7 @@ public class PolyMarkerMapRvAdapter extends RecyclerView.Adapter<PolyMarkerMapRv
         holder.fcbUnAdjNav.setOnFlipCheckedChangeListener(new FlipCheckBoxEx.OnFlipCheckedChangeListener() {
             @Override
             public void onCheckedChanged(FlipCheckBoxEx flipCardView, boolean isChecked) {
-                markerMap.setUnadjNavVisible(isChecked);
+                graphicManager.setUnadjNavVisible(isChecked);
                 onOptionChanged(holder, GraphicCode.UNADJNAV);
             }
         });
@@ -129,7 +129,7 @@ public class PolyMarkerMapRvAdapter extends RecyclerView.Adapter<PolyMarkerMapRv
         holder.fcbAdjNavPts.setOnFlipCheckedChangeListener(new FlipCheckBoxEx.OnFlipCheckedChangeListener() {
             @Override
             public void onCheckedChanged(FlipCheckBoxEx flipCardView, boolean isChecked) {
-                markerMap.setAdjNavPtsVisible(isChecked);
+                graphicManager.setAdjNavPtsVisible(isChecked);
                 onOptionChanged(holder, GraphicCode.ADJNAVPTS);
             }
         });
@@ -137,7 +137,7 @@ public class PolyMarkerMapRvAdapter extends RecyclerView.Adapter<PolyMarkerMapRv
         holder.fcbUnAdjNavPts.setOnFlipCheckedChangeListener(new FlipCheckBoxEx.OnFlipCheckedChangeListener() {
             @Override
             public void onCheckedChanged(FlipCheckBoxEx flipCardView, boolean isChecked) {
-                markerMap.setUnadjNavPtsVisible(isChecked);
+                graphicManager.setUnadjNavPtsVisible(isChecked);
                 onOptionChanged(holder, GraphicCode.UNADJNAVPTS);
             }
         });
@@ -145,7 +145,7 @@ public class PolyMarkerMapRvAdapter extends RecyclerView.Adapter<PolyMarkerMapRv
         holder.fcbAdjMiscPts.setOnFlipCheckedChangeListener(new FlipCheckBoxEx.OnFlipCheckedChangeListener() {
             @Override
             public void onCheckedChanged(FlipCheckBoxEx flipCardView, boolean isChecked) {
-                markerMap.setAdjMiscPtsVisible(isChecked);
+                graphicManager.setAdjMiscPtsVisible(isChecked);
                 onOptionChanged(holder, GraphicCode.ADJMISCPTS);
             }
         });
@@ -153,7 +153,7 @@ public class PolyMarkerMapRvAdapter extends RecyclerView.Adapter<PolyMarkerMapRv
         holder.fcbUnadjMiscPts.setOnFlipCheckedChangeListener(new FlipCheckBoxEx.OnFlipCheckedChangeListener() {
             @Override
             public void onCheckedChanged(FlipCheckBoxEx flipCardView, boolean isChecked) {
-                markerMap.setUnadjMiscPtsVisible(isChecked);
+                graphicManager.setUnadjMiscPtsVisible(isChecked);
                 onOptionChanged(holder, GraphicCode.UNADJMISCPTS);
             }
         });
@@ -161,7 +161,7 @@ public class PolyMarkerMapRvAdapter extends RecyclerView.Adapter<PolyMarkerMapRv
         holder.fcbWayPts.setOnFlipCheckedChangeListener(new FlipCheckBoxEx.OnFlipCheckedChangeListener() {
             @Override
             public void onCheckedChanged(FlipCheckBoxEx flipCardView, boolean isChecked) {
-                markerMap.setWayPtsVisible(isChecked);
+                graphicManager.setWayPtsVisible(isChecked);
                 onOptionChanged(holder, GraphicCode.WAYPTS);
             }
         });
@@ -177,10 +177,10 @@ public class PolyMarkerMapRvAdapter extends RecyclerView.Adapter<PolyMarkerMapRv
                             @Override
                             public void onClick(DialogInterface dialog, int which, boolean isChecked) {
                                 if (which == 0) {
-                                    markerMap.setAdjBndClose(isChecked);
+                                    graphicManager.setAdjBndClose(isChecked);
                                     onOptionChanged(holder, GraphicCode.ADJBNDCLOSE);
                                 } else if (which == 1) {
-                                    markerMap.setUnadjBndClose(isChecked);
+                                    graphicManager.setUnadjBndClose(isChecked);
                                     onOptionChanged(holder, GraphicCode.UNADJBNDCLOSE);
                                 }
                             }
@@ -193,7 +193,7 @@ public class PolyMarkerMapRvAdapter extends RecyclerView.Adapter<PolyMarkerMapRv
             }
         });
 
-        //markerMap.setListener(holder);
+        graphicManager.setListener(holder);
     }
 
 
@@ -204,7 +204,7 @@ public class PolyMarkerMapRvAdapter extends RecyclerView.Adapter<PolyMarkerMapRv
     }
 
 
-    public class PolyMarkerMapViewHolder extends RecyclerView.ViewHolder implements PolygonDrawOptions.Listener {
+    public class PolyMarkerMapViewHolder extends RecyclerView.ViewHolder implements PolygonGraphicManager.Listener {
         TextView tvPolyName;
         View layHeader, layContent;
         MultiStateTouchCheckBox tcbPoly;

@@ -13,15 +13,17 @@ import java.util.List;
 
 import com.usda.fmsc.geospatial.GeoPosition;
 import com.usda.fmsc.geospatial.nmea.INmeaBurst;
-import com.usda.fmsc.geospatial.nmea.NmeaBurst;
+import com.usda.fmsc.geospatial.nmea.NmeaIDs;
+import com.usda.fmsc.geospatial.nmea.Satellite;
 import com.usda.fmsc.geospatial.nmea.sentences.GGASentence;
 import com.usda.fmsc.geospatial.nmea.sentences.GSASentence;
+import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.geospatial.utm.UTMTools;
 import com.usda.fmsc.geospatial.Units;
 import com.usda.fmsc.utilities.StringEx;
 
-public class TtNmeaBurst implements INmeaBurst, Serializable {
+public class TtNmeaBurst implements Serializable {
     private String cn;
     private String pointCN;
     private Boolean used;
@@ -96,7 +98,7 @@ public class TtNmeaBurst implements INmeaBurst, Serializable {
         //this.satellites = satellites;
     }
     
-    public static TtNmeaBurst create(String pointCN, boolean used, NmeaBurst burst) {
+    public static TtNmeaBurst create(String pointCN, boolean used, INmeaBurst burst) {
         return new TtNmeaBurst(java.util.UUID.randomUUID().toString(),
                 DateTime.now(),
                 pointCN,

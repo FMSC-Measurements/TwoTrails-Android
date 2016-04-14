@@ -13,6 +13,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 
+import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.twotrails.activities.custom.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.gps.GpsService;
@@ -257,7 +258,7 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
     }
 
     @Override
-    public void nmeaBurstReceived(NmeaBurst nmeaBurst) {
+    public void nmeaBurstReceived(INmeaBurst nmeaBurst) {
         if (logging) {
             strings.add(0, nmeaBurst.toString());//String.format("Burst Received- Valid: %s", Boolean.toString(nmeaBurst.isValid())));
             updateList();

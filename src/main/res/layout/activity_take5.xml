@@ -4,19 +4,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
     tools:context="com.usda.fmsc.twotrails.activities.Take5Activity">
 
     <RelativeLayout
         android:id="@+id/lay1"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-
-        <fragment
-            android:id="@+id/map"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            class="com.google.android.gms.maps.SupportMapFragment"/>
 
         <include layout="@layout/toolbar_default"
             android:layout_width="match_parent"
@@ -89,7 +82,8 @@
         app:layout_anchorGravity="bottom|left|start"
         android:visibility="gone"
         android:onClick="btnCancelClick"/>
-    
+
+    <!--TODO Take5 progress bar update-->
     <RelativeLayout
         android:id="@+id/progressLayout"
         android:layout_width="100dp"
