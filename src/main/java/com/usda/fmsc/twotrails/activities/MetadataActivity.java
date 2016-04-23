@@ -100,12 +100,6 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_metadata);
 
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            //actionBar.setDisplayShowTitleEnabled(false);
-        }
-
         listeners = new HashMap<>();
 
         _Metadata = Global.DAL.getMetadata();

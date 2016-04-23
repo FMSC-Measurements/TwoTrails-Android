@@ -231,9 +231,9 @@ public class Global {
         public static void showPointAquired() {
             if(_NotificationManager != null && _GpsBuilder != null) {
 
-                _GpsBuilder.setContentTitle(Consts.ServiceTitle);
-                _GpsBuilder.setContentText(Consts.ServiceAcquiringPoint);
-                _GpsBuilder.setSmallIcon(R.drawable.ica_capturepoint);
+                _GpsBuilder.setContentTitle(Consts.ServiceTitle)
+                .setContentText(Consts.ServiceAcquiringPoint)
+                .setSmallIcon(R.drawable.ica_capturepoint);
 
                 _NotificationManager.notify(GPS_NOTIFICATION_ID, _GpsBuilder.build());
 
@@ -262,6 +262,7 @@ public class Global {
         public static void startMapDownload(int id, String name) {
             NotificationCompat.Builder builder = new NotificationCompat.Builder(_ApplicationContext);
             builder.setOngoing(true)
+                    .setSmallIcon(R.drawable.ic_map_black_36dp)
                     .setContentTitle(String.format("Downloading Map %s", name))
                     .setProgress(100, 0, false);
 

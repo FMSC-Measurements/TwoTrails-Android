@@ -145,7 +145,7 @@ public class TestActivity extends BaseMapActivity {
 //        // Create an instance of ExportTileCacheTask for the mapService that
 //        // supports the exportTiles() operation
 //        final ExportTileCacheTask exportTileCacheTask = new ExportTileCacheTask(
-//                layer.getUri(), null);
+//                layer.getUrl(), null);
 //
 //        // Set up GenerateTileCacheParameters
 //        ExportTileCacheParameters params = new ExportTileCacheParameters(
@@ -247,11 +247,11 @@ public class TestActivity extends BaseMapActivity {
 //
 //                            // switch to the successfully downloaded local layer
 //                            localTiledLayer = new ArcGISLocalTiledLayer(path);
-//                            //mMapView.addLayer(localTiledLayer);
+//                            //mMapView.addMapLayer(localTiledLayer);
 //                            // initially setting the visibility to false,
 //                            // turning it back on in the switchToLocalLayer()
 //                            // method
-//                            //mMapView.getLayers()[1].setVisible(false);
+//                            //mMapView.getMapLayers()[1].setVisible(false);
 //
 //                            runOnUiThread(new Runnable() {
 //                                @Override

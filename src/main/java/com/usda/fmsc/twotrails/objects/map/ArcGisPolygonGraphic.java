@@ -1,5 +1,7 @@
 package com.usda.fmsc.twotrails.objects.map;
 
+import android.support.annotation.ColorInt;
+
 import com.esri.android.map.GraphicsLayer;
 import com.esri.android.map.MapView;
 import com.esri.core.geometry.Point;
@@ -21,9 +23,11 @@ import com.usda.fmsc.twotrails.utilities.TtUtils;
 import java.util.HashMap;
 import java.util.List;
 
+//TODO finish change shape and point colors
 public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic {
     private TtPolygon polygon;
     private PolygonDrawOptions drawOptions;
+    private PolygonGraphicOptions graphicOptions;
     private HashMap<String, IMultiMapFragment.MarkerData> _MarkerData;
 
     private MapView map;
@@ -41,6 +45,7 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
     public void build(TtPolygon polygon, List<TtPoint> points, HashMap<String, TtMetadata> meta, PolygonGraphicOptions graphicOptions, PolygonDrawOptions drawOptions) {
         this.polygon = polygon;
         this.drawOptions = drawOptions;
+        this.graphicOptions = graphicOptions;
 
         _MarkerData = new HashMap<>();
 
@@ -174,9 +179,9 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
         outline = new SimpleLineSymbol(graphicOptions.getUnAdjNavColor(), graphicOptions.getUnAdjWidth(), SimpleLineSymbol.STYLE.SOLID);
         _UnadjNav.addGraphic(new Graphic(unadjNavPLO, outline));
 
-        if (drawOptions.Visible) {
-            if (drawOptions.AdjBnd) {
-                if (drawOptions.AdjBndClose) {
+        if (drawOptions.isVisible()) {
+            if (drawOptions.isAdjBnd()) {
+                if (drawOptions.isAdjBndClose()) {
                     _AdjBnd.setVisible(false);
                 } else {
                     _AdjBndCB.setVisible(false);
@@ -186,8 +191,8 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
                 _AdjBndCB.setVisible(false);
             }
 
-            if (drawOptions.UnadjBnd) {
-                if (drawOptions.UnadjBndClose) {
+            if (drawOptions.isUnadjBnd()) {
+                if (drawOptions.isUnadjBndClose()) {
                     _UnadjBnd.setVisible(false);
                 } else {
                     _UnadjBndCB.setVisible(false);
@@ -197,31 +202,31 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
                 _UnadjBndCB.setVisible(false);
             }
 
-            if (!drawOptions.AdjNav) {
+            if (!drawOptions.isAdjNav()) {
                 _AdjNav.setVisible(false);
             }
 
-            if (!drawOptions.UnadjNav) {
+            if (!drawOptions.isUnadjNav()) {
                 _UnadjNav.setVisible(false);
             }
 
-            if (!drawOptions.AdjBndPts) {
+            if (!drawOptions.isAdjBndPts()) {
                 _AdjBndPts.setVisible(false);
             }
 
-            if (!drawOptions.UnadjBndPts) {
+            if (!drawOptions.isUnadjBndPts()) {
                 _UnadjBndPts.setVisible(false);
             }
             
-            if (!drawOptions.AdjMiscPts) {
+            if (!drawOptions.isAdjMiscPts()) {
                 _AdjMiscPts.setVisible(false);
             }
 
-            if (!drawOptions.UnadjMiscPts) {
+            if (!drawOptions.isUnadjMiscPts()) {
                 _UnadjMiscPts.setVisible(false);
             }
             
-            if (!drawOptions.WayPts) {
+            if (!drawOptions.isWayPts()) {
                 _WayPts.setVisible(false);
             }
         } else {
@@ -281,6 +286,10 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
         return polyBounds;
     }
 
+    @Override
+    public PolygonGraphicOptions getGraphicOptions() {
+        return graphicOptions;
+    }
 
     //region Get Layers
     public GraphicsLayer getAdjBndPtsLayer() {
@@ -335,56 +344,56 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
     //region Setters
     @Override
     public void setVisible(boolean visible) {
-        drawOptions.Visible = visible;
+        drawOptions.setVisible(visible);
 
-        if (drawOptions.AdjBnd) {
-            if (drawOptions.AdjBndClose)
+        if (drawOptions.isAdjBnd()) {
+            if (drawOptions.isAdjBndClose())
                 _AdjBndCB.setVisible(visible);
             else
                 _AdjBnd.setVisible(visible);
         }
 
-        if (drawOptions.AdjBndPts)
+        if (drawOptions.isAdjBndPts())
             _AdjBndPts.setVisible(visible);
 
-        if (drawOptions.UnadjBnd) {
-            if (drawOptions.UnadjBndClose)
+        if (drawOptions.isUnadjBnd()) {
+            if (drawOptions.isUnadjBndClose())
                 _UnadjBndCB.setVisible(visible);
             else
                 _UnadjBnd.setVisible(visible);
         }
 
-        if (drawOptions.UnadjBndPts)
+        if (drawOptions.isUnadjBndPts())
             _UnadjBndPts.setVisible(visible);
 
-        if (drawOptions.AdjNav)
+        if (drawOptions.isAdjNav())
             _AdjNav.setVisible(visible);
 
-        if (drawOptions.AdjNavPts)
+        if (drawOptions.isAdjNavPts())
             _AdjNavPts.setVisible(visible);
 
-        if (drawOptions.UnadjNav)
+        if (drawOptions.isUnadjNav())
             _UnadjNav.setVisible(visible);
 
-        if (drawOptions.UnadjNavPts)
+        if (drawOptions.isUnadjNavPts())
             _UnadjNavPts.setVisible(visible);
 
-        if (drawOptions.AdjMiscPts)
+        if (drawOptions.isAdjMiscPts())
             _AdjMiscPts.setVisible(visible);
 
-        if (drawOptions.UnadjMiscPts)
+        if (drawOptions.isUnadjMiscPts())
             _UnadjMiscPts.setVisible(visible);
 
-        if (drawOptions.WayPts)
+        if (drawOptions.isWayPts())
             _WayPts.setVisible(visible);
     }
 
     @Override
     public void setAdjBndVisible(boolean visible) {
-        drawOptions.AdjBnd = visible;
-        visible &= drawOptions.Visible;
+        drawOptions.setAdjBnd(visible);
+        visible &= drawOptions.isVisible();
         
-        if (drawOptions.AdjBndClose)
+        if (drawOptions.isAdjBndClose())
             _AdjBndCB.setVisible(visible);
         else
             _AdjBnd.setVisible(visible);
@@ -392,18 +401,18 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
 
     @Override
     public void setAdjBndPtsVisible(boolean visible) {
-        drawOptions.AdjBndPts = visible;
-        visible &= drawOptions.Visible;
+        drawOptions.setAdjBndPts(visible);
+        visible &= drawOptions.isVisible();
 
         _AdjBndPts.setVisible(visible);
     }
 
     @Override
     public void setUnadjBndVisible(boolean visible) {
-        drawOptions.UnadjBnd = visible;
-        visible &= drawOptions.Visible;
+        drawOptions.setUnadjBnd(visible);
+        visible &= drawOptions.isVisible();
 
-        if (drawOptions.UnadjBndClose)
+        if (drawOptions.isUnadjBndClose())
             _UnadjBndCB.setVisible(visible);
         else
             _UnadjBnd.setVisible(visible);
@@ -411,74 +420,74 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
 
     @Override
     public void setUnadjBndPtsVisible(boolean visible) {
-        drawOptions.UnadjBndPts = visible;
-        visible &= drawOptions.Visible;
+        drawOptions.setUnadjBndPts(visible);
+        visible &= drawOptions.isVisible();
 
         _UnadjBndPts.setVisible(visible);
     }
 
     @Override
     public void setAdjNavVisible(boolean visible) {
-        drawOptions.AdjNav = visible;
-        visible &= drawOptions.Visible;
+        drawOptions.setAdjNav(visible);
+        visible &= drawOptions.isVisible();
 
         _AdjNav.setVisible(visible);
     }
 
     @Override
     public void setAdjNavPtsVisible(boolean visible) {
-        drawOptions.AdjNavPts = visible;
-        visible &= drawOptions.Visible;
+        drawOptions.setAdjNavPts(visible);
+        visible &= drawOptions.isVisible();
 
         _AdjNavPts.setVisible(visible);
     }
 
     @Override
     public void setUnadjNavVisible(boolean visible) {
-        drawOptions.UnadjNav = visible;
-        visible &= drawOptions.Visible;
+        drawOptions.setUnadjNav(visible);
+        visible &= drawOptions.isVisible();
 
         _UnadjNav.setVisible(visible);
     }
 
     @Override
     public void setUnadjNavPtsVisible(boolean visible) {
-        drawOptions.UnadjNavPts = visible;
-        visible &= drawOptions.Visible;
+        drawOptions.setUnadjNavPts(visible);
+        visible &= drawOptions.isVisible();
 
         _UnadjNavPts.setVisible(visible);
     }
 
     @Override
     public void setAdjMiscPtsVisible(boolean visible) {
-        drawOptions.AdjMiscPts = visible;
-        visible &= drawOptions.Visible;
+        drawOptions.setAdjMiscPts(visible);
+        visible &= drawOptions.isVisible();
 
         _AdjMiscPts.setVisible(visible);
     }
 
     @Override
     public void setUnadjMiscPtsVisible(boolean visible) {
-        drawOptions.UnadjMiscPts = visible;
-        visible &= drawOptions.Visible;
+        drawOptions.setUnadjMiscPts(visible);
+        visible &= drawOptions.isVisible();
 
         _UnadjMiscPts.setVisible(visible);
     }
 
     @Override
     public void setWayPtsVisible(boolean visible) {
-        drawOptions.WayPts = visible;
-        visible &= drawOptions.Visible;
+        drawOptions.setWayPts(visible);
+        visible &= drawOptions.isVisible();
 
         _WayPts.setVisible(visible);
     }
 
     @Override
     public void setAdjBndClose(boolean close) {
-        drawOptions.AdjBndClose = close;
+        drawOptions.setAdjBndClose(close);
         
-        if (drawOptions.Visible) {
-            if (drawOptions.AdjBndClose) {
+        if (drawOptions.isVisible()) {
+            if (drawOptions.isAdjBndClose()) {
                 _AdjBndCB.setVisible(true);
                 _AdjBnd.setVisible(false);
             } else {
@@ -490,10 +499,10 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
 
     @Override
     public void setUnadjBndClose(boolean close) {
-        drawOptions.UnadjBndClose = close;
+        drawOptions.setUnadjBndClose(close);
 
-        if (drawOptions.Visible) {
-            if (drawOptions.UnadjBndClose) {
+        if (drawOptions.isVisible()) {
+            if (drawOptions.isUnadjBndClose()) {
                 _UnadjBndCB.setVisible(true);
                 _UnadjBnd.setVisible(false);
             } else {
@@ -502,77 +511,152 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
             }
         }
     }
+
+
+    @Override
+    public void setAdjBndColor(@ColorInt int adjBndColor) {
+
+    }
+
+    @Override
+    public void setUnAdjBndColor(@ColorInt int unAdjBndColor) {
+
+    }
+
+    @Override
+    public void setAdjNavColor(@ColorInt int adjNavColor) {
+
+    }
+
+    @Override
+    public void setUnAdjNavColor(@ColorInt int unAdjNavColor) {
+
+    }
+
+    @Override
+    public void setAdjPtsColor(@ColorInt int adjPtsColor) {
+
+    }
+
+    @Override
+    public void setUnAdjPtsColor(@ColorInt int unAdjPtsColor) {
+
+    }
+
+    @Override
+    public void setWayPtsColor(@ColorInt int wayPtsColor) {
+
+    }
+
+
     //endregion
 
     //region Getters
     @Override
     public boolean isVisible() {
-        return drawOptions.Visible;
+        return drawOptions.isVisible();
     }
 
     @Override
     public boolean isAdjBndVisible() {
-        return drawOptions.AdjBnd;
+        return drawOptions.isAdjBnd();
     }
 
     @Override
     public boolean isAdjBndPtsVisible() {
-        return drawOptions.AdjBndPts;
+        return drawOptions.isAdjBndPts();
     }
 
     @Override
     public boolean isUnadjBndVisible() {
-        return drawOptions.UnadjBnd;
+        return drawOptions.isUnadjBnd();
     }
 
     @Override
     public boolean isUnadjBndPtsVisible() {
-        return drawOptions.UnadjBndPts;
+        return drawOptions.isUnadjBndPts();
     }
 
     @Override
     public boolean isAdjNavVisible() {
-        return drawOptions.AdjNav;
+        return drawOptions.isAdjNav();
     }
 
     @Override
     public boolean isAdjNavPtsVisible() {
-        return drawOptions.AdjNavPts;
+        return drawOptions.isAdjNavPts();
     }
 
     @Override
     public boolean isUnadjNavVisible() {
-        return drawOptions.UnadjNav;
+        return drawOptions.isUnadjNav();
     }
 
     @Override
     public boolean isUnadjNavPtsVisible() {
-        return drawOptions.UnadjNavPts;
+        return drawOptions.isUnadjNavPts();
     }
 
     @Override
     public boolean isAdjMiscPtsVisible() {
-        return drawOptions.AdjMiscPts;
+        return drawOptions.isAdjMiscPts();
     }
 
     @Override
     public boolean isUnadjMiscPtsVisible() {
-        return drawOptions.UnadjMiscPts;
+        return drawOptions.isUnadjMiscPts();
     }
 
     @Override
     public boolean isWayPtsVisible() {
-        return drawOptions.WayPts;
+        return drawOptions.isWayPts();
     }
 
     @Override
     public boolean isAdjBndClose() {
-        return drawOptions.AdjBndClose;
+        return drawOptions.isAdjBndClose();
     }
 
     @Override
     public boolean isUnadjBndClose() {
-        return drawOptions.UnadjBndClose;
+        return drawOptions.isUnadjBndClose();
+    }
+
+
+
+    @Override
+    public int getAdjBndColor() {
+        return graphicOptions.getAdjBndColor();
+    }
+
+    @Override
+    public int getUnAdjBndColor() {
+        return graphicOptions.getUnAdjBndColor();
+    }
+
+    @Override
+    public int getAdjNavColor() {
+        return graphicOptions.getAdjNavColor();
+    }
+
+    @Override
+    public int getUnAdjNavColor() {
+        return graphicOptions.getUnAdjNavColor();
+    }
+
+    @Override
+    public int getAdjPtsColor() {
+        return graphicOptions.getAdjPtsColor();
+    }
+
+    @Override
+    public int getUnAdjPtsColor() {
+        return graphicOptions.getUnAdjPtsColor();
+    }
+
+    @Override
+    public int getWayPtsColor() {
+        return graphicOptions.getWayPtsColor();
     }
     //endregion
 }

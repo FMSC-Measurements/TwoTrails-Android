@@ -1,6 +1,7 @@
 package com.usda.fmsc.twotrails.activities;
 
 import android.os.AsyncTask;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.res.Configuration;
@@ -40,6 +41,11 @@ public class HaidActivity extends CustomToolbarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_haid);
+
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(false);
+        }
 
         drawerLayout = (DrawerLayout)findViewById(R.id.haidNavDrawer);
         progress = (ProgressBar)findViewById(R.id.progress);

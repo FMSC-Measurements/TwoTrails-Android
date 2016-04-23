@@ -56,6 +56,16 @@
     <item name="primary_900" type="color">#0A130B</item>
     <item name="primary_950" type="color">#050905</item>
 
+
+
+    <item name="map_adj_bnd" type="color">@color/red_500</item>
+    <item name="map_unadj_bnd" type="color">@color/red_900</item>
+    <item name="map_adj_nav" type="color">@color/indigo_500</item>
+    <item name="map_unadj_nav" type="color">@color/indigo_900</item>
+    <item name="map_adj_pts" type="color">@color/purple_500</item>
+    <item name="map_unadj_pts" type="color">@color/purple_900</item>
+    <item name="map_way_pts" type="color">@color/orange_900</item>
+
 </resources>
 
 

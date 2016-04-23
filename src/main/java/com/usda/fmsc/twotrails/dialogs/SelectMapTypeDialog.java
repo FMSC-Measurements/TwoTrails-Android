@@ -22,15 +22,13 @@ import com.usda.fmsc.twotrails.Units;
 import com.usda.fmsc.twotrails.adapters.ArcGisMapSelectionAdapter;
 import com.usda.fmsc.twotrails.adapters.GoogleMapSelectionAdapter;
 import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
-import com.usda.fmsc.twotrails.utilities.TtUtils;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class SelectMapTypeDialog extends DialogFragment {
     private static final String ARC_MAP_LAYERS = "ArcMapLayers";
-    private static final String SELECT_ONLINE_ARC = "SelectOnlineArc";
+    private static final String SELECT_MAP_MODE = "MadeMode";
 
     OnMapSelectedListener listener;
 
@@ -38,11 +36,9 @@ public class SelectMapTypeDialog extends DialogFragment {
 
     ViewPager viewPager;
 
+    SelectMapMode mode;
     Units.MapType mapType, defaultMapType;
     int mapId = -1, defaultMapId;
-    boolean selectOnlineArc;
-
-
 
     LayoutInflater inflater;
     View arcView, gmapView;
@@ -52,16 +48,16 @@ public class SelectMapTypeDialog extends DialogFragment {
 
 
     public static SelectMapTypeDialog newInstance(ArrayList<ArcGisMapLayer> layers) {
-        return newInstance(layers, false);
+        return newInstance(layers, SelectMapMode.ALL);
     }
 
-    public static SelectMapTypeDialog newInstance(ArrayList<ArcGisMapLayer> layers, boolean selectOnlineArc) {
+    public static SelectMapTypeDialog newInstance(ArrayList<ArcGisMapLayer> layers, SelectMapMode mode) {
         SelectMapTypeDialog dialog = new SelectMapTypeDialog();
 
         Bundle bundle = new Bundle();
 
         try {
-            bundle.putBoolean(SELECT_ONLINE_ARC, selectOnlineArc);
+            bundle.putInt(SELECT_MAP_MODE, mode.getValue());
             bundle.putParcelableArrayList(ARC_MAP_LAYERS, layers);
         } catch (Exception e) {
             e.printStackTrace();
@@ -84,7 +80,7 @@ public class SelectMapTypeDialog extends DialogFragment {
         if (bundle != null && bundle.containsKey(ARC_MAP_LAYERS)) {
             try {
                 mapLayers = bundle.getParcelableArrayList(ARC_MAP_LAYERS);
-                selectOnlineArc = bundle.getBoolean(SELECT_ONLINE_ARC, false);
+                mode = SelectMapMode.parse(bundle.getInt(SELECT_MAP_MODE, 0));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -104,14 +100,32 @@ public class SelectMapTypeDialog extends DialogFragment {
 
         FrameLayout fl = new FrameLayout(getActivity());
 
-        View view = inflater.inflate(selectOnlineArc ? R.layout.diag_select_map_online_arc : R.layout.diag_select_map, fl);
+        View view = inflater.inflate(mode == SelectMapMode.ALL ? R.layout.diag_select_map :  R.layout.diag_select_map_arc_map, fl);
 
-        if (selectOnlineArc) {
+        if (mode != SelectMapMode.ALL) {
             Toolbar toolbar = (Toolbar)view.findViewById(R.id.toolbar);
-            toolbar.setTitle("Online Arc Maps");
+
+            toolbar.setTitle(String.format("%sArc Maps",
+                    mode == SelectMapMode.ALL_ARC ? "" :
+                    mode == SelectMapMode.ARC_ONLINE ? "Online " : "Offline "));
 
             lvArcMap = (ListView)view.findViewById(R.id.diagSelectArcMapListView);
-            arcMapAdapter = new ArcGisMapSelectionAdapter(getContext(), mapLayers, -1, new ArcGisMapSelectionAdapter.IArcGisMapAdapterListener() {
+
+
+            List<ArcGisMapLayer> amls;
+
+            if (mode == SelectMapMode.ALL_ARC) {
+                amls = mapLayers;
+            } else {
+                amls = new ArrayList<>();
+                boolean online = mode == SelectMapMode.ARC_ONLINE;
+                for (ArcGisMapLayer layer : mapLayers) {
+                    if ((online && layer.isOnline()) || (!online && !layer.isOnline()))
+                        amls.add(layer);
+                }
+            }
+
+            arcMapAdapter = new ArcGisMapSelectionAdapter(getContext(), amls, -1, new ArcGisMapSelectionAdapter.IArcGisMapAdapterListener() {
                 @Override
                 public void onArcGisMapSelected(ArcGisMapLayer map) {
                     mapType = Units.MapType.ArcGIS;
@@ -148,8 +162,9 @@ public class SelectMapTypeDialog extends DialogFragment {
         return dialog.create();
     }
 
-    public void setOnMapSelectedListener(OnMapSelectedListener listener) {
+    public SelectMapTypeDialog setOnMapSelectedListener(OnMapSelectedListener listener) {
         this.listener = listener;
+        return this;
     }
 
 
@@ -248,5 +263,41 @@ public class SelectMapTypeDialog extends DialogFragment {
 
     public interface OnMapSelectedListener {
         void mapSelected(Units.MapType mapType, int mapId);
+    }
+
+
+    public enum SelectMapMode {
+        ALL(0),
+        ALL_ARC(1),
+        ARC_OFFLINE(2),
+        ARC_ONLINE(3);
+
+        private final int value;
+
+        private SelectMapMode(int value) {
+            this.value = value;
+        }
+
+        public int getValue() {
+            return value;
+        }
+
+        public static SelectMapMode parse(int id) {
+            SelectMapMode[] dists = values();
+            if(dists.length > id && id > -1)
+                return dists[id];
+            throw new IllegalArgumentException("Invalid SelectMapMode id: " + id);
+        }
+
+        @Override
+        public String toString() {
+            switch(this) {
+                case ALL: return "ALL";
+                case ALL_ARC: return "ALL ARC";
+                case ARC_OFFLINE: return "ARC OFFLINE";
+                case ARC_ONLINE: return "ARC_ONLINE";
+                default: throw new IllegalArgumentException();
+            }
+        }
     }
 }

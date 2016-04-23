@@ -26,8 +26,6 @@ public interface IMultiMapFragment {
 
     void setGesturesEnabled(boolean enabled);
 
-    void setEnableCameraQueue(boolean enabled);
-
 
     void moveToLocation(float lat, float lon, boolean animate);
 

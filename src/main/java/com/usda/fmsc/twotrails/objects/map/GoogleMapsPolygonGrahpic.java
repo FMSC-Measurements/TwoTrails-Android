@@ -1,6 +1,9 @@
 package com.usda.fmsc.twotrails.objects.map;
 
+import android.support.annotation.ColorInt;
+
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
@@ -9,6 +12,7 @@ import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.twotrails.Units;
 import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment.MarkerData;
@@ -22,10 +26,11 @@ import java.util.HashMap;
 import java.util.List;
 
 public class GoogleMapsPolygonGrahpic implements IPolygonGraphic, IMarkerDataGraphic {
+    private GoogleMap map;
+
     private TtPolygon polygon;
     private PolygonDrawOptions drawOptions;
-
-    private GoogleMap map;
+    private PolygonGraphicOptions graphicOptions;
 
     private ArrayList<Marker> _AllAdjPts, _AllUnadjPts, _AdjBndPts, _UnadjBndPts, _AdjNavPts, _UnadjNavPts, _WayPts, _AdjMiscPts, _UnadjMiscPts;
     private Polygon _AdjBndCB, _UnadjBndCB;
@@ -42,6 +47,7 @@ public class GoogleMapsPolygonGrahpic implements IPolygonGraphic, IMarkerDataGra
     public void build(TtPolygon polygon, List<TtPoint> points, HashMap<String, TtMetadata> meta, PolygonGraphicOptions graphicOptions, PolygonDrawOptions drawOptions) {
         this.polygon = polygon;
         this.drawOptions = drawOptions;
+        this.graphicOptions = graphicOptions;
 
         _MarkerData = new HashMap<>();
 
@@ -81,8 +87,14 @@ public class GoogleMapsPolygonGrahpic implements IPolygonGraphic, IMarkerDataGra
             adj = TtUtils.GMap.createMarkerOptions(point, true, meta);
             unadj = TtUtils.GMap.createMarkerOptions(point, false, meta);
 
-            adjmk = map.addMarker(adj.visible(false));
-            unadjmk = map.addMarker(unadj.visible(false));
+            adjmk = map.addMarker(adj.visible(false).icon(BitmapDescriptorFactory.defaultMarker(
+                    AndroidUtils.Convert.rgbToHsvHue(graphicOptions.getAdjPtsColor())
+            )));
+
+            unadjmk = map.addMarker(unadj.visible(false).icon(BitmapDescriptorFactory.defaultMarker(
+                    AndroidUtils.Convert.rgbToHsvHue(
+                    point.getOp() == Units.OpType.WayPoint ? graphicOptions.getWayPtsColor() : graphicOptions.getUnAdjPtsColor())
+            )));
 
             _MarkerData.put(adjmk.getId(), new MarkerData(point, metadata, true));
             _MarkerData.put(unadjmk.getId(), new MarkerData(point, metadata, false));
@@ -124,17 +136,17 @@ public class GoogleMapsPolygonGrahpic implements IPolygonGraphic, IMarkerDataGra
                 isMisc = true;
             }
             
-            adjmk.setVisible(drawOptions.Visible && (
-                    drawOptions.AdjBndPts ||
-                    drawOptions.AdjNavPts ||
-                    (isMisc && drawOptions.AdjMiscPts)
+            adjmk.setVisible(drawOptions.isVisible() && (
+                    drawOptions.isAdjBndPts() ||
+                    drawOptions.isAdjNavPts() ||
+                    (isMisc && drawOptions.isAdjMiscPts())
             ));
             
-            unadjmk.setVisible(drawOptions.Visible && (
-                    drawOptions.UnadjBndPts ||
-                    drawOptions.UnadjNavPts ||
-                    (isMisc && drawOptions.UnadjMiscPts) ||
-                    (isWay && drawOptions.WayPts)
+            unadjmk.setVisible(drawOptions.isVisible() && (
+                    drawOptions.isUnadjBndPts() ||
+                    drawOptions.isUnadjNavPts() ||
+                    (isMisc && drawOptions.isUnadjMiscPts()) ||
+                    (isWay && drawOptions.isWayPts())
             ));
 
             llBuilder.include(adjLL);
@@ -163,17 +175,17 @@ public class GoogleMapsPolygonGrahpic implements IPolygonGraphic, IMarkerDataGra
             _UnadjBndCB = map.addPolygon(unadjBndPO.visible(false));
 
 
-            if (drawOptions.Visible) {
-                if (drawOptions.AdjBnd) {
-                    if (drawOptions.AdjBndClose) {
+            if (drawOptions.isVisible()) {
+                if (drawOptions.isAdjBnd()) {
+                    if (drawOptions.isAdjBndClose()) {
                         _AdjBndCB.setVisible(true);
                     } else {
                         _AdjBnd.setVisible(true);
                     }
                 }
 
-                if (drawOptions.UnadjBnd) {
-                    if (drawOptions.UnadjBndClose) {
+                if (drawOptions.isUnadjBnd()) {
+                    if (drawOptions.isUnadjBndClose()) {
                         _UnadjBndCB.setVisible(true);
                     } else {
                         _UnadjBnd.setVisible(true);
@@ -189,12 +201,12 @@ public class GoogleMapsPolygonGrahpic implements IPolygonGraphic, IMarkerDataGra
             _AdjNav = map.addPolyline(adjNavPLO.visible(false));
             _UnadjNav = map.addPolyline(unadjNavPLO.visible(false));
             
-            if (drawOptions.Visible) {
-                if (drawOptions.AdjNav) {
+            if (drawOptions.isVisible()) {
+                if (drawOptions.isAdjNav()) {
                     _AdjNav.setVisible(true);
                 }
                 
-                if (drawOptions.UnadjNav) {
+                if (drawOptions.isUnadjNav()) {
                     _UnadjNav.setVisible(true);
                 }
             }
@@ -205,40 +217,40 @@ public class GoogleMapsPolygonGrahpic implements IPolygonGraphic, IMarkerDataGra
     //region Setters
     @Override
     public void setVisible(boolean visible) {
-        drawOptions.Visible = visible;
+        drawOptions.setVisible(visible);
 
         if (visible) {
             for (Marker m : _AllAdjPts) {
-                m.setVisible(drawOptions.AdjBndPts || drawOptions.AdjNavPts);
+                m.setVisible(drawOptions.isAdjBndPts() || drawOptions.isAdjNavPts());
             }
             
             for (Marker m : _AllUnadjPts) {
-                m.setVisible(drawOptions.UnadjBndPts || drawOptions.UnadjNavPts);
+                m.setVisible(drawOptions.isUnadjBndPts() || drawOptions.isUnadjNavPts());
             }
             
-            if (drawOptions.AdjMiscPts) {
+            if (drawOptions.isAdjMiscPts()) {
                 for (Marker m : _AdjMiscPts) {
                     m.setVisible(true);
                 }
             }
             
-            if (drawOptions.WayPts) {
+            if (drawOptions.isWayPts()) {
                 for (Marker m : _WayPts) {
                     m.setVisible(true);
                 }
             }
 
             if (_AdjBnd != null) {
-                if (drawOptions.AdjBnd) {
-                    if (drawOptions.AdjBndClose) {
+                if (drawOptions.isAdjBnd()) {
+                    if (drawOptions.isAdjBndClose()) {
                         _AdjBndCB.setVisible(true);
                     } else {
                         _AdjBnd.setVisible(true);
                     }
                 }
 
-                if (drawOptions.UnadjBnd) {
-                    if (drawOptions.UnadjBndClose) {
+                if (drawOptions.isUnadjBnd()) {
+                    if (drawOptions.isUnadjBndClose()) {
                         _UnadjBndCB.setVisible(true);
                     } else {
                         _UnadjBnd.setVisible(true);
@@ -247,11 +259,11 @@ public class GoogleMapsPolygonGrahpic implements IPolygonGraphic, IMarkerDataGra
             }
 
             if (_AdjNav != null) {
-                if (drawOptions.AdjNav) {
+                if (drawOptions.isAdjNav()) {
                     _AdjNav.setVisible(true);
                 }
 
-                if (drawOptions.UnadjNav) {
+                if (drawOptions.isUnadjNav()) {
                     _UnadjNav.setVisible(true);
                 }
             }
@@ -281,12 +293,12 @@ public class GoogleMapsPolygonGrahpic implements IPolygonGraphic, IMarkerDataGra
 
     @Override
     public void setAdjBndVisible(boolean visible) {
-        drawOptions.AdjBnd = visible;
+        drawOptions.setAdjBnd(visible);
 
         if (_AdjBnd != null) {
-            visible &= drawOptions.Visible;
+            visible &= drawOptions.isVisible();
 
-            if (drawOptions.AdjBndClose) {
+            if (drawOptions.isAdjBndClose()) {
                 _AdjBndCB.setVisible(visible);
             } else {
                 _AdjBnd.setVisible(visible);
@@ -296,9 +308,9 @@ public class GoogleMapsPolygonGrahpic implements IPolygonGraphic, IMarkerDataGra
 
     @Override
     public void setAdjBndPtsVisible(boolean visible) {
-        drawOptions.AdjBndPts = visible;
+        drawOptions.setAdjBndPts(visible);
 
-        visible &= drawOptions.Visible;
+        visible &= drawOptions.isVisible();
         for (Marker m : _AdjBndPts) {
             m.setVisible(visible);
         }
@@ -307,12 +319,12 @@ public class GoogleMapsPolygonGrahpic implements IPolygonGraphic, IMarkerDataGra
 
     @Override
     public void setUnadjBndVisible(boolean visible) {
-        drawOptions.UnadjBnd = visible;
+        drawOptions.setUnadjBnd(visible);
 
         if (_UnadjBnd != null) {
-            visible &= drawOptions.Visible;
+            visible &= drawOptions.isVisible();
 
-            if (drawOptions.AdjBndClose) {
+            if (drawOptions.isAdjBndClose()) {
                 _UnadjBndCB.setVisible(visible);
             } else {
                 _UnadjBnd.setVisible(visible);
@@ -322,9 +334,9 @@ public class GoogleMapsPolygonGrahpic implements IPolygonGraphic, IMarkerDataGra
 
     @Override
     public void setUnadjBndPtsVisible(boolean visible) {
-        drawOptions.UnadjBndPts = visible;
+        drawOptions.setUnadjBndPts(visible);
 
-        visible &= drawOptions.Visible;
+        visible &= drawOptions.isVisible();
         for (Marker m : _UnadjBndPts) {
             m.setVisible(visible);
         }
@@ -333,18 +345,18 @@ public class GoogleMapsPolygonGrahpic implements IPolygonGraphic, IMarkerDataGra
 
     @Override
     public void setAdjNavVisible(boolean visible) {
-        drawOptions.AdjNav = visible;
+        drawOptions.setAdjNav(visible);
 
         if (_AdjNav != null) {
-            _AdjNav.setVisible(visible && drawOptions.Visible);
+            _AdjNav.setVisible(visible && drawOptions.isVisible());
         }
     }
 
     @Override
     public void setAdjNavPtsVisible(boolean visible) {
-        drawOptions.AdjNavPts = visible;
+        drawOptions.setAdjNavPts(visible);
 
-        visible &= drawOptions.Visible;
+        visible &= drawOptions.isVisible();
         for (Marker m : _AdjNavPts) {
             m.setVisible(visible);
         }
@@ -353,18 +365,18 @@ public class GoogleMapsPolygonGrahpic implements IPolygonGraphic, IMarkerDataGra
 
     @Override
     public void setUnadjNavVisible(boolean visible) {
-        drawOptions.UnadjNav = visible;
+        drawOptions.setUnadjNav(visible);
 
         if (_UnadjNav != null) {
-            _UnadjNav.setVisible(visible && drawOptions.Visible);
+            _UnadjNav.setVisible(visible && drawOptions.isVisible());
         }
     }
 
     @Override
     public void setUnadjNavPtsVisible(boolean visible) {
-        drawOptions.UnadjNavPts = visible;
+        drawOptions.setUnadjNavPts(visible);
 
-        visible &= drawOptions.Visible;
+        visible &= drawOptions.isVisible();
         for (Marker m : _UnadjNavPts) {
             m.setVisible(visible);
         }
@@ -373,19 +385,19 @@ public class GoogleMapsPolygonGrahpic implements IPolygonGraphic, IMarkerDataGra
 
     @Override
     public void setAdjMiscPtsVisible(boolean visible) {
-        drawOptions.AdjMiscPts = visible;
+        drawOptions.setAdjMiscPts(visible);
 
-        visible &= drawOptions.Visible;
+        visible &= drawOptions.isVisible();
         for (Marker m : _AdjMiscPts) {
-            m.setVisible(visible && drawOptions.Visible);
+            m.setVisible(visible && drawOptions.isVisible());
         }
     }
 
     @Override
     public void setUnadjMiscPtsVisible(boolean visible) {
-        drawOptions.UnadjMiscPts = visible;
+        drawOptions.setUnadjMiscPts(visible);
 
-        visible &= drawOptions.Visible;
+        visible &= drawOptions.isVisible();
         for (Marker m : _UnadjMiscPts) {
             m.setVisible(visible);
         }
@@ -394,7 +406,7 @@ public class GoogleMapsPolygonGrahpic implements IPolygonGraphic, IMarkerDataGra
 
     @Override
     public void setWayPtsVisible(boolean visible) {
-        drawOptions.WayPts = visible;
+        drawOptions.setWayPts(visible);
 
         for (Marker m : _WayPts) {
             m.setVisible(visible);
@@ -404,14 +416,14 @@ public class GoogleMapsPolygonGrahpic implements IPolygonGraphic, IMarkerDataGra
 
     @Override
     public void setAdjBndClose(boolean close) {
-        if (drawOptions.AdjBndClose != close) {
-            boolean isvis = drawOptions.AdjBnd;
+        if (drawOptions.isAdjBndClose() != close) {
+            boolean isvis = drawOptions.isAdjBnd();
 
             setAdjBndVisible(false);
 
-            drawOptions.AdjBndClose = close;
+            drawOptions.setAdjBndClose(close);
 
-            if (drawOptions.Visible && isvis) {
+            if (drawOptions.isVisible() && isvis) {
                 setAdjBndVisible(true);
             }
         }
@@ -419,16 +431,74 @@ public class GoogleMapsPolygonGrahpic implements IPolygonGraphic, IMarkerDataGra
 
     @Override
     public void setUnadjBndClose(boolean close) {
-        if (drawOptions.UnadjBndClose != close) {
-            boolean isvis = drawOptions.AdjBnd;
+        if (drawOptions.isUnadjBndClose() != close) {
+            boolean isvis = drawOptions.isAdjBnd();
 
             setUnadjBndVisible(false);
 
-            drawOptions.UnadjBndClose = close;
+            drawOptions.setUnadjBndClose(close);
 
-            if (drawOptions.Visible && isvis) {
+            if (drawOptions.isVisible() && isvis) {
                 setUnadjBndVisible(true);
             }
+        }
+    }
+
+
+
+    @Override
+    public void setAdjBndColor(@ColorInt int color) {
+        graphicOptions.setAdjBndColor(color);
+        _AdjBnd.setColor(color);
+    }
+
+    @Override
+    public void setUnAdjBndColor(@ColorInt int color) {
+        graphicOptions.setUnAdjBndColor(color);
+        _UnadjBnd.setColor(color);
+    }
+
+
+    @Override
+    public void setAdjNavColor(@ColorInt int color) {
+        graphicOptions.setAdjNavColor(color);
+        _AdjNav.setColor(color);
+    }
+
+    @Override
+    public void setUnAdjNavColor(@ColorInt int color) {
+        graphicOptions.setUnAdjNavColor(color);
+        _UnadjNav.setColor(color);
+    }
+
+
+    @Override
+    public void setAdjPtsColor(@ColorInt int color) {
+        graphicOptions.setAdjPtsColor(color);
+
+        for (Marker marker : _AllAdjPts) {
+            marker.setIcon(BitmapDescriptorFactory.defaultMarker(color));
+        }
+    }
+
+    @Override
+    public void setUnAdjPtsColor(@ColorInt int color) {
+        graphicOptions.setUnAdjPtsColor(color);
+
+        for (Marker marker : _AllUnadjPts) {
+            if (!_WayPts.contains(marker)) {
+                marker.setIcon(BitmapDescriptorFactory.defaultMarker(color));
+            }
+        }
+    }
+
+
+    @Override
+    public void setWayPtsColor(@ColorInt int color) {
+        graphicOptions.setWayPtsColor(color);
+
+        for (Marker marker : _WayPts) {
+            marker.setIcon(BitmapDescriptorFactory.defaultMarker(color));
         }
     }
     //endregion
@@ -456,74 +526,115 @@ public class GoogleMapsPolygonGrahpic implements IPolygonGraphic, IMarkerDataGra
     }
 
     @Override
+    public PolygonGraphicOptions getGraphicOptions() {
+        return graphicOptions;
+    }
+
+    @Override
     public boolean isVisible() {
-        return drawOptions.Visible;
+        return drawOptions.isVisible();
     }
 
     @Override
     public boolean isAdjBndVisible() {
-        return drawOptions.AdjBnd;
+        return drawOptions.isAdjBnd();
     }
 
     @Override
     public boolean isAdjBndPtsVisible() {
-        return drawOptions.AdjBndPts;
+        return drawOptions.isAdjBndPts();
     }
 
     @Override
     public boolean isUnadjBndVisible() {
-        return drawOptions.UnadjBnd;
+        return drawOptions.isUnadjBnd();
     }
 
     @Override
     public boolean isUnadjBndPtsVisible() {
-        return drawOptions.UnadjBndPts;
+        return drawOptions.isUnadjBndPts();
     }
 
     @Override
     public boolean isAdjNavVisible() {
-        return drawOptions.AdjNav;
+        return drawOptions.isAdjNav();
     }
 
     @Override
     public boolean isAdjNavPtsVisible() {
-        return drawOptions.AdjNavPts;
+        return drawOptions.isAdjNavPts();
     }
 
     @Override
     public boolean isUnadjNavVisible() {
-        return drawOptions.UnadjNav;
+        return drawOptions.isUnadjNav();
     }
 
     @Override
     public boolean isUnadjNavPtsVisible() {
-        return drawOptions.UnadjNavPts;
+        return drawOptions.isUnadjNavPts();
     }
 
     @Override
     public boolean isAdjMiscPtsVisible() {
-        return drawOptions.AdjMiscPts;
+        return drawOptions.isAdjMiscPts();
     }
 
     @Override
     public boolean isUnadjMiscPtsVisible() {
-        return drawOptions.UnadjMiscPts;
+        return drawOptions.isUnadjMiscPts();
     }
 
     @Override
     public boolean isWayPtsVisible() {
-        return drawOptions.WayPts;
+        return drawOptions.isWayPts();
     }
 
     @Override
     public boolean isAdjBndClose() {
-        return drawOptions.AdjBndClose;
+        return drawOptions.isAdjBndClose();
     }
 
     @Override
     public boolean isUnadjBndClose() {
-        return drawOptions.UnadjBndClose;
+        return drawOptions.isUnadjBndClose();
+    }
+
+
+
+    @Override
+    public int getAdjBndColor() {
+        return graphicOptions.getAdjBndColor();
+    }
+
+    @Override
+    public int getUnAdjBndColor() {
+        return graphicOptions.getUnAdjBndColor();
+    }
+
+    @Override
+    public int getAdjNavColor() {
+        return graphicOptions.getAdjNavColor();
+    }
+
+    @Override
+    public int getUnAdjNavColor() {
+        return graphicOptions.getUnAdjNavColor();
+    }
+
+    @Override
+    public int getAdjPtsColor() {
+        return graphicOptions.getAdjPtsColor();
+    }
+
+    @Override
+    public int getUnAdjPtsColor() {
+        return graphicOptions.getUnAdjPtsColor();
+    }
+
+    @Override
+    public int getWayPtsColor() {
+        return graphicOptions.getWayPtsColor();
     }
     //endregion
-
 }

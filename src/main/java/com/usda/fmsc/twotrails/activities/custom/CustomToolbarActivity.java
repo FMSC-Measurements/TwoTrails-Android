@@ -60,7 +60,7 @@ public class CustomToolbarActivity extends AppCompatActivity {
 
             ActionBar ab = getSupportActionBar();
             if (ab != null) {
-                ab.setDisplayHomeAsUpEnabled(false);
+                ab.setDisplayHomeAsUpEnabled(true);
             }
         }
     }

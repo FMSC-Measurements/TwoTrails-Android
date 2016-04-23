@@ -11,4 +11,17 @@
     <style name="ToolbarElevation2" parent="ToolbarElevationBase"/>
 
     <style name="ToolbarElevation3" parent="ToolbarElevationBase"/>
+
+    <style name="ArcMapDetailsStyle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:transitionName">@string/trans_map_details</item>
+        <item name="android:elevation">2dp</item>
+    </style>
+
+    <style name="toolbar">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/toolbar_height</item>
+        <item name="android:transitionName">@string/trans_toolbar</item>
+    </style>
 </resources>

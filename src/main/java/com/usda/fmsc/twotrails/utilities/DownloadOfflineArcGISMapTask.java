@@ -15,6 +15,8 @@ import com.usda.fmsc.utilities.StringEx;
 public class DownloadOfflineArcGISMapTask {
     //true create as tile package, false to create as compact cache
     private static final boolean CREATE_AS_TILE_PACKAGE = false;
+    private static final int MAX_DETAIL_LEVELS = 8;
+
 
     private ExportTileCacheTask exportTileCacheTask;
     private ExportTileCacheParameters params;
@@ -22,17 +24,17 @@ public class DownloadOfflineArcGISMapTask {
     private ArcGisMapLayer layer;
     private String downloadLocation;
 
-    public DownloadOfflineArcGISMapTask(ArcGisMapLayer layer, Envelope extents, SpatialReference spatialReference, String downloadLocation) {
+    public DownloadOfflineArcGISMapTask(ArcGisMapLayer layer, Envelope extents, SpatialReference spatialReference, String downloadLocation, UserCredentials credentials) {
         this.layer = layer;
         this.downloadLocation = downloadLocation;
 
         double[] detailLevels = new double[layer.getLevelsOfDetail().length];
 
-        for (int i = 0; i < layer.getLevelsOfDetail().length; i++) {
-            detailLevels[i] = layer.getLevelsOfDetail()[i].getResolution();
+        for (int i = 0; i < layer.getLevelsOfDetail().length && i < MAX_DETAIL_LEVELS; i++) {
+            detailLevels[i] = layer.getLevelsOfDetail()[i].getLevel();
         }
 
-        exportTileCacheTask = new ExportTileCacheTask(layer.getUri(), new UserCredentials());
+        exportTileCacheTask = new ExportTileCacheTask(layer.getUrl(), credentials);
 
         exportTileCacheTask.setRecoveryDir(TtUtils.getOfflineMapsRecoveryDir());
 
@@ -84,7 +86,7 @@ public class DownloadOfflineArcGISMapTask {
                     @Override
                     public void onCallback(String s) {
                         if (!StringEx.isEmpty(s)) {
-                            layer.setUri(s);
+                            layer.setFilePath(s);
 
                             if (listener != null) {
                                 listener.onMapDownloaded(layer);

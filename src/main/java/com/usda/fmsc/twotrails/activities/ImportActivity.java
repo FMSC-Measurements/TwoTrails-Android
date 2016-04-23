@@ -99,12 +99,6 @@ public class ImportActivity extends TtAjusterCustomToolbarActivity {
 
         activity = this;
 
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayShowTitleEnabled(true);
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
-
         fabImport = (FloatingActionButton)findViewById(R.id.importFabImport);
         fabProgCircle = (FABProgressCircleEx)findViewById(R.id.importFabImportProgressCircle);
 
