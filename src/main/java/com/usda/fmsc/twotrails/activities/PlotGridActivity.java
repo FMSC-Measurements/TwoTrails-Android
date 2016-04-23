@@ -105,11 +105,6 @@ public class PlotGridActivity extends CustomToolbarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_plot_grid);
 
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
-
         polygons = new ArrayList<>();
         allPolys = new ArrayList<>();
         polyNames = new ArrayList<>();

@@ -1,5 +1,7 @@
 package com.usda.fmsc.twotrails.objects.map;
 
+import android.support.annotation.ColorInt;
+
 import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.TtPoint;
@@ -15,6 +17,8 @@ public interface IPolygonGraphic {
     TtPolygon getPolygon();
 
     PolygonDrawOptions getDrawOptions();
+
+    PolygonGraphicOptions getGraphicOptions();
 
     Extent getExtents();
 
@@ -64,42 +68,20 @@ public interface IPolygonGraphic {
     boolean isUnadjBndClose();
 
 
-    class PolygonGraphicOptions {
-        private int AdjBndColor, UnAdjBndColor;
-        private int AdjNavColor, UnAdjNavColor;
-        private float AdjWidth, UnAdjWidth;
 
-        public PolygonGraphicOptions(int AdjBndColor, int UnAdjBndColor, int AdjNavColor, int UnAdjNavColor, float AdjWidth, float UnAdjWidth) {
-            this.AdjBndColor = AdjBndColor;
-            this.UnAdjBndColor = UnAdjBndColor;
-            this.AdjNavColor = AdjNavColor;
-            this.UnAdjNavColor = UnAdjNavColor;
-            this.AdjWidth = AdjWidth;
-            this.UnAdjWidth = UnAdjWidth;
-        }
+    void setAdjBndColor(@ColorInt int adjBndColor);
+    void setUnAdjBndColor(@ColorInt int unAdjBndColor);
+    void setAdjNavColor(@ColorInt int adjNavColor);
+    void setUnAdjNavColor(@ColorInt int unAdjNavColor);
+    void setAdjPtsColor(@ColorInt int adjPtsColor);
+    void setUnAdjPtsColor(@ColorInt int unAdjPtsColor);
+    void setWayPtsColor(@ColorInt int wayPtsColor);
 
-        public int getAdjBndColor() {
-            return AdjBndColor;
-        }
-
-        public int getUnAdjBndColor() {
-            return UnAdjBndColor;
-        }
-
-        public int getAdjNavColor() {
-            return AdjNavColor;
-        }
-
-        public int getUnAdjNavColor() {
-            return UnAdjNavColor;
-        }
-
-        public float getAdjWidth() {
-            return AdjWidth;
-        }
-
-        public float getUnAdjWidth() {
-            return UnAdjWidth;
-        }
-    }
+    int getAdjBndColor();
+    int getUnAdjBndColor();
+    int getAdjNavColor();
+    int getUnAdjNavColor();
+    int getAdjPtsColor();
+    int getUnAdjPtsColor();
+    int getWayPtsColor();
 }

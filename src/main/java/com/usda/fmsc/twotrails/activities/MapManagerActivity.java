@@ -4,11 +4,13 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
-import android.support.v7.app.ActionBar;
+import android.support.v4.util.Pair;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.PopupMenu;
+import android.transition.Transition;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,31 +18,41 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.usda.fmsc.android.AndroidUtils;
+import com.usda.fmsc.android.Transitions.ElevationTransition;
+import com.usda.fmsc.android.widget.PopupMenuButton;
 import com.usda.fmsc.android.widget.RecyclerViewEx;
 import com.usda.fmsc.android.widget.SheetFab;
 import com.usda.fmsc.android.widget.layoutmanagers.LinearLayoutManagerWithSmoothScroller;
+import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.Units;
 import com.usda.fmsc.twotrails.activities.custom.CustomToolbarActivity;
-import com.usda.fmsc.twotrails.dialogs.ArcMapFromUrlDialog;
+import com.usda.fmsc.twotrails.dialogs.NewArcMapDialog;
 import com.usda.fmsc.twotrails.dialogs.SelectMapTypeDialog;
 import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
 import com.usda.fmsc.twotrails.ui.MSFloatingActionButton;
 import com.usda.fmsc.twotrails.utilities.ArcGISTools;
+import com.usda.fmsc.utilities.StringEx;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
 
-import jp.wasabeef.recyclerview.animators.SlideInUpAnimator;
+import jp.wasabeef.recyclerview.animators.SlideInLeftAnimator;
 
-public class MapManagerActivity extends CustomToolbarActivity {
+//TODO check to see if there if credentials exist before creating/editing maps
+//TODO delete ctx
+//TODO rename ctx
+public class MapManagerActivity extends CustomToolbarActivity implements ArcGISTools.IArcToolsListener {
     private static final String SELECT_MAP = "SelectMap";
 
     RecyclerViewEx rvMaps;
     SheetFab fabSheet;
 
     ArcGisMapAdapter adapter;
-    ArrayList<ArcGisMapLayer> maps, visibleMaps, onlineMaps, offlineMaps;
+    ArrayList<ArcGisMapLayer> maps, visibleMaps;
+
+    boolean inDetails = false;
+    int notifyAdapter = -1;
 
 
     @Override
@@ -49,35 +61,61 @@ public class MapManagerActivity extends CustomToolbarActivity {
 
         setContentView(R.layout.activity_map_manager);
 
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            getWindow().getSharedElementReenterTransition().addListener(new Transition.TransitionListener() {
+                @Override
+                public void onTransitionStart(Transition transition) {
+
+                }
+
+                @Override
+                public void onTransitionEnd(Transition transition) {
+                    inDetails = false;
+
+                    if (notifyAdapter > -1) {
+                        adapter.notifyItemRemoved(notifyAdapter);
+                        notifyAdapter = -1;
+                    }
+                }
+
+                @Override
+                public void onTransitionCancel(Transition transition) {
+
+                }
+
+                @Override
+                public void onTransitionPause(Transition transition) {
+
+                }
+
+                @Override
+                public void onTransitionResume(Transition transition) {
+
+                }
+            });
         }
 
-
-        maps = new ArrayList<>(ArcGISTools.getLayers());
+        maps = new ArrayList<>(ArcGISTools.getMapLayers());
         visibleMaps = new ArrayList<>();
-        onlineMaps = new ArrayList<>();
-        offlineMaps = new ArrayList<>();
+
+        Collections.sort(maps);
 
         for (ArcGisMapLayer layer : maps) {
-            if (layer.isOnline())
-                onlineMaps.add(layer);
-            else
-                offlineMaps.add(layer);
-
             visibleMaps.add(layer);
         }
 
+
         rvMaps = (RecyclerViewEx) findViewById(R.id.mmRvMaps);
-        rvMaps.setViewHasFooter(true);
-        rvMaps.setLayoutManager(new LinearLayoutManagerWithSmoothScroller(this));
-        rvMaps.setHasFixedSize(true);
-        rvMaps.setItemAnimator(new SlideInUpAnimator());
 
-        adapter = new ArcGisMapAdapter(this);
-        rvMaps.setAdapter(adapter);
+        if (rvMaps != null) {
+            rvMaps.setViewHasFooter(true);
+            rvMaps.setLayoutManager(new LinearLayoutManagerWithSmoothScroller(this));
+            rvMaps.setHasFixedSize(true);
+            rvMaps.setItemAnimator(new SlideInLeftAnimator());
 
+            adapter = new ArcGisMapAdapter(this);
+            rvMaps.setAdapter(adapter);
+        }
 
         MSFloatingActionButton fabMenu = (MSFloatingActionButton)findViewById(R.id.mmFabMenu);
         View overlay = findViewById(R.id.overlay);
@@ -91,6 +129,58 @@ public class MapManagerActivity extends CustomToolbarActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == Consts.Activities.MAP_DETAILS) {
+            if (data != null && data.hasExtra(Consts.Activities.Data.MAP_DATA)) {
+                ArcGisMapLayer layer = data.getParcelableExtra(Consts.Activities.Data.MAP_DATA);
+
+                if (layer != null) {
+
+                    if (resultCode == Consts.Activities.Results.MAP_UPDATED) {
+                        for (ArcGisMapLayer agml : maps) {
+                            if (agml.getId() == layer.getId()) {
+                                agml.update(layer);
+                                break;
+                            }
+                        }
+
+                        int pos = 0;
+                        for (ArcGisMapLayer agml : visibleMaps) {
+                            if (agml.getId() == layer.getId()) {
+                                agml.update(layer);
+                                adapter.notifyItemChanged(pos);
+                                break;
+                            }
+                            pos++;
+                        }
+                    } else if (resultCode == Consts.Activities.Results.MAP_DELETED) {
+                        boolean mr = false, vmr = false;
+
+                        for (int i = 0; i < maps.size(); i++) {
+                            if (!mr && maps.get(i).getId() == layer.getId()) {
+                                maps.remove(i);
+                                mr = true;
+                            }
+
+                            if (!vmr && visibleMaps.get(i).getId() == layer.getId()) {
+                                visibleMaps.remove(i);
+
+                                if (!inDetails)
+                                    adapter.notifyItemRemoved(i);
+                                else
+                                    notifyAdapter = i;
+
+                                vmr = true;
+                            }
+
+                            if (vmr && mr) {
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         super.onActivityResult(requestCode, resultCode, data);
     }
 
@@ -105,55 +195,75 @@ public class MapManagerActivity extends CustomToolbarActivity {
         return super.onOptionsItemSelected(item);
     }
 
+
+    @Override
+    public void arcLayerAdded(ArcGisMapLayer layer) {
+        visibleMaps.add(layer);
+        adapter.notifyDataSetChanged();
+    }
+
+
     public void btnMmAddClick(View view) {
         fabSheet.showSheet();
     }
 
     public void btnMmAddOnlineClick(View view) {
         fabSheet.hideSheet();
-        createMap(null, null, true);
+        createMap(null, null, NewArcMapDialog.CreateMode.NEW_ONLINE);
     }
 
     public void btnMmAddOfflineClick(View view) {
         fabSheet.hideSheet();
 
-        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+        new AlertDialog.Builder(this)
+            .setMessage("Create Offline map from:")
+            .setPositiveButton("Existing Map", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
 
-        dialog.setMessage("Create Offline map from:")
-                .setPositiveButton("Online Map", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        SelectMapTypeDialog odialog = SelectMapTypeDialog.newInstance(onlineMaps, true);
+                    SelectMapTypeDialog.newInstance(maps, SelectMapTypeDialog.SelectMapMode.ALL_ARC)
+                    .setOnMapSelectedListener(new SelectMapTypeDialog.OnMapSelectedListener() {
+                        @Override
+                        public void mapSelected(Units.MapType mapType, int mapId) {
+                            ArcGisMapLayer layer = ArcGISTools.getMapLayer(mapId);
 
-                        odialog.setOnMapSelectedListener(new SelectMapTypeDialog.OnMapSelectedListener() {
-                            @Override
-                            public void mapSelected(Units.MapType mapType, int mapId) {
-                                ArcGisMapLayer layer = ArcGISTools.getMapLayer(mapId);
-                                createMap(String.format("%s (Offline)", layer.getName()), layer.getUri(), false);
+                            if (!layer.isOnline() && StringEx.isEmpty(layer.getUrl())) {
+                                new AlertDialog.Builder(getBaseContext())
+                                        .setMessage("This offline map was not created from an online resource. " +
+                                                "You can only create offline maps from online maps or offline" +
+                                                "maps which were created from online resources.")
+                                        .setPositiveButton(R.string.str_ok, null)
+                                        .show();
+                            } else {
+                                createMap(String.format("%s (Offline)", layer.getName()), layer.getUrl(),
+                                        layer.isOnline() ?
+                                                NewArcMapDialog.CreateMode.OFFLINE_FROM_ONLINE_URL :
+                                                NewArcMapDialog.CreateMode.OFFLINE_FROM_OFFLINE_URL
+                                );
                             }
-                        });
-
-                        odialog.show(getSupportFragmentManager(), SELECT_MAP);
-                    }
-                })
-                .setNegativeButton("Url", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        createMap(null, null, false);
-                    }
-                })
-                .setNeutralButton(R.string.str_cancel, null)
-                .show();
+                        }
+                    })
+                    .show(getSupportFragmentManager(), SELECT_MAP);
+                }
+            })
+            .setNegativeButton("File", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    createMap(null, null, NewArcMapDialog.CreateMode.OFFLINE_FROM_FILE);
+                }
+            })
+            .setNeutralButton(R.string.str_cancel, null)
+            .show();
     }
 
-    private void createMap(String name, String url, boolean isOnline) {
-        ArcMapFromUrlDialog odialog = ArcMapFromUrlDialog.newInstance(name, url, isOnline);
-        odialog.show(getSupportFragmentManager(), SELECT_MAP);
+    private void createMap(String name, String uri, NewArcMapDialog.CreateMode mode) {
+        NewArcMapDialog.newInstance(name, uri, mode)
+            .show(getSupportFragmentManager(), SELECT_MAP);
     }
 
 
     private class ArcGisMapAdapter extends RecyclerViewEx.BaseAdapterEx {
-        private Drawable dOffline, dOnline;
+        private Drawable dOffline, dOnline, dOfflineInvalid;
         private LayoutInflater inflater;
 
         public ArcGisMapAdapter(Context context) {
@@ -162,11 +272,12 @@ public class MapManagerActivity extends CustomToolbarActivity {
             inflater = LayoutInflater.from(context);
             dOnline = AndroidUtils.UI.getDrawable(context, R.drawable.ic_online_primary_36);
             dOffline = AndroidUtils.UI.getDrawable(context, R.drawable.ic_offline_primary_36);
+            dOfflineInvalid = AndroidUtils.UI.getDrawable(context, R.drawable.ic_offline_red_36);
         }
 
         @Override
         public RecyclerViewEx.ViewHolderEx onCreateViewHolderEx(ViewGroup parent, int viewType) {
-            return new MapViewHolder(inflater.inflate(R.layout.content_details_map, null));
+            return new MapViewHolder(inflater.inflate(R.layout.content_map_info, null));
         }
 
         @Override
@@ -181,36 +292,59 @@ public class MapManagerActivity extends CustomToolbarActivity {
 
         class MapViewHolder extends RecyclerViewEx.ViewHolderEx {
             ImageView ivStatusIcon;
-            TextView tvName, tvDesc;
-            boolean collpased = true;
+            PopupMenuButton ofmbMenu;
+            TextView tvName;
+            View lay;
 
             public MapViewHolder(View view) {
                 super(view);
 
-                ivStatusIcon = (ImageView) view.findViewById(R.id.image);
-                tvName = (TextView) view.findViewById(R.id.text1);
-                tvDesc = (TextView) view.findViewById(R.id.text2);
+                ivStatusIcon = (ImageView) view.findViewById(R.id.mhIcon);
+                tvName = (TextView) view.findViewById(R.id.mhName);
+                ofmbMenu = (PopupMenuButton)view.findViewById(R.id.mhMenu);
+                lay = view.findViewById(R.id.lay1);
+            }
 
-                view.setOnLongClickListener(new View.OnLongClickListener() {
+            public void bind(final ArcGisMapLayer layer) {
+                ivStatusIcon.setImageDrawable(layer.isOnline() ? dOnline :
+                        layer.hasValidFile() ? dOffline : dOfflineInvalid);
+                tvName.setText(layer.getName());
+
+                ofmbMenu.setListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
-                    public boolean onLongClick(View v) {
-                        if (collpased) {
-                            collpased = false;
-                            AndroidUtils.Animation.expandTextView(tvDesc);
-                        } else {
-                            collpased = true;
-                            AndroidUtils.Animation.collapseTextView(tvDesc, 1);
+                    public boolean onMenuItemClick(MenuItem item) {
+                        switch (item.getItemId()) {
+                            case R.id.mhMenuRename: {
+                                break;
+                            }
+                            case R.id.mhMenuDelete: {
+                                break;
+                            }
                         }
-                        return true;
+
+                        return false;
+                    }
+                });
+
+                lay.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        viewMapDetails(lay, layer);
                     }
                 });
             }
+        }
 
-            public void bind(ArcGisMapLayer layer) {
-                ivStatusIcon.setImageDrawable(layer.isOnline() ? dOnline : dOffline);
-                tvName.setText(layer.getName());
-                tvDesc.setText(layer.getDescription());
-            }
+        private void viewMapDetails(View view, ArcGisMapLayer agml) {
+            Intent i = new Intent(MapManagerActivity.this, MapDetailsActivity.class);
+            i.putExtra(Consts.Activities.Data.MAP_DATA, agml);
+
+            Pair<View, String>[] transitionPairs = new Pair[2];
+            transitionPairs[0] = Pair.create(findViewById(R.id.toolbar), getString(R.string.trans_toolbar));
+            transitionPairs[1] = Pair.create(view, getString(R.string.trans_map_details));
+
+            inDetails = true;
+            ElevationTransition.startTransition(MapManagerActivity.this, i, Consts.Activities.MAP_DETAILS, transitionPairs);
         }
     }
 }

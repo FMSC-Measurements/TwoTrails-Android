@@ -167,8 +167,8 @@ public class AcquireGpsActivity extends AcquireGpsMapActivity {
     }
 
     @Override
-    public void nmeaBurstReceived(final INmeaBurst nmeaBurst) {
-        super.nmeaBurstReceived(nmeaBurst);
+    public void onNmeaBurstReceived(final INmeaBurst nmeaBurst) {
+        super.onNmeaBurstReceived(nmeaBurst);
 
         if (isLogging() && nmeaBurst.hasPosition()) {
             onLoggedNmeaBurst(nmeaBurst);

@@ -48,12 +48,6 @@ public class ExportActivity extends CustomToolbarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_export);
 
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayShowTitleEnabled(true);
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
-
         fabExport = (FloatingActionButton)findViewById(R.id.exportFabExport);
         progCircle = (FABProgressCircleEx)findViewById(R.id.exportFabExportProgressCircle);
 

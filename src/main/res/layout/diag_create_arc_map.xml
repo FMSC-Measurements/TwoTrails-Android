@@ -13,10 +13,9 @@
         android:paddingEnd="36dp">
 
         <EditText
-            android:id="@+id/txtUrl"
+            android:id="@+id/txtUri"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/str_url"
             android:maxLines="1"
             android:ellipsize="end"
             android:inputType="textUri"/>
@@ -46,10 +45,9 @@
             android:visibility="invisible"/>
 
         <ImageView
-            android:id="@+id/ivBadUrl"
+            android:id="@+id/ivBadUri"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:contentDescription="@string/str_empty"
             android:src="@drawable/ic_error_outline_black_24dp"
             android:visibility="invisible"/>
     </RelativeLayout>

@@ -9,6 +9,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.usda.fmsc.android.widget.PopupMenuButton;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.Units;
 
@@ -58,12 +59,12 @@ public class GoogleMapSelectionAdapter extends BaseAdapter {
         MapViewHolder holder;
 
         if (convertView == null) {
-            convertView = inflater.inflate(R.layout.content_details_map, null);
+            convertView = inflater.inflate(R.layout.content_map_header, null);
 
             holder = new MapViewHolder(convertView);
             convertView.setTag(holder);
 
-            convertView.setBackgroundResource(R.drawable.list_item_selector);
+            //convertView.setBackgroundResource(R.drawable.list_item_selector);
 
             final View fview = convertView;
             convertView.setOnClickListener(new View.OnClickListener() {
@@ -100,7 +101,8 @@ public class GoogleMapSelectionAdapter extends BaseAdapter {
         }
 
         holder.tvName.setText(map.getName());
-        holder.tvDesc.setText(map.getDescription());
+        holder.ofmbMenu.setVisibility(View.INVISIBLE);
+        holder.ofmbMenu.setEnabled(false);
 
         if (position == selectedIndex) {
             convertView.setSelected(true);
@@ -131,13 +133,12 @@ public class GoogleMapSelectionAdapter extends BaseAdapter {
     }
 
     private class MapViewHolder {
-        ImageView ivStatusIcon;
-        TextView tvName, tvDesc;
+        TextView tvName;
+        PopupMenuButton ofmbMenu;
 
         public MapViewHolder(View view) {
-            ivStatusIcon = (ImageView)view.findViewById(R.id.image);
-            tvName = (TextView)view.findViewById(R.id.text1);
-            tvDesc = (TextView)view.findViewById(R.id.text2);
+            tvName = (TextView)view.findViewById(R.id.mhName);
+            ofmbMenu = (PopupMenuButton)view.findViewById(R.id.mhMenu);
         }
     }
 

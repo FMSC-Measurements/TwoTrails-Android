@@ -183,7 +183,6 @@ public class PointsActivity extends CustomToolbarActivity {
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null){
             actionBar.setDisplayShowTitleEnabled(false);
-            actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
         setUseExitWarning(true);

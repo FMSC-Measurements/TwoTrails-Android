@@ -18,14 +18,14 @@ public class TrailGraphicManager implements IGraphicManager {
     private HashMap<String, TtMetadata> meta;
 
     private ITrailGraphic trailGraphic;
-    private ITrailGraphic.TrailGraphicOptions graphicOptions;
+    private TrailGraphicOptions graphicOptions;
 
 
-    public TrailGraphicManager(TtPolygon polygon, ArrayList<TtPoint> points, HashMap<String, TtMetadata> meta, ITrailGraphic.TrailGraphicOptions graphicOptions) {
+    public TrailGraphicManager(TtPolygon polygon, ArrayList<TtPoint> points, HashMap<String, TtMetadata> meta, TrailGraphicOptions graphicOptions) {
         this(polygon, points, meta, null, graphicOptions);
     }
 
-    public TrailGraphicManager(TtPolygon polygon, ArrayList<TtPoint> points, HashMap<String, TtMetadata> meta, ITrailGraphic trailGraphic, ITrailGraphic.TrailGraphicOptions graphicOptions) {
+    public TrailGraphicManager(TtPolygon polygon, ArrayList<TtPoint> points, HashMap<String, TtMetadata> meta, ITrailGraphic trailGraphic, TrailGraphicOptions graphicOptions) {
         this.polygon = polygon;
         this.points = points;
         this.meta = meta;
@@ -42,7 +42,7 @@ public class TrailGraphicManager implements IGraphicManager {
         setGraphic(trailGraphic, graphicOptions);
     }
 
-    public void setGraphic(ITrailGraphic trailGraphic, ITrailGraphic.TrailGraphicOptions graphicOptions) {
+    public void setGraphic(ITrailGraphic trailGraphic, TrailGraphicOptions graphicOptions) {
         this.trailGraphic = trailGraphic;
         this.graphicOptions = graphicOptions;
 
@@ -65,7 +65,7 @@ public class TrailGraphicManager implements IGraphicManager {
         return trailGraphic;
     }
 
-    public ITrailGraphic.TrailGraphicOptions getGraphicOptions() {
+    public TrailGraphicOptions getGraphicOptions() {
         return graphicOptions;
     }
 

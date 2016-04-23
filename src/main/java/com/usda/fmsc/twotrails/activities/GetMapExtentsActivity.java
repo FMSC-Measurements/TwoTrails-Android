@@ -43,7 +43,8 @@ public class GetMapExtentsActivity extends AppCompatActivity {
 
         fragment = ArcGisMapFragment.newInstance(
                 new IMultiMapFragment.MapOptions(0, Consts.LocationInfo.USA_BOUNDS, Consts.LocationInfo.PADDING),
-                new ArcGisMapLayer(agml.getId(), agml.getName(), agml.getDescription(), agml.getLocation(), agml.getUri(), agml.getMinScale(), agml.getMaxScale(), agml.getLevelsOfDetail(), true)
+                new ArcGisMapLayer(agml.getId(), agml.getName(), agml.getDescription(), agml.getLocation(),
+                        agml.getUrl(), agml.getFilePath(), agml.getMinScale(), agml.getMaxScale(), agml.getLevelsOfDetail(), true)
         );
 
         getSupportFragmentManager().beginTransaction().add(R.id.mapContainer, fragment).commit();
@@ -65,12 +66,19 @@ public class GetMapExtentsActivity extends AppCompatActivity {
             fileLocation = String.format("%s%s%s(%d).tpk", TtUtils.getOfflineMapsDir(), File.separator, StringEx.sanitizeForFile(agml.getName()), ++inc);
         }
 
-        ArcGISTools.startOfflineMapDownload(new DownloadOfflineArcGISMapTask(
+
+        DownloadOfflineArcGISMapTask task = new DownloadOfflineArcGISMapTask(
                 agml,
                 fragment.getArcExtents(),
                 fragment.getSpatialReference(),
-                null)
-        );
+                fileLocation,
+                ArcGISTools.getCredentials());
+
+        //TODO create confirm dialog with button to estimate file size
+//        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+//        dialog.setMessage(String.format("Estimated File Size: %d Mb"));
+
+        ArcGISTools.startOfflineMapDownload(task);
 
         setResult(Consts.Activities.Results.DOWNLOADING_MAP);
         finish();

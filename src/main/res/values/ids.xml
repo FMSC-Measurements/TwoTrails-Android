@@ -3,4 +3,8 @@
     <item name="tag1" type="id"/>
     <item name="tag2" type="id"/>
     <item name="mmSelectMap" type="id"/>
+
+    <item name="ctx_menu_add" type="id"/>
+    <item name="ctx_menu_delete" type="id"/>
+    <item name="ctx_menu_details" type="id"/>
 </resources>

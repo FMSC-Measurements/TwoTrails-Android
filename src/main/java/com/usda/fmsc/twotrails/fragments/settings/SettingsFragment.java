@@ -34,6 +34,7 @@ import com.usda.fmsc.twotrails.dialogs.CheckNmeaDialog;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
+import com.usda.fmsc.twotrails.utilities.ArcGISTools;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.util.ArrayList;
@@ -448,6 +449,7 @@ public class SettingsFragment extends PreferenceFragment {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
                     Global.Settings.DeviceSettings.reset();
+                    ArcGISTools.reset();
                 }
             });
 

@@ -3,7 +3,11 @@ package com.usda.fmsc.twotrails.adapters;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.PopupMenu;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -11,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.usda.fmsc.android.AndroidUtils;
+import com.usda.fmsc.android.widget.PopupMenuButton;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
 
@@ -55,6 +60,7 @@ public class ArcGisMapSelectionAdapter extends ArrayAdapter<ArcGisMapLayer> {
         return maps.size();
     }
 
+    //TODO remove details animation and do open to full details on click, long click opens editer (delete, move (to sd card))
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         final ArcGisMapLayer map = getItem(position);
@@ -62,12 +68,12 @@ public class ArcGisMapSelectionAdapter extends ArrayAdapter<ArcGisMapLayer> {
         MapViewHolder holder;
 
         if (convertView == null) {
-            convertView = inflater.inflate(R.layout.content_details_map, null);
+            convertView = inflater.inflate(R.layout.content_map_header, null);
 
             holder = new MapViewHolder(convertView);
             convertView.setTag(holder);
 
-            convertView.setBackgroundResource(R.drawable.list_item_selector);
+            //convertView.setBackgroundResource(R.drawable.list_item_selector);
 
             final View fview = convertView;
             convertView.setOnClickListener(new View.OnClickListener() {
@@ -105,7 +111,8 @@ public class ArcGisMapSelectionAdapter extends ArrayAdapter<ArcGisMapLayer> {
 
         holder.ivStatusIcon.setImageDrawable(map.isOnline() ? dOnline : dOffline);
         holder.tvName.setText(map.getName());
-        holder.tvDesc.setText(map.getDescription());
+        holder.ofmbMenu.setVisibility(View.INVISIBLE);
+        holder.ofmbMenu.setEnabled(false);
 
         if (position == selectedIndex) {
             convertView.setSelected(true);
@@ -138,12 +145,13 @@ public class ArcGisMapSelectionAdapter extends ArrayAdapter<ArcGisMapLayer> {
 
     private class MapViewHolder {
         ImageView ivStatusIcon;
-        TextView tvName, tvDesc;
+        PopupMenuButton ofmbMenu;
+        TextView tvName;
 
         public MapViewHolder(View view) {
-            ivStatusIcon = (ImageView)view.findViewById(R.id.image);
-            tvName = (TextView)view.findViewById(R.id.text1);
-            tvDesc = (TextView)view.findViewById(R.id.text2);
+            ivStatusIcon = (ImageView)view.findViewById(R.id.mhIcon);
+            ofmbMenu = (PopupMenuButton) view.findViewById(R.id.mhMenu);
+            tvName = (TextView)view.findViewById(R.id.mhName);
         }
     }
 

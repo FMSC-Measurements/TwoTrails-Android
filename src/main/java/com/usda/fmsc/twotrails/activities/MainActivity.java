@@ -40,6 +40,7 @@ import com.usda.fmsc.twotrails.objects.TtGroup;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
+import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
 import com.usda.fmsc.twotrails.utilities.Export;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
@@ -755,7 +756,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
         final String gEarth = "com.google.earth";
         final Activity activity = this;
 
-        if (AndroidUtils.Device.isPackageInstalled(this, gEarth)) {
+        if (AndroidUtils.App.isPackageInstalled(this, gEarth)) {
 
             progressLayout.setVisibility(View.VISIBLE);
 
@@ -780,7 +781,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
             .setPositiveButton("Install", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    AndroidUtils.Device.navigateAppStore(activity, gEarth);
+                    AndroidUtils.App.navigateAppStore(activity, gEarth);
                 }
             })
             .setNeutralButton(R.string.str_cancel, null)

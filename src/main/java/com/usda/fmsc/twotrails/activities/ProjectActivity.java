@@ -16,11 +16,6 @@ public class ProjectActivity extends CustomToolbarActivity {
 
         setContentView(R.layout.activity_project);
 
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
-
         getFragmentManager().beginTransaction()
                 .replace(R.id.content2, ProjectFragment.newInstance()).commit();
     }

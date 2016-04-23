@@ -31,7 +31,6 @@ import com.usda.fmsc.twotrails.objects.map.IMarkerDataGraphic;
 import com.usda.fmsc.twotrails.objects.map.PolygonDrawOptions;
 import com.usda.fmsc.twotrails.objects.map.PolygonGraphicManager;
 import com.usda.fmsc.twotrails.objects.map.TrailGraphicManager;
-import com.usda.fmsc.utilities.Tuple;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -50,11 +49,11 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
 
     private Marker currentMarker;
 
-    int fragWidth, fragHeight;
+    private int fragWidth, fragHeight;
 
-    Queue<CameraUpdate> cameraQueue = new ArrayDeque<>();
+    private Queue<CameraUpdate> cameraQueue = new ArrayDeque<>();
 
-    boolean cameraQueueEnabled = true, isMoving;
+    private boolean isMoving, cameraQueueEnabled = false;
 
 
     public static ManagedSupportMapFragment newInstance() {
@@ -117,6 +116,8 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
+        map = googleMap;
+
         //use external GPS if available
         if (Global.Settings.DeviceSettings.isGpsConfigured() && Global.Settings.DeviceSettings.getGpsExternal()) {
             GpsService.GpsBinder binder = Global.getGpsBinder();
@@ -124,8 +125,6 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
 
             map.setLocationSource(service);
         }
-
-        map = googleMap;
 
         map.setOnMapLoadedCallback(this);
         map.setOnCameraChangeListener(this);
@@ -250,8 +249,11 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
                 map.animateCamera(cu);
             }
         } else {
-            cameraQueue.clear();
-            isMoving = false;
+            if (cameraQueueEnabled) {
+                cameraQueue.clear();
+                isMoving = false;
+            }
+
             map.moveCamera(cu);
         }
     }
@@ -273,7 +275,6 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
         }
     };
 
-    @Override
     public void setEnableCameraQueue(boolean enabled) {
         cameraQueueEnabled = enabled;
 

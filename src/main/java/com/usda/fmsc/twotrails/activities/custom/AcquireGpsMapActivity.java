@@ -35,6 +35,7 @@ import com.usda.fmsc.twotrails.objects.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.objects.map.ITrailGraphic;
 import com.usda.fmsc.twotrails.objects.map.TrailGraphicManager;
+import com.usda.fmsc.twotrails.objects.map.TrailGraphicOptions;
 import com.usda.fmsc.twotrails.ui.GpsStatusSatView;
 import com.usda.fmsc.twotrails.ui.GpsStatusSkyView;
 import com.usda.fmsc.utilities.StringEx;
@@ -68,8 +69,6 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
 
     private TrailGraphicManager trailGraphicManager;
 
-    private PostDelayHandler moveDelayer = new PostDelayHandler(250);
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,9 +96,9 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
             ArrayList<TtPoint> points = Global.DAL.getPointsInPolygon(polygon.getCN());
 
             trailGraphicManager = new TrailGraphicManager(polygon, points, getMetadata(),
-                    new ITrailGraphic.TrailGraphicOptions(
+                    new TrailGraphicOptions(
                             AndroidUtils.UI.getColor(this, R.color.indigo_800),
-                            14
+                            32
                     )
             );
         } else {
@@ -343,8 +342,8 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
 
     //region GPS
     @Override
-    public void nmeaBurstReceived(INmeaBurst nmeaBurst) {
-        super.nmeaBurstReceived(nmeaBurst);
+    protected void onNmeaBurstReceived(INmeaBurst nmeaBurst) {
+        super.onNmeaBurstReceived(nmeaBurst);
         setNmeaData(nmeaBurst);
     }
 

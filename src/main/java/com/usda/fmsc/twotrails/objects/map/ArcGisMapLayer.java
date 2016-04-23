@@ -3,11 +3,10 @@ package com.usda.fmsc.twotrails.objects.map;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.usda.fmsc.twotrails.utilities.TtUtils;
 import com.usda.fmsc.utilities.StringEx;
 
-import java.io.Serializable;
-
-public class ArcGisMapLayer implements Serializable, Parcelable {
+public class ArcGisMapLayer implements Parcelable, Comparable { //Serializable, {
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
         @Override
         public Object createFromParcel(Parcel source) {
@@ -24,12 +23,14 @@ public class ArcGisMapLayer implements Serializable, Parcelable {
     private String name;
     private String description;
     private String location;
-    private String uri;
+    private String url;
+    private String filePath;
     private boolean online;
     private double minScale;
     private double maxScale;
-    private int numberOfLevels;
     private DetailLevel[] levelsOfDetail;
+
+    private boolean hasValidFile;
 
 
     public ArcGisMapLayer(Parcel in) {
@@ -37,25 +38,36 @@ public class ArcGisMapLayer implements Serializable, Parcelable {
         name = in.readString();
         description = in.readString();
         location = in.readString();
-        uri = in.readString();
+        url = in.readString();
+        setFilePath(in.readString());
         online = in.readByte() == 1;
         minScale = in.readDouble();
         maxScale = in.readDouble();
-
-        numberOfLevels = in.readInt();
         levelsOfDetail = (DetailLevel[])in.createTypedArray(DetailLevel.CREATOR);
     }
 
-    public ArcGisMapLayer(int id, String name, String description, String location, String uri, boolean online) {
-        this(id, name, description, location, uri, 0, 0, null, online);
+    public ArcGisMapLayer(ArcGisMapLayer agml) {
+        this.id = agml.getId();
+        this.name = agml.getName();
+        this.description = agml.getDescription();
+        this.location = agml.getLocation();
+        this.url = agml.getUrl();
+        this.filePath = agml.getFilePath();
+        this.online = agml.isOnline();
+        this.minScale = agml.getMinScale();
+        this.maxScale = agml.getMaxScale();
+        this.levelsOfDetail = agml.getLevelsOfDetail();
+
+        this.hasValidFile =agml.hasValidFile();
     }
 
-    public ArcGisMapLayer(int id, String name, String description, String location, String uri, double minScale,
+    public ArcGisMapLayer(int id, String name, String description, String location, String url, String filePath, boolean online) {
+        this(id, name, description, location, url, filePath, -1, -1, null, online);
+    }
+
+    public ArcGisMapLayer(int id, String name, String description, String location, String url, String filePath, double minScale,
                           double maxScale, DetailLevel[] levelsOfDetail, boolean online) {
         if (name == null)
-            description = StringEx.Empty;
-
-        if (uri == null)
             description = StringEx.Empty;
 
         if (description == null)
@@ -64,6 +76,12 @@ public class ArcGisMapLayer implements Serializable, Parcelable {
         if (location == null)
             location = StringEx.Empty;
 
+        if (url == null)
+            url = StringEx.Empty;
+
+        if (filePath == null)
+            filePath = StringEx.Empty;
+
         if (levelsOfDetail == null)
             levelsOfDetail = new DetailLevel[0];
 
@@ -71,11 +89,11 @@ public class ArcGisMapLayer implements Serializable, Parcelable {
         this.name = name;
         this.description = description;
         this.location = location;
-        this.uri = uri;
+        this.url = url;
+        setFilePath(filePath);
         this.online = online;
         this.minScale = minScale;
         this.maxScale = maxScale;
-        this.numberOfLevels = levelsOfDetail.length;
         this.levelsOfDetail = levelsOfDetail;
     }
 
@@ -91,22 +109,38 @@ public class ArcGisMapLayer implements Serializable, Parcelable {
         dest.writeString(name);
         dest.writeString(description);
         dest.writeString(location);
-        dest.writeString(uri);
+        dest.writeString(url);
+        dest.writeString(filePath);
         dest.writeByte((byte) (online ? 1 : 0));
         dest.writeDouble(minScale);
         dest.writeDouble(maxScale);
-        dest.writeInt(numberOfLevels);
         dest.writeTypedArray(levelsOfDetail, flags);
     }
 
+
+    @Override
+    public int compareTo(Object another) {
+        if (another instanceof  ArcGisMapLayer)
+        {
+            return this.getName().compareTo(((ArcGisMapLayer)another).getName());
+        }
+
+        return -1;
+    }
 
     public int getId() {
         return id;
     }
 
+    public void setId(int id) {
+        this.id = id;
+    }
+
+
     public boolean isOnline() {
         return online;
     }
+
 
     public String getName() {
         return name;
@@ -116,6 +150,7 @@ public class ArcGisMapLayer implements Serializable, Parcelable {
         this.name = name;
     }
 
+
     public String getDescription() {
         return description;
     }
@@ -123,6 +158,7 @@ public class ArcGisMapLayer implements Serializable, Parcelable {
     public void setDescription(String description) {
         this.description = description;
     }
+
 
     public String getLocation() {
         return location;
@@ -132,13 +168,30 @@ public class ArcGisMapLayer implements Serializable, Parcelable {
         this.location = location;
     }
 
-    public String getUri() {
-        return uri;
+
+    public String getUrl() {
+        return url;
     }
 
-    public void setUri(String uri) {
-        this.uri = uri;
+    public void setUrl(String url) {
+        this.url = url;
     }
+
+
+    public String getFilePath() {
+        return filePath;
+    }
+
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
+
+        hasValidFile = !StringEx.isEmpty(this.filePath) && TtUtils.fileExists(this.filePath);
+    }
+
+    public boolean hasValidFile() {
+        return hasValidFile;
+    }
+
 
     public double getMaxScale() {
         return maxScale;
@@ -148,6 +201,7 @@ public class ArcGisMapLayer implements Serializable, Parcelable {
         this.maxScale = maxScale;
     }
 
+
     public double getMinScale() {
         return minScale;
     }
@@ -156,16 +210,52 @@ public class ArcGisMapLayer implements Serializable, Parcelable {
         this.minScale = minScale;
     }
 
+
     public boolean hasScales() {
         return minScale != 0 && maxScale != 0;
     }
 
+
     public int getNumberOfLevels() {
-        return numberOfLevels;
+        return levelsOfDetail.length;
     }
 
     public DetailLevel[] getLevelsOfDetail() {
         return levelsOfDetail;
+    }
+
+
+    public void update(ArcGisMapLayer layer) {
+        this.name = layer.getName();
+        this.description = layer.getDescription();
+        this.location = layer.getLocation();
+        this.url = layer.getUrl();
+        this.filePath = layer.getFilePath();
+        this.online = layer.isOnline();
+        this.minScale = layer.getMinScale();
+        this.maxScale = layer.getMaxScale();
+        this.levelsOfDetail = layer.getLevelsOfDetail();
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof ArcGisMapLayer) {
+            ArcGisMapLayer agml = (ArcGisMapLayer)o;
+
+            return
+                this.name.equals(agml.getName()) &&
+                this.description.equals(agml.getDescription()) &&
+                this.location.equals(agml.getLocation()) &&
+                this.url.equals(agml.getUrl()) &&
+                this.filePath.equals(agml.getFilePath()) &&
+                this.online == agml.isOnline() &&
+                this.minScale == agml.getMinScale() &&
+                this.maxScale == agml.getMaxScale() &&
+                this.levelsOfDetail.length == agml.getNumberOfLevels();
+        }
+
+        return false;
     }
 
 
@@ -232,6 +322,21 @@ public class ArcGisMapLayer implements Serializable, Parcelable {
 
         public void setResolution(double resolution) {
             this.resolution = resolution;
+        }
+
+
+        @Override
+        public boolean equals(Object o) {
+            if (o instanceof  DetailLevel) {
+                DetailLevel dl = (DetailLevel)o;
+
+                return
+                    level == dl.level &&
+                    resolution == dl.resolution &&
+                    scale == dl.scale;
+            }
+
+            return false;
         }
     }
 }

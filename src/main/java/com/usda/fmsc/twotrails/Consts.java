@@ -87,6 +87,7 @@ public class Consts {
         public static final int PLOT_GRID = 1016;
         public static final int GET_MAP_EXTENTS = 1017;
         public static final int MAP_MANAGER = 1018;
+        public static final int MAP_DETAILS = 1018;
 
         public static class Results {
             public static final int ERROR = 2000;
@@ -95,7 +96,9 @@ public class Consts {
             public static final int NO_POLYGON_DATA = 2003;
             public static final int NO_METDATA_DATA = 2004;
             public static final int MAP_CREATED = 2005;
-            public static final int DOWNLOADING_MAP = 2006;
+            public static final int MAP_UPDATED = 2006;
+            public static final int MAP_DELETED = 2007;
+            public static final int DOWNLOADING_MAP = 2008;
 
         }
 
@@ -110,6 +113,7 @@ public class Consts {
             public static final String METADATA_DATA = "MetaDataData";
             public static final String ADDITIVE_NMEA_DATA = "AdditiveNmeaData";
             public static final String NUMBER_OF_CREATED_POINTS = "NumOfCreatedPoints";
+            public static final String MAP_DATA = "MapData";
         }
 
     }

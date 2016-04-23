@@ -47,11 +47,6 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gps_logger);
 
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
-
         lvNmea = (ListView)findViewById(R.id.logLvNmea);
 
         lvNmea.setFadingEdgeLength(0);

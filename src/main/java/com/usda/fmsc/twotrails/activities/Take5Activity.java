@@ -176,12 +176,6 @@ public class Take5Activity extends AcquireGpsMapActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_take5);
 
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null){
-            //actionBar.setDisplayShowTitleEnabled(false);
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
-
         setUseLostConnectionWarning(true);
 
 
@@ -639,8 +633,8 @@ public class Take5Activity extends AcquireGpsMapActivity {
 
     //region GPS
     @Override
-    public void nmeaBurstReceived(INmeaBurst nmeaBurst) {
-        super.nmeaBurstReceived(nmeaBurst);
+    protected void onNmeaBurstReceived(INmeaBurst nmeaBurst) {
+        super.onNmeaBurstReceived(nmeaBurst);
 
         if (isLogging() && nmeaBurst.isValid()) {
             TtNmeaBurst burst = TtNmeaBurst.create(_AddTake5.getCN(), false, nmeaBurst);

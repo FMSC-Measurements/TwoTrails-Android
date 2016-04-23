@@ -82,12 +82,6 @@ public class PolygonsActivity extends CustomToolbarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_polygons);
 
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            //actionBar.setDisplayShowTitleEnabled(false);
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
-
         listeners = new HashMap<>();
 
         _Polygons = Global.DAL.getPolygons();

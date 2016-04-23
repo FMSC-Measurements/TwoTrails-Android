@@ -14,6 +14,7 @@ import android.hardware.SensorManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -40,6 +41,7 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.animation.ViewAnimator;
+import com.usda.fmsc.android.utilities.PostDelayHandler;
 import com.usda.fmsc.android.widget.MultiStateTouchCheckBox;
 import com.usda.fmsc.android.widget.drawables.FadeBitmapProgressDrawable;
 import com.usda.fmsc.android.widget.drawables.PolygonProgressDrawable;
@@ -65,9 +67,9 @@ import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
-import com.usda.fmsc.twotrails.objects.map.IPolygonGraphic;
 import com.usda.fmsc.twotrails.objects.map.PolygonDrawOptions;
 import com.usda.fmsc.twotrails.objects.map.PolygonGraphicManager;
+import com.usda.fmsc.twotrails.objects.map.PolygonGraphicOptions;
 import com.usda.fmsc.twotrails.objects.map.TrailGraphicManager;
 import com.usda.fmsc.twotrails.ui.UnadjustedDrawable;
 import com.usda.fmsc.twotrails.utilities.AppUnits;
@@ -82,7 +84,7 @@ import java.util.HashMap;
 
 import jp.wasabeef.recyclerview.animators.SlideInUpAnimator;
 
-public abstract class BaseMapActivity extends CustomToolbarActivity implements IMultiMapFragment.MultiMapListener, GpsService.Listener,
+public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapFragment.MultiMapListener, GpsService.Listener,
         SensorEventListener, PolyMarkerMapRvAdapter.Listener {
 
     private static final String FRAGMENT = "fragmet";
@@ -132,6 +134,10 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     private HashMap<String, TtMetadata> _Metadata;
 
     private Extent completeBnds, trackedPoly;
+
+    private boolean[] visd = new boolean[12];
+    private boolean[] invisd = new boolean[12];
+    private int[] dpc = new int[12];
     //endregion
 
 
@@ -148,21 +154,25 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
 
             switch (mapType) {
                 case Google:
-                    // check google play services and setup map
-                    Integer code = AndroidUtils.App.checkPlayServices(this, Consts.Activities.Services.REQUEST_GOOGLE_PLAY_SERVICES);
-                    if (code == null) {
-                        mapFragment = createMapFragment(mapType, getMapOptions(mapType, mapId));
-                        mmFrag = (IMultiMapFragment)mapFragment;
-                        getSupportFragmentManager().beginTransaction().add(R.id.mapContainer, mapFragment).commit();
+                    if (AndroidUtils.Device.isInternetAvailable()) {
+                        // check google play services and setup map
+                        Integer code = AndroidUtils.App.checkPlayServices(this, Consts.Activities.Services.REQUEST_GOOGLE_PLAY_SERVICES);
+                        if (code == 0) {
+                            startGMap();
+                        } else {
+                            String str = GoogleApiAvailability.getInstance().getErrorString(code);
+                            Toast.makeText(this, str, Toast.LENGTH_LONG).show();
+                        }
                     } else {
-                        String str = GoogleApiAvailability.getInstance().getErrorString(code);
-                        Toast.makeText(this, str, Toast.LENGTH_LONG).show();
+                        requestOfflineMap();
                     }
                     break;
                 case ArcGIS:
-                    mapFragment = createMapFragment(mapType, getMapOptions(mapType, mapId));
-                    mmFrag = (IMultiMapFragment)mapFragment;
-                    getSupportFragmentManager().beginTransaction().add(R.id.mapContainer, mapFragment).commit();
+                    if (ArcGISTools.getMapLayer(mapId).isOnline() && !AndroidUtils.Device.isInternetAvailable()) {
+                        requestOfflineMap();
+                    } else {
+                        startArcMap();
+                    }
                     break;
             }
         }
@@ -260,6 +270,51 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     }
 
 
+    private void startGMap() {
+        mapFragment = createMapFragment(mapType, getMapOptions(mapType, mapId));
+        mmFrag = (IMultiMapFragment)mapFragment;
+        getSupportFragmentManager().beginTransaction().add(R.id.mapContainer, mapFragment).commit();
+    }
+
+    private void startArcMap() {
+        mapFragment = createMapFragment(mapType, getMapOptions(mapType, mapId));
+        mmFrag = (IMultiMapFragment)mapFragment;
+        getSupportFragmentManager().beginTransaction().add(R.id.mapContainer, mapFragment).commit();
+    }
+
+    private void requestOfflineMap() {
+        //use empty google map while user decides
+        mapFragment = createMapFragment(Units.MapType.Google, getMapOptions(Units.MapType.Google, Units.GoogleMapType.MAP_TYPE_NONE.getValue()));
+        mmFrag = (IMultiMapFragment)mapFragment;
+        getSupportFragmentManager().beginTransaction().add(R.id.mapContainer, mapFragment).commit();
+
+        if (ArcGISTools.offlineMapsAvailable()) {
+            new AlertDialog.Builder(this)
+                    .setMessage("There is no internet connection. Would you like to use an offline map?")
+                    .setPositiveButton(R.string.str_ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            SelectMapTypeDialog.newInstance(new ArrayList<>(ArcGISTools.getMapLayers()),
+                                    SelectMapTypeDialog.SelectMapMode.ARC_OFFLINE)
+                            .setOnMapSelectedListener(new SelectMapTypeDialog.OnMapSelectedListener() {
+                                @Override
+                                public void mapSelected(Units.MapType mapType, int mapId) {
+                                    setMapType(mapType, mapId);
+                                }
+                            })
+                            .show(getSupportFragmentManager(), SELECT_MAP);
+                        }
+                    })
+                    .setNegativeButton(R.string.str_no, null)
+                    .show();
+        } else {
+            new AlertDialog.Builder(this)
+                    .setMessage("There is no internet connection and there are no Offline maps are available. No Map can be displayed.")
+                    .setPositiveButton(R.string.str_ok, null)
+                    .show();
+        }
+    }
+
     @Override
     public void setContentView(int layoutResID) {
         LayoutInflater inflater = LayoutInflater.from(this);
@@ -298,12 +353,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         switch (requestCode) {
             case Consts.Activities.Services.REQUEST_GOOGLE_PLAY_SERVICES: {
                 if (resultCode == Activity.RESULT_OK) {
-                    if (mapFragment == null) {
-                        getSupportFragmentManager().beginTransaction().add(R.id.mapContainer, mapFragment).commit();
-                    } else {
-                        mapFragment = createMapFragment(mapType, getMapOptions(mapType, mapId));
-                        mmFrag = (IMultiMapFragment)mapFragment;
-                    }
+                    startGMap();
                 }
             }
             case Consts.Activities.SETTINGS: {
@@ -463,20 +513,24 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
 
     @Override
     public void onBackPressed() {
-        switch (slidingLayout.getPanelState()) {
-            case EXPANDED:
-            case ANCHORED: {
-                slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
-                break;
-            }
-            case COLLAPSED: {
-                slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
-                hideSelectedMarkerInfo();
-                break;
-            }
-            case HIDDEN: {
-                super.onBackPressed();
-                break;
+        if (polyDrawer.isDrawerOpen(GravityCompat.START)) {
+            polyDrawer.closeDrawer(GravityCompat.START);
+        } else {
+            switch (slidingLayout.getPanelState()) {
+                case EXPANDED:
+                case ANCHORED: {
+                    slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+                    break;
+                }
+                case COLLAPSED: {
+                    slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
+                    hideSelectedMarkerInfo();
+                    break;
+                }
+                case HIDDEN: {
+                    super.onBackPressed();
+                    break;
+                }
             }
         }
     }
@@ -525,7 +579,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
             return getMapStartLocation(mapType, terrainType);
         }
 
-        return new IMultiMapFragment.MapOptions(terrainType, extents);
+        return new IMultiMapFragment.MapOptions(terrainType, extents != null ? extents : Consts.LocationInfo.USA_BOUNDS, Consts.LocationInfo.PADDING);
     }
 
     protected IMultiMapFragment.MapOptions getMapStartLocation(Units.MapType mapType, int terrainType) {
@@ -542,7 +596,11 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
 
     //region Map Type and Move
     protected void selectMapType() {
-        SelectMapTypeDialog dialog = SelectMapTypeDialog.newInstance(new ArrayList<>(ArcGISTools.getLayers()));
+        selectMapType(SelectMapTypeDialog.SelectMapMode.ALL);
+    }
+
+    protected void selectMapType(SelectMapTypeDialog.SelectMapMode mode) {
+        SelectMapTypeDialog dialog = SelectMapTypeDialog.newInstance(new ArrayList<>(ArcGISTools.getMapLayers()), mode);
 
         dialog.setOnMapSelectedListener(new SelectMapTypeDialog.OnMapSelectedListener() {
             @Override
@@ -559,8 +617,14 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
             if (mmFrag != null) {
                 mmFrag.setMap(mapId);
                 onMapTypeChanged(mapType, mapId);
+            } else {
+                throw new NullPointerException("MapFragment is null");
             }
         } else {
+            if (mapType == Units.MapType.Google && AndroidUtils.App.checkPlayServices(this, Consts.Activities.Services.REQUEST_GOOGLE_PLAY_SERVICES) != 0) {
+                throw new RuntimeException("Play Services not available");
+            }
+
             mapFragment = createMapFragment(mapType, getMapOptions(mapType, mapId));
             mmFrag = (IMultiMapFragment)mapFragment;
             getSupportFragmentManager().beginTransaction().replace(R.id.mapContainer, mapFragment).commit();
@@ -803,8 +867,16 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
                 calculateDir();
             }
 
+            onNmeaBurstReceived(nmeaBurst);
+
             lastPosition = position;
+        } else {
+            onNmeaBurstReceived(nmeaBurst);
         }
+    }
+
+    protected void onNmeaBurstReceived(INmeaBurst nmeaBurst) {
+
     }
 
     @Override
@@ -919,13 +991,16 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         PolygonGraphicManager polygonGraphicManager;
         String trackedPolyCN = getTrackedPolyCN();
 
-        IPolygonGraphic.PolygonGraphicOptions graphicOptions = new IPolygonGraphic.PolygonGraphicOptions(
-                AndroidUtils.UI.getColor(this, R.color.red_500),
-                AndroidUtils.UI.getColor(this, R.color.red_800),
-                AndroidUtils.UI.getColor(this, R.color.indigo_500),
-                AndroidUtils.UI.getColor(this, R.color.indigo_800),
-                7,
-                16
+        PolygonGraphicOptions graphicOptions = new PolygonGraphicOptions(
+                AndroidUtils.UI.getColor(this, R.color.map_adj_bnd),
+                AndroidUtils.UI.getColor(this, R.color.map_unadj_bnd),
+                AndroidUtils.UI.getColor(this, R.color.map_adj_nav),
+                AndroidUtils.UI.getColor(this, R.color.map_unadj_nav),
+                AndroidUtils.UI.getColor(this, R.color.map_adj_pts),
+                AndroidUtils.UI.getColor(this, R.color.map_unadj_pts),
+                AndroidUtils.UI.getColor(this, R.color.map_way_pts),
+                8,
+                32
         );
 
         for (TtPolygon polygon : getSortedPolys()) {
@@ -989,8 +1064,14 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
 
     boolean masterCardExpanded;
 
+    PostDelayHandler[] postDelayHandlers = new PostDelayHandler[12];
+
     private void setupMasterPolyControl() {
         //PolygonDrawOptions mopt = Global.MapSettings.MasterPolyOptions;
+
+        for (int i = 0; i < 12; i++) {
+            postDelayHandlers[i] = new PostDelayHandler(250);
+        }
 
         layHeader = findViewById(R.id.mpcLayHeader);
         layContent = findViewById(R.id.mpcLayPolyContent);
@@ -1028,14 +1109,14 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         tcbWayPts.setCheckBoxDrawable(new FadeBitmapProgressDrawable(b));
 
 
-        for (PolygonDrawOptions.GraphicCode code : PolygonDrawOptions.GraphicCode.values()) {
+        for (PolygonDrawOptions.DrawCode code : PolygonDrawOptions.DrawCode.values()) {
             onHolderOptionChanged(null, code);
         }
 //        try {
 //            Class c = PolygonDrawOptions.class;
 //            for (Field f : c.getFields()) {
-//                if (f.getType().equals(GraphicCode.class)) {
-//                    onHolderOptionChanged(null, (GraphicCode)f.get(mopt));
+//                if (f.getType().equals(DrawCode.class)) {
+//                    onHolderOptionChanged(null, (DrawCode)f.get(mopt));
 //                }
 //            }
 //        } catch (IllegalAccessException e) {
@@ -1057,95 +1138,95 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
 
         tcbPoly.setOnCheckedStateChangeListener(new MultiStateTouchCheckBox.OnCheckedStateChangeListener() {
             @Override
-            public void onCheckedStateChanged(View buttonView, boolean isChecked, MultiStateTouchCheckBox.CheckedState state) {
-                updatePolyOptions(PolygonDrawOptions.GraphicCode.VISIBLE, isChecked);
+            public void onCheckedStateChanged(View buttonView, final boolean isChecked, MultiStateTouchCheckBox.CheckedState state) {
+                updatePolyOptions(PolygonDrawOptions.DrawCode.VISIBLE, isChecked);
             }
         });
 
         tcbAdjBnd.setOnCheckedStateChangeListener(new MultiStateTouchCheckBox.OnCheckedStateChangeListener() {
             @Override
             public void onCheckedStateChanged(View buttonView, boolean isChecked, MultiStateTouchCheckBox.CheckedState state) {
-                updatePolyOptions(PolygonDrawOptions.GraphicCode.ADJBND, isChecked);
+                updatePolyOptions(PolygonDrawOptions.DrawCode.ADJBND, isChecked);
             }
         });
 
         tcbAdjNav.setOnCheckedStateChangeListener(new MultiStateTouchCheckBox.OnCheckedStateChangeListener() {
             @Override
             public void onCheckedStateChanged(View buttonView, boolean isChecked, MultiStateTouchCheckBox.CheckedState state) {
-                updatePolyOptions(PolygonDrawOptions.GraphicCode.ADJNAV, isChecked);
+                updatePolyOptions(PolygonDrawOptions.DrawCode.ADJNAV, isChecked);
             }
         });
 
         tcbUnAdjBnd.setOnCheckedStateChangeListener(new MultiStateTouchCheckBox.OnCheckedStateChangeListener() {
             @Override
             public void onCheckedStateChanged(View buttonView, boolean isChecked, MultiStateTouchCheckBox.CheckedState state) {
-                updatePolyOptions(PolygonDrawOptions.GraphicCode.UNADJBND, isChecked);
+                updatePolyOptions(PolygonDrawOptions.DrawCode.UNADJBND, isChecked);
             }
         });
 
         tcbUnAdjNav.setOnCheckedStateChangeListener(new MultiStateTouchCheckBox.OnCheckedStateChangeListener() {
             @Override
             public void onCheckedStateChanged(View buttonView, boolean isChecked, MultiStateTouchCheckBox.CheckedState state) {
-                updatePolyOptions(PolygonDrawOptions.GraphicCode.UNADJNAV, isChecked);
+                updatePolyOptions(PolygonDrawOptions.DrawCode.UNADJNAV, isChecked);
             }
         });
 
         tcbAdjBndPts.setOnCheckedStateChangeListener(new MultiStateTouchCheckBox.OnCheckedStateChangeListener() {
             @Override
             public void onCheckedStateChanged(View buttonView, boolean isChecked, MultiStateTouchCheckBox.CheckedState state) {
-                updatePolyOptions(PolygonDrawOptions.GraphicCode.ADJBNDPTS, isChecked);
+                updatePolyOptions(PolygonDrawOptions.DrawCode.ADJBNDPTS, isChecked);
             }
         });
 
         tcbAdjNavPts.setOnCheckedStateChangeListener(new MultiStateTouchCheckBox.OnCheckedStateChangeListener() {
             @Override
             public void onCheckedStateChanged(View buttonView, boolean isChecked, MultiStateTouchCheckBox.CheckedState state) {
-                updatePolyOptions(PolygonDrawOptions.GraphicCode.ADJNAVPTS, isChecked);
+                updatePolyOptions(PolygonDrawOptions.DrawCode.ADJNAVPTS, isChecked);
             }
         });
 
         tcbUnAdjBndPts.setOnCheckedStateChangeListener(new MultiStateTouchCheckBox.OnCheckedStateChangeListener() {
             @Override
             public void onCheckedStateChanged(View buttonView, boolean isChecked, MultiStateTouchCheckBox.CheckedState state) {
-                updatePolyOptions(PolygonDrawOptions.GraphicCode.UNADJBNDPTS, isChecked);
+                updatePolyOptions(PolygonDrawOptions.DrawCode.UNADJBNDPTS, isChecked);
             }
         });
 
         tcbUnAdjNavPts.setOnCheckedStateChangeListener(new MultiStateTouchCheckBox.OnCheckedStateChangeListener() {
             @Override
             public void onCheckedStateChanged(View buttonView, boolean isChecked, MultiStateTouchCheckBox.CheckedState state) {
-                updatePolyOptions(PolygonDrawOptions.GraphicCode.UNADJNAVPTS, isChecked);
+                updatePolyOptions(PolygonDrawOptions.DrawCode.UNADJNAVPTS, isChecked);
             }
         });
 
         tcbAdjMiscPts.setOnCheckedStateChangeListener(new MultiStateTouchCheckBox.OnCheckedStateChangeListener() {
             @Override
             public void onCheckedStateChanged(View buttonView, boolean isChecked, MultiStateTouchCheckBox.CheckedState state) {
-                updatePolyOptions(PolygonDrawOptions.GraphicCode.ADJMISCPTS, isChecked);
+                updatePolyOptions(PolygonDrawOptions.DrawCode.ADJMISCPTS, isChecked);
             }
         });
 
         tcbUnadjMiscPts.setOnCheckedStateChangeListener(new MultiStateTouchCheckBox.OnCheckedStateChangeListener() {
             @Override
             public void onCheckedStateChanged(View buttonView, boolean isChecked, MultiStateTouchCheckBox.CheckedState state) {
-                updatePolyOptions(PolygonDrawOptions.GraphicCode.UNADJMISCPTS, isChecked);
+                updatePolyOptions(PolygonDrawOptions.DrawCode.UNADJMISCPTS, isChecked);
             }
         });
 
         tcbWayPts.setOnCheckedStateChangeListener(new MultiStateTouchCheckBox.OnCheckedStateChangeListener() {
             @Override
             public void onCheckedStateChanged(View buttonView, boolean isChecked, MultiStateTouchCheckBox.CheckedState state) {
-                updatePolyOptions(PolygonDrawOptions.GraphicCode.WAYPTS, isChecked);
+                updatePolyOptions(PolygonDrawOptions.DrawCode.WAYPTS, isChecked);
             }
         });
     }
 
     //change master
     @Override
-    public void onHolderOptionChanged(PolyMarkerMapRvAdapter.PolyMarkerMapViewHolder holder, PolygonDrawOptions.GraphicCode code) {
+    public void onHolderOptionChanged(PolyMarkerMapRvAdapter.PolyMarkerMapViewHolder holder, PolygonDrawOptions.DrawCode code) {
         boolean vis = false, invis = false;
-
         MultiStateTouchCheckBox tcb = null;
+        int x = -1;
 
         try {
             for (PolygonGraphicManager map : getPolyGraphicManagers()) {
@@ -1166,64 +1247,122 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
             switch (code) {
                 case VISIBLE:
                     tcb = tcbPoly;
+                    x = 0;
                     break;
                 case ADJBND:
                     tcb = tcbAdjBnd;
+                    x = 1;
                     break;
                 case UNADJBND:
                     tcb = tcbUnAdjBnd;
+                    x = 2;
                     break;
                 case ADJBNDPTS:
                     tcb = tcbAdjBndPts;
+                    x = 3;
                     break;
                 case UNADJBNDPTS:
                     tcb = tcbUnAdjBndPts;
+                    x = 4;
                     break;
                 case ADJNAV:
                     tcb = tcbAdjNav;
+                    x = 5;
                     break;
                 case UNADJNAV:
                     tcb = tcbUnAdjNav;
+                    x = 6;
                     break;
                 case ADJNAVPTS:
                     tcb = tcbAdjNavPts;
+                    x = 7;
                     break;
                 case UNADJNAVPTS:
                     tcb = tcbUnAdjNavPts;
+                    x = 8;
                     break;
                 case ADJMISCPTS:
                     tcb = tcbAdjMiscPts;
+                    x = 9;
                     break;
                 case UNADJMISCPTS:
                     tcb = tcbUnadjMiscPts;
+                    x = 10;
                     break;
                 case WAYPTS:
                     tcb = tcbWayPts;
+                    x = 11;
                     break;
             }
 
+            if (x > -1) {
+                final int xf = x;
+                final PolygonDrawOptions.DrawCode codef = code;
+                final MultiStateTouchCheckBox mscb = tcb;
 
-            if (tcb != null) {
-                if (vis && invis) {
-                    tcb.setCheckedStateNoEvent(MultiStateTouchCheckBox.CheckedState.PartialChecked);
-                    Global.MapSettings.MasterPolyOptions.setValue(code, true);
-                } else {
-                    if (vis) {
-                        tcb.setCheckedStateNoEvent(MultiStateTouchCheckBox.CheckedState.Checked);
-                        Global.MapSettings.MasterPolyOptions.setValue(code, true);
+                if (dpc[xf] == 0) {
+                    if (postDelayHandlers[xf] != null) {
+                        dpc[xf]++;
+                        visd[xf] = vis;
+                        invisd[xf] = invis;
+
+                        postDelayHandlers[xf].post(new Runnable() {
+                            @Override
+                            public void run() {
+                                setMasterPolyCheckBox(mscb, visd[xf], invisd[xf], codef);
+                                dpc[xf] = 0;
+                                visd[xf] = false;
+                                invisd[xf] = false;
+                            }
+                        });
                     } else {
-                        tcb.setCheckedStateNoEvent(MultiStateTouchCheckBox.CheckedState.NotChecked);
-                        Global.MapSettings.MasterPolyOptions.setValue(code, false);
+                        setMasterPolyCheckBox(mscb, visd[xf], invisd[xf], codef);
                     }
+                } else {
+                    dpc[xf]++;
+                    visd[xf] &= vis;
+                    invisd[xf] &= invis;
                 }
             }
+
+//            if (tcb != null) {
+//                if (vis && invis) {
+//                    tcb.setCheckedStateNoEvent(MultiStateTouchCheckBox.CheckedState.PartialChecked);
+//                    Global.MapSettings.MasterPolyOptions.setValue(code, true);
+//                } else {
+//                    if (vis) {
+//                        tcb.setCheckedStateNoEvent(MultiStateTouchCheckBox.CheckedState.Checked);
+//                        Global.MapSettings.MasterPolyOptions.setValue(code, true);
+//                    } else {
+//                        tcb.setCheckedStateNoEvent(MultiStateTouchCheckBox.CheckedState.NotChecked);
+//                        Global.MapSettings.MasterPolyOptions.setValue(code, false);
+//                    }
+//                }
+//            }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    private void setMasterPolyCheckBox(MultiStateTouchCheckBox tcb, boolean vis, boolean invis, PolygonDrawOptions.DrawCode code) {
+        if (tcb != null) {
+            if (vis && invis) {
+                tcb.setCheckedStateNoEvent(MultiStateTouchCheckBox.CheckedState.PartialChecked);
+                Global.MapSettings.MasterPolyOptions.setValue(code, true);
+            } else {
+                if (vis) {
+                    tcb.setCheckedStateNoEvent(MultiStateTouchCheckBox.CheckedState.Checked);
+                    Global.MapSettings.MasterPolyOptions.setValue(code, true);
+                } else {
+                    tcb.setCheckedStateNoEvent(MultiStateTouchCheckBox.CheckedState.NotChecked);
+                    Global.MapSettings.MasterPolyOptions.setValue(code, false);
+                }
+            }
+        }
+    }
+
     //change options for all drawoptions and display
-    private void updatePolyOptions(PolygonDrawOptions.GraphicCode code, boolean value) {
+    private void updatePolyOptions(PolygonDrawOptions.DrawCode code, boolean value) {
         for (PolygonGraphicManager gm : getPolyGraphicManagers()) {
             gm.update(code, value);
         }

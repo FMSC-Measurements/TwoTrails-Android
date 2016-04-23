@@ -124,11 +124,6 @@ public class TableEditActivity extends CustomToolbarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_table_edit);
 
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
-
         activity = this;
 
         ssvPoints = (SpreadsheetView)findViewById(R.id.teSsvPoints);

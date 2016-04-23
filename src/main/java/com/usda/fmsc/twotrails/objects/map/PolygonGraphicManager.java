@@ -1,31 +1,36 @@
 package com.usda.fmsc.twotrails.objects.map;
 
+import android.support.annotation.ColorInt;
+
 import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 public class PolygonGraphicManager implements IGraphicManager {
 
-    private Listener listener;
+    private ArrayList<PolygonDrawOptions.Listener> polygonDrawListeners = new ArrayList<>();
+    private ArrayList<PolygonGraphicOptions.Listener> polygonGraphicListeners = new ArrayList<>();
+    
 
     private TtPolygon polygon;
     private List<TtPoint> points;
     private HashMap<String, TtMetadata> meta;
 
     private IPolygonGraphic polygonGraphic;
-    private IPolygonGraphic.PolygonGraphicOptions graphicOptions;
+    private PolygonGraphicOptions graphicOptions;
 
 
-    public PolygonGraphicManager(TtPolygon polygon, List<TtPoint> points, HashMap<String, TtMetadata> meta, IPolygonGraphic.PolygonGraphicOptions graphicOptions) {
+    public PolygonGraphicManager(TtPolygon polygon, List<TtPoint> points, HashMap<String, TtMetadata> meta, PolygonGraphicOptions graphicOptions) {
         this(polygon, points, meta, null, graphicOptions, null);
     }
 
     public PolygonGraphicManager(TtPolygon polygon, List<TtPoint> points, HashMap<String, TtMetadata> meta, IPolygonGraphic polygonGraphic,
-                                 IPolygonGraphic.PolygonGraphicOptions graphicOptions, PolygonDrawOptions drawOptions) {
+                                 PolygonGraphicOptions graphicOptions, PolygonDrawOptions drawOptions) {
         this.polygon = polygon;
         this.points = points;
         this.meta = meta;
@@ -52,7 +57,7 @@ public class PolygonGraphicManager implements IGraphicManager {
         }
     }
 
-    public void setGraphic(IPolygonGraphic polygonGraphic, PolygonDrawOptions drawOptions, IPolygonGraphic.PolygonGraphicOptions graphicOptions) {
+    public void setGraphic(IPolygonGraphic polygonGraphic, PolygonDrawOptions drawOptions, PolygonGraphicOptions graphicOptions) {
         this.polygonGraphic = polygonGraphic;
         this.graphicOptions = graphicOptions;
 
@@ -92,7 +97,7 @@ public class PolygonGraphicManager implements IGraphicManager {
     }
 
     public void setAdjNavPtsVisible(boolean visible) {
-        polygonGraphic.setAdjBndPtsVisible(visible);
+        polygonGraphic.setAdjNavPtsVisible(visible);
     }
 
 
@@ -125,6 +130,35 @@ public class PolygonGraphicManager implements IGraphicManager {
 
     public void setUnadjBndClose(boolean close) {
         polygonGraphic.setUnadjBndClose(close);
+    }
+
+
+    public void setAdjBndColor(@ColorInt int adjBndColor) {
+        polygonGraphic.setAdjBndColor(adjBndColor);
+    }
+
+    public void setAdjNavColor(@ColorInt int adjNavColor) {
+        polygonGraphic.setAdjNavColor(adjNavColor);
+    }
+
+    public void setUnAdjBndColor(@ColorInt int unAdjBndColor) {
+        polygonGraphic.setUnAdjBndColor(unAdjBndColor);
+    }
+
+    public void setUnAdjNavColor(@ColorInt int unAdjNavColor) {
+        polygonGraphic.setUnAdjNavColor(unAdjNavColor);
+    }
+
+    public void setAdjPtsColor(@ColorInt int adjPtsColor) {
+        polygonGraphic.setAdjPtsColor(adjPtsColor);
+    }
+
+    public void setUnAdjPtsColor(@ColorInt int unAdjPtsColor) {
+        polygonGraphic.setUnAdjPtsColor(unAdjPtsColor);
+    }
+
+    public void setWayPtsColor(@ColorInt int wayPtsColor) {
+        polygonGraphic.setWayPtsColor(wayPtsColor);
     }
     //endregion
 
@@ -201,6 +235,34 @@ public class PolygonGraphicManager implements IGraphicManager {
     public boolean isUnadjBndClose() {
         return polygonGraphic.isUnadjBndClose();
     }
+
+
+    public int getAdjBndColor() {
+        return graphicOptions.getAdjBndColor();
+    }
+    public int getUnAdjBndColor() {
+        return graphicOptions.getUnAdjBndColor();
+    }
+
+    public int getAdjNavColor() {
+        return graphicOptions.getAdjNavColor();
+    }
+
+    public int getUnAdjNavColor() {
+        return graphicOptions.getUnAdjNavColor();
+    }
+
+    public int getAdjPtsColor() {
+        return graphicOptions.getAdjPtsColor();
+    }
+
+    public int getUnAdjPtsColor() {
+        return graphicOptions.getUnAdjPtsColor();
+    }
+
+    public int getWayPtsColor() {
+        return graphicOptions.getWayPtsColor();
+    }
     //endregion
 
 
@@ -210,12 +272,24 @@ public class PolygonGraphicManager implements IGraphicManager {
     }
 
 
-    public void setListener(Listener listener) {
-        this.listener = listener;
+    public void addPolygonDrawListener(PolygonDrawOptions.Listener polygonDrawListener) {
+        polygonDrawListeners.add(polygonDrawListener);
+    }
+    
+    public void removePolygonDrawListener(PolygonDrawOptions.Listener polygonDrawListener) {
+        polygonDrawListeners.remove(polygonDrawListener);
     }
 
-    
-    public void update(PolygonDrawOptions.GraphicCode code, boolean value) {
+    public void addPolygonGraphicListener(PolygonGraphicOptions.Listener polygonGraphicListener) {
+        polygonGraphicListeners.add(polygonGraphicListener);
+    }
+
+    public void removePolygonGraphicListener(PolygonGraphicOptions.Listener polygonGraphicListener) {
+        polygonGraphicListeners.remove(polygonGraphicListener);
+    }
+
+
+    public void update(PolygonDrawOptions.DrawCode code, boolean value) {
         switch (code) {
             case VISIBLE:
                 setVisible(value);
@@ -261,13 +335,32 @@ public class PolygonGraphicManager implements IGraphicManager {
                 break;
         }
 
-        if (listener != null) {
+        for (PolygonDrawOptions.Listener listener : polygonDrawListeners) {
             listener.onOptionChanged(code, value);
         }
     }
 
+    public void update(PolygonGraphicOptions.GraphicCode code, int value) {
+        switch (code) {
+            case ADJBND_COLOR:
 
-    public interface Listener {
-        void onOptionChanged(PolygonDrawOptions.GraphicCode code, boolean value);
+                break;
+            case ADJNAV_COLOR:
+                break;
+            case ADJPTS_COLOR:
+                break;
+            case UNADJBND_COLOR:
+                break;
+            case UNADJNAV_COLOR:
+                break;
+            case UNADJPTS_COLOR:
+                break;
+            case WAYPTS_COLOR:
+                break;
+        }
+
+        for (PolygonGraphicOptions.Listener listener : polygonGraphicListeners) {
+            listener.onOptionChanged(code, value);
+        }
     }
 }

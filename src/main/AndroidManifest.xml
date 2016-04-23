@@ -202,7 +202,12 @@
             android:label="@string/title_activity_get_map_extents"
             android:theme="@style/AppTheme">
         </activity>
+
         <activity android:name=".activities.custom.AcquireGpsMapActivity">
+        </activity>
+
+        <activity android:name=".activities.MapDetailsActivity"
+                  android:label="@string/title_activity_edit_arc_map">
         </activity>
     </application>
 

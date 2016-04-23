@@ -50,6 +50,7 @@ import com.usda.fmsc.twotrails.ui.MyPositionDrawable;
 import com.usda.fmsc.twotrails.utilities.ArcGISTools;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
 
@@ -169,7 +170,7 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
 //        mMapView.setMaxScale(mBasemapLayer.getMaxScale());
 //        mMapView.setMinScale(mBasemapLayer.getMinScale());
 
-//        mMapView.addLayer(mBasemapLayer);
+//        mMapView.addMapLayer(mBasemapLayer);
 
         mMapView.addLayer(locationLayer);
 
@@ -260,28 +261,36 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
     }
 
     public void changeBasemap(ArcGisMapLayer agml) {
-        this.basemapId = agml.getId();
-        this.currentGisMapLayer = agml;
 
         if (mMapView == null) {
             mBasemapLayer = null;
         } else {
-            if (mBasemapLayer != null)
-                mMapView.removeLayer(mBasemapLayer);
+            try {
+                Layer newLayer = ArcGISTools.getBaseLayer(agml);
 
-            mBasemapLayer = ArcGISTools.getBaseLayer(agml);
-            mMapView.addLayer(mBasemapLayer, 0);
+                if (mBasemapLayer != null)
+                    mMapView.removeLayer(mBasemapLayer);
 
-            if (agml.hasScales()) {
-                mMapView.setMaxScale(agml.getMaxScale());
-                mMapView.setMinScale(agml.getMinScale());
-            } else {
-                mMapView.setMaxScale(1000);
-                mMapView.setMinScale(591657550.5);
-            }
+                this.basemapId = agml.getId();
+                this.currentGisMapLayer = agml;
 
-            if (mmListener != null) {
-                mmListener.onMapTypeChanged(Units.MapType.ArcGIS, basemapId);
+                mBasemapLayer = newLayer;
+
+                mMapView.addLayer(mBasemapLayer, 0);
+
+                if (agml.hasScales()) {
+                    mMapView.setMaxScale(agml.getMaxScale());
+                    mMapView.setMinScale(agml.getMinScale());
+                } else {
+                    mMapView.setMaxScale(50);
+                    mMapView.setMinScale(591657550.5);
+                }
+
+                if (mmListener != null) {
+                    mmListener.onMapTypeChanged(Units.MapType.ArcGIS, basemapId);
+                }
+            } catch (FileNotFoundException e) {
+                //TODO Show error and ask to remove or reattach
             }
         }
     }
@@ -326,11 +335,6 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
 
 
     @Override
-    public void setEnableCameraQueue(boolean enabled) {
-
-    }
-
-    @Override
     public void onMapLocationChanged() {
         if (mmListener != null) {
             mmListener.onMapLocationChanged();
@@ -364,12 +368,14 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
     public Extent getExtents() {
         Polygon polygon = mMapView.getExtent();
 
+        if (polygon != null) {
+            Point ne = ArcGISTools.pointToLatLng(polygon.getPoint(1), mMapView);
+            Point sw = ArcGISTools.pointToLatLng(polygon.getPoint(3), mMapView);
 
-        Point ne = ArcGISTools.pointToLatLng(polygon.getPoint(1), mMapView);
-        Point sw = ArcGISTools.pointToLatLng(polygon.getPoint(3), mMapView);
+            return new Extent(sw.getY(), ne.getX(), ne.getY(), sw.getX());
+        }
 
-
-        return new Extent(sw.getY(), ne.getX(), ne.getY(), sw.getX());
+        return null;
     }
 
     public Envelope getArcExtents() {

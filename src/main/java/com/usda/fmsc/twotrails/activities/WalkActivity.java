@@ -24,6 +24,7 @@ import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.dialogs.InputDialog;
 import com.usda.fmsc.android.widget.SheetLayoutEx;
 import com.usda.fmsc.android.widget.drawables.AnimationDrawableEx;
+import com.usda.fmsc.geospatial.GeoPosition;
 import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.Global;
@@ -76,12 +77,6 @@ public class WalkActivity extends AcquireGpsMapActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_walk);
-
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null){
-            //actionBar.setDisplayShowTitleEnabled(false);
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
 
         setUseLostConnectionWarning(true);
 
@@ -471,7 +466,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
 
         Global.TtNotifyManager.showPointAquired();
 
-        addPosition(_CurrentPoint, false);
+        addPosition(_CurrentPoint, getLastPosition() != null);
     }
 
     private void setStartWalkingDrawable(boolean startAquring) {
@@ -532,8 +527,8 @@ public class WalkActivity extends AcquireGpsMapActivity {
     }
 
     @Override
-    public void nmeaBurstReceived(INmeaBurst nmeaBurst) {
-        super.nmeaBurstReceived(nmeaBurst);
+    protected void onNmeaBurstReceived(INmeaBurst nmeaBurst) {
+        super.onNmeaBurstReceived(nmeaBurst);
 
         if (walking) {
             //if valid and after frequency
@@ -552,7 +547,6 @@ public class WalkActivity extends AcquireGpsMapActivity {
             }
         }
     }
-
 
     public void btnWalkClick(View view) {
         if (walking) {
