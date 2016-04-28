@@ -5,6 +5,7 @@
     <item name="mmSelectMap" type="id"/>
 
     <item name="ctx_menu_add" type="id"/>
+    <item name="ctx_menu_rename" type="id"/>
     <item name="ctx_menu_delete" type="id"/>
     <item name="ctx_menu_details" type="id"/>
 </resources>

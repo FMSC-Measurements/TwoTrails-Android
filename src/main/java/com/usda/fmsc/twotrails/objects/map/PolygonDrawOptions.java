@@ -28,6 +28,7 @@ public class PolygonDrawOptions {
         Visible = true;
         AdjBnd = true;
         AdjBndClose = true;
+        UnadjBndClose = true;
         AdjBndPts = true;
     }
 

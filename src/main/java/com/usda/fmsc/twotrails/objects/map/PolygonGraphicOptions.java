@@ -2,6 +2,8 @@ package com.usda.fmsc.twotrails.objects.map;
 
 import android.support.annotation.ColorInt;
 
+import java.util.ArrayList;
+
 public class PolygonGraphicOptions {
     public enum GraphicCode {
         ADJBND_COLOR,
@@ -12,6 +14,8 @@ public class PolygonGraphicOptions {
         UNADJPTS_COLOR,
         WAYPTS_COLOR
     }
+
+    private ArrayList<Listener> listeners = new ArrayList<>();
 
     @ColorInt private int AdjBndColor, UnAdjBndColor;
     @ColorInt private int AdjNavColor, UnAdjNavColor;
@@ -63,25 +67,25 @@ public class PolygonGraphicOptions {
     public void setColor(GraphicCode color, @ColorInt int value) {
         switch (color) {
             case ADJBND_COLOR:
-                AdjBndColor = value;
+                setAdjBndColor(value);
                 break;
             case ADJNAV_COLOR:
-                AdjNavColor = value;
+                setAdjNavColor(value);
                 break;
             case ADJPTS_COLOR:
-                AdjPtsColor = value;
+                setAdjPtsColor(value);
                 break;
             case UNADJBND_COLOR:
-                UnAdjBndColor = value;
+                setUnAdjBndColor(value);
                 break;
             case UNADJNAV_COLOR:
-                UnAdjNavColor = value;
+                setUnAdjNavColor(value);
                 break;
             case UNADJPTS_COLOR:
-                UnAdjPtsColor = value;
+                setUnAdjPtsColor(value);
                 break;
             case WAYPTS_COLOR:
-                WayPtsColor = value;
+                setWayPtsColor(value);
                 break;
         }
     }
@@ -93,6 +97,7 @@ public class PolygonGraphicOptions {
 
     public void setAdjBndColor(@ColorInt int adjBndColor) {
         AdjBndColor = adjBndColor;
+        onColorChange(GraphicCode.ADJBND_COLOR, adjBndColor);
     }
 
     @ColorInt
@@ -102,6 +107,7 @@ public class PolygonGraphicOptions {
 
     public void setUnAdjBndColor(@ColorInt int unAdjBndColor) {
         UnAdjBndColor = unAdjBndColor;
+        onColorChange(GraphicCode.UNADJBND_COLOR, unAdjBndColor);
     }
 
     @ColorInt
@@ -111,6 +117,7 @@ public class PolygonGraphicOptions {
 
     public void setAdjNavColor(@ColorInt int adjNavColor) {
         AdjNavColor = adjNavColor;
+        onColorChange(GraphicCode.ADJNAV_COLOR, adjNavColor);
     }
 
     @ColorInt
@@ -120,6 +127,7 @@ public class PolygonGraphicOptions {
 
     public void setUnAdjNavColor(@ColorInt int unAdjNavColor) {
         UnAdjNavColor = unAdjNavColor;
+        onColorChange(GraphicCode.UNADJNAV_COLOR, unAdjNavColor);
     }
 
     @ColorInt
@@ -129,6 +137,7 @@ public class PolygonGraphicOptions {
 
     public void setAdjPtsColor(@ColorInt int adjPtsColor) {
         AdjPtsColor = adjPtsColor;
+        onColorChange(GraphicCode.ADJPTS_COLOR, adjPtsColor);
     }
 
     @ColorInt
@@ -138,6 +147,7 @@ public class PolygonGraphicOptions {
 
     public void setUnAdjPtsColor(@ColorInt int unAdjPtsColor) {
         UnAdjPtsColor = unAdjPtsColor;
+        onColorChange(GraphicCode.UNADJPTS_COLOR, unAdjPtsColor);
     }
 
     @ColorInt
@@ -147,6 +157,7 @@ public class PolygonGraphicOptions {
 
     public void setWayPtsColor(@ColorInt int wayPtsColor) {
         WayPtsColor = wayPtsColor;
+        onColorChange(GraphicCode.WAYPTS_COLOR, wayPtsColor);
     }
 
     public float getAdjWidth() {
@@ -166,7 +177,23 @@ public class PolygonGraphicOptions {
     }
 
 
+    private void onColorChange(GraphicCode code, @ColorInt int value) {
+        for (Listener listener : listeners) {
+            listener.onOptionChanged(this, code, value);
+        }
+    }
+
+    public void addListener(Listener listener) {
+        if (!listeners.contains(listener)){
+            listeners.add(listener);
+        }
+    }
+
+    public void removeListener(Listener listener) {
+        listeners.remove(listener);
+    }
+
     public interface Listener {
-        void onOptionChanged(GraphicCode code, int value);
+        void onOptionChanged(PolygonGraphicOptions pgo, GraphicCode code, @ColorInt int value);
     }
 }

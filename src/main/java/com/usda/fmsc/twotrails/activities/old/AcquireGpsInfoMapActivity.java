@@ -16,6 +16,7 @@ import com.usda.fmsc.android.animation.ViewAnimator;
 import com.usda.fmsc.geospatial.nmea.NmeaIDs;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.Global;
+import com.usda.fmsc.twotrails.activities.custom.AcquireGpsMapActivity;
 import com.usda.fmsc.twotrails.activities.custom.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.R;
@@ -259,7 +260,7 @@ public class AcquireGpsInfoMapActivity extends CustomToolbarActivity implements 
 
                             if (status != GpsService.GpsDeviceStatus.ExternalGpsStarted &&
                                     status != GpsService.GpsDeviceStatus.InternalGpsStarted) {
-                                Toast.makeText(Global.getMainActivity(), "Unabled to conenct to GPS.", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(AcquireGpsInfoMapActivity.this, "Unabled to conenct to GPS.", Toast.LENGTH_SHORT).show();
                                 activity.setResult(RESULT_CANCELED);
                                 activity.finish();
                             } else {

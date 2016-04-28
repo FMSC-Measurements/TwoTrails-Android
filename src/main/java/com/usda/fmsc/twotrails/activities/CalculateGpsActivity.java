@@ -75,17 +75,17 @@ public class CalculateGpsActivity extends CustomToolbarActivity {
             _Bursts = new ArrayList<>();
 
             try {
-                _Point = (GpsPoint)intent.getSerializableExtra(Consts.Activities.Data.POINT_DATA);
-                _Metadata = (TtMetadata)intent.getSerializableExtra(Consts.Activities.Data.METADATA_DATA);
+                _Point = (GpsPoint)intent.getSerializableExtra(Consts.Codes.Data.POINT_DATA);
+                _Metadata = (TtMetadata)intent.getSerializableExtra(Consts.Codes.Data.METADATA_DATA);
                 _Zone = _Metadata.getZone();
 
-                _Bursts = TtNmeaBurst.bytesToBursts(intent.getByteArrayExtra(Consts.Activities.Data.ADDITIVE_NMEA_DATA));
+                _Bursts = TtNmeaBurst.bytesToBursts(intent.getByteArrayExtra(Consts.Codes.Data.ADDITIVE_NMEA_DATA));
                 _FilteredBursts = new ArrayList<>();
             } catch (Exception e) {
                 e.printStackTrace();
             }
         } else {
-            setResult(Consts.Activities.Results.NO_POINT_DATA);
+            setResult(Consts.Codes.Results.NO_POINT_DATA);
             finish();
             return;
         }
@@ -522,9 +522,9 @@ public class CalculateGpsActivity extends CustomToolbarActivity {
     public void btnCreateClick(View view) {
         if (calculated) {
 
-            Global.DAL.insertNmeaBursts(_Bursts);
+            Global.getDAL().insertNmeaBursts(_Bursts);
 
-            setResult(Consts.Activities.Results.POINT_CREATED, new Intent().putExtra(Consts.Activities.Data.POINT_DATA, _Point));
+            setResult(Consts.Codes.Results.POINT_CREATED, new Intent().putExtra(Consts.Codes.Data.POINT_DATA, _Point));
             finish();
         }
     }

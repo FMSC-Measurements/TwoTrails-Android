@@ -4,12 +4,14 @@ import android.support.annotation.ColorInt;
 
 import com.esri.android.map.GraphicsLayer;
 import com.esri.android.map.MapView;
+import com.esri.core.geometry.Geometry;
 import com.esri.core.geometry.Point;
 import com.esri.core.geometry.Polygon;
 import com.esri.core.geometry.Polyline;
 import com.esri.core.map.Graphic;
 import com.esri.core.symbol.SimpleLineSymbol;
 import com.esri.core.symbol.SimpleMarkerSymbol;
+import com.esri.core.symbol.Symbol;
 import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.geospatial.GeoPosition;
 import com.usda.fmsc.twotrails.Units;
@@ -23,7 +25,6 @@ import com.usda.fmsc.twotrails.utilities.TtUtils;
 import java.util.HashMap;
 import java.util.List;
 
-//TODO finish change shape and point colors
 public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic {
     private TtPolygon polygon;
     private PolygonDrawOptions drawOptions;
@@ -123,7 +124,6 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
                     adjBndPLO.lineTo(adjLL);
                     unadjBndPLO.lineTo(unadjLL);
                 }
-
             }
 
             if (point.isNavPoint()) {
@@ -515,40 +515,75 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
 
     @Override
     public void setAdjBndColor(@ColorInt int adjBndColor) {
-
+        setLineColor(adjBndColor, _AdjBnd);
+        setLineColor(adjBndColor, _AdjBndCB);
     }
 
     @Override
     public void setUnAdjBndColor(@ColorInt int unAdjBndColor) {
-
+        setLineColor(unAdjBndColor, _UnadjBnd);
+        setLineColor(unAdjBndColor, _UnadjBndCB);
     }
 
     @Override
     public void setAdjNavColor(@ColorInt int adjNavColor) {
-
+        setLineColor(adjNavColor, _AdjNav);
     }
 
     @Override
     public void setUnAdjNavColor(@ColorInt int unAdjNavColor) {
-
+        setLineColor(unAdjNavColor, _UnadjNav);
     }
 
     @Override
     public void setAdjPtsColor(@ColorInt int adjPtsColor) {
-
+        setPtsColor(adjPtsColor, _AdjBndPts);
+        setPtsColor(adjPtsColor, _AdjNavPts);
     }
 
     @Override
     public void setUnAdjPtsColor(@ColorInt int unAdjPtsColor) {
-
+        setPtsColor(unAdjPtsColor, _UnadjBndPts);
+        setPtsColor(unAdjPtsColor, _UnadjNavPts);
     }
 
     @Override
     public void setWayPtsColor(@ColorInt int wayPtsColor) {
-
+        setPtsColor(wayPtsColor, _WayPts);
     }
 
 
+    private void setLineColor(@ColorInt int color, GraphicsLayer graphicLayer) {
+        if (graphicLayer.getNumberOfGraphics() > 0) {
+            int[] gids = graphicLayer.getGraphicIDs();
+
+            for (int id : gids) {
+                Graphic g = graphicLayer.getGraphic(id);
+                Symbol s = g.getSymbol();
+
+                if (s instanceof SimpleLineSymbol) {
+                    SimpleLineSymbol sls = (SimpleLineSymbol)s;
+                    sls.setColor(color);
+                }
+            }
+        }
+    }
+
+    private void setPtsColor(@ColorInt int color, GraphicsLayer graphicLayer) {
+        if (graphicLayer.getNumberOfGraphics() > 0) {
+            int[] gids = graphicLayer.getGraphicIDs();
+
+            for (int id : gids) {
+                Graphic g = graphicLayer.getGraphic(id);
+                Symbol s = g.getSymbol();
+
+                if (s instanceof SimpleMarkerSymbol) {
+                    SimpleMarkerSymbol sms = (SimpleMarkerSymbol)s;
+                    sms.setColor(color);
+                }
+            }
+        }
+    }
     //endregion
 
     //region Getters

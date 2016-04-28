@@ -67,27 +67,39 @@ public class Consts {
         public static final long[] VIB_ERROR = new long[] { 0, 1000 };
     }
 
-    public static class Activities {
-        public static final int MAIN = 1000;
-        public static final int ACQUIRE = 1001;
-        public static final int CALCULATE = 1002;
-        public static final int LOGGER = 1003;
-        public static final int HAID = 1004;
-        public static final int MAP = 1005;
-        public static final int METADATA = 1006;
-        public static final int POINTS = 1007;
-        public static final int POLYGONS = 1008;
-        public static final int PROJECT = 1009;
-        public static final int SETTINGS = 1010;
-        public static final int TABLE_EDIT = 1011;
-        public static final int TAKE5 = 1012;
-        public static final int WALK = 1013;
-        public static final int EXPORT = 1014;
-        public static final int MULTI_POINT = 1015;
-        public static final int PLOT_GRID = 1016;
-        public static final int GET_MAP_EXTENTS = 1017;
-        public static final int MAP_MANAGER = 1018;
-        public static final int MAP_DETAILS = 1018;
+    public static class FileExtensions {
+        public static final String TWO_TRAILS = "file/*.tt";
+        public static final String TPK = "file/*.tpk";
+    }
+
+    public static class Codes {
+        public static class Activites {
+            public static final int MAIN = 1000;
+            public static final int ACQUIRE = 1001;
+            public static final int CALCULATE = 1002;
+            public static final int LOGGER = 1003;
+            public static final int HAID = 1004;
+            public static final int MAP = 1005;
+            public static final int METADATA = 1006;
+            public static final int POINTS = 1007;
+            public static final int POLYGONS = 1008;
+            public static final int PROJECT = 1009;
+            public static final int SETTINGS = 1010;
+            public static final int TABLE_EDIT = 1011;
+            public static final int TAKE5 = 1012;
+            public static final int WALK = 1013;
+            public static final int EXPORT = 1014;
+            public static final int MULTI_POINT = 1015;
+            public static final int PLOT_GRID = 1016;
+            public static final int GET_MAP_EXTENTS = 1017;
+            public static final int MAP_MANAGER = 1018;
+            public static final int MAP_DETAILS = 1018;
+        }
+
+        public static class Dialogs {
+            public static final int REQUEST_FILE = 4001;
+            public static final int NEW_ARC_MAP = 4002;
+        }
 
         public static class Results {
             public static final int ERROR = 2000;
@@ -118,7 +130,7 @@ public class Consts {
 
     }
 
-    public static class LocationInfo {
+    public static class Location {
         private static final double north = 49.384359;
         private static final double east = -66.885666;
         private static final double south = 25.837377;
@@ -132,6 +144,9 @@ public class Consts {
 
         public static final int PADDING = 30;
 
+        public static final float ZOOM_GENERAL = 10f;
+        public static final float ZOOM_CLOSE = 20f;
+
         public static class GoogleMaps {
             public static final LatLng USA_CENTER = new LatLng(center_lat, center_lon);
 
@@ -140,10 +155,6 @@ public class Consts {
                             new LatLng(south, west),
                             new LatLng(north, east)
                     );
-
-            public static final float ZOOM_GENERAL = 10f;
-            public static final float ZOOM_CLOSE = 20f;
         }
-
     }
 }

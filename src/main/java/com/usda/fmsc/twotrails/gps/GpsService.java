@@ -218,7 +218,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
                                     android.Manifest.permission.ACCESS_FINE_LOCATION,
                                     android.Manifest.permission.ACCESS_COARSE_LOCATION
                             },
-                            Consts.Activities.Services.REQUEST_GPS_SERVICE);
+                            Consts.Codes.Services.REQUEST_GPS_SERVICE);
                     return GpsDeviceStatus.InternalGpsNeedsPermissions;
                 }
             } else {
@@ -291,7 +291,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
                 logPrintWriter.close();
             }
 
-            File logFileDir = new File(TtUtils.getTtLogFileDir());
+            File logFileDir = new File(Global.getTtLogFileDir());
             if (!logFileDir.exists()) {
                 logFileDir.mkdirs();
             }

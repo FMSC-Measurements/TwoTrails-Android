@@ -53,7 +53,7 @@ public class HaidActivity extends CustomToolbarActivity {
         ListView lvPolys = (ListView)findViewById(R.id.haidLvPolys);
         tvInfo = (TextView)findViewById(R.id.haidTxtInfo);
 
-        ArrayList<TtPolygon> polys = Global.DAL.getPolygons();
+        ArrayList<TtPolygon> polys = Global.getDAL().getPolygons();
 
         if (polys.size() < 1) {
             finish();

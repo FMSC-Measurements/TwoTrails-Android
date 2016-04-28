@@ -8,10 +8,13 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.os.Build;
+import android.os.Environment;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.support.annotation.ColorInt;
 import android.support.v4.app.NotificationCompat;
 
+import com.esri.android.runtime.ArcGISRuntime;
 import com.usda.fmsc.android.AndroidUtils;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -24,7 +27,8 @@ import com.usda.fmsc.twotrails.objects.map.PolygonDrawOptions;
 import com.usda.fmsc.twotrails.objects.RecentProject;
 import com.usda.fmsc.twotrails.objects.TtGroup;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
-import com.usda.fmsc.twotrails.objects.TtPolygon;
+import com.usda.fmsc.twotrails.objects.map.PolygonGraphicOptions;
+import com.usda.fmsc.twotrails.objects.map.PolygonGraphicOptions.GraphicCode;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.io.File;
@@ -35,15 +39,18 @@ import java.util.List;
 
 import com.usda.fmsc.geospatial.nmea.sentences.GGASentence;
 import com.usda.fmsc.geospatial.Units.UomElevation;
+import com.usda.fmsc.utilities.FileUtils;
 import com.usda.fmsc.utilities.StringEx;
 
+import org.joda.time.DateTime;
+
 public class Global {
-    public static DataAccessLayer DAL;
+    private static DataAccessLayer DAL;
 
     private static Context _ApplicationContext;
     private static MainActivity _MainActivity;
 
-    private static String _LogFilePath;
+    //private static String _LogFilePath;
 
     private static TtMetadata _DefaultMeta;
     private static TtGroup _MainGroup;
@@ -73,10 +80,10 @@ public class Global {
 
         Settings.DeviceSettings.init();
 
-        _LogFilePath = _ApplicationContext.getApplicationInfo().dataDir;// Environment.getDataDirectory().getAbsolutePath(); //TtUtils.getTtFileDir();
+        //_LogFilePath = _ApplicationContext.getApplicationInfo().dataDir;// Environment.getDataDirectory().getAbsolutePath(); //TtUtils.getTtFileDir();
         _DefaultMeta = Settings.MetaDataSetting.getDefaultmetaData();
 
-        TtUtils.TtReport.changeFilePath(_LogFilePath);
+        TtUtils.TtReport.changeDirectory(getTtLogFileDir());
 
         _MainGroup = new TtGroup();
         _MainGroup.setCN(Consts.EmptyGuid);
@@ -88,17 +95,17 @@ public class Global {
 
         TtNotifyManager.init(applicationContext);
 
-        File dir = new File(TtUtils.getTtFileDir());
+        File dir = new File(getTtFileDir());
         if(!dir.exists()) {
             dir.mkdirs();
         }
 
-        dir = new File(TtUtils.getOfflineMapsDir());
+        dir = new File(getOfflineMapsDir());
         if(!dir.exists()) {
             dir.mkdirs();
         }
 
-        dir = new File(TtUtils.getOfflineMapsRecoveryDir());
+        dir = new File(getOfflineMapsRecoveryDir());
         if(!dir.exists()) {
             dir.mkdirs();
         }
@@ -107,6 +114,8 @@ public class Global {
         _ApplicationContext.bindService(new Intent(_ApplicationContext, GpsService.class), serviceConnection, Context.BIND_AUTO_CREATE);
 
         TtUtils.TtReport.writeEvent("TwoTrails Started");
+
+        ArcGISRuntime.setClientId(_ApplicationContext.getString(R.string.arcgis_client_id));
 
         initUI();
     }
@@ -125,8 +134,13 @@ public class Global {
     }
 
 
-    public static String getLogFilePath() {
-        return _LogFilePath;
+    public static DataAccessLayer getDAL() {
+        return DAL;
+    }
+
+    public static void setDAL(DataAccessLayer dal) {
+        DAL = dal;
+        MapSettings.reset();
     }
 
     public static TtMetadata getDefaultMeta() {
@@ -164,6 +178,55 @@ public class Global {
     public static Context getApplicationContext() {
         return _ApplicationContext;
     }
+
+
+
+
+    //region Files
+    public static String getTtFilePath(String fileName) {
+        if(!fileName.endsWith(".tt"))
+            fileName += ".tt";
+
+        return getTtFileDir() + File.separator + fileName;
+    }
+
+    public static String getDocumentsDir() {
+        File dir;
+
+        if (Build.VERSION.SDK_INT < 19) {
+            dir = Environment.getExternalStorageDirectory();
+        } else {
+            dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
+        }
+
+        return dir.toString();
+    }
+
+    public static String getOfflineMapsDir() {
+        return String.format("%s%s%s", getDocumentsDir(), File.separator, "OfflineMaps");
+    }
+
+    public static String getOfflineMapsRecoveryDir() {
+        return String.format("%s%s%s", getOfflineMapsDir(), File.separator, "Recovery");
+    }
+
+    public static String getTtFileDir() {
+        return String.format("%s%s%s", getDocumentsDir(), File.separator, "TwoTrailsFiles");
+    }
+
+    public static String getTtLogFileDir() {
+        return getTtFileDir();
+        //return String.format("%s%s%s", getTtFileDir(), File.separator, "LogFiles");
+    }
+
+    public static String getLogFileName() {
+        return String.format("%s%sTtGpsLog_%s.txt",
+                getTtLogFileDir(),
+                File.separator,
+                DateTime.now().toString());
+    }
+    //endregion
+
 
     public static class TtNotifyManager {
         public static int GPS_NOTIFICATION_ID = 123;
@@ -280,7 +343,6 @@ public class Global {
             _DownloadingNotifs.remove(id);
         }
     }
-
 
 
     public static class Settings {
@@ -676,7 +738,7 @@ public class Global {
 
 
             public static boolean isGpsConfigured() {
-                return getBool(GPS_CONFIGURED);
+                return getBool(GPS_CONFIGURED) || !getBool(GPS_EXTERNAL);
             }
 
             public static void setGpsConfigured(boolean value) {
@@ -1286,7 +1348,7 @@ public class Global {
                 newList.add(project);
 
                 for(RecentProject p : getRecentProjects()) {
-                    if(!project.File.equals(p.File) && TtUtils.fileExists(p.File)) {
+                    if(!project.File.equals(p.File) && FileUtils.fileExists(p.File)) {
                         newList.add(p);
                     }
                 }
@@ -1462,32 +1524,82 @@ public class Global {
     }
 
 
+
     public static class MapSettings {
-        public static HashMap<String, PolygonDrawOptions> PolyOptions;
-        public static PolygonDrawOptions MasterPolyOptions;
+        private static HashMap<String, PolygonDrawOptions> _PolyDrawOptions = new HashMap<>();
+        private static PolygonDrawOptions _MasterPolyDrawOptions = new PolygonDrawOptions();
 
-        //initial values
-        public static void init(ArrayList<TtPolygon> polys) {
-            HashMap<String, PolygonDrawOptions> polyOptions = new HashMap<>();
+        private static HashMap<String, PolygonGraphicOptions> _PolyGraphicOptions = new HashMap<>();
+        private static PolygonGraphicOptions _MasterPolyGraphicOptions;
 
-            if (MasterPolyOptions == null) {
-                MasterPolyOptions = new PolygonDrawOptions();
+        public static void reset() {
+            _PolyDrawOptions.clear();
+
+            _MasterPolyGraphicOptions = new PolygonGraphicOptions(
+                    AndroidUtils.UI.getColor(getApplicationContext(), R.color.map_adj_bnd),
+                    AndroidUtils.UI.getColor(getApplicationContext(), R.color.map_unadj_bnd),
+                    AndroidUtils.UI.getColor(getApplicationContext(), R.color.map_adj_nav),
+                    AndroidUtils.UI.getColor(getApplicationContext(), R.color.map_unadj_nav),
+                    AndroidUtils.UI.getColor(getApplicationContext(), R.color.map_adj_pts),
+                    AndroidUtils.UI.getColor(getApplicationContext(), R.color.map_unadj_pts),
+                    AndroidUtils.UI.getColor(getApplicationContext(), R.color.map_way_pts),
+                    8,
+                    32
+            );
+
+
+            //TODO getGraphicOptions
+            //_PolyGraphicOptions = getDAL().getGraphicOptions();
+
+            for (PolygonGraphicOptions pgo : _PolyGraphicOptions.values()) {
+                pgo.addListener(new PolygonGraphicOptions.Listener() {
+                    @Override
+                    public void onOptionChanged(PolygonGraphicOptions pgo, GraphicCode code, @ColorInt int value) {
+                        //UPDATE
+                    }
+                });
             }
+        }
 
-            boolean polyOptsCreated = PolyOptions != null;
+        public static PolygonDrawOptions getMasterPolyDrawOptions() {
+            return _MasterPolyDrawOptions;
+        }
 
-            String key;
-            for (TtPolygon poly : polys) {
-                key = poly.getCN();
-
-                if (polyOptsCreated && PolyOptions.containsKey(key)) {
-                    polyOptions.put(key, PolyOptions.get(key));
-                } else {
-                    polyOptions.put(key, new PolygonDrawOptions(MasterPolyOptions));
-                }
+        public static PolygonDrawOptions getPolyDrawOptions(String cn) {
+            if (_PolyDrawOptions.containsKey(cn)) {
+                return _PolyDrawOptions.get(cn);
+            } else {
+                PolygonDrawOptions pdo = new PolygonDrawOptions(_MasterPolyDrawOptions);
+                _PolyDrawOptions.put(cn, pdo);
+                return pdo;
             }
+        }
 
-            PolyOptions = polyOptions;
+        public static PolygonGraphicOptions getMasterPolyGraphicOptions() {
+            return _MasterPolyGraphicOptions;
+        }
+
+        public static PolygonGraphicOptions getPolyGraphicOptions(final String cn) {
+            if (_PolyGraphicOptions.containsKey(cn)) {
+                return _PolyGraphicOptions.get(cn);
+            } else {
+                PolygonGraphicOptions pgo = new PolygonGraphicOptions(_MasterPolyGraphicOptions);
+                _PolyGraphicOptions.put(cn, pgo);
+
+                //TODO save PolygonGraphicOptions
+//                if (getDAL() != null) {
+//                    //ADD
+//                }
+
+                pgo.addListener(new PolygonGraphicOptions.Listener() {
+                    @Override
+                    public void onOptionChanged(PolygonGraphicOptions pgo, GraphicCode code, @ColorInt int value) {
+                        //UPDATE
+                    }
+                });
+
+                return pgo;
+            }
         }
     }
 }

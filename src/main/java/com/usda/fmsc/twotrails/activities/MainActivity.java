@@ -14,7 +14,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,21 +31,15 @@ import com.usda.fmsc.twotrails.fragments.main.MainFileFragment;
 import com.usda.fmsc.twotrails.fragments.main.MainToolsFragment;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.logic.PointNamer;
 import com.usda.fmsc.twotrails.logic.PolygonAdjuster;
-import com.usda.fmsc.twotrails.objects.GpsPoint;
 import com.usda.fmsc.twotrails.objects.RecentProject;
-import com.usda.fmsc.twotrails.objects.TtGroup;
-import com.usda.fmsc.twotrails.objects.TtMetadata;
-import com.usda.fmsc.twotrails.objects.TtPoint;
-import com.usda.fmsc.twotrails.objects.TtPolygon;
-import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
 import com.usda.fmsc.twotrails.utilities.Export;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.io.File;
 import java.util.ArrayList;
 
+import com.usda.fmsc.utilities.FileUtils;
 import com.usda.fmsc.utilities.StringEx;
 
 
@@ -159,7 +152,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
         switch (item.getItemId()) {
             case R.id.mainMenuSettings:
-                startActivityForResult(new Intent(this, PreferenceActivity.class), Consts.Activities.SETTINGS);
+                startActivityForResult(new Intent(this, PreferenceActivity.class), Consts.Codes.Activites.SETTINGS);
                 break;
             case R.id.mainMenuGpsSettings:
                 startActivity(new Intent(this, SettingsActivity.class).
@@ -237,20 +230,16 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
 
     //region Actions
-    public final int OPEN_TT_FILE = 101;
-    //public final int CREATE_TT_FILE = 102;
-    public final int UPDATE_INFO = 103;
-    public final int UPDATE_INFO_AND_GOTO_DATA_TAB = 104;
-    public final int GOTO_DATA_TAB = 105;
-
-    public final int OPEN_SHP_FILE = 111;
+    public final int UPDATE_INFO = 101;
+    public final int UPDATE_INFO_AND_GOTO_DATA_TAB = 102;
+    public final int GOTO_DATA_TAB = 103;
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         switch (requestCode) {
-            case OPEN_TT_FILE: {
+            case Consts.Codes.Dialogs.REQUEST_FILE: {
                 if(data == null)
                     return;
                 openFile(data.getData());
@@ -266,7 +255,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
                 gotoDataTab();
                 break;
             }
-            case Consts.Activities.SETTINGS: {
+            case Consts.Codes.Activites.SETTINGS: {
                 updateAppInfo();
                 break;
             }
@@ -291,18 +280,18 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
             }
 
             try {
-                if (!TtUtils.fileExists(filePath)) {
+                if (!FileUtils.fileExists(filePath)) {
                     createFile(filePath);
                 } else {
-                    Global.DAL = new DataAccessLayer(filePath);
+                    Global.setDAL(new DataAccessLayer(filePath));
 
-                    if (Global.DAL.getDalVersion().toIntVersion() < TwoTrailsSchema.SchemaVersion.toIntVersion()) {
+                    if (Global.getDAL().getDalVersion().toIntVersion() < TwoTrailsSchema.SchemaVersion.toIntVersion()) {
                         //upgrade?
 
                         //if upgrade
 
                         //else
-                        Global.DAL = null;
+                        Global.setDAL(null);
                         Toast.makeText(this, "Upgrade Canceled", Toast.LENGTH_SHORT).show();
 
                     } else {
@@ -334,15 +323,9 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
         }
 
         try {
-            Global.DAL = new DataAccessLayer(filePath);
+            Global.setDAL(new DataAccessLayer(filePath));
 
             Global.Settings.ProjectSettings.initProjectSettings(null);
-
-            //for test values *****
-            //testDAL(Global.DAL);
-            //Global.DAL.setProjectID(new File(filePath).getName());
-            //******
-
 
             startActivityForResult(new Intent(this, ProjectActivity.class), UPDATE_INFO_AND_GOTO_DATA_TAB);
 
@@ -356,150 +339,24 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     }
 
     private void closeFile() {
-        if(Global.DAL != null) {
-            Global.DAL.close();
-            Global.DAL = null;
+        if(Global.getDAL() != null) {
+            Global.getDAL().close();
+            Global.setDAL(null);
         }
     }
-
-
-    private void testDAL(DataAccessLayer dal){
-        try{
-
-            TtMetadata metaData = dal.getDefaultMetadata();
-            TtGroup mainGroup = Global.getMainGroup();
-
-            TtPolygon poly = new TtPolygon();
-            poly.setName("testPoly");
-            poly.setPointStartIndex(1010);
-            poly.setIncrementBy(5);
-            poly.setDescription("this is a test poly");
-            poly.setAccuracy(5.0);
-
-            dal.insertPolygon(poly);
-
-            TtPoint point = new GpsPoint(), lastPoint;
-            GpsPoint gps = (GpsPoint)point;
-
-            gps.setCN(java.util.UUID.randomUUID().toString());
-            gps.setManualAccuracy(2.0);
-            gps.setUnAdjX(100);
-            gps.setUnAdjY(100);
-            gps.setUnAdjZ(0);
-            gps.setPolyName(poly.getName());
-            gps.setPolyCN(poly.getCN());
-            gps.setComment("Point 100,100");
-            gps.setGroupCN(mainGroup.getCN());
-            gps.setGroupName(mainGroup.getName());
-            gps.setIndex(0);
-            gps.setMetadataCN(metaData.getCN());
-            gps.setOnBnd(true);
-
-            gps.setPID(PointNamer.nameFirstPoint(poly));
-            dal.insertPoint(point);
-
-            lastPoint = point;
-            point = new GpsPoint();
-            gps = (GpsPoint)point;
-
-            gps.setCN(java.util.UUID.randomUUID().toString());
-            gps.setManualAccuracy(2.0);
-            gps.setUnAdjX(100);
-            gps.setUnAdjY(200);
-            gps.setUnAdjZ(10);
-            gps.setPolyName(poly.getName());
-            gps.setPolyCN(poly.getCN());
-            gps.setComment("Point 100,200");
-            gps.setGroupCN(mainGroup.getCN());
-            gps.setGroupName(mainGroup.getName());
-            gps.setIndex(1);
-            gps.setMetadataCN(metaData.getCN());
-            gps.setOnBnd(true);
-
-            gps.setPID(PointNamer.namePoint(lastPoint, poly));
-            dal.insertPoint(point);
-
-
-            lastPoint = point;
-            point = new GpsPoint();
-            gps = (GpsPoint)point;
-
-            gps.setCN(java.util.UUID.randomUUID().toString());
-            gps.setUnAdjX(200);
-            gps.setUnAdjY(200);
-            gps.setUnAdjZ(20);
-            gps.setPolyName(poly.getName());
-            gps.setPolyCN(poly.getCN());
-            gps.setComment("Point 200,200");
-            gps.setGroupCN(mainGroup.getCN());
-            gps.setGroupName(mainGroup.getName());
-            gps.setIndex(2);
-            gps.setMetadataCN(metaData.getCN());
-            gps.setOnBnd(true);
-
-            gps.setPID(PointNamer.namePoint(lastPoint, poly));
-
-            dal.insertPoint(point);
-
-
-            lastPoint = point;
-            point = new GpsPoint();
-            gps = (GpsPoint)point;
-
-            gps.setCN(java.util.UUID.randomUUID().toString());
-            gps.setManualAccuracy(2.0);
-            gps.setUnAdjX(200);
-            gps.setUnAdjY(100);
-            gps.setUnAdjZ(2);
-            gps.setPolyName(poly.getName());
-            gps.setPolyCN(poly.getCN());
-            gps.setComment("Point 200,100");
-            gps.setGroupCN(mainGroup.getCN());
-            gps.setGroupName(mainGroup.getName());
-            gps.setIndex(3);
-            gps.setMetadataCN(metaData.getCN());
-            gps.setOnBnd(true);
-
-            gps.setPID(PointNamer.namePoint(lastPoint, poly));
-
-            dal.insertPoint(point);
-
-            Thread.sleep(1000);
-            poly = new TtPolygon();
-            poly.setName("Poly 2");
-            poly.setPointStartIndex(2010);
-            poly.setIncrementBy(10);
-            poly.setDescription("this is a test poly 2");
-            poly.setAccuracy(1.0);
-
-            dal.insertPolygon(poly);
-
-
-            PolygonAdjuster.adjust(dal, this);
-
-
-
-
-        } catch (Exception ex){
-            ex.printStackTrace();
-            Log.d("TT", ex.getMessage());
-        }
-    }
-
-
 
     private void updateAppInfo() {
         saveProjectSettings();
 
         boolean enable = false;
-        if(Global.DAL != null) {
+        if(Global.getDAL() != null) {
             Global.Settings.ProjectSettings.updateRecentProjects(
-                    new RecentProject(Global.DAL.getProjectID(), Global.DAL.getFilePath()));
+                    new RecentProject(Global.getDAL().getProjectID(), Global.getDAL().getFilePath()));
             
-            setTitle("TwoTrails - " + Global.DAL.getProjectID());
+            setTitle("TwoTrails - " + Global.getDAL().getProjectID());
             enable = true;
 
-            mFragFile.updateInfo(Global.DAL);
+            mFragFile.updateInfo(Global.getDAL());
         } else {
             setTitle(R.string.app_name);
         }
@@ -516,17 +373,17 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
 
     private void saveProjectSettings() {
-        if(Global.DAL != null) {
-            Global.DAL.setProjectID(Global.Settings.ProjectSettings.getProjectId());
-            Global.DAL.setProjectDescription(Global.Settings.ProjectSettings.getDescription());
-            Global.DAL.setProjectDistrict(Global.Settings.ProjectSettings.getDistrict());
-            Global.DAL.setProjectForest(Global.Settings.ProjectSettings.getForest());
-            Global.DAL.setProjectRegion(Global.Settings.ProjectSettings.getRegion());
+        if(Global.getDAL() != null) {
+            Global.getDAL().setProjectID(Global.Settings.ProjectSettings.getProjectId());
+            Global.getDAL().setProjectDescription(Global.Settings.ProjectSettings.getDescription());
+            Global.getDAL().setProjectDistrict(Global.Settings.ProjectSettings.getDistrict());
+            Global.getDAL().setProjectForest(Global.Settings.ProjectSettings.getForest());
+            Global.getDAL().setProjectRegion(Global.Settings.ProjectSettings.getRegion());
         }
     }
 
     private void duplicateFile(final String fileName) {
-        if (Global.DAL.duplicate(fileName)) {
+        if (Global.getDAL().duplicate(fileName)) {
             Snackbar snackbar = Snackbar.make(findViewById(R.id.parent), "File duplicated", Snackbar.LENGTH_LONG).setAction("Open", new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -555,9 +412,9 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
                 String value = inputDialog.getText().trim();
 
                 //filePath = TtUtils.getTtFilePath(inputDialog.getContext(), value);
-                String filePath = TtUtils.getTtFilePath(value);
+                String filePath = Global.getTtFilePath(value);
 
-                if(TtUtils.fileExists(filePath)) {
+                if(FileUtils.fileExists(filePath)) {
                     OverwriteFileDialog(filePath);
                 } else {
                     createFile(filePath);
@@ -610,7 +467,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
         startActivityForResult(fileIntent, OPEN_TT_FILE);
         */
 
-        AndroidUtils.App.openFileIntent(this, "file/*.tt", OPEN_TT_FILE);
+        AndroidUtils.App.openFileIntent(this, Consts.FileExtensions.TWO_TRAILS, Consts.Codes.Dialogs.REQUEST_FILE);
     }
 
     public void btnOpenRecClick(View view) {
@@ -642,7 +499,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
                         RecentProject project = adapter.getItem(which);
 
-                        if(TtUtils.fileExists(project.File))
+                        if(FileUtils.fileExists(project.File))
                             openFile(project.File);
                         else
                             Toast.makeText(getApplicationContext(), "File not found", Toast.LENGTH_LONG).show();
@@ -657,7 +514,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
         //AndroidUtils.App.openFileIntent(this, "file/*.shp", OPEN_SHP_FILE);
 
-        //Global.DAL.clean();
+        //Global.getDAL().clean();
     }
 
     public void btnDupClick(View view) {
@@ -666,13 +523,13 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
         } else {
             AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 
-            String filepath = Global.DAL.getFilePath();
+            String filepath = Global.getDAL().getFilePath();
 
             String dupFile = String.format("%s_bk.tt", filepath.substring(0, filepath.length() - 3));
             int inc = 2;
 
             while (true) {
-                if (TtUtils.fileExists(dupFile)) {
+                if (FileUtils.fileExists(dupFile)) {
                     dupFile = String.format("%s_bk%d.tt", filepath.substring(0, filepath.length() - 3), inc);
                     inc++;
                     continue;
@@ -708,7 +565,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
                         pd.show();
 
-                        Global.DAL.clean();
+                        Global.getDAL().clean();
 
                         pd.cancel();
                     }
@@ -719,7 +576,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
     //region Data
     public void btnPointsClick(View view) {
-        if(Global.DAL.getItemCount(TwoTrailsSchema.PolygonSchema.TableName) > 0) {
+        if(Global.getDAL().getItemCount(TwoTrailsSchema.PolygonSchema.TableName) > 0) {
             startActivityForResult(new Intent(this, PointsActivity.class), UPDATE_INFO);
         } else {
             Toast.makeText(this, "No Polygons in Project", Toast.LENGTH_SHORT).show();
@@ -739,7 +596,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     }
 
     public void btnPointTableClick(View view) {
-        if(Global.DAL.getItemCount(TwoTrailsSchema.PointSchema.TableName) > 0) {
+        if(Global.getDAL().getItemCount(TwoTrailsSchema.PointSchema.TableName) > 0) {
             startActivityForResult(new Intent(this, TableEditActivity.class), UPDATE_INFO);
         } else {
             Toast.makeText(this, "No Points in Project", Toast.LENGTH_SHORT).show();
@@ -760,7 +617,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
             progressLayout.setVisibility(View.VISIBLE);
 
-            String kmlPath = Export.kml(Global.DAL, TtUtils.getTtFileDir());
+            String kmlPath = Export.kml(Global.getDAL(), Global.getTtFileDir());
 
             progressLayout.setVisibility(View.GONE);
 
@@ -790,7 +647,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     }
 
     public void btnHAIDClick(View view) {
-        if(Global.DAL.getItemCount(TwoTrailsSchema.PolygonSchema.TableName) > 0) {
+        if(Global.getDAL().getItemCount(TwoTrailsSchema.PolygonSchema.TableName) > 0) {
             startActivity(new Intent(this, HaidActivity.class));
         } else {
             Toast.makeText(this, "No Polygons in Project", Toast.LENGTH_SHORT).show();
@@ -798,7 +655,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     }
 
     public void btnExportClick(View view) {
-        if(Global.DAL.getItemCount(TwoTrailsSchema.PolygonSchema.TableName) > 0) {
+        if(Global.getDAL().getItemCount(TwoTrailsSchema.PolygonSchema.TableName) > 0) {
             startActivity(new Intent(this, ExportActivity.class));
         } else {
             Toast.makeText(this, "No Polygons in Project", Toast.LENGTH_SHORT).show();
@@ -806,7 +663,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     }
 
     public void btnPlotGridClick(View view) {
-        if(Global.DAL.getItemCount(TwoTrailsSchema.PolygonSchema.TableName) > 0) {
+        if(Global.getDAL().getItemCount(TwoTrailsSchema.PolygonSchema.TableName) > 0) {
             startActivityForResult(new Intent(this, PlotGridActivity.class), UPDATE_INFO);
         } else {
             Toast.makeText(this, "No Polygons in Project", Toast.LENGTH_SHORT).show();
@@ -815,7 +672,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
     public void btnMultiEdit(View view) {
         /*
-        if(Global.DAL.getItemCount(TwoTrailsSchema.PolygonSchema.TableName) > 0) {
+        if(Global.getDAL().getItemCount(TwoTrailsSchema.PolygonSchema.TableName) > 0) {
             startActivityForResult(new Intent(this, MultiEditActivity.class), UPDATE_INFO);
         } else {
             Toast.makeText(this, "No Polygons in Project", Toast.LENGTH_SHORT).show();

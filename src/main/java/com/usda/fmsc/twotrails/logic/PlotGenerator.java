@@ -56,7 +56,7 @@ public class PlotGenerator extends AsyncTask<PlotGenerator.PlotParams, Void, TtP
 
         TtPolygon poly = new TtPolygon();
         poly.setName(pp.PolyName);
-        poly.setPointStartIndex(Global.DAL.getItemCount(TwoTrailsSchema.PolygonSchema.TableName) * 1000 + 1010);
+        poly.setPointStartIndex(Global.getDAL().getItemCount(TwoTrailsSchema.PolygonSchema.TableName) * 1000 + 1010);
         poly.setIncrementBy(1);
         poly.setAccuracy(Consts.Default_Point_Accuracy);
 

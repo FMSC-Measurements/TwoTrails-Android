@@ -4,7 +4,6 @@ import android.animation.Animator;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.view.View;
@@ -16,24 +15,18 @@ import android.widget.Toast;
 
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.animation.ViewAnimator;
-import com.usda.fmsc.android.utilities.PostDelayHandler;
 import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.geospatial.GeoPosition;
-import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.geospatial.nmea.NmeaIDs;
 import com.usda.fmsc.geospatial.nmea.sentences.GGASentence;
-import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.Units;
-import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.objects.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
-import com.usda.fmsc.twotrails.objects.map.ITrailGraphic;
 import com.usda.fmsc.twotrails.objects.map.TrailGraphicManager;
 import com.usda.fmsc.twotrails.objects.map.TrailGraphicOptions;
 import com.usda.fmsc.twotrails.ui.GpsStatusSatView;
@@ -41,7 +34,6 @@ import com.usda.fmsc.twotrails.ui.GpsStatusSkyView;
 import com.usda.fmsc.utilities.StringEx;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class AcquireGpsMapActivity extends BaseMapActivity {
     public static final int GPS_NOT_FOUND = 1910;
@@ -83,17 +75,17 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
         Intent intent = getIntent();
 
         if (intent != null) {
-            polygon = (TtPolygon) intent.getSerializableExtra(Consts.Activities.Data.POLYGON_DATA);
+            polygon = (TtPolygon) intent.getSerializableExtra(Consts.Codes.Data.POLYGON_DATA);
 
             if (polygon == null) {
-                setResult(Consts.Activities.Results.NO_POLYGON_DATA);
+                setResult(Consts.Codes.Results.NO_POLYGON_DATA);
                 canceling = true;
                 return;
             }
 
             super.onCreate(savedInstanceState);
 
-            ArrayList<TtPoint> points = Global.DAL.getPointsInPolygon(polygon.getCN());
+            ArrayList<TtPoint> points = Global.getDAL().getPointsInPolygon(polygon.getCN());
 
             trailGraphicManager = new TrailGraphicManager(polygon, points, getMetadata(),
                     new TrailGraphicOptions(
@@ -368,7 +360,7 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
 
                             if (status != GpsService.GpsDeviceStatus.ExternalGpsStarted &&
                                     status != GpsService.GpsDeviceStatus.InternalGpsStarted) {
-                                Toast.makeText(Global.getMainActivity(), "Unabled to conenct to GPS.", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(AcquireGpsMapActivity.this, "Unabled to conenct to GPS.", Toast.LENGTH_SHORT).show();
                                 activity.setResult(RESULT_CANCELED);
                                 activity.finish();
                             } else {
@@ -396,7 +388,7 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
 
     @Override
     protected void onFirstPositionReceived(GeoPosition position) {
-        moveToLocation(position, Consts.LocationInfo.GoogleMaps.ZOOM_CLOSE, true);
+        moveToLocation(position, Consts.Location.ZOOM_CLOSE, true);
     }
 
     protected boolean isCanceling() {

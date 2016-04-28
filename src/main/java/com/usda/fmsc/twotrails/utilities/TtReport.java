@@ -34,7 +34,7 @@ public class TtReport {
         }
     }
 
-    public void changeFilePath(String path) {
+    public void changeDirectory(String path) {
         inst.changeFilePathString(path + File.separator + _fileName);
     }
 

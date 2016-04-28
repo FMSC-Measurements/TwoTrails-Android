@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
@@ -178,7 +177,6 @@ public class Take5Activity extends AcquireGpsMapActivity {
 
         setUseLostConnectionWarning(true);
 
-
         if (!isCanceling()) {
             SheetLayoutEx.enterFromBottomAnimation(this);
             _CurrentPoint = null;
@@ -193,31 +191,31 @@ public class Take5Activity extends AcquireGpsMapActivity {
                 _Bursts = new ArrayList<>();
 
                 try {
-                    if (intent.getExtras().containsKey(Consts.Activities.Data.POINT_DATA)) {
-                        _CurrentPoint = (TtPoint) intent.getSerializableExtra(Consts.Activities.Data.POINT_DATA);
+                    if (intent.getExtras().containsKey(Consts.Codes.Data.POINT_DATA)) {
+                        _CurrentPoint = (TtPoint) intent.getSerializableExtra(Consts.Codes.Data.POINT_DATA);
                         onBnd = _CurrentPoint.isOnBnd();
                     }
 
-                    _Metadata = (TtMetadata)intent.getSerializableExtra(Consts.Activities.Data.METADATA_DATA);
-                    _Polygon = (TtPolygon)intent.getSerializableExtra(Consts.Activities.Data.POLYGON_DATA);
+                    _Metadata = (TtMetadata)intent.getSerializableExtra(Consts.Codes.Data.METADATA_DATA);
+                    _Polygon = (TtPolygon)intent.getSerializableExtra(Consts.Codes.Data.POLYGON_DATA);
 
                     if (_Metadata == null) {
-                        cancelResult = Consts.Activities.Results.NO_METDATA_DATA;
+                        cancelResult = Consts.Codes.Results.NO_METDATA_DATA;
                     } else {
                         setZone(_Metadata.getZone());
 
                         if (_Polygon == null) {
-                            cancelResult = Consts.Activities.Results.NO_POLYGON_DATA;
+                            cancelResult = Consts.Codes.Results.NO_POLYGON_DATA;
                         }
                     }
 
 
                 } catch (Exception e) {
-                    cancelResult = Consts.Activities.Results.ERROR;
+                    cancelResult = Consts.Codes.Results.ERROR;
                     e.printStackTrace();
                 }
             } else {
-                cancelResult = Consts.Activities.Results.NO_POINT_DATA;
+                cancelResult = Consts.Codes.Results.NO_POINT_DATA;
             }
 
             if (cancelResult != 0) {
@@ -227,7 +225,7 @@ public class Take5Activity extends AcquireGpsMapActivity {
             }
 
             _Group = new TtGroup(TtGroup.GroupType.Take5);
-            Global.DAL.insertGroup(_Group);
+            Global.getDAL().insertGroup(_Group);
 
             fabT5 = (FloatingActionButton)findViewById(R.id.take5FabT5);
             fabSS = (FloatingActionButton)findViewById(R.id.take5FabSideShot);
@@ -318,13 +316,13 @@ public class Take5Activity extends AcquireGpsMapActivity {
             case R.id.take5MenuGps: {
                 startActivityForResult(new Intent(this, SettingsActivity.class)
                                 .putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.GPS_SETTINGS_PAGE),
-                        Consts.Activities.SETTINGS);
+                        Consts.Codes.Activites.SETTINGS);
                 break;
             }
             case R.id.take5MenuTake5Settings: {
                 startActivityForResult(new Intent(this, SettingsActivity.class)
                                 .putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.FILTER_TAKE5_SETTINGS_PAGE),
-                        Consts.Activities.SETTINGS);
+                        Consts.Codes.Activites.SETTINGS);
                 break;
             }
             case R.id.take5MenuMode: {
@@ -346,7 +344,7 @@ public class Take5Activity extends AcquireGpsMapActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         switch (requestCode) {
-            case Consts.Activities.SETTINGS: {
+            case Consts.Codes.Activites.SETTINGS: {
                 Global.getGpsBinder().startGps();
 
                 getSettings();
@@ -366,10 +364,10 @@ public class Take5Activity extends AcquireGpsMapActivity {
     @Override
     public void finish() {
         if (_Points != null && _Points.size() > 0) {
-            setResult(Consts.Activities.Results.POINT_CREATED, new Intent().putExtra(Consts.Activities.Data.NUMBER_OF_CREATED_POINTS, _Points.size()));
+            setResult(Consts.Codes.Results.POINT_CREATED, new Intent().putExtra(Consts.Codes.Data.NUMBER_OF_CREATED_POINTS, _Points.size()));
         } else {
             if (_Group != null) {
-                Global.DAL.deleteGroup(_Group.getCN());
+                Global.getDAL().deleteGroup(_Group.getCN());
             }
 
             setResult(RESULT_CANCELED);
@@ -390,19 +388,19 @@ public class Take5Activity extends AcquireGpsMapActivity {
         if (point != null) {
             if (point == _CurrentPoint) {
                 if (!saved) {
-                    Global.DAL.insertPoint(point);
-                    Global.DAL.insertNmeaBursts(_Bursts);
+                    Global.getDAL().insertPoint(point);
+                    Global.getDAL().insertNmeaBursts(_Bursts);
 
                     _Bursts = new ArrayList<>();
                     _UsedBursts = new ArrayList<>();
                 } else if (updated) {
-                    Global.DAL.updatePoint(point);
+                    Global.getDAL().updatePoint(point);
                 }
 
                 saved = true;
                 updated = false;
             } else {
-                Global.DAL.updatePoint(point);
+                Global.getDAL().updatePoint(point);
             }
         }
 

@@ -84,7 +84,7 @@ public class PolygonsActivity extends CustomToolbarActivity {
 
         listeners = new HashMap<>();
 
-        _Polygons = Global.DAL.getPolygons();
+        _Polygons = Global.getDAL().getPolygons();
         if (_Polygons.size() > 0) {
             _CurrentIndex = 0;
             _CurrentPolygon = getPolyAtIndex(_CurrentIndex);
@@ -94,9 +94,11 @@ public class PolygonsActivity extends CustomToolbarActivity {
         mSectionsPagerAdapter.saveFragmentStates(false);
 
         mViewPager = (ViewPager) findViewById(R.id.polysViewPager);
-        mViewPager.setAdapter(mSectionsPagerAdapter);
+        if (mViewPager != null) {
+            mViewPager.setAdapter(mSectionsPagerAdapter);
 
-        mViewPager.addOnPageChangeListener(onPageChangeListener);
+            mViewPager.addOnPageChangeListener(onPageChangeListener);
+        }
 
         lockPolygon(true);
     }
@@ -113,7 +115,7 @@ public class PolygonsActivity extends CustomToolbarActivity {
         savePolygon();
 
         if (adjust) {
-            PolygonAdjuster.adjust(Global.DAL, Global.getMainActivity(), true);
+            PolygonAdjuster.adjust(Global.getDAL(), Global.getMainActivity(), true);
         }
     }
 
@@ -231,7 +233,7 @@ public class PolygonsActivity extends CustomToolbarActivity {
     //region Save Delete Create Reset
     private void savePolygon() {
         if (_PolygonUpdated && _CurrentPolygon != null) {
-            Global.DAL.updatePolygon(_CurrentPolygon);
+            Global.getDAL().updatePolygon(_CurrentPolygon);
             _Polygons.set(_CurrentIndex, _CurrentPolygon);
             _PolygonUpdated = false;
         }
@@ -260,8 +262,8 @@ public class PolygonsActivity extends CustomToolbarActivity {
     private boolean deletePolygon(TtPolygon polygon, int index) {
         try {
             if (polygon != null) {
-                if (Global.DAL.deletePointsInPolygon(polygon.getCN())) {
-                    Global.DAL.deletePolygon(polygon.getCN());
+                if (Global.getDAL().deletePointsInPolygon(polygon.getCN())) {
+                    Global.getDAL().deletePolygon(polygon.getCN());
                     mSectionsPagerAdapter.notifyDataSetChanged();
                 } else {
                     return false;
@@ -290,12 +292,12 @@ public class PolygonsActivity extends CustomToolbarActivity {
     private void createPolygon() {
         savePolygon();
 
-        int polyCount = Global.DAL.getItemCount(TwoTrailsSchema.PolygonSchema.TableName);
+        int polyCount = Global.getDAL().getItemCount(TwoTrailsSchema.PolygonSchema.TableName);
 
         TtPolygon newPolygon = new TtPolygon(polyCount * 1000 + 1010);
         newPolygon.setName(String.format("Poly %d", polyCount + 1));
         newPolygon.setAccuracy(Consts.Default_Point_Accuracy);
-        Global.DAL.insertPolygon(newPolygon);
+        Global.getDAL().insertPolygon(newPolygon);
 
         addedPoly = newPolygon.getCN();
 

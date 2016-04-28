@@ -60,7 +60,6 @@ public class ArcGisMapSelectionAdapter extends ArrayAdapter<ArcGisMapLayer> {
         return maps.size();
     }
 
-    //TODO remove details animation and do open to full details on click, long click opens editer (delete, move (to sd card))
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         final ArcGisMapLayer map = getItem(position);
@@ -72,8 +71,6 @@ public class ArcGisMapSelectionAdapter extends ArrayAdapter<ArcGisMapLayer> {
 
             holder = new MapViewHolder(convertView);
             convertView.setTag(holder);
-
-            //convertView.setBackgroundResource(R.drawable.list_item_selector);
 
             final View fview = convertView;
             convertView.setOnClickListener(new View.OnClickListener() {
@@ -158,6 +155,4 @@ public class ArcGisMapSelectionAdapter extends ArrayAdapter<ArcGisMapLayer> {
     public interface IArcGisMapAdapterListener {
         void onArcGisMapSelected(ArcGisMapLayer map);
     }
-
-
 }

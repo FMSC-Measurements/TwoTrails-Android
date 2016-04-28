@@ -52,13 +52,13 @@ public class AcquireGpsActivity extends AcquireGpsMapActivity {
                 _Bursts = new ArrayList<>();
 
                 try {
-                    _Point = (GpsPoint)intent.getSerializableExtra(Consts.Activities.Data.POINT_DATA);
-                    _Metadata = (TtMetadata)intent.getSerializableExtra(Consts.Activities.Data.METADATA_DATA);
+                    _Point = (GpsPoint)intent.getSerializableExtra(Consts.Codes.Data.POINT_DATA);
+                    _Metadata = (TtMetadata)intent.getSerializableExtra(Consts.Codes.Data.METADATA_DATA);
 
                     setZone(_Metadata.getZone());
 
-                    if (intent.getExtras().containsKey(Consts.Activities.Data.ADDITIVE_NMEA_DATA)) {
-                        _Bursts = TtNmeaBurst.bytesToBursts(intent.getByteArrayExtra(Consts.Activities.Data.ADDITIVE_NMEA_DATA));
+                    if (intent.getExtras().containsKey(Consts.Codes.Data.ADDITIVE_NMEA_DATA)) {
+                        _Bursts = TtNmeaBurst.bytesToBursts(intent.getByteArrayExtra(Consts.Codes.Data.ADDITIVE_NMEA_DATA));
                         setLoggedCount(_Bursts.size());
                     }
 
@@ -66,7 +66,7 @@ public class AcquireGpsActivity extends AcquireGpsMapActivity {
                     e.printStackTrace();
                 }
             } else {
-                setResult(Consts.Activities.Results.NO_POINT_DATA);
+                setResult(Consts.Codes.Results.NO_POINT_DATA);
                 finish();
                 return;
             }
@@ -97,10 +97,10 @@ public class AcquireGpsActivity extends AcquireGpsMapActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == Consts.Activities.CALCULATE) {
+        if (requestCode == Consts.Codes.Activites.CALCULATE) {
             switch (resultCode) {
-                case Consts.Activities.Results.POINT_CREATED: {
-                    setResult(Consts.Activities.Results.POINT_CREATED, data);
+                case Consts.Codes.Results.POINT_CREATED: {
+                    setResult(Consts.Codes.Results.POINT_CREATED, data);
                     finish();
                     break;
                 }
@@ -218,12 +218,12 @@ public class AcquireGpsActivity extends AcquireGpsMapActivity {
 
         try {
             Intent intent = new Intent(this, CalculateGpsActivity.class);
-            intent.putExtra(Consts.Activities.Data.POINT_DATA, _Point);
-            intent.putExtra(Consts.Activities.Data.METADATA_DATA, _Metadata);
+            intent.putExtra(Consts.Codes.Data.POINT_DATA, _Point);
+            intent.putExtra(Consts.Codes.Data.METADATA_DATA, _Metadata);
 
-            intent.putExtra(Consts.Activities.Data.ADDITIVE_NMEA_DATA, TtNmeaBurst.burstsToByteArray(_Bursts));
+            intent.putExtra(Consts.Codes.Data.ADDITIVE_NMEA_DATA, TtNmeaBurst.burstsToByteArray(_Bursts));
 
-            startActivityForResult(intent, Consts.Activities.CALCULATE);
+            startActivityForResult(intent, Consts.Codes.Activites.CALCULATE);
         } catch (Exception e) {
             e.printStackTrace();
         }

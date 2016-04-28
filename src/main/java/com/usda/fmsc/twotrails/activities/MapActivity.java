@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.twotrails.Consts;
@@ -15,10 +16,8 @@ import com.usda.fmsc.twotrails.activities.custom.BaseMapActivity;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.Units;
 
 import com.usda.fmsc.geospatial.GeoPosition;
-import com.usda.fmsc.geospatial.nmea.NmeaBurst;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.geospatial.utm.UTMTools;
 
@@ -138,8 +137,15 @@ public class MapActivity extends BaseMapActivity {
         }
 
         if (lastPosition != null) {
-            moveToLocation(lastPosition, Consts.LocationInfo.GoogleMaps.ZOOM_CLOSE, true);
+            moveToLocation(lastPosition, Consts.Location.ZOOM_CLOSE, true);
         }
+    }
+
+    @Override
+    public void onMapReady() {
+        super.onMapReady();
+
+        setMapPadding(0, (int)getResources().getDimension(R.dimen.toolbar_height), 0, 0);
     }
 
     @Override
@@ -155,8 +161,8 @@ public class MapActivity extends BaseMapActivity {
     }
 
     @Override
-    public void nmeaBurstReceived(INmeaBurst nmeaBurst) {
-        super.nmeaBurstReceived(nmeaBurst);
+    public void onNmeaBurstReceived(INmeaBurst nmeaBurst) {
+        super.onNmeaBurstReceived(nmeaBurst);
 
         if (getLastPosition() != null) {
             if (myPosBtn && fabMyPos != null && fabMyPos.getVisibility() != View.VISIBLE  && getLastPosition() != null) {

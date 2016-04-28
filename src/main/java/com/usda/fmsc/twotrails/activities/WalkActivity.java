@@ -8,7 +8,6 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -24,12 +23,10 @@ import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.dialogs.InputDialog;
 import com.usda.fmsc.android.widget.SheetLayoutEx;
 import com.usda.fmsc.android.widget.drawables.AnimationDrawableEx;
-import com.usda.fmsc.geospatial.GeoPosition;
 import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.activities.custom.AcquireGpsMapActivity;
-import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.logic.PointNamer;
@@ -87,29 +84,29 @@ public class WalkActivity extends AcquireGpsMapActivity {
             Intent intent = getIntent();
             if (intent != null && intent.getExtras() != null) {
                 try {
-                    if (intent.getExtras().containsKey(Consts.Activities.Data.POINT_DATA)) {
-                        _PrevPoint = (TtPoint) intent.getSerializableExtra(Consts.Activities.Data.POINT_DATA);
+                    if (intent.getExtras().containsKey(Consts.Codes.Data.POINT_DATA)) {
+                        _PrevPoint = (TtPoint) intent.getSerializableExtra(Consts.Codes.Data.POINT_DATA);
                         onBnd = _PrevPoint.isOnBnd();
                     }
 
-                    _Metadata = (TtMetadata)intent.getSerializableExtra(Consts.Activities.Data.METADATA_DATA);
-                    _Polygon = (TtPolygon)intent.getSerializableExtra(Consts.Activities.Data.POLYGON_DATA);
+                    _Metadata = (TtMetadata)intent.getSerializableExtra(Consts.Codes.Data.METADATA_DATA);
+                    _Polygon = (TtPolygon)intent.getSerializableExtra(Consts.Codes.Data.POLYGON_DATA);
 
                     if (_Metadata == null) {
-                        cancelResult = Consts.Activities.Results.NO_METDATA_DATA;
+                        cancelResult = Consts.Codes.Results.NO_METDATA_DATA;
                     } else {
                         setZone(_Metadata.getZone());
 
                         if (_Polygon == null) {
-                            cancelResult = Consts.Activities.Results.NO_POLYGON_DATA;
+                            cancelResult = Consts.Codes.Results.NO_POLYGON_DATA;
                         }
                     }
                 } catch (Exception e) {
-                    cancelResult = Consts.Activities.Results.ERROR;
+                    cancelResult = Consts.Codes.Results.ERROR;
                     e.printStackTrace();
                 }
             } else {
-                cancelResult = Consts.Activities.Results.NO_POINT_DATA;
+                cancelResult = Consts.Codes.Results.NO_POINT_DATA;
             }
 
             if (cancelResult != 0) {
@@ -119,7 +116,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
             }
 
             _Group = new TtGroup(TtGroup.GroupType.Walk);
-            Global.DAL.insertGroup(_Group);
+            Global.getDAL().insertGroup(_Group);
 
             fabWalk = (FloatingActionButton)findViewById(R.id.walkFabWalk);
             walkCardView = findViewById(R.id.walkCardWalk);
@@ -219,13 +216,13 @@ public class WalkActivity extends AcquireGpsMapActivity {
             case R.id.walkMenuGps: {
                 startActivityForResult(new Intent(this, SettingsActivity.class)
                                 .putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.GPS_SETTINGS_PAGE),
-                        Consts.Activities.SETTINGS);
+                        Consts.Codes.Activites.SETTINGS);
                 break;
             }
             case R.id.walkMenuWalkSettings: {
                 startActivityForResult(new Intent(this, SettingsActivity.class)
                                 .putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.FILTER_WALK_SETTINGS_PAGE),
-                        Consts.Activities.SETTINGS);
+                        Consts.Codes.Activites.SETTINGS);
                 break;
             }
             case R.id.walkMenuRenameGroup: {
@@ -252,7 +249,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         switch (requestCode) {
-            case Consts.Activities.SETTINGS: {
+            case Consts.Codes.Activites.SETTINGS: {
                 Global.getGpsBinder().startGps();
                 getSettings();
                 break;
@@ -271,15 +268,15 @@ public class WalkActivity extends AcquireGpsMapActivity {
     @Override
     public void finish() {
         if (updated) {
-            Global.DAL.updatePoint(_CurrentPoint);
+            Global.getDAL().updatePoint(_CurrentPoint);
         }
 
         if (pointsCreated > 0) {
-            setResult(Consts.Activities.Results.POINT_CREATED,
-                    new Intent().putExtra(Consts.Activities.Data.NUMBER_OF_CREATED_POINTS, pointsCreated));
+            setResult(Consts.Codes.Results.POINT_CREATED,
+                    new Intent().putExtra(Consts.Codes.Data.NUMBER_OF_CREATED_POINTS, pointsCreated));
         } else {
             if (_Group != null) {
-                Global.DAL.deleteGroup(_Group.getCN());
+                Global.getDAL().deleteGroup(_Group.getCN());
             }
 
             setResult(RESULT_CANCELED);
@@ -300,20 +297,20 @@ public class WalkActivity extends AcquireGpsMapActivity {
                 String name = dialog.getText();
 
                 _Group.setName(name);
-                Global.DAL.updateGroup(_Group);
+                Global.getDAL().updateGroup(_Group);
 
                 if (_CurrentPoint != null) {
                     _CurrentPoint.setGroupName(name);
                     updated = true;
 
-                    List<TtPoint> points = Global.DAL.getPointsInGroup(_Group.getCN());
+                    List<TtPoint> points = Global.getDAL().getPointsInGroup(_Group.getCN());
 
                     if (points.size() > 0) {
                         for (TtPoint p : points) {
                             p.setGroupName(name);
                         }
 
-                        Global.DAL.updatePoints(points);
+                        Global.getDAL().updatePoints(points);
                     }
                 }
             }
@@ -335,7 +332,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
 
     private void createPoint(INmeaBurst nmeaBurst, UTMCoords utmCoords) {
         if (updated) {
-            Global.DAL.updatePoint(_CurrentPoint);
+            Global.getDAL().updatePoint(_CurrentPoint);
             updated = false;
         }
 
@@ -369,8 +366,8 @@ public class WalkActivity extends AcquireGpsMapActivity {
         _CurrentPoint.setAndCalc(utmCoords.getX(), utmCoords.getY(), burst.getElevation(), _Polygon);
 
         try {
-            Global.DAL.insertPoint(_CurrentPoint);
-            Global.DAL.insertNmeaBurst(burst);
+            Global.getDAL().insertPoint(_CurrentPoint);
+            Global.getDAL().insertNmeaBurst(burst);
             pointsCreated++;
 
             lastPointCreationTime = System.currentTimeMillis();

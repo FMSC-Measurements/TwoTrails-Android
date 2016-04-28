@@ -31,6 +31,7 @@ import com.usda.fmsc.geospatial.GeoPosition;
 import com.usda.fmsc.geospatial.nmea.sentences.GGASentence;
 import com.usda.fmsc.geospatial.nmea.sentences.GSASentence;
 import com.usda.fmsc.geospatial.Units.*;
+import com.usda.fmsc.utilities.FileUtils;
 import com.usda.fmsc.utilities.ParseEx;
 import com.usda.fmsc.utilities.StringEx;
 
@@ -56,14 +57,14 @@ public class DataAccessLayer {
     public DataAccessLayer(String filePath) {
         _FilePath = filePath;
 
-        if(TtUtils.fileExists(_FilePath))
+        if(FileUtils.fileExists(_FilePath))
             open();
         else
             CreateDB();
     }
 
     public boolean open() {
-        if(TtUtils.fileExists(_FilePath)) {
+        if(FileUtils.fileExists(_FilePath)) {
             _db = SQLiteDatabase.openDatabase(_FilePath, null, 0);
 
             try {

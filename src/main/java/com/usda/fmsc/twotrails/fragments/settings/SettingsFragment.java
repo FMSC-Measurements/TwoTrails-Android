@@ -33,6 +33,7 @@ import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.dialogs.CheckNmeaDialog;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.R;
+import com.usda.fmsc.twotrails.logic.SettingsLogic;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.utilities.ArcGISTools;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
@@ -48,15 +49,14 @@ import com.usda.fmsc.utilities.StringEx;
 public class SettingsFragment extends PreferenceFragment {
     public static final String CURRENT_PAGE = "CurrentPage";
 
-    GpsService.GpsBinder binder;
-    Preference prefGpsCheck, prefExportReport, prefClearLog, prefResetDevice, prefCheckNmea, prefCode;
-    SwitchCompatPreference swtUseExDev;
-    PreferenceCategory exGpsCat;
-    ListCompatPreference perfLstGpsDevice;
+    private GpsService.GpsBinder binder;
+    private Preference prefGpsCheck;
+    private SwitchCompatPreference swtUseExDev;
+    private PreferenceCategory exGpsCat;
+    private ListCompatPreference perfLstGpsDevice;
 
-    Bundle bundle;
+    private String moveToPage;
 
-    String moveToPage;
 
     public static SettingsFragment newInstance(String currPageKey) {
         SettingsFragment fragment = new SettingsFragment();
@@ -71,12 +71,9 @@ public class SettingsFragment extends PreferenceFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        bundle = getArguments();
+        Bundle bundle = getArguments();
 
         addPreferencesFromResource(R.xml.settings);
-
-        //Toolbar toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
-        //((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
 
         if (bundle != null && bundle.containsKey(CURRENT_PAGE)) {
             moveToPage = bundle.getString(CURRENT_PAGE);
@@ -122,17 +119,15 @@ public class SettingsFragment extends PreferenceFragment {
             }
         }
 
-
-
         swtUseExDev = (SwitchCompatPreference)findPreference(Global.Settings.DeviceSettings.GPS_EXTERNAL);
         exGpsCat = (PreferenceCategory)findPreference(getString(R.string.set_GPS_CAT));
         perfLstGpsDevice = (ListCompatPreference)findPreference(getString(R.string.set_GPS_LIST_DEVICE));
         prefGpsCheck = findPreference(getString(R.string.set_GPS_CHECK));
-        prefClearLog = findPreference(getString(R.string.set_CLEAR_LOG));
-        prefExportReport = findPreference(getString(R.string.set_EXPORT_REPORT));
-        prefResetDevice = findPreference(getString(R.string.set_RESET));
-        prefCheckNmea = findPreference(getString(R.string.set_GPS_CHECK_NMEA));
-        prefCode = findPreference(getString(R.string.set_CODE));
+        Preference prefClearLog = findPreference(getString(R.string.set_CLEAR_LOG));
+        Preference prefExportReport = findPreference(getString(R.string.set_EXPORT_REPORT));
+        Preference prefResetDevice = findPreference(getString(R.string.set_RESET));
+        Preference prefCheckNmea = findPreference(getString(R.string.set_GPS_CHECK_NMEA));
+        Preference prefCode = findPreference(getString(R.string.set_CODE));
 
         binder = Global.getGpsBinder();
 
@@ -143,15 +138,39 @@ public class SettingsFragment extends PreferenceFragment {
 
         perfLstGpsDevice.setOnPreferenceChangeListener(btGPSList);
 
-        prefResetDevice.setOnPreferenceClickListener(resetDeviceListener);
+        prefResetDevice.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                SettingsLogic.reset(getActivity());
+                return false;
+            }
+        });
 
-        prefClearLog.setOnPreferenceClickListener(clearLogListener);
+        prefClearLog.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                SettingsLogic.clearLog(getActivity());
+                return false;
+            }
+        });
 
         prefCheckNmea.setOnPreferenceClickListener(checkNmeaListener);
 
-        prefExportReport.setOnPreferenceClickListener(exportReportListener);
+        prefExportReport.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                SettingsLogic.exportReport(getActivity());
+                return false;
+            }
+        });
 
-        prefCode.setOnPreferenceClickListener(enterCodeListener);
+        prefCode.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                SettingsLogic.enterCode(getActivity());
+                return false;
+            }
+        });
 
         //get initial bluetooth devices
         setBTValues(perfLstGpsDevice);
@@ -279,7 +298,7 @@ public class SettingsFragment extends PreferenceFragment {
 
                                                 dialog.setPositiveButton("Default", setMetaListener, 1);
 
-                                                if (Global.DAL != null)
+                                                if (Global.getDAL() != null)
                                                     dialog.setNegativeButton("All", setMetaListener, 2);
 
                                                 dialog.setNeutralButton("None", null, 0);
@@ -437,61 +456,9 @@ public class SettingsFragment extends PreferenceFragment {
     //endregion
 
 
-    Preference.OnPreferenceClickListener resetDeviceListener = new Preference.OnPreferenceClickListener() {
-        @Override
-        public boolean onPreferenceClick(Preference preference) {
-            AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());
-
-            alert.setTitle("Reset Settings");
-            alert.setMessage("Do you want to reset all the settings in TwoTrails?");
-
-            alert.setPositiveButton("Reset", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    Global.Settings.DeviceSettings.reset();
-                    ArcGISTools.reset();
-                }
-            });
-
-            alert.setNeutralButton(R.string.str_cancel, null);
-
-            alert.show();
-
-            return false;
-        }
-    };
-
-
-    Preference.OnPreferenceClickListener clearLogListener = new Preference.OnPreferenceClickListener() {
-        @Override
-        public boolean onPreferenceClick(Preference preference) {
-
-            AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());
-
-            alert.setTitle("Clear Log File");
-            alert.setMessage("Do you want clear the log file?");
-
-            alert.setPositiveButton("Clear", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    TtUtils.TtReport.clearReport();
-                    Toast.makeText(getActivity(), "Log Cleared", Toast.LENGTH_SHORT).show();
-                }
-            });
-
-            alert.setNeutralButton(R.string.str_cancel, null);
-
-            alert.show();
-
-            return false;
-        }
-    };
-
-
     Preference.OnPreferenceClickListener checkNmeaListener = new Preference.OnPreferenceClickListener() {
         @Override
         public boolean onPreferenceClick(Preference preference) {
-
             if (Global.Settings.DeviceSettings.isGpsConfigured()) {
                 CheckNmeaDialog.newInstance().show(((AppCompatActivity) getActivity()).getSupportFragmentManager(), "CHECK_NMEA");
             } else {
@@ -505,114 +472,26 @@ public class SettingsFragment extends PreferenceFragment {
         }
     };
 
-
-    Preference.OnPreferenceClickListener exportReportListener = new Preference.OnPreferenceClickListener() {
-        @Override
-        public boolean onPreferenceClick(Preference preference) {
-            AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity());
-
-            if (Global.DAL != null) {
-                dialog.setMessage("Would you like to include the current project into the report?")
-                        .setPositiveButton(R.string.str_yes, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                onExportReportComplete(TtUtils.exportReport(Global.DAL));
-                            }
-                        })
-                        .setNegativeButton(R.string.str_no, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                onExportReportComplete(TtUtils.exportReport(null));
-                            }
-                        })
-                        .setNeutralButton(R.string.str_cancel, null)
-                        .show();
-            } else {
-                onExportReportComplete(TtUtils.exportReport(null));
-            }
-
-            return false;
-        }
-    };
-
-    Preference.OnPreferenceClickListener enterCodeListener = new Preference.OnPreferenceClickListener() {
-        @Override
-        public boolean onPreferenceClick(Preference preference) {
-            final InputDialog idialog = new InputDialog(getActivity());
-
-            idialog.setPositiveButton(R.string.str_ok, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    switch (idialog.getText().toLowerCase()) {
-                        case "dev": {
-                            Global.Settings.DeviceSettings.enabledDevelopterOptions(true);
-                            Toast.makeText(getActivity(), "Developer Mode Enabled", Toast.LENGTH_LONG).show();
-                            break;
-                        }
-                        case "disable dev": {
-                            Global.Settings.DeviceSettings.enabledDevelopterOptions(false);
-                            Toast.makeText(getActivity(), "Developer Mode Disabled", Toast.LENGTH_LONG).show();
-                            break;
-                        }
-                    }
-
-                }
-            })
-            .setNeutralButton(R.string.str_cancel, null)
-            .show();
-
-            return false;
-        }
-    };
-
-    Snackbar snackbar;
-    private void onExportReportComplete(String filepath) {
-        if (filepath != null) {
-            snackbar = Snackbar.make(getActivity().findViewById(android.R.id.content), "Report Exported", Snackbar.LENGTH_LONG)
-                    .setAction("View", new View.OnClickListener() {
-
-                        @Override
-                        public void onClick(View v) {
-                            Intent intent = new Intent(Intent.ACTION_VIEW);
-                            intent.setDataAndType(Uri.parse(TtUtils.getTtFileDir()), "resource/folder");
-
-                            if (snackbar != null)
-                                snackbar.dismiss();
-
-                            startActivity(Intent.createChooser(intent, "Open folder"));
-                        }
-                    })
-            .setActionTextColor(AndroidUtils.UI.getColor(getActivity(), R.color.primaryLighter));
-
-            AndroidUtils.UI.setSnackbarTextColor(snackbar, Color.WHITE);
-
-            snackbar.show();
-        } else {
-            Toast.makeText(getActivity(), "Report failed to export", Toast.LENGTH_LONG).show();
-        }
-    }
-
-
     DontAskAgainDialog.OnClickListener setMetaListener = new DontAskAgainDialog.OnClickListener() {
         @Override
         public void onClick(DialogInterface dialogInterface, int i, Object value) {
             String receiver = Global.Settings.DeviceSettings.getGpsDeviceName();
 
             if (value == 1) {
-                TtMetadata metadata = Global.DAL.getDefaultMetadata();
+                TtMetadata metadata = Global.getDAL().getDefaultMetadata();
 
                 if (metadata != null) {
                     metadata.setGpsReceiver(receiver);
-                    Global.DAL.updateMetadata(metadata);
+                    Global.getDAL().updateMetadata(metadata);
                     Global.Settings.MetaDataSetting.setReceiver(receiver);
                 }
             } else if (value == 2) {
-                List<TtMetadata> metas = Global.DAL.getMetadata();
+                List<TtMetadata> metas = Global.getDAL().getMetadata();
 
                 if (metas.size() > 0) {
                     for (TtMetadata meta : metas) {
                         meta.setGpsReceiver(receiver);
-                        Global.DAL.updateMetadata(meta);
+                        Global.getDAL().updateMetadata(meta);
                     }
                 }
             }

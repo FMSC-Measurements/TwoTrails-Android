@@ -83,7 +83,7 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
         if (bundle != null && bundle.containsKey(MAP_OPTIONS_EXTRA)) {
             startUpMapOptions = bundle.getParcelable(MAP_OPTIONS_EXTRA);
         } else {
-            startUpMapOptions = new MapOptions(0, Consts.LocationInfo.USA_BOUNDS, Consts.LocationInfo.PADDING);
+            startUpMapOptions = new MapOptions(0, Consts.Location.USA_BOUNDS, Consts.Location.PADDING);
         }
 
         getMapAsync(this);
@@ -157,13 +157,13 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
                                 startUpMapOptions.getLatitude(),
                                 startUpMapOptions.getLongitide()
                         ),
-                        startUpMapOptions.getZoomLevel() != null ? startUpMapOptions.getZoomLevel() : Consts.LocationInfo.GoogleMaps.ZOOM_GENERAL));
+                        startUpMapOptions.getZoomLevel() != null ? startUpMapOptions.getZoomLevel() : Consts.Location.ZOOM_GENERAL));
             } else {
                 map.moveCamera(CameraUpdateFactory.newLatLngBounds(
-                        Consts.LocationInfo.GoogleMaps.USA_BOUNDS,
+                        Consts.Location.GoogleMaps.USA_BOUNDS,
                         fragWidth,
                         fragHeight,
-                        Consts.LocationInfo.PADDING
+                        Consts.Location.PADDING
                 ));
             }
         }
@@ -211,6 +211,7 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
         }
         return false;
     }
+
 
     @Override
     public void moveToLocation(float lat, float lon, boolean animate) {
@@ -290,6 +291,7 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
             }
         }
     }
+
 
     @Override
     public void hideSelectedMarkerInfo() {

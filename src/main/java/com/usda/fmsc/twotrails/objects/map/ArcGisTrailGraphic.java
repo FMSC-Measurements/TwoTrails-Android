@@ -155,4 +155,13 @@ public class ArcGisTrailGraphic implements ITrailGraphic, IMarkerDataGraphic {
     public boolean isTrailVisible() {
         return trailVisible;
     }
+
+
+    public GraphicsLayer getTrailLayer() {
+        return _TrailLayer;
+    }
+
+    public GraphicsLayer getPtsLayer() {
+        return _PtsLayer;
+    }
 }
