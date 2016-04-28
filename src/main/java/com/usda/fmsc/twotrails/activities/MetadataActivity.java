@@ -102,7 +102,7 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
 
         listeners = new HashMap<>();
 
-        _Metadata = Global.DAL.getMetadata();
+        _Metadata = Global.getDAL().getMetadata();
         if (_Metadata.size() > 0) {
             _CurrentIndex = 0;
             _CurrentMetadata = getMetaAtIndex(_CurrentIndex);
@@ -240,7 +240,7 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
     //region Save Delete Create Reset
     private void saveMetadata() {
         if (_MetadataUpdated && _CurrentMetadata != null) {
-            Global.DAL.updateMetadata(_CurrentMetadata);
+            Global.getDAL().updateMetadata(_CurrentMetadata);
             _Metadata.set(_CurrentIndex, _CurrentMetadata);
             _MetadataUpdated = false;
         }
@@ -269,7 +269,7 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
     private boolean deleteMetadata(TtMetadata metadata, int index) {
         try {
             if (metadata != null) {
-                if (Global.DAL.deleteMetadataSafe(metadata.getCN())) {
+                if (Global.getDAL().deleteMetadataSafe(metadata.getCN())) {
                     mSectionsPagerAdapter.notifyDataSetChanged();
                 } else {
                     return false;
@@ -298,12 +298,12 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
     private void createMetadata() {
         saveMetadata();
 
-        int metaCount = Global.DAL.getItemCount(TwoTrailsSchema.MetadataSchema.TableName);
+        int metaCount = Global.getDAL().getItemCount(TwoTrailsSchema.MetadataSchema.TableName);
 
         TtMetadata newMetadata = Global.Settings.MetaDataSetting.getDefaultmetaData();
         newMetadata.setCN(java.util.UUID.randomUUID().toString());
         newMetadata.setName(String.format("Meta %d", metaCount + 1));
-        Global.DAL.insertMetadata(newMetadata);
+        Global.getDAL().insertMetadata(newMetadata);
 
         addedMeta = newMetadata.getCN();
 
@@ -521,7 +521,7 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
-                                ArrayList<TtPoint> points = Global.DAL.getGpsPointsWithMeta(_CurrentMetadata.getCN());
+                                ArrayList<TtPoint> points = Global.getDAL().getGpsPointsWithMeta(_CurrentMetadata.getCN());
 
                                 if (points.size() > 0) {
                                     TtPoint point;
@@ -529,7 +529,7 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
                                         points.set(i, TtUtils.reCalculateGps(points.get(i), zone, Global.DAL, null));
                                     }
 
-                                    Global.DAL.updatePoints(points);
+                                    Global.getDAL().updatePoints(points);
                                 }
                             }
                         }).start();

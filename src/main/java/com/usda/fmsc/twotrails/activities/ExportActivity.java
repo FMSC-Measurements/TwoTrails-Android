@@ -166,16 +166,16 @@ public class ExportActivity extends CustomToolbarActivity {
                 Toast.makeText(this, "No options selected for export", Toast.LENGTH_SHORT).show();
             } else {
                 if (selectdir) {
-                    selectDirectory(TtUtils.getTtFileDir());
+                    selectDirectory(Global.getTtFileDir());
                 } else {
-                    startExport(TtUtils.getTtFileDir());
+                    startExport(Global.getTtFileDir());
                 }
             }
         }
     }
 
     private void startExport(String directory) {
-        final File dir = new File(String.format("%s/%s/", directory, Global.DAL.getProjectID()));
+        final File dir = new File(String.format("%s/%s/", directory, Global.getDAL().getProjectID()));
 
         if (dir.exists()) {
             if (Global.Settings.DeviceSettings.getAutoOverwriteExportAsk()) {

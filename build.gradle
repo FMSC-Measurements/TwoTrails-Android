@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "23.0.2"
+    buildToolsVersion "23.0.3"
 
     defaultConfig {
         applicationId "com.usda.fmsc.twotrails"
@@ -11,6 +11,9 @@ android {
         versionCode 0
         versionName "0.9"
         multiDexEnabled true
+
+        resValue "string", "arcgis_client_id", project.property("TwoTrails.ArcGIS.ClientID")
+        resValue "string", "arcgis_client_secret", project.property("TwoTrails.ArcGIS.ClientSecret")
     }
 
     signingConfigs {

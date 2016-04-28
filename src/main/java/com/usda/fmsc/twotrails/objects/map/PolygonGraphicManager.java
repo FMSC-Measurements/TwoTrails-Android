@@ -268,7 +268,7 @@ public class PolygonGraphicManager implements IGraphicManager {
 
     @Override
     public Extent getExtents() {
-        return polygonGraphic.getExtents();
+        return polygonGraphic != null ? polygonGraphic.getExtents() : null;
     }
 
 
@@ -341,26 +341,10 @@ public class PolygonGraphicManager implements IGraphicManager {
     }
 
     public void update(PolygonGraphicOptions.GraphicCode code, int value) {
-        switch (code) {
-            case ADJBND_COLOR:
-
-                break;
-            case ADJNAV_COLOR:
-                break;
-            case ADJPTS_COLOR:
-                break;
-            case UNADJBND_COLOR:
-                break;
-            case UNADJNAV_COLOR:
-                break;
-            case UNADJPTS_COLOR:
-                break;
-            case WAYPTS_COLOR:
-                break;
-        }
+        graphicOptions.setColor(code, value);
 
         for (PolygonGraphicOptions.Listener listener : polygonGraphicListeners) {
-            listener.onOptionChanged(code, value);
+            listener.onOptionChanged(graphicOptions, code, value);
         }
     }
 }

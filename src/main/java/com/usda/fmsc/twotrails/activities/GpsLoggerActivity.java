@@ -136,7 +136,7 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
                     item.setChecked(true);
 
                     if (logging) {
-                        Global.getGpsBinder().startLogging(TtUtils.getLogFileName());
+                        Global.getGpsBinder().startLogging(Global.getLogFileName());
                     }
                 }
                 return true;
@@ -232,7 +232,7 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
                 btnLog.setText(R.string.aqr_log_pause);
 
                 if (miCheckLtf.isChecked()) {
-                    binder.startLogging(TtUtils.getLogFileName());
+                    binder.startLogging(Global.getLogFileName());
                 }
             } else {
                 logging = false;

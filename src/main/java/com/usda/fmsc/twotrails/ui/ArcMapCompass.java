@@ -15,7 +15,6 @@ package com.usda.fmsc.twotrails.ui;
 
 import com.esri.android.map.MapView;
 import com.esri.android.map.event.OnPinchListener;
-import com.esri.android.map.event.OnSingleTapListener;
 import com.usda.fmsc.twotrails.R;
 
 import android.content.Context;
@@ -26,48 +25,39 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewGroup;
 
-/**
- * This class defines a custom view that draws an image of a compass. The angle of the compass changes when the
- * setRotationAngle method is called. If a MapView is passed to the constructor, an OnPinchListener is set in order to
- * update the compass rotation angle when the pinch gesture is used on the MapView.
- */
 public class ArcMapCompass extends View implements View.OnClickListener {
-
     float mAngle = 0;
 
-    Paint mPaint;
+    Paint compassPaint;
+    Bitmap bitmap;
+    Matrix matrix;
 
-    Bitmap mBitmap;
+    MapView mapView;
 
-    Matrix mMatrix;
-
-    MapView mMapView;
-
+    Integer oLeft, oTop, oRight, oBottom;
     boolean visible = false;
 
-    // Called when the Compass view is inflated from XML. In this case, no attributes are initialized from XML.
+
     public ArcMapCompass(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        // Create a Paint, Matrix and Bitmap that will be re-used together to draw the
-        // compass image each time the onDraw method is called.
-        mPaint = new Paint();
-        mMatrix = new Matrix();
+        compassPaint = new Paint();
+        matrix = new Matrix();
 
-        // Create the bitmap of the compass from a resource.
-        mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_compass_36dp);
+        bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_compass_36dp);
 
         setOnClickListener(this);
     }
 
     public void setMapView(MapView mapView) {
         // Save reference to the MapView passed in to this compass.
-        mMapView = mapView;
-        if (mMapView != null) {
+        this.mapView = mapView;
+        if (this.mapView != null) {
 
             // Set an OnPinchListener on the map to listen for the pinch gesture which may change the map rotation.
-            mMapView.setOnPinchListener(new OnPinchListener() {
+            this.mapView.setOnPinchListener(new OnPinchListener() {
 
                 private static final long serialVersionUID = 1L;
 
@@ -91,7 +81,7 @@ public class ArcMapCompass extends View implements View.OnClickListener {
                 public void postPointersMove(float arg0, float arg1, float arg2, float arg3, double arg4) {
                     // Update the compass angle from the map rotation angle (the arguments passed in to the method are not
                     // relevant in this case).
-                    setRotationAngle(mMapView.getRotationAngle());
+                    setRotationAngle(ArcMapCompass.this.mapView.getRotationAngle());
                 }
 
                 @Override
@@ -101,8 +91,6 @@ public class ArcMapCompass extends View implements View.OnClickListener {
         }
     }
 
-
-    /** Updates the angle, in degrees, at which the compass is draw within this view. */
     public void setRotationAngle(double angle) {
         // Save the new rotation angle.
         mAngle = (float) angle;
@@ -115,26 +103,40 @@ public class ArcMapCompass extends View implements View.OnClickListener {
         postInvalidate();
     }
 
-    /** Draws the compass image at the current angle of rotation on the canvas. */
     @Override
     protected void onDraw(Canvas canvas) {
         if (visible) {
-            // Reset the matrix to default values.
-            mMatrix.reset();
+            matrix.reset();
 
-            // Pass the current rotation angle to the matrix. The center of rotation is set to be the center of the bitmap.
-            mMatrix.postRotate(-this.mAngle, mBitmap.getHeight() / 2, mBitmap.getWidth() / 2);
+            matrix.postRotate(-this.mAngle, bitmap.getHeight() / 2, bitmap.getWidth() / 2);
 
-            // Use the matrix to draw the bitmap image of the compass.
-            canvas.drawBitmap(mBitmap, mMatrix, mPaint);
+            canvas.drawBitmap(bitmap, matrix, compassPaint);
         }
 
         super.onDraw(canvas);
     }
 
     @Override
+    public void setPadding(int left, int top, int right, int bottom) {
+        super.setPadding(left, top, right, bottom);
+
+        ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams)getLayoutParams();
+
+        //get original padding
+        if (oLeft == null) {
+            oLeft = params.leftMargin;
+            oTop = params.topMargin;
+            oRight = params.rightMargin;
+            oBottom = params.bottomMargin;
+        }
+
+        params.setMargins(left + oLeft, top + oTop, right + oRight, bottom + oBottom);
+        this.setLayoutParams(params);
+    }
+
+    @Override
     public void onClick(View v) {
-        mMapView.setRotationAngle(0);
+        mapView.setRotationAngle(0);
         setRotationAngle(0);
         visible = false;
     }
@@ -142,5 +144,6 @@ public class ArcMapCompass extends View implements View.OnClickListener {
     public void resetCompass() {
         setRotationAngle(0);
         visible = false;
+        invalidate();
     }
 }

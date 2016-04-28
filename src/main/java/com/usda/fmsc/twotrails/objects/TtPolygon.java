@@ -7,7 +7,7 @@ import org.joda.time.DateTime;
 import java.io.Serializable;
 import java.util.Comparator;
 
-public class TtPolygon implements  Comparable<TtPolygon>, Comparator<TtPolygon>, Serializable {
+public class TtPolygon implements Comparable<TtPolygon>, Comparator<TtPolygon>, Serializable {
 
     private String CN;
     private String Name;

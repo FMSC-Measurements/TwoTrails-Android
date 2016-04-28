@@ -4,7 +4,10 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.usda.fmsc.twotrails.utilities.TtUtils;
+import com.usda.fmsc.utilities.FileUtils;
 import com.usda.fmsc.utilities.StringEx;
+
+import java.io.File;
 
 public class ArcGisMapLayer implements Parcelable, Comparable { //Serializable, {
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
@@ -185,7 +188,7 @@ public class ArcGisMapLayer implements Parcelable, Comparable { //Serializable, 
     public void setFilePath(String filePath) {
         this.filePath = filePath;
 
-        hasValidFile = !StringEx.isEmpty(this.filePath) && TtUtils.fileExists(this.filePath);
+        hasValidFile = !StringEx.isEmpty(this.filePath) && filePath.endsWith(".tpk") && FileUtils.fileOrFolderExists(filePath);
     }
 
     public boolean hasValidFile() {
@@ -222,6 +225,10 @@ public class ArcGisMapLayer implements Parcelable, Comparable { //Serializable, 
 
     public DetailLevel[] getLevelsOfDetail() {
         return levelsOfDetail;
+    }
+
+    public void setLevelsOfDetail(DetailLevel[] levelsOfDetail) {
+        this.levelsOfDetail = levelsOfDetail;
     }
 
 

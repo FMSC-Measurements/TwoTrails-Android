@@ -11,7 +11,6 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
@@ -104,7 +103,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
     private ArrayList<TrailGraphicManager> trailGraphicManagers = new ArrayList<>();
 
     private GeoPosition lastPosition;
-    private Location currentLocation, targetLocation;
+    private android.location.Location currentLocation, targetLocation;
 
     private DrawerLayout polyDrawer;
 
@@ -152,29 +151,34 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
             mapType = Global.Settings.DeviceSettings.getMapType();
             mapId = Global.Settings.DeviceSettings.getMapId();
 
-            switch (mapType) {
-                case Google:
-                    if (AndroidUtils.Device.isInternetAvailable()) {
-                        // check google play services and setup map
-                        Integer code = AndroidUtils.App.checkPlayServices(this, Consts.Activities.Services.REQUEST_GOOGLE_PLAY_SERVICES);
-                        if (code == 0) {
-                            startGMap();
-                        } else {
-                            String str = GoogleApiAvailability.getInstance().getErrorString(code);
-                            Toast.makeText(this, str, Toast.LENGTH_LONG).show();
-                        }
-                    } else {
-                        requestOfflineMap();
+            AndroidUtils.Device.isInternetAvailable(new AndroidUtils.Device.InternetAvailableCallback() {
+                @Override
+                public void onCheckInternet(boolean internetAvailable) {
+                    switch (mapType) {
+                        case Google:
+                            if (internetAvailable) {
+                                // check google play services and setup map
+                                Integer code = AndroidUtils.App.checkPlayServices(BaseMapActivity.this, Consts.Codes.Services.REQUEST_GOOGLE_PLAY_SERVICES);
+                                if (code == 0) {
+                                    startGMap();
+                                } else {
+                                    String str = GoogleApiAvailability.getInstance().getErrorString(code);
+                                    Toast.makeText(BaseMapActivity.this, str, Toast.LENGTH_LONG).show();
+                                }
+                            } else {
+                                requestOfflineMap();
+                            }
+                            break;
+                        case ArcGIS:
+                            if (ArcGISTools.getMapLayer(mapId).isOnline() && !internetAvailable) {
+                                requestOfflineMap();
+                            } else {
+                                startArcMap();
+                            }
+                            break;
                     }
-                    break;
-                case ArcGIS:
-                    if (ArcGISTools.getMapLayer(mapId).isOnline() && !AndroidUtils.Device.isInternetAvailable()) {
-                        requestOfflineMap();
-                    } else {
-                        startArcMap();
-                    }
-                    break;
-            }
+                }
+            });
         }
 
         super.setContentView(R.layout.activity_map_base);
@@ -193,14 +197,12 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
 
         getMapSettings();
 
-        _Polygons = Global.DAL.getPolygonsMap();
+        _Polygons = Global.getDAL().getPolygonsMap();
 
         for (TtPolygon poly : getPolygonsToMap()) {
-            polyPoints.put(poly.getCN(), Global.DAL.getPointsInPolygon(poly.getCN()));
+            polyPoints.put(poly.getCN(), Global.getDAL().getPointsInPolygon(poly.getCN()));
             _Polygons.put(poly.getCN(), poly);
         }
-
-        Global.MapSettings.init(new ArrayList<>(_Polygons.values()));
     }
 
     private void setupUI() {
@@ -246,8 +248,8 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
             });
         }
 
-        if (Global.DAL != null) {
-            _Metadata = Global.DAL.getMetadataMap();
+        if (Global.getDAL() != null) {
+            _Metadata = Global.getDAL().getMetadataMap();
             zone = _Metadata.get(Consts.EmptyGuid).getZone();
         }
 
@@ -351,12 +353,12 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
         super.onActivityResult(requestCode, resultCode, data);
 
         switch (requestCode) {
-            case Consts.Activities.Services.REQUEST_GOOGLE_PLAY_SERVICES: {
+            case Consts.Codes.Services.REQUEST_GOOGLE_PLAY_SERVICES: {
                 if (resultCode == Activity.RESULT_OK) {
                     startGMap();
                 }
             }
-            case Consts.Activities.SETTINGS: {
+            case Consts.Codes.Activites.SETTINGS: {
                 getMapSettings();
                 break;
             }
@@ -407,13 +409,13 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
             case R.id.mapMenuGps: {
                 startActivityForResult(new Intent(this, SettingsActivity.class).
                                 putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.GPS_SETTINGS_PAGE),
-                        Consts.Activities.SETTINGS);
+                        Consts.Codes.Activites.SETTINGS);
                 break;
             }
             case R.id.mmMenuMapSettings: {
                 startActivityForResult(new Intent(this, SettingsActivity.class).
                                 putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.MAP_SETTINGS_PAGE),
-                        Consts.Activities.SETTINGS);
+                        Consts.Codes.Activites.SETTINGS);
                 break;
             }
             case R.id.mapMenuWhereIs: {
@@ -579,7 +581,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
             return getMapStartLocation(mapType, terrainType);
         }
 
-        return new IMultiMapFragment.MapOptions(terrainType, extents != null ? extents : Consts.LocationInfo.USA_BOUNDS, Consts.LocationInfo.PADDING);
+        return new IMultiMapFragment.MapOptions(terrainType, extents != null ? extents : Consts.Location.USA_BOUNDS, Consts.Location.PADDING);
     }
 
     protected IMultiMapFragment.MapOptions getMapStartLocation(Units.MapType mapType, int terrainType) {
@@ -587,7 +589,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
         //extents = Global.Settings.DeviceSettings.getLastViewedExtents();
 
         if (extents == null) {
-            return new IMultiMapFragment.MapOptions(terrainType, Consts.LocationInfo.USA_BOUNDS, Consts.LocationInfo.PADDING);
+            return new IMultiMapFragment.MapOptions(terrainType, Consts.Location.USA_BOUNDS, Consts.Location.PADDING);
         }
 
         return new IMultiMapFragment.MapOptions(terrainType, extents);
@@ -621,7 +623,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
                 throw new NullPointerException("MapFragment is null");
             }
         } else {
-            if (mapType == Units.MapType.Google && AndroidUtils.App.checkPlayServices(this, Consts.Activities.Services.REQUEST_GOOGLE_PLAY_SERVICES) != 0) {
+            if (mapType == Units.MapType.Google && AndroidUtils.App.checkPlayServices(this, Consts.Codes.Services.REQUEST_GOOGLE_PLAY_SERVICES) != 0) {
                 throw new RuntimeException("Play Services not available");
             }
 
@@ -831,10 +833,10 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
 
         if (mapMoved) {
             if (getMapTracking() == Units.MapTracking.POLY_BOUNDS && getTrackedPoly() != null) {
-                moveToLocation(getTrackedPoly(), Consts.LocationInfo.PADDING, true);
+                moveToLocation(getTrackedPoly(), Consts.Location.PADDING, true);
                 mapMoved = false;
             } else if (getMapTracking() == Units.MapTracking.COMPLETE_BOUNDS && getCompleteBounds() != null) {
-                moveToLocation(getCompleteBounds(), Consts.LocationInfo.PADDING, true);
+                moveToLocation(getCompleteBounds(), Consts.Location.PADDING, true);
                 mapMoved = false;
             }
         }
@@ -848,7 +850,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
             GeoPosition position = nmeaBurst.getPosition();
 
             if (currentLocation == null) {
-                currentLocation = new Location(StringEx.Empty);
+                currentLocation = new android.location.Location(StringEx.Empty);
             } else {
                 currentLocation.reset();
             }
@@ -991,26 +993,14 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
         PolygonGraphicManager polygonGraphicManager;
         String trackedPolyCN = getTrackedPolyCN();
 
-        PolygonGraphicOptions graphicOptions = new PolygonGraphicOptions(
-                AndroidUtils.UI.getColor(this, R.color.map_adj_bnd),
-                AndroidUtils.UI.getColor(this, R.color.map_unadj_bnd),
-                AndroidUtils.UI.getColor(this, R.color.map_adj_nav),
-                AndroidUtils.UI.getColor(this, R.color.map_unadj_nav),
-                AndroidUtils.UI.getColor(this, R.color.map_adj_pts),
-                AndroidUtils.UI.getColor(this, R.color.map_unadj_pts),
-                AndroidUtils.UI.getColor(this, R.color.map_way_pts),
-                8,
-                32
-        );
-
         for (TtPolygon polygon : getSortedPolys()) {
             polygonGraphicManager =  new PolygonGraphicManager(
                     polygon,
                     polyPoints.get(polygon.getCN()),
                     _Metadata,
-                    graphicOptions);
+                    Global.MapSettings.getPolyGraphicOptions(polygon.getCN()));
 
-            addPolygonGraphic(polygonGraphicManager, Global.MapSettings.PolyOptions.get(polygon.getCN()));
+            addPolygonGraphic(polygonGraphicManager, Global.MapSettings.getPolyDrawOptions(polygon.getCN()));
 
             if (polygon.getCN().equals(trackedPolyCN)) {
                 trackedPoly = polygonGraphicManager.getExtents();
@@ -1067,7 +1057,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
     PostDelayHandler[] postDelayHandlers = new PostDelayHandler[12];
 
     private void setupMasterPolyControl() {
-        //PolygonDrawOptions mopt = Global.MapSettings.MasterPolyOptions;
+        //PolygonDrawOptions mopt = Global.MapSettings.MasterPolyDrawOptions;
 
         for (int i = 0; i < 12; i++) {
             postDelayHandlers[i] = new PostDelayHandler(250);
@@ -1328,14 +1318,14 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
 //            if (tcb != null) {
 //                if (vis && invis) {
 //                    tcb.setCheckedStateNoEvent(MultiStateTouchCheckBox.CheckedState.PartialChecked);
-//                    Global.MapSettings.MasterPolyOptions.setValue(code, true);
+//                    Global.MapSettings.MasterPolyDrawOptions.setValue(code, true);
 //                } else {
 //                    if (vis) {
 //                        tcb.setCheckedStateNoEvent(MultiStateTouchCheckBox.CheckedState.Checked);
-//                        Global.MapSettings.MasterPolyOptions.setValue(code, true);
+//                        Global.MapSettings.MasterPolyDrawOptions.setValue(code, true);
 //                    } else {
 //                        tcb.setCheckedStateNoEvent(MultiStateTouchCheckBox.CheckedState.NotChecked);
-//                        Global.MapSettings.MasterPolyOptions.setValue(code, false);
+//                        Global.MapSettings.MasterPolyDrawOptions.setValue(code, false);
 //                    }
 //                }
 //            }
@@ -1348,14 +1338,14 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
         if (tcb != null) {
             if (vis && invis) {
                 tcb.setCheckedStateNoEvent(MultiStateTouchCheckBox.CheckedState.PartialChecked);
-                Global.MapSettings.MasterPolyOptions.setValue(code, true);
+                Global.MapSettings.getMasterPolyDrawOptions().setValue(code, true);
             } else {
                 if (vis) {
                     tcb.setCheckedStateNoEvent(MultiStateTouchCheckBox.CheckedState.Checked);
-                    Global.MapSettings.MasterPolyOptions.setValue(code, true);
+                    Global.MapSettings.getMasterPolyDrawOptions().setValue(code, true);
                 } else {
                     tcb.setCheckedStateNoEvent(MultiStateTouchCheckBox.CheckedState.NotChecked);
-                    Global.MapSettings.MasterPolyOptions.setValue(code, false);
+                    Global.MapSettings.getMasterPolyDrawOptions().setValue(code, false);
                 }
             }
         }

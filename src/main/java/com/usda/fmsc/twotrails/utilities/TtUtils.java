@@ -21,6 +21,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.twotrails.Consts;
+import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
 import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment;
 import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
@@ -59,7 +60,7 @@ import com.usda.fmsc.geospatial.GeoPosition;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.geospatial.utm.UTMTools;
 import com.usda.fmsc.geospatial.Units.UomElevation;
-import com.usda.fmsc.utilities.FileTools;
+import com.usda.fmsc.utilities.FileUtils;
 import com.usda.fmsc.utilities.StringEx;
 
 
@@ -1036,60 +1037,6 @@ public class TtUtils {
     }
     //endregion
 
-
-    //region Files
-    public static boolean fileExists(String filePath) {
-        if(StringEx.isEmpty(filePath))
-            return false;
-        File file = new File(filePath);
-        return file.exists() && !file.isDirectory();
-    }
-
-    public static String getTtFilePath(String fileName) {
-        if(!fileName.contains(".tt"))
-            fileName += ".tt";
-
-        return getTtFileDir() + File.separator + fileName;
-    }
-
-    public static String getDocumentsDir() {
-        File dir;
-
-        if (Build.VERSION.SDK_INT < 19) {
-            dir = Environment.getExternalStorageDirectory();
-        } else {
-            dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
-        }
-
-        return dir.toString();
-    }
-
-    public static String getOfflineMapsDir() {
-        return String.format("%s%s%s", getDocumentsDir(), File.separator, "OfflineMaps");
-    }
-
-    public static String getOfflineMapsRecoveryDir() {
-        return String.format("%s%s%s", getOfflineMapsDir(), File.separator, "Recovery");
-    }
-
-    public static String getTtFileDir() {
-        return String.format("%s%s%s", getDocumentsDir(), File.separator, "TwoTrailsFiles");
-    }
-
-    public static String getTtLogFileDir() {
-        return getTtFileDir();
-        //return String.format("%s%s%s", getTtFileDir(), File.separator, "LogFiles");
-    }
-
-    public static String getLogFileName() {
-        return String.format("%s%sTtGpsLog_%s.txt",
-                TtUtils.getTtLogFileDir(),
-                File.separator,
-                DateTime.now().toString());
-    }
-    //endregion
-
-
     //region Device Info
     public static String getDeviceName() {
         return String.format("%s %s %s",
@@ -1099,16 +1046,16 @@ public class TtUtils {
 
     public static String exportReport(DataAccessLayer dal) {
         String filename = String.format("%s%sTwoTrailsReport_%s.zip",
-                TtUtils.getTtLogFileDir(),
+                Global.getTtLogFileDir(),
                 File.separator,
                 DateTime.now().toString());
 
         boolean exported;
 
         if (dal != null) {
-            exported = FileTools.zipFiles(filename, TtReport.getFilePath(), dal.getFilePath());
+            exported = FileUtils.zipFiles(filename, TtReport.getFilePath(), dal.getFilePath());
         } else {
-            exported = FileTools.zipFiles(filename, TtReport.getFilePath());
+            exported = FileUtils.zipFiles(filename, TtReport.getFilePath());
         }
 
         return exported ? filename : null;

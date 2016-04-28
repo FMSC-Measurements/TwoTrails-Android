@@ -42,7 +42,7 @@ public class AcquireGpsGoogleMapActivity extends AcquireGpsInfoMapActivity imple
         _Markers = new ArrayList<>();
 
         // check google play services and setup map
-        Integer code = AndroidUtils.App.checkPlayServices(this, Consts.Activities.Services.REQUEST_GOOGLE_PLAY_SERVICES);
+        Integer code = AndroidUtils.App.checkPlayServices(this, Consts.Codes.Services.REQUEST_GOOGLE_PLAY_SERVICES);
         if (code == null) {
             startMap();
         } else {
@@ -59,7 +59,7 @@ public class AcquireGpsGoogleMapActivity extends AcquireGpsInfoMapActivity imple
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == Consts.Activities.Services.REQUEST_GOOGLE_PLAY_SERVICES &&
+        if (requestCode == Consts.Codes.Services.REQUEST_GOOGLE_PLAY_SERVICES &&
                 resultCode == RESULT_OK) {
             startMap();
         }
@@ -89,7 +89,7 @@ public class AcquireGpsGoogleMapActivity extends AcquireGpsInfoMapActivity imple
         googleMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
             @Override
             public void onCameraChange(CameraPosition cameraPosition) {
-                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(Consts.LocationInfo.GoogleMaps.USA_CENTER, 3));
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(Consts.Location.GoogleMaps.USA_CENTER, 3));
                 googleMap.setOnCameraChangeListener(null);
             }
         });
@@ -113,7 +113,7 @@ public class AcquireGpsGoogleMapActivity extends AcquireGpsInfoMapActivity imple
 
                     map.animateCamera(CameraUpdateFactory.newLatLngZoom(
                             new LatLng(llp.latitude, llp.longitude),
-                            Consts.LocationInfo.GoogleMaps.ZOOM_CLOSE
+                            Consts.Location.ZOOM_CLOSE
                     ));
                 }
             });
@@ -142,7 +142,7 @@ public class AcquireGpsGoogleMapActivity extends AcquireGpsInfoMapActivity imple
                 if (_Markers.size() == 1) {
                     map.moveCamera(CameraUpdateFactory.newLatLngZoom(
                             new LatLng(marker.getPosition().latitude, marker.getPosition().longitude),
-                            Consts.LocationInfo.GoogleMaps.ZOOM_CLOSE
+                            Consts.Location.ZOOM_CLOSE
                     ));
 
                     new Handler().postDelayed(new Runnable() {
@@ -186,7 +186,7 @@ public class AcquireGpsGoogleMapActivity extends AcquireGpsInfoMapActivity imple
                 public void run() {
                     getMap().moveCamera(CameraUpdateFactory.newLatLngZoom(
                             new LatLng(nmeaBurst.getLatitude(), nmeaBurst.getLongitude()),
-                            Consts.LocationInfo.GoogleMaps.ZOOM_CLOSE
+                            Consts.Location.ZOOM_CLOSE
                     ));
                 }
             });

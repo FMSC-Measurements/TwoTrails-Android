@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
@@ -16,22 +17,25 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 
+import com.nononsenseapps.filepicker.FilePickerActivity;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.listeners.SimpleTextWatcher;
 import com.usda.fmsc.android.utilities.PostDelayHandler;
+import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.activities.GetMapExtentsActivity;
 import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
 import com.usda.fmsc.twotrails.ui.CheckMarkAnimatedView;
 import com.usda.fmsc.twotrails.utilities.ArcGISTools;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
+import com.usda.fmsc.utilities.FileUtils;
 import com.usda.fmsc.utilities.StringEx;
+
+import java.io.File;
 
 import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
 
 public class NewArcMapDialog extends DialogFragment {
-    private static final int FILE_SELECTED = 101;
-
     private static final String CREATE_MODE = "CreateMode";
     private static final String DEFAULT_NAME = "DefaultName";
     private static final String DEFAULT_URI = "DefaultUrI";
@@ -142,8 +146,8 @@ public class NewArcMapDialog extends DialogFragment {
                                     txtName.getText().toString(),
                                     txtDesc.getText().toString(),
                                     txtLoc.getText().toString(),
-                                    txtUri.getText().toString(),
-                                    null,
+                                    mode == CreateMode.OFFLINE_FROM_FILE ? null : txtUri.getText().toString(),
+                                    mode == CreateMode.OFFLINE_FROM_FILE ? txtUri.getText().toString() : null,
                                     mode == CreateMode.NEW_ONLINE);
                         } else {
                             aLayer.setName(txtName.getText().toString());
@@ -178,11 +182,12 @@ public class NewArcMapDialog extends DialogFragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == FILE_SELECTED && data != null) {
+        if (requestCode == Consts.Codes.Dialogs.REQUEST_FILE && data != null) {
             Uri uri = data.getData();
 
             if (uri != null) {
                 txtUri.setText(uri.getPath());
+                txtUri.setSelection(uri.getPath().length());
             }
         }
     }
@@ -200,7 +205,15 @@ public class NewArcMapDialog extends DialogFragment {
                 btnNeg.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        AndroidUtils.App.openFileIntent(getActivity(), "file/*.tt", FILE_SELECTED);
+                        Intent i = new Intent(getActivity(), FilePickerActivity.class);
+
+                        i.putExtra(FilePickerActivity.EXTRA_ALLOW_MULTIPLE, false);
+                        i.putExtra(FilePickerActivity.EXTRA_ALLOW_CREATE_DIR, false);
+                        i.putExtra(FilePickerActivity.EXTRA_MODE, FilePickerActivity.MODE_FILE_AND_DIR);
+
+                        i.putExtra(FilePickerActivity.EXTRA_START_PATH, Environment.getExternalStorageDirectory().getPath());
+
+                        startActivityForResult(i, Consts.Codes.Dialogs.REQUEST_FILE);
                     }
                 });
             }
@@ -286,15 +299,16 @@ public class NewArcMapDialog extends DialogFragment {
     }
 
     private void validateFile(String filePath) {
-        if (TtUtils.fileExists(filePath))
-        {
+        if (filePath.endsWith(".tpk") && FileUtils.fileOrFolderExists(filePath)) {
             ivBadUri.setVisibility(View.INVISIBLE);
             chkmkavUrlStatus.reset();
             chkmkavUrlStatus.setVisibility(View.VISIBLE);
             chkmkavUrlStatus.start();
+            validUri = true;
         } else {
             chkmkavUrlStatus.setVisibility(View.INVISIBLE);
             ivBadUri.setVisibility(View.VISIBLE);
+            validUri = false;
         }
 
         validate();

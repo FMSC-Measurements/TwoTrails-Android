@@ -9,6 +9,7 @@ import com.esri.core.map.CallbackListener;
 import com.esri.core.tasks.tilecache.ExportTileCacheParameters;
 import com.esri.core.tasks.tilecache.ExportTileCacheStatus;
 import com.esri.core.tasks.tilecache.ExportTileCacheTask;
+import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
 import com.usda.fmsc.utilities.StringEx;
 
@@ -36,7 +37,7 @@ public class DownloadOfflineArcGISMapTask {
 
         exportTileCacheTask = new ExportTileCacheTask(layer.getUrl(), credentials);
 
-        exportTileCacheTask.setRecoveryDir(TtUtils.getOfflineMapsRecoveryDir());
+        exportTileCacheTask.setRecoveryDir(Global.getOfflineMapsRecoveryDir());
 
         params = new ExportTileCacheParameters(CREATE_AS_TILE_PACKAGE, detailLevels, ExportTileCacheParameters.ExportBy.ID, extents, spatialReference);
     }

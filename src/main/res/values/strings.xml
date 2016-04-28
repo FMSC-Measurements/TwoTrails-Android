@@ -443,7 +443,7 @@
     <!-- EditArcMap -->
     <string name="amd_update_path">Update File Path</string>
     <string name="amd_update_details">Update Map Details</string>
-    <string name="amd_scale">Update Map Scale</string>
+    <string name="amd_scale">Map Scale</string>
 
 
     <!-- ArcGIS Values -->

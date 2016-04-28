@@ -84,7 +84,7 @@ public class QuondamPointFragment extends BasePointFragment {
     public View onCreateViewEx(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_points_quondam_card, container, false);
 
-        _Polygons = Global.DAL.getPolygons();
+        _Polygons = Global.getDAL().getPolygons();
         ArrayList<String> _PolygonNames = new ArrayList<>();
         _Points = new ArrayList<?>[_Polygons.size()];
 
@@ -241,7 +241,7 @@ public class QuondamPointFragment extends BasePointFragment {
 
         if (_Points[index] == null) {
             ArrayList<TtPoint> tmpPoints = new ArrayList<>();
-            for (TtPoint point : Global.DAL.getPointsInPolygon(_Polygons.get(index).getCN())) {
+            for (TtPoint point : Global.getDAL().getPointsInPolygon(_Polygons.get(index).getCN())) {
                 if (point.getOp() != Units.OpType.Quondam && point.getOp() != Units.OpType.WayPoint) {
                     tmpPoints.add(point);
                     pids.add(StringEx.toString(point.getPID()));
