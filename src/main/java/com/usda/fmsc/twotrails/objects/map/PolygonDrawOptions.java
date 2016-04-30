@@ -238,19 +238,4 @@ public class PolygonDrawOptions {
     public interface Listener {
         void onOptionChanged(PolygonDrawOptions.DrawCode code, boolean value);
     }
-
-    //    public static final String VISIBLE = "Visible";
-//    public static final String ADJBND = "AdjBnd";
-//    public static final String UNADJBND = "UnadjBnd";
-//    public static final String ADJBNDPTS = "AdjBndPts";
-//    public static final String UNADJBNDPTS = "UnadjBndPts";
-//    public static final String ADJBNDCLOSE = "AdjBndClose";
-//    public static final String UNADJBNDCLOSE = "UnadjBndClose";
-//    public static final String ADJNAV = "AdjNav";
-//    public static final String UNADJNAV = "UnadjNav";
-//    public static final String ADJNAVPTS = "AdjNavPts";
-//    public static final String UNADJNAVPTS = "UnadjNavPts";
-//    public static final String ADJMISCPTS = "AdjMiscPts";
-//    public static final String UNADJMISCPTS = "UnadjMiscPts";
-//    public static final String WAYPTS = "WayPts";
 }

@@ -1,4 +1,4 @@
-package com.usda.fmsc.twotrails.activities.custom;
+package com.usda.fmsc.twotrails.activities.base;
 
 import android.support.v7.app.AlertDialog;
 import android.app.ProgressDialog;

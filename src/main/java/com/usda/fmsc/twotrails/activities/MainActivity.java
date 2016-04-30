@@ -22,7 +22,7 @@ import android.widget.Toast;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.dialogs.InputDialog;
 import com.usda.fmsc.twotrails.Consts;
-import com.usda.fmsc.twotrails.activities.custom.TtAjusterCustomToolbarActivity;
+import com.usda.fmsc.twotrails.activities.base.TtAjusterCustomToolbarActivity;
 import com.usda.fmsc.twotrails.adapters.RecentProjectAdapter;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
 import com.usda.fmsc.twotrails.data.TwoTrailsSchema;

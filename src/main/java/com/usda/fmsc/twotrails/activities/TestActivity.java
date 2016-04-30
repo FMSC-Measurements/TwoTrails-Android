@@ -5,7 +5,7 @@ import android.view.Menu;
 
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.activities.custom.BaseMapActivity;
+import com.usda.fmsc.twotrails.activities.base.BaseMapActivity;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
 
@@ -102,9 +102,9 @@ public class TestActivity extends BaseMapActivity {
 //
 //    double[] levels;
 //
-//    final CharSequence[] items = { "Level ID:0", "Level ID:1", "Level ID:2",
-//            "Level ID:3", "Level ID:4", "Level ID:5", "Level ID:6",
-//            "Level ID:7", "Level ID:8", "Level ID:9", };
+//    final CharSequence[] items = { "Level Name:0", "Level Name:1", "Level Name:2",
+//            "Level Name:3", "Level Name:4", "Level Name:5", "Level Name:6",
+//            "Level Name:7", "Level Name:8", "Level Name:9", };
 //
 //    double[] mapResolution = { 156543.03392800014, 78271.51696399994,
 //            39135.75848200009, 19567.87924099992, 9783.93962049996,
@@ -149,7 +149,7 @@ public class TestActivity extends BaseMapActivity {
 //
 //        // Set up GenerateTileCacheParameters
 //        ExportTileCacheParameters params = new ExportTileCacheParameters(
-//                createAsTilePackage, levels, ExportTileCacheParameters.ExportBy.ID, extentForTPK,
+//                createAsTilePackage, levels, ExportTileCacheParameters.ExportBy.Name, extentForTPK,
 //                ((ArcGisMapFragment) mapFragment).getSpatialReference());
 //
 //        // create tile cache

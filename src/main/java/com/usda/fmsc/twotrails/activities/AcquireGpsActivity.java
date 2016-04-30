@@ -11,7 +11,8 @@ import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.widget.SheetLayoutEx;
 import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.twotrails.Consts;
-import com.usda.fmsc.twotrails.activities.custom.AcquireGpsMapActivity;
+import com.usda.fmsc.twotrails.Units;
+import com.usda.fmsc.twotrails.activities.base.AcquireGpsMapActivity;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
 import com.usda.fmsc.twotrails.R;
@@ -53,7 +54,7 @@ public class AcquireGpsActivity extends AcquireGpsMapActivity {
 
                 try {
                     _Point = (GpsPoint)intent.getSerializableExtra(Consts.Codes.Data.POINT_DATA);
-                    _Metadata = (TtMetadata)intent.getSerializableExtra(Consts.Codes.Data.METADATA_DATA);
+                    _Metadata = intent.getParcelableExtra(Consts.Codes.Data.METADATA_DATA);
 
                     setZone(_Metadata.getZone());
 
@@ -124,14 +125,6 @@ public class AcquireGpsActivity extends AcquireGpsMapActivity {
         }
     }
 
-
-//    @Override
-//    public void onMapReady(GoogleMap googleMap) {
-//        super.onMapReady(googleMap);
-//
-//        setMapMyLocationEnabled(true);
-//        setMapFollowMyPosition(true);
-//    }
 
     @Override
     protected void startLogging() {
@@ -228,5 +221,10 @@ public class AcquireGpsActivity extends AcquireGpsMapActivity {
             e.printStackTrace();
         }
 
+    }
+
+    @Override
+    protected Units.MapTracking getMapTracking() {
+        return Units.MapTracking.FOLLOW;
     }
 }

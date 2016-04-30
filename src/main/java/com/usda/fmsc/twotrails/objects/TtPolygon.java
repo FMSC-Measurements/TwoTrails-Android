@@ -1,5 +1,8 @@
 package com.usda.fmsc.twotrails.objects;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.usda.fmsc.twotrails.Consts;
 
 import org.joda.time.DateTime;
@@ -7,7 +10,19 @@ import org.joda.time.DateTime;
 import java.io.Serializable;
 import java.util.Comparator;
 
-public class TtPolygon implements Comparable<TtPolygon>, Comparator<TtPolygon>, Serializable {
+public class TtPolygon implements Comparable<TtPolygon>, Comparator<TtPolygon>, Parcelable {
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+        @Override
+        public Object createFromParcel(Parcel source) {
+            return new TtPolygon(source);
+        }
+
+        @Override
+        public TtPolygon[] newArray(int size) {
+            return new TtPolygon[size];
+        }
+    };
+
 
     private String CN;
     private String Name;
@@ -25,6 +40,23 @@ public class TtPolygon implements Comparable<TtPolygon>, Comparator<TtPolygon>, 
 
 
     //region Constructors
+
+    public TtPolygon() {
+        this(1010);
+    }
+
+    public TtPolygon(Parcel source) {
+        CN = source.readString();
+        Name = source.readString();
+        Time = (DateTime) source.readSerializable();
+        Description = source.readString();
+        IncrementBy = source.readInt();
+        PointStartIndex = source.readInt();
+        Accuracy = source.readDouble();
+        Area = source.readDouble();
+        Perimeter = source.readDouble();
+    }
+
     public TtPolygon(TtPolygon p) {
         CN = p.getCN();
         Name = p.getName();
@@ -37,10 +69,6 @@ public class TtPolygon implements Comparable<TtPolygon>, Comparator<TtPolygon>, 
         Time = p.getTime();
     }
 
-    public TtPolygon() {
-        this(1010);
-    }
-
     public TtPolygon(int pointStartIndex) {
         this.CN = java.util.UUID.randomUUID().toString();
         this.IncrementBy = 10;
@@ -49,6 +77,25 @@ public class TtPolygon implements Comparable<TtPolygon>, Comparator<TtPolygon>, 
         this.Time = DateTime.now();
     }
     //endregion
+
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(CN);
+        dest.writeString(Name);
+        dest.writeSerializable(Time);
+        dest.writeString(Description);
+        dest.writeInt(IncrementBy);
+        dest.writeInt(PointStartIndex);
+        dest.writeDouble(Accuracy);
+        dest.writeDouble(Area);
+        dest.writeDouble(Perimeter);
+    }
 
     //region Get/Set
     public String getCN() {

@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.esri.core.io.UserCredentials;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.Transitions.ElevationTransition;
 import com.usda.fmsc.android.dialogs.InputDialog;
@@ -27,13 +28,13 @@ import com.usda.fmsc.android.widget.layoutmanagers.LinearLayoutManagerWithSmooth
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.Units;
-import com.usda.fmsc.twotrails.activities.custom.CustomToolbarActivity;
+import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.dialogs.NewArcMapDialog;
 import com.usda.fmsc.twotrails.dialogs.SelectMapTypeDialog;
 import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
 import com.usda.fmsc.twotrails.ui.MSFloatingActionButton;
 import com.usda.fmsc.twotrails.utilities.ArcGISTools;
-import com.usda.fmsc.utilities.ISimpleEvent;
+import com.usda.fmsc.utilities.IListener;
 import com.usda.fmsc.utilities.StringEx;
 
 import java.util.ArrayList;
@@ -41,7 +42,6 @@ import java.util.Collections;
 
 import jp.wasabeef.recyclerview.animators.SlideInLeftAnimator;
 
-//TODO check to see if there if credentials exist before creating/editing maps
 public class MapManagerActivity extends CustomToolbarActivity implements ArcGISTools.IArcToolsListener {
     private static final String SELECT_MAP = "SelectMap";
 
@@ -231,14 +231,14 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
     public void btnMmAddOfflineClick(View view) {
         fabSheet.hideSheet();
 
-        if (ArcGISTools.hasValidCredentials()) {
+        if (ArcGISTools.hasValidCredentials(MapManagerActivity.this)) {
             addOfflineMap();
         } else {
             String message;
             boolean updateCredentials = false;
 
-            if (ArcGISTools.hasCredentials()) {
-                if (ArcGISTools.areCredentialsOutOfDate()) {
+            if (ArcGISTools.hasCredentials(MapManagerActivity.this)) {
+                if (ArcGISTools.areCredentialsOutOfDate(MapManagerActivity.this)) {
                     message = "Your credentials are out of date. Would you like to update them now?";
                     updateCredentials = true;
                 } else {
@@ -248,12 +248,21 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
                 message = "You need credentials before creating an offline map. Would you like to add them now?";
             }
 
+            UserCredentials credentials = ArcGISTools.getCredentials(MapManagerActivity.this);
+            final String oldUn = updateCredentials && credentials != null ? credentials.getUserName() : StringEx.Empty;
+
             new AlertDialog.Builder(this)
                     .setMessage(message)
                     .setPositiveButton(R.string.str_yes, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
+                            Intent intent = new Intent(getBaseContext(), ArcGisLoginActivity.class);
 
+                            if (!StringEx.isEmpty(oldUn)) {
+                                intent.putExtra(ArcGisLoginActivity.USERNAME, oldUn);
+                            }
+
+                            startActivityForResult(intent, Consts.Codes.Activites.ARC_GIS_LOGIN);
                         }
                     })
                     .setNegativeButton(R.string.str_no, null);
@@ -382,7 +391,7 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
                                         .setPositiveButton(R.string.str_delete, new DialogInterface.OnClickListener() {
                                             @Override
                                             public void onClick(DialogInterface dialog, int which) {
-                                                ArcGISTools.deleteMapLayer(MapManagerActivity.this, layer.getId(), true, new ISimpleEvent() {
+                                                ArcGISTools.deleteMapLayer(MapManagerActivity.this, layer.getId(), true, new IListener() {
                                                     @Override
                                                     public void onEventTriggerd(Object o) {
                                                         removeMap(layer, false);

@@ -9,7 +9,7 @@ import com.usda.fmsc.utilities.StringEx;
 
 import java.io.File;
 
-public class ArcGisMapLayer implements Parcelable, Comparable { //Serializable, {
+public class ArcGisMapLayer implements Parcelable, Comparable {
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
         @Override
         public Object createFromParcel(Parcel source) {

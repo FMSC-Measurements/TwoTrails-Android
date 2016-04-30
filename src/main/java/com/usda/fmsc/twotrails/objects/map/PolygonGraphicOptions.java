@@ -17,13 +17,15 @@ public class PolygonGraphicOptions {
 
     private ArrayList<Listener> listeners = new ArrayList<>();
 
+    private String CN;
     @ColorInt private int AdjBndColor, UnAdjBndColor;
     @ColorInt private int AdjNavColor, UnAdjNavColor;
     @ColorInt private int AdjPtsColor, UnAdjPtsColor, WayPtsColor;
     private float AdjWidth, UnAdjWidth;
 
 
-    public PolygonGraphicOptions(PolygonGraphicOptions options) {
+    public PolygonGraphicOptions(String CN, PolygonGraphicOptions options) {
+        this.CN = CN;
         this.AdjBndColor = options.AdjBndColor;
         this.UnAdjBndColor = options.UnAdjBndColor;
         this.AdjNavColor = options.AdjNavColor;
@@ -35,9 +37,10 @@ public class PolygonGraphicOptions {
         this.UnAdjWidth = options.UnAdjWidth;
     }
 
-    public PolygonGraphicOptions(@ColorInt int AdjBndColor, @ColorInt int UnAdjBndColor, @ColorInt int AdjNavColor, @ColorInt int UnAdjNavColor,
+    public PolygonGraphicOptions(String CN, @ColorInt int AdjBndColor, @ColorInt int UnAdjBndColor, @ColorInt int AdjNavColor, @ColorInt int UnAdjNavColor,
                                  @ColorInt int AdjPtsColor, @ColorInt int UnAdjPtsColor, @ColorInt int WayPtsColor,
                                  float AdjWidth, float UnAdjWidth) {
+        this.CN = CN;
         this.AdjBndColor = AdjBndColor;
         this.UnAdjBndColor = UnAdjBndColor;
         this.AdjNavColor = AdjNavColor;
@@ -49,6 +52,10 @@ public class PolygonGraphicOptions {
         this.UnAdjWidth = UnAdjWidth;
     }
 
+
+    public String getCN() {
+        return CN;
+    }
 
     public int getColor(GraphicCode code) {
         switch (code) {
@@ -192,6 +199,7 @@ public class PolygonGraphicOptions {
     public void removeListener(Listener listener) {
         listeners.remove(listener);
     }
+
 
     public interface Listener {
         void onOptionChanged(PolygonGraphicOptions pgo, GraphicCode code, @ColorInt int value);

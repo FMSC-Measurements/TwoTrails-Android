@@ -74,7 +74,7 @@ public class GetMapExtentsActivity extends AppCompatActivity {
                 fragment.getArcExtents(),
                 fragment.getSpatialReference(),
                 fileLocation,
-                ArcGISTools.getCredentials());
+                ArcGISTools.getCredentials(GetMapExtentsActivity.this));
 
         task.estimateMapSize(new DownloadOfflineArcGISMapTask.EstimateListener() {
             @Override

@@ -19,10 +19,10 @@ import com.usda.fmsc.android.dialogs.InputDialog;
 import com.usda.fmsc.android.widget.PopupMenuButton;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.activities.custom.CustomToolbarActivity;
+import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
 import com.usda.fmsc.twotrails.utilities.ArcGISTools;
-import com.usda.fmsc.utilities.ISimpleEvent;
+import com.usda.fmsc.utilities.IListener;
 import com.usda.fmsc.utilities.StringEx;
 
 //TODO Display Details
@@ -108,7 +108,7 @@ public class MapDetailsActivity extends CustomToolbarActivity {
                                 .setPositiveButton(R.string.str_delete, new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
-                                        ArcGISTools.deleteMapLayer(MapDetailsActivity.this, arcGisMapLayer.getId(), true, new ISimpleEvent() {
+                                        ArcGISTools.deleteMapLayer(MapDetailsActivity.this, arcGisMapLayer.getId(), true, new IListener() {
                                             @Override
                                             public void onEventTriggerd(Object o) {
                                                 setUpdated(false);

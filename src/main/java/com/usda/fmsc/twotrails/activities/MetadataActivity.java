@@ -10,7 +10,6 @@ import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -24,7 +23,7 @@ import com.usda.fmsc.android.dialogs.InputDialog;
 import com.usda.fmsc.android.dialogs.NumericInputDialog;
 import com.usda.fmsc.android.listeners.ComplexOnPageChangeListener;
 import com.usda.fmsc.geospatial.nmea.INmeaBurst;
-import com.usda.fmsc.twotrails.activities.custom.TtAjusterCustomToolbarActivity;
+import com.usda.fmsc.twotrails.activities.base.TtAjusterCustomToolbarActivity;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.data.TwoTrailsSchema;
 import com.usda.fmsc.twotrails.dialogs.EditableListDialog;
@@ -44,7 +43,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.usda.fmsc.geospatial.Units.UomElevation;
-import com.usda.fmsc.geospatial.nmea.NmeaBurst;
 import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
 import com.usda.fmsc.utilities.StringEx;
 
@@ -131,7 +129,7 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
         saveMetadata();
 
         if (adjust) {
-            PolygonAdjuster.adjust(Global.DAL, Global.getMainActivity(), true);
+            PolygonAdjuster.adjust(Global.getDAL(), Global.getMainActivity(), true);
         }
     }
 
@@ -483,7 +481,7 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
     //region MetaFrag
     public void btnNameClick(View view) {
         if (!_MetaLocked) {
-            final InputDialog inputDialog = new InputDialog(this, R.style.EditTextStyle);
+            final InputDialog inputDialog = new InputDialog(this);
 
             inputDialog.setTitle("Name");
             inputDialog.setInputText(_CurrentMetadata.getName());
@@ -526,7 +524,7 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
                                 if (points.size() > 0) {
                                     TtPoint point;
                                     for (int i = 0; i < points.size(); i++) {
-                                        points.set(i, TtUtils.reCalculateGps(points.get(i), zone, Global.DAL, null));
+                                        points.set(i, TtUtils.reCalculateGps(points.get(i), zone, Global.getDAL(), null));
                                     }
 
                                     Global.getDAL().updatePoints(points);

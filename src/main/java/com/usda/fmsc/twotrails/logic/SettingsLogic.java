@@ -61,12 +61,12 @@ public class SettingsLogic {
     public static void exportReport(final Activity activity) {
         AlertDialog.Builder dialog = new AlertDialog.Builder(activity);
 
-        if (Global.DAL != null) {
+        if (Global.getDAL() != null) {
             dialog.setMessage("Would you like to include the current project into the report?")
                     .setPositiveButton(R.string.str_yes, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            onExportReportComplete(TtUtils.exportReport(Global.DAL), activity);
+                            onExportReportComplete(TtUtils.exportReport(Global.getDAL()), activity);
                         }
                     })
                     .setNegativeButton(R.string.str_no, new DialogInterface.OnClickListener() {

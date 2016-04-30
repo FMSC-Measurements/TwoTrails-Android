@@ -19,11 +19,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.usda.fmsc.android.AndroidUtils;
+import com.usda.fmsc.android.utilities.PostDelayHandler;
 import com.usda.fmsc.android.widget.SheetLayoutEx;
 import com.usda.fmsc.android.widget.layoutmanagers.LinearLayoutManagerWithSmoothScroller;
 import com.usda.fmsc.android.widget.RecyclerViewEx;
 import com.usda.fmsc.geospatial.nmea.INmeaBurst;
-import com.usda.fmsc.twotrails.activities.custom.AcquireGpsMapActivity;
+import com.usda.fmsc.geospatial.nmea.exceptions.ExcessiveStringException;
+import com.usda.fmsc.twotrails.activities.base.AcquireGpsMapActivity;
 import com.usda.fmsc.utilities.StringEx;
 import com.usda.fmsc.twotrails.adapters.Take5PointsEditRvAdapter;
 import com.usda.fmsc.twotrails.Consts;
@@ -69,7 +71,9 @@ public class Take5Activity extends AcquireGpsMapActivity {
     private TtGroup _Group;
 
     private int increment, takeAmount, nmeaCount = 0;
-    private boolean saved = true, updated, onBnd = true, cancelVisible, ignoreScroll, useRing, useVib, mapViewMode;
+    private boolean saved = true, updated, onBnd = true, cancelVisible, ignoreScroll, useRing, useVib, mapViewMode, killAcquire;
+
+    private PostDelayHandler pdhHideProgress = new PostDelayHandler(500);
 
     private FilterOptions options = new FilterOptions();
 
@@ -196,8 +200,8 @@ public class Take5Activity extends AcquireGpsMapActivity {
                         onBnd = _CurrentPoint.isOnBnd();
                     }
 
-                    _Metadata = (TtMetadata)intent.getSerializableExtra(Consts.Codes.Data.METADATA_DATA);
-                    _Polygon = (TtPolygon)intent.getSerializableExtra(Consts.Codes.Data.POLYGON_DATA);
+                    _Metadata = intent.getParcelableExtra(Consts.Codes.Data.METADATA_DATA);
+                    _Polygon = getPolygon();
 
                     if (_Metadata == null) {
                         cancelResult = Consts.Codes.Results.NO_METDATA_DATA;
@@ -238,20 +242,18 @@ public class Take5Activity extends AcquireGpsMapActivity {
             linearLayoutManager = new LinearLayoutManagerWithSmoothScroller(this);
 
             rvPoints = (RecyclerViewEx)findViewById(R.id.take5RvPoints);
-            rvPoints.setViewHasFooter(true);
-            rvPoints.setLayoutManager(linearLayoutManager);
-            rvPoints.setHasFixedSize(true);
-            rvPoints.setItemAnimator(new SlideInUpAnimator());
-            rvPoints.setAdapter(t5pAdapter);
+            if (rvPoints != null) {
+                rvPoints.setViewHasFooter(true);
+                rvPoints.setLayoutManager(linearLayoutManager);
+                rvPoints.setHasFixedSize(true);
+                rvPoints.setItemAnimator(new SlideInUpAnimator());
+                rvPoints.setAdapter(t5pAdapter);
 
-            rvPoints.addOnScrollListener(scrollListener);
+                rvPoints.addOnScrollListener(scrollListener);
+            }
 
             progLay = (RelativeLayout)findViewById(R.id.progressLayout);
             tvProg = (TextView)findViewById(R.id.take5ProgressText);
-
-            //getSettings();
-
-            //setupMap();
         }
     }
 
@@ -532,7 +534,6 @@ public class Take5Activity extends AcquireGpsMapActivity {
             fabSS.setEnabled(true);
 
             addPosition(point, true);
-            //addMapMarker(point, _Metadata, !mapViewMode);
 
             if (useVib) {
                 AndroidUtils.Device.vibrate(this, Consts.Notifications.VIB_POINT_CREATED);
@@ -562,9 +563,48 @@ public class Take5Activity extends AcquireGpsMapActivity {
     protected void stopLogging() {
         super.stopLogging();
 
-        progLay.setVisibility(View.GONE);
-    }
+        if (killAcquire) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    progLay.setVisibility(View.GONE);
+                }
+            });
 
+            killAcquire = false;
+        } else {
+            pdhHideProgress.post(new Runnable() {
+                @Override
+                public void run() {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Animation a = AnimationUtils.loadAnimation(Take5Activity.this, R.anim.push_down_out);
+
+                            a.setAnimationListener(new Animation.AnimationListener() {
+                                @Override
+                                public void onAnimationStart(Animation animation) {
+                                    progLay.setVisibility(View.GONE);
+                                }
+
+                                @Override
+                                public void onAnimationEnd(Animation animation) {
+
+                                }
+
+                                @Override
+                                public void onAnimationRepeat(Animation animation) {
+
+                                }
+                            });
+
+                            progLay.startAnimation(a);
+                        }
+                    });
+                }
+            });
+        }
+    }
 
     private void lockLastPoint() {
         if (_Points.size() > 0) {
@@ -652,13 +692,7 @@ public class Take5Activity extends AcquireGpsMapActivity {
                 });
 
                 if (_UsedBursts.size() == takeAmount) {
-
-                    this.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            stopLogging();
-                        }
-                    });
+                    stopLogging();
 
                     ArrayList<GeoPosition> positions = new ArrayList<>();
                     int zone = _Metadata.getZone();
@@ -741,6 +775,7 @@ public class Take5Activity extends AcquireGpsMapActivity {
         cancelVisible = false;
 
         if (isLogging()) {
+            killAcquire = true;
             stopLogging();
             _Bursts = new ArrayList<>();
             _UsedBursts = new ArrayList<>();

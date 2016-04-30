@@ -313,54 +313,6 @@ public class TtUtils {
 
             return value;
         }
-
-
-
-        public static byte[] arrayToByteArray(Object[] arr) throws IOException {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ObjectOutputStream oos = new ObjectOutputStream(baos);
-            oos.writeObject(arr);
-            oos.close();
-            baos.close();
-            return baos.toByteArray();
-        }
-
-        public static Object[] bytesToArray(byte[] bytes) throws IOException, ClassNotFoundException {
-            ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-            ObjectInputStream ois = new ObjectInputStream(bais);
-            return (Object[]) ois.readObject();
-        }
-
-
-        public static byte[] listToByteArray(List list) throws IOException {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ObjectOutputStream oos = new ObjectOutputStream(baos);
-            oos.writeObject(list);
-            oos.close();
-            baos.close();
-            return baos.toByteArray();
-        }
-
-        public static List bytesToList(byte[] bytes) throws IOException, ClassNotFoundException {
-            ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-            ObjectInputStream ois = new ObjectInputStream(bais);
-            return (List) ois.readObject();
-        }
-
-        public static byte[] hashMapToByteArray(HashMap hashMap) throws IOException {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ObjectOutputStream oos = new ObjectOutputStream(baos);
-            oos.writeObject(hashMap);
-            oos.close();
-            baos.close();
-            return baos.toByteArray();
-        }
-
-        public static HashMap bytesToHashMap(byte[] bytes) throws IOException, ClassNotFoundException {
-            ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-            ObjectInputStream ois = new ObjectInputStream(bais);
-            return (HashMap) ois.readObject();
-        }
     }
 
     public static class Math {

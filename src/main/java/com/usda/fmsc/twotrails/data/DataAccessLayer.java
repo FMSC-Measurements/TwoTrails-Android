@@ -16,6 +16,7 @@ import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.Units;
+import com.usda.fmsc.twotrails.objects.map.PolygonGraphicOptions;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import org.joda.time.DateTime;
@@ -115,6 +116,7 @@ public class DataAccessLayer {
             CreateProjectInfoDataTable();
             CreateTtNmeaTable();
             CreateGroupTable();
+            CreatePolygonAttrTable();
 
             SetupProjInfo();
             insertMetadata(Global.getDefaultMeta());
@@ -231,6 +233,18 @@ public class DataAccessLayer {
             TtUtils.TtReport.writeError(ex.getMessage(), "DataAccessLayer:CreateTtnmeaTable");
         }
     }
+
+    private void CreatePolygonAttrTable() {
+        try
+        {
+            _db.execSQL(TwoTrailsSchema.PolygonAttrSchema.CreateTable);
+        }
+        catch (Exception ex)
+        {
+            TtUtils.TtReport.writeError(ex.getMessage(), "DataAccessLayer:CreatePolygonAttrTable");
+            throw ex;
+        }
+    }
     //endregion
 
 
@@ -315,7 +329,7 @@ public class DataAccessLayer {
 
             ContentValues cvs = new ContentValues();
             cvs.put(TwoTrailsSchema.SharedSchema.CN, poly.getCN());
-            cvs.put(TwoTrailsSchema.PolygonSchema.PolyID, poly.getName());
+            cvs.put(TwoTrailsSchema.PolygonSchema.Name, poly.getName());
             cvs.put(TwoTrailsSchema.PolygonSchema.Description, poly.getDescription());
             cvs.put(TwoTrailsSchema.PolygonSchema.Accuracy, poly.getAccuracy());
             cvs.put(TwoTrailsSchema.PolygonSchema.Area, poly.getArea());
@@ -346,7 +360,7 @@ public class DataAccessLayer {
             _db.beginTransaction();
 
             ContentValues cvs = new ContentValues();
-            cvs.put(TwoTrailsSchema.PolygonSchema.PolyID, poly.getName());
+            cvs.put(TwoTrailsSchema.PolygonSchema.Name, poly.getName());
             cvs.put(TwoTrailsSchema.PolygonSchema.Description, poly.getDescription());
             cvs.put(TwoTrailsSchema.PolygonSchema.Accuracy, poly.getAccuracy());
             cvs.put(TwoTrailsSchema.PolygonSchema.Area, poly.getArea());
@@ -376,6 +390,10 @@ public class DataAccessLayer {
             success = _db.delete(TwoTrailsSchema.PolygonSchema.TableName,
                     TwoTrailsSchema.SharedSchema.CN + "=?",
                     new String[] { cn }) > 0;
+
+            if (success) {
+                deletePolygonGraphicOption(cn);
+            }
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:deletePolygon");
         }
@@ -1327,7 +1345,7 @@ public class DataAccessLayer {
 
             ContentValues cvs = new ContentValues();
             cvs.put(TwoTrailsSchema.SharedSchema.CN, meta.getCN());
-            cvs.put(TwoTrailsSchema.MetadataSchema.ID, meta.getName());
+            cvs.put(TwoTrailsSchema.MetadataSchema.Name, meta.getName());
             cvs.put(TwoTrailsSchema.MetadataSchema.Comment, meta.getComment());
             cvs.put(TwoTrailsSchema.MetadataSchema.Distance, meta.getDistance().toString());
             cvs.put(TwoTrailsSchema.MetadataSchema.Slope, meta.getSlope().toString());
@@ -1364,7 +1382,7 @@ public class DataAccessLayer {
             _db.beginTransaction();
 
             ContentValues cvs = new ContentValues();
-            cvs.put(TwoTrailsSchema.MetadataSchema.ID, meta.getName());
+            cvs.put(TwoTrailsSchema.MetadataSchema.Name, meta.getName());
             cvs.put(TwoTrailsSchema.MetadataSchema.Comment, meta.getComment());
             cvs.put(TwoTrailsSchema.MetadataSchema.Distance, meta.getDistance().toString());
             cvs.put(TwoTrailsSchema.MetadataSchema.Slope, meta.getSlope().toString());
@@ -1539,7 +1557,6 @@ public class DataAccessLayer {
             _db.beginTransaction();
 
             ContentValues cvs = new ContentValues();
-            cvs.put(TwoTrailsSchema.SharedSchema.CN, group.getCN());
             cvs.put(TwoTrailsSchema.GroupSchema.Name, group.getName());
             cvs.put(TwoTrailsSchema.GroupSchema.Description, group.getDescription());
             cvs.put(TwoTrailsSchema.GroupSchema.Type, group.getGroupType().toString());
@@ -1629,7 +1646,7 @@ public class DataAccessLayer {
                     EastWest lonDir;
                     UomElevation uomelev;
 
-                    //region ID Time Pos
+                    //region Name Time Pos
                     if (!c.isNull(0))
                         cn = c.getString(0);
                     else
@@ -1957,7 +1974,6 @@ public class DataAccessLayer {
         try {
 
             ContentValues cvs = new ContentValues();
-            cvs.put(TwoTrailsSchema.SharedSchema.CN, burst.getCN());
             cvs.put(TwoTrailsSchema.TtNmeaSchema.PointCN, burst.getPointCN());
             cvs.put(TwoTrailsSchema.TtNmeaSchema.Used, burst.isUsed());
             cvs.put(TwoTrailsSchema.TtNmeaSchema.TimeCreated, dtf.print(burst.getTimeCreated()));
@@ -2199,6 +2215,185 @@ public class DataAccessLayer {
         {
             TtUtils.TtReport.writeError(ex.getMessage(), "DataAccessLayer:SetProjectInfoField");
         }
+    }
+    //endregion
+    //endregion
+
+
+    //region Polygon Attr
+    //region Get
+    public ArrayList<PolygonGraphicOptions> getPolygonGraphicOptions()
+    {
+        return getPolygonGraphicOptions(null);
+    }
+
+    public PolygonGraphicOptions getPolygonGraphicOptionByCN(String cn) {
+        ArrayList<PolygonGraphicOptions> groups = getPolygonGraphicOptions(String.format("%s = '%s'",
+                TwoTrailsSchema.SharedSchema.CN, cn));
+
+        if (groups != null && groups.size() > 0)
+            return groups.get(0);
+        else
+            return null;
+    }
+
+    private ArrayList<PolygonGraphicOptions> getPolygonGraphicOptions(String where) {
+        ArrayList<PolygonGraphicOptions> graphicOptions = new ArrayList<>();
+
+        try {
+            String query = createSelectQuery(TwoTrailsSchema.GroupSchema.TableName, where);
+
+            Cursor c = _db.rawQuery(query, null);
+
+            PolygonGraphicOptions master = Global.MapSettings.getMasterPolyGraphicOptions();
+
+            String cn;
+            int adjbnd, unadjbnd, adjnav, unadjnav, adjpts, unadjpts, waypts;
+
+            if (c.moveToFirst()) {
+                do {
+
+                    if (!c.isNull(0))
+                        cn = c.getString(0);
+                    else
+                        throw new RuntimeException("PolygonGraphicOptions has no CN");
+
+                    if (!c.isNull(1))
+                        adjbnd = c.getInt(1);
+                    else
+                        adjbnd = master.getAdjBndColor();
+
+                    if (!c.isNull(2))
+                        unadjbnd = c.getInt(2);
+                    else
+                        unadjbnd = master.getUnAdjBndColor();
+
+                    if (!c.isNull(3))
+                        adjnav = c.getInt(3);
+                    else
+                        adjnav = master.getAdjNavColor();
+
+                    if (!c.isNull(4))
+                        unadjnav = c.getInt(4);
+                    else
+                        unadjnav = master.getUnAdjNavColor();
+
+                    if (!c.isNull(5))
+                        adjpts = c.getInt(5);
+                    else
+                        adjpts = master.getAdjPtsColor();
+
+                    if (!c.isNull(6))
+                        unadjpts = c.getInt(6);
+                    else
+                        unadjpts = master.getUnAdjPtsColor();
+
+                    if (!c.isNull(7))
+                        waypts = c.getInt(7);
+                    else
+                        waypts = master.getWayPtsColor();
+
+                    graphicOptions.add(
+                            new PolygonGraphicOptions(cn,
+                                    adjbnd, unadjbnd, adjnav, unadjnav, adjpts, unadjpts, waypts,
+                                    master.getAdjWidth(), master.getUnAdjWidth())
+                    );
+                } while (c.moveToNext());
+            }
+
+            c.close();
+        } catch (Exception ex) {
+            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:getPolygonGraphicOptions");
+            return null;
+        }
+
+        return graphicOptions;
+    }
+
+
+    public HashMap<String, PolygonGraphicOptions> getPolygonGraphicOptionsMap() {
+        HashMap<String, PolygonGraphicOptions> pgos = new HashMap<>();
+        for(PolygonGraphicOptions pgo : getPolygonGraphicOptions()) {
+            pgos.put(pgo.getCN(), pgo);
+        }
+        return  pgos;
+    }
+    //endregion
+
+    //region Insert
+    public boolean insertPolygonGraphicOption(PolygonGraphicOptions pgo) {
+        boolean success = false;
+
+        try {
+            _db.beginTransaction();
+
+            ContentValues cvs = new ContentValues();
+            cvs.put(TwoTrailsSchema.SharedSchema.CN, pgo.getCN());
+            cvs.put(TwoTrailsSchema.PolygonAttrSchema.AdjBndColor, pgo.getAdjBndColor());
+            cvs.put(TwoTrailsSchema.PolygonAttrSchema.UnAdjBndColor, pgo.getUnAdjBndColor());
+            cvs.put(TwoTrailsSchema.PolygonAttrSchema.AdjNavColor, pgo.getAdjNavColor());
+            cvs.put(TwoTrailsSchema.PolygonAttrSchema.UnAdjNavColor, pgo.getUnAdjNavColor());
+            cvs.put(TwoTrailsSchema.PolygonAttrSchema.AdjPtsColor, pgo.getAdjPtsColor());
+            cvs.put(TwoTrailsSchema.PolygonAttrSchema.UnAdjPtsColor, pgo.getUnAdjPtsColor());
+            cvs.put(TwoTrailsSchema.PolygonAttrSchema.WayPtsColor, pgo.getWayPtsColor());
+
+            _db.insert(TwoTrailsSchema.PolygonAttrSchema.TableName, null, cvs);
+
+            _db.setTransactionSuccessful();
+            success = true;
+        } catch (Exception ex) {
+            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:insertPolygonGraphicOption");
+        } finally {
+            _db.endTransaction();
+        }
+
+        return success;
+    }
+    //endregion
+
+    //region Update
+    public boolean updatePolygonGraphicOption(PolygonGraphicOptions pgo) {
+        int success = -1;
+
+        try {
+            _db.beginTransaction();
+
+            ContentValues cvs = new ContentValues();
+            cvs.put(TwoTrailsSchema.PolygonAttrSchema.AdjBndColor, pgo.getAdjBndColor());
+            cvs.put(TwoTrailsSchema.PolygonAttrSchema.UnAdjBndColor, pgo.getUnAdjBndColor());
+            cvs.put(TwoTrailsSchema.PolygonAttrSchema.AdjNavColor, pgo.getAdjNavColor());
+            cvs.put(TwoTrailsSchema.PolygonAttrSchema.UnAdjNavColor, pgo.getUnAdjNavColor());
+            cvs.put(TwoTrailsSchema.PolygonAttrSchema.AdjPtsColor, pgo.getAdjPtsColor());
+            cvs.put(TwoTrailsSchema.PolygonAttrSchema.UnAdjPtsColor, pgo.getUnAdjPtsColor());
+            cvs.put(TwoTrailsSchema.PolygonAttrSchema.WayPtsColor, pgo.getWayPtsColor());
+
+            success = _db.update(TwoTrailsSchema.PolygonAttrSchema.TableName, cvs,
+                    String.format("%s = '%s'", TwoTrailsSchema.SharedSchema.CN, pgo.getCN()), null);
+
+            _db.setTransactionSuccessful();
+        } catch (Exception ex) {
+            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:updatePolygonGraphicOption");
+        } finally {
+            _db.endTransaction();
+        }
+
+        return success > 0;
+    }
+    //endregion
+
+    //region Delete
+    public boolean deletePolygonGraphicOption(String cn) {
+        boolean success = false;
+
+        try {
+            success = _db.delete(TwoTrailsSchema.PolygonAttrSchema.TableName,
+                    TwoTrailsSchema.SharedSchema.CN + "=?",
+                    new String[] { cn }) > 0;
+        } catch (Exception ex) {
+            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:deletePolygonGraphicOption");
+        }
+
+        return success;
     }
     //endregion
     //endregion

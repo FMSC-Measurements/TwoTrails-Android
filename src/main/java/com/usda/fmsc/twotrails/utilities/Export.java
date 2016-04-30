@@ -2,9 +2,7 @@ package com.usda.fmsc.twotrails.utilities;
 
 import android.os.AsyncTask;
 
-import com.usda.fmsc.geospatial.nmea.Satellite;
 import com.usda.fmsc.geospatial.utm.UTMTools;
-import com.usda.fmsc.utilities.csv.CSVWriter;
 import com.usda.fmsc.utilities.gpx.GpxDocument;
 import com.usda.fmsc.utilities.gpx.GpxMetadata;
 import com.usda.fmsc.utilities.gpx.GpxPoint;
@@ -43,6 +41,8 @@ import com.usda.fmsc.utilities.StringEx;
 import com.usda.fmsc.twotrails.Units;
 import com.usda.fmsc.twotrails.Units.OpType;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.joda.time.DateTime;
 
 public class Export {
@@ -54,10 +54,10 @@ public class Export {
             HashMap<String, TtMetadata> metadata = dal.getMetadataMap();
 
             //region Point Headers
-            CSVWriter writer = new CSVWriter(new FileWriter(pointsFilename));
+            CSVPrinter printer = new CSVPrinter(new FileWriter(pointsFilename), CSVFormat.DEFAULT);
 
-            writer.writeNext(new String[] {
-                    "Point ID",
+            printer.printRecord(new String[] {
+                    "Point Name",
                     "OpType",
                     "Index",
                     "Polygon",
@@ -205,17 +205,17 @@ public class Export {
                     values.add(StringEx.Empty);
                 }
 
-                writer.writeNext(values);
+                printer.printRecord(values);
                 values.clear();
             }
 
-            writer.close();
+            printer.close();
             //endregion
 
             //region Groups
-            writer = new CSVWriter(new FileWriter(groupsFilename));
+            printer = new CSVPrinter(new FileWriter(groupsFilename), CSVFormat.DEFAULT);
 
-            writer.writeNext(new String[] {
+            printer.printRecords(new String[] {
                     "Name",
                     "Type",
                     "Description",
@@ -231,11 +231,11 @@ public class Export {
                 values.add(2, group.getDescription());
                 values.add(3, group.getCN());
 
-                writer.writeNext(values);
+                printer.printRecords(values);
                 values.clear();
             }
 
-            writer.close();
+            printer.close();
             //endregion
         } catch (Exception ex) {
             pointsFilename = null;
@@ -249,9 +249,9 @@ public class Export {
         String polysFilename = String.format("%s/polygons.csv", dir);
 
         try {
-            CSVWriter writer = new CSVWriter(new FileWriter(polysFilename));
+            CSVPrinter printer = new CSVPrinter(new FileWriter(polysFilename), CSVFormat.DEFAULT);
 
-            writer.writeNext(new String[] {
+            printer.printRecords(new String[] {
                     "Name",
                     "Accuracy (M)",
                     "Area (Ac)",
@@ -276,11 +276,11 @@ public class Export {
 
                 values.add(4, poly.getCN());
 
-                writer.writeNext(values);
+                printer.printRecords(values);
                 values.clear();
             }
 
-            writer.close();
+            printer.close();
         } catch (Exception ex) {
             polysFilename = null;
             TtUtils.TtReport.writeError(ex.getMessage(), "Export:polygons", ex.getStackTrace());
@@ -293,9 +293,9 @@ public class Export {
         String metaFilename = String.format("%s/metadata.csv", dir);
 
         try {
-            CSVWriter writer = new CSVWriter(new FileWriter(metaFilename));
+            CSVPrinter writer = new CSVPrinter(new FileWriter(metaFilename), CSVFormat.DEFAULT);
 
-            writer.writeNext(new String[] {
+            writer.printRecords(new String[] {
                     "Name",
                     "Zone",
                     "Datum",
@@ -330,7 +330,7 @@ public class Export {
                 values.add(meta.getComment());
                 values.add(meta.getCN());
 
-                writer.writeNext(values);
+                writer.printRecords(values);
                 values.clear();
             }
 
@@ -347,10 +347,10 @@ public class Export {
         String projFilename = String.format("%s/project.csv", dir);
 
         try {
-            CSVWriter writer = new CSVWriter(new FileWriter(projFilename));
+            CSVPrinter writer = new CSVPrinter(new FileWriter(projFilename), CSVFormat.DEFAULT);
 
-            writer.writeNext(new String[] {
-                    "Project ID",
+            writer.printRecords(new String[] {
+                    "Project Name",
                     "Region",
                     "Forest",
                     "District",
@@ -362,7 +362,7 @@ public class Export {
                     "CreatedTtVersion"
             });
 
-            writer.writeNext(new String[] {
+            writer.printRecords(new String[] {
                     dal.getProjectID(),
                     dal.getProjectRegion(),
                     dal.getProjectForest(),
@@ -388,9 +388,9 @@ public class Export {
         String nmeaFilename = String.format("%s/nmea.csv", dir);
         try {
             //region NMEA Headers
-            CSVWriter writer = new CSVWriter(new FileWriter(nmeaFilename));
+            CSVPrinter writer = new CSVPrinter(new FileWriter(nmeaFilename), CSVFormat.DEFAULT);
 
-            writer.writeNext(new String[] {
+            writer.printRecords(new String[] {
                     "Point CN",
                     "Used",
                     "Time Created",
@@ -508,7 +508,7 @@ public class Export {
                 }
                 */
 
-                writer.writeNext(values);
+                writer.printRecords(values);
                 values.clear();
             }
 
@@ -697,7 +697,7 @@ public class Export {
         sUnAdjNav.setBalloonDisplayMode(DisplayMode.Default);
 
         sUnAdjMisc.setIconColorMode(ColorMode.normal);
-        sUnAdjMisc.setIconColor(UnAdjMiscColor);
+        sUnAdjMisc.setIconColor(AdjMiscColor);
         sUnAdjMisc.setIconScale(1d);
         sUnAdjMisc.setBalloonDisplayMode(DisplayMode.Default);
 

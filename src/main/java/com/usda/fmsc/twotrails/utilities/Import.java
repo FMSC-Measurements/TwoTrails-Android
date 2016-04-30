@@ -2,20 +2,16 @@ package com.usda.fmsc.twotrails.utilities;
 
 import android.os.AsyncTask;
 
+import com.usda.fmsc.geospatial.Units.UomElevation;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.geospatial.utm.UTMTools;
-import com.usda.fmsc.utilities.csv.CSVReader;
-import com.usda.fmsc.utilities.gpx.GpxBaseTrack;
-import com.usda.fmsc.utilities.gpx.GpxPoint;
-import com.usda.fmsc.utilities.gpx.GpxRoute;
-import com.usda.fmsc.utilities.gpx.GpxTrack;
-import com.usda.fmsc.utilities.gpx.GpxTrackSeg;
-import com.usda.fmsc.utilities.ParseEx;
-import com.usda.fmsc.utilities.StringEx;
 import com.usda.fmsc.twotrails.Consts;
+import com.usda.fmsc.twotrails.Global;
+import com.usda.fmsc.twotrails.Units;
+import com.usda.fmsc.twotrails.Units.Dist;
+import com.usda.fmsc.twotrails.Units.Slope;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
 import com.usda.fmsc.twotrails.data.TwoTrailsSchema;
-import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.logic.PointNamer;
 import com.usda.fmsc.twotrails.objects.GpsPoint;
 import com.usda.fmsc.twotrails.objects.QuondamPoint;
@@ -24,23 +20,30 @@ import com.usda.fmsc.twotrails.objects.TtGroup;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
-import com.usda.fmsc.twotrails.Units;
-import com.usda.fmsc.twotrails.Units.Dist;
-import com.usda.fmsc.twotrails.Units.Slope;
-import com.usda.fmsc.geospatial.Units.UomElevation;
+import com.usda.fmsc.utilities.ParseEx;
+import com.usda.fmsc.utilities.StringEx;
+import com.usda.fmsc.utilities.gpx.GpxBaseTrack;
+import com.usda.fmsc.utilities.gpx.GpxPoint;
+import com.usda.fmsc.utilities.gpx.GpxRoute;
+import com.usda.fmsc.utilities.gpx.GpxTrack;
+import com.usda.fmsc.utilities.gpx.GpxTrackSeg;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.joda.time.DateTime;
 
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 public class Import {
     
-    //region Text
+    //region Text (CSV)
     public static class TextImportTask extends ImportTask<TextImportTask.TextImportParams, Void> {
 
         @Override
@@ -56,12 +59,7 @@ public class Import {
             }
 
             try {
-                CSVReader reader = new CSVReader(
-                        new FileReader(ip.getFilePath()),
-                        ',' ,
-                        '"',
-                        1
-                );
+                CSVParser parser = new CSVParser(new FileReader(ip.getFilePath()), CSVFormat.DEFAULT);
 
                 HashMap<String, TtPolygon> polygons = new HashMap<>();
                 HashMap<String, String> polyNameToCN = new HashMap<>();
@@ -83,8 +81,7 @@ public class Import {
                 List<String> toUsePolys = ip.getPolygonNames();
                 Map<TextFieldType, Integer> columnMap = ip.getColumnMap();
                 int polyCount = dal.getItemCount(TwoTrailsSchema.PolygonSchema.TableName);
-                
-                String[] line;
+
                 TtPoint point, prevPoint = null;
                 String temp;
                 double tempD;
@@ -145,13 +142,19 @@ public class Import {
                 //endregion
 
 
-                while ((line = reader.readNext()) != null && !isCancelled()) {
-                    if (usePolyNames && toUsePolys.size() > 0 && !toUsePolys.contains(line[fPolyName].toLowerCase())) {
+
+                Iterator<CSVRecord> iterator = parser.iterator();
+                CSVRecord record;
+
+                while (iterator.hasNext() && !isCancelled()) {
+                    record = iterator.next();
+
+                    if (usePolyNames && toUsePolys.size() > 0 && !toUsePolys.contains(record.get(fPolyName).toLowerCase())) {
                         continue;
                     }
 
                     if (ip.isAdvImport()) {
-                        Units.OpType op = Units.OpType.parse(line[fOp]);
+                        Units.OpType op = Units.OpType.parse(record.get(fOp));
                         point = TtUtils.getPointByOpType(op);
 
                         switch (op) {
@@ -162,16 +165,16 @@ public class Import {
                                 GpsPoint gps = (GpsPoint)point;
 
                                 if (hasLatLon) {
-                                    gps.setLatitude(ParseEx.parseDouble(line[fLat], null));
-                                    gps.setLongitude(ParseEx.parseDouble(line[fLon], null));
+                                    gps.setLatitude(ParseEx.parseDouble(record.get(fLat), null));
+                                    gps.setLongitude(ParseEx.parseDouble(record.get(fLon), null));
                                 }
 
                                 if (hasElevation) {
-                                    gps.setElevation(ParseEx.parseDouble(line[fElev], null));
+                                    gps.setElevation(ParseEx.parseDouble(record.get(fElev), null));
                                 }
 
                                 if (hasRMSEr) {
-                                    gps.setRMSEr(ParseEx.parseDouble(line[fRmser], null));
+                                    gps.setRMSEr(ParseEx.parseDouble(record.get(fRmser), null));
                                 }
                                 break;
                             }
@@ -180,41 +183,41 @@ public class Import {
                                 TravPoint trav = (TravPoint) point;
 
                                 if (hasFwdAz) {
-                                    trav.setFwdAz(ParseEx.parseDouble(line[fFwdAz], null));
+                                    trav.setFwdAz(ParseEx.parseDouble(record.get(fFwdAz), null));
                                 }
 
                                 if (hasBkAz) {
-                                    trav.setBkAz(ParseEx.parseDouble(line[fBkAz], null));
+                                    trav.setBkAz(ParseEx.parseDouble(record.get(fBkAz), null));
                                 }
 
                                 if (trav.getFwdAz() == null && trav.getBkAz() == null) {
                                     throw new RuntimeException("No Forward or Back Azimuth");
                                 }
 
-                                tempD = ParseEx.parseDouble(line[fSlopeDist], 0d);
-                                Dist tempDist = Dist.parse(line[fSlopeDType]);
+                                tempD = ParseEx.parseDouble(record.get(fSlopeDist), 0d);
+                                Dist tempDist = Dist.parse(record.get(fSlopeDType));
 
                                 trav.setSlopeDistance(TtUtils.Convert.distance(tempD, Dist.Meters, tempDist));
 
-                                tempD = ParseEx.parseDouble(line[fSlopeAng], 0d);
-                                Slope tmpSlope = Slope.parse(line[fSlopeAngType]);
+                                tempD = ParseEx.parseDouble(record.get(fSlopeAng), 0d);
+                                Slope tmpSlope = Slope.parse(record.get(fSlopeAngType));
 
                                 trav.setSlopeDistance(TtUtils.Convert.angle(tempD, Slope.Percent, tmpSlope));
                                 break;
                             }
                             case Quondam: {
                                 QuondamPoint qp = (QuondamPoint)point;
-                                qps.put(qp, line[fPCN]);
+                                qps.put(qp, record.get(fPCN));
                                 break;
                             }
                         }
 
                         if (hasManAcc && point instanceof TtPoint.IManualAccuracy) {
-                            ((TtPoint.IManualAccuracy)point).setManualAccuracy(ParseEx.parseDouble(line[fManAcc], null));
+                            ((TtPoint.IManualAccuracy)point).setManualAccuracy(ParseEx.parseDouble(record.get(fManAcc), null));
                         }
 
                         if (hasCN) {
-                            temp = line[fCN];
+                            temp = record.get(fCN);
                             if (dal.getItemsCount(TwoTrailsSchema.PointSchema.TableName, TwoTrailsSchema.SharedSchema.CN, temp) > 0) {
                                 remapCNs.put(temp, point.getCN());
                             } else {
@@ -226,7 +229,7 @@ public class Import {
                     }
 
                     //XYZ
-                    Double d = Double.parseDouble(line[fUnAjX]);
+                    Double d = Double.parseDouble(record.get(fUnAjX));
 
                     if (d != null) {
                         point.setUnAdjX(d);
@@ -234,7 +237,7 @@ public class Import {
                         throw new Exception("No X value");
                     }
 
-                    d = Double.parseDouble(line[fUnAjY]);
+                    d = Double.parseDouble(record.get(fUnAjY));
 
                     if (d != null) {
                         point.setUnAdjY(d);
@@ -243,7 +246,7 @@ public class Import {
                     }
 
                     if (hasUnAdjZ) {
-                        point.setUnAdjZ(ParseEx.parseDouble(line[fUnAjZ], 0d));
+                        point.setUnAdjZ(ParseEx.parseDouble(record.get(fUnAjZ), 0d));
                     } else {
                         point.setUnAdjZ(0d);
                     }
@@ -251,7 +254,7 @@ public class Import {
 
                     //Polygons
                     if (usePolyNames) {
-                        temp = line[fPolyName];
+                        temp = record.get(fPolyName);
 
                         if (useSpecificPolys && toUsePolys.size() > 0 && !toUsePolys.contains(temp)) {
                             continue;
@@ -286,7 +289,7 @@ public class Import {
 
                     //Groups
                     if (hasGroups) {
-                        temp = line[fGroupName];
+                        temp = record.get(fGroupName);
 
                         if (temp.equals(Global.getMainGroup().getName())) {
                             tempGroup = Global.getMainGroup();
@@ -310,7 +313,7 @@ public class Import {
                             PointNamer.namePoint(prevPoint, tempPoly);
 
                     if (usePIDs) {
-                        point.setPID(ParseEx.parseInteger(line[fPID], tempI));
+                        point.setPID(ParseEx.parseInteger(record.get(fPID), tempI));
                     } else {
                         point.setPID(tempI);
                     }
@@ -321,7 +324,7 @@ public class Import {
                     //Time
                     if (hasTime) {
                         try {
-                            tempDT = Consts.DateTimeFormatter.parseDateTime(line[fTime]);
+                            tempDT = Consts.DateTimeFormatter.parseDateTime(record.get(fTime));
                         } catch (Exception ex) {
                             tempDT = DateTime.now();
                         }
@@ -335,7 +338,7 @@ public class Import {
                     
                     //Index
                     if (hasIndex) {
-                        tempIndex = ParseEx.parseLong(line[fIndex], tempIndex);
+                        tempIndex = ParseEx.parseLong(record.get(fIndex), tempIndex);
                     }
                     
                     point.setIndex(tempIndex);
@@ -344,14 +347,14 @@ public class Import {
 
                     //Boundary
                     if (hasBnd) {
-                        point.setOnBnd(ParseEx.parseBoolean(line[fBnd], true));
+                        point.setOnBnd(ParseEx.parseBoolean(record.get(fBnd), true));
                     } else {
                         point.setOnBnd(true);
                     }
 
                     //Comment
                     if (hasComment) {
-                        point.setComment(line[fCmt]);
+                        point.setComment(record.get(fCmt));
                     }
 
 
@@ -825,8 +828,7 @@ public class Import {
     }
     //endregion
     
-    
-    
+
     public static abstract class ImportTask<IP extends ImportParams, Progress> extends AsyncTask<IP, Progress, ImportResult> {
         ImportTaskListener listener;
 

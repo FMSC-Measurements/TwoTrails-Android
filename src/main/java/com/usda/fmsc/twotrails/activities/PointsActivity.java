@@ -28,7 +28,7 @@ import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.listeners.ComplexOnPageChangeListener;
 import com.usda.fmsc.android.widget.SheetFab;
 import com.usda.fmsc.android.widget.SheetLayoutEx;
-import com.usda.fmsc.twotrails.activities.custom.CustomToolbarActivity;
+import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.adapters.PointDetailsAdapter;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.dialogs.LatLonDialog;
@@ -335,7 +335,7 @@ public class PointsActivity extends CustomToolbarActivity {
         savePoint();
 
         if (adjust) {
-            PolygonAdjuster.adjust(Global.DAL, Global.getMainActivity(), true);
+            PolygonAdjuster.adjust(Global.getDAL(), Global.getMainActivity(), true);
         }
     }
 

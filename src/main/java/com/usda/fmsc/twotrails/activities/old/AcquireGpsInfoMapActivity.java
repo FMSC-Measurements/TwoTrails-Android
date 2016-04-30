@@ -16,8 +16,7 @@ import com.usda.fmsc.android.animation.ViewAnimator;
 import com.usda.fmsc.geospatial.nmea.NmeaIDs;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.Global;
-import com.usda.fmsc.twotrails.activities.custom.AcquireGpsMapActivity;
-import com.usda.fmsc.twotrails.activities.custom.CustomToolbarActivity;
+import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.R;
 

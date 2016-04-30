@@ -10,7 +10,6 @@ import com.esri.android.map.Layer;
 import com.esri.android.map.MapView;
 import com.esri.android.map.ags.ArcGISLocalTiledLayer;
 import com.esri.android.map.ags.ArcGISTiledMapServiceLayer;
-import com.esri.android.runtime.ArcGISRuntime;
 import com.esri.core.geometry.Envelope;
 import com.esri.core.geometry.GeometryEngine;
 import com.esri.core.geometry.Point;
@@ -24,25 +23,26 @@ import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
+import com.usda.fmsc.utilities.Encryption;
 import com.usda.fmsc.utilities.FileUtils;
-import com.usda.fmsc.utilities.ISimpleEvent;
+import com.usda.fmsc.utilities.IListener;
+import com.usda.fmsc.utilities.SerializationTools;
 import com.usda.fmsc.utilities.StringEx;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.EventListener;
 import java.util.HashMap;
 import java.util.List;
 
-//TODO Create ArcGIS Credential tools (add/sign-in, validate, get)
 public class ArcGISTools {
     private static SpatialReference LatLonSpatialReference = SpatialReference.create(4326);
+
+    private static UserCredentials userCredentials;
 
     private static HashMap<Integer, ArcGisMapLayer> mapLayers;
     private static int idCounter = 0;
@@ -258,12 +258,10 @@ public class ArcGISTools {
     }
 
     public static Layer getBaseLayer(ArcGisMapLayer agml, boolean isOnline) throws FileNotFoundException {
-        UserCredentials credentials = null; //Global.Settings.DeviceSettings.getArcGisUserCredentials();
-
         Layer layer = null;
 
         if (isOnline) {
-            layer = new ArcGISTiledMapServiceLayer(agml.getUrl(), credentials);
+            layer = new ArcGISTiledMapServiceLayer(agml.getUrl(), userCredentials);
         } else {
             if (FileUtils.fileExists(agml.getUrl())) {
                 layer = new ArcGISLocalTiledLayer(agml.getUrl());
@@ -294,7 +292,7 @@ public class ArcGISTools {
         deleteMapLayer(context, id, false, null);
     }
 
-    public static void deleteMapLayer(Context context, int id, boolean askDeleteFile, final ISimpleEvent event) {
+    public static void deleteMapLayer(Context context, int id, boolean askDeleteFile, final IListener event) {
         if (mapLayers == null) {
             init();
         }
@@ -554,35 +552,68 @@ public class ArcGISTools {
 
 
 
-    public static boolean hasValidCredentials() {
+    public static boolean hasValidCredentials(Context context) {
+        UserCredentials creds = getCredentials(context);
+
+        return creds != null && creds.getTokenExpiry() > System.currentTimeMillis();
+    }
+
+    public static boolean hasCredentials(Context context) {
+        return getCredentials(context) != null;
+    }
+
+    public static UserCredentials getCredentials(Context context) {
+        String credStr = Global.Settings.DeviceSettings.getArcCredentials();
+
+        if (userCredentials != null)
+            return userCredentials;
+
+        if (!StringEx.isEmpty(credStr)) {
+            try {
+                byte[] data = credStr.getBytes("UTF-8");
+
+                byte[] decoded = Encryption.decodeFile(AndroidUtils.Device.getDeviceID(context), data);
+
+                userCredentials = (UserCredentials) SerializationTools.bytesToObject(decoded);
+                return userCredentials;
+            } catch (Exception e) {
+                TtUtils.TtReport.writeError("ArcGISTools:getCredentials", e.getMessage(), e.getStackTrace());
+            }
+        }
+
+        return null;
+    }
+
+    public static boolean saveCredentials(Context context, UserCredentials credentials) {
+        if (credentials == null)
+            throw new NullPointerException();
+
+        try {
+            byte[] data = SerializationTools.objectToBytes(credentials);
+
+            byte[] encoded = Encryption.encodeFile(AndroidUtils.Device.getDeviceID(context), data);
+
+            userCredentials = credentials;
+
+            Global.Settings.DeviceSettings.setArcCredentials(new String(encoded, "UTF-8"));
+
+            return true;
+        } catch (Exception e) {
+            TtUtils.TtReport.writeError("ArcGISTools:setCredentials", e.getMessage(), e.getStackTrace());
+        }
+
         return false;
-    }
-
-    public static boolean hasCredentials() {
-        return false;
-    }
-
-    public static UserCredentials getCredentials() {
-        UserCredentials credentials = new UserCredentials();
-
-
-        return credentials;
-    }
-
-    public static void updateCredentials(UserCredentials credentials) {
-
-    }
-
-    private static void saveCredentials(UserCredentials credentials) {
-
     }
 
     public static void deleteCredentials() {
-
+        Global.Settings.DeviceSettings.setArcCredentials(StringEx.Empty);
+        userCredentials = null;
     }
 
-    public static boolean areCredentialsOutOfDate() {
-        return false;
+    public static boolean areCredentialsOutOfDate(Context context) {
+        UserCredentials creds = getCredentials(context);
+
+        return creds != null && creds.getTokenExpiry() < System.currentTimeMillis();
     }
 
 

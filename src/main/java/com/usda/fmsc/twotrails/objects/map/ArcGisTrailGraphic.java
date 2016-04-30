@@ -51,13 +51,15 @@ public class ArcGisTrailGraphic implements ITrailGraphic, IMarkerDataGraphic {
         _TrailLayer = new GraphicsLayer();
         _PtsLayer = new GraphicsLayer();
 
-        markerOpts = new SimpleMarkerSymbol(graphicOptions.getTrailColor(), 20, SimpleMarkerSymbol.STYLE.SQUARE);
+        int drawSize = (int)(graphicOptions.getTrailWidth() / 2);
+
+        markerOpts = new SimpleMarkerSymbol(graphicOptions.getPointColor(), drawSize, SimpleMarkerSymbol.STYLE.SQUARE);
 
         for (TtPoint point : points) {
             addPoint(point, meta);
         }
 
-        SimpleLineSymbol outline = new SimpleLineSymbol(graphicOptions.getTrailColor(), graphicOptions.getTrailWidth(), SimpleLineSymbol.STYLE.SOLID);
+        SimpleLineSymbol outline = new SimpleLineSymbol(graphicOptions.getTrailColor(), drawSize, SimpleLineSymbol.STYLE.SOLID);
 
         _TrailLayer.addGraphic(new Graphic(polyline, outline));
 

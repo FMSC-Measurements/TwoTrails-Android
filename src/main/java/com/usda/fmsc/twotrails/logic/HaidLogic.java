@@ -305,7 +305,7 @@ public class HaidLogic {
     private static String getPolygonSummary(TtPolygon polygon, boolean save) throws Exception {
         StringBuilder sb = new StringBuilder();
 
-        //sb.append(String.format("Polygon ID: %s%s", polygon.getName(), Consts.NewLine));
+        //sb.append(String.format("Polygon Name: %s%s", polygon.getName(), Consts.NewLine));
 
         if (!StringEx.isEmpty(polygon.getDescription()))
             sb.append(String.format("Description: %s\r\n\r\n", polygon.getDescription()));

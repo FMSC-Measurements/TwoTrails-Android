@@ -83,7 +83,7 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
     private Graphic locationGraphic;
 
     private boolean mapReady, showPosition, centerOnLoad = false;
-    private int gid;
+    private int gid, padLeft, padTop, padRight, padBottom;
     private SimpleMarkerSymbol sms;
 
     private ArcGisMapLayer startArcOpts, currentGisMapLayer;
@@ -369,8 +369,13 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
         if (markerData != null) {
             if (Geometry.Type.POINT.equals(geometry.getType())) {
                 Point point = (Point)geometry;
+
+                Point sp = mMapView.toScreenPoint(point);
+                sp.setXY(sp.getX() + padLeft - padRight, sp.getY() - padTop + padBottom);
+
+                mMapView.centerAt(mMapView.toMapPoint(sp), true);
+
                 showSelectedMarkerInfo(markerData, point);
-                mMapView.centerAt(point, true);
             }
 
             if (mmListener != null) {
@@ -464,6 +469,11 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
     @Override
     public void setMapPadding(int left, int top, int right, int bottom) {
         compass.setPadding(left, top, right, bottom);
+
+        padLeft = left;
+        padTop = top;
+        padRight = right;
+        padBottom = bottom;
     }
 
     @Override
@@ -524,18 +534,25 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
     }
 
 
-    //TODO update my position drawable
     @Override
     public void nmeaBurstReceived(INmeaBurst nmeaBurst) {
         if (showPosition && nmeaBurst.hasPosition()) {
             Point point = ArcGISTools.latLngToMapSpatial(nmeaBurst.getLatitude(), nmeaBurst.getLongitude(), mMapView);
 
-            if (sms == null) {
-                sms = new SimpleMarkerSymbol(Color.RED, 20, SimpleMarkerSymbol.STYLE.DIAMOND);
+            if (locationLayer != null) {
+                Layer[] layers = mMapView.getLayers();
+
+                if (layers[layers.length - 1].getID() != locationLayer.getID()) {
+                    mMapView.removeLayer(locationLayer);
+                    locationLayer = new GraphicsLayer();
+                    mMapView.addLayer(locationLayer);
+                } else if (locationGraphic != null) {
+                    locationLayer.removeGraphic(gid);
+                }
             }
 
-            if (locationGraphic != null) {
-                locationLayer.removeGraphic(gid);
+            if (sms == null) {
+                sms = new SimpleMarkerSymbol(Color.RED, 20, SimpleMarkerSymbol.STYLE.DIAMOND);
             }
 
             locationGraphic = new Graphic(point, sms);
