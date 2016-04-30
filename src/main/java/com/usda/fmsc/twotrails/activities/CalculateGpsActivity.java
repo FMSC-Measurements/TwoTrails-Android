@@ -14,7 +14,7 @@ import android.widget.TextView;
 
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.listeners.SimpleTextWatcher;
-import com.usda.fmsc.twotrails.activities.custom.CustomToolbarActivity;
+import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
@@ -76,7 +76,7 @@ public class CalculateGpsActivity extends CustomToolbarActivity {
 
             try {
                 _Point = (GpsPoint)intent.getSerializableExtra(Consts.Codes.Data.POINT_DATA);
-                _Metadata = (TtMetadata)intent.getSerializableExtra(Consts.Codes.Data.METADATA_DATA);
+                _Metadata = intent.getParcelableExtra(Consts.Codes.Data.METADATA_DATA);
                 _Zone = _Metadata.getZone();
 
                 _Bursts = TtNmeaBurst.bytesToBursts(intent.getByteArrayExtra(Consts.Codes.Data.ADDITIVE_NMEA_DATA));

@@ -18,7 +18,7 @@ import android.support.v4.app.ActivityCompat;
 import com.google.android.gms.maps.LocationSource;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.geospatial.nmea.NmeaIDs;
-import com.usda.fmsc.geospatial.nmea.sentences.NmeaBurstEx;
+import com.usda.fmsc.geospatial.nmea.NmeaBurstEx;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.devices.TtBluetoothManager;
 import com.usda.fmsc.twotrails.Global;

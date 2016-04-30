@@ -83,14 +83,14 @@
         android:visibility="gone"
         android:onClick="btnCancelClick"/>
 
-    <!--TODO Take5 progress bar update-->
     <RelativeLayout
         android:id="@+id/progressLayout"
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:gravity="center"
         android:layout_gravity="center"
-        android:visibility="gone">
+        android:visibility="gone"
+        android:background="@drawable/t5_progress_background">
 
         <!--<ProgressBar-->
             <!--android:id="@+id/progress"-->

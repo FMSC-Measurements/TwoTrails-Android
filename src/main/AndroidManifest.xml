@@ -25,6 +25,11 @@
     <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES"/>
     <uses-permission android:name="com.usda.fmsc.twotrails.permission.MAPS_RECEIVE"/>
 
+    <!-- To auto-complete the email text field in the login form with the user's emails -->
+    <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
+    <uses-permission android:name="android.permission.READ_PROFILE"/>
+    <uses-permission android:name="android.permission.READ_CONTACTS"/>
+
     <application
         android:name="android.support.multidex.MultiDexApplication"
         android:allowBackup="true"
@@ -45,7 +50,6 @@
             android:value="@string/maps_api_key"/>
 
         <uses-library android:name="com.google.android.maps"/>
-
 
         <!-- Samsung Multi Window Support -->
         <uses-library
@@ -68,7 +72,6 @@
             android:name=".activities.MainActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -116,7 +119,6 @@
                 <data android:pathPattern="/.*\\.tt"/>
             </intent-filter>
         </activity>
-
         <activity
             android:name=".activities.SettingsActivity"
             android:label="@string/title_activity_settings">
@@ -126,81 +128,64 @@
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>
-
         <activity
             android:name=".activities.PreferenceActivity"
             android:label="@string/title_activity_settings"/>
-
         <activity
             android:name=".activities.PointsActivity"
             android:label="@string/title_activity_points"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan"/>
-
         <activity
             android:name=".activities.AcquireGpsActivity"
             android:label="@string/title_activity_acquire_gps"
             android:screenOrientation="portrait"/>
-
         <activity
             android:name=".activities.CalculateGpsActivity"
             android:label="@string/title_activity_calculate_gps"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan"/>
-
         <activity
             android:name=".activities.Take5Activity"
             android:label="@string/title_activity_take5"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan"/>
-
         <activity
             android:name=".activities.WalkActivity"
             android:label="@string/title_activity_walk"
             android:screenOrientation="portrait"/>
-
         <activity
             android:name=".activities.PolygonsActivity"
             android:label="@string/title_activity_polygons"
             android:screenOrientation="portrait"/>
-
         <activity
             android:name=".activities.MetadataActivity"
             android:label="@string/title_activity_metadata"
             android:screenOrientation="portrait"/>
-
         <activity
             android:name=".activities.ProjectActivity"
             android:label="@string/title_activity_project"/>
-
         <activity
             android:name=".activities.TableEditActivity"
             android:label="@string/title_activity_table_edit"/>
-
         <activity
             android:name=".activities.MapActivity"
             android:label="@string/title_activity_map"/>
-
         <activity
             android:name=".activities.HaidActivity"
             android:label="@string/title_activity_haid"/>
-
         <activity
             android:name=".activities.PlotGridActivity"
             android:label="@string/title_activity_plot_grid"/>
-
         <activity
             android:name=".activities.GpsLoggerActivity"
             android:label="@string/title_activity_gps_logger"/>
-
         <activity
             android:name=".activities.ExportActivity"
             android:label="@string/title_activity_export"/>
-
         <activity
             android:name=".activities.ImportActivity"
             android:label="@string/title_activity_import"/>
-
         <activity
             android:name="com.nononsenseapps.filepicker.FilePickerActivity"
             android:label="@string/app_name"
@@ -211,21 +196,21 @@
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>
-
         <activity android:name=".activities.TestActivity"/>
-
         <activity
             android:name=".activities.MapManagerActivity"
             android:label="@string/title_activity_offline_map_manager"/>
-
         <activity
             android:name=".activities.GetMapExtentsActivity"
-            android:label="@string/title_activity_get_map_extents" />
-
-        <activity android:name=".activities.custom.AcquireGpsMapActivity"/>
-
-        <activity android:name=".activities.MapDetailsActivity"
-                  android:label="@string/title_activity_edit_arc_map"/>
+            android:label="@string/title_activity_get_map_extents"/>
+        <activity android:name=".activities.base.AcquireGpsMapActivity"/>
+        <activity
+            android:name=".activities.MapDetailsActivity"
+            android:label="@string/title_activity_edit_arc_map"/>
+        <activity
+            android:name=".ArcGisLoginActivity"
+            android:label="@string/title_activity_arc_gis_login">
+        </activity>
     </application>
 
 </manifest>

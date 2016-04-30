@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.view.ViewCompat;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -19,7 +18,7 @@ import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.animation.ViewAnimator;
 import com.usda.fmsc.android.widget.SpreadsheetView;
 import com.usda.fmsc.utilities.StringEx;
-import com.usda.fmsc.twotrails.activities.custom.CustomToolbarActivity;
+import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
 

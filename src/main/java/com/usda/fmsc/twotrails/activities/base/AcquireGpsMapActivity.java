@@ -1,4 +1,4 @@
-package com.usda.fmsc.twotrails.activities.custom;
+package com.usda.fmsc.twotrails.activities.base;
 
 import android.animation.Animator;
 import android.app.Activity;
@@ -27,6 +27,7 @@ import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.objects.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
+import com.usda.fmsc.twotrails.objects.map.PolygonGraphicOptions;
 import com.usda.fmsc.twotrails.objects.map.TrailGraphicManager;
 import com.usda.fmsc.twotrails.objects.map.TrailGraphicOptions;
 import com.usda.fmsc.twotrails.ui.GpsStatusSatView;
@@ -75,7 +76,7 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
         Intent intent = getIntent();
 
         if (intent != null) {
-            polygon = (TtPolygon) intent.getSerializableExtra(Consts.Codes.Data.POLYGON_DATA);
+            polygon = intent.getParcelableExtra(Consts.Codes.Data.POLYGON_DATA);
 
             if (polygon == null) {
                 setResult(Consts.Codes.Results.NO_POLYGON_DATA);
@@ -87,10 +88,13 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
 
             ArrayList<TtPoint> points = Global.getDAL().getPointsInPolygon(polygon.getCN());
 
+            PolygonGraphicOptions pgo = Global.MapSettings.getPolyGraphicOptions(polygon.getCN());
+
             trailGraphicManager = new TrailGraphicManager(polygon, points, getMetadata(),
                     new TrailGraphicOptions(
-                            AndroidUtils.UI.getColor(this, R.color.indigo_800),
-                            32
+                            pgo.getUnAdjNavColor(),
+                            pgo.getAdjPtsColor(),
+                            Global.Settings.DeviceSettings.getMapUnAdjLineWidth()
                     )
             );
         } else {
@@ -269,7 +273,7 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
                     }
                 }
 
-                if (burst.isValid(NmeaIDs.SentenceID.RMC)) {
+                if (burst.isValid(NmeaIDs.SentenceID.RMC) && burst.getMagVarDir() != null) {
                     tvDec.setText(String.format("%.2f %s", burst.getMagVar(), burst.getMagVarDir().toStringAbv()));
                 } else {
                     tvDec.setText(nVal);
@@ -489,5 +493,9 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
         addTrailGraphic(trailGraphicManager);
 
         super.onCreateGraphicManagers();
+    }
+
+    protected TtPolygon getPolygon() {
+        return polygon;
     }
 }

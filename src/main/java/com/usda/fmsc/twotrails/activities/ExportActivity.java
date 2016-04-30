@@ -1,21 +1,15 @@
 package com.usda.fmsc.twotrails.activities;
 
-import android.content.ClipData;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.ActionBar;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
 
 //import com.devpaul.filepickerlibrary.FilePickerActivity;
@@ -25,14 +19,12 @@ import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.dialogs.DontAskAgainDialog;
 import com.usda.fmsc.android.widget.FABProgressCircleEx;
 import com.usda.fmsc.android.widget.MultiStateTouchCheckBox;
-import com.usda.fmsc.twotrails.activities.custom.CustomToolbarActivity;
+import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.utilities.Export;
-import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.io.File;
-import java.util.ArrayList;
 
 public class ExportActivity extends CustomToolbarActivity {
 
@@ -309,7 +301,7 @@ public class ExportActivity extends CustomToolbarActivity {
 
                 exportTask.execute(
                         new Export.ExportTask.ExportParams(
-                                Global.DAL,
+                                Global.getDAL(),
                                 directory,
                                 chkPoints.isChecked(),
                                 chkPolys.isChecked(),

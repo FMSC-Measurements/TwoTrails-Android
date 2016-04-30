@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.ActionBar;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -18,7 +17,7 @@ import android.widget.Toast;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.utilities.PostDelayHandler;
 import com.usda.fmsc.android.widget.FABProgressCircleEx;
-import com.usda.fmsc.twotrails.activities.custom.TtAjusterCustomToolbarActivity;
+import com.usda.fmsc.twotrails.activities.base.TtAjusterCustomToolbarActivity;
 import com.usda.fmsc.twotrails.fragments.imprt.BaseImportFragment;
 import com.usda.fmsc.twotrails.fragments.imprt.ImportGpxFragment;
 import com.usda.fmsc.twotrails.fragments.imprt.ImportTextFragment;
@@ -59,7 +58,7 @@ public class ImportActivity extends TtAjusterCustomToolbarActivity {
                             .setAction("View Map", new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
-                                    PolygonAdjuster.adjust(Global.DAL, activity);
+                                    PolygonAdjuster.adjust(Global.getDAL(), activity);
                                 }
                             })
                             .setActionTextColor(AndroidUtils.UI.getColor(getBaseContext(), R.color.primaryLighter));
@@ -229,7 +228,7 @@ public class ImportActivity extends TtAjusterCustomToolbarActivity {
         super.onDestroy();
 
         if (adjust) {
-            PolygonAdjuster.adjust(Global.DAL, Global.getMainActivity(), true);
+            PolygonAdjuster.adjust(Global.getDAL(), Global.getMainActivity(), true);
         }
     }
 
@@ -253,7 +252,7 @@ public class ImportActivity extends TtAjusterCustomToolbarActivity {
 
     public void btnImport(View view) {
         if (fragment != null) {
-            fragment.importFile(Global.DAL);
+            fragment.importFile(Global.getDAL());
         }
     }
 

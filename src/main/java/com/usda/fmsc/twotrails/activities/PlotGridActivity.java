@@ -3,7 +3,6 @@ package com.usda.fmsc.twotrails.activities;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,7 +16,7 @@ import android.widget.Toast;
 
 import com.usda.fmsc.android.dialogs.DontAskAgainDialog;
 import com.usda.fmsc.android.dialogs.InputDialog;
-import com.usda.fmsc.twotrails.activities.custom.CustomToolbarActivity;
+import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.adapters.MetadataDetailsSpinnerAdapter;
 import com.usda.fmsc.twotrails.adapters.PointDetailsSpinnerAdapter;
 import com.usda.fmsc.twotrails.Global;
@@ -272,7 +271,7 @@ public class PlotGridActivity extends CustomToolbarActivity {
         super.onDestroy();
 
         if (adjust) {
-            PolygonAdjuster.adjust(Global.DAL, Global.getMainActivity(), true);
+            PolygonAdjuster.adjust(Global.getDAL(), Global.getMainActivity(), true);
         }
     }
 
@@ -366,7 +365,7 @@ public class PlotGridActivity extends CustomToolbarActivity {
             params.SampleValue = ParseEx.parseInteger(txtSubSample.getText().toString());
         }
 
-        generator = new PlotGenerator(Global.DAL, metadata, plotGenListener);
+        generator = new PlotGenerator(Global.getDAL(), metadata, plotGenListener);
         generator.execute(params);
         layControls.setEnabled(false);
         progressBar.setVisibility(View.VISIBLE);

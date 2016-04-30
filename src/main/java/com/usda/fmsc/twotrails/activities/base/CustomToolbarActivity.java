@@ -1,4 +1,4 @@
-package com.usda.fmsc.twotrails.activities.custom;
+package com.usda.fmsc.twotrails.activities.base;
 
 import android.os.Build;
 import android.os.Bundle;

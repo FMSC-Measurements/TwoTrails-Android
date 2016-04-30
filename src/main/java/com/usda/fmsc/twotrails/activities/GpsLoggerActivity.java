@@ -2,7 +2,6 @@ package com.usda.fmsc.twotrails.activities;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -14,17 +13,15 @@ import android.widget.Button;
 import android.widget.ListView;
 
 import com.usda.fmsc.geospatial.nmea.INmeaBurst;
-import com.usda.fmsc.twotrails.activities.custom.CustomToolbarActivity;
+import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import org.joda.time.DateTime;
 
 import java.util.ArrayList;
 
-import com.usda.fmsc.geospatial.nmea.NmeaBurst;
 import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
 
 public class GpsLoggerActivity extends CustomToolbarActivity implements GpsService.Listener {

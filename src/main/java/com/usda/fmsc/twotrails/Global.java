@@ -15,6 +15,7 @@ import android.support.annotation.ColorInt;
 import android.support.v4.app.NotificationCompat;
 
 import com.esri.android.runtime.ArcGISRuntime;
+import com.esri.core.io.UserCredentials;
 import com.usda.fmsc.android.AndroidUtils;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -49,8 +50,6 @@ public class Global {
 
     private static Context _ApplicationContext;
     private static MainActivity _MainActivity;
-
-    //private static String _LogFilePath;
 
     private static TtMetadata _DefaultMeta;
     private static TtGroup _MainGroup;
@@ -115,7 +114,8 @@ public class Global {
 
         TtUtils.TtReport.writeEvent("TwoTrails Started");
 
-        ArcGISRuntime.setClientId(_ApplicationContext.getString(R.string.arcgis_client_id));
+        //TODO set arc license for release
+        //ArcGISRuntime.setClientId(_ApplicationContext.getString(R.string.arcgis_client_id));
 
         initUI();
     }
@@ -140,16 +140,21 @@ public class Global {
 
     public static void setDAL(DataAccessLayer dal) {
         DAL = dal;
-        MapSettings.reset();
+
+        if (dal != null) {
+            MapSettings.reset();
+        }
     }
 
     public static TtMetadata getDefaultMeta() {
         return _DefaultMeta;
     }
 
+
     public static TtGroup getMainGroup() {
         return _MainGroup;
     }
+
 
     public static String getTwoTrailsVersion() {
         try {
@@ -163,13 +168,16 @@ public class Global {
         return "ANDROID: ???";
     }
 
+
     public static TtBluetoothManager getBluetoothManager() {
         return bluetoothManager;
     }
 
+
     public static GpsService.GpsBinder getGpsBinder() {
         return gpsBinder;
     }
+
 
     public static MainActivity getMainActivity() {
         return _MainActivity;
@@ -178,8 +186,6 @@ public class Global {
     public static Context getApplicationContext() {
         return _ApplicationContext;
     }
-
-
 
 
     //region Files
@@ -529,7 +535,6 @@ public class Global {
             public static final String LAST_OPENED_PROJECT = "AutoOpenLastProject";
 
             public static final String MAP_TRACKING_OPTION = "MapTrackingOption";
-            //public static final String MAP_ZOOM_BUTTONS = "MapZoomButtons";
             public static final String MAP_COMPASS_ENABLED = "MapCompassEnabled";
             public static final String MAP_MYPOS_BUTTON = "MapMyPosButton";
             public static final String MAP_MIN_DIST = "MapMinDist";
@@ -540,6 +545,10 @@ public class Global {
             public static final String MAP_ID = "MapTerrainType";
             public static final String ARC_GIS_MAPS = "ArcGISMaps";
             public static final String ARC_GIS_MAP_ID_COUNTER = "ArcGISMapIdCounter";
+            public static final String MAP_ADJ_LINE_WIDTH = "MapAdjLineWidth";
+            public static final String MAP_UNADJ_LINE_WIDTH = "MapUnAdjLineWidth";
+
+            public static final String ARC_CREDENTIALS = "ArcCredentials";
             //endregion
 
             //region Default Values
@@ -588,7 +597,6 @@ public class Global {
             public static final boolean DEFAULT_AUTO_OVERWRITE_EXPORT_ASK = true;
 
             public static final Units.MapTracking DEFAULT_MAP_TRACKING_OPTION = Units.MapTracking.POLY_BOUNDS;
-            //public static final boolean DEFAULT_MAP_ZOOM_BUTTONS = false;
             public static final boolean DEFAULT_MAP_COMPASS_ENABLED = true;
             public static final boolean DEFAULT_MAP_MYPOS_BUTTON = true;
             public static final double DEFAULT_MAP_MIN_DIST = 50;
@@ -599,7 +607,10 @@ public class Global {
             public static final int DEFAULT_MAP_ID = 1;
             public static final String DEFAULT_ARC_GIS_MAPS = StringEx.Empty;
             public static final int DEFAULT_ARC_GIS_MAP_ID_COUNTER = 0;
+            public static final int DEFAULT_MAP_ADJ_LINE_WIDTH = 8;
+            public static final int DEFAULT_MAP_UNADJ_LINE_WIDTH = 32;
             //endregion
+
 
             public static void init() {
                 if (!getBool(SETTINGS_CREATED, false)) {
@@ -659,7 +670,6 @@ public class Global {
                 editor.putInt(MAP_TRACKING_OPTION, DEFAULT_MAP_TRACKING_OPTION.getValue());
                 editor.putBoolean(MAP_MYPOS_BUTTON, DEFAULT_MAP_MYPOS_BUTTON);
                 editor.putBoolean(MAP_COMPASS_ENABLED, DEFAULT_MAP_COMPASS_ENABLED);
-                //editor.putBoolean(MAP_ZOOM_BUTTONS, DEFAULT_MAP_ZOOM_BUTTONS);
                 editor.putBoolean(MAP_SHOW_MY_POS, DEFAULT_MAP_SHOW_MY_POS);
                 editor.putBoolean(MAP_DISPLAY_GPS_LOCATION, DEFAULT_MAP_DISPLAY_GPS_LOCATION);
                 editor.putBoolean(MAP_USE_UTM_NAV, DEFAULT_MAP_USE_UTM_NAV);
@@ -667,11 +677,16 @@ public class Global {
                 editor.putInt(MAP_ID, DEFAULT_MAP_ID);
                 editor.putString(ARC_GIS_MAPS, DEFAULT_ARC_GIS_MAPS);
                 editor.putInt(ARC_GIS_MAP_ID_COUNTER, DEFAULT_ARC_GIS_MAP_ID_COUNTER);
+                editor.putInt(MAP_ADJ_LINE_WIDTH, DEFAULT_MAP_ADJ_LINE_WIDTH);
+                editor.putInt(MAP_UNADJ_LINE_WIDTH, DEFAULT_MAP_UNADJ_LINE_WIDTH);
+
+                editor.putString(ARC_CREDENTIALS, StringEx.Empty);
 
                 editor.putBoolean(SETTINGS_CREATED, true);
 
                 editor.commit();
             }
+
 
             //region GPS Settings
             public static boolean getGpsExternal() {
@@ -681,24 +696,6 @@ public class Global {
             public static void setGpsExternal(boolean value) {
                 setBool(GPS_EXTERNAL, value);
             }
-
-            /*
-            public static String getGpsPort() {
-                return getString(GPS_PORT);
-            }
-
-            public static void setGpsPort(String value) {
-                setString(GPS_PORT, value);
-            }
-
-            public static int getGpsBaud() {
-                return getInt(GPS_BAUD);
-            }
-
-            public static void setGpsBaud(int value) {
-                setInt(GPS_BAUD, value);
-            }
-            */
 
 
             public static String getGpsDeviceID() {
@@ -1010,6 +1007,7 @@ public class Global {
                 setBool(MAP_MYPOS_BUTTON, value);
             }
 
+
             public static boolean getMapCompassEnabled() {
                 return getBool(MAP_COMPASS_ENABLED, DEFAULT_MAP_COMPASS_ENABLED);
             }
@@ -1055,6 +1053,7 @@ public class Global {
             }
 
 
+
             public static Units.MapType getMapType() {
                 return Units.MapType.parse(getInt(MAP_TYPE, DEFAULT_MAP_TYPE));
             }
@@ -1074,6 +1073,24 @@ public class Global {
 
 
 
+            public static int getMapAdjLineWidth() {
+                return getInt(MAP_ADJ_LINE_WIDTH, DEFAULT_MAP_ADJ_LINE_WIDTH);
+            }
+
+            public static void setMapAdjLineWidth(int value) {
+                setInt(MAP_ADJ_LINE_WIDTH, value);
+            }
+
+
+            public static int getMapUnAdjLineWidth() {
+                return getInt(MAP_UNADJ_LINE_WIDTH, DEFAULT_MAP_UNADJ_LINE_WIDTH);
+            }
+
+            public static void setMapUnAdjLineWidth(int value) {
+                setInt(MAP_UNADJ_LINE_WIDTH, value);
+            }
+
+
             //region ArcGIS
 
             public static int getArcGisIdCounter() {
@@ -1083,6 +1100,7 @@ public class Global {
             public static void setArcGisMapIdCounter(int value) {
                 setInt(ARC_GIS_MAP_ID_COUNTER, value);
             }
+
 
             public static ArrayList<ArcGisMapLayer> getArcGisMayLayers() {
                 if(getPrefs() == null)
@@ -1104,7 +1122,6 @@ public class Global {
                 return getEditor().putString(ARC_GIS_MAPS, new Gson().toJson(recentProjects)).commit();
             }
             //endregion
-
 
             //endregion
 
@@ -1230,6 +1247,16 @@ public class Global {
 
             public static void setAutoOpenLastProject(boolean value) {
                 setBool(AUTO_OPEN_LAST_PROJECT, value);
+            }
+
+
+
+            public static String getArcCredentials() {
+                return getString(ARC_CREDENTIALS, StringEx.Empty);
+            }
+
+            public static void setArcCredentials(String value) {
+                setString(ARC_CREDENTIALS, value);
             }
             //endregion
         }
@@ -1524,7 +1551,6 @@ public class Global {
     }
 
 
-
     public static class MapSettings {
         private static HashMap<String, PolygonDrawOptions> _PolyDrawOptions = new HashMap<>();
         private static PolygonDrawOptions _MasterPolyDrawOptions = new PolygonDrawOptions();
@@ -1533,9 +1559,14 @@ public class Global {
         private static PolygonGraphicOptions _MasterPolyGraphicOptions;
 
         public static void reset() {
+            for (PolygonGraphicOptions pgo : _PolyGraphicOptions.values()) {
+                pgo.removeListener(updateListener);
+            }
+
             _PolyDrawOptions.clear();
 
             _MasterPolyGraphicOptions = new PolygonGraphicOptions(
+                    Consts.EmptyGuid,
                     AndroidUtils.UI.getColor(getApplicationContext(), R.color.map_adj_bnd),
                     AndroidUtils.UI.getColor(getApplicationContext(), R.color.map_unadj_bnd),
                     AndroidUtils.UI.getColor(getApplicationContext(), R.color.map_adj_nav),
@@ -1543,23 +1574,17 @@ public class Global {
                     AndroidUtils.UI.getColor(getApplicationContext(), R.color.map_adj_pts),
                     AndroidUtils.UI.getColor(getApplicationContext(), R.color.map_unadj_pts),
                     AndroidUtils.UI.getColor(getApplicationContext(), R.color.map_way_pts),
-                    8,
-                    32
+                    Settings.DeviceSettings.getMapAdjLineWidth(),
+                    Settings.DeviceSettings.getMapUnAdjLineWidth()
             );
 
-
-            //TODO getGraphicOptions
-            //_PolyGraphicOptions = getDAL().getGraphicOptions();
+            _PolyGraphicOptions = getDAL().getPolygonGraphicOptionsMap();
 
             for (PolygonGraphicOptions pgo : _PolyGraphicOptions.values()) {
-                pgo.addListener(new PolygonGraphicOptions.Listener() {
-                    @Override
-                    public void onOptionChanged(PolygonGraphicOptions pgo, GraphicCode code, @ColorInt int value) {
-                        //UPDATE
-                    }
-                });
+                pgo.addListener(updateListener);
             }
         }
+
 
         public static PolygonDrawOptions getMasterPolyDrawOptions() {
             return _MasterPolyDrawOptions;
@@ -1575,6 +1600,7 @@ public class Global {
             }
         }
 
+
         public static PolygonGraphicOptions getMasterPolyGraphicOptions() {
             return _MasterPolyGraphicOptions;
         }
@@ -1583,23 +1609,26 @@ public class Global {
             if (_PolyGraphicOptions.containsKey(cn)) {
                 return _PolyGraphicOptions.get(cn);
             } else {
-                PolygonGraphicOptions pgo = new PolygonGraphicOptions(_MasterPolyGraphicOptions);
+                PolygonGraphicOptions pgo = new PolygonGraphicOptions(cn, _MasterPolyGraphicOptions);
                 _PolyGraphicOptions.put(cn, pgo);
 
-                //TODO save PolygonGraphicOptions
-//                if (getDAL() != null) {
-//                    //ADD
-//                }
+                if (getDAL() != null) {
+                    getDAL().insertPolygonGraphicOption(pgo);
+                }
 
-                pgo.addListener(new PolygonGraphicOptions.Listener() {
-                    @Override
-                    public void onOptionChanged(PolygonGraphicOptions pgo, GraphicCode code, @ColorInt int value) {
-                        //UPDATE
-                    }
-                });
+                pgo.addListener(updateListener);
 
                 return pgo;
             }
         }
+
+        static PolygonGraphicOptions.Listener updateListener = new PolygonGraphicOptions.Listener() {
+            @Override
+            public void onOptionChanged(PolygonGraphicOptions pgo, GraphicCode code, @ColorInt int value) {
+                if (getDAL() != null && _PolyGraphicOptions.containsKey(pgo.getCN())) {
+                    getDAL().updatePolygonGraphicOption(pgo);
+                }
+            }
+        };
     }
 }

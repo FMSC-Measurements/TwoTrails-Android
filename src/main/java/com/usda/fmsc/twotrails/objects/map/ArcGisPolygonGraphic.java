@@ -75,8 +75,17 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
         Polyline adjNavPLO = null;
         Polyline unadjNavPLO = null;
 
-        SimpleMarkerSymbol adjMkOpts = new SimpleMarkerSymbol(graphicOptions.getAdjBndColor(), 20, SimpleMarkerSymbol.STYLE.DIAMOND);
-        SimpleMarkerSymbol unAdjMkOpts = new SimpleMarkerSymbol(graphicOptions.getUnAdjBndColor(), 20, SimpleMarkerSymbol.STYLE.SQUARE);
+        SimpleMarkerSymbol adjMkOpts = new SimpleMarkerSymbol(
+                graphicOptions.getAdjBndColor(),
+                (int)graphicOptions.getUnAdjWidth(),
+                SimpleMarkerSymbol.STYLE.DIAMOND
+        );
+
+        SimpleMarkerSymbol unAdjMkOpts = new SimpleMarkerSymbol(
+                graphicOptions.getUnAdjBndColor(),
+                (int)graphicOptions.getUnAdjWidth(),
+                SimpleMarkerSymbol.STYLE.SQUARE
+        );
 
         GeoPosition adjPos, unAdjPos;
         Point adjLL, unadjLL;

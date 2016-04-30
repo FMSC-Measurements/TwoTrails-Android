@@ -93,7 +93,8 @@ public class Consts {
             public static final int PLOT_GRID = 1016;
             public static final int GET_MAP_EXTENTS = 1017;
             public static final int MAP_MANAGER = 1018;
-            public static final int MAP_DETAILS = 1018;
+            public static final int MAP_DETAILS = 1019;
+            public static final int ARC_GIS_LOGIN = 1020;
         }
 
         public static class Dialogs {

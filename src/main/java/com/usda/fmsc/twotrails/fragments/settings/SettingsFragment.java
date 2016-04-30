@@ -57,6 +57,8 @@ public class SettingsFragment extends PreferenceFragment {
 
     private String moveToPage;
 
+    private int stringRecvCount = 0;
+
 
     public static SettingsFragment newInstance(String currPageKey) {
         SettingsFragment fragment = new SettingsFragment();
@@ -241,6 +243,8 @@ public class SettingsFragment extends PreferenceFragment {
 
                 prefGpsCheck.setSummary(R.string.ds_gps_not_connected);
 
+                stringRecvCount = 0;
+
                 new Thread(new Runnable() {
 
                     final Activity activity = getActivity();
@@ -276,49 +280,51 @@ public class SettingsFragment extends PreferenceFragment {
 
                                     Global.Settings.DeviceSettings.setGpsConfigured(true);
 
-                                    activity.runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            pd.setMessage(getString(R.string.ds_gps_connected));
+                                    if (1 > stringRecvCount++) {
+                                        activity.runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                pd.setMessage(getString(R.string.ds_gps_connected));
 
-                                            if (Global.Settings.DeviceSettings.isGpsAlwaysOn()) {
-                                                prefGpsCheck.setSummary(R.string.ds_gps_connected);
-                                            } else {
-                                                prefGpsCheck.setSummary(R.string.ds_dev_configured);
-                                                binder.stopGps();
+                                                if (Global.Settings.DeviceSettings.isGpsAlwaysOn()) {
+                                                    prefGpsCheck.setSummary(R.string.ds_gps_connected);
+                                                } else {
+                                                    prefGpsCheck.setSummary(R.string.ds_dev_configured);
+                                                    binder.stopGps();
+                                                }
+
+                                                if (Global.Settings.DeviceSettings.getAutoSetGpsNameToMetaAsk()) {
+                                                    DontAskAgainDialog dialog = new DontAskAgainDialog(getActivity(),
+                                                            Global.Settings.DeviceSettings.AUTO_SET_GPS_NAME_TO_META_ASK,
+                                                            Global.Settings.DeviceSettings.AUTO_SET_GPS_NAME_TO_META,
+                                                            Global.Settings.PreferenceHelper.getPrefs());
+
+                                                    dialog.setMessage("Do you want to update metadata with the current GPS receiver?");
+
+                                                    dialog.setPositiveButton("Default", setMetaListener, 1);
+
+                                                    if (Global.getDAL() != null)
+                                                        dialog.setNegativeButton("All", setMetaListener, 2);
+
+                                                    dialog.setNeutralButton("None", null, 0);
+
+                                                    dialog.show();
+                                                } else {
+                                                    setMetaListener.onClick(null, 0, Global.Settings.DeviceSettings.getAutoSetGpsNameToMeta());
+                                                }
                                             }
+                                        });
 
-                                            if (Global.Settings.DeviceSettings.getAutoSetGpsNameToMetaAsk()) {
-                                                DontAskAgainDialog dialog = new DontAskAgainDialog(getActivity(),
-                                                        Global.Settings.DeviceSettings.AUTO_SET_GPS_NAME_TO_META_ASK,
-                                                        Global.Settings.DeviceSettings.AUTO_SET_GPS_NAME_TO_META,
-                                                        Global.Settings.PreferenceHelper.getPrefs());
 
-                                                dialog.setMessage("Do you want to update metadata with the current GPS receiver?");
+                                        Thread.sleep(1000);
 
-                                                dialog.setPositiveButton("Default", setMetaListener, 1);
-
-                                                if (Global.getDAL() != null)
-                                                    dialog.setNegativeButton("All", setMetaListener, 2);
-
-                                                dialog.setNeutralButton("None", null, 0);
-
-                                                dialog.show();
-                                            } else {
-                                                setMetaListener.onClick(null, 0, Global.Settings.DeviceSettings.getAutoSetGpsNameToMeta());
+                                        activity.runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                pd.hide();
                                             }
-                                        }
-                                    });
-
-
-                                    Thread.sleep(1000);
-
-                                    activity.runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            pd.hide();
-                                        }
-                                    });
+                                        });
+                                    }
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
                                 }

@@ -26,7 +26,7 @@ import com.usda.fmsc.android.widget.drawables.AnimationDrawableEx;
 import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.Global;
-import com.usda.fmsc.twotrails.activities.custom.AcquireGpsMapActivity;
+import com.usda.fmsc.twotrails.activities.base.AcquireGpsMapActivity;
 import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.logic.PointNamer;
@@ -89,8 +89,8 @@ public class WalkActivity extends AcquireGpsMapActivity {
                         onBnd = _PrevPoint.isOnBnd();
                     }
 
-                    _Metadata = (TtMetadata)intent.getSerializableExtra(Consts.Codes.Data.METADATA_DATA);
-                    _Polygon = (TtPolygon)intent.getSerializableExtra(Consts.Codes.Data.POLYGON_DATA);
+                    _Metadata = intent.getParcelableExtra(Consts.Codes.Data.METADATA_DATA);
+                    _Polygon = getPolygon();
 
                     if (_Metadata == null) {
                         cancelResult = Consts.Codes.Results.NO_METDATA_DATA;

@@ -1,4 +1,4 @@
-package com.usda.fmsc.twotrails.activities.custom;
+package com.usda.fmsc.twotrails.activities.base;
 
 import android.app.Activity;
 import android.content.DialogInterface;
@@ -68,7 +68,6 @@ import com.usda.fmsc.twotrails.objects.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.objects.map.PolygonDrawOptions;
 import com.usda.fmsc.twotrails.objects.map.PolygonGraphicManager;
-import com.usda.fmsc.twotrails.objects.map.PolygonGraphicOptions;
 import com.usda.fmsc.twotrails.objects.map.TrailGraphicManager;
 import com.usda.fmsc.twotrails.ui.UnadjustedDrawable;
 import com.usda.fmsc.twotrails.utilities.AppUnits;
