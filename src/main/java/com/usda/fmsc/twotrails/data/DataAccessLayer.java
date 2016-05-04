@@ -456,7 +456,7 @@ public class DataAccessLayer {
                 TwoTrailsSchema.PointSchema.MetadataCN, metaCN));
     }
 
-    public ArrayList<TtPoint> getGpsPointsWithMeta(String metaCN) {
+    public ArrayList<TtPoint> getGpsTypePointsWithMeta(String metaCN) {
         return getPoints(String.format("%s = '%s' and %s = '%s' or %s = '%s' or %s = '%s' or %s = '%s'",
                 TwoTrailsSchema.PointSchema.MetadataCN, metaCN,
                 TwoTrailsSchema.PointSchema.Operation, Units.OpType.GPS.toString(),
@@ -2441,6 +2441,10 @@ public class DataAccessLayer {
             cursor.close();
         }
         return count;
+    }
+
+    public boolean hasPolygons() {
+        return getItemCount(TwoTrailsSchema.PolygonSchema.TableName) > 0;
     }
 
     public boolean duplicate(String duplicateFileName) {

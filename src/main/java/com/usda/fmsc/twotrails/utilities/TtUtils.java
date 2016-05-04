@@ -928,10 +928,55 @@ public class TtUtils {
 
     public static Point RotatePoint(int x, int y, double angle, int rX, int rY) {
         return new Point(
-                (int)(java.lang.Math.cos(angle) * (x - rX) - java.lang.Math.sin(angle) * (y - rY) + rX),
+                (int) (java.lang.Math.cos(angle) * (x - rX) - java.lang.Math.sin(angle) * (y - rY) + rX),
                 (int) (java.lang.Math.sin(angle) * (x - rX) + java.lang.Math.cos(angle) * (y - rY) + rY));
     }
 
+
+    public static ArrayList<PointD> generateStaticPolyPoints(List<TtPoint> points, HashMap<String, TtMetadata> metadata, int zone, int canvasSize) {
+        ArrayList<PointD> pts = new ArrayList<>();
+
+        double minX = Double.POSITIVE_INFINITY, maxX = Double.NEGATIVE_INFINITY,
+                minY = Double.POSITIVE_INFINITY, maxY = Double.NEGATIVE_INFINITY;
+
+        for (TtPoint point : points) {
+            UTMCoords coords = forcePointZone(point, zone, metadata.get(point.getMetadataCN()).getZone(), true);
+            PointD pt = new PointD(coords.getX() + 500000, coords.getY() + 10000000);
+            
+            if (pt.X > maxX) {
+                maxX = pt.X;
+            }
+
+            if (pt.X < minX) {
+                minX = pt.X;
+            }
+
+            if (pt.Y > maxY) {
+                maxY = pt.Y;
+            }
+
+            if (pt.Y < minY) {
+                minY = pt.Y;
+            }
+            
+            pts.add(pt);
+        }
+
+        double width = maxX - minX;
+        double height = maxY - minY;
+
+        double adjustment = canvasSize / (width > height ? width : height);
+
+        double xOffset = (height > width ? (canvasSize - width * adjustment) / 2 : 0);
+        double yOffset = (width > height ? (canvasSize - height * adjustment) / 2 : 0);
+
+        for (PointD pt : pts) {
+            pt.X = (pt.X - minX) * adjustment + xOffset;
+            pt.Y = canvasSize - (pt.Y - minY) * adjustment - yOffset;
+        }
+
+        return pts;
+    }
     //endregion
 
 

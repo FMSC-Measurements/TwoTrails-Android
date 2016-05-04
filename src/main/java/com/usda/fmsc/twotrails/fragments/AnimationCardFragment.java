@@ -3,6 +3,7 @@ package com.usda.fmsc.twotrails.fragments;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
@@ -13,7 +14,7 @@ public class AnimationCardFragment extends Fragment {
 
     private VisibilityListener listener;
 
-    private boolean hidden;
+    private boolean hidden, infocus;
     private View view;
 
 
@@ -35,14 +36,20 @@ public class AnimationCardFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        if (hidden) {
-            if (view == null) {
-                this.view = getView();
-            }
+        if (view == null) {
+            this.view = getView();
+        } else {
+            this.view = view;
+        }
 
+        if (isCardHidden()) {
             if (this.view != null) {
                 view.setY(-view.getHeight());
             }
+        }
+
+        if (infocus) {
+            onCardFocused();
         }
     }
 
@@ -50,8 +57,22 @@ public class AnimationCardFragment extends Fragment {
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
 
-        if (isVisibleToUser && isCardHidden()) {
-            showCard();
+        if (isVisibleToUser) {
+            if (isCardHidden()) {
+                showCard();
+            }
+
+            infocus = true;
+
+            if (view != null) {
+                onCardFocused();
+            }
+        } else {
+            infocus = false;
+
+            if (view != null) {
+                onCardUnFocused();
+            }
         }
     }
 
@@ -78,7 +99,7 @@ public class AnimationCardFragment extends Fragment {
 
                         @Override
                         public void onAnimationEnd(Animation animation) {
-                            listener.onHidden();
+                            onCardHidden();
                         }
 
                         @Override
@@ -92,16 +113,12 @@ public class AnimationCardFragment extends Fragment {
             } else {
                 view.setY(-view.getHeight());
 
-                if (listener != null) {
-                    listener.onHidden();
-                }
+                onCardHidden();
             }
 
             hidden = true;
         } else {
-            if (listener != null) {
-                listener.onHidden();
-            }
+            onCardHidden();
         }
     }
 
@@ -127,7 +144,7 @@ public class AnimationCardFragment extends Fragment {
 
                         @Override
                         public void onAnimationEnd(Animation animation) {
-                            listener.onVisible();
+                            onCardVisible();
                         }
 
                         @Override
@@ -141,9 +158,7 @@ public class AnimationCardFragment extends Fragment {
             } else {
                 view.setY(0);
 
-                if (listener != null) {
-                    listener.onVisible();
-                }
+                onCardVisible();
             }
 
             hidden = false;
@@ -155,6 +170,24 @@ public class AnimationCardFragment extends Fragment {
         return hidden;
     }
 
+
+    protected void onCardVisible() {
+        if (listener != null)
+            listener.onVisible();
+    }
+
+    protected void onCardHidden() {
+        if (listener != null)
+            listener.onHidden();
+    }
+
+    protected void onCardFocused() {
+
+    }
+
+    protected void onCardUnFocused() {
+
+    }
 
     public void setVisibilityListener(VisibilityListener listener) {
         this.listener = listener;

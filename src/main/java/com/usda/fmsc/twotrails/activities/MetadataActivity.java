@@ -519,7 +519,7 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
-                                ArrayList<TtPoint> points = Global.getDAL().getGpsPointsWithMeta(_CurrentMetadata.getCN());
+                                ArrayList<TtPoint> points = Global.getDAL().getGpsTypePointsWithMeta(_CurrentMetadata.getCN());
 
                                 if (points.size() > 0) {
                                     TtPoint point;

@@ -294,13 +294,13 @@ public class TwoTrailsSchema {
 
         public static final String CreateTable =
             "CREATE TABLE " + TableName + " (" +
-            SharedSchema.CN   + " TEXT, " +
-            ID          + " TEXT, " +
-            District    + " TEXT, " +
-            Forest      + " TEXT, " +
-            Region      + " TEXT, " +
-            DeviceID    + " TEXT, " +
-            Created     + " TEXT, " +
+            SharedSchema.CN     + " TEXT, " +
+            ID                  + " TEXT, " +
+            District            + " TEXT, " +
+            Forest              + " TEXT, " +
+            Region              + " TEXT, " +
+            DeviceID            + " TEXT, " +
+            Created             + " TEXT, " +
             Description         + " TEXT, " +
             TtDbSchemaVersion   + " TEXT, " +
             TtVersion           + " TEXT, " +

@@ -23,6 +23,7 @@ import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.utilities.Export;
+import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.io.File;
 
@@ -294,6 +295,7 @@ public class ExportActivity extends CustomToolbarActivity {
                             case InvalidParams:
                                 progCircle.hide();
                                 Toast.makeText(getBaseContext(), "Export error, See log for details", Toast.LENGTH_SHORT).show();
+                                TtUtils.TtReport.writeError("ExportActivity", result.getMessage());
                                 break;
                         }
                     }

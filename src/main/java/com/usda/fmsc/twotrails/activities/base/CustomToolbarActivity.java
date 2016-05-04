@@ -98,9 +98,9 @@ public class CustomToolbarActivity extends AppCompatActivity {
     }
 
     @Override
-    public boolean onTouchEvent(MotionEvent event) {
+    public boolean dispatchTouchEvent(MotionEvent event) {
         exit = false;
-        return super.onTouchEvent(event);
+        return super.dispatchTouchEvent(event);
     }
 
     public void setUseExitWarning(boolean useWarning) {
@@ -109,5 +109,9 @@ public class CustomToolbarActivity extends AppCompatActivity {
 
     public void setExitWarningText(String warningText) {
         exitWarningText = warningText;
+    }
+
+    protected boolean isAboutToExit() {
+        return exit;
     }
 }

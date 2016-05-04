@@ -224,7 +224,7 @@ public class HaidActivity extends CustomToolbarActivity {
 
         @Override
         protected String doInBackground(PolyInfoParams... params) {
-            return HaidLogic.generatePolyStats(params[0].polygon, Global.getDAL(), params[0].isShowingPoints());
+            return HaidLogic.generatePolyStats(params[0].polygon, Global.getDAL(), params[0].isShowingPoints(), false);
         }
 
         @Override
