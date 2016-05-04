@@ -1263,14 +1263,15 @@ public class Global {
 
 
         public static class ProjectSettings extends PreferenceHelper {
-            public static final String PROJECT_ID = "ProjectID";  //Zone
-            public static final String DESCRIPTION = "Description";  //Zone
-            public static final String REGION = "Region";  //Zone
+            public static final String PROJECT_ID = "ProjectID";
+            public static final String DESCRIPTION = "Description";
+            public static final String REGION = "Region";
             public static final String FOREST = "Forest";
             public static final String DISTRICT = "District";
             public static final String RECENT_PROJS = "Recent";
             public static final String LAST_EDITED_POLY_CN = "LastEditedPolyCN";
             public static final String TRACKED_POLY_CN = "TrackedPolyCN";
+
 
             public static void initProjectSettings(DataAccessLayer dal) {
                 if(dal != null) {
@@ -1280,26 +1281,26 @@ public class Global {
                     setForest(dal.getProjectForest());
                     setDistrict(dal.getProjectDistrict());
                 } else {
-                    setProjectId("1");
+                    setProjectId("Unamed");
                     setDescription(StringEx.Empty);
                 }
             }
 
             //region Project Settings
-            public static String getProjectId() {
+            private static String getProjectId() {
                 return getString(PROJECT_ID);
             }
 
-            public static void setProjectId(String value) {
+            private static void setProjectId(String value) {
                 setString(PROJECT_ID, value);
             }
 
 
-            public static String getDescription() {
+            private static String getDescription() {
                 return getString(DESCRIPTION);
             }
 
-            public static void setDescription(String value) {
+            private static void setDescription(String value) {
                 setString(DESCRIPTION, value);
             }
 
@@ -1349,6 +1350,7 @@ public class Global {
 
 
             //region Recent Projects
+            @SuppressWarnings("unchecked")
             public static ArrayList<RecentProject> getRecentProjects() {
 
                 if(getPrefs() == null)
@@ -1360,7 +1362,15 @@ public class Global {
                 if(json == null)
                     return new ArrayList<>();
 
-                return gson.fromJson(json, new TypeToken<ArrayList<RecentProject>>() { }.getType());
+                ArrayList<RecentProject> projects = new ArrayList<>();
+
+                for (RecentProject rp : (ArrayList<RecentProject>)gson.fromJson(json, new TypeToken<ArrayList<RecentProject>>() { }.getType())) {
+                    if (FileUtils.fileExists(rp.File)) {
+                        projects.add(rp);
+                    }
+                }
+
+                return projects;
             }
 
             public static boolean setRecentProjects(List<RecentProject> recentProjects) {
@@ -1374,13 +1384,13 @@ public class Global {
                 ArrayList<RecentProject> newList = new ArrayList<>();
                 newList.add(project);
 
-                for(RecentProject p : getRecentProjects()) {
-                    if(!project.File.equals(p.File) && FileUtils.fileExists(p.File)) {
+                for (RecentProject p : getRecentProjects()) {
+                    if (!project.File.equals(p.File)) {
                         newList.add(p);
                     }
                 }
 
-                if(newList.size() > 7)
+                if (newList.size() > 7)
                     setRecentProjects(newList.subList(0, 8));
                 else
                     setRecentProjects(newList);

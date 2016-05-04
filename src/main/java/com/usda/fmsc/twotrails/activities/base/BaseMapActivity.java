@@ -1013,12 +1013,6 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
         onCreateGraphicManagers();
 
         if (getPolyGraphicManagers().size() > 0) {
-//            if (trackedPoly == null) {
-//                PolygonGraphicManager pgm = getPolyGraphicManagers().get(0);
-//                trackedPoly = pgm.getExtents();
-//                Global.Settings.ProjectSettings.setTrackedPolyCN(pgm.getPolygonCN());
-//            }
-
             Extent.Builder builder = new Extent.Builder();
             Extent tmp;
 
@@ -1056,8 +1050,6 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
     PostDelayHandler[] postDelayHandlers = new PostDelayHandler[12];
 
     private void setupMasterPolyControl() {
-        //PolygonDrawOptions mopt = Global.MapSettings.MasterPolyDrawOptions;
-
         for (int i = 0; i < 12; i++) {
             postDelayHandlers[i] = new PostDelayHandler(250);
         }
@@ -1101,16 +1093,6 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
         for (PolygonDrawOptions.DrawCode code : PolygonDrawOptions.DrawCode.values()) {
             onHolderOptionChanged(null, code);
         }
-//        try {
-//            Class c = PolygonDrawOptions.class;
-//            for (Field f : c.getFields()) {
-//                if (f.getType().equals(DrawCode.class)) {
-//                    onHolderOptionChanged(null, (DrawCode)f.get(mopt));
-//                }
-//            }
-//        } catch (IllegalAccessException e) {
-//            e.printStackTrace();
-//        }
 
         layHeader.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -1313,21 +1295,6 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
                     invisd[xf] &= invis;
                 }
             }
-
-//            if (tcb != null) {
-//                if (vis && invis) {
-//                    tcb.setCheckedStateNoEvent(MultiStateTouchCheckBox.CheckedState.PartialChecked);
-//                    Global.MapSettings.MasterPolyDrawOptions.setValue(code, true);
-//                } else {
-//                    if (vis) {
-//                        tcb.setCheckedStateNoEvent(MultiStateTouchCheckBox.CheckedState.Checked);
-//                        Global.MapSettings.MasterPolyDrawOptions.setValue(code, true);
-//                    } else {
-//                        tcb.setCheckedStateNoEvent(MultiStateTouchCheckBox.CheckedState.NotChecked);
-//                        Global.MapSettings.MasterPolyDrawOptions.setValue(code, false);
-//                    }
-//                }
-//            }
         } catch (Exception e) {
             e.printStackTrace();
         }

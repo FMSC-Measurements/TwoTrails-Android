@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -14,6 +15,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -52,7 +54,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
     private ViewPager mViewPager;
 
-    private boolean _fileOpen = false;
+    private boolean _fileOpen = false, exitOnAdjusted;
 
 
     //region Main Activity Functions
@@ -62,10 +64,13 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
         setContentView(R.layout.activity_main);
 
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(false);
+        }
+
         setUseExitWarning(true);
 
-        // Create the adapter that will return a fragment for each of the three
-        // primary sections of the activity.
         TabsPagerAdapter mTabsPagerAdapter = new TabsPagerAdapter(getSupportFragmentManager());
 
         mFragFile = MainFileFragment.newInstance();
@@ -76,14 +81,15 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.mainViewPager);
-        mViewPager.setAdapter(mTabsPagerAdapter);
+        if (mViewPager != null) {
+            mViewPager.setAdapter(mTabsPagerAdapter);
+        }
 
         //Setup Tabs
         TabLayout tabLayout = (TabLayout)findViewById(R.id.mainTabs);
-        tabLayout.setupWithViewPager(mViewPager);
-
-
-        //TwoTrails creation
+        if (tabLayout != null) {
+            tabLayout.setupWithViewPager(mViewPager);
+        }
 
         //setup values
         Global.init(getApplicationContext(), this);  //setup all the values using the application context
@@ -105,31 +111,9 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     }
 
     @Override
-    protected void onRestart() {
-        super.onRestart();
-
-        //if(Values.Dal != null && !Values.Dal.isOpen())
-        //    Values.Dal.open();
-    }
-
-    @Override
     protected void onResume() {
         super.onResume();
         updateAppInfo();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-        //if(Values.Dal != null)
-        //    Values.Dal.close();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        //CloseFile();
     }
 
     @Override
@@ -169,18 +153,45 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
     @Override
     public void onBackPressed() {
-
         /*
         * Check if polys are calculating
         * if calculating ask to wait
         *   if yes, return
         *   if no cancel calc and finish*/
 
-        if (PolygonAdjuster.isProcessing()) {
-            return;
+        if (isAboutToExit() && PolygonAdjuster.isProcessing()) {
+            new AlertDialog.Builder(MainActivity.this)
+                    .setMessage("Polygons are currently adjusting. Would you like to wait for them to finish?")
+                    .setPositiveButton("Wait", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            if (!PolygonAdjuster.isProcessing()) {
+                                finish();
+                            } else {
+                                exitOnAdjusted = true;
+                            }
+                        }
+                    })
+                    .setNegativeButton(R.string.str_exit, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            finish();
+                        }
+                    })
+                    .setNeutralButton(R.string.str_cancel, null)
+                    .show();
+        } else {
+            super.onBackPressed();
         }
+    }
 
-        super.onBackPressed();
+    @Override
+    protected void onAdjusterStopped(PolygonAdjuster.AdjustResult result) {
+        super.onAdjusterStopped(result);
+
+        if (exitOnAdjusted) {
+            finish();
+        }
     }
 
     //endregion
@@ -325,7 +336,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
         try {
             Global.setDAL(new DataAccessLayer(filePath));
 
-            Global.Settings.ProjectSettings.initProjectSettings(null);
+            Global.Settings.ProjectSettings.initProjectSettings(Global.getDAL());
 
             startActivityForResult(new Intent(this, ProjectActivity.class), UPDATE_INFO_AND_GOTO_DATA_TAB);
 
@@ -346,8 +357,6 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     }
 
     private void updateAppInfo() {
-        saveProjectSettings();
-
         boolean enable = false;
         if(Global.getDAL() != null) {
             Global.Settings.ProjectSettings.updateRecentProjects(
@@ -369,17 +378,6 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
     private void gotoDataTab() {
         mViewPager.setCurrentItem(1);
-    }
-
-
-    private void saveProjectSettings() {
-        if(Global.getDAL() != null) {
-            Global.getDAL().setProjectID(Global.Settings.ProjectSettings.getProjectId());
-            Global.getDAL().setProjectDescription(Global.Settings.ProjectSettings.getDescription());
-            Global.getDAL().setProjectDistrict(Global.Settings.ProjectSettings.getDistrict());
-            Global.getDAL().setProjectForest(Global.Settings.ProjectSettings.getForest());
-            Global.getDAL().setProjectRegion(Global.Settings.ProjectSettings.getRegion());
-        }
     }
 
     private void duplicateFile(final String fileName) {
@@ -460,13 +458,6 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     }
 
     public void btnOpenClick(View view) {
-        /*
-        Intent fileIntent = new Intent(Intent.ACTION_GET_CONTENT);
-
-        fileIntent.setType("file/*.tt");
-        startActivityForResult(fileIntent, OPEN_TT_FILE);
-        */
-
         AndroidUtils.App.openFileIntent(this, Consts.FileExtensions.TWO_TRAILS, Consts.Codes.Dialogs.REQUEST_FILE);
     }
 
@@ -474,47 +465,44 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
         AlertDialog.Builder builderSingle = new AlertDialog.Builder(
                 MainActivity.this);
 
-        //builderSingle.setIcon(R.drawable.ic_launcher);
-
         builderSingle.setTitle("Recently Opened");
 
         ArrayList<RecentProject> recentProjects = Global.Settings.ProjectSettings.getRecentProjects();
 
-        final RecentProjectAdapter adapter = new RecentProjectAdapter(MainActivity.this, recentProjects);
+        if (recentProjects.size() > 0) {
+            final RecentProjectAdapter adapter = new RecentProjectAdapter(MainActivity.this, recentProjects);
 
-        builderSingle.setNegativeButton("Cancel",
-                new DialogInterface.OnClickListener() {
+            builderSingle.setNegativeButton("Cancel",
+                    new DialogInterface.OnClickListener() {
 
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
 
-        builderSingle.setAdapter(adapter,
-                new DialogInterface.OnClickListener() {
+            builderSingle.setAdapter(adapter,
+                    new DialogInterface.OnClickListener() {
 
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
 
-                        RecentProject project = adapter.getItem(which);
+                            RecentProject project = adapter.getItem(which);
 
-                        if(FileUtils.fileExists(project.File))
-                            openFile(project.File);
-                        else
-                            Toast.makeText(getApplicationContext(), "File not found", Toast.LENGTH_LONG).show();
-                    }
-                });
-        builderSingle.show();
+                            if(FileUtils.fileExists(project.File))
+                                openFile(project.File);
+                            else
+                                Toast.makeText(getApplicationContext(), "File not found", Toast.LENGTH_LONG).show();
+                        }
+                    });
+            builderSingle.show();
+        } else {
+            Toast.makeText(MainActivity.this, "No Recent Projects.", Toast.LENGTH_LONG).show();
+        }
     }
 
     public void btnImportClick(View view) {
-
         startActivityForResult(new Intent(this, ImportActivity.class), UPDATE_INFO);
-
-        //AndroidUtils.App.openFileIntent(this, "file/*.shp", OPEN_SHP_FILE);
-
-        //Global.getDAL().clean();
     }
 
     public void btnDupClick(View view) {
@@ -576,7 +564,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
     //region Data
     public void btnPointsClick(View view) {
-        if(Global.getDAL().getItemCount(TwoTrailsSchema.PolygonSchema.TableName) > 0) {
+        if(Global.getDAL().hasPolygons()) {
             startActivityForResult(new Intent(this, PointsActivity.class), UPDATE_INFO);
         } else {
             Toast.makeText(this, "No Polygons in Project", Toast.LENGTH_SHORT).show();
@@ -627,10 +615,6 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
                 i.setDataAndType(Uri.fromFile(KML), "application/vnd.google-earth.kml+xml");
                 startActivity(i);
             }
-
-
-            //Toast.makeText(this, "Earth is installed.", Toast.LENGTH_SHORT).show();
-
         } else {
             AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 
@@ -647,7 +631,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     }
 
     public void btnHAIDClick(View view) {
-        if(Global.getDAL().getItemCount(TwoTrailsSchema.PolygonSchema.TableName) > 0) {
+        if(Global.getDAL().hasPolygons()) {
             startActivity(new Intent(this, HaidActivity.class));
         } else {
             Toast.makeText(this, "No Polygons in Project", Toast.LENGTH_SHORT).show();
@@ -655,7 +639,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     }
 
     public void btnExportClick(View view) {
-        if(Global.getDAL().getItemCount(TwoTrailsSchema.PolygonSchema.TableName) > 0) {
+        if(Global.getDAL().hasPolygons()) {
             startActivity(new Intent(this, ExportActivity.class));
         } else {
             Toast.makeText(this, "No Polygons in Project", Toast.LENGTH_SHORT).show();
@@ -663,7 +647,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     }
 
     public void btnPlotGridClick(View view) {
-        if(Global.getDAL().getItemCount(TwoTrailsSchema.PolygonSchema.TableName) > 0) {
+        if(Global.getDAL().hasPolygons()) {
             startActivityForResult(new Intent(this, PlotGridActivity.class), UPDATE_INFO);
         } else {
             Toast.makeText(this, "No Polygons in Project", Toast.LENGTH_SHORT).show();
@@ -672,7 +656,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
     public void btnMultiEdit(View view) {
         /*
-        if(Global.getDAL().getItemCount(TwoTrailsSchema.PolygonSchema.TableName) > 0) {
+        if(Global.getDAL().hasPolygons()) {
             startActivityForResult(new Intent(this, MultiEditActivity.class), UPDATE_INFO);
         } else {
             Toast.makeText(this, "No Polygons in Project", Toast.LENGTH_SHORT).show();

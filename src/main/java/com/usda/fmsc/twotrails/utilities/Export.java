@@ -413,61 +413,12 @@ public class Export {
                     "Tracked Satellites",
                     "Satellites In View",
                     "Satellites Used Count",
-                    "Satellites Used",
-
-                    "Sat1 Id",
-                    "Sat1 Elev",
-                    "Sat1 Az",
-                    "Sat1 SRN",
-                    "Sat2 Id",
-                    "Sat2 Elev",
-                    "Sat2 Az",
-                    "Sat2 SRN",
-                    "Sat3 Id",
-                    "Sat3 Elev",
-                    "Sat3 Az",
-                    "Sat3 SRN",
-                    "Sat4 Id",
-                    "Sat4 Elev",
-                    "Sat4 Az",
-                    "Sat4 SRN",
-                    "Sat5 Id",
-                    "Sat5 Elev",
-                    "Sat5 Az",
-                    "Sat5 SRN",
-                    "Sat6 Id",
-                    "Sat6 Elev",
-                    "Sat6 Az",
-                    "Sat6 SRN",
-                    "Sat7 Id",
-                    "Sat7 Elev",
-                    "Sat7 Az",
-                    "Sat7 SRN",
-                    "Sat8 Id",
-                    "Sat8 Elev",
-                    "Sat8 Az",
-                    "Sat8 SRN",
-                    "Sat9 Id",
-                    "Sat9 Elev",
-                    "Sat9 Az",
-                    "Sat9 SRN",
-                    "Sat10 Id",
-                    "Sat10 Elev",
-                    "Sat10 Az",
-                    "Sat10 SRN",
-                    "Sat11 Id",
-                    "Sat11 Elev",
-                    "Sat11 Az",
-                    "Sat11 SRN",
-                    "Sat12 Id",
-                    "Sat12 Elev",
-                    "Sat12 Az",
-                    "Sat12 SRN"
+                    "Satellites Used"
             });
             //endregion
 
             //region NMEA Values
-            ArrayList<String> values = new ArrayList<>(71);
+            ArrayList<String> values = new ArrayList<>(23);
 
             for (TtNmeaBurst burst : dal.getNmeaBursts()) {
                 values.add(burst.getPointCN());
@@ -493,20 +444,6 @@ public class Export {
                 values.add(StringEx.toString(burst.getSatellitesInViewCount()));
                 values.add(StringEx.toString(burst.getUsedSatellitesCount()));
                 values.add(burst.getUsedSatelliteIDsString());
-
-                /*
-                for (Satellite sat : burst.getSatellitesInView()) {
-                    values.add(StringEx.toString(sat.getNmeaID()));
-                    values.add(StringEx.toString(sat.getElevation()));
-                    values.add(StringEx.toString(sat.getAzimuth()));
-                    values.add(StringEx.toString(sat.getSRN()));
-                }
-
-                int remaining = 12 - burst.getSatellitesInView().size();
-                for (int i = 0; i < remaining * 4; i++) {
-                    values.add(StringEx.Empty);
-                }
-                */
 
                 writer.printRecords(values);
                 values.clear();
@@ -1190,7 +1127,6 @@ public class Export {
 
     private static String scrubProjectName(String file) {
         return  file.replaceAll("[^a-zA-Z0-9.-]", "_");
-        //return file.replaceAll("\\W+", "");
     }
 
 
@@ -1209,7 +1145,7 @@ public class Export {
                 return new ExportResult(ExportResultCode.InvalidParams, "No directory selected");
             }
 
-            if (!ep.getDirectory().exists() && ep.getDirectory().mkdirs()) {
+            if (!ep.getDirectory().exists() && !ep.getDirectory().mkdirs()) {
                 return new ExportResult(ExportResultCode.ExportFailure, "Failed to create main directory");
             }
 

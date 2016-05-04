@@ -7,25 +7,32 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.usda.fmsc.android.AndroidUtils;
+import com.usda.fmsc.android.animation.ViewAnimator;
+import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.activities.PolygonsActivity;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.fragments.AnimationCardFragment;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
+import com.usda.fmsc.twotrails.ui.StaticPolygonView;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
+import com.usda.fmsc.utilities.IListener;
 import com.usda.fmsc.utilities.ParseEx;
 import com.usda.fmsc.utilities.StringEx;
 
 public class PolygonFragment extends AnimationCardFragment implements PolygonsActivity.Listener {
     private static final String POLYGON_CN = "PolygonCN";
 
-    PolygonsActivity activity;
+    private PolygonsActivity activity;
 
     private View viewPreFocus;
     private ScrollView scrollView;
@@ -233,6 +240,14 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
 
         AndroidUtils.UI.hideKeyboardOnSelect(parent, ets);
 
+        if (Global.getDAL().getPointCountInPolygon(_Polygon.getCN()) > 2) {
+            View polyLayImage = view.findViewById(R.id.polyLayImage);
+
+            if (polyLayImage != null) {
+                polyLayImage.setVisibility(View.VISIBLE);
+            }
+        }
+
         return view;
     }
 
@@ -302,6 +317,32 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
     public void scrollToTop() {
         if (scrollView != null) {
             scrollView.fullScroll(ScrollView.FOCUS_UP);
+        }
+    }
+
+    @Override
+    public void onCardFocused() {
+        super.onCardFocused();
+
+        View view = getView();
+
+        if (view != null) {
+            final StaticPolygonView spv = (StaticPolygonView)view.findViewById(R.id.polySPView);
+
+            if (spv != null && !spv.isRendered() && Global.getDAL().getPointCountInPolygon(_Polygon.getCN()) > 2) {
+                if (spv.getWidth() < 1) {
+                    view.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                        @Override
+                        public void onGlobalLayout() {
+                            if (!spv.isRendered()) {
+                                spv.render(Global.getDAL().getPointsInPolygon(_Polygon.getCN()), Global.getDAL().getMetadataMap());
+                            }
+                        }
+                    });
+                } else {
+                    spv.render(Global.getDAL().getPointsInPolygon(_Polygon.getCN()), Global.getDAL().getMetadataMap());
+                }
+            }
         }
     }
 }
