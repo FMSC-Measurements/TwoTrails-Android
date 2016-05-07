@@ -378,6 +378,12 @@ public class Take5Activity extends AcquireGpsMapActivity {
         super.finish();
     }
 
+    @Override
+    public void onMapReady() {
+        super.onMapReady();
+
+        setMapGesturesEnabled(mapViewMode);
+    }
 
     public void updatePoint(TtPoint point) {
         if (_CurrentPoint == point) {

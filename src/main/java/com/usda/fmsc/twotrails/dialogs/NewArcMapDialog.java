@@ -280,7 +280,7 @@ public class NewArcMapDialog extends DialogFragment {
                         }
 
                         @Override
-                        public void onBadUrl() {
+                        public void onBadUrl(String error) {
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {

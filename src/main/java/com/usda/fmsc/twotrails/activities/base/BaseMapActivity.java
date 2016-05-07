@@ -66,6 +66,7 @@ import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
+import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
 import com.usda.fmsc.twotrails.objects.map.PolygonDrawOptions;
 import com.usda.fmsc.twotrails.objects.map.PolygonGraphicManager;
 import com.usda.fmsc.twotrails.objects.map.TrailGraphicManager;
@@ -110,7 +111,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
     private Sensor accelerometer, magnetometer;
 
     private ActionBarDrawerToggle drawerToggle;
-    private MenuItem miResetBounds, miShowMyPos, miTrackedPoly;
+    private MenuItem miResetBounds, miShowMyPos, miTrackedPoly, miMapMaxBounds;
     private SlidingUpPanelLayout slidingLayout;
     private TextView tvNavPid, tvNavPoly, tvNavDistMt, tvNavDistFt, tvNavAzTrue, tvNavAzMag;
     private ImageView ivArrow;
@@ -120,7 +121,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
     private TtPoint fromPoint, toPoint;
     private boolean fromMyLoc = true;
 
-    private boolean showCompass, mapMoved = true, showMyPos, polysCreated;
+    private boolean showCompass, mapMoved = true, showMyPos, polysCreated, mapHasMaxExtents;
     private Units.MapTracking mapTracking = Units.MapTracking.FOLLOW;
     private Integer zone;
 
@@ -169,7 +170,13 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
                             }
                             break;
                         case ArcGIS:
-                            if (ArcGISTools.getMapLayer(mapId).isOnline() && !internetAvailable) {
+                            ArcGisMapLayer agml = ArcGISTools.getMapLayer(mapId);
+                            if (agml == null) {
+                                mapId = 0;
+                                agml = ArcGISTools.getMapLayer(mapId);
+                            }
+
+                            if (agml.isOnline() && !internetAvailable) {
                                 requestOfflineMap();
                             } else {
                                 startArcMap();
@@ -381,6 +388,17 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
             miShowMyPos.setChecked(Global.Settings.DeviceSettings.getMapShowMyPos());
         }
 
+        miMapMaxBounds = menu.findItem(R.id.mmMenuMoveToMaxBounds);
+        if (miMapMaxBounds != null) {
+            miMapMaxBounds.setVisible(false);
+
+            if (mmFrag != null) {
+                mapHasMaxExtents = mmFrag.mapHasMaxExtents();
+            }
+
+            miMapMaxBounds.setVisible(mapHasMaxExtents);
+        }
+
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -420,6 +438,12 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
             case R.id.mapMenuWhereIs: {
                 calculateDir();
                 slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
+                break;
+            }
+            case R.id.mmMenuMoveToMaxBounds: {
+                if (mmFrag != null) {
+                    mmFrag.moveToMapMaxExtents(true);
+                }
                 break;
             }
             case R.id.mapMenuResetBounds: {
@@ -617,7 +641,6 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
         if (this.mapType == mapType) {
             if (mmFrag != null) {
                 mmFrag.setMap(mapId);
-                onMapTypeChanged(mapType, mapId);
             } else {
                 throw new NullPointerException("MapFragment is null");
             }
@@ -629,7 +652,6 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
             mapFragment = createMapFragment(mapType, getMapOptions(mapType, mapId));
             mmFrag = (IMultiMapFragment)mapFragment;
             getSupportFragmentManager().beginTransaction().replace(R.id.mapContainer, mapFragment).commit();
-            onMapTypeChanged(mapType, mapId);
         }
 
         Global.Settings.DeviceSettings.setMapType(mapType);
@@ -740,12 +762,17 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
     }
 
     @Override
-    public void onMapTypeChanged(Units.MapType mapType, int mapId) {
+    public void onMapTypeChanged(Units.MapType mapType, int mapId, boolean isOnline) {
         this.mapType = mapType;
         this.mapId = mapId;
 
         setCompassEnabled(showCompass);
         setLocationEnabled(showMyPos);
+
+        if (miMapMaxBounds != null && mmFrag != null) {
+            mapHasMaxExtents = mmFrag.mapHasMaxExtents();
+            miMapMaxBounds.setVisible(mapHasMaxExtents);
+        }
     }
     //endregion
 

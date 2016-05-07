@@ -2,6 +2,7 @@ package com.usda.fmsc.twotrails.utilities;
 
 import android.util.Log;
 
+import com.esri.core.ags.MapServiceInfo;
 import com.esri.core.geometry.Envelope;
 import com.esri.core.geometry.SpatialReference;
 import com.esri.core.io.UserCredentials;
@@ -15,8 +16,9 @@ import com.usda.fmsc.utilities.StringEx;
 
 public class DownloadOfflineArcGISMapTask {
     //true create as tile package, false to create as compact cache
-    private static final boolean CREATE_AS_TILE_PACKAGE = false;
-    private static final int MAX_DETAIL_LEVELS = 8;
+    private static final boolean CREATE_AS_TILE_PACKAGE = true;
+    private static final int MAX_DETAIL_LEVELS = 12;
+    private static final int PRELEVELS = 3;
 
 
     private ExportTileCacheTask exportTileCacheTask;
@@ -26,14 +28,61 @@ public class DownloadOfflineArcGISMapTask {
     private String downloadLocation;
 
     public DownloadOfflineArcGISMapTask(ArcGisMapLayer layer, Envelope extents, SpatialReference spatialReference, String downloadLocation, UserCredentials credentials) {
+        this(layer, extents, spatialReference, downloadLocation, credentials, -1, -1);
+    }
+
+    public DownloadOfflineArcGISMapTask(ArcGisMapLayer layer, Envelope extents, SpatialReference spatialReference, String downloadLocation, UserCredentials credentials, int level, int levelLimit) {
         this.layer = layer;
         this.downloadLocation = downloadLocation;
 
-        double[] detailLevels = new double[layer.getLevelsOfDetail().length];
+        int numOfLevels;
 
-        for (int i = 0; i < layer.getLevelsOfDetail().length && i < MAX_DETAIL_LEVELS; i++) {
-            detailLevels[i] = layer.getLevelsOfDetail()[i].getLevel();
+        if (levelLimit > -1) {
+            for (int i = 0; i < layer.getNumberOfLevels(); i++) {
+                if (levelLimit - i <= layer.getNumberOfLevels()) {
+                    levelLimit -= i;
+                    break;
+                }
+            }
+
+            numOfLevels = levelLimit;
+        } else {
+            numOfLevels = MAX_DETAIL_LEVELS < layer.getNumberOfLevels() ? MAX_DETAIL_LEVELS : layer.getNumberOfLevels();
         }
+
+        numOfLevels += PRELEVELS;
+
+        int startLevel = level > -1 ? level : layer.getNumberOfLevels() - numOfLevels - 1;
+
+        startLevel -= PRELEVELS;
+
+        double[] detailLevels = new double[numOfLevels];
+        double[] scales = new double[numOfLevels];
+
+        for (int i = startLevel, j = 0; i < layer.getNumberOfLevels() && j < numOfLevels; i++, j++) {
+            ArcGisMapLayer.DetailLevel dt = layer.getLevelsOfDetail()[i];
+            detailLevels[j] = dt.getLevel();
+            scales[j] = dt.getScale();
+        }
+
+        layer.setMinScale(scales[0]);
+        layer.setMaxScale(scales[detailLevels.length - 1]);
+
+
+//        int numOfLevels = MAX_DETAIL_LEVELS < layer.getNumberOfLevels() ? MAX_DETAIL_LEVELS : layer.getNumberOfLevels();
+
+        //Number of details below max level
+//        double[] detailLevels = new double[numOfLevels];
+//        for (int i = layer.getNumberOfLevels() -1, j = 0; i > -1 && j < numOfLevels; i--, j++) {
+//            detailLevels[j] = layer.getLevelsOfDetail()[i].getLevel();
+//        }
+
+        //all levels
+//        double[] detailLevels = new double[layer.getLevelsOfDetail().length];
+//
+//        for (int i = 0; i < layer.getLevelsOfDetail().length; i++) {
+//            detailLevels[i] = layer.getLevelsOfDetail()[i].getLevel();
+//        }
 
         exportTileCacheTask = new ExportTileCacheTask(layer.getUrl(), credentials);
 
@@ -57,6 +106,23 @@ public class DownloadOfflineArcGISMapTask {
                 if (listener != null) {
                     listener.onEstimateError(throwable.getMessage());
                 }
+            }
+        });
+    }
+
+
+    public void getMapServiceInfo(final ServiceInfoListener listener) {
+        exportTileCacheTask.fetchMapServiceInfo(new CallbackListener<MapServiceInfo>() {
+            @Override
+            public void onCallback(MapServiceInfo mapServiceInfo) {
+                if (mapServiceInfo != null) {
+                    listener.onInfoReceived(mapServiceInfo);
+                }
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                listener.onError(throwable.getMessage());
             }
         });
     }
@@ -87,6 +153,11 @@ public class DownloadOfflineArcGISMapTask {
                     @Override
                     public void onCallback(String s) {
                         if (!StringEx.isEmpty(s)) {
+
+                            if (s.endsWith("/Layers")) {
+                                s = s.substring(0, s.indexOf("/Layers"));
+                            }
+
                             layer.setFilePath(s);
 
                             if (listener != null) {
@@ -124,5 +195,10 @@ public class DownloadOfflineArcGISMapTask {
         void onTaskUpdate(ExportTileCacheStatus status);
         void onStatusError(String message);
         void onDownloadError(String message);
+    }
+
+    public interface ServiceInfoListener {
+        void onInfoReceived(MapServiceInfo msi);
+        void onError(String error);
     }
 }

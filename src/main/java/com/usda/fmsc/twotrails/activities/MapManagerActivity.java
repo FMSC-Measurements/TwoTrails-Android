@@ -11,6 +11,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.PopupMenu;
 import android.transition.Transition;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,6 +43,7 @@ import java.util.Collections;
 
 import jp.wasabeef.recyclerview.animators.SlideInLeftAnimator;
 
+//TODO show icon to indicate whether or not an arcgis acc is connected
 public class MapManagerActivity extends CustomToolbarActivity implements ArcGISTools.IArcToolsListener {
     private static final String SELECT_MAP = "SelectMap";
 
@@ -200,10 +202,29 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_map_manager, menu);
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home: {
                 finish();
+            }
+            case R.id.mmMenuLogin: {
+                Intent intent = new Intent(getBaseContext(), ArcGisLoginActivity.class);
+
+                UserCredentials credentials = ArcGISTools.getCredentials(MapManagerActivity.this);
+                final String oldUn = credentials != null ? credentials.getUserName() : StringEx.Empty;
+
+                if (!StringEx.isEmpty(oldUn)) {
+                    intent.putExtra(ArcGisLoginActivity.USERNAME, oldUn);
+                }
+
+                startActivityForResult(intent, Consts.Codes.Activites.ARC_GIS_LOGIN);
             }
         }
 
@@ -212,10 +233,16 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
 
 
     @Override
-    public void arcLayerAdded(ArcGisMapLayer layer) {
-        maps.add(layer);
-        visibleMaps.add(layer);
-        adapter.notifyDataSetChanged();
+    public void arcLayerAdded(final ArcGisMapLayer layer) {
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                maps.add(layer);
+                visibleMaps.add(layer);
+                adapter.notifyDataSetChanged();
+            }
+        });
     }
 
 
@@ -265,7 +292,8 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
                             startActivityForResult(intent, Consts.Codes.Activites.ARC_GIS_LOGIN);
                         }
                     })
-                    .setNegativeButton(R.string.str_no, null);
+                    .setNegativeButton(R.string.str_no, null)
+                    .show();
         }
     }
 

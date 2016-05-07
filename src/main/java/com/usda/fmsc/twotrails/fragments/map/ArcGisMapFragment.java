@@ -15,6 +15,8 @@ import com.esri.android.map.GraphicsLayer;
 import com.esri.android.map.Layer;
 import com.esri.android.map.MapOnTouchListener;
 import com.esri.android.map.MapView;
+import com.esri.android.map.ags.ArcGISLocalTiledLayer;
+import com.esri.android.map.ags.ArcGISTiledMapServiceLayer;
 import com.esri.android.map.event.OnPanListener;
 import com.esri.android.map.event.OnStatusChangedListener;
 import com.esri.android.map.event.OnZoomListener;
@@ -186,6 +188,24 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
         mMapView = null;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if (mMapView != null) {
+            mMapView.unpause();
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        if (mMapView != null) {
+            mMapView.pause();
+        }
+    }
+
 
     @Override
     public void onStatusChanged(Object o, STATUS status) {
@@ -194,6 +214,9 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
                 if (!mapReady) {
                     mmListener.onMapReady();
                     mapReady = true;
+
+                    //if map is offline and has extents
+                    moveToMapMaxExtents(false);
                 }
 
                 mmListener.onMapLoaded();
@@ -249,7 +272,7 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
             mBasemapLayer = null;
         } else {
             try {
-                Layer newLayer = ArcGISTools.getBaseLayer(agml);
+                Layer newLayer = ArcGISTools.getBaseLayer(getContext(), agml);
 
                 if (mBasemapLayer != null)
                     mMapView.removeLayer(mBasemapLayer);
@@ -270,7 +293,7 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
                 }
 
                 if (mmListener != null) {
-                    mmListener.onMapTypeChanged(Units.MapType.ArcGIS, basemapId);
+                    mmListener.onMapTypeChanged(Units.MapType.ArcGIS, basemapId, agml.isOnline());
                 }
 
                 if (currentGisMapLayer.isOnline() && currentGisMapLayer.getNumberOfLevels() < 1) {
@@ -304,7 +327,7 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
                                     }
 
                                     @Override
-                                    public void onBadUrl() {
+                                    public void onBadUrl(String error) {
 
                                     }
                                 });
@@ -318,11 +341,22 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
         }
     }
 
+    @Override
+    public boolean mapHasMaxExtents() {
+        return currentGisMapLayer != null && !currentGisMapLayer.isOnline() && currentGisMapLayer.hasExtent();
+    }
 
     @Override
     public void setMap(int mapId) {
         if (mapId != basemapId) {
             changeBasemap(mapId);
+        }
+    }
+
+    @Override
+    public void moveToMapMaxExtents(boolean animate) {
+        if (mapHasMaxExtents()) {
+            moveToLocation(currentGisMapLayer.getExtent(), 0, animate);
         }
     }
 
@@ -407,8 +441,11 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
 
     public Envelope getArcExtents() {
         Envelope extents = new Envelope();
-        mMapView.getExtent().queryEnvelope(extents);
-        return extents;
+        if (mMapView.getExtent() != null) {
+            mMapView.getExtent().queryEnvelope(extents);
+            return extents;
+        }
+        return null;
     }
 
     public SpatialReference getSpatialReference() {
@@ -420,22 +457,38 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
     }
 
 
-    @Override
-    public void onResume() {
-        super.onResume();
+    public int getMapZoomLevel() {
+        if (mBasemapLayer instanceof ArcGISTiledMapServiceLayer) {
+            double mapRes = mMapView.getResolution();
+            double[] resolutions = ((ArcGISTiledMapServiceLayer) mBasemapLayer).getTileInfo().getResolutions();
 
-        if (mMapView != null) {
-            mMapView.unpause();
+            for (int i = 0; i < resolutions.length - 2; i++) {
+                if (mapRes <= resolutions[i] && mapRes > resolutions[i + 1])
+                    return i;
+            }
         }
+
+        return  -1;
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
 
-        if (mMapView != null) {
-            mMapView.pause();
-        }
+    public Point getMapPoint(int x, int y) {
+        return mMapView.toMapPoint(x, y);
+    }
+
+
+    public Extent getExtentsFromScreen(int xmin, int ymin, int xmax, int ymax) {
+        Point ne = ArcGISTools.pointToLatLng(getMapPoint(xmin, ymin), mMapView);
+        Point sw = ArcGISTools.pointToLatLng(getMapPoint(xmax, ymax), mMapView);
+
+        return new Extent(sw.getX(), ne.getY(), ne.getX(), sw.getY());
+    }
+
+    public Envelope getArcExtentsFromScreen(int xmin, int ymin, int xmax, int ymax) {
+        Point nw = getMapPoint(xmin, ymin);
+        Point se = getMapPoint(xmax, ymax);
+
+        return new Envelope(nw.getX(), nw.getY(), se.getX(), se.getY());
     }
 
 

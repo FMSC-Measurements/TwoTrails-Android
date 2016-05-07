@@ -293,7 +293,7 @@ public class MapDetailsActivity extends CustomToolbarActivity {
                     }
 
                     @Override
-                    public void onBadUrl() {
+                    public void onBadUrl(String error) {
                         Toast.makeText(MapDetailsActivity.this, "Failed to update map details", Toast.LENGTH_LONG).show();
                     }
                 });

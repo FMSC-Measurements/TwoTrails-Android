@@ -109,7 +109,7 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
             map.setMapType(mapId);
 
             if (mmlistener != null) {
-                mmlistener.onMapTypeChanged(Units.MapType.Google, mapId);
+                mmlistener.onMapTypeChanged(Units.MapType.Google, mapId, true);
             }
         }
     }
@@ -214,6 +214,11 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
 
 
     @Override
+    public void moveToMapMaxExtents(boolean animate) {
+        map.moveCamera(CameraUpdateFactory.zoomTo(map.getMinZoomLevel()));
+    }
+
+    @Override
     public void moveToLocation(float lat, float lon, boolean animate) {
         moveToLocation(CameraUpdateFactory.newLatLng(new LatLng(lat, lon)), animate);
     }
@@ -292,6 +297,11 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
         }
     }
 
+
+    @Override
+    public boolean mapHasMaxExtents() {
+        return false;
+    }
 
     @Override
     public void hideSelectedMarkerInfo() {

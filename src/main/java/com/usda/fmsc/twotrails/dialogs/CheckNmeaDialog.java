@@ -11,7 +11,6 @@ import android.view.View;
 import android.widget.ListView;
 
 import com.usda.fmsc.geospatial.nmea.INmeaBurst;
-import com.usda.fmsc.geospatial.nmea.NmeaBurst;
 import com.usda.fmsc.geospatial.nmea.NmeaIDs;
 import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
 import com.usda.fmsc.twotrails.Global;
