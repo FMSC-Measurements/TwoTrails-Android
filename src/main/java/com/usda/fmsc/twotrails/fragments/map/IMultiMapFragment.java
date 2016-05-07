@@ -27,6 +27,8 @@ public interface IMultiMapFragment {
     void setGesturesEnabled(boolean enabled);
 
 
+    void moveToMapMaxExtents(boolean animate);
+
     void moveToLocation(float lat, float lon, boolean animate);
 
     void moveToLocation(float lat, float lon, float zoomLevel, boolean animate);
@@ -48,11 +50,13 @@ public interface IMultiMapFragment {
 
     MarkerData getMarkerData(String id);
 
+    boolean mapHasMaxExtents();
+
 
     interface MultiMapListener {
         void onMapReady();
         void onMapLoaded();
-        void onMapTypeChanged(Units.MapType mapType, int mapId);
+        void onMapTypeChanged(Units.MapType mapType, int mapId, boolean isOnline);
         void onMapLocationChanged();
         void onMapClick(Position position);
         void onMarkerClick(MarkerData markerData);

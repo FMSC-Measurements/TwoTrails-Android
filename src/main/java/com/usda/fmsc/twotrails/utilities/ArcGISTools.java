@@ -1,8 +1,12 @@
 package com.usda.fmsc.twotrails.utilities;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.os.Environment;
 import android.support.v7.app.AlertDialog;
+import android.util.Base64;
+import android.widget.Toast;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -33,6 +37,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -48,6 +53,9 @@ public class ArcGISTools {
     private static int idCounter = 0;
 
     private static List<IArcToolsListener> listeners = new ArrayList<>();
+
+    private static HashMap<Integer, DownloadOfflineArcGISMapTask> tasks = new HashMap<>();
+    private static long lastUpdate = System.currentTimeMillis();
 
 
     private static void init() {
@@ -245,26 +253,34 @@ public class ArcGISTools {
         return mapLayers.get(id);
     }
 
-    public static Layer getBaseLayer(int id) throws FileNotFoundException {
+
+    public static Layer getBaseLayer(Context context, int id) throws FileNotFoundException {
         if (mapLayers == null) {
             init();
         }
 
-        return getBaseLayer(mapLayers.get(id));
+        return getBaseLayer(context, mapLayers.get(id));
     }
 
-    public static Layer getBaseLayer(ArcGisMapLayer agml) throws FileNotFoundException {
-        return getBaseLayer(agml, agml.isOnline());
+    public static Layer getBaseLayer(Context context, ArcGisMapLayer agml) throws FileNotFoundException {
+        return getBaseLayer(context, agml, agml.isOnline());
     }
 
-    public static Layer getBaseLayer(ArcGisMapLayer agml, boolean isOnline) throws FileNotFoundException {
+    public static Layer getBaseLayer(Context context, ArcGisMapLayer agml, boolean isOnline) throws FileNotFoundException {
         Layer layer = null;
 
         if (isOnline) {
-            layer = new ArcGISTiledMapServiceLayer(agml.getUrl(), userCredentials);
+            layer = new ArcGISTiledMapServiceLayer(agml.getUrl(),
+                    agml.getUrl().contains("services.arcgisonline") ?
+                            null: getCredentials(context)
+            );
         } else {
-            if (FileUtils.fileExists(agml.getUrl())) {
-                layer = new ArcGISLocalTiledLayer(agml.getUrl());
+            if (FileUtils.fileOrFolderExists(agml.getFilePath())) {
+                try {
+                    layer = new ArcGISLocalTiledLayer(agml.getFilePath());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             } else {
                 throw new FileNotFoundException("Tile Package Not Found");
             }
@@ -392,7 +408,7 @@ public class ArcGISTools {
 
     public static String getOfflineUrlFromOnlineUrl(String onlineUrl) {
         if (onlineUrl.contains("services.arcgisonline")) {
-            onlineUrl =onlineUrl.replace("services.arcgisonline", "tiledbasemaps.arcgis");
+            onlineUrl = onlineUrl.replace("services.arcgisonline", "tiledbasemaps.arcgis");
         }
 
         return onlineUrl;
@@ -403,6 +419,11 @@ public class ArcGISTools {
             throw new RuntimeException("Listener is null");
 
         String jUrl = url;
+
+        if (jUrl.contains("tiledbasemaps.arcgis")) {
+            jUrl = url.replace("tiledbasemaps.arcgis", "services.arcgisonline");
+        }
+
         if (!jUrl.endsWith("?f=pjson")) {
             jUrl = String.format("%s?f=pjson", jUrl);
         }
@@ -421,21 +442,28 @@ public class ArcGISTools {
                                     response.optDouble("minScale", 0),
                                     response.optDouble("maxScale", 0),
                                     getDetailLevelsFromJson(response),
-                                    false)
+                                    null,
+                                    false
+                            )
                     );
                 } else {
-                    listener.onBadUrl();
+                    String message = "invalid json";
+
+                    if (response.has("message")) {
+                        message = response.optString("message", "error");
+                    }
+
+                    listener.onBadUrl(message);
                 }
             }
         },
         new Response.ErrorListener(){
             @Override
             public void onErrorResponse(VolleyError error) {
-                listener.onBadUrl();
+                listener.onBadUrl(error.getMessage());
             }
         });
     }
-
 
     private static ArcGisMapLayer.DetailLevel[] getDetailLevelsFromJson(JSONObject jobj) {
         ArrayList<ArcGisMapLayer.DetailLevel> detailLevels = new ArrayList<>();
@@ -462,20 +490,18 @@ public class ArcGISTools {
                             detailLevels.add(new ArcGisMapLayer.DetailLevel(level, res, scale));
                         }
                     } catch (JSONException e) {
-
+                        //
                     }
                 }
             }
         } catch (JSONException e) {
-
+            //
         }
 
         return detailLevels.toArray(new ArcGisMapLayer.DetailLevel[detailLevels.size()]);
     }
 
 
-
-    private static HashMap<Integer, DownloadOfflineArcGISMapTask> tasks = new HashMap<>();
 
     public static void startOfflineMapDownload(DownloadOfflineArcGISMapTask task) {
         final ArcGisMapLayer layer = task.getLayer();
@@ -499,24 +525,65 @@ public class ArcGISTools {
                         Global.TtNotifyManager.endMapDownload(layer.getId());
                     }
                 });
-                //Global.TtNotifyManager.endMapDownload(layer.getId());
-                //Toast.makeText(Global.getApplicationContext(), String.format("%s Downloaded", layer.getName()), Toast.LENGTH_LONG).show();
+
+                final Activity activity = Global.getCurrentActivity();
+                if (activity != null) {
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(Global.getApplicationContext(), String.format("%s Downloaded", layer.getName()), Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
             }
 
             @Override
-            public void onTaskUpdate(ExportTileCacheStatus status) {
+            public void onTaskUpdate(final ExportTileCacheStatus status) {
                 if (status.getStatus() == GPJobResource.JobStatus.EXECUTING) {
-                    final int progress = status.getDownloadSize() > 0 ? (int) (100 * status.getTotalBytesDownloaded() / status.getDownloadSize()) : 0;
+                    long now = System.currentTimeMillis();
 
+                    if (now > lastUpdate + 250) {
+                        final int progress = status.getDownloadSize() > 0 ? (int) (100 * status.getTotalBytesDownloaded() / status.getDownloadSize()) : 0;
+
+                        Global.getMainActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Global.TtNotifyManager.updateMapDownload(layer.getId(), progress);
+                            }
+                        });
+
+                        lastUpdate = now;
+                    }
+                } else if (status.getStatus() == GPJobResource.JobStatus.FAILED) {
                     Global.getMainActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            Global.TtNotifyManager.updateMapDownload(layer.getId(), progress);
+                            Global.TtNotifyManager.endMapDownload(layer.getId());
                         }
                     });
-                } else {
-                    //Toast.makeText(Global.getApplicationContext(), status.getStatus().toString(), Toast.LENGTH_LONG).show();
-                }
+
+                    final Activity activity = Global.getCurrentActivity();
+
+                    if (activity != null) {
+                        activity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(activity, "Failed to download offline map", Toast.LENGTH_LONG).show();
+                            }
+                        });
+                    }
+                } //else {
+//                    final Activity activity = Global.getCurrentActivity();
+//
+//                    if (activity != null) {
+//                        activity.runOnUiThread(new Runnable() {
+//                            @Override
+//                            public void run() {
+//                                Toast.makeText(activity, status.getStatus().toString(), Toast.LENGTH_LONG).show();
+//                            }
+//                        });
+//                    }
+//                }
             }
 
             @Override
@@ -529,8 +596,17 @@ public class ArcGISTools {
                         Global.TtNotifyManager.endMapDownload(layer.getId());
                     }
                 });
-                //Global.TtNotifyManager.endMapDownload(layer.getId());
-                //Toast.makeText(Global.getApplicationContext(), "Error creating offline map", Toast.LENGTH_LONG).show();
+
+                final Activity activity = Global.getCurrentActivity();
+
+                if (activity != null) {
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(activity, "Error creating offline map", Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
             }
 
             @Override
@@ -542,8 +618,17 @@ public class ArcGISTools {
                         Global.TtNotifyManager.endMapDownload(layer.getId());
                     }
                 });
-                //Global.TtNotifyManager.endMapDownload(layer.getId());
-                //Toast.makeText(Global.getApplicationContext(), "Error downloading offline map", Toast.LENGTH_LONG).show();
+
+                final Activity activity = Global.getCurrentActivity();
+
+                if (activity != null) {
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(Global.getApplicationContext(), "Error downloading offline map", Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
             }
         });
     }
@@ -555,7 +640,13 @@ public class ArcGISTools {
     public static boolean hasValidCredentials(Context context) {
         UserCredentials creds = getCredentials(context);
 
-        return creds != null && creds.getTokenExpiry() > System.currentTimeMillis();
+        if (creds != null) {
+            long expire = creds.getTokenExpiry();
+            long now = System.currentTimeMillis();
+
+            return expire == 0 || expire > now;
+        }
+        return false;
     }
 
     public static boolean hasCredentials(Context context) {
@@ -568,9 +659,11 @@ public class ArcGISTools {
         if (userCredentials != null)
             return userCredentials;
 
+        userCredentials = new UserCredentials();
+
         if (!StringEx.isEmpty(credStr)) {
             try {
-                byte[] data = credStr.getBytes("UTF-8");
+                byte[] data = Base64.decode(credStr, Base64.DEFAULT);
 
                 byte[] decoded = Encryption.decodeFile(AndroidUtils.Device.getDeviceID(context), data);
 
@@ -595,7 +688,7 @@ public class ArcGISTools {
 
             userCredentials = credentials;
 
-            Global.Settings.DeviceSettings.setArcCredentials(new String(encoded, "UTF-8"));
+            Global.Settings.DeviceSettings.setArcCredentials(Base64.encodeToString(encoded, Base64.DEFAULT));
 
             return true;
         } catch (Exception e) {
@@ -623,7 +716,7 @@ public class ArcGISTools {
 
     public interface IGetArcMapLayerListener {
         void onComplete(ArcGisMapLayer layer);
-        void onBadUrl();
+        void onBadUrl(String error);
     }
 
     public interface IArcToolsListener {

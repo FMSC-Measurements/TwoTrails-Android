@@ -3,11 +3,9 @@ package com.usda.fmsc.twotrails.objects.map;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.usda.fmsc.twotrails.utilities.TtUtils;
+import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.utilities.FileUtils;
 import com.usda.fmsc.utilities.StringEx;
-
-import java.io.File;
 
 public class ArcGisMapLayer implements Parcelable, Comparable {
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
@@ -32,6 +30,7 @@ public class ArcGisMapLayer implements Parcelable, Comparable {
     private double minScale;
     private double maxScale;
     private DetailLevel[] levelsOfDetail;
+    private double north, south, east, west;
 
     private boolean hasValidFile;
 
@@ -47,6 +46,10 @@ public class ArcGisMapLayer implements Parcelable, Comparable {
         minScale = in.readDouble();
         maxScale = in.readDouble();
         levelsOfDetail = (DetailLevel[])in.createTypedArray(DetailLevel.CREATOR);
+        north = in.readDouble();
+        south = in.readDouble();
+        east = in.readDouble();
+        west = in.readDouble();
     }
 
     public ArcGisMapLayer(ArcGisMapLayer agml) {
@@ -60,16 +63,16 @@ public class ArcGisMapLayer implements Parcelable, Comparable {
         this.minScale = agml.getMinScale();
         this.maxScale = agml.getMaxScale();
         this.levelsOfDetail = agml.getLevelsOfDetail();
-
-        this.hasValidFile =agml.hasValidFile();
+        this.hasValidFile = agml.hasValidFile();
+        setExtent(agml.getExtent());
     }
 
     public ArcGisMapLayer(int id, String name, String description, String location, String url, String filePath, boolean online) {
-        this(id, name, description, location, url, filePath, -1, -1, null, online);
+        this(id, name, description, location, url, filePath, -1, -1, null, null, online);
     }
 
     public ArcGisMapLayer(int id, String name, String description, String location, String url, String filePath, double minScale,
-                          double maxScale, DetailLevel[] levelsOfDetail, boolean online) {
+                          double maxScale, DetailLevel[] levelsOfDetail, Extent extent, boolean online) {
         if (name == null)
             description = StringEx.Empty;
 
@@ -98,6 +101,7 @@ public class ArcGisMapLayer implements Parcelable, Comparable {
         this.minScale = minScale;
         this.maxScale = maxScale;
         this.levelsOfDetail = levelsOfDetail;
+        setExtent(extent);
     }
 
 
@@ -118,6 +122,10 @@ public class ArcGisMapLayer implements Parcelable, Comparable {
         dest.writeDouble(minScale);
         dest.writeDouble(maxScale);
         dest.writeTypedArray(levelsOfDetail, flags);
+        dest.writeDouble(north);
+        dest.writeDouble(south);
+        dest.writeDouble(east);
+        dest.writeDouble(west);
     }
 
 
@@ -231,6 +239,25 @@ public class ArcGisMapLayer implements Parcelable, Comparable {
         this.levelsOfDetail = levelsOfDetail;
     }
 
+
+    public Extent getExtent() {
+        return new Extent(north, east, south, west);
+    }
+
+    public boolean hasExtent() {
+        return north != 0 || south != 0 || east != 0 || west != 0;
+    }
+
+    public void setExtent(Extent extent) {
+        if (extent == null) {
+            this.north = south = east = west = 0;
+        } else {
+            this.north = extent.getNorth();
+            this.south = extent.getSouth();
+            this.east = extent.getEast();
+            this.west = extent.getWest();
+        }
+    }
 
     public void update(ArcGisMapLayer layer) {
         this.name = layer.getName();

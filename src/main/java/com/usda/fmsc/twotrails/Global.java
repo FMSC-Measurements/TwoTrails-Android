@@ -1,5 +1,6 @@
 package com.usda.fmsc.twotrails;
 
+import android.app.Activity;
 import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -50,6 +51,7 @@ public class Global {
 
     private static Context _ApplicationContext;
     private static MainActivity _MainActivity;
+    private static Activity _CurrentActivity;
 
     private static TtMetadata _DefaultMeta;
     private static TtGroup _MainGroup;
@@ -188,6 +190,14 @@ public class Global {
     }
 
 
+    public static void setCurrentActivity(Activity activity) {
+        _CurrentActivity = activity;
+    }
+
+    public static Activity getCurrentActivity() {
+        return _CurrentActivity;
+    }
+
     //region Files
     public static String getTtFilePath(String fileName) {
         if(!fileName.endsWith(".tt"))
@@ -205,7 +215,7 @@ public class Global {
             dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
         }
 
-        return dir.toString();
+        return dir.getAbsolutePath();
     }
 
     public static String getOfflineMapsDir() {

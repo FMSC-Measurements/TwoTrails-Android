@@ -169,7 +169,6 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
     }
 
     public void addPosition(TtPoint point, boolean moveToPointAfterAdd) {
-
         final GeoPosition position = trailGraphicManager.addPoint(point);
 
         if (position != null) {

@@ -32,6 +32,12 @@
         app:showAsAction="never"/>
 
     <item
+        android:id="@+id/mmMenuMoveToMaxBounds"
+        android:title="@string/menu_map_move_to_max_extents"
+        app:showAsAction="never"
+        android:visible="false"/>
+
+    <item
         android:id="@+id/mapMenuResetBounds"
         android:title="@string/menu_map_reset_bnds"
         app:showAsAction="never"

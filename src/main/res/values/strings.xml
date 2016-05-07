@@ -143,9 +143,10 @@
     <string name="menu_walk_walking">Walking</string>
     <string name="menu_walk_map_mode">Map Mode</string>
     <string name="menu_rename_group">Rename Group</string>
-    <string name="menu_map_select_type">Select Map Type</string>
+    <string name="menu_map_select_type">Select Map</string>
     <string name="menu_map_settings">Map Settings</string>
     <string name="menu_map_reset_bnds">Reset Bounds</string>
+    <string name="menu_map_move_to_max_extents">Move To Map Bounds</string>
     <string name="menu_map_where_is">Where Is</string>
     <string name="menu_map_show_my_pos">Show My Position</string>
     <string name="menu_map_zoom_to_poly">Zoom To Polygon</string>
@@ -153,6 +154,7 @@
     <string name="menu_table_edit_filter">Filter</string>
     <string name="menu_table_edit_columns">Edit Columns</string>
     <string name="menu_table_edit_reset">Reset</string>
+    <string name="menu_map_manager_login">Login To ArcGIS</string>
 
 
     <!-- Transitions -->

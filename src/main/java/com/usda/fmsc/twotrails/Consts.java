@@ -129,6 +129,14 @@ public class Consts {
             public static final String MAP_DATA = "MapData";
         }
 
+        public static class Requests {
+            public static final int LOCATION = 5000;
+            public static final int PHONE = 5001;
+            public static final int STORAGE = 5002;
+            public static final int BLUETOOH = 5003;
+            public static final int INTERNET = 5004;
+            public static final int VIBRATE = 5005;
+        }
     }
 
     public static class Location {

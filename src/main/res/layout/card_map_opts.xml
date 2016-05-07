@@ -196,13 +196,17 @@
                             android:id="@+id/pmcFcbAdjMiscPts"
                             android:contentDescription="@string/map_adj_misc_pts"
                             style="@style/mapOptFlipCheckBoxStyle"
-                            app:acceptColor="@color/map_adj_pts"/>
+                            app:acceptColor="@color/map_adj_pts"
+                            app:acceptImage="@drawable/ic_location_white_36dp"
+                            app:declineImage="@drawable/ic_location_white_36dp"/>
 
                         <com.usda.fmsc.android.widget.FlipCheckBoxEx
                             android:id="@+id/pmcFcbUnadjMiscPts"
                             android:contentDescription="@string/map_unadj_misc_pts"
                             style="@style/mapOptFlipCheckBoxStyle"
-                            app:acceptColor="@color/map_unadj_pts"/>
+                            app:acceptColor="@color/map_unadj_pts"
+                            app:acceptImage="@drawable/ic_location_white_36dp"
+                            app:declineImage="@drawable/ic_location_white_36dp"/>
                     </LinearLayout>
                 </LinearLayout>
 

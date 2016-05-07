@@ -1,7 +1,9 @@
 package com.usda.fmsc.twotrails.activities.base;
 
+import android.app.Application;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -12,6 +14,8 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.usda.fmsc.android.AndroidUtils;
+import com.usda.fmsc.twotrails.Consts;
+import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
 
 public class CustomToolbarActivity extends AppCompatActivity {
@@ -48,6 +52,20 @@ public class CustomToolbarActivity extends AppCompatActivity {
         setupToolbar(view);
     }
 
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Global.setCurrentActivity(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Global.setCurrentActivity(null);
+    }
+
+
     protected void setupToolbar(View view) {
         toolbar = (Toolbar)view.findViewById(R.id.toolbar);
 
@@ -68,6 +86,7 @@ public class CustomToolbarActivity extends AppCompatActivity {
     protected Toolbar getToolbar() {
         return toolbar;
     }
+
 
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
@@ -97,11 +116,13 @@ public class CustomToolbarActivity extends AppCompatActivity {
         super.onBackPressed();
     }
 
+
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
         exit = false;
         return super.dispatchTouchEvent(event);
     }
+
 
     public void setUseExitWarning(boolean useWarning) {
         useExitWarning = useWarning;
