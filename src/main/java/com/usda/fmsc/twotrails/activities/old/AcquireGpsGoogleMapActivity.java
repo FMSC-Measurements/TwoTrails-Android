@@ -195,7 +195,7 @@ public class AcquireGpsGoogleMapActivity extends AcquireGpsInfoMapActivity imple
 
     @Override
     public void setMapMyLocationEnabled(boolean enabled) {
-        if (AndroidUtils.App.checkFineLocationPermission(this)) {
+        if (AndroidUtils.App.checkLocationPermission(this)) {
             map.setMyLocationEnabled(enabled);
         }
     }

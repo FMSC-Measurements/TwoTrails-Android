@@ -3,6 +3,7 @@ package com.usda.fmsc.twotrails.fragments.map;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -172,15 +173,11 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
     }
 
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
+    public void onDestroy() {
+        super.onDestroy();
 
         if (binder != null) {
             binder.removeListener(this);
-
-            if (!Global.Settings.DeviceSettings.isGpsAlwaysOn()) {
-                binder.stopGps();
-            }
         }
 
         // Release MapView resources
@@ -589,7 +586,7 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
 
     @Override
     public void nmeaBurstReceived(INmeaBurst nmeaBurst) {
-        if (showPosition && nmeaBurst.hasPosition()) {
+        if (showPosition && nmeaBurst.hasPosition() && mMapView != null) {
             Point point = ArcGISTools.latLngToMapSpatial(nmeaBurst.getLatitude(), nmeaBurst.getLongitude(), mMapView);
 
             if (locationLayer != null) {
@@ -721,17 +718,21 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
         }
 
         boolean displayInfoWindow(GraphicsLayer layer, MotionEvent point) {
-            int[] graphicIds = layer.getGraphicIDs(point.getX(), point.getY(), TOLERANCE, 1);
+            try {
+                int[] graphicIds = layer.getGraphicIDs(point.getX(), point.getY(), TOLERANCE, 1);
 
-            Graphic graphic = null;
+                Graphic graphic = null;
 
-            if (graphicIds.length > 0) {
-                graphic = layer.getGraphic(graphicIds[0]);
-            }
+                if (graphicIds.length > 0) {
+                    graphic = layer.getGraphic(graphicIds[0]);
+                }
 
-            if (graphic != null) {
-                onMarkerClick(graphicIds[0],graphic.getGeometry());
-                return true;
+                if (graphic != null) {
+                    onMarkerClick(graphicIds[0],graphic.getGeometry());
+                    return true;
+                }
+            } catch (Exception e) {
+                //getGraphicIDs throws IllegalStateException sometimes for no reason
             }
 
             return false;

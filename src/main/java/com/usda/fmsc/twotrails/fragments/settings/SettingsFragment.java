@@ -1,11 +1,13 @@
 package com.usda.fmsc.twotrails.fragments.settings;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
@@ -17,10 +19,12 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 
+import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.dialogs.DontAskAgainDialog;
 import com.usda.fmsc.android.preferences.ListCompatPreference;
 import com.usda.fmsc.android.preferences.SwitchCompatPreference;
 import com.usda.fmsc.geospatial.nmea.INmeaBurst;
+import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.activities.SettingsActivity;
 import com.usda.fmsc.twotrails.devices.TtBluetoothManager;
 import com.usda.fmsc.twotrails.Global;
@@ -223,6 +227,15 @@ public class SettingsFragment extends PreferenceFragment {
     }
 
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == Consts.Codes.Requests.BLUETOOH && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            switchToExternal();
+        }
+    }
+
     //region GPS Check
     Preference.OnPreferenceClickListener gpsCheckListener = new Preference.OnPreferenceClickListener() {
         @Override
@@ -384,40 +397,66 @@ public class SettingsFragment extends PreferenceFragment {
         @Override
         public boolean onPreferenceChange(Preference preference, Object newValue) {
             boolean useExternal = (boolean)newValue;
-            swtUseExDev.setSummary(getString(useExternal ? R.string.ds_gps_use_external : R.string.ds_gps_use_internal));
+
+            boolean sucess = false;
 
             if (useExternal) {
-                TtBluetoothManager btm = Global.getBluetoothManager();
-                Global.Settings.DeviceSettings.setGpsConfigured(false);
-                prefGpsCheck.setSummary(R.string.ds_gps_not_connected);
-
-                if (btm.isAvailable()) {
-                    if (btm.isEnabled()) {
-                        setBTValues(perfLstGpsDevice);
-                        exGpsCat.setEnabled(true);
-                        return true;
-                    } else {
-                        //bluetooth isnt turned on, request that it should be
-                        Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
-                    }
-                } else {
-                    //no bluetooth option on device
-                    Toast.makeText(getActivity().getApplicationContext(), R.string.ds_no_bt, Toast.LENGTH_LONG).show();
+                if (AndroidUtils.App.requestPermission(getActivity(), new String[] {
+                        Manifest.permission.BLUETOOTH,
+                        Manifest.permission.BLUETOOTH_ADMIN
+                }, Consts.Codes.Requests.BLUETOOH, null)) {
+                    sucess = switchToExternal();
                 }
             } else {
-                binder.stopGps();
-                binder.setGpsProvider(null);
-
-                Global.Settings.DeviceSettings.setGpsConfigured(true);
-                exGpsCat.setEnabled(false);
-                return true;
+                if (AndroidUtils.App.requestPermission(getActivity(), new String[] {
+                        Manifest.permission.ACCESS_COARSE_LOCATION,
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                }, Consts.Codes.Requests.LOCATION, null)) {
+                    sucess = switchToInternal();
+                }
             }
 
-            return false;
+            if (sucess) {
+                swtUseExDev.setSummary(getString(useExternal ? R.string.ds_gps_use_external : R.string.ds_gps_use_internal));
+            }
+
+            return sucess;
         }
     };
+
+
+    private boolean switchToExternal() {
+        TtBluetoothManager btm = Global.getBluetoothManager();
+        Global.Settings.DeviceSettings.setGpsConfigured(false);
+        prefGpsCheck.setSummary(R.string.ds_gps_not_connected);
+
+        if (btm.isAvailable()) {
+            if (btm.isEnabled()) {
+                setBTValues(perfLstGpsDevice);
+                exGpsCat.setEnabled(true);
+                return true;
+            } else {
+                //bluetooth isnt turned on, request that it should be
+                Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+            }
+        } else {
+            //no bluetooth option on device
+            Toast.makeText(getActivity().getApplicationContext(), R.string.ds_no_bt, Toast.LENGTH_LONG).show();
+        }
+
+        return false;
+    }
+
+    private boolean switchToInternal() {
+        binder.stopGps();
+        binder.setGpsProvider(null);
+
+        Global.Settings.DeviceSettings.setGpsConfigured(true);
+        exGpsCat.setEnabled(false);
+        return true;
+    }
     //endregion
 
 

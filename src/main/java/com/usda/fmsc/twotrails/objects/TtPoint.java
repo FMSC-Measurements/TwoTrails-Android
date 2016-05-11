@@ -1,6 +1,8 @@
 package com.usda.fmsc.twotrails.objects;
 
 
+import android.support.annotation.NonNull;
+
 import com.usda.fmsc.twotrails.Units.OpType;
 
 import org.joda.time.DateTime;
@@ -15,7 +17,7 @@ import com.usda.fmsc.utilities.StringEx;
 public abstract class TtPoint implements Comparable<TtPoint>, Comparator<TtPoint>, Serializable {
 
     //region Vars
-    protected String _CN = StringEx.Empty;
+    protected String _CN;
     protected OpType _Op;
     protected long _Index;
     protected int _PID;
@@ -65,7 +67,7 @@ public abstract class TtPoint implements Comparable<TtPoint>, Comparator<TtPoint
     //region Get/Set
     //region CN Op Index PID Time
     public String getCN() {
-        if(StringEx.isEmpty(_CN))
+        if (StringEx.isEmpty(_CN))
             _CN = java.util.UUID.randomUUID().toString();
         return _CN;
     }
@@ -349,17 +351,8 @@ public abstract class TtPoint implements Comparable<TtPoint>, Comparator<TtPoint
     }
 
     public boolean isNavPoint() {
-        if (_Op == OpType.GPS || _Op == OpType.Take5 || _Op == OpType.Walk || _Op == OpType.Traverse)
-            return true;
-        else if (_Op == OpType.Quondam) {
-            QuondamPoint qp = (QuondamPoint)this;
-            TtPoint qpParent = qp.getParentPoint();
-
-            if (qpParent != null && qpParent.isNavPoint())
-                return true;
-        }
-
-        return false;
+        return  (_Op == OpType.GPS || _Op == OpType.Take5 ||
+                _Op == OpType.Walk || _Op == OpType.Traverse);
     }
     //endregion
 
@@ -381,21 +374,11 @@ public abstract class TtPoint implements Comparable<TtPoint>, Comparator<TtPoint
     //region Adjusting / Calculating
     public abstract boolean adjustPoint();
 
-//    public boolean adjustPoint() {
-//        return false;
-//    }
-
     public boolean calculatePoint(TtPolygon polygon) {
         return calculatePoint(polygon, null);
     }
 
     public abstract boolean calculatePoint(TtPolygon polygon, TtPoint previousPoint);
-
-//    public boolean calculatePoint(TtPolygon polygon, TtPoint previousPoint) {
-//        _Accuracy = polygon.getAccuracy();
-//        _calculated = true;
-//        return true;
-//    }
     //endregion
 
 
@@ -405,7 +388,7 @@ public abstract class TtPoint implements Comparable<TtPoint>, Comparator<TtPoint
     }
 
     @Override
-    public int compareTo(TtPoint another) {
+    public int compareTo(@NonNull TtPoint another) {
         return compare(this, another);
     }
 
@@ -427,16 +410,12 @@ public abstract class TtPoint implements Comparable<TtPoint>, Comparator<TtPoint
         else
         {
             val = Long.valueOf(p1.getIndex()).compareTo(p2.getIndex());
-            //val = Long.compare(p1.getIndex(), p2.getIndex()); requires api 19
-            //val = p1.getIndex().compareTo(p2.getIndex()); c#
 
             if (val != 0)
                 return val;
             else
             {
                 val = Integer.valueOf(p1.getPID()).compareTo(p2.getPID());
-                //val = Integer.compare(p1.getPID(), p2.getPID()); requires api 19
-                //val = p1.getPID().compareTo(p2.getPID()); c#
 
                 if (val != 0)
                     return val;

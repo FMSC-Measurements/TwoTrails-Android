@@ -107,19 +107,6 @@ public class TtReport {
         }
     }
 
-    public void writeMessage(String msg, String codePage) {
-        String msgStr = String.format("MSG[%s][%s]: %s", new Date(), codePage, msg);
-        Log.d(Consts.LOG_TAG, msgStr);
-        inst.writeToReport(msgStr);
-    }
-
-    public void writeMessage(String msg, String codePage, String adv) {
-        writeMessage(msg, codePage);
-        String msgStr = String.format("%-5s%s", StringEx.Empty, adv);
-        Log.d(Consts.LOG_TAG, msgStr);
-        inst.writeToReport(msgStr);
-    }
-
     public void writeEvent(String event) {
         String eStr = String.format("EVT[%s]: %s", new Date(), event);
         Log.i(Consts.LOG_TAG, eStr);

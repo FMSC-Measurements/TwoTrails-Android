@@ -1,6 +1,7 @@
 package com.usda.fmsc.twotrails.objects.map;
 
 import android.support.annotation.ColorInt;
+import android.view.ViewGroup;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -214,6 +215,15 @@ public class GoogleMapsPolygonGrahpic implements IPolygonGraphic, IMarkerDataGra
     }
 
 
+    private boolean isInList(ArrayList<Marker> markers, Marker marker) {
+        String id = marker.getId();
+        for (Marker m : markers) {
+            if (m.getId().equals(id));
+                return true;
+        }
+        return false;
+    }
+
     //region Setters
     @Override
     public void setVisible(boolean visible) {
@@ -312,7 +322,10 @@ public class GoogleMapsPolygonGrahpic implements IPolygonGraphic, IMarkerDataGra
 
         visible &= drawOptions.isVisible();
         for (Marker m : _AdjBndPts) {
-            m.setVisible(visible);
+            if (visible || (!drawOptions.isAdjNavPts() && isInList(_AdjNavPts, m) ||
+                    !drawOptions.isAdjMiscPts() && isInList(_AdjMiscPts, m))) {
+                m.setVisible(visible);
+            }
         }
     }
 
@@ -338,7 +351,10 @@ public class GoogleMapsPolygonGrahpic implements IPolygonGraphic, IMarkerDataGra
 
         visible &= drawOptions.isVisible();
         for (Marker m : _UnadjBndPts) {
-            m.setVisible(visible);
+            if (visible || (!drawOptions.isUnadjNavPts() && isInList(_UnadjNavPts, m) ||
+                    !drawOptions.isUnadjMiscPts() && isInList(_UnadjMiscPts, m))) {
+                m.setVisible(visible);
+            }
         }
     }
 
@@ -358,7 +374,9 @@ public class GoogleMapsPolygonGrahpic implements IPolygonGraphic, IMarkerDataGra
 
         visible &= drawOptions.isVisible();
         for (Marker m : _AdjNavPts) {
-            m.setVisible(visible);
+            if (visible || !drawOptions.isAdjBndPts() && isInList(_AdjBndPts, m)) {
+                m.setVisible(visible);
+            }
         }
     }
 
@@ -378,7 +396,9 @@ public class GoogleMapsPolygonGrahpic implements IPolygonGraphic, IMarkerDataGra
 
         visible &= drawOptions.isVisible();
         for (Marker m : _UnadjNavPts) {
-            m.setVisible(visible);
+            if (visible || !drawOptions.isUnadjBndPts() && isInList(_UnadjBndPts, m)) {
+                m.setVisible(visible);
+            }
         }
     }
 
@@ -389,7 +409,10 @@ public class GoogleMapsPolygonGrahpic implements IPolygonGraphic, IMarkerDataGra
 
         visible &= drawOptions.isVisible();
         for (Marker m : _AdjMiscPts) {
-            m.setVisible(visible && drawOptions.isVisible());
+            if (visible || (!drawOptions.isAdjBndPts() && isInList(_AdjBndPts, m) ||
+                    !drawOptions.isAdjNavPts() && isInList(_AdjNavPts, m))) {
+                m.setVisible(visible);
+            }
         }
     }
 
@@ -399,7 +422,9 @@ public class GoogleMapsPolygonGrahpic implements IPolygonGraphic, IMarkerDataGra
 
         visible &= drawOptions.isVisible();
         for (Marker m : _UnadjMiscPts) {
-            m.setVisible(visible);
+            if (visible || (!drawOptions.isUnadjBndPts() && isInList(_UnadjBndPts, m) || !drawOptions.isUnadjNavPts() && isInList(_UnadjNavPts, m))) {
+                m.setVisible(visible);
+            }
         }
     }
 
@@ -408,6 +433,7 @@ public class GoogleMapsPolygonGrahpic implements IPolygonGraphic, IMarkerDataGra
     public void setWayPtsVisible(boolean visible) {
         drawOptions.setWayPts(visible);
 
+        visible &= drawOptions.isVisible();
         for (Marker m : _WayPts) {
             m.setVisible(visible);
         }

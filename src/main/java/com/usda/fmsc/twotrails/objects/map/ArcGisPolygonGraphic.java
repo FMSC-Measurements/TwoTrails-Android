@@ -76,13 +76,13 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
         Polyline unadjNavPLO = null;
 
         SimpleMarkerSymbol adjMkOpts = new SimpleMarkerSymbol(
-                graphicOptions.getAdjBndColor(),
+                graphicOptions.getAdjPtsColor(),
                 (int)graphicOptions.getUnAdjWidth(),
                 SimpleMarkerSymbol.STYLE.DIAMOND
         );
 
         SimpleMarkerSymbol unAdjMkOpts = new SimpleMarkerSymbol(
-                graphicOptions.getUnAdjBndColor(),
+                graphicOptions.getUnAdjPtsColor(),
                 (int)graphicOptions.getUnAdjWidth(),
                 SimpleMarkerSymbol.STYLE.SQUARE
         );
@@ -226,6 +226,14 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
             if (!drawOptions.isUnadjBndPts()) {
                 _UnadjBndPts.setVisible(false);
             }
+
+            if (!drawOptions.isAdjNavPts()) {
+                _AdjNavPts.setVisible(false);
+            }
+
+            if (!drawOptions.isUnadjNavPts()) {
+                _UnadjNavPts.setVisible(false);
+            }
             
             if (!drawOptions.isAdjMiscPts()) {
                 _AdjMiscPts.setVisible(false);
@@ -250,6 +258,9 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
 
             _AdjBndPts.setVisible(false);
             _UnadjBndPts.setVisible(false);
+            
+            _AdjNavPts.setVisible(false);
+            _UnadjNavPts.setVisible(false);
 
             _AdjMiscPts.setVisible(false);
             _UnadjMiscPts.setVisible(false);
@@ -268,6 +279,9 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
 
         map.addLayer(_AdjBndPts);
         map.addLayer(_UnadjBndPts);
+
+        map.addLayer(_AdjNavPts);
+        map.addLayer(_UnadjNavPts);
 
         map.addLayer(_AdjMiscPts);
         map.addLayer(_UnadjMiscPts);

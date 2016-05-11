@@ -1,8 +1,11 @@
 package com.usda.fmsc.twotrails.activities;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -193,6 +196,16 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
             finish();
         }
     }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == Consts.Codes.Requests.INTERNET && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            startActivity(new Intent(this, MapActivity.class));
+        }
+    }
+
 
     //endregion
 
@@ -594,7 +607,9 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
     //region Tools
     public void btnMapClick(View view) {
-        startActivity(new Intent(this, MapActivity.class));
+        if (AndroidUtils.App.requestPermission(this, Manifest.permission.INTERNET, Consts.Codes.Requests.INTERNET, null)) {
+            startActivity(new Intent(this, MapActivity.class));
+        }
     }
 
     public void btnGoogleEarthClick(View view) {

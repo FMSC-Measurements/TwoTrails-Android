@@ -2,6 +2,7 @@ package com.usda.fmsc.twotrails.fragments.map;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewTreeObserver;
 
@@ -89,7 +90,6 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
         getMapAsync(this);
     }
 
-
     @Override
     public void onViewCreated(final View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -102,6 +102,7 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
             }
         });
     }
+
 
     @Override
     public void setMap(int mapId) {
@@ -170,6 +171,7 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
 
         if (mmlistener != null) {
             mmlistener.onMapReady();
+            mmlistener.onMapTypeChanged(Units.MapType.Google, map.getMapType(), true);
         }
     }
 

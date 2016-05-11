@@ -56,8 +56,8 @@ public class TwoTrailsSchema {
             UnAdjX      + " REAL NOT NULL, " +
             UnAdjY      + " REAL NOT NULL, " +
             UnAdjZ      + " REAL NOT NULL, " +
-            Accuracy            + " REAL, " +
-            QuondamLinks    + " TEXT, " +
+            Accuracy    + " REAL, " +
+            QuondamLinks+ " TEXT, " +
             GroupName   + " TEXT, " +
             GroupCN     + " TEXT NOT NULL, " +
             "PRIMARY KEY (" + TwoTrailsSchema.SharedSchema.CN + "));";
@@ -99,7 +99,7 @@ public class TwoTrailsSchema {
 
         public static final String CreateTable =
             "CREATE TABLE " + TableName + " (" +
-            SharedSchema.CN + " TEXT REFERENCES " +
+            SharedSchema.CN     + " TEXT REFERENCES " +
             PointSchema.TableName + ", " +
             ForwardAz           + " REAL, " +
             BackAz              + " REAL, " +
@@ -118,8 +118,8 @@ public class TwoTrailsSchema {
         public static final String ManualAccuracy = "ManualAccuracy";
 
         public static final String CreateTable =
-            "CREATE TABLE " + TableName + " (" +
-            SharedSchema.CN + " TEXT REFERENCES " +
+            "CREATE TABLE "     + TableName + " (" +
+            SharedSchema.CN         + " TEXT REFERENCES " +
             PointSchema.TableName   + ", " +
             ParentPointCN           + " TEXT NOT NULL, " +
             ManualAccuracy          + " REAL, " +
@@ -143,7 +143,7 @@ public class TwoTrailsSchema {
         public static final String CreateTable =
             "CREATE TABLE " + TableName + " (" +
             SharedSchema.CN + " TEXT, " +
-                    Name + " TEXT, " +
+            Name            + " TEXT, " +
             Accuracy        + " REAL, " +
             Description     + " TEXT, " +
             Area            + " REAL, " +
@@ -166,9 +166,9 @@ public class TwoTrailsSchema {
         public static final String CreateTable =
             "CREATE TABLE " + TableName + " (" +
             SharedSchema.CN + " TEXT, " +
-            Name        + " TEXT, " +
-            Description + " TEXT, " +
-            Type        + " TEXT, " +
+            Name            + " TEXT, " +
+            Description     + " TEXT, " +
+            Type            + " TEXT, " +
             "PRIMARY KEY (" + SharedSchema.CN + "));";
     }
     //endregion
@@ -260,7 +260,7 @@ public class TwoTrailsSchema {
         public static final String CreateTable =
             "CREATE TABLE " + TableName + " (" +
             SharedSchema.CN + " TEXT NOT NULL, " +
-                    Name + " TEXT, " +
+            Name            + " TEXT, " +
             Distance        + " TEXT, " +
             Slope           + " TEXT, " +
             MagDec          + " REAL, " +
@@ -268,8 +268,8 @@ public class TwoTrailsSchema {
             Elevation       + " TEXT, " +
             Comment         + " TEXT, " +
             Datum           + " TEXT, " +
-            GpsReceiver        + " TEXT, " +
-            RangeFinder           + " TEXT, " +
+            GpsReceiver     + " TEXT, " +
+            RangeFinder     + " TEXT, " +
             Compass         + " TEXT, " +
             Crew            + " TEXT, " +
             UtmZone         + " INTEGER, " +
@@ -323,7 +323,7 @@ public class TwoTrailsSchema {
 
         public static final String CreateTable =
             "CREATE TABLE " + TableName + " (" +
-            SharedSchema.CN + " INTEGER, " +
+            SharedSchema.CN + " TEXT, " +
             AdjBndColor     + " INTEGER, " +
             UnAdjBndColor   + " INTEGER, " +
             AdjNavColor     + " INTEGER, " +
