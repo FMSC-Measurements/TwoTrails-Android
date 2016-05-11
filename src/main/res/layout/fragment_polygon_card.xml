@@ -186,6 +186,7 @@
                         <!-- Hide when below content is hidden, maybe put in content below amd change padding -->
 
                         <RelativeLayout
+                            android:id="@+id/polyLayImage"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_below="@id/cardContent"
@@ -195,22 +196,19 @@
 
                             <RelativeLayout
                                 android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:padding="8dp">
+                                android:layout_height="wrap_content"
+                                android:layout_margin="8dp"
+                                android:background="@color/primary_100">
 
-                                <!--This is where map will be, either gmap or drawable-->
-                                <RelativeLayout
+                                <com.usda.fmsc.twotrails.ui.StaticPolygonView
+                                    android:id="@+id/polySPView"
                                     android:layout_width="match_parent"
-                                    android:layout_height="300dp"
-                                    android:background="@color/primary_300">
-
-                                </RelativeLayout>
+                                    android:layout_height="0dp"/>
                             </RelativeLayout>
                         </RelativeLayout>
                     </RelativeLayout>
                 </RelativeLayout>
             </android.support.v7.widget.CardView>
         </LinearLayout>
-
     </ScrollView>
 </FrameLayout>

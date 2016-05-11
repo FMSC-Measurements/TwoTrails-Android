@@ -18,7 +18,7 @@ import java.util.List;
 
 public class HaidLogic {
     private static StringBuilder pointStats;
-    private static double travLength, totalTravError, totalGpsError, travGpsError;//, totalError;
+    private static double travLength, totalTravError, totalGpsError, travGpsError;
     private static boolean traversing;
     private static int traverseSegments, lastGpsPtPID;
 
@@ -39,12 +39,12 @@ public class HaidLogic {
             _Polygons.put(poly.getCN(), poly);
         }
 
-        totalTravError = totalGpsError = travGpsError = 0; //totalError =
-                traversing = false;
+        totalTravError = totalGpsError = travGpsError = 0;
+        traversing = false;
         traverseSegments = 0;
     }
 
-    public synchronized static String generatePolyStats(TtPolygon polygon, DataAccessLayer dal, boolean showPoints) {
+    public synchronized static String generatePolyStats(TtPolygon polygon, DataAccessLayer dal, boolean showPoints, boolean save) {
         StringBuilder sb = new StringBuilder();
 
         try {
@@ -52,43 +52,61 @@ public class HaidLogic {
 
             List<TtPoint> points = dal.getPointsInPolygon(polygon.getCN());
 
+            if (save) {
+                sb.append(String.format("Polygon Name: %s%s%s", polygon.getName(), Consts.NewLine, Consts.NewLine));
+            }
+
+            if (!StringEx.isEmpty(polygon.getDescription())) {
+                sb.append(String.format("Description: %s%s%s", polygon.getDescription(), Consts.NewLine, Consts.NewLine));
+            }
+
             if (points.size() > 0) {
-                points = TtUtils.filterOut(points, Units.OpType.WayPoint);
+                if (points.size() > 2) {
+                    points = TtUtils.filterOut(points, Units.OpType.WayPoint);
 
-                if (points.size() > 0) {
-                    for (TtPoint point : points) {
-                        pointStats.append(getPointSummary(point, false, showPoints));
-                    }
+                    if (points.size() > 0) {
+                        if (points.size() > 2) {
+                            for (TtPoint point : points) {
+                                pointStats.append(getPointSummary(point, false, showPoints));
+                            }
 
-                    TtPoint pt = points.get(0);
-                    for (TtPoint point : points) {
-                        if (point.isOnBnd()) {
-                            pt = point;
-                            break;
+                            TtPoint pt = points.get(0);
+                            for (TtPoint point : points) {
+                                if (point.isOnBnd()) {
+                                    pt = point;
+                                    break;
+                                }
+                            }
+
+                            if (!pt.sameAdjLocation(_LastTtPoint)) {
+                                _Legs.add(new Leg(_LastTtPoint, pt));
+                            }
+
+                            for (Leg leg : _Legs) {
+                                totalGpsError += leg.getAreaError();
+                            }
+
+                            sb.append(getPolygonSummary(polygon, save));
+                            sb.append(pointStats);
+                        } else {
+                            sb.append("There are not enough valid points in the polygon.");
                         }
+                    } else {
+                        sb.append("There are only WayPoints in the polygon.");
                     }
-
-                    if (!pt.sameAdjLocation(_LastTtPoint)) {
-                        _Legs.add(new Leg(_LastTtPoint, pt, _Polygons));
-                    }
-
-                    for (Leg leg : _Legs) {
-                        totalGpsError += leg.getAreaError();
-                    }
-
-                    //totalError = totalGpsError + totalTravError;
-
-                    sb.append(getPolygonSummary(polygon, false));
-                    sb.append(pointStats);
                 } else {
-                    sb.append("There are only WayPoints in the polygon.");
+                    sb.append("There are not enough points in the polygon.");
                 }
             } else {
                 sb.append("There are no points in the polygon.");
             }
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "HaidLogic:generatePolyStats");
+            TtUtils.TtReport.writeError(ex.getMessage(), "HaidLogic:generatePolyStats", ex.getStackTrace());
             return "Error generating polygon info";
+        }
+
+        if (save) {
+            sb.append(String.format("%s%s- - - - - - - - - - - - - - - - - - - -", Consts.NewLine, Consts.NewLine));
         }
 
         return sb.toString();
@@ -102,38 +120,9 @@ public class HaidLogic {
 
             for (TtPolygon polygon : _Polygons.values()) {
 
-                List<TtPoint> points = TtUtils.filterOut(dal.getPointsInPolygon(polygon.getCN()), Units.OpType.WayPoint);
+                sb.append(generatePolyStats(polygon, dal, showPoints, save));
 
-                if (points.size() > 0) {
-                    for (TtPoint point : points) {
-                        pointStats.append(getPointSummary(point, false, showPoints));
-                    }
-
-                    TtPoint pt = points.get(0);
-                    for (TtPoint point : points) {
-                        if (point.isOnBnd()) {
-                            pt = point;
-                            break;
-                        }
-                    }
-
-                    if (!pt.sameAdjLocation(_LastTtPoint)) {
-                        _Legs.add(new Leg(_LastTtPoint, pt, _Polygons));
-                    }
-
-                    for (Leg leg : _Legs) {
-                        totalGpsError += leg.getAreaError();
-                    }
-
-                    //totalError = totalGpsError + totalTravError;
-
-                    sb.append(getPolygonSummary(polygon, save));
-                    sb.append(pointStats);
-                } else {
-                    sb.append("No Points in Polygon.");
-                }
-
-                sb.append("\r\n\r\n");
+                sb.append(String.format("%s%s", Consts.NewLine, Consts.NewLine));
             }
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "HaidLogic:generateAllPolyStats");
@@ -161,7 +150,7 @@ public class HaidLogic {
 
         traversing = false;
 
-        _Legs.add(new Leg(_LastTtPoint, point, _Polygons));
+        _Legs.add(new Leg(_LastTtPoint, point));
 
         if(_Legs.size() > 0) {
             double travStartAcc = _Legs.get(0).getPoint1Acc();
@@ -197,7 +186,7 @@ public class HaidLogic {
                        closeTraverse(point, sb);
                     } else {
                         if (_LastTtPoint != null && _LastTtPoint.isOnBnd()) {
-                            _Legs.add(new Leg(_LastTtPoint, point, _Polygons));
+                            _Legs.add(new Leg(_LastTtPoint, point));
                         }
                     }
 
@@ -219,7 +208,7 @@ public class HaidLogic {
                             travLength += TtUtils.Math.distance(_LastPoint.X, _LastPoint.Y, point.getUnAdjX(), point.getUnAdjY());
 
                             if (_LastTtPoint.isOnBnd()) {
-                                _Legs.add(new Leg(_LastTtPoint, point, _Polygons));
+                                _Legs.add(new Leg(_LastTtPoint, point));
                             }
                         } else {
                             traverseSegments = 0;
@@ -232,7 +221,7 @@ public class HaidLogic {
 
                             _Legs = new ArrayList<>();
                             if (_LastTtPoint.isOnBnd()) {
-                                _Legs.add(new Leg(_LastTtPoint, point, _Polygons));
+                                _Legs.add(new Leg(_LastTtPoint, point));
                             }
                         }
                         _LastPoint = new PointD(point.getUnAdjX(), point.getUnAdjY());
@@ -253,7 +242,7 @@ public class HaidLogic {
 
                 if (_LastTtPoint != null && _LastTtPoint.isOnBnd())
                 {
-                    _Legs.add(new Leg(_LastTtPoint, point, _Polygons));
+                    _Legs.add(new Leg(_LastTtPoint, point));
                 }
 
                 _LastPoint = new PointD(point.getUnAdjX(), point.getUnAdjY());
@@ -271,7 +260,7 @@ public class HaidLogic {
                     else
                     {
                         if (_LastTtPoint.isOnBnd()) {
-                            _Legs.add(new Leg(_LastTtPoint, qp.getParentPoint(), _Polygons));
+                            _Legs.add(new Leg(_LastTtPoint, qp.getParentPoint()));
                         }
 
                         _LastTtPoint = point;
@@ -297,11 +286,6 @@ public class HaidLogic {
     private static String getPolygonSummary(TtPolygon polygon, boolean save) throws Exception {
         StringBuilder sb = new StringBuilder();
 
-        //sb.append(String.format("Polygon ID: %s%s", polygon.getName(), Consts.NewLine));
-
-        if (!StringEx.isEmpty(polygon.getDescription()))
-            sb.append(String.format("Description: %s\r\n\r\n", polygon.getDescription()));
-
         if (polygon.getArea() > 0)
         {
             sb.append(String.format("The polygon area is: %s%.3f Ha (%.3f ac).%s",
@@ -316,21 +300,6 @@ public class HaidLogic {
                             TtUtils.Convert.toFeetTenths(polygon.getPerimeter(), Units.Dist.Meters),
                             Consts.NewLine));
         }
-
-        /*
-        if (totalError > 0) {
-            sb.append(String.format("The polygon area-error is: %s%.5f Ha (%.3f ac)%s",
-                    save ? "    " : "",
-                    TtUtils.Convert.metersSquaredToHa(totalError),
-                    TtUtils.Convert.metersSquaredToAcres(totalError),
-                    Consts.NewLine));
-
-            sb.append(String.format("Ratio of area-error-area to area is: %.2f%%.%s",
-                    totalError / polygon.getArea() * 100.0,
-                    Consts.NewLine));
-
-        }
-        */
 
         if (totalGpsError > 0) {
             sb.append(String.format("GPS Contribution: %s%.5f Ha (%.3f ac)%s",
@@ -359,26 +328,28 @@ public class HaidLogic {
         sb.append(Consts.NewLine);
         return sb.toString();
     }
+
+
+    static class Leg {
+        private double point1Acc;
+        private double point2Acc;
+        private double distance;
+
+        public double getPoint1Acc() { return point1Acc; }
+        public double getPoint2Acc() { return point2Acc; }
+        public double getDistance() {return distance; }
+
+        public Leg(TtPoint point1, TtPoint point2) {
+            point1Acc = point1.getAccuracy();
+            point2Acc = point2.getAccuracy();
+            distance = TtUtils.Math.distance(point1, point2);
+        }
+
+        public double getAreaError()
+        {
+            return distance * (point1Acc + point2Acc) / 2;
+        }
+    }
 }
 
 
-class Leg {
-    private double point1Acc;
-    private double point2Acc;
-    private double distance;
-
-    public double getPoint1Acc() { return point1Acc; }
-    public double getPoint2Acc() { return point2Acc; }
-    public double getDistance() {return distance; }
-
-    public Leg(TtPoint point1, TtPoint point2, HashMap<String, TtPolygon> polygons) {
-        point1Acc = point1.getAccuracy();// TtUtils.getPointAcc(point1, polygons);
-        point2Acc = point2.getAccuracy();// TtUtils.getPointAcc(point2, polygons);
-        distance = TtUtils.Math.distance(point1, point2);
-    }
-
-    public double getAreaError()
-    {
-        return distance * (point1Acc + point2Acc) / 2;
-    }
-}

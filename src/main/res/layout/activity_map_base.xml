@@ -1,0 +1,69 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              tools:context="com.usda.fmsc.twotrails.activities.base.BaseMapActivity">
+
+    <android.support.v4.widget.DrawerLayout
+        android:id="@+id/mapNavDrawer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <!-- View -->
+        <com.sothree.slidinguppanel.SlidingUpPanelLayout
+            xmlns:sothree="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/mapSlidingPanelLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="bottom"
+            sothree:umanoPanelHeight="50dp"
+            sothree:umanoShadowHeight="4dp"
+            sothree:umanoDragView="@+id/mapDragView"
+            sothree:umanoOverlay="true"
+            sothree:umanoInitialState="hidden">
+
+            <!-- MAIN CONTENT -->
+            <android.support.design.widget.CoordinatorLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <FrameLayout
+                    android:id="@+id/mapContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"/>
+
+                <FrameLayout
+                    android:id="@+id/contentContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"/>
+            </android.support.design.widget.CoordinatorLayout>
+
+
+            <!-- SLIDING LAYOUT -->
+            <include android:id="@+id/mapSlidingContent" layout="@layout/layout_where_is" />
+
+        </com.sothree.slidinguppanel.SlidingUpPanelLayout>
+
+
+        <!-- Drawer -->
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="start"
+            android:background="@color/background_card_view">
+
+            <include layout="@layout/control_map_options"
+                     android:id="@+id/controlOpts"
+                     android:layout_width="match_parent"
+                     android:layout_height="wrap_content"
+                     android:layout_alignParentTop="true"/>
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/mapRvPolyOptions"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_alignParentBottom="true"
+                android:layout_below="@id/controlOpts"/>
+        </RelativeLayout>
+    </android.support.v4.widget.DrawerLayout>
+</LinearLayout>

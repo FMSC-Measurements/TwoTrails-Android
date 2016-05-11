@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.view.ViewCompat;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -19,7 +18,7 @@ import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.animation.ViewAnimator;
 import com.usda.fmsc.android.widget.SpreadsheetView;
 import com.usda.fmsc.utilities.StringEx;
-import com.usda.fmsc.twotrails.activities.custom.CustomToolbarActivity;
+import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
 
@@ -123,11 +122,6 @@ public class TableEditActivity extends CustomToolbarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_table_edit);
-
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
 
         activity = this;
 
@@ -257,7 +251,7 @@ public class TableEditActivity extends CustomToolbarActivity {
     private void setupTable() {
         _Polygons = new ArrayList<>();
         _Points = new ArrayList<>();
-        _Metadata = Global.DAL.getMetadataMap();
+        _Metadata = Global.getDAL().getMetadataMap();
         _MetaNames = new HashMap<>();
 
         _PolygonFilter = new HashMap<>();
@@ -271,11 +265,11 @@ public class TableEditActivity extends CustomToolbarActivity {
             _MetaNames.put(meta.getCN(), meta.getName());
         }
 
-        for (TtPolygon poly : Global.DAL.getPolygons()) {
+        for (TtPolygon poly : Global.getDAL().getPolygons()) {
             _Polygons.add(poly);
             _PolygonFilter.put(poly.getCN(), true);
 
-            _Points.addAll(Global.DAL.getPointsInPolygon(poly.getCN()));
+            _Points.addAll(Global.getDAL().getPointsInPolygon(poly.getCN()));
         }
 
         _DisplayedPoints = new ArrayList<>();

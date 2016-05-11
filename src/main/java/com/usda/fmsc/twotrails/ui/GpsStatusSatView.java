@@ -98,7 +98,7 @@ public class GpsStatusSatView extends GpsStatusView {
     protected void onDraw(Canvas canvas) {
         int vHeight = getHeight();
 
-        //canvas.drawRect(0, 0, getWidth(), getHeight(), paintBackground);
+        //canvas.drawRect(0, 0, getSize(), getHeight(), paintBackground);
 
         if (getValidSatelliteCount() > 0) {
             int width = getWidth() / getValidSatelliteCount();

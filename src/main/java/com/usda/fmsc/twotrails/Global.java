@@ -1,49 +1,54 @@
 package com.usda.fmsc.twotrails;
 
+import android.app.Activity;
 import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
-import android.content.res.Resources;
+import android.os.Build;
 import android.os.Environment;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.support.annotation.ColorInt;
 import android.support.v4.app.NotificationCompat;
 
-import com.usda.fmsc.android.AndroidUtils;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.usda.fmsc.android.AndroidUtils;
+import com.usda.fmsc.geospatial.Units.UomElevation;
+import com.usda.fmsc.geospatial.nmea.sentences.GGASentence;
 import com.usda.fmsc.twotrails.activities.MainActivity;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
 import com.usda.fmsc.twotrails.devices.TtBluetoothManager;
 import com.usda.fmsc.twotrails.gps.GpsService;
-import com.usda.fmsc.twotrails.objects.PolyDrawOptions;
 import com.usda.fmsc.twotrails.objects.RecentProject;
 import com.usda.fmsc.twotrails.objects.TtGroup;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
-import com.usda.fmsc.twotrails.objects.TtPolygon;
+import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
+import com.usda.fmsc.twotrails.objects.map.PolygonDrawOptions;
+import com.usda.fmsc.twotrails.objects.map.PolygonGraphicOptions;
+import com.usda.fmsc.twotrails.objects.map.PolygonGraphicOptions.GraphicCode;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
+import com.usda.fmsc.utilities.FileUtils;
+import com.usda.fmsc.utilities.StringEx;
+
+import org.joda.time.DateTime;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
-import com.usda.fmsc.geospatial.nmea.sentences.GGASentence;
-import com.usda.fmsc.geospatial.Units.UomElevation;
-import com.usda.fmsc.utilities.StringEx;
-
 public class Global {
-    public static DataAccessLayer DAL;
+    private static DataAccessLayer DAL;
 
     private static Context _ApplicationContext;
     private static MainActivity _MainActivity;
-
-    private static String _LogFilePath;
+    private static Activity _CurrentActivity;
 
     private static TtMetadata _DefaultMeta;
     private static TtGroup _MainGroup;
@@ -73,10 +78,10 @@ public class Global {
 
         Settings.DeviceSettings.init();
 
-        _LogFilePath = _ApplicationContext.getApplicationInfo().dataDir;// Environment.getDataDirectory().getAbsolutePath(); //TtUtils.getTtFileDir();
+        //_LogFilePath = _ApplicationContext.getApplicationInfo().dataDir;// Environment.getDataDirectory().getAbsolutePath(); //TtUtils.getTtFileDir();
         _DefaultMeta = Settings.MetaDataSetting.getDefaultmetaData();
 
-        TtUtils.TtReport.changeFilePath(_LogFilePath);
+        TtUtils.TtReport.changeDirectory(getTtLogFileDir());
 
         _MainGroup = new TtGroup();
         _MainGroup.setCN(Consts.EmptyGuid);
@@ -88,9 +93,19 @@ public class Global {
 
         TtNotifyManager.init(applicationContext);
 
-        File ttFileDir = new File(TtUtils.getTtFileDir());
-        if(!ttFileDir.exists()) {
-            ttFileDir.mkdirs();
+        File dir = new File(getTtFileDir());
+        if(!dir.exists()) {
+            dir.mkdirs();
+        }
+
+        dir = new File(getOfflineMapsDir());
+        if(!dir.exists()) {
+            dir.mkdirs();
+        }
+
+        dir = new File(getOfflineMapsRecoveryDir());
+        if(!dir.exists()) {
+            dir.mkdirs();
         }
 
         _ApplicationContext.startService(new Intent(_ApplicationContext, GpsService.class));
@@ -98,12 +113,16 @@ public class Global {
 
         TtUtils.TtReport.writeEvent("TwoTrails Started");
 
+        //TODO set arc license for release
+        //ArcGISRuntime.setClientId(_ApplicationContext.getString(R.string.arcgis_client_id));
+
         initUI();
     }
 
     private static void initUI() {
-        Resources res = _ApplicationContext.getResources();
-        AndroidUtils.UI.setOverscrollColor(res, _ApplicationContext, res.getColor(R.color.primary));
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            AndroidUtils.UI.setOverscrollColor(_ApplicationContext.getResources(), _ApplicationContext, R.color.primary);
+        }
     }
 
     public static void destroy() {
@@ -114,17 +133,27 @@ public class Global {
     }
 
 
-    public static String getLogFilePath() {
-        return _LogFilePath;
+    public static DataAccessLayer getDAL() {
+        return DAL;
+    }
+
+    public static void setDAL(DataAccessLayer dal) {
+        DAL = dal;
+
+        if (dal != null) {
+            MapSettings.reset();
+        }
     }
 
     public static TtMetadata getDefaultMeta() {
         return _DefaultMeta;
     }
 
+
     public static TtGroup getMainGroup() {
         return _MainGroup;
     }
+
 
     public static String getTwoTrailsVersion() {
         try {
@@ -138,32 +167,94 @@ public class Global {
         return "ANDROID: ???";
     }
 
+
     public static TtBluetoothManager getBluetoothManager() {
         return bluetoothManager;
     }
+
 
     public static GpsService.GpsBinder getGpsBinder() {
         return gpsBinder;
     }
 
+
     public static MainActivity getMainActivity() {
         return _MainActivity;
     }
 
+    public static Context getApplicationContext() {
+        return _ApplicationContext;
+    }
+
+
+    public static void setCurrentActivity(Activity activity) {
+        _CurrentActivity = activity;
+    }
+
+    public static Activity getCurrentActivity() {
+        return _CurrentActivity;
+    }
+
+    //region Files
+    public static String getTtFilePath(String fileName) {
+        if(!fileName.endsWith(".tt"))
+            fileName += ".tt";
+
+        return getTtFileDir() + File.separator + fileName;
+    }
+
+    public static String getDocumentsDir() {
+        File dir;
+
+        if (Build.VERSION.SDK_INT < 19) {
+            dir = Environment.getExternalStorageDirectory();
+        } else {
+            dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
+        }
+
+        return dir.getAbsolutePath();
+    }
+
+    public static String getOfflineMapsDir() {
+        return String.format("%s%s%s", getDocumentsDir(), File.separator, "OfflineMaps");
+    }
+
+    public static String getOfflineMapsRecoveryDir() {
+        return String.format("%s%s%s", getOfflineMapsDir(), File.separator, "Recovery");
+    }
+
+    public static String getTtFileDir() {
+        return String.format("%s%s%s", getDocumentsDir(), File.separator, "TwoTrailsFiles");
+    }
+
+    public static String getTtLogFileDir() {
+        return getTtFileDir();
+        //return String.format("%s%s%s", getTtFileDir(), File.separator, "LogFiles");
+    }
+
+    public static String getLogFileName() {
+        return String.format("%s%sTtGpsLog_%s.txt",
+                getTtLogFileDir(),
+                File.separator,
+                DateTime.now().toString());
+    }
+    //endregion
 
 
     public static class TtNotifyManager {
         public static int GPS_NOTIFICATION_ID = 123;
 
         protected static NotificationManager _NotificationManager;
-        private static NotificationCompat.Builder _Builder;
+        private static NotificationCompat.Builder _GpsBuilder;
         private static int _UsedDrawable;
         private static String _UsedText;
+        private static HashMap<Integer, NotificationCompat.Builder> _DownloadingNotifs;
 
         public static void init(Context ctx) {
             _NotificationManager = (NotificationManager)ctx.getSystemService(Context.NOTIFICATION_SERVICE);
-            _Builder = new NotificationCompat.Builder(ctx);
-            _Builder.setOngoing(true);
+            _GpsBuilder = new NotificationCompat.Builder(ctx);
+            _GpsBuilder.setOngoing(true);
+            _DownloadingNotifs = new HashMap<>();
         }
 
         public static NotificationManager getNotificationManager() {
@@ -171,16 +262,16 @@ public class Global {
         }
 
         public static void setGpsOn() {
-            if(_NotificationManager != null && _Builder != null) {
-                _Builder.setContentTitle(Consts.ServiceTitle);
+            if(_NotificationManager != null && _GpsBuilder != null) {
+                _GpsBuilder.setContentTitle(Consts.ServiceTitle);
 
                 _UsedText = Consts.ServiceContent;
-                _Builder.setContentText(_UsedText);
+                _GpsBuilder.setContentText(_UsedText);
 
                 _UsedDrawable = R.drawable.ic_ttgps_holo_dark_enabled;
-                _Builder.setSmallIcon(_UsedDrawable);
+                _GpsBuilder.setSmallIcon(_UsedDrawable);
 
-                _NotificationManager.notify(GPS_NOTIFICATION_ID, _Builder.build());
+                _NotificationManager.notify(GPS_NOTIFICATION_ID, _GpsBuilder.build());
             }
         }
 
@@ -192,16 +283,16 @@ public class Global {
 
 
         public static void startWalking() {
-            if (_NotificationManager != null && _Builder != null) {
-                _Builder.setContentTitle(Consts.ServiceTitle);
+            if (_NotificationManager != null && _GpsBuilder != null) {
+                _GpsBuilder.setContentTitle(Consts.ServiceTitle);
 
                 _UsedText = Consts.ServiceWalking;
-                _Builder.setContentText(_UsedText);
+                _GpsBuilder.setContentText(_UsedText);
 
                 _UsedDrawable = R.drawable.ic_ttgps_holo_dark_enabled; //switch to walking anim
-                _Builder.setSmallIcon(_UsedDrawable);
+                _GpsBuilder.setSmallIcon(_UsedDrawable);
 
-                _NotificationManager.notify(GPS_NOTIFICATION_ID, _Builder.build());
+                _NotificationManager.notify(GPS_NOTIFICATION_ID, _GpsBuilder.build());
             }
         }
 
@@ -214,13 +305,13 @@ public class Global {
         }
 
         public static void showPointAquired() {
-            if(_NotificationManager != null && _Builder != null) {
+            if(_NotificationManager != null && _GpsBuilder != null) {
 
-                _Builder.setContentTitle(Consts.ServiceTitle);
-                _Builder.setContentText(Consts.ServiceAcquiringPoint);
-                _Builder.setSmallIcon(R.drawable.ica_capturepoint);
+                _GpsBuilder.setContentTitle(Consts.ServiceTitle)
+                .setContentText(Consts.ServiceAcquiringPoint)
+                .setSmallIcon(R.drawable.ica_capturepoint);
 
-                _NotificationManager.notify(GPS_NOTIFICATION_ID, _Builder.build());
+                _NotificationManager.notify(GPS_NOTIFICATION_ID, _GpsBuilder.build());
 
                 Thread thread = new Thread() {
                     @Override
@@ -228,11 +319,11 @@ public class Global {
                         try {
                             sleep(1000);
 
-                            _Builder.setContentTitle(Consts.ServiceTitle);
-                            _Builder.setContentText(_UsedText);
-                            _Builder.setSmallIcon(_UsedDrawable);
+                            _GpsBuilder.setContentTitle(Consts.ServiceTitle);
+                            _GpsBuilder.setContentText(_UsedText);
+                            _GpsBuilder.setSmallIcon(_UsedDrawable);
 
-                            _NotificationManager.notify(GPS_NOTIFICATION_ID, _Builder.build());
+                            _NotificationManager.notify(GPS_NOTIFICATION_ID, _GpsBuilder.build());
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
@@ -242,8 +333,29 @@ public class Global {
                 thread.start();
             }
         }
-    }
 
+
+        public static void startMapDownload(int id, String name) {
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(_ApplicationContext);
+            builder.setOngoing(true)
+                    .setSmallIcon(R.drawable.ic_map_black_36dp)
+                    .setContentTitle(String.format("Downloading Map %s", name))
+                    .setProgress(100, 0, false);
+
+            _DownloadingNotifs.put(id, builder);
+
+            _NotificationManager.notify(id, builder.build());
+        }
+
+        public static void updateMapDownload(int id, int progress) {
+            _NotificationManager.notify(id, _DownloadingNotifs.get(id).setProgress(100, progress, false).build());
+        }
+
+        public static void endMapDownload(int id) {
+            _NotificationManager.cancel(id);
+            _DownloadingNotifs.remove(id);
+        }
+    }
 
 
     public static class Settings {
@@ -430,13 +542,20 @@ public class Global {
             public static final String LAST_OPENED_PROJECT = "AutoOpenLastProject";
 
             public static final String MAP_TRACKING_OPTION = "MapTrackingOption";
-            //public static final String MAP_ZOOM_BUTTONS = "MapZoomButtons";
             public static final String MAP_COMPASS_ENABLED = "MapCompassEnabled";
             public static final String MAP_MYPOS_BUTTON = "MapMyPosButton";
             public static final String MAP_MIN_DIST = "MapMinDist";
             public static final String MAP_SHOW_MY_POS = "MapShowMyPos";
             public static final String MAP_DISPLAY_GPS_LOCATION = "MapDisplayGpsLocation";
             public static final String MAP_USE_UTM_NAV = "MapUseUtmNav";
+            public static final String MAP_TYPE = "MapType";
+            public static final String MAP_ID = "MapTerrainType";
+            public static final String ARC_GIS_MAPS = "ArcGISMaps";
+            public static final String ARC_GIS_MAP_ID_COUNTER = "ArcGISMapIdCounter";
+            public static final String MAP_ADJ_LINE_WIDTH = "MapAdjLineWidth";
+            public static final String MAP_UNADJ_LINE_WIDTH = "MapUnAdjLineWidth";
+
+            public static final String ARC_CREDENTIALS = "ArcCredentials";
             //endregion
 
             //region Default Values
@@ -485,14 +604,20 @@ public class Global {
             public static final boolean DEFAULT_AUTO_OVERWRITE_EXPORT_ASK = true;
 
             public static final Units.MapTracking DEFAULT_MAP_TRACKING_OPTION = Units.MapTracking.POLY_BOUNDS;
-            //public static final boolean DEFAULT_MAP_ZOOM_BUTTONS = false;
             public static final boolean DEFAULT_MAP_COMPASS_ENABLED = true;
             public static final boolean DEFAULT_MAP_MYPOS_BUTTON = true;
             public static final double DEFAULT_MAP_MIN_DIST = 50;
             public static final boolean DEFAULT_MAP_SHOW_MY_POS = true;
             public static final boolean DEFAULT_MAP_DISPLAY_GPS_LOCATION = true;
             public static final boolean DEFAULT_MAP_USE_UTM_NAV = true;
+            public static final int DEFAULT_MAP_TYPE = 1;
+            public static final int DEFAULT_MAP_ID = 1;
+            public static final String DEFAULT_ARC_GIS_MAPS = StringEx.Empty;
+            public static final int DEFAULT_ARC_GIS_MAP_ID_COUNTER = 0;
+            public static final int DEFAULT_MAP_ADJ_LINE_WIDTH = 8;
+            public static final int DEFAULT_MAP_UNADJ_LINE_WIDTH = 32;
             //endregion
+
 
             public static void init() {
                 if (!getBool(SETTINGS_CREATED, false)) {
@@ -552,15 +677,23 @@ public class Global {
                 editor.putInt(MAP_TRACKING_OPTION, DEFAULT_MAP_TRACKING_OPTION.getValue());
                 editor.putBoolean(MAP_MYPOS_BUTTON, DEFAULT_MAP_MYPOS_BUTTON);
                 editor.putBoolean(MAP_COMPASS_ENABLED, DEFAULT_MAP_COMPASS_ENABLED);
-                //editor.putBoolean(MAP_ZOOM_BUTTONS, DEFAULT_MAP_ZOOM_BUTTONS);
                 editor.putBoolean(MAP_SHOW_MY_POS, DEFAULT_MAP_SHOW_MY_POS);
                 editor.putBoolean(MAP_DISPLAY_GPS_LOCATION, DEFAULT_MAP_DISPLAY_GPS_LOCATION);
                 editor.putBoolean(MAP_USE_UTM_NAV, DEFAULT_MAP_USE_UTM_NAV);
+                editor.putInt(MAP_TYPE, DEFAULT_MAP_TYPE);
+                editor.putInt(MAP_ID, DEFAULT_MAP_ID);
+                editor.putString(ARC_GIS_MAPS, DEFAULT_ARC_GIS_MAPS);
+                editor.putInt(ARC_GIS_MAP_ID_COUNTER, DEFAULT_ARC_GIS_MAP_ID_COUNTER);
+                editor.putInt(MAP_ADJ_LINE_WIDTH, DEFAULT_MAP_ADJ_LINE_WIDTH);
+                editor.putInt(MAP_UNADJ_LINE_WIDTH, DEFAULT_MAP_UNADJ_LINE_WIDTH);
+
+                editor.putString(ARC_CREDENTIALS, StringEx.Empty);
 
                 editor.putBoolean(SETTINGS_CREATED, true);
 
                 editor.commit();
             }
+
 
             //region GPS Settings
             public static boolean getGpsExternal() {
@@ -570,24 +703,6 @@ public class Global {
             public static void setGpsExternal(boolean value) {
                 setBool(GPS_EXTERNAL, value);
             }
-
-            /*
-            public static String getGpsPort() {
-                return getString(GPS_PORT);
-            }
-
-            public static void setGpsPort(String value) {
-                setString(GPS_PORT, value);
-            }
-
-            public static int getGpsBaud() {
-                return getInt(GPS_BAUD);
-            }
-
-            public static void setGpsBaud(int value) {
-                setInt(GPS_BAUD, value);
-            }
-            */
 
 
             public static String getGpsDeviceID() {
@@ -627,7 +742,7 @@ public class Global {
 
 
             public static boolean isGpsConfigured() {
-                return getBool(GPS_CONFIGURED);
+                return getBool(GPS_CONFIGURED) || !getBool(GPS_EXTERNAL);
             }
 
             public static void setGpsConfigured(boolean value) {
@@ -899,6 +1014,7 @@ public class Global {
                 setBool(MAP_MYPOS_BUTTON, value);
             }
 
+
             public static boolean getMapCompassEnabled() {
                 return getBool(MAP_COMPASS_ENABLED, DEFAULT_MAP_COMPASS_ENABLED);
             }
@@ -942,6 +1058,78 @@ public class Global {
             public static void setMapUseUtmNav(boolean value) {
                 setBool(MAP_USE_UTM_NAV, value);
             }
+
+
+
+            public static Units.MapType getMapType() {
+                return Units.MapType.parse(getInt(MAP_TYPE, DEFAULT_MAP_TYPE));
+            }
+
+            public static void setMapType(Units.MapType value) {
+                setInt(MAP_TYPE, value.getValue());
+            }
+
+
+            public static int getMapId() {
+                return getInt(MAP_ID, DEFAULT_MAP_ID);
+            }
+
+            public static void setMapId(int value) {
+                setInt(MAP_ID, value);
+            }
+
+
+
+            public static int getMapAdjLineWidth() {
+                return getInt(MAP_ADJ_LINE_WIDTH, DEFAULT_MAP_ADJ_LINE_WIDTH);
+            }
+
+            public static void setMapAdjLineWidth(int value) {
+                setInt(MAP_ADJ_LINE_WIDTH, value);
+            }
+
+
+            public static int getMapUnAdjLineWidth() {
+                return getInt(MAP_UNADJ_LINE_WIDTH, DEFAULT_MAP_UNADJ_LINE_WIDTH);
+            }
+
+            public static void setMapUnAdjLineWidth(int value) {
+                setInt(MAP_UNADJ_LINE_WIDTH, value);
+            }
+
+
+            //region ArcGIS
+
+            public static int getArcGisIdCounter() {
+                return getInt(ARC_GIS_MAP_ID_COUNTER, DEFAULT_ARC_GIS_MAP_ID_COUNTER);
+            }
+
+            public static void setArcGisMapIdCounter(int value) {
+                setInt(ARC_GIS_MAP_ID_COUNTER, value);
+            }
+
+
+            public static ArrayList<ArcGisMapLayer> getArcGisMayLayers() {
+                if(getPrefs() == null)
+                    loadPrefs();
+
+                Gson gson = new Gson();
+                String json = getPrefs().getString(ARC_GIS_MAPS, null);
+
+                if(StringEx.isEmpty(json))
+                    return new ArrayList<>();
+
+                return gson.fromJson(json, new TypeToken<ArrayList<ArcGisMapLayer>>() { }.getType());
+            }
+
+            public static boolean setArcGisMayLayers(Collection<ArcGisMapLayer> recentProjects) {
+                if(getEditor() == null)
+                    loadPrefs();
+
+                return getEditor().putString(ARC_GIS_MAPS, new Gson().toJson(recentProjects)).commit();
+            }
+            //endregion
+
             //endregion
 
             //region Other
@@ -1067,19 +1255,30 @@ public class Global {
             public static void setAutoOpenLastProject(boolean value) {
                 setBool(AUTO_OPEN_LAST_PROJECT, value);
             }
+
+
+
+            public static String getArcCredentials() {
+                return getString(ARC_CREDENTIALS, StringEx.Empty);
+            }
+
+            public static void setArcCredentials(String value) {
+                setString(ARC_CREDENTIALS, value);
+            }
             //endregion
         }
 
 
         public static class ProjectSettings extends PreferenceHelper {
-            public static final String PROJECT_ID = "ProjectID";  //Zone
-            public static final String DESCRIPTION = "Description";  //Zone
-            public static final String REGION = "Region";  //Zone
+            public static final String PROJECT_ID = "ProjectID";
+            public static final String DESCRIPTION = "Description";
+            public static final String REGION = "Region";
             public static final String FOREST = "Forest";
             public static final String DISTRICT = "District";
             public static final String RECENT_PROJS = "Recent";
             public static final String LAST_EDITED_POLY_CN = "LastEditedPolyCN";
             public static final String TRACKED_POLY_CN = "TrackedPolyCN";
+
 
             public static void initProjectSettings(DataAccessLayer dal) {
                 if(dal != null) {
@@ -1089,26 +1288,26 @@ public class Global {
                     setForest(dal.getProjectForest());
                     setDistrict(dal.getProjectDistrict());
                 } else {
-                    setProjectId("1");
+                    setProjectId("Unamed");
                     setDescription(StringEx.Empty);
                 }
             }
 
             //region Project Settings
-            public static String getProjectId() {
+            private static String getProjectId() {
                 return getString(PROJECT_ID);
             }
 
-            public static void setProjectId(String value) {
+            private static void setProjectId(String value) {
                 setString(PROJECT_ID, value);
             }
 
 
-            public static String getDescription() {
+            private static String getDescription() {
                 return getString(DESCRIPTION);
             }
 
-            public static void setDescription(String value) {
+            private static void setDescription(String value) {
                 setString(DESCRIPTION, value);
             }
 
@@ -1158,6 +1357,7 @@ public class Global {
 
 
             //region Recent Projects
+            @SuppressWarnings("unchecked")
             public static ArrayList<RecentProject> getRecentProjects() {
 
                 if(getPrefs() == null)
@@ -1167,15 +1367,17 @@ public class Global {
                 String json = getPrefs().getString(RECENT_PROJS, null);
 
                 if(json == null)
-                    return new ArrayList<RecentProject>();
+                    return new ArrayList<>();
 
-                return gson.fromJson(json, new TypeToken<ArrayList<RecentProject>>() {
-                }.getType());
+                ArrayList<RecentProject> projects = new ArrayList<>();
 
-                //return new Gson().fromJson(
-                //        getPrefs().getString(RECENT_PROJS, null),
-                //        new TypeToken<ArrayList<RecentProject>>() {
-                //        }.getType());
+                for (RecentProject rp : (ArrayList<RecentProject>)gson.fromJson(json, new TypeToken<ArrayList<RecentProject>>() { }.getType())) {
+                    if (FileUtils.fileExists(rp.File)) {
+                        projects.add(rp);
+                    }
+                }
+
+                return projects;
             }
 
             public static boolean setRecentProjects(List<RecentProject> recentProjects) {
@@ -1189,13 +1391,13 @@ public class Global {
                 ArrayList<RecentProject> newList = new ArrayList<>();
                 newList.add(project);
 
-                for(RecentProject p : getRecentProjects()) {
-                    if(!project.File.equals(p.File) && TtUtils.fileExists(p.File)) {
+                for (RecentProject p : getRecentProjects()) {
+                    if (!project.File.equals(p.File)) {
                         newList.add(p);
                     }
                 }
 
-                if(newList.size() > 7)
+                if (newList.size() > 7)
                     setRecentProjects(newList.subList(0, 8));
                 else
                     setRecentProjects(newList);
@@ -1367,32 +1569,83 @@ public class Global {
 
 
     public static class MapSettings {
-        public static HashMap<String, PolyDrawOptions> PolyOptions;
-        public static PolyDrawOptions MasterPolyOptions;
+        private static HashMap<String, PolygonDrawOptions> _PolyDrawOptions = new HashMap<>();
+        private static PolygonDrawOptions _MasterPolyDrawOptions = new PolygonDrawOptions();
 
-        //initial values
-        public static void init(ArrayList<TtPolygon> polys) {
-            HashMap<String, PolyDrawOptions> polyOptions = new HashMap<>();
+        private static HashMap<String, PolygonGraphicOptions> _PolyGraphicOptions = new HashMap<>();
+        private static PolygonGraphicOptions _MasterPolyGraphicOptions;
 
-
-            if (MasterPolyOptions == null) {
-                MasterPolyOptions = new PolyDrawOptions();
+        public static void reset() {
+            for (PolygonGraphicOptions pgo : _PolyGraphicOptions.values()) {
+                pgo.removeListener(updateListener);
             }
 
-            boolean polyOptsCreated = PolyOptions != null;
+            _PolyDrawOptions.clear();
 
-            String key;
-            for (TtPolygon poly : polys) {
-                key = poly.getCN();
+            _MasterPolyGraphicOptions = new PolygonGraphicOptions(
+                    Consts.EmptyGuid,
+                    AndroidUtils.UI.getColor(getApplicationContext(), R.color.map_adj_bnd),
+                    AndroidUtils.UI.getColor(getApplicationContext(), R.color.map_unadj_bnd),
+                    AndroidUtils.UI.getColor(getApplicationContext(), R.color.map_adj_nav),
+                    AndroidUtils.UI.getColor(getApplicationContext(), R.color.map_unadj_nav),
+                    AndroidUtils.UI.getColor(getApplicationContext(), R.color.map_adj_pts),
+                    AndroidUtils.UI.getColor(getApplicationContext(), R.color.map_unadj_pts),
+                    AndroidUtils.UI.getColor(getApplicationContext(), R.color.map_way_pts),
+                    Settings.DeviceSettings.getMapAdjLineWidth(),
+                    Settings.DeviceSettings.getMapUnAdjLineWidth()
+            );
 
-                if (polyOptsCreated && PolyOptions.containsKey(key)) {
-                    polyOptions.put(key, PolyOptions.get(key));
-                } else {
-                    polyOptions.put(key, new PolyDrawOptions(MasterPolyOptions));
+            _PolyGraphicOptions = getDAL().getPolygonGraphicOptionsMap();
+
+            for (PolygonGraphicOptions pgo : _PolyGraphicOptions.values()) {
+                pgo.addListener(updateListener);
+            }
+        }
+
+
+        public static PolygonDrawOptions getMasterPolyDrawOptions() {
+            return _MasterPolyDrawOptions;
+        }
+
+        public static PolygonDrawOptions getPolyDrawOptions(String cn) {
+            if (_PolyDrawOptions.containsKey(cn)) {
+                return _PolyDrawOptions.get(cn);
+            } else {
+                PolygonDrawOptions pdo = new PolygonDrawOptions(_MasterPolyDrawOptions);
+                _PolyDrawOptions.put(cn, pdo);
+                return pdo;
+            }
+        }
+
+
+        public static PolygonGraphicOptions getMasterPolyGraphicOptions() {
+            return _MasterPolyGraphicOptions;
+        }
+
+        public static PolygonGraphicOptions getPolyGraphicOptions(final String cn) {
+            if (_PolyGraphicOptions.containsKey(cn)) {
+                return _PolyGraphicOptions.get(cn);
+            } else {
+                PolygonGraphicOptions pgo = new PolygonGraphicOptions(cn, _MasterPolyGraphicOptions);
+                _PolyGraphicOptions.put(cn, pgo);
+
+                if (getDAL() != null) {
+                    getDAL().insertPolygonGraphicOption(pgo);
+                }
+
+                pgo.addListener(updateListener);
+
+                return pgo;
+            }
+        }
+
+        static PolygonGraphicOptions.Listener updateListener = new PolygonGraphicOptions.Listener() {
+            @Override
+            public void onOptionChanged(PolygonGraphicOptions pgo, GraphicCode code, @ColorInt int value) {
+                if (getDAL() != null && _PolyGraphicOptions.containsKey(pgo.getCN())) {
+                    getDAL().updatePolygonGraphicOption(pgo);
                 }
             }
-
-            PolyOptions = polyOptions;
-        }
+        };
     }
 }

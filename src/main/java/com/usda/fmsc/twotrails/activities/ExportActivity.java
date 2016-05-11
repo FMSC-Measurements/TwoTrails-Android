@@ -1,21 +1,15 @@
 package com.usda.fmsc.twotrails.activities;
 
-import android.content.ClipData;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.ActionBar;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
 
 //import com.devpaul.filepickerlibrary.FilePickerActivity;
@@ -25,14 +19,13 @@ import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.dialogs.DontAskAgainDialog;
 import com.usda.fmsc.android.widget.FABProgressCircleEx;
 import com.usda.fmsc.android.widget.MultiStateTouchCheckBox;
-import com.usda.fmsc.twotrails.activities.custom.CustomToolbarActivity;
+import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.utilities.Export;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.io.File;
-import java.util.ArrayList;
 
 public class ExportActivity extends CustomToolbarActivity {
 
@@ -47,12 +40,6 @@ public class ExportActivity extends CustomToolbarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_export);
-
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayShowTitleEnabled(true);
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
 
         fabExport = (FloatingActionButton)findViewById(R.id.exportFabExport);
         progCircle = (FABProgressCircleEx)findViewById(R.id.exportFabExportProgressCircle);
@@ -172,16 +159,16 @@ public class ExportActivity extends CustomToolbarActivity {
                 Toast.makeText(this, "No options selected for export", Toast.LENGTH_SHORT).show();
             } else {
                 if (selectdir) {
-                    selectDirectory(TtUtils.getTtFileDir());
+                    selectDirectory(Global.getTtFileDir());
                 } else {
-                    startExport(TtUtils.getTtFileDir());
+                    startExport(Global.getTtFileDir());
                 }
             }
         }
     }
 
     private void startExport(String directory) {
-        final File dir = new File(String.format("%s/%s/", directory, Global.DAL.getProjectID()));
+        final File dir = new File(String.format("%s/%s/", directory, Global.getDAL().getProjectID()));
 
         if (dir.exists()) {
             if (Global.Settings.DeviceSettings.getAutoOverwriteExportAsk()) {
@@ -308,6 +295,7 @@ public class ExportActivity extends CustomToolbarActivity {
                             case InvalidParams:
                                 progCircle.hide();
                                 Toast.makeText(getBaseContext(), "Export error, See log for details", Toast.LENGTH_SHORT).show();
+                                TtUtils.TtReport.writeError("ExportActivity", result.getMessage());
                                 break;
                         }
                     }
@@ -315,7 +303,7 @@ public class ExportActivity extends CustomToolbarActivity {
 
                 exportTask.execute(
                         new Export.ExportTask.ExportParams(
-                                Global.DAL,
+                                Global.getDAL(),
                                 directory,
                                 chkPoints.isChecked(),
                                 chkPolys.isChecked(),

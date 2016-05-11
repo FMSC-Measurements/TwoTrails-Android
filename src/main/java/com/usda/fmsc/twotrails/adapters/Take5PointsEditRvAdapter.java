@@ -32,7 +32,7 @@ import java.util.List;
 import com.usda.fmsc.utilities.ParseEx;
 import com.usda.fmsc.utilities.StringEx;
 
-public class Take5PointsEditRvAdapter extends RecyclerViewEx.AdapterEx<ViewHolderEx> {
+public class Take5PointsEditRvAdapter extends RecyclerViewEx.BaseAdapterEx {
     Take5Activity activity;
     List<TtPoint> points;
     Drawable dOnBnd, dOffBnd;
@@ -47,8 +47,6 @@ public class Take5PointsEditRvAdapter extends RecyclerViewEx.AdapterEx<ViewHolde
 
         dOnBnd = AndroidUtils.UI.getDrawable(this.activity, R.drawable.ic_onbnd_dark);
         dOffBnd = AndroidUtils.UI.getDrawable(this.activity, R.drawable.ic_offbnd_dark);
-
-        setViewHasFooter(true);
     }
 
 
@@ -182,11 +180,6 @@ public class Take5PointsEditRvAdapter extends RecyclerViewEx.AdapterEx<ViewHolde
                 break;
             }
         }
-    }
-
-    @Override
-    public ViewHolderEx onCreateHeaderViewHolder(ViewGroup parent) {
-        return null;
     }
 
     @Override

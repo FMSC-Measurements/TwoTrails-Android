@@ -1,191 +1,137 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.usda.fmsc.twotrails.activities.MapActivity">
 
-    <android.support.v4.widget.DrawerLayout
-        android:id="@+id/mapNavDrawer"
+    <RelativeLayout
+        android:id="@+id/lay1"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <!-- View -->
-        <com.sothree.slidinguppanel.SlidingUpPanelLayout
-            xmlns:sothree="http://schemas.android.com/apk/res-auto"
-            android:id="@+id/mapSlidingPanelLayout"
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="bottom"
-            sothree:umanoPanelHeight="50dp"
-            sothree:umanoShadowHeight="4dp"
-            sothree:umanoDragView="@+id/mapDragView"
-            sothree:umanoOverlay="true"
-            sothree:umanoInitialState="hidden">
+            android:layout_height="@dimen/toolbar_height"
+            android:theme="@style/ToolbarTheme"
+            app:popupTheme="@style/PopupTheme"
+            android:background="#AA486E4A"
+            android:layout_alignParentTop="true">
 
-            <!-- MAIN CONTENT -->
-            <android.support.design.widget.CoordinatorLayout
+            <LinearLayout
+                android:id="@+id/mapTbLayPosition"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                xmlns:app="http://schemas.android.com/apk/res-auto">
+                android:orientation="horizontal"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:clickable="false">
 
-                <fragment
-                    android:id="@+id/map"
-                    android:layout_width="match_parent"
+                <ImageView
+                    android:id="@+id/mapIvGps"
+                    android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    class="com.google.android.gms.maps.SupportMapFragment" />
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-
-                    <android.support.v7.widget.Toolbar
-                        android:id="@+id/toolbar"
-                        android:layout_width="match_parent"
-                        android:layout_height="@dimen/toolbar_height"
-                        android:theme="@style/ToolbarTheme"
-                        app:popupTheme="@style/PopupTheme"
-                        android:background="#AA486E4A"
-                        android:layout_alignParentTop="true">
-
-                        <LinearLayout
-                            android:id="@+id/mapTbLayPosition"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:orientation="horizontal"
-                            android:focusable="false"
-                            android:focusableInTouchMode="false"
-                            android:clickable="false">
-
-                            <ImageView
-                                android:id="@+id/mapIvGps"
-                                android:layout_width="wrap_content"
-                                android:layout_height="match_parent"
-                                android:src="@drawable/ic_satellite_white"
-                                android:layout_marginTop="14dp"
-                                android:layout_marginBottom="14dp"
-                                android:visibility="gone"
-                                android:contentDescription="@string/str_empty"/>
+                    android:src="@drawable/ic_satellite_white"
+                    android:layout_marginTop="14dp"
+                    android:layout_marginBottom="14dp"
+                    android:visibility="gone"
+                    android:contentDescription="@string/str_empty"/>
 
 
-                            <TableLayout
-                                android:layout_width="0dp"
-                                android:layout_height="match_parent"
-                                android:layout_weight="1"
-                                android:layout_marginLeft="4dp"
-                                android:layout_marginStart="4dp">
+                <TableLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:layout_marginLeft="4dp"
+                    android:layout_marginStart="4dp">
 
-                                <TableRow
-                                    android:layout_height="0dp"
-                                    android:layout_weight="1">
+                    <TableRow
+                        android:layout_height="0dp"
+                        android:layout_weight="1">
 
-                                    <TextView
-                                        android:id="@+id/mapTbTvLocXType"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:textSize="14sp"
-                                        android:textColor="@android:color/white"
-                                        android:visibility="gone"
-                                        android:text="@string/str_utmx"
-                                        android:layout_gravity="center_vertical"/>
+                        <TextView
+                            android:id="@+id/mapTbTvLocXType"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="14sp"
+                            android:textColor="@android:color/white"
+                            android:visibility="gone"
+                            android:text="@string/str_utmx"
+                            android:layout_gravity="center_vertical"/>
 
-                                    <TextView
-                                        android:id="@+id/mapTbTvLocX"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:textSize="14sp"
-                                        android:textColor="@android:color/white"
-                                        android:visibility="gone"
-                                        android:layout_gravity="center_vertical"
-                                        android:layout_marginLeft="4dp"
-                                        android:layout_marginStart="4dp"
-                                        android:minWidth="10dp"/>
+                        <TextView
+                            android:id="@+id/mapTbTvLocX"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="14sp"
+                            android:textColor="@android:color/white"
+                            android:visibility="gone"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginLeft="4dp"
+                            android:layout_marginStart="4dp"
+                            android:minWidth="10dp"/>
 
-                                    <TextView
-                                        android:id="@+id/mapTbTvLocZoneLabel"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:textSize="14sp"
-                                        android:textColor="@android:color/white"
-                                        android:text="@string/str_zone"
-                                        android:visibility="gone"
-                                        android:layout_gravity="center_vertical"/>
+                        <TextView
+                            android:id="@+id/mapTbTvLocZoneLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="14sp"
+                            android:textColor="@android:color/white"
+                            android:text="@string/str_zone"
+                            android:visibility="gone"
+                            android:layout_gravity="center_vertical"/>
 
-                                    <TextView
-                                        android:id="@+id/mapTbTvLocZone"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:textSize="14sp"
-                                        android:textColor="@android:color/white"
-                                        android:visibility="gone"
-                                        android:layout_gravity="center_vertical"
-                                        android:layout_marginLeft="4dp"
-                                        android:layout_marginStart="4dp"/>
-                                </TableRow>
+                        <TextView
+                            android:id="@+id/mapTbTvLocZone"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="14sp"
+                            android:textColor="@android:color/white"
+                            android:visibility="gone"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginLeft="4dp"
+                            android:layout_marginStart="4dp"/>
+                    </TableRow>
 
-                                <TableRow
-                                    android:layout_height="0dp"
-                                    android:layout_weight="1">
+                    <TableRow
+                        android:layout_height="0dp"
+                        android:layout_weight="1">
 
-                                    <TextView
-                                        android:id="@+id/mapTbTvLocYType"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:textSize="14sp"
-                                        android:textColor="@android:color/white"
-                                        android:visibility="gone"
-                                        android:text="@string/str_utmy"
-                                        android:layout_gravity="center_vertical"/>
+                        <TextView
+                            android:id="@+id/mapTbTvLocYType"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="14sp"
+                            android:textColor="@android:color/white"
+                            android:visibility="gone"
+                            android:text="@string/str_utmy"
+                            android:layout_gravity="center_vertical"/>
 
-                                    <TextView
-                                        android:id="@+id/mapTbTvLocY"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:textSize="14sp"
-                                        android:textColor="@android:color/white"
-                                        android:visibility="gone"
-                                        android:layout_gravity="center_vertical"
-                                        android:layout_marginLeft="4dp"
-                                        android:layout_marginStart="4dp"
-                                        android:minWidth="10dp"/>
-                                </TableRow>
-                            </TableLayout>
-                        </LinearLayout>
-                    </android.support.v7.widget.Toolbar>
+                        <TextView
+                            android:id="@+id/mapTbTvLocY"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="14sp"
+                            android:textColor="@android:color/white"
+                            android:visibility="gone"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginLeft="4dp"
+                            android:layout_marginStart="4dp"
+                            android:minWidth="10dp"/>
+                    </TableRow>
+                </TableLayout>
+            </LinearLayout>
+        </android.support.v7.widget.Toolbar>
 
-                    <View style="@style/ToolbarElevation" android:layout_below="@id/toolbar" />
-                </RelativeLayout>
+        <View style="@style/ToolbarElevation" android:layout_below="@id/toolbar" />
+    </RelativeLayout>
 
-                <android.support.design.widget.FloatingActionButton
-                    android:id="@+id/mapFabMyPos"
-                    style="@style/fabStyle"
-                    android:src="@drawable/ic_my_location_white_36dp"
-                    app:layout_anchor="@id/map"
-                    android:onClick="btnMyLocClick" />
-            </android.support.design.widget.CoordinatorLayout>
-
-
-            <!-- SLIDING LAYOUT -->
-            <include android:id="@+id/mapSlidingContent" layout="@layout/layout_where_is" />
-
-        </com.sothree.slidinguppanel.SlidingUpPanelLayout>
-
-
-        <!-- Drawer -->
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_gravity="start"
-            android:orientation="vertical"
-            android:background="@color/background_card_view">
-
-            <include layout="@layout/control_map_options"/>
-
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/mapRvPolyOptions"
-                android:layout_width="wrap_content"
-                android:layout_height="0dp"
-                android:layout_weight="1"/>
-        </LinearLayout>
-    </android.support.v4.widget.DrawerLayout>
-</LinearLayout>
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/mapFabMyPos"
+        style="@style/fabStyle"
+        android:src="@drawable/ic_my_location_white_36dp"
+        app:layout_anchor="@id/lay1"
+        android:onClick="btnMyLocClick" />
+</android.support.design.widget.CoordinatorLayout>

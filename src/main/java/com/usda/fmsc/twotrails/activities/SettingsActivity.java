@@ -2,10 +2,9 @@ package com.usda.fmsc.twotrails.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
-import com.usda.fmsc.twotrails.activities.custom.CustomToolbarActivity;
+import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.fragments.settings.SettingsFragment;
 import com.usda.fmsc.twotrails.R;
 

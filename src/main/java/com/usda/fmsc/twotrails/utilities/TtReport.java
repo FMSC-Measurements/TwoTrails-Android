@@ -28,14 +28,13 @@ public class TtReport {
         }
 
         try {
-            logWriter = new PrintWriter(new FileOutputStream(
-                    new File(path), true));
+            logWriter = new PrintWriter(new FileOutputStream(new File(path), true));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
     }
 
-    public void changeFilePath(String path) {
+    public void changeDirectory(String path) {
         inst.changeFilePathString(path + File.separator + _fileName);
     }
 
@@ -50,8 +49,7 @@ public class TtReport {
     public void clearReport() {
         closeReport();
         try {
-            logWriter = new PrintWriter(new FileOutputStream(
-                    new File(filePath), false));
+            logWriter = new PrintWriter(new FileOutputStream(new File(filePath), false));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -88,33 +86,30 @@ public class TtReport {
     }
 
     public void writeError(String msg, String codePage) {
-        inst.writeToReport(String.format("ERR[%s][%s]: %s",
-                new Date(), codePage, msg));
+        String error = String.format("ERR[%s][%s]: %s", new Date(), codePage, msg);
+        Log.e(Consts.LOG_TAG, error);
+        inst.writeToReport(error);
     }
 
     public void writeError(String msg, String codePage, StackTraceElement[] stack) {
-        inst.writeToReport(String.format("ERR[%s][%s]: %s",
-                new Date(), codePage, msg));
-        inst.writeToReport(String.format("Stack Trace: %n"));
-        if(stack != null) {
-            for (StackTraceElement ste : stack)
-                inst.writeToReport(String.format("%-5s%s", StringEx.Empty, ste.toString()));
+        writeError(msg, codePage);
+
+        String error = String.format("Stack Trace: %n");
+        Log.d(Consts.LOG_TAG, error);
+        inst.writeToReport(error);
+
+        if (stack != null) {
+            for (StackTraceElement ste : stack) {
+                error = String.format("%-5s%s", StringEx.Empty, ste.toString());
+                Log.d(Consts.LOG_TAG, error);
+                inst.writeToReport(error);
+            }
         }
     }
 
-    public void writeMessage(String msg, String codePage) {
-        inst.writeToReport(String.format("MSG[%s][%s]: %s",
-                new Date(), codePage, msg));
-    }
-
-    public void writeMessage(String msg, String codePage, String adv) {
-        inst.writeToReport(String.format("MSG[%s][%s]: %s",
-                new Date(), codePage, msg));
-        inst.writeToReport(String.format("%-5s%s", StringEx.Empty, adv));
-    }
-
     public void writeEvent(String event) {
-        inst.writeToReport(String.format("EVT[%s]: %s",
-                new Date(), event));
+        String eStr = String.format("EVT[%s]: %s", new Date(), event);
+        Log.i(Consts.LOG_TAG, eStr);
+        inst.writeToReport(eStr);
     }
 }

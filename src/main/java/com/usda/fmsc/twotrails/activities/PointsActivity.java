@@ -21,7 +21,6 @@ import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.usda.fmsc.android.adapters.FragmentStatePagerAdapterEx;
@@ -29,7 +28,7 @@ import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.listeners.ComplexOnPageChangeListener;
 import com.usda.fmsc.android.widget.SheetFab;
 import com.usda.fmsc.android.widget.SheetLayoutEx;
-import com.usda.fmsc.twotrails.activities.custom.CustomToolbarActivity;
+import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.adapters.PointDetailsAdapter;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.dialogs.LatLonDialog;
@@ -183,15 +182,14 @@ public class PointsActivity extends CustomToolbarActivity {
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null){
             actionBar.setDisplayShowTitleEnabled(false);
-            actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
         setUseExitWarning(true);
 
         listeners = new HashMap<>();
 
-        _Polygons = Global.DAL.getPolygonsMap();
-        _MetaData = Global.DAL.getMetadataMap();
+        _Polygons = Global.getDAL().getPolygonsMap();
+        _MetaData = Global.getDAL().getMetadataMap();
 
         final TtPolygon[] polyArray = _Polygons.values().toArray(new TtPolygon[_Polygons.size()]);
         Arrays.sort(polyArray);
@@ -337,7 +335,7 @@ public class PointsActivity extends CustomToolbarActivity {
         savePoint();
 
         if (adjust) {
-            PolygonAdjuster.adjust(Global.DAL, Global.getMainActivity(), true);
+            PolygonAdjuster.adjust(Global.getDAL(), Global.getMainActivity(), true);
         }
     }
 
@@ -543,14 +541,14 @@ public class PointsActivity extends CustomToolbarActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         switch (requestCode) {
-            case Consts.Activities.ACQUIRE:
-            case Consts.Activities.CALCULATE: {
+            case Consts.Codes.Activites.ACQUIRE:
+            case Consts.Codes.Activites.CALCULATE: {
                 slexAqr.contractFab();
                 calculateResult(resultCode, data);
                 break;
             }
-            case Consts.Activities.TAKE5:
-            case Consts.Activities.WALK: {
+            case Consts.Codes.Activites.TAKE5:
+            case Consts.Codes.Activites.WALK: {
                 slexCreate.contractFab();
                 addInsertPointsResult(resultCode, data);
                 break;
@@ -559,8 +557,8 @@ public class PointsActivity extends CustomToolbarActivity {
     }
 
     private void calculateResult(int resultCode, Intent data) {
-        if (resultCode == Consts.Activities.Results.POINT_CREATED) {
-            GpsPoint point = (GpsPoint)data.getSerializableExtra(Consts.Activities.Data.POINT_DATA);
+        if (resultCode == Consts.Codes.Results.POINT_CREATED) {
+            GpsPoint point = (GpsPoint)data.getSerializableExtra(Consts.Codes.Data.POINT_DATA);
 
             updatePoint(point);
             onPointUpdate();
@@ -568,12 +566,12 @@ public class PointsActivity extends CustomToolbarActivity {
     }
 
     private void addInsertPointsResult(int resultCode, Intent data) {
-        if (resultCode == Consts.Activities.Results.POINT_CREATED) {
+        if (resultCode == Consts.Codes.Results.POINT_CREATED) {
             Bundle bundle = data.getExtras();
             int created = 1;
 
-            if (bundle.containsKey(Consts.Activities.Data.NUMBER_OF_CREATED_POINTS)) {
-                created = bundle.getInt(Consts.Activities.Data.NUMBER_OF_CREATED_POINTS);
+            if (bundle.containsKey(Consts.Codes.Data.NUMBER_OF_CREATED_POINTS)) {
+                created = bundle.getInt(Consts.Codes.Data.NUMBER_OF_CREATED_POINTS);
             }
 
             if (_CurrentIndex < _Points.size() - 1) {
@@ -586,12 +584,12 @@ public class PointsActivity extends CustomToolbarActivity {
                     updatePoints.add(tmpPoint);
                 }
 
-                Global.DAL.updatePoints(updatePoints);
+                Global.getDAL().updatePoints(updatePoints);
             }
 
             int goToPoint = _CurrentIndex + created;
 
-            _Points = Global.DAL.getPointsInPolygon(_CurrentPolygon.getCN());
+            _Points = Global.getDAL().getPointsInPolygon(_CurrentPolygon.getCN());
 
             mSectionsPagerAdapter.notifyDataSetChanged();
 
@@ -636,10 +634,10 @@ public class PointsActivity extends CustomToolbarActivity {
                             return true;
                         }
 
-                        Global.DAL.updatePoint(_CurrentPoint);
+                        Global.getDAL().updatePoint(_CurrentPoint);
                         updated = true;
                     } else {
-                        Global.DAL.insertPoint(_CurrentPoint);
+                        Global.getDAL().insertPoint(_CurrentPoint);
                     }
 
                     if (_CurrentPoint.getOp() == OpType.Quondam) {
@@ -713,7 +711,7 @@ public class PointsActivity extends CustomToolbarActivity {
     private boolean deletePoint(TtPoint point, int index) {
         try {
             if (point != null) {
-                Global.DAL.deletePointSafe(point);
+                Global.getDAL().deletePointSafe(point);
 
                 if (point.getOp() == OpType.Quondam) {
                     QuondamPoint qp = (QuondamPoint) point;
@@ -726,7 +724,7 @@ public class PointsActivity extends CustomToolbarActivity {
 
                 if (point.hasQuondamLinks()) {
                     for (String qndmCN : point.getLinkedPoints()) {
-                        TtPoint convertedPoint = Global.DAL.getPointByCN(qndmCN);
+                        TtPoint convertedPoint = Global.getDAL().getPointByCN(qndmCN);
 
                         for (int i = 0; i < _Points.size(); i++) {
                             if (_Points.get(i).getCN().equals(qndmCN)) {
@@ -889,7 +887,7 @@ public class PointsActivity extends CustomToolbarActivity {
                 }
 
                 if (tmpPoints.size() > 0) {
-                    Global.DAL.updatePoints(tmpPoints);
+                    Global.getDAL().updatePoints(tmpPoints);
                 }
             }
         }).start();
@@ -979,7 +977,7 @@ public class PointsActivity extends CustomToolbarActivity {
                 _CurrentPolygon = polygon;
                 _CurrentPoint = null;
                 _CurrentIndex = INVALID_INDEX;
-                _Points = Global.DAL.getPointsInPolygon(_CurrentPolygon.getCN());
+                _Points = Global.getDAL().getPointsInPolygon(_CurrentPolygon.getCN());
 
                 if (_Points == null) {
                     Toast.makeText(this, "DATA ERROR", Toast.LENGTH_SHORT).show();
@@ -1016,7 +1014,7 @@ public class PointsActivity extends CustomToolbarActivity {
 
         final ArrayList<TtPoint> points = new ArrayList<>();
         for (String cn : point.getLinkedPoints()) {
-            points.add(Global.DAL.getPointByCN(cn));
+            points.add(Global.getDAL().getPointByCN(cn));
         }
 
         if (points.size() > 0) {
@@ -1324,18 +1322,19 @@ public class PointsActivity extends CustomToolbarActivity {
             configGps();
         } else {
             Intent intent = new Intent(this, AcquireGpsActivity.class);
-            intent.putExtra(Consts.Activities.Data.POINT_DATA, TtUtils.clonePoint(point));
-            intent.putExtra(Consts.Activities.Data.METADATA_DATA, _MetaData.get(point.getMetadataCN()));
+            intent.putExtra(Consts.Codes.Data.POINT_DATA, TtUtils.clonePoint(point));
+            intent.putExtra(Consts.Codes.Data.POLYGON_DATA, _CurrentPolygon);
+            intent.putExtra(Consts.Codes.Data.METADATA_DATA, _MetaData.get(point.getMetadataCN()));
 
             if (bursts != null) {
                 try {
-                    intent.putExtra(Consts.Activities.Data.ADDITIVE_NMEA_DATA, TtNmeaBurst.burstsToByteArray(bursts));
+                    intent.putExtra(Consts.Codes.Data.ADDITIVE_NMEA_DATA, TtNmeaBurst.burstsToByteArray(bursts));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
 
-            startActivityForResult(intent, Consts.Activities.ACQUIRE);
+            startActivityForResult(intent, Consts.Codes.Activites.ACQUIRE);
         }
     }
 
@@ -1346,18 +1345,18 @@ public class PointsActivity extends CustomToolbarActivity {
             Intent intent = new Intent(this, Take5Activity.class);
 
             if (currentPoint != null) {
-                intent.putExtra(Consts.Activities.Data.POINT_DATA, TtUtils.clonePoint(currentPoint));
+                intent.putExtra(Consts.Codes.Data.POINT_DATA, TtUtils.clonePoint(currentPoint));
             }
 
             if (_CurrentMetadata != null) {
-                intent.putExtra(Consts.Activities.Data.METADATA_DATA, _CurrentMetadata);
+                intent.putExtra(Consts.Codes.Data.METADATA_DATA, _CurrentMetadata);
             } else {
-                intent.putExtra(Consts.Activities.Data.METADATA_DATA, _MetaData.get(Consts.EmptyGuid));
+                intent.putExtra(Consts.Codes.Data.METADATA_DATA, _MetaData.get(Consts.EmptyGuid));
             }
 
-            intent.putExtra(Consts.Activities.Data.POLYGON_DATA, _CurrentPolygon);
+            intent.putExtra(Consts.Codes.Data.POLYGON_DATA, _CurrentPolygon);
 
-            startActivityForResult(intent, Consts.Activities.TAKE5);
+            startActivityForResult(intent, Consts.Codes.Activites.TAKE5);
         }
     }
 
@@ -1368,37 +1367,37 @@ public class PointsActivity extends CustomToolbarActivity {
             Intent intent = new Intent(this, WalkActivity.class);
 
             if (currentPoint != null) {
-                intent.putExtra(Consts.Activities.Data.POINT_DATA, TtUtils.clonePoint(currentPoint));
+                intent.putExtra(Consts.Codes.Data.POINT_DATA, TtUtils.clonePoint(currentPoint));
             }
 
             if (_CurrentMetadata != null) {
-                intent.putExtra(Consts.Activities.Data.METADATA_DATA, _CurrentMetadata);
+                intent.putExtra(Consts.Codes.Data.METADATA_DATA, _CurrentMetadata);
             } else {
-                intent.putExtra(Consts.Activities.Data.METADATA_DATA, _MetaData.get(Consts.EmptyGuid));
+                intent.putExtra(Consts.Codes.Data.METADATA_DATA, _MetaData.get(Consts.EmptyGuid));
             }
 
-            intent.putExtra(Consts.Activities.Data.POLYGON_DATA, _CurrentPolygon);
+            intent.putExtra(Consts.Codes.Data.POLYGON_DATA, _CurrentPolygon);
 
-            startActivityForResult(intent, Consts.Activities.WALK);
+            startActivityForResult(intent, Consts.Codes.Activites.WALK);
         }
     }
 
     private void calculateGpsPoint() {
         if (_CurrentPoint != null && _CurrentPoint.isGpsType()) {
-            ArrayList<TtNmeaBurst> bursts = Global.DAL.getNmeaBurstsByPointCN(_CurrentPoint.getCN());
+            ArrayList<TtNmeaBurst> bursts = Global.getDAL().getNmeaBurstsByPointCN(_CurrentPoint.getCN());
 
             if (bursts.size() > 0) {
                 Intent intent = new Intent(this, CalculateGpsActivity.class);
-                intent.putExtra(Consts.Activities.Data.POINT_DATA, TtUtils.clonePoint(_CurrentPoint));
-                intent.putExtra(Consts.Activities.Data.METADATA_DATA, _MetaData.get(_CurrentPoint.getMetadataCN()));
+                intent.putExtra(Consts.Codes.Data.POINT_DATA, TtUtils.clonePoint(_CurrentPoint));
+                intent.putExtra(Consts.Codes.Data.METADATA_DATA, _MetaData.get(_CurrentPoint.getMetadataCN()));
 
                 try {
-                    intent.putExtra(Consts.Activities.Data.ADDITIVE_NMEA_DATA, TtNmeaBurst.burstsToByteArray(bursts));
+                    intent.putExtra(Consts.Codes.Data.ADDITIVE_NMEA_DATA, TtNmeaBurst.burstsToByteArray(bursts));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
 
-                startActivityForResult(intent, Consts.Activities.CALCULATE);
+                startActivityForResult(intent, Consts.Codes.Activites.CALCULATE);
             } else {
                 AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
@@ -1408,10 +1407,10 @@ public class PointsActivity extends CustomToolbarActivity {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         Intent intent = new Intent(getBaseContext(), AcquireGpsActivity.class);
-                        intent.putExtra(Consts.Activities.Data.POINT_DATA, new GpsPoint(_CurrentPoint));
-                        intent.putExtra(Consts.Activities.Data.METADATA_DATA, _MetaData.get(_CurrentPoint.getMetadataCN()));
+                        intent.putExtra(Consts.Codes.Data.POINT_DATA, new GpsPoint(_CurrentPoint));
+                        intent.putExtra(Consts.Codes.Data.METADATA_DATA, _MetaData.get(_CurrentPoint.getMetadataCN()));
 
-                        startActivityForResult(intent, Consts.Activities.ACQUIRE);
+                        startActivityForResult(intent, Consts.Codes.Activites.ACQUIRE);
                     }
                 });
 
@@ -1439,7 +1438,7 @@ public class PointsActivity extends CustomToolbarActivity {
                             dialog.setPositiveButton(R.string.points_aqr_diag_add, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    ArrayList<TtNmeaBurst> bursts = Global.DAL.getNmeaBurstsByPointCN(_CurrentPoint.getCN());
+                                    ArrayList<TtNmeaBurst> bursts = Global.getDAL().getNmeaBurstsByPointCN(_CurrentPoint.getCN());
                                     acquireGpsPoint(_CurrentPoint, bursts);
                                 }
                             });
@@ -1454,7 +1453,7 @@ public class PointsActivity extends CustomToolbarActivity {
                                     dialogA.setPositiveButton(R.string.str_delete, new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialog, int which) {
-                                            Global.DAL.deleteNmeaByPointCN(_CurrentPoint.getCN());
+                                            Global.getDAL().deleteNmeaByPointCN(_CurrentPoint.getCN());
                                             acquireGpsPoint(_CurrentPoint, null);
                                         }
                                     });

@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
@@ -53,11 +54,7 @@ public class PointEditorDialog extends DialogFragment {
         args.putString(PID, Integer.toString(pid));
         args.putString(METACN, metacn);
         args.putString(CN, cn);
-
-        ArrayList<String> names = new ArrayList<>(metas.size());
-        ArrayList<String> cns = new ArrayList<>(metas.size());
-
-        args.putByteArray(META, TtUtils.Convert.listToByteArray(new ArrayList(metas.values())));
+        args.putParcelableArrayList(META, new ArrayList<Parcelable>(metas.values()));
 
         f.setArguments(args);
 
@@ -83,14 +80,9 @@ public class PointEditorDialog extends DialogFragment {
             pid = bundle.getString(PID);
             metacn = bundle.getString(METACN);
             cn = bundle.getString(CN);
+            meta = bundle.getParcelableArrayList(META);
 
             newMetacn = metacn;
-
-            try {
-                meta = (ArrayList<TtMetadata>)TtUtils.Convert.bytesToList(bundle.getByteArray(META));
-            } catch (Exception e) {
-
-            }
         }
     }
 
