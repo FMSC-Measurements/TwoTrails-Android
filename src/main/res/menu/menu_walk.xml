@@ -19,6 +19,16 @@
         android:visible="true"/>
 
     <item
+        android:id="@+id/mmMenuSelectMap"
+        android:title="@string/menu_map_select_type"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/mmMenuMapSettings"
+        android:title="@string/menu_map_settings"
+        app:showAsAction="never"/>
+
+    <item
         android:id="@+id/walkMenuGps"
         android:title="@string/menu_x_gps_settings"
         app:showAsAction="never"

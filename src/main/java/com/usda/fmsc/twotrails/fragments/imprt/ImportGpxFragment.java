@@ -102,7 +102,7 @@ public class ImportGpxFragment extends BaseImportFragment {
         rvImport.setLayoutManager(new LinearLayoutManager(getContext()));
         rvImport.setHasFixedSize(true);
         rvImport.setItemAnimator(new SlideInUpAnimator());
-        rvImport.setViewHashFooter(true);
+        rvImport.setViewHasFooter(true);
 
         setupTracks();
 
@@ -119,7 +119,6 @@ public class ImportGpxFragment extends BaseImportFragment {
             selector.clearSelections();
 
             GpxTracksAdapter adapter = new GpxTracksAdapter(getContext(), tracks, selector);
-            adapter.setViewHasFooter(true);
             rvImport.setAdapter(adapter);
         }
     }

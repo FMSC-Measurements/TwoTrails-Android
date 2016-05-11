@@ -1,4 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+
     <style name="MainActivityButtons" parent="@android:style/Widget.Holo.Light.Button.Borderless.Small">
         <item name="android:textAllCaps">true</item>
     </style>
@@ -246,7 +247,6 @@
     </style>
 
 
-
     <style name="teFilterbuttonStyle">
         <item name="android:background">@color/primaryLighter</item>
         <item name="android:adjustViewBounds">true</item>
@@ -265,7 +265,6 @@
         <item name="android:gravity">center_vertical</item>
         <item name="android:layout_gravity">center_vertical</item>
     </style>
-
 
 
     <!--Toolbars-->
@@ -321,18 +320,19 @@
         <item name="android:layout_marginTop">4dp</item>
     </style>
 
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light"/>
 
 
-
-
-
-
-    <style name="FilePickerAlertDialogTheme" parent="Theme.AppCompat.Dialog.Alert">
-        <item name="colorPrimary">@color/primary</item>
-        <item name="colorPrimaryDark">@color/primaryDark</item>
-        <item name="colorAccent">@color/accent</item>
+    <style name="ArcMapDetailsStyle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
     </style>
 
-
+    <style name="toolbar">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/toolbar_height</item>
+    </style>
 </resources>
 

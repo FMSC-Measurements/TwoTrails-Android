@@ -8,7 +8,6 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -20,15 +19,14 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.google.android.gms.maps.GoogleMap;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.dialogs.InputDialog;
 import com.usda.fmsc.android.widget.SheetLayoutEx;
 import com.usda.fmsc.android.widget.drawables.AnimationDrawableEx;
+import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.Global;
-import com.usda.fmsc.twotrails.activities.custom.AcquireGpsMapActivity;
-import com.usda.fmsc.twotrails.gps.GpsService;
+import com.usda.fmsc.twotrails.activities.base.AcquireGpsMapActivity;
 import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.logic.PointNamer;
@@ -44,7 +42,6 @@ import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.util.List;
 
-import com.usda.fmsc.geospatial.nmea.NmeaBurst;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.utilities.StringEx;
 
@@ -71,18 +68,12 @@ public class WalkActivity extends AcquireGpsMapActivity {
     private boolean updated, onBnd = true, walking, useRing, useVib, menuCreated, mapViewMode;
     private long lastPointCreationTime = 0;
 
-    private FilterOptions options;
+    private FilterOptions options = new FilterOptions();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_walk);
-
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null){
-            //actionBar.setDisplayShowTitleEnabled(false);
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
 
         setUseLostConnectionWarning(true);
 
@@ -93,31 +84,29 @@ public class WalkActivity extends AcquireGpsMapActivity {
             Intent intent = getIntent();
             if (intent != null && intent.getExtras() != null) {
                 try {
-                    if (intent.getExtras().containsKey(Consts.Activities.Data.POINT_DATA)) {
-                        _PrevPoint = (TtPoint) intent.getSerializableExtra(Consts.Activities.Data.POINT_DATA);
+                    if (intent.getExtras().containsKey(Consts.Codes.Data.POINT_DATA)) {
+                        _PrevPoint = (TtPoint) intent.getSerializableExtra(Consts.Codes.Data.POINT_DATA);
                         onBnd = _PrevPoint.isOnBnd();
                     }
 
-                    _Metadata = (TtMetadata)intent.getSerializableExtra(Consts.Activities.Data.METADATA_DATA);
-                    _Polygon = (TtPolygon)intent.getSerializableExtra(Consts.Activities.Data.POLYGON_DATA);
+                    _Metadata = intent.getParcelableExtra(Consts.Codes.Data.METADATA_DATA);
+                    _Polygon = getPolygon();
 
                     if (_Metadata == null) {
-                        cancelResult = Consts.Activities.Results.NO_METDATA_DATA;
+                        cancelResult = Consts.Codes.Results.NO_METDATA_DATA;
                     } else {
                         setZone(_Metadata.getZone());
 
                         if (_Polygon == null) {
-                            cancelResult = Consts.Activities.Results.NO_POLYGON_DATA;
+                            cancelResult = Consts.Codes.Results.NO_POLYGON_DATA;
                         }
                     }
-
-
                 } catch (Exception e) {
-                    cancelResult = Consts.Activities.Results.ERROR;
+                    cancelResult = Consts.Codes.Results.ERROR;
                     e.printStackTrace();
                 }
             } else {
-                cancelResult = Consts.Activities.Results.NO_POINT_DATA;
+                cancelResult = Consts.Codes.Results.NO_POINT_DATA;
             }
 
             if (cancelResult != 0) {
@@ -127,7 +116,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
             }
 
             _Group = new TtGroup(TtGroup.GroupType.Walk);
-            Global.DAL.insertGroup(_Group);
+            Global.getDAL().insertGroup(_Group);
 
             fabWalk = (FloatingActionButton)findViewById(R.id.walkFabWalk);
             walkCardView = findViewById(R.id.walkCardWalk);
@@ -165,16 +154,14 @@ public class WalkActivity extends AcquireGpsMapActivity {
                 }
             });
 
-            options = new FilterOptions();
-            getSettings();
-
             lockPoint(true);
-
-            setupMap();
         }
     }
 
-    private void getSettings() {
+    @Override
+    protected void getSettings() {
+        super.getSettings();
+
         options.Fix = Global.Settings.DeviceSettings.getWalkFilterFixType();
         options.DopType = Global.Settings.DeviceSettings.getWalkFilterDopType();
         options.DopValue = Global.Settings.DeviceSettings.getWalkFilterDopValue();
@@ -199,7 +186,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
 
         menuCreated = true;
 
-        return true;
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
@@ -229,13 +216,13 @@ public class WalkActivity extends AcquireGpsMapActivity {
             case R.id.walkMenuGps: {
                 startActivityForResult(new Intent(this, SettingsActivity.class)
                                 .putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.GPS_SETTINGS_PAGE),
-                        Consts.Activities.SETTINGS);
+                        Consts.Codes.Activites.SETTINGS);
                 break;
             }
             case R.id.walkMenuWalkSettings: {
                 startActivityForResult(new Intent(this, SettingsActivity.class)
                                 .putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.FILTER_WALK_SETTINGS_PAGE),
-                        Consts.Activities.SETTINGS);
+                        Consts.Codes.Activites.SETTINGS);
                 break;
             }
             case R.id.walkMenuRenameGroup: {
@@ -262,7 +249,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         switch (requestCode) {
-            case Consts.Activities.SETTINGS: {
+            case Consts.Codes.Activites.SETTINGS: {
                 Global.getGpsBinder().startGps();
                 getSettings();
                 break;
@@ -281,30 +268,21 @@ public class WalkActivity extends AcquireGpsMapActivity {
     @Override
     public void finish() {
         if (updated) {
-            Global.DAL.updatePoint(_CurrentPoint);
+            Global.getDAL().updatePoint(_CurrentPoint);
         }
 
         if (pointsCreated > 0) {
-            setResult(Consts.Activities.Results.POINT_CREATED,
-                    new Intent().putExtra(Consts.Activities.Data.NUMBER_OF_CREATED_POINTS, pointsCreated));
+            setResult(Consts.Codes.Results.POINT_CREATED,
+                    new Intent().putExtra(Consts.Codes.Data.NUMBER_OF_CREATED_POINTS, pointsCreated));
         } else {
             if (_Group != null) {
-                Global.DAL.deleteGroup(_Group.getCN());
+                Global.getDAL().deleteGroup(_Group.getCN());
             }
 
             setResult(RESULT_CANCELED);
         }
 
         super.finish();
-    }
-
-
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        super.onMapReady(googleMap);
-
-        setMapMyLocationEnabled(true);
-        setMapFollowMyPosition(true);
     }
 
     private void updateGroupName() {
@@ -319,20 +297,20 @@ public class WalkActivity extends AcquireGpsMapActivity {
                 String name = dialog.getText();
 
                 _Group.setName(name);
-                Global.DAL.updateGroup(_Group);
+                Global.getDAL().updateGroup(_Group);
 
                 if (_CurrentPoint != null) {
                     _CurrentPoint.setGroupName(name);
                     updated = true;
 
-                    List<TtPoint> points = Global.DAL.getPointsInGroup(_Group.getCN());
+                    List<TtPoint> points = Global.getDAL().getPointsInGroup(_Group.getCN());
 
                     if (points.size() > 0) {
                         for (TtPoint p : points) {
                             p.setGroupName(name);
                         }
 
-                        Global.DAL.updatePoints(points);
+                        Global.getDAL().updatePoints(points);
                     }
                 }
             }
@@ -352,9 +330,9 @@ public class WalkActivity extends AcquireGpsMapActivity {
     }
 
 
-    private void createPoint(NmeaBurst nmeaBurst, UTMCoords utmCoords) {
+    private void createPoint(INmeaBurst nmeaBurst, UTMCoords utmCoords) {
         if (updated) {
-            Global.DAL.updatePoint(_CurrentPoint);
+            Global.getDAL().updatePoint(_CurrentPoint);
             updated = false;
         }
 
@@ -388,8 +366,8 @@ public class WalkActivity extends AcquireGpsMapActivity {
         _CurrentPoint.setAndCalc(utmCoords.getX(), utmCoords.getY(), burst.getElevation(), _Polygon);
 
         try {
-            Global.DAL.insertPoint(_CurrentPoint);
-            Global.DAL.insertNmeaBurst(burst);
+            Global.getDAL().insertPoint(_CurrentPoint);
+            Global.getDAL().insertNmeaBurst(burst);
             pointsCreated++;
 
             lastPointCreationTime = System.currentTimeMillis();
@@ -485,7 +463,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
 
         Global.TtNotifyManager.showPointAquired();
 
-        addMapMarker(_CurrentPoint, _Metadata, false);
+        addPosition(_CurrentPoint, getLastPosition() != null);
     }
 
     private void setStartWalkingDrawable(boolean startAquring) {
@@ -546,8 +524,8 @@ public class WalkActivity extends AcquireGpsMapActivity {
     }
 
     @Override
-    public void nmeaBurstReceived(NmeaBurst nmeaBurst) {
-        super.nmeaBurstReceived(nmeaBurst);
+    protected void onNmeaBurstReceived(INmeaBurst nmeaBurst) {
+        super.onNmeaBurstReceived(nmeaBurst);
 
         if (walking) {
             //if valid and after frequency
@@ -567,12 +545,6 @@ public class WalkActivity extends AcquireGpsMapActivity {
         }
     }
 
-    @Override
-    public void gpsError(GpsService.GpsError error) {
-        super.gpsError(error);
-    }
-
-
     public void btnWalkClick(View view) {
         if (walking) {
             stopLogging();
@@ -583,5 +555,11 @@ public class WalkActivity extends AcquireGpsMapActivity {
 
     public void btnPointInfo(View view) {
 
+    }
+
+
+    @Override
+    protected Units.MapTracking getMapTracking() {
+        return mapViewMode ? Units.MapTracking.NONE : Units.MapTracking.FOLLOW;
     }
 }

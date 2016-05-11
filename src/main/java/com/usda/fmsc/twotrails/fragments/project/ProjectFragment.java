@@ -24,10 +24,10 @@ public class ProjectFragment extends PreferenceFragment implements SharedPrefere
         addPreferencesFromResource(R.xml.project_settings);
 
         EditTextPreference editTextPref = (EditTextPreference) findPreference(Global.Settings.ProjectSettings.PROJECT_ID);
-        editTextPref.setSummary(Global.Settings.ProjectSettings.getProjectId());
+        editTextPref.setSummary(Global.getDAL().getProjectID());
 
         editTextPref = (EditTextPreference) findPreference(Global.Settings.ProjectSettings.DESCRIPTION);
-        editTextPref.setSummary(Global.Settings.ProjectSettings.getDescription());
+        editTextPref.setSummary(Global.getDAL().getProjectDescription());
 
         editTextPref = (EditTextPreference) findPreference(Global.Settings.ProjectSettings.DISTRICT);
         editTextPref.setSummary(Global.Settings.ProjectSettings.getDistrict());
@@ -66,19 +66,19 @@ public class ProjectFragment extends PreferenceFragment implements SharedPrefere
 
         switch (key) {
             case Global.Settings.ProjectSettings.PROJECT_ID:
-                Global.DAL.setProjectID(value);
+                Global.getDAL().setProjectID(value);
                 break;
             case Global.Settings.ProjectSettings.DESCRIPTION:
-                Global.DAL.setProjectDescription(value);
+                Global.getDAL().setProjectDescription(value);
                 break;
             case Global.Settings.ProjectSettings.DISTRICT:
-                Global.DAL.setProjectDistrict(value);
+                Global.getDAL().setProjectDistrict(value);
                 break;
             case Global.Settings.ProjectSettings.FOREST:
-                Global.DAL.setProjectForest(value);
+                Global.getDAL().setProjectForest(value);
                 break;
             case Global.Settings.ProjectSettings.REGION:
-                Global.DAL.setProjectRegion(value);
+                Global.getDAL().setProjectRegion(value);
                 break;
         }
     }

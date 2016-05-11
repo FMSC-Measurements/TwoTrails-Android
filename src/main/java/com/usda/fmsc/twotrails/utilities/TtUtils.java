@@ -7,8 +7,11 @@ import android.location.Location;
 import android.os.Build;
 import android.os.Environment;
 import android.support.annotation.Nullable;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.usda.fmsc.android.AndroidUtils;
 import com.google.android.gms.maps.GoogleMap;
@@ -18,7 +21,9 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.twotrails.Consts;
+import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
+import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment;
 import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.objects.FilterOptions;
@@ -55,7 +60,7 @@ import com.usda.fmsc.geospatial.GeoPosition;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.geospatial.utm.UTMTools;
 import com.usda.fmsc.geospatial.Units.UomElevation;
-import com.usda.fmsc.utilities.FileTools;
+import com.usda.fmsc.utilities.FileUtils;
 import com.usda.fmsc.utilities.StringEx;
 
 
@@ -307,54 +312,6 @@ public class TtUtils {
             }
 
             return value;
-        }
-
-
-
-        public static byte[] arrayToByteArray(Object[] arr) throws IOException {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ObjectOutputStream oos = new ObjectOutputStream(baos);
-            oos.writeObject(arr);
-            oos.close();
-            baos.close();
-            return baos.toByteArray();
-        }
-
-        public static Object[] bytesToArray(byte[] bytes) throws IOException, ClassNotFoundException {
-            ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-            ObjectInputStream ois = new ObjectInputStream(bais);
-            return (Object[]) ois.readObject();
-        }
-
-
-        public static byte[] listToByteArray(List list) throws IOException {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ObjectOutputStream oos = new ObjectOutputStream(baos);
-            oos.writeObject(list);
-            oos.close();
-            baos.close();
-            return baos.toByteArray();
-        }
-
-        public static List bytesToList(byte[] bytes) throws IOException, ClassNotFoundException {
-            ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-            ObjectInputStream ois = new ObjectInputStream(bais);
-            return (List) ois.readObject();
-        }
-
-        public static byte[] hashMapToByteArray(HashMap hashMap) throws IOException {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ObjectOutputStream oos = new ObjectOutputStream(baos);
-            oos.writeObject(hashMap);
-            oos.close();
-            baos.close();
-            return baos.toByteArray();
-        }
-
-        public static HashMap bytesToHashMap(byte[] bytes) throws IOException, ClassNotFoundException {
-            ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-            ObjectInputStream ois = new ObjectInputStream(bais);
-            return (HashMap) ois.readObject();
         }
     }
 
@@ -971,10 +928,55 @@ public class TtUtils {
 
     public static Point RotatePoint(int x, int y, double angle, int rX, int rY) {
         return new Point(
-                (int)(java.lang.Math.cos(angle) * (x - rX) - java.lang.Math.sin(angle) * (y - rY) + rX),
+                (int) (java.lang.Math.cos(angle) * (x - rX) - java.lang.Math.sin(angle) * (y - rY) + rX),
                 (int) (java.lang.Math.sin(angle) * (x - rX) + java.lang.Math.cos(angle) * (y - rY) + rY));
     }
 
+
+    public static ArrayList<PointD> generateStaticPolyPoints(List<TtPoint> points, HashMap<String, TtMetadata> metadata, int zone, int canvasSize) {
+        ArrayList<PointD> pts = new ArrayList<>();
+
+        double minX = Double.POSITIVE_INFINITY, maxX = Double.NEGATIVE_INFINITY,
+                minY = Double.POSITIVE_INFINITY, maxY = Double.NEGATIVE_INFINITY;
+
+        for (TtPoint point : points) {
+            UTMCoords coords = forcePointZone(point, zone, metadata.get(point.getMetadataCN()).getZone(), true);
+            PointD pt = new PointD(coords.getX() + 500000, coords.getY() + 10000000);
+            
+            if (pt.X > maxX) {
+                maxX = pt.X;
+            }
+
+            if (pt.X < minX) {
+                minX = pt.X;
+            }
+
+            if (pt.Y > maxY) {
+                maxY = pt.Y;
+            }
+
+            if (pt.Y < minY) {
+                minY = pt.Y;
+            }
+            
+            pts.add(pt);
+        }
+
+        double width = maxX - minX;
+        double height = maxY - minY;
+
+        double adjustment = canvasSize / (width > height ? width : height);
+
+        double xOffset = (height > width ? (canvasSize - width * adjustment) / 2 : 0);
+        double yOffset = (width > height ? (canvasSize - height * adjustment) / 2 : 0);
+
+        for (PointD pt : pts) {
+            pt.X = (pt.X - minX) * adjustment + xOffset;
+            pt.Y = canvasSize - (pt.Y - minY) * adjustment - yOffset;
+        }
+
+        return pts;
+    }
     //endregion
 
 
@@ -1004,49 +1006,33 @@ public class TtUtils {
 
         return valid;
     }
-    //endregion
 
+    public static boolean isUsableNmeaBurst(TtNmeaBurst nmeaBurst, FilterOptions options) {
+        boolean valid = false;
 
-    //region Files
-    public static boolean fileExists(String filePath) {
-        if(StringEx.isEmpty(filePath))
-            return false;
-        File file = new File(filePath);
-        return file.exists() && !file.isDirectory();
-    }
-
-    public static String getTtFilePath(String fileName) {
-        if(!fileName.contains(".tt"))
-            fileName += ".tt";
-
-        return getTtFileDir() + File.separator + fileName;
-    }
-
-    public static String getTtFileDir() {
-        File dir;
-
-        if (Build.VERSION.SDK_INT < 19) {
-            dir = Environment.getExternalStorageDirectory();
+        if (options == null) {
+            if (nmeaBurst.getFixQuality().getValue() > 0) {
+                valid = true;
+            }
         } else {
-            dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
+            int value = options.Fix.getValue();
+
+            //reverse RTK and FRTK
+            if (value == 4)
+                value = 5;
+            else if (value == 5)
+                value = 4;
+
+            if (value >= options.Fix.getValue() &&
+                    (options.DopType == Units.DopType.HDOP && nmeaBurst.getHDOP() <= options.DopValue) ||
+                    (options.DopType == Units.DopType.PDOP && nmeaBurst.getPDOP() <= options.DopValue)) {
+                valid = true;
+            }
         }
 
-        return String.format("%s%s%s", dir, File.separator, "TwoTrailsFiles");
-    }
-
-    public static String getTtLogFileDir() {
-        return getTtFileDir();
-        //return String.format("%s%s%s", getTtFileDir(), File.separator, "LogFiles");
-    }
-
-    public static String getLogFileName() {
-        return String.format("%s%sTtGpsLog_%s.txt",
-                TtUtils.getTtLogFileDir(),
-                File.separator,
-                DateTime.now().toString());
+        return valid;
     }
     //endregion
-
 
     //region Device Info
     public static String getDeviceName() {
@@ -1057,16 +1043,16 @@ public class TtUtils {
 
     public static String exportReport(DataAccessLayer dal) {
         String filename = String.format("%s%sTwoTrailsReport_%s.zip",
-                TtUtils.getTtLogFileDir(),
+                Global.getTtLogFileDir(),
                 File.separator,
                 DateTime.now().toString());
 
         boolean exported;
 
         if (dal != null) {
-            exported = FileTools.zipFiles(filename, TtReport.getFilePath(), dal.getFilePath());
+            exported = FileUtils.zipFiles(filename, TtReport.getFilePath(), dal.getFilePath());
         } else {
-            exported = FileTools.zipFiles(filename, TtReport.getFilePath());
+            exported = FileUtils.zipFiles(filename, TtReport.getFilePath());
         }
 
         return exported ? filename : null;
@@ -1363,8 +1349,7 @@ public class TtUtils {
                     double x = adjusted ? point.getAdjX() : point.getUnAdjX();
                     double y = adjusted ? point.getAdjY() : point.getUnAdjY();
                     double z = adjusted ? point.getAdjZ() : point.getUnAdjZ();
-                    z = TtUtils.Convert.distance(z, metadata.getElevation(), UomElevation.Meters);
-                    GeoPosition position = UTMTools.convertUTMtoLatLonSignedDec(x, y, metadata.getZone());
+                    GeoPosition position = getLatLonFromPoint(point, adjusted, metadata);
 
                     return new MarkerOptions()
                             .title(Integer.toString(point.getPID()))
@@ -1426,7 +1411,6 @@ public class TtUtils {
                 return null;
             }
         }
-
 
         public static MarkerOptions createMarkerOptions(TravPoint point, boolean adjusted, TtMetadata meta) {
             double x = adjusted ? point.getAdjX() : point.getUnAdjX();
@@ -1614,5 +1598,108 @@ public class TtUtils {
 
             return builder.build();
         }
+    }
+
+    public static class ArcMap {
+
+        public static View createInfoWindow(LayoutInflater inflater, IMultiMapFragment.MarkerData markerData) {
+            View view = inflater.inflate(R.layout.content_map_popup, null);
+
+            TextView title = (TextView)view.findViewById(R.id.title);
+            TextView content = (TextView)view.findViewById(R.id.text1);
+
+            title.setText(String.format("%d", markerData.Point.getPID()));
+            content.setText(getInfoWindowSnippet(markerData.Point, markerData.Adjusted, markerData.Metadata));
+
+            return view;
+        }
+
+
+
+        private static String getInfoWindowSnippet(TtPoint point, boolean adjusted, TtMetadata meta) {
+            switch (point.getOp()) {
+                case GPS:
+                case Take5:
+                case Walk:
+                case WayPoint:
+                    return getInfoWindowSnippet((GpsPoint) point, adjusted, meta);
+                case Traverse:
+                case SideShot:
+                    return getInfoWindowSnippet((TravPoint) point, adjusted, meta);
+                case Quondam:
+                    return getInfoWindowSnippet((QuondamPoint) point, adjusted, meta);
+                default: {
+                    double x = adjusted ? point.getAdjX() : point.getUnAdjX();
+                    double y = adjusted ? point.getAdjY() : point.getUnAdjY();
+                    double z = adjusted ? point.getAdjZ() : point.getUnAdjZ();
+
+                    return String.format("UTM X: %.3f\nUTM Y: %.3f\nElev (%s): %.1f",
+                            x, y, meta.getElevation().toStringAbv(), z);
+                }
+            }
+        }
+
+        private static String getInfoWindowSnippet(GpsPoint point, boolean adjusted, TtMetadata meta) {
+
+            try {
+                Double x = adjusted ? point.getAdjX() : point.getUnAdjX();
+                Double y = adjusted ? point.getAdjY() : point.getUnAdjY();
+                Double z = adjusted ? point.getAdjZ() : point.getUnAdjZ();
+
+                if (x == null) {
+                    x = point.getUnAdjX();
+                    y = point.getUnAdjY();
+                    z =  point.getUnAdjZ();
+                }
+
+                z = TtUtils.Convert.distance(z, meta.getElevation(), UomElevation.Meters);
+
+                double lat, lon;
+
+                //if (point.hasLatLon() && !adjusted) {
+                if (point.hasLatLon()) { //ignore adjust since gps dont adjust to new positions
+                    lat = point.getLatitude();
+                    lon = point.getLongitude();
+                } else {
+                    GeoPosition position = UTMTools.convertUTMtoLatLonSignedDec(x, y, meta.getZone());
+                    lat = position.getLatitudeSignedDecimal();
+                    lon = position.getLongitudeSignedDecimal();
+                }
+
+                return String.format("%s\n\nUTM X: %.3f\nUTM Y: %.3f\nElev (%s): %.1f\n\nLat: %.4f\nLon: %.4f",
+                        point.getOp().toString(),
+                        x, y, meta.getElevation().toStringAbv(), z, lat, lon);
+            } catch (Exception ex) {
+                TtReport.writeError(ex.getMessage(), "TtUtils:getInfoWindowSnippet");
+                return null;
+            }
+        }
+
+        private static String getInfoWindowSnippet(TravPoint point, boolean adjusted, TtMetadata meta) {
+            double x = adjusted ? point.getAdjX() : point.getUnAdjX();
+            double y = adjusted ? point.getAdjY() : point.getUnAdjY();
+            double z = adjusted ? point.getAdjZ() : point.getUnAdjZ();
+            z = TtUtils.Convert.distance(z, meta.getElevation(), UomElevation.Meters);
+
+            Double faz = point.getFwdAz();
+            Double baz = point.getBkAz();
+
+            String sFaz = faz == null ? StringEx.Empty : String.format("%.2f", faz);
+            String sBaz = baz == null ? StringEx.Empty : String.format("%.2f", baz);
+
+            return String.format("%s\n\nUTM X: %.3f\nUTM Y: %.3f\nElev (%s): %.1f\n\nFwd Az: %s\nBk Az:   %s\nSlpDist (%s): %.2f\nSlope (%s): %.2f",
+                    point.getOp(),
+                    x, y, meta.getElevation().toStringAbv(), z,
+                    sFaz, sBaz, meta.getDistance().toString(), point.getSlopeAngle(),
+                    meta.getSlope().toStringAbv(), point.getSlopeAngle());
+        }
+
+        private static String getInfoWindowSnippet(QuondamPoint point, boolean adjusted, TtMetadata meta) {
+            return String.format("%s -> %d %s",
+                point.getOp().toString(),
+                point.getParentPID(),
+                getInfoWindowSnippet(point.getParentPoint(), adjusted, meta));
+        }
+
     }
 }

@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.MapDetailsActivity">
+
+    <include layout="@layout/toolbar_default" android:id="@id/toolbar"/>
+
+    <RelativeLayout
+        android:id="@+id/lay1"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@color/white_1000"
+        android:transitionName="@string/trans_map_details"
+        android:layout_below="@id/toolbar"
+        android:layout_alignParentBottom="true">
+
+        <RelativeLayout
+            android:id="@+id/lay2"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:background="@color/white_1000"
+            android:layout_alignParentTop="true"
+            android:elevation="2dp">
+
+            <ImageView
+                android:id="@+id/amdIcon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_online_primary_36"
+                android:layout_centerVertical="true"
+                android:padding="8dp"/>
+
+            <com.usda.fmsc.android.widget.PopupMenuButton
+                android:id="@+id/amdMenu"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:src="@drawable/ic_action_overflow_dark"
+                android:background="@android:color/transparent"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:paddingStart="8dp"
+                android:paddingLeft="8dp"
+                android:paddingEnd="12dp"
+                android:paddingRight="12dp"
+                app:menuRes="@menu/ctx_menu_map_details"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_toEndOf="@id/amdIcon"
+                android:layout_toRightOf="@id/amdIcon"
+                android:layout_toLeftOf="@id/amdMenu"
+                android:layout_toStartOf="@id/amdMenu"
+                android:id="@+id/amdName"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textSize="28sp"
+                android:textColor="@android:color/black"
+                android:layout_centerVertical="true"
+                android:padding="8dp"
+                android:gravity="center"/>
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:orientation="vertical"
+            android:layout_below="@id/lay2"
+            android:layout_alignParentBottom="true"
+            android:layout_margin="8dp">
+
+            <TableLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TableRow>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/str_url"
+                        android:textSize="22sp"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginRight="8dp"
+                        android:layout_marginEnd="8dp"/>
+
+                    <TextView
+                        android:id="@+id/amdTvUrl"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="4"
+                        android:layout_column="2"
+                        style="@style/Widget.AppCompat.EditText"
+                        android:textSize="20sp"
+                        android:maxLines="1"
+                        android:ellipsize="end"/>
+                </TableRow>
+
+                <TableRow>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/str_file"
+                        android:textSize="22sp"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginRight="8dp"
+                        android:layout_marginEnd="8dp"/>
+
+                    <TextView
+                        android:id="@+id/amdTvFile"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="4"
+                        android:layout_column="2"
+                        style="@style/EditTextStyle"
+                        android:textSize="20sp"
+                        android:maxLines="1"
+                        android:onClick="amdTvFileClick"
+                        android:ellipsize="start"
+                        android:gravity="end"/>
+                </TableRow>
+            </TableLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textSize="22sp"
+                android:layout_gravity="center_horizontal"
+                android:gravity="center_horizontal"
+                android:paddingTop="4dp"
+                android:text="@string/amd_scale"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:baselineAligned="false">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_weight="1">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="18sp"
+                        android:paddingEnd="4dp"
+                        android:paddingRight="4dp"
+                        android:text="@string/str_min"/>
+
+                    <TextView
+                        android:id="@+id/amdTvScaleMin"
+                        android:layout_weight="1"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        style="@style/EditTextStyle"
+                        android:textSize="18sp"
+                        android:maxLines="1"
+                        android:ellipsize="end"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_weight="1">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="18sp"
+                        android:paddingEnd="4dp"
+                        android:paddingRight="4dp"
+                        android:text="@string/str_max"/>
+
+                    <TextView
+                        android:id="@+id/amdTvScaleMax"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        style="@style/EditTextStyle"
+                        android:textSize="18sp"
+                        android:maxLines="1"
+                        android:ellipsize="end"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="4dp">
+
+                <EditText
+                    android:id="@+id/amdTxtLoc"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/str_location"
+                    android:maxLines="1"
+                    android:ellipsize="end"/>
+            </android.support.design.widget.TextInputLayout>
+
+            <!--<RelativeLayout-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="@dimen/toolbar_height"-->
+                <!--android:background="@color/primary_300"-->
+                <!--android:paddingTop="4dp">-->
+                <!--&lt;!&ndash;Details levels&ndash;&gt;-->
+            <!--</RelativeLayout>-->
+
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:paddingTop="4dp">
+
+                <EditText
+                    android:id="@+id/amdTxtDesc"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/str_desc"/>
+            </android.support.design.widget.TextInputLayout>
+        </LinearLayout>
+    </RelativeLayout>
+</RelativeLayout>

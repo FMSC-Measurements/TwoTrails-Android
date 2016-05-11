@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/amdMenuRename"
+        android:title="@string/str_rename"/>
+
+    <item android:id="@+id/amdMenuUpdatePath"
+          android:title="@string/amd_update_path"/>
+
+    <item android:id="@+id/amdMenuUpdateDetails"
+          android:title="@string/amd_update_details"/>
+
+    <item android:id="@+id/amdMenuReset"
+          android:title="@string/str_reset"/>
+
+    <item android:id="@+id/amdMenuDelete"
+          android:title="@string/str_delete"/>
+</menu>

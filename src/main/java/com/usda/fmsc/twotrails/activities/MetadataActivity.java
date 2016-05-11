@@ -10,7 +10,6 @@ import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,7 +22,8 @@ import com.usda.fmsc.android.dialogs.EnumSelectionDialog;
 import com.usda.fmsc.android.dialogs.InputDialog;
 import com.usda.fmsc.android.dialogs.NumericInputDialog;
 import com.usda.fmsc.android.listeners.ComplexOnPageChangeListener;
-import com.usda.fmsc.twotrails.activities.custom.TtAjusterCustomToolbarActivity;
+import com.usda.fmsc.geospatial.nmea.INmeaBurst;
+import com.usda.fmsc.twotrails.activities.base.TtAjusterCustomToolbarActivity;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.data.TwoTrailsSchema;
 import com.usda.fmsc.twotrails.dialogs.EditableListDialog;
@@ -43,12 +43,13 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.usda.fmsc.geospatial.Units.UomElevation;
-import com.usda.fmsc.geospatial.nmea.NmeaBurst;
 import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
 import com.usda.fmsc.utilities.StringEx;
 
 public class MetadataActivity extends TtAjusterCustomToolbarActivity {
     HashMap<String, Listener> listeners;
+
+    GpsService.Listener listener;
 
     private MenuItem miLock, miReset, miDelete;
 
@@ -97,15 +98,9 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_metadata);
 
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            //actionBar.setDisplayShowTitleEnabled(false);
-        }
-
         listeners = new HashMap<>();
 
-        _Metadata = Global.DAL.getMetadata();
+        _Metadata = Global.getDAL().getMetadata();
         if (_Metadata.size() > 0) {
             _CurrentIndex = 0;
             _CurrentMetadata = getMetaAtIndex(_CurrentIndex);
@@ -134,7 +129,7 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
         saveMetadata();
 
         if (adjust) {
-            PolygonAdjuster.adjust(Global.DAL, Global.getMainActivity(), true);
+            PolygonAdjuster.adjust(Global.getDAL(), Global.getMainActivity(), true);
         }
     }
 
@@ -243,7 +238,7 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
     //region Save Delete Create Reset
     private void saveMetadata() {
         if (_MetadataUpdated && _CurrentMetadata != null) {
-            Global.DAL.updateMetadata(_CurrentMetadata);
+            Global.getDAL().updateMetadata(_CurrentMetadata);
             _Metadata.set(_CurrentIndex, _CurrentMetadata);
             _MetadataUpdated = false;
         }
@@ -272,7 +267,7 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
     private boolean deleteMetadata(TtMetadata metadata, int index) {
         try {
             if (metadata != null) {
-                if (Global.DAL.deleteMetadataSafe(metadata.getCN())) {
+                if (Global.getDAL().deleteMetadataSafe(metadata.getCN())) {
                     mSectionsPagerAdapter.notifyDataSetChanged();
                 } else {
                     return false;
@@ -301,12 +296,12 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
     private void createMetadata() {
         saveMetadata();
 
-        int metaCount = Global.DAL.getItemCount(TwoTrailsSchema.MetadataSchema.TableName);
+        int metaCount = Global.getDAL().getItemCount(TwoTrailsSchema.MetadataSchema.TableName);
 
         TtMetadata newMetadata = Global.Settings.MetaDataSetting.getDefaultmetaData();
         newMetadata.setCN(java.util.UUID.randomUUID().toString());
         newMetadata.setName(String.format("Meta %d", metaCount + 1));
-        Global.DAL.insertMetadata(newMetadata);
+        Global.getDAL().insertMetadata(newMetadata);
 
         addedMeta = newMetadata.getCN();
 
@@ -486,7 +481,7 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
     //region MetaFrag
     public void btnNameClick(View view) {
         if (!_MetaLocked) {
-            final InputDialog inputDialog = new InputDialog(this, R.style.EditTextStyle);
+            final InputDialog inputDialog = new InputDialog(this);
 
             inputDialog.setTitle("Name");
             inputDialog.setInputText(_CurrentMetadata.getName());
@@ -524,15 +519,15 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
-                                ArrayList<TtPoint> points = Global.DAL.getGpsPointsWithMeta(_CurrentMetadata.getCN());
+                                ArrayList<TtPoint> points = Global.getDAL().getGpsTypePointsWithMeta(_CurrentMetadata.getCN());
 
                                 if (points.size() > 0) {
                                     TtPoint point;
                                     for (int i = 0; i < points.size(); i++) {
-                                        points.set(i, TtUtils.reCalculateGps(points.get(i), zone, Global.DAL, null));
+                                        points.set(i, TtUtils.reCalculateGps(points.get(i), zone, Global.getDAL(), null));
                                     }
 
-                                    Global.DAL.updatePoints(points);
+                                    Global.getDAL().updatePoints(points);
                                 }
                             }
                         }).start();
@@ -571,9 +566,9 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
 
                                 binder.startGps();
 
-                                binder.registerActiviy(mContext, new GpsService.Listener() {
+                                listener = new GpsService.Listener() {
                                     @Override
-                                    public void nmeaBurstReceived(NmeaBurst nmeaBurst) {
+                                    public void nmeaBurstReceived(INmeaBurst nmeaBurst) {
                                         if (!Global.Settings.DeviceSettings.isGpsAlwaysOn()) {
                                             binder.stopGps();
                                         }
@@ -581,6 +576,10 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
                                         inputDialog.getInput().setText(StringEx.toString(nmeaBurst.getTrueUTM().getZone()));
 
                                         gotNmea = true;
+
+                                        if (listener != null) {
+                                            binder.removeListener(listener);
+                                        }
                                     }
 
                                     @Override
@@ -618,8 +617,14 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
                                         if (!Global.Settings.DeviceSettings.isGpsAlwaysOn()) {
                                             binder.stopGps();
                                         }
+
+                                        if (listener != null) {
+                                            binder.removeListener(listener);
+                                        }
                                     }
-                                });
+                                };
+
+                                binder.addListener(listener);
 
                                 final Handler mHandler = new Handler();
 

@@ -2,6 +2,8 @@ package com.usda.fmsc.twotrails;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.usda.fmsc.geospatial.Extent;
+import com.usda.fmsc.geospatial.Position;
 
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -65,24 +67,40 @@ public class Consts {
         public static final long[] VIB_ERROR = new long[] { 0, 1000 };
     }
 
-    public static class Activities {
-        public static final int MAIN = 1000;
-        public static final int ACQUIRE = 1001;
-        public static final int CALCULATE = 1002;
-        public static final int LOGGER = 1003;
-        public static final int HAID = 1004;
-        public static final int MAP = 1005;
-        public static final int METADATA = 1006;
-        public static final int POINTS = 1007;
-        public static final int POLYGONS = 1008;
-        public static final int PROJECT = 1009;
-        public static final int SETTINGS = 1010;
-        public static final int TABLE_EDIT = 1011;
-        public static final int TAKE5 = 1012;
-        public static final int WALK = 1013;
-        public static final int EXPORT = 1014;
-        public static final int MULTI_POINT = 1015;
-        public static final int PLOT_GRID = 1016;
+    public static class FileExtensions {
+        public static final String TWO_TRAILS = "file/*.tt";
+        public static final String TPK = "file/*.tpk";
+    }
+
+    public static class Codes {
+        public static class Activites {
+            public static final int MAIN = 1000;
+            public static final int ACQUIRE = 1001;
+            public static final int CALCULATE = 1002;
+            public static final int LOGGER = 1003;
+            public static final int HAID = 1004;
+            public static final int MAP = 1005;
+            public static final int METADATA = 1006;
+            public static final int POINTS = 1007;
+            public static final int POLYGONS = 1008;
+            public static final int PROJECT = 1009;
+            public static final int SETTINGS = 1010;
+            public static final int TABLE_EDIT = 1011;
+            public static final int TAKE5 = 1012;
+            public static final int WALK = 1013;
+            public static final int EXPORT = 1014;
+            public static final int MULTI_POINT = 1015;
+            public static final int PLOT_GRID = 1016;
+            public static final int GET_MAP_EXTENTS = 1017;
+            public static final int MAP_MANAGER = 1018;
+            public static final int MAP_DETAILS = 1019;
+            public static final int ARC_GIS_LOGIN = 1020;
+        }
+
+        public static class Dialogs {
+            public static final int REQUEST_FILE = 4001;
+            public static final int NEW_ARC_MAP = 4002;
+        }
 
         public static class Results {
             public static final int ERROR = 2000;
@@ -90,6 +108,10 @@ public class Consts {
             public static final int NO_POINT_DATA = 2002;
             public static final int NO_POLYGON_DATA = 2003;
             public static final int NO_METDATA_DATA = 2004;
+            public static final int MAP_CREATED = 2005;
+            public static final int MAP_UPDATED = 2006;
+            public static final int MAP_DELETED = 2007;
+            public static final int DOWNLOADING_MAP = 2008;
 
         }
 
@@ -104,24 +126,44 @@ public class Consts {
             public static final String METADATA_DATA = "MetaDataData";
             public static final String ADDITIVE_NMEA_DATA = "AdditiveNmeaData";
             public static final String NUMBER_OF_CREATED_POINTS = "NumOfCreatedPoints";
+            public static final String MAP_DATA = "MapData";
         }
 
+        public static class Requests {
+            public static final int LOCATION = 5000;
+            public static final int PHONE = 5001;
+            public static final int STORAGE = 5002;
+            public static final int BLUETOOH = 5003;
+            public static final int INTERNET = 5004;
+            public static final int VIBRATE = 5005;
+        }
     }
 
-    public static class GoogleMaps {
-        public static final LatLngBounds USA_BOUNDS =
-                new LatLngBounds(
-                    new LatLng(-124.7844079, -124.7844079),
-                    new LatLng(49.3457868, -66.9513812)
-                );
+    public static class Location {
+        private static final double north = 49.384359;
+        private static final double east = -66.885666;
+        private static final double south = 25.837377;
+        private static final double west = -124.327629;
 
-        public static final LatLng USA_CENTER = new LatLng(39.8282, -98.5795);
+        private static final double center_lat = 39.8282;
+        private static final double center_lon = -98.5795;
+
+        public static final Position USA_CENTER = new Position(center_lat, center_lon);
+        public static final Extent USA_BOUNDS = new Extent(north, east, south, west);
 
         public static final int PADDING = 30;
-        public static final float DEFAULT_ZOOM_CLOSE = 20f;
-        public static final float DEFAULT_ZOOM_GENERAL = 10f;
 
-        public static float ZOOM_CLOSE = 20;
-        public static float ZOOM_GENERAL = 10;
+        public static final float ZOOM_GENERAL = 10f;
+        public static final float ZOOM_CLOSE = 20f;
+
+        public static class GoogleMaps {
+            public static final LatLng USA_CENTER = new LatLng(center_lat, center_lon);
+
+            public static final LatLngBounds USA_BOUNDS =
+                    new LatLngBounds(
+                            new LatLng(south, west),
+                            new LatLng(north, east)
+                    );
+        }
     }
 }

@@ -7,11 +7,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.google.android.gms.maps.GoogleMap;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.widget.SheetLayoutEx;
+import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.twotrails.Consts;
-import com.usda.fmsc.twotrails.activities.custom.AcquireGpsMapActivity;
+import com.usda.fmsc.twotrails.Units;
+import com.usda.fmsc.twotrails.activities.base.AcquireGpsMapActivity;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
 import com.usda.fmsc.twotrails.R;
@@ -21,7 +22,6 @@ import com.usda.fmsc.twotrails.objects.TtMetadata;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.usda.fmsc.geospatial.nmea.NmeaBurst;
 import com.usda.fmsc.utilities.StringEx;
 
 public class AcquireGpsActivity extends AcquireGpsMapActivity {
@@ -46,9 +46,6 @@ public class AcquireGpsActivity extends AcquireGpsMapActivity {
 
         setResult(RESULT_CANCELED);
 
-        tvLogged = (TextView)findViewById(R.id.acquireGpsToolbarLblLoggedValue);
-        tvRecv = (TextView)findViewById(R.id.acquireGpsToolbarLblReceivedValue);
-
         if (!isCanceling()) {
             SheetLayoutEx.enterFromBottomAnimation(this);
             Intent intent = getIntent();
@@ -56,13 +53,13 @@ public class AcquireGpsActivity extends AcquireGpsMapActivity {
                 _Bursts = new ArrayList<>();
 
                 try {
-                    _Point = (GpsPoint)intent.getSerializableExtra(Consts.Activities.Data.POINT_DATA);
-                    _Metadata = (TtMetadata)intent.getSerializableExtra(Consts.Activities.Data.METADATA_DATA);
+                    _Point = (GpsPoint)intent.getSerializableExtra(Consts.Codes.Data.POINT_DATA);
+                    _Metadata = intent.getParcelableExtra(Consts.Codes.Data.METADATA_DATA);
 
                     setZone(_Metadata.getZone());
 
-                    if (intent.getExtras().containsKey(Consts.Activities.Data.ADDITIVE_NMEA_DATA)) {
-                        _Bursts = TtNmeaBurst.bytesToBursts(intent.getByteArrayExtra(Consts.Activities.Data.ADDITIVE_NMEA_DATA));
+                    if (intent.getExtras().containsKey(Consts.Codes.Data.ADDITIVE_NMEA_DATA)) {
+                        _Bursts = TtNmeaBurst.bytesToBursts(intent.getByteArrayExtra(Consts.Codes.Data.ADDITIVE_NMEA_DATA));
                         setLoggedCount(_Bursts.size());
                     }
 
@@ -70,7 +67,7 @@ public class AcquireGpsActivity extends AcquireGpsMapActivity {
                     e.printStackTrace();
                 }
             } else {
-                setResult(Consts.Activities.Results.NO_POINT_DATA);
+                setResult(Consts.Codes.Results.NO_POINT_DATA);
                 finish();
                 return;
             }
@@ -79,6 +76,9 @@ public class AcquireGpsActivity extends AcquireGpsMapActivity {
             if (actionBar != null){
                 actionBar.setDisplayShowTitleEnabled(false);
             }
+
+            tvLogged = (TextView)findViewById(R.id.acquireGpsToolbarLblLoggedValue);
+            tvRecv = (TextView)findViewById(R.id.acquireGpsToolbarLblReceivedValue);
 
             btnLog = (Button)findViewById(R.id.aqrBtnLog);
             btnCalc = (Button)findViewById(R.id.aqrBtnCalc);
@@ -89,7 +89,7 @@ public class AcquireGpsActivity extends AcquireGpsMapActivity {
                 btnCalc.setBackgroundColor(AndroidUtils.UI.getColor(this, R.color.primaryLighter));
             }
 
-            setupMap();
+            //setupMap();
         }
     }
 
@@ -98,10 +98,10 @@ public class AcquireGpsActivity extends AcquireGpsMapActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == Consts.Activities.CALCULATE) {
+        if (requestCode == Consts.Codes.Activites.CALCULATE) {
             switch (resultCode) {
-                case Consts.Activities.Results.POINT_CREATED: {
-                    setResult(Consts.Activities.Results.POINT_CREATED, data);
+                case Consts.Codes.Results.POINT_CREATED: {
+                    setResult(Consts.Codes.Results.POINT_CREATED, data);
                     finish();
                     break;
                 }
@@ -127,14 +127,6 @@ public class AcquireGpsActivity extends AcquireGpsMapActivity {
 
 
     @Override
-    public void onMapReady(GoogleMap googleMap) {
-        super.onMapReady(googleMap);
-
-        setMapMyLocationEnabled(true);
-        setMapFollowMyPosition(true);
-    }
-
-    @Override
     protected void startLogging() {
         super.startLogging();
         btnLog.setText(R.string.aqr_log_pause);
@@ -158,7 +150,7 @@ public class AcquireGpsActivity extends AcquireGpsMapActivity {
     }
 
 
-    protected void onLoggedNmeaBurst(NmeaBurst burst) {
+    protected void onLoggedNmeaBurst(INmeaBurst burst) {
         _Bursts.add(TtNmeaBurst.create(_Point.getCN(), false, burst));
 
         if (!btnCalc.isEnabled() && getLoggedCount() > 0) {
@@ -168,8 +160,8 @@ public class AcquireGpsActivity extends AcquireGpsMapActivity {
     }
 
     @Override
-    public void nmeaBurstReceived(final NmeaBurst nmeaBurst) {
-        super.nmeaBurstReceived(nmeaBurst);
+    public void onNmeaBurstReceived(final INmeaBurst nmeaBurst) {
+        super.onNmeaBurstReceived(nmeaBurst);
 
         if (isLogging() && nmeaBurst.hasPosition()) {
             onLoggedNmeaBurst(nmeaBurst);
@@ -219,15 +211,20 @@ public class AcquireGpsActivity extends AcquireGpsMapActivity {
 
         try {
             Intent intent = new Intent(this, CalculateGpsActivity.class);
-            intent.putExtra(Consts.Activities.Data.POINT_DATA, _Point);
-            intent.putExtra(Consts.Activities.Data.METADATA_DATA, _Metadata);
+            intent.putExtra(Consts.Codes.Data.POINT_DATA, _Point);
+            intent.putExtra(Consts.Codes.Data.METADATA_DATA, _Metadata);
 
-            intent.putExtra(Consts.Activities.Data.ADDITIVE_NMEA_DATA, TtNmeaBurst.burstsToByteArray(_Bursts));
+            intent.putExtra(Consts.Codes.Data.ADDITIVE_NMEA_DATA, TtNmeaBurst.burstsToByteArray(_Bursts));
 
-            startActivityForResult(intent, Consts.Activities.CALCULATE);
+            startActivityForResult(intent, Consts.Codes.Activites.CALCULATE);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
+    }
+
+    @Override
+    protected Units.MapTracking getMapTracking() {
+        return Units.MapTracking.FOLLOW;
     }
 }

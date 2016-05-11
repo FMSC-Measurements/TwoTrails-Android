@@ -22,6 +22,7 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
     <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES"/>
     <uses-permission android:name="com.usda.fmsc.twotrails.permission.MAPS_RECEIVE"/>
 
@@ -183,14 +184,28 @@
             android:label="@string/title_activity_import"/>
         <activity
             android:name="com.nononsenseapps.filepicker.FilePickerActivity"
-            android:label="@string/app_name">
+            android:label="@string/app_name"
+            android:theme="@style/FilePickerTheme">
             <intent-filter>
                 <action android:name="android.intent.action.GET_CONTENT"/>
 
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>
-        <activity android:name=".activities.TestActivity">
+        <activity android:name=".activities.TestActivity"/>
+        <activity
+            android:name=".activities.MapManagerActivity"
+            android:label="@string/title_activity_offline_map_manager"/>
+        <activity
+            android:name=".activities.GetMapExtentsActivity"
+            android:label="@string/title_activity_get_map_extents"/>
+        <activity android:name=".activities.base.AcquireGpsMapActivity"/>
+        <activity
+            android:name=".activities.MapDetailsActivity"
+            android:label="@string/title_activity_edit_arc_map"/>
+        <activity
+            android:name=".activities.ArcGisLoginActivity"
+            android:label="@string/title_activity_arc_gis_login">
         </activity>
     </application>
 

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:fitsSystemWindows="true"
+    tools:context=".activities.MapManagerActivity">
+
+    <RelativeLayout
+        android:id="@+id/container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <include
+            layout="@layout/toolbar_default"
+            android:id="@id/toolbar"/>
+
+
+        <com.usda.fmsc.android.widget.RecyclerViewEx
+            android:id="@+id/mmRvMaps"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_below="@id/toolbar"
+            android:layout_alignParentBottom="true"
+            android:background="@color/background_card_view"/>
+    </RelativeLayout>
+
+    <com.usda.fmsc.twotrails.ui.MSFloatingActionButton
+        android:id="@+id/mmFabMenu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/fab_margin"
+        android:src="@drawable/ic_add_white"
+        app:layout_anchor="@id/container"
+        app:layout_anchorGravity="bottom|end"
+        android:onClick="btnMmAddClick"
+        android:elevation="8dp"/>
+
+    <com.usda.fmsc.android.widget.DimOverlayFrameLayout
+        android:id="@+id/overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:elevation="7dp"/>
+
+    <io.codetail.widget.RevealLinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="bottom|end"
+        android:layout_margin="@dimen/fab_margin"
+        android:elevation="9dp">
+
+        <android.support.v7.widget.CardView
+            android:id="@+id/fab_sheet"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:background="@color/background_card_view">
+
+                <TextView
+                    android:text="@string/str_online_map"
+                    android:drawableStart="@drawable/ic_online_primary_36"
+                    android:drawableLeft="@drawable/ic_online_primary_36"
+                    android:onClick="btnMmAddOnlineClick"
+                    style="@style/pointsTvOptionStyle"/>
+
+                <TextView
+                    android:text="@string/str_offline_map"
+                    android:drawableStart="@drawable/ic_offline_primary_36"
+                    android:drawableLeft="@drawable/ic_offline_primary_36"
+                    android:onClick="btnMmAddOfflineClick"
+                    style="@style/pointsTvOptionStyle"/>
+            </LinearLayout>
+
+        </android.support.v7.widget.CardView>
+    </io.codetail.widget.RevealLinearLayout>
+
+</android.support.design.widget.CoordinatorLayout>

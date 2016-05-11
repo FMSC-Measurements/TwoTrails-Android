@@ -2,7 +2,6 @@ package com.usda.fmsc.twotrails.activities;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -13,17 +12,16 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 
-import com.usda.fmsc.twotrails.activities.custom.CustomToolbarActivity;
+import com.usda.fmsc.geospatial.nmea.INmeaBurst;
+import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import org.joda.time.DateTime;
 
 import java.util.ArrayList;
 
-import com.usda.fmsc.geospatial.nmea.NmeaBurst;
 import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
 
 public class GpsLoggerActivity extends CustomToolbarActivity implements GpsService.Listener {
@@ -46,11 +44,6 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gps_logger);
 
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
-
         lvNmea = (ListView)findViewById(R.id.logLvNmea);
 
         lvNmea.setFadingEdgeLength(0);
@@ -58,7 +51,7 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
         binder = Global.getGpsBinder();
 
         if (Global.Settings.DeviceSettings.isGpsConfigured()) {
-            binder.registerActiviy(this, this);
+            binder.addListener(this);
             binder.startGps();
         }
 
@@ -140,7 +133,7 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
                     item.setChecked(true);
 
                     if (logging) {
-                        Global.getGpsBinder().startLogging(TtUtils.getLogFileName());
+                        Global.getGpsBinder().startLogging(Global.getLogFileName());
                     }
                 }
                 return true;
@@ -236,7 +229,7 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
                 btnLog.setText(R.string.aqr_log_pause);
 
                 if (miCheckLtf.isChecked()) {
-                    binder.startLogging(TtUtils.getLogFileName());
+                    binder.startLogging(Global.getLogFileName());
                 }
             } else {
                 logging = false;
@@ -257,7 +250,7 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
     }
 
     @Override
-    public void nmeaBurstReceived(NmeaBurst nmeaBurst) {
+    public void nmeaBurstReceived(INmeaBurst nmeaBurst) {
         if (logging) {
             strings.add(0, nmeaBurst.toString());//String.format("Burst Received- Valid: %s", Boolean.toString(nmeaBurst.isValid())));
             updateList();

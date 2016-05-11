@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:fitsSystemWindows="true"
+    tools:context="com.usda.fmsc.twotrails.activities.GetMapExtentsActivity">
+
+
+    <FrameLayout
+        android:id="@+id/mapContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+    <!--<RelativeLayout-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent">-->
+
+        <!--<FrameLayout-->
+            <!--android:id="@+id/mapContainer"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent"/>-->
+
+        <!--<com.usda.fmsc.twotrails.ui.SquareOverlay-->
+            <!--android:id="@+id/getMapOverlay"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:layout_centerInParent="true"/>-->
+    <!--</RelativeLayout>-->
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/getMapFabMap"
+        style="@style/fabStyle"
+        android:src="@drawable/ic_map_white_36dp"
+        app:layout_anchor="@id/mapContainer"
+        android:onClick="btnCreateClick" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/getMapFabPos"
+        style="@style/fabStyle"
+        android:src="@drawable/ic_ttpoint_gps_white"
+        app:layout_anchor="@id/mapContainer"
+        android:layout_margin="@null"
+        android:layout_marginEnd="@dimen/fab_margin"
+        android:layout_marginRight="@dimen/fab_margin"
+        android:layout_marginBottom="86dp"
+        app:layout_anchorGravity="bottom|right|end"
+        android:onClick="btnLocClick"
+        android:visibility="gone"/>
+
+</android.support.design.widget.CoordinatorLayout>

@@ -1,6 +1,5 @@
 package com.usda.fmsc.twotrails.dialogs;
 
-import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
@@ -9,10 +8,9 @@ import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import com.usda.fmsc.geospatial.nmea.NmeaBurst;
+import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.geospatial.nmea.NmeaIDs;
 import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
 import com.usda.fmsc.twotrails.Global;
@@ -72,7 +70,7 @@ public class CheckNmeaDialog extends DialogFragment implements GpsService.Listen
         postAllStrings = binder.postsAllNmeaStrings();
         binder.postAllNmeaStrings(true);
 
-        binder.registerActiviy(getActivity(), this);
+        binder.addListener(this);
         binder.startGps();
     }
 
@@ -86,12 +84,12 @@ public class CheckNmeaDialog extends DialogFragment implements GpsService.Listen
             }
 
             binder.postAllNmeaStrings(postAllStrings);
-            binder.unregisterActivity(getActivity());
+            binder.removeListener(this);
         }
     }
 
     @Override
-    public void nmeaBurstReceived(NmeaBurst nmeaBurst) {
+    public void nmeaBurstReceived(INmeaBurst nmeaBurst) {
 
     }
 

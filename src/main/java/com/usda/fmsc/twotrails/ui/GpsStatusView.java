@@ -4,7 +4,8 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
 
-import com.usda.fmsc.geospatial.nmea.NmeaBurst;
+import com.usda.fmsc.geospatial.nmea.INmeaBurst;
+import com.usda.fmsc.geospatial.nmea.NmeaIDs;
 import com.usda.fmsc.geospatial.nmea.Satellite;
 
 import java.util.ArrayList;
@@ -46,15 +47,15 @@ public class GpsStatusView extends View {
         satsUsedCount = satsVisCount = satsTrackedCount = satValidCount = 0;
     }
 
-    public void update(NmeaBurst burst) {
-        if (burst.getGSV().isValid()) {
+    public void update(INmeaBurst burst) {
+        if (burst.isValid(NmeaIDs.SentenceID.GSV)) {
             satsVisCount = burst.getSatellitesInViewCount();
-            satsTrackedCount = burst.getGGA().isValid() ? burst.getTrackedSatellitesCount() : 0;
+            satsTrackedCount = burst.isValid(NmeaIDs.SentenceID.GGA) ? burst.getTrackedSatellitesCount() : 0;
 
             satellitesUsed.clear();
             usedSats.clear();
 
-            if (burst.getGSA().isValid()) {
+            if (burst.isValid(NmeaIDs.SentenceID.GSA)) {
                 usedSats = burst.getUsedSatelliteIDs();
                 satsUsedCount = burst.getUsedSatellitesCount();
             } else {

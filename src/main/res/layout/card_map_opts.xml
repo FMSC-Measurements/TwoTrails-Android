@@ -77,7 +77,7 @@
                             android:id="@+id/pmcFcbAdjBnd"
                             android:contentDescription="@string/map_adj_bnd"
                             style="@style/mapOptFlipCheckBoxStyle"
-                            app:acceptColor="@color/red_500"
+                            app:acceptColor="@color/map_adj_bnd"
                             app:acceptImage="@drawable/ic_poly"
                             app:declineImage="@drawable/ic_poly"/>
 
@@ -85,7 +85,7 @@
                             android:id="@+id/pmcFcbAdjBndPts"
                             android:contentDescription="@string/map_adj_bnd_pts"
                             style="@style/mapOptFlipCheckBoxStyle"
-                            app:acceptColor="@color/red_500"
+                            app:acceptColor="@color/map_adj_pts"
                             app:acceptImage="@drawable/ic_location_white_36dp"
                             app:declineImage="@drawable/ic_location_white_36dp"/>
 
@@ -93,7 +93,7 @@
                             android:id="@+id/pmcFcbUnadjBnd"
                             android:contentDescription="@string/map_unadj_bnd"
                             style="@style/mapOptFlipCheckBoxStyle"
-                            app:acceptColor="@color/red_800"
+                            app:acceptColor="@color/map_unadj_bnd"
                             app:acceptImage="@drawable/ic_unpoly"
                             app:declineImage="@drawable/ic_unpoly"/>
 
@@ -101,7 +101,7 @@
                             android:id="@+id/pmcFcbUnadjBndPts"
                             android:contentDescription="@string/map_unadj_bnd_pts"
                             style="@style/mapOptFlipCheckBoxStyle"
-                            app:acceptColor="@color/red_800"
+                            app:acceptColor="@color/map_unadj_pts"
                             app:acceptImage="@drawable/ic_location_white_36dp"
                             app:declineImage="@drawable/ic_location_white_36dp"/>
 
@@ -139,7 +139,7 @@
                             android:id="@+id/pmcFcbAdjNav"
                             android:contentDescription="@string/map_adj_nav"
                             style="@style/mapOptFlipCheckBoxStyle"
-                            app:acceptColor="@color/indigo_500"
+                            app:acceptColor="@color/map_adj_nav"
                             app:acceptImage="@drawable/ic_poly"
                             app:declineImage="@drawable/ic_poly"/>
 
@@ -147,7 +147,7 @@
                             android:id="@+id/pmcFcbAdjNavPts"
                             android:contentDescription="@string/map_adj_nav_pts"
                             style="@style/mapOptFlipCheckBoxStyle"
-                            app:acceptColor="@color/indigo_500"
+                            app:acceptColor="@color/map_adj_pts"
                             app:acceptImage="@drawable/ic_location_white_36dp"
                             app:declineImage="@drawable/ic_location_white_36dp"/>
 
@@ -155,7 +155,7 @@
                             android:id="@+id/pmcFcbUnadjNav"
                             android:contentDescription="@string/map_unadj_nav"
                             style="@style/mapOptFlipCheckBoxStyle"
-                            app:acceptColor="@color/indigo_800"
+                            app:acceptColor="@color/map_unadj_nav"
                             app:acceptImage="@drawable/ic_unpoly"
                             app:declineImage="@drawable/ic_unpoly"/>
 
@@ -163,7 +163,7 @@
                             android:id="@+id/pmcFcbUnadjNavPts"
                             android:contentDescription="@string/map_unadj_nav_pts"
                             style="@style/mapOptFlipCheckBoxStyle"
-                            app:acceptColor="@color/indigo_800"
+                            app:acceptColor="@color/map_unadj_pts"
                             app:acceptImage="@drawable/ic_location_white_36dp"
                             app:declineImage="@drawable/ic_location_white_36dp"/>
                     </LinearLayout>
@@ -185,24 +185,28 @@
                         android:orientation="horizontal">
 
                         <com.usda.fmsc.android.widget.FlipCheckBoxEx
+                            android:id="@+id/pmcFcbWayPts"
+                            android:contentDescription="@string/map_way_pts"
+                            style="@style/mapOptFlipCheckBoxStyle"
+                            app:acceptColor="@color/map_way_pts"
+                            app:acceptImage="@drawable/ic_ttpoint_way_white"
+                            app:declineImage="@drawable/ic_ttpoint_way_white"/>
+
+                        <com.usda.fmsc.android.widget.FlipCheckBoxEx
                             android:id="@+id/pmcFcbAdjMiscPts"
                             android:contentDescription="@string/map_adj_misc_pts"
                             style="@style/mapOptFlipCheckBoxStyle"
-                            app:acceptColor="@color/primaryLight"/>
+                            app:acceptColor="@color/map_adj_pts"
+                            app:acceptImage="@drawable/ic_location_white_36dp"
+                            app:declineImage="@drawable/ic_location_white_36dp"/>
 
                         <com.usda.fmsc.android.widget.FlipCheckBoxEx
                             android:id="@+id/pmcFcbUnadjMiscPts"
                             android:contentDescription="@string/map_unadj_misc_pts"
                             style="@style/mapOptFlipCheckBoxStyle"
-                            app:acceptColor="@color/primaryLight"/>
-
-                        <com.usda.fmsc.android.widget.FlipCheckBoxEx
-                            android:id="@+id/pmcFcbWayPts"
-                            android:contentDescription="@string/map_way_pts"
-                            style="@style/mapOptFlipCheckBoxStyle"
-                            app:acceptColor="@color/primaryLight"
-                            app:acceptImage="@drawable/ic_ttpoint_way_white"
-                            app:declineImage="@drawable/ic_ttpoint_way_white"/>
+                            app:acceptColor="@color/map_unadj_pts"
+                            app:acceptImage="@drawable/ic_location_white_36dp"
+                            app:declineImage="@drawable/ic_location_white_36dp"/>
                     </LinearLayout>
                 </LinearLayout>
 
