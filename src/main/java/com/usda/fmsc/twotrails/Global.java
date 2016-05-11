@@ -15,36 +15,33 @@ import android.preference.PreferenceManager;
 import android.support.annotation.ColorInt;
 import android.support.v4.app.NotificationCompat;
 
-import com.esri.android.runtime.ArcGISRuntime;
-import com.esri.core.io.UserCredentials;
-import com.usda.fmsc.android.AndroidUtils;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.usda.fmsc.android.AndroidUtils;
+import com.usda.fmsc.geospatial.Units.UomElevation;
+import com.usda.fmsc.geospatial.nmea.sentences.GGASentence;
 import com.usda.fmsc.twotrails.activities.MainActivity;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
 import com.usda.fmsc.twotrails.devices.TtBluetoothManager;
 import com.usda.fmsc.twotrails.gps.GpsService;
-import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
-import com.usda.fmsc.twotrails.objects.map.PolygonDrawOptions;
 import com.usda.fmsc.twotrails.objects.RecentProject;
 import com.usda.fmsc.twotrails.objects.TtGroup;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
+import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
+import com.usda.fmsc.twotrails.objects.map.PolygonDrawOptions;
 import com.usda.fmsc.twotrails.objects.map.PolygonGraphicOptions;
 import com.usda.fmsc.twotrails.objects.map.PolygonGraphicOptions.GraphicCode;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
+import com.usda.fmsc.utilities.FileUtils;
+import com.usda.fmsc.utilities.StringEx;
+
+import org.joda.time.DateTime;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-
-import com.usda.fmsc.geospatial.nmea.sentences.GGASentence;
-import com.usda.fmsc.geospatial.Units.UomElevation;
-import com.usda.fmsc.utilities.FileUtils;
-import com.usda.fmsc.utilities.StringEx;
-
-import org.joda.time.DateTime;
 
 public class Global {
     private static DataAccessLayer DAL;
