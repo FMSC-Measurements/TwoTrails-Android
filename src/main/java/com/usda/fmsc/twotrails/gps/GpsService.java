@@ -208,7 +208,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
                 locManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);
 
             if (isInternalGpsEnabled()) {
-                if (AndroidUtils.App.checkFineLocationPermission(this)) {
+                if (AndroidUtils.App.checkLocationPermission(this)) {
                     locManager.addNmeaListener(this);
                     locManager.addGpsStatusListener(this);
                     locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_UPDATE_INTERVAL, GPS_MINIMUM_DISTANCE, this);
@@ -233,7 +233,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
 
     private GpsDeviceStatus stopInternalGps() {
         if(locManager != null) {
-            if (AndroidUtils.App.checkFineLocationPermission(this)) {
+            if (AndroidUtils.App.checkLocationPermission(this)) {
                 locManager.removeNmeaListener(this);
                 locManager.removeGpsStatusListener(this);
                 locManager.removeUpdates(this);
@@ -665,10 +665,6 @@ public class GpsService extends Service implements LocationListener, LocationSou
     @Override
     public void deactivate() {
         gmapListener = null;
-
-        if (!Global.Settings.DeviceSettings.isGpsAlwaysOn()) {
-            stopGps();
-        }
     }
     //endregion
 
