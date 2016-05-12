@@ -18,7 +18,7 @@ import android.support.v4.app.NotificationCompat;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.usda.fmsc.android.AndroidUtils;
-import com.usda.fmsc.geospatial.Units.UomElevation;
+import com.usda.fmsc.geospatial.UomElevation;
 import com.usda.fmsc.geospatial.nmea.sentences.GGASentence;
 import com.usda.fmsc.twotrails.activities.MainActivity;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
@@ -31,6 +31,13 @@ import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
 import com.usda.fmsc.twotrails.objects.map.PolygonDrawOptions;
 import com.usda.fmsc.twotrails.objects.map.PolygonGraphicOptions;
 import com.usda.fmsc.twotrails.objects.map.PolygonGraphicOptions.GraphicCode;
+import com.usda.fmsc.twotrails.units.Datum;
+import com.usda.fmsc.twotrails.units.DeclinationType;
+import com.usda.fmsc.twotrails.units.Dist;
+import com.usda.fmsc.twotrails.units.DopType;
+import com.usda.fmsc.twotrails.units.MapTracking;
+import com.usda.fmsc.twotrails.units.MapType;
+import com.usda.fmsc.twotrails.units.Slope;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 import com.usda.fmsc.utilities.FileUtils;
 import com.usda.fmsc.utilities.StringEx;
@@ -562,11 +569,11 @@ public class Global {
             public static final boolean DEFAULT_DROP_ZERO = true;
             public static final boolean DEFAULT_ROUND_POINTS = true;
 
-            public static final Units.DopType DEFAULT_GPS_DOP_TYPE = Units.DopType.HDOP;
+            public static final DopType DEFAULT_GPS_DOP_TYPE = DopType.HDOP;
             public static final GGASentence.GpsFixType DEFAULT_GPS_FIX_TYPE = GGASentence.GpsFixType.GPS;
             public static final int DEFAULT_GPS_DOP_VALUE = 20;
 
-            public static final Units.DopType DEFAULT_TAKE5_DOP_TYPE = Units.DopType.HDOP;
+            public static final DopType DEFAULT_TAKE5_DOP_TYPE = DopType.HDOP;
             public static final GGASentence.GpsFixType DEFAULT_TAKE5_FIX_TYPE = GGASentence.GpsFixType.GPS;
             public static final int DEFAULT_TAKE5_DOP_VALUE = 20;
             public static final int DEFAULT_TAKE5_INCREMENT = 5;
@@ -577,7 +584,7 @@ public class Global {
             public static final boolean DEFAULT_TAKE5_VIB_ON_CREATE = true;
             public static final boolean DEFAULT_TAKE5_RING_ON_CREATE = true;
 
-            public static final Units.DopType DEFAULT_WALK_DOP_TYPE = Units.DopType.HDOP;
+            public static final DopType DEFAULT_WALK_DOP_TYPE = DopType.HDOP;
             public static final GGASentence.GpsFixType DEFAULT_WALK_FIX_TYPE = GGASentence.GpsFixType.GPS;
             public static final int DEFAULT_WALK_DOP_VALUE = 20;
             public static final int DEFAULT_WALK_INCREMENT = 2;
@@ -603,7 +610,7 @@ public class Global {
             public static final int DEFAULT_AUTO_OVERWRITE_EXPORT = 0;
             public static final boolean DEFAULT_AUTO_OVERWRITE_EXPORT_ASK = true;
 
-            public static final Units.MapTracking DEFAULT_MAP_TRACKING_OPTION = Units.MapTracking.POLY_BOUNDS;
+            public static final MapTracking DEFAULT_MAP_TRACKING_OPTION = MapTracking.POLY_BOUNDS;
             public static final boolean DEFAULT_MAP_COMPASS_ENABLED = true;
             public static final boolean DEFAULT_MAP_MYPOS_BUTTON = true;
             public static final double DEFAULT_MAP_MIN_DIST = 50;
@@ -797,11 +804,11 @@ public class Global {
             //endregion
 
             //region Filters
-            public static Units.DopType getGpsFilterDopType() {
-                return Units.DopType.parse(getInt(GPS_FILTER_DOP_TYPE, DEFAULT_GPS_DOP_TYPE.getValue()));
+            public static DopType getGpsFilterDopType() {
+                return DopType.parse(getInt(GPS_FILTER_DOP_TYPE, DEFAULT_GPS_DOP_TYPE.getValue()));
             }
 
-            public static void setGpsFilterDopType(Units.DopType value) {
+            public static void setGpsFilterDopType(DopType value) {
                 setInt(GPS_FILTER_DOP_TYPE, value.getValue());
             }
 
@@ -822,11 +829,11 @@ public class Global {
             }
 
 
-            public static Units.DopType getTake5FilterDopType() {
-                return Units.DopType.parse(getInt(TAKE5_FILTER_DOP_TYPE, DEFAULT_TAKE5_DOP_TYPE.getValue()));
+            public static DopType getTake5FilterDopType() {
+                return DopType.parse(getInt(TAKE5_FILTER_DOP_TYPE, DEFAULT_TAKE5_DOP_TYPE.getValue()));
             }
 
-            public static void setTake5FilterDopType(Units.DopType value) {
+            public static void setTake5FilterDopType(DopType value) {
                 setInt(TAKE5_FILTER_DOP_TYPE, value.getValue());
             }
 
@@ -847,11 +854,11 @@ public class Global {
             }
             
             
-            public static Units.DopType getWalkFilterDopType() {
-                return Units.DopType.parse(getInt(WALK_FILTER_DOP_TYPE, DEFAULT_WALK_DOP_TYPE.getValue()));
+            public static DopType getWalkFilterDopType() {
+                return DopType.parse(getInt(WALK_FILTER_DOP_TYPE, DEFAULT_WALK_DOP_TYPE.getValue()));
             }
 
-            public static void setWalkFilterDopType(Units.DopType value) {
+            public static void setWalkFilterDopType(DopType value) {
                 setInt(WALK_FILTER_DOP_TYPE, value.getValue());
             }
 
@@ -997,11 +1004,11 @@ public class Global {
             //endregion
 
             //region Map
-            public static Units.MapTracking getMapTrackingOption() {
-                return Units.MapTracking.parse(getInt(MAP_TRACKING_OPTION, DEFAULT_MAP_TRACKING_OPTION.getValue()));
+            public static MapTracking getMapTrackingOption() {
+                return MapTracking.parse(getInt(MAP_TRACKING_OPTION, DEFAULT_MAP_TRACKING_OPTION.getValue()));
             }
 
-            public static void setMapTrackingOption(Units.MapTracking mapTrackingOption) {
+            public static void setMapTrackingOption(MapTracking mapTrackingOption) {
                 setInt(MAP_TRACKING_OPTION, mapTrackingOption.getValue());
             }
 
@@ -1061,11 +1068,11 @@ public class Global {
 
 
 
-            public static Units.MapType getMapType() {
-                return Units.MapType.parse(getInt(MAP_TYPE, DEFAULT_MAP_TYPE));
+            public static MapType getMapType() {
+                return MapType.parse(getInt(MAP_TYPE, DEFAULT_MAP_TYPE));
             }
 
-            public static void setMapType(Units.MapType value) {
+            public static void setMapType(MapType value) {
                 setInt(MAP_TYPE, value.getValue());
             }
 
@@ -1440,20 +1447,20 @@ public class Global {
             }
 
 
-            public static Units.Datum getDatum() {
-                return Units.Datum.parse(getInt(META_DATUM, Units.Datum.NAD83.getValue()));
+            public static Datum getDatum() {
+                return Datum.parse(getInt(META_DATUM, Datum.NAD83.getValue()));
             }
 
-            public static void setDatm(Units.Datum value) {
+            public static void setDatm(Datum value) {
                 setInt(META_ZONE, value.getValue());
             }
 
 
-            public static Units.Dist getDistance() {
-                return Units.Dist.parse(getInt(META_DISTANCE, Units.Dist.FeetTenths.getValue()));
+            public static Dist getDistance() {
+                return Dist.parse(getInt(META_DISTANCE, Dist.FeetTenths.getValue()));
             }
 
-            public static void setDistance(Units.Dist value) {
+            public static void setDistance(Dist value) {
                 setInt(META_DISTANCE, value.getValue());
             }
 
@@ -1467,20 +1474,20 @@ public class Global {
             }
 
 
-            public static Units.Slope getSlope() {
-                return Units.Slope.parse(getInt(META_SLOPE, Units.Slope.Percent.getValue()));
+            public static Slope getSlope() {
+                return Slope.parse(getInt(META_SLOPE, Slope.Percent.getValue()));
             }
 
-            public static void setSlope(Units.Slope value) {
+            public static void setSlope(Slope value) {
                 setInt(META_SLOPE, value.getValue());
             }
 
 
-            public static Units.DeclinationType getDeclinationType() {
-                return Units.DeclinationType.parse(getInt(META_DECTYPE, Units.DeclinationType.MagDec.getValue()));
+            public static DeclinationType getDeclinationType() {
+                return DeclinationType.parse(getInt(META_DECTYPE, DeclinationType.MagDec.getValue()));
             }
 
-            public static void setDeclinationType(Units.DeclinationType value) {
+            public static void setDeclinationType(DeclinationType value) {
                 setInt(META_DECTYPE, value.getValue());
             }
 

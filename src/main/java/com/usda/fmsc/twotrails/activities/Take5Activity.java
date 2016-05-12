@@ -24,8 +24,9 @@ import com.usda.fmsc.android.widget.SheetLayoutEx;
 import com.usda.fmsc.android.widget.layoutmanagers.LinearLayoutManagerWithSmoothScroller;
 import com.usda.fmsc.android.widget.RecyclerViewEx;
 import com.usda.fmsc.geospatial.nmea.INmeaBurst;
-import com.usda.fmsc.geospatial.nmea.exceptions.ExcessiveStringException;
 import com.usda.fmsc.twotrails.activities.base.AcquireGpsMapActivity;
+import com.usda.fmsc.twotrails.units.MapTracking;
+import com.usda.fmsc.twotrails.units.OpType;
 import com.usda.fmsc.utilities.StringEx;
 import com.usda.fmsc.twotrails.adapters.Take5PointsEditRvAdapter;
 import com.usda.fmsc.twotrails.Consts;
@@ -35,13 +36,12 @@ import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.logic.PointNamer;
 import com.usda.fmsc.twotrails.objects.FilterOptions;
-import com.usda.fmsc.twotrails.objects.SideShotPoint;
-import com.usda.fmsc.twotrails.objects.Take5Point;
+import com.usda.fmsc.twotrails.objects.points.SideShotPoint;
+import com.usda.fmsc.twotrails.objects.points.Take5Point;
 import com.usda.fmsc.twotrails.objects.TtGroup;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
-import com.usda.fmsc.twotrails.objects.TtPoint;
+import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
-import com.usda.fmsc.twotrails.Units;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.util.ArrayList;
@@ -481,7 +481,7 @@ public class Take5Activity extends AcquireGpsMapActivity {
 
 
     private boolean validateSideShot() {
-        if (_CurrentPoint != null && _CurrentPoint.getOp() == Units.OpType.SideShot) {
+        if (_CurrentPoint != null && _CurrentPoint.getOp() == OpType.SideShot) {
             SideShotPoint ssp = (SideShotPoint)_CurrentPoint;
 
             if (ssp.getFwdAz() != null || ssp.getBkAz() != null) {
@@ -788,7 +788,7 @@ public class Take5Activity extends AcquireGpsMapActivity {
 
             fabT5.setEnabled(true);
             fabSS.setEnabled(true);
-        } else if (_Points.size() > 0 && _CurrentPoint.getOp() == Units.OpType.SideShot) {
+        } else if (_Points.size() > 0 && _CurrentPoint.getOp() == OpType.SideShot) {
             _Points.remove(_Points.size() - 1);
 
             ignoreScroll = true;
@@ -817,7 +817,7 @@ public class Take5Activity extends AcquireGpsMapActivity {
 
 
     @Override
-    protected Units.MapTracking getMapTracking() {
-        return mapViewMode ? Units.MapTracking.NONE : Units.MapTracking.FOLLOW;
+    protected MapTracking getMapTracking() {
+        return mapViewMode ? MapTracking.NONE : MapTracking.FOLLOW;
     }
 }

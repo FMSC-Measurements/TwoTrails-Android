@@ -30,7 +30,7 @@ import java.util.HashMap;
 import com.usda.fmsc.utilities.StringEx;
 
 public class PointEditorDialog extends DialogFragment {
-    private static String CN = "CN";
+    private static String CN = "_CN";
     private static String PID = "PID";
     private static String METACN = "METACN";
     private static String META = "META";

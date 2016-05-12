@@ -4,7 +4,6 @@ import android.support.annotation.ColorInt;
 
 import com.esri.android.map.GraphicsLayer;
 import com.esri.android.map.MapView;
-import com.esri.core.geometry.Geometry;
 import com.esri.core.geometry.Point;
 import com.esri.core.geometry.Polygon;
 import com.esri.core.geometry.Polyline;
@@ -14,11 +13,11 @@ import com.esri.core.symbol.SimpleMarkerSymbol;
 import com.esri.core.symbol.Symbol;
 import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.geospatial.GeoPosition;
-import com.usda.fmsc.twotrails.Units;
 import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
-import com.usda.fmsc.twotrails.objects.TtPoint;
+import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
+import com.usda.fmsc.twotrails.units.OpType;
 import com.usda.fmsc.twotrails.utilities.ArcGISTools;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
@@ -151,11 +150,11 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
                 }
             }
 
-            if (point.getOp() == Units.OpType.WayPoint) {
+            if (point.getOp() == OpType.WayPoint) {
                 _MarkerData.put(Integer.toHexString(_WayPts.addGraphic(unadjmk)), unadjMd);
             }
 
-            if (point.getOp() == Units.OpType.SideShot && !point.isOnBnd()) {
+            if (point.getOp() == OpType.SideShot && !point.isOnBnd()) {
                 _MarkerData.put(Integer.toHexString(_AdjMiscPts.addGraphic(adjmk)), adjMd);
                 _MarkerData.put(Integer.toHexString(_UnadjMiscPts.addGraphic(unadjmk)), unadjMd);
             }

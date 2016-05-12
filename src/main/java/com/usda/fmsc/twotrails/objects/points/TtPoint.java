@@ -1,9 +1,7 @@
-package com.usda.fmsc.twotrails.objects;
+package com.usda.fmsc.twotrails.objects.points;
 
 
 import android.support.annotation.NonNull;
-
-import com.usda.fmsc.twotrails.Units.OpType;
 
 import org.joda.time.DateTime;
 
@@ -11,13 +9,15 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 
+import com.usda.fmsc.twotrails.objects.TtObject;
+import com.usda.fmsc.twotrails.objects.TtPolygon;
+import com.usda.fmsc.twotrails.units.OpType;
 import com.usda.fmsc.utilities.StringEx;
 
 
-public abstract class TtPoint implements Comparable<TtPoint>, Comparator<TtPoint>, Serializable {
+public abstract class TtPoint extends TtObject implements Comparable<TtPoint>, Comparator<TtPoint>, Serializable {
 
     //region Vars
-    protected String _CN;
     protected OpType _Op;
     protected long _Index;
     protected int _PID;
@@ -65,18 +65,7 @@ public abstract class TtPoint implements Comparable<TtPoint>, Comparator<TtPoint
 
 
     //region Get/Set
-    //region CN Op Index PID Time
-    public String getCN() {
-        if (StringEx.isEmpty(_CN))
-            _CN = java.util.UUID.randomUUID().toString();
-        return _CN;
-    }
-
-    public void setCN(String CN) {
-        _CN = CN;
-    }
-
-
+    //region _CN Op Index PID Time
     public OpType getOp() {
         return _Op;
     }
@@ -295,7 +284,7 @@ public abstract class TtPoint implements Comparable<TtPoint>, Comparator<TtPoint
 
     //region copy Point
     public void copy(TtPoint toCopy) {
-        this._CN = toCopy.getCN();
+        setCN(toCopy.getCN());
         this._Op = toCopy.getOp();
         this._Comment = toCopy.getComment();
         this._Index = toCopy.getIndex();
@@ -318,7 +307,7 @@ public abstract class TtPoint implements Comparable<TtPoint>, Comparator<TtPoint
     }
 
     public void copyInfo(TtPoint toCopy) {
-        this._CN = toCopy.getCN();
+        setCN(toCopy.getCN());
 
         if (StringEx.isEmpty(_Comment)) {
             _Comment = toCopy.getComment();

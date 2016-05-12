@@ -19,14 +19,14 @@ import android.widget.EditText;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.animation.ViewAnimator;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.objects.GpsPoint;
+import com.usda.fmsc.twotrails.objects.points.GpsPoint;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import com.usda.fmsc.geospatial.DMS;
 import com.usda.fmsc.utilities.StringEx;
 
 public class LatLonDialog extends DialogFragment {
-    private static String CN = "CN";
+    private static String CN = "_CN";
     private static String PID = "PID";
     private static String LAT = "LAT";
     private static String LON = "LON";

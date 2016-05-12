@@ -1,6 +1,6 @@
-package com.usda.fmsc.twotrails.objects;
+package com.usda.fmsc.twotrails.objects.points;
 
-import com.usda.fmsc.twotrails.Units.OpType;
+import com.usda.fmsc.twotrails.units.OpType;
 
 public class SideShotPoint extends TravPoint {
     public SideShotPoint() {

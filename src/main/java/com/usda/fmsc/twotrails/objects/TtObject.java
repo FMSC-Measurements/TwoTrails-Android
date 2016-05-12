@@ -3,16 +3,15 @@ package com.usda.fmsc.twotrails.objects;
 import com.usda.fmsc.utilities.StringEx;
 
 public abstract class TtObject {
-    protected String CN = StringEx.Empty;
+    private String _CN = StringEx.Empty;
 
     public String getCN() {
-        if(StringEx.isEmpty(CN))
-            CN = java.util.UUID.randomUUID().toString();
-        return CN;
+        if(StringEx.isEmpty(_CN))
+            _CN = java.util.UUID.randomUUID().toString();
+        return _CN;
     }
 
-    public abstract String getName();
-    public abstract String getType();
-
-    public abstract TtObject clone();
+    public void setCN(String CN) {
+        this._CN = CN;
+    }
 }

@@ -5,7 +5,6 @@ import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Build;
-import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -27,29 +26,23 @@ import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment;
 import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.objects.FilterOptions;
-import com.usda.fmsc.twotrails.objects.GpsPoint;
+import com.usda.fmsc.twotrails.objects.media.TtPanorama;
+import com.usda.fmsc.twotrails.objects.media.TtPhotoSphere;
+import com.usda.fmsc.twotrails.objects.media.TtPicture;
+import com.usda.fmsc.twotrails.objects.points.GpsPoint;
 import com.usda.fmsc.twotrails.objects.PointD;
-import com.usda.fmsc.twotrails.objects.QuondamPoint;
-import com.usda.fmsc.twotrails.objects.SideShotPoint;
-import com.usda.fmsc.twotrails.objects.Take5Point;
-import com.usda.fmsc.twotrails.objects.TravPoint;
+import com.usda.fmsc.twotrails.objects.points.QuondamPoint;
+import com.usda.fmsc.twotrails.objects.points.SideShotPoint;
+import com.usda.fmsc.twotrails.objects.points.Take5Point;
+import com.usda.fmsc.twotrails.objects.points.TravPoint;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
-import com.usda.fmsc.twotrails.objects.TtPoint;
-import com.usda.fmsc.twotrails.objects.WalkPoint;
-import com.usda.fmsc.twotrails.objects.WayPoint;
-import com.usda.fmsc.twotrails.Units;
-import com.usda.fmsc.twotrails.Units.Dist;
-import com.usda.fmsc.twotrails.Units.OpType;
-import com.usda.fmsc.twotrails.Units.Slope;
+import com.usda.fmsc.twotrails.objects.points.TtPoint;
+import com.usda.fmsc.twotrails.objects.points.WalkPoint;
+import com.usda.fmsc.twotrails.objects.points.WayPoint;
 
 import org.joda.time.DateTime;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -59,7 +52,12 @@ import java.util.List;
 import com.usda.fmsc.geospatial.GeoPosition;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.geospatial.utm.UTMTools;
-import com.usda.fmsc.geospatial.Units.UomElevation;
+import com.usda.fmsc.geospatial.UomElevation;
+import com.usda.fmsc.twotrails.units.Dist;
+import com.usda.fmsc.twotrails.units.DopType;
+import com.usda.fmsc.twotrails.units.OpType;
+import com.usda.fmsc.twotrails.units.PictureType;
+import com.usda.fmsc.twotrails.units.Slope;
 import com.usda.fmsc.utilities.FileUtils;
 import com.usda.fmsc.utilities.StringEx;
 
@@ -979,6 +977,19 @@ public class TtUtils {
     }
     //endregion
 
+    //region Media
+
+    public static TtPicture getPictureByType(PictureType type) {
+        switch (type) {
+            case Regular: return new TtPicture();
+            case Panorama: return new TtPanorama();
+            case PhotoSphere: return new TtPhotoSphere();
+            default:
+                throw new IllegalArgumentException("Unknown type");
+        }
+    }
+
+    //endregion
 
     //region NMEA
     public static boolean isUsableNmeaBurst(INmeaBurst nmeaBurst, FilterOptions options) {
@@ -998,8 +1009,8 @@ public class TtUtils {
                 value = 4;
 
             if (value >= options.Fix.getValue() &&
-                    (options.DopType == Units.DopType.HDOP && nmeaBurst.getHDOP() <= options.DopValue) ||
-                    (options.DopType == Units.DopType.PDOP && nmeaBurst.getPDOP() <= options.DopValue)) {
+                    (options.DopType == DopType.HDOP && nmeaBurst.getHDOP() <= options.DopValue) ||
+                    (options.DopType == DopType.PDOP && nmeaBurst.getPDOP() <= options.DopValue)) {
                 valid = true;
             }
         }
@@ -1024,8 +1035,8 @@ public class TtUtils {
                 value = 4;
 
             if (value >= options.Fix.getValue() &&
-                    (options.DopType == Units.DopType.HDOP && nmeaBurst.getHDOP() <= options.DopValue) ||
-                    (options.DopType == Units.DopType.PDOP && nmeaBurst.getPDOP() <= options.DopValue)) {
+                    (options.DopType == DopType.HDOP && nmeaBurst.getHDOP() <= options.DopValue) ||
+                    (options.DopType == DopType.PDOP && nmeaBurst.getPDOP() <= options.DopValue)) {
                 valid = true;
             }
         }
