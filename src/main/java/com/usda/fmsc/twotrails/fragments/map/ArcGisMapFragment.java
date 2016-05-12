@@ -3,7 +3,6 @@ package com.usda.fmsc.twotrails.fragments.map;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -16,21 +15,16 @@ import com.esri.android.map.GraphicsLayer;
 import com.esri.android.map.Layer;
 import com.esri.android.map.MapOnTouchListener;
 import com.esri.android.map.MapView;
-import com.esri.android.map.ags.ArcGISLocalTiledLayer;
 import com.esri.android.map.ags.ArcGISTiledMapServiceLayer;
 import com.esri.android.map.event.OnPanListener;
 import com.esri.android.map.event.OnStatusChangedListener;
 import com.esri.android.map.event.OnZoomListener;
-import com.esri.android.toolkit.map.MapViewHelper;
 import com.esri.core.geometry.Envelope;
 import com.esri.core.geometry.Geometry;
 import com.esri.core.geometry.Point;
 import com.esri.core.geometry.Polygon;
 import com.esri.core.geometry.SpatialReference;
 import com.esri.core.map.Graphic;
-import com.esri.core.symbol.PictureMarkerSymbol;
-import com.esri.core.symbol.SimpleFillSymbol;
-import com.esri.core.symbol.SimpleLineSymbol;
 import com.esri.core.symbol.SimpleMarkerSymbol;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.geospatial.Extent;
@@ -40,7 +34,6 @@ import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.Units;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
 import com.usda.fmsc.twotrails.objects.map.ArcGisPolygonGraphic;
@@ -50,7 +43,7 @@ import com.usda.fmsc.twotrails.objects.map.PolygonDrawOptions;
 import com.usda.fmsc.twotrails.objects.map.PolygonGraphicManager;
 import com.usda.fmsc.twotrails.objects.map.TrailGraphicManager;
 import com.usda.fmsc.twotrails.ui.ArcMapCompass;
-import com.usda.fmsc.twotrails.ui.MyPositionDrawable;
+import com.usda.fmsc.twotrails.units.MapType;
 import com.usda.fmsc.twotrails.utilities.ArcGISTools;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
@@ -290,7 +283,7 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
                 }
 
                 if (mmListener != null) {
-                    mmListener.onMapTypeChanged(Units.MapType.ArcGIS, basemapId, agml.isOnline());
+                    mmListener.onMapTypeChanged(MapType.ArcGIS, basemapId, agml.isOnline());
                 }
 
                 if (currentGisMapLayer.isOnline() && currentGisMapLayer.getNumberOfLevels() < 1) {

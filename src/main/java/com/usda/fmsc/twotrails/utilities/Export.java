@@ -3,6 +3,8 @@ package com.usda.fmsc.twotrails.utilities;
 import android.os.AsyncTask;
 
 import com.usda.fmsc.geospatial.utm.UTMTools;
+import com.usda.fmsc.twotrails.units.Dist;
+import com.usda.fmsc.twotrails.units.Slope;
 import com.usda.fmsc.utilities.gpx.GpxDocument;
 import com.usda.fmsc.utilities.gpx.GpxMetadata;
 import com.usda.fmsc.utilities.gpx.GpxPoint;
@@ -16,12 +18,12 @@ import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
 import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
 import com.usda.fmsc.twotrails.logic.HaidLogic;
-import com.usda.fmsc.twotrails.objects.GpsPoint;
-import com.usda.fmsc.twotrails.objects.QuondamPoint;
-import com.usda.fmsc.twotrails.objects.TravPoint;
+import com.usda.fmsc.twotrails.objects.points.GpsPoint;
+import com.usda.fmsc.twotrails.objects.points.QuondamPoint;
+import com.usda.fmsc.twotrails.objects.points.TravPoint;
 import com.usda.fmsc.twotrails.objects.TtGroup;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
-import com.usda.fmsc.twotrails.objects.TtPoint;
+import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
 
 import java.io.File;
@@ -38,8 +40,7 @@ import java.util.zip.ZipOutputStream;
 import com.usda.fmsc.geospatial.GeoPosition;
 import com.usda.fmsc.utilities.StringEx;
 
-import com.usda.fmsc.twotrails.Units;
-import com.usda.fmsc.twotrails.Units.OpType;
+import com.usda.fmsc.twotrails.units.OpType;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -86,11 +87,11 @@ public class Export {
                     "Slope A Type",
                     "Parent",
                     "Comment",
-                    "Point CN",
-                    "Poly CN",
-                    "Metadata CN",
-                    "Group CN",
-                    "Parent CN",
+                    "Point _CN",
+                    "Poly _CN",
+                    "Metadata _CN",
+                    "Group _CN",
+                    "Parent _CN",
                     "Linked CNs"
             });
             //endregion
@@ -155,7 +156,7 @@ public class Export {
                             TtUtils.Convert.distance(
                                     trav.getSlopeDistance(),
                                     tMeta.getDistance(),
-                                    Units.Dist.Meters
+                                    Dist.Meters
                             )
                     ));
                     values.add(tMeta.getDistance().toString());
@@ -164,7 +165,7 @@ public class Export {
                             TtUtils.Convert.angle(
                                     trav.getSlopeAngle(),
                                     tMeta.getSlope(),
-                                    Units.Slope.Percent
+                                    Slope.Percent
                             )
                     ));
                     values.add(tMeta.getSlope().toString());
@@ -219,7 +220,7 @@ public class Export {
                     "Name",
                     "Type",
                     "Description",
-                    "CN"
+                    "_CN"
             });
 
 
@@ -256,7 +257,7 @@ public class Export {
                     "Accuracy (M)",
                     "Area (Ac)",
                     "Perimeter (Ft)",
-                    "CN"
+                    "_CN"
             });
 
             ArrayList<String> values = new ArrayList<>(5);
@@ -270,8 +271,8 @@ public class Export {
 
                 values.add(StringEx.toString(
                         TtUtils.Convert.distance(poly.getPerimeter(),
-                                Units.Dist.FeetTenths,
-                                Units.Dist.Meters)
+                                Dist.FeetTenths,
+                                Dist.Meters)
                 ));
 
                 values.add(4, poly.getCN());
@@ -309,7 +310,7 @@ public class Export {
                     "Compass",
                     "Crew",
                     "Comment",
-                    "CN"
+                    "_CN"
             });
 
             ArrayList<String> values = new ArrayList<>(14);
@@ -391,7 +392,7 @@ public class Export {
             CSVPrinter writer = new CSVPrinter(new FileWriter(nmeaFilename), CSVFormat.DEFAULT);
 
             writer.printRecords(new String[] {
-                    "Point CN",
+                    "Point _CN",
                     "Used",
                     "Time Created",
                     "Time Fix",

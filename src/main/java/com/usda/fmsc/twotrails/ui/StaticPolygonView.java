@@ -12,7 +12,7 @@ import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.objects.PointD;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
-import com.usda.fmsc.twotrails.objects.TtPoint;
+import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.util.HashMap;

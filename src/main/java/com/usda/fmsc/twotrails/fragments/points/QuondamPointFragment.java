@@ -16,14 +16,14 @@ import com.usda.fmsc.android.adapters.SelectableStringArrayAdapter;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.objects.QuondamPoint;
-import com.usda.fmsc.twotrails.objects.TtPoint;
+import com.usda.fmsc.twotrails.objects.points.QuondamPoint;
+import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
-import com.usda.fmsc.twotrails.Units;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import com.usda.fmsc.twotrails.units.OpType;
 import com.usda.fmsc.utilities.ParseEx;
 import com.usda.fmsc.utilities.StringEx;
 
@@ -242,7 +242,7 @@ public class QuondamPointFragment extends BasePointFragment {
         if (_Points[index] == null) {
             ArrayList<TtPoint> tmpPoints = new ArrayList<>();
             for (TtPoint point : Global.getDAL().getPointsInPolygon(_Polygons.get(index).getCN())) {
-                if (point.getOp() != Units.OpType.Quondam && point.getOp() != Units.OpType.WayPoint) {
+                if (point.getOp() != OpType.Quondam && point.getOp() != OpType.WayPoint) {
                     tmpPoints.add(point);
                     pids.add(StringEx.toString(point.getPID()));
                 }

@@ -1,7 +1,7 @@
 package com.usda.fmsc.twotrails.activities.old;
 
 import com.usda.fmsc.twotrails.objects.TtMetadata;
-import com.usda.fmsc.twotrails.objects.TtPoint;
+import com.usda.fmsc.twotrails.objects.points.TtPoint;
 
 public interface IAcquireMapActivity {
     void setupMap();

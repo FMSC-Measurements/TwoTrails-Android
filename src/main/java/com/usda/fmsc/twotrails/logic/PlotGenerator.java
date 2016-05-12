@@ -8,10 +8,10 @@ import com.usda.fmsc.twotrails.data.TwoTrailsSchema;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.objects.PointD;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
-import com.usda.fmsc.twotrails.objects.TtPoint;
+import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
-import com.usda.fmsc.twotrails.objects.WayPoint;
-import com.usda.fmsc.twotrails.Units;
+import com.usda.fmsc.twotrails.objects.points.WayPoint;
+import com.usda.fmsc.twotrails.units.Dist;
 import com.usda.fmsc.twotrails.utilities.PolygonCalculator;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
@@ -66,9 +66,9 @@ public class PlotGenerator extends AsyncTask<PlotGenerator.PlotParams, Void, TtP
             double gridX = pp.GridX;
             double gridY = pp.GridY;
 
-            if (pp.Metadata.getDistance() != Units.Dist.Meters) {
-                gridX = TtUtils.Convert.distance(gridX, Units.Dist.Meters, pp.Metadata.getDistance());
-                gridY = TtUtils.Convert.distance(gridY, Units.Dist.Meters, pp.Metadata.getDistance());
+            if (pp.Metadata.getDistance() != Dist.Meters) {
+                gridX = TtUtils.Convert.distance(gridX, Dist.Meters, pp.Metadata.getDistance());
+                gridY = TtUtils.Convert.distance(gridY, Dist.Meters, pp.Metadata.getDistance());
             }
 
             int angle;

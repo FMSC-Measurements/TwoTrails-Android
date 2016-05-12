@@ -1,6 +1,7 @@
-package com.usda.fmsc.twotrails.objects;
+package com.usda.fmsc.twotrails.objects.points;
 
-import com.usda.fmsc.twotrails.Units.OpType;
+import com.usda.fmsc.twotrails.objects.TtPolygon;
+import com.usda.fmsc.twotrails.units.OpType;
 import com.usda.fmsc.utilities.StringEx;
 
 import java.io.Serializable;

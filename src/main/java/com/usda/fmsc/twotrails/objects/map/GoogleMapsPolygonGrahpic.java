@@ -1,7 +1,6 @@
 package com.usda.fmsc.twotrails.objects.map;
 
 import android.support.annotation.ColorInt;
-import android.view.ViewGroup;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -15,11 +14,11 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.geospatial.Extent;
-import com.usda.fmsc.twotrails.Units;
 import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment.MarkerData;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
-import com.usda.fmsc.twotrails.objects.TtPoint;
+import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
+import com.usda.fmsc.twotrails.units.OpType;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.util.ArrayList;
@@ -94,7 +93,7 @@ public class GoogleMapsPolygonGrahpic implements IPolygonGraphic, IMarkerDataGra
 
             unadjmk = map.addMarker(unadj.visible(false).icon(BitmapDescriptorFactory.defaultMarker(
                     AndroidUtils.Convert.rgbToHsvHue(
-                    point.getOp() == Units.OpType.WayPoint ? graphicOptions.getWayPtsColor() : graphicOptions.getUnAdjPtsColor())
+                    point.getOp() == OpType.WayPoint ? graphicOptions.getWayPtsColor() : graphicOptions.getUnAdjPtsColor())
             )));
 
             _MarkerData.put(adjmk.getId(), new MarkerData(point, metadata, true));
@@ -125,12 +124,12 @@ public class GoogleMapsPolygonGrahpic implements IPolygonGraphic, IMarkerDataGra
                 unadjNavPLO.add(unadjLL);
             }
 
-            if (point.getOp() == Units.OpType.WayPoint) {
+            if (point.getOp() == OpType.WayPoint) {
                 _WayPts.add(unadjmk);
                 isWay = true;
             }
 
-            if (point.getOp() == Units.OpType.SideShot && !point.isOnBnd()) {
+            if (point.getOp() == OpType.SideShot && !point.isOnBnd()) {
                 _AdjMiscPts.add(adjmk);
                 _UnadjMiscPts.add(unadjmk);
                 

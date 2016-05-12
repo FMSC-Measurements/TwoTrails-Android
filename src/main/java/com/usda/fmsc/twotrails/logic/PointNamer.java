@@ -1,7 +1,7 @@
 package com.usda.fmsc.twotrails.logic;
 
 
-import com.usda.fmsc.twotrails.objects.TtPoint;
+import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
 
 import java.security.InvalidParameterException;

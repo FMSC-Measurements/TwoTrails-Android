@@ -5,10 +5,10 @@ import android.content.Context;
 
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
 import com.usda.fmsc.twotrails.data.TwoTrailsSchema;
-import com.usda.fmsc.twotrails.objects.QuondamPoint;
-import com.usda.fmsc.twotrails.objects.TtPoint;
+import com.usda.fmsc.twotrails.objects.points.QuondamPoint;
+import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
-import com.usda.fmsc.twotrails.Units;
+import com.usda.fmsc.twotrails.units.OpType;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.util.ArrayList;
@@ -56,7 +56,7 @@ public class PolygonAdjuster {
                 TtPoint p = dal.getFirstPointInPolygon(poly.getCN());
 
                 if(p != null) {
-                    if(p.isTravType() || (p.getOp() == Units.OpType.Quondam &&
+                    if(p.isTravType() || (p.getOp() == OpType.Quondam &&
                             ((QuondamPoint)p).getParentPoint().isTravType()))
                         return AdjustResult.STARTS_WITH_TRAV_TYPE;
                 }
@@ -200,7 +200,7 @@ public class PolygonAdjuster {
 
                 /*
                 //set sideshot accuracies
-                if(TtUtils.filterOnly(points, Units.OpType.SideShot).size() > 0) {
+                if(TtUtils.filterOnly(points, OpType.SideShot).size() > 0) {
                     Collections.sort(points);
                     HashMap<String, TtPolygon> polys = dal.getPolygonsMap();
                     TtPoint currPoint, lastPoint = points.get(0);
@@ -209,7 +209,7 @@ public class PolygonAdjuster {
                     {
                         currPoint = points.get(i);
 
-                        if (currPoint.getOp() == Units.OpType.SideShot)
+                        if (currPoint.getOp() == OpType.SideShot)
                         {
                             ((TravPoint)currPoint).setAccuracy(TtUtils.getPointAcc(lastPoint, polys));
                         }

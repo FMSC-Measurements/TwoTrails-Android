@@ -22,6 +22,7 @@ import com.usda.fmsc.android.dialogs.EnumSelectionDialog;
 import com.usda.fmsc.android.dialogs.InputDialog;
 import com.usda.fmsc.android.dialogs.NumericInputDialog;
 import com.usda.fmsc.android.listeners.ComplexOnPageChangeListener;
+import com.usda.fmsc.geospatial.UomElevation;
 import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.twotrails.activities.base.TtAjusterCustomToolbarActivity;
 import com.usda.fmsc.twotrails.Consts;
@@ -34,15 +35,17 @@ import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.logic.PolygonAdjuster;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
-import com.usda.fmsc.twotrails.objects.TtPoint;
-import com.usda.fmsc.twotrails.Units;
+import com.usda.fmsc.twotrails.objects.points.TtPoint;
+import com.usda.fmsc.twotrails.units.Datum;
+import com.usda.fmsc.twotrails.units.DeclinationType;
+import com.usda.fmsc.twotrails.units.Dist;
+import com.usda.fmsc.twotrails.units.Slope;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import com.usda.fmsc.geospatial.Units.UomElevation;
 import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
 import com.usda.fmsc.utilities.StringEx;
 
@@ -712,8 +715,8 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
 
     public void btnDecTypeClick(View view) {
         if (!_MetaLocked) {
-            final EnumSelectionDialog<Units.DeclinationType> edialog =
-                    new EnumSelectionDialog<>(this, Units.DeclinationType.class);
+            final EnumSelectionDialog<DeclinationType> edialog =
+                    new EnumSelectionDialog<>(this, DeclinationType.class);
 
             edialog.setTitle(R.string.meta_dec_type);
 
@@ -731,8 +734,8 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
 
     public void btnDatumClick(View view) {
         if (!_MetaLocked) {
-            final EnumSelectionDialog<Units.Datum> edialog =
-                    new EnumSelectionDialog<>(this, Units.Datum.class);
+            final EnumSelectionDialog<Datum> edialog =
+                    new EnumSelectionDialog<>(this, Datum.class);
 
             edialog.setTitle(R.string.meta_datum);
 
@@ -750,8 +753,8 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
 
     public void btnDistClick(View view) {
         if (!_MetaLocked) {
-            final EnumSelectionDialog<Units.Dist> edialog =
-                    new EnumSelectionDialog<>(this, Units.Dist.class);
+            final EnumSelectionDialog<Dist> edialog =
+                    new EnumSelectionDialog<>(this, Dist.class);
 
             edialog.setTitle(R.string.str_dist);
 
@@ -788,8 +791,8 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
 
     public void btnSlopeClick(View view) {
         if (!_MetaLocked) {
-            final EnumSelectionDialog<Units.Slope> edialog =
-                    new EnumSelectionDialog<>(this, Units.Slope.class);
+            final EnumSelectionDialog<Slope> edialog =
+                    new EnumSelectionDialog<>(this, Slope.class);
 
             edialog.setTitle(R.string.meta_slope);
 

@@ -2,10 +2,8 @@ package com.usda.fmsc.twotrails.objects.map;
 
 import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.geospatial.GeoPosition;
-import com.usda.fmsc.geospatial.Position;
-import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
-import com.usda.fmsc.twotrails.objects.TtPoint;
+import com.usda.fmsc.twotrails.objects.points.TtPoint;
 
 import java.util.HashMap;
 import java.util.List;

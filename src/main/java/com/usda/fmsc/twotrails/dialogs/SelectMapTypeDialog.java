@@ -18,10 +18,11 @@ import android.widget.ListView;
 
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.Units;
 import com.usda.fmsc.twotrails.adapters.ArcGisMapSelectionAdapter;
 import com.usda.fmsc.twotrails.adapters.GoogleMapSelectionAdapter;
 import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
+import com.usda.fmsc.twotrails.units.GoogleMapType;
+import com.usda.fmsc.twotrails.units.MapType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +38,7 @@ public class SelectMapTypeDialog extends DialogFragment {
     ViewPager viewPager;
 
     SelectMapMode mode;
-    Units.MapType mapType, defaultMapType;
+    MapType mapType, defaultMapType;
     int mapId = -1, defaultMapId;
 
     LayoutInflater inflater;
@@ -128,7 +129,7 @@ public class SelectMapTypeDialog extends DialogFragment {
             arcMapAdapter = new ArcGisMapSelectionAdapter(getContext(), amls, -1, new ArcGisMapSelectionAdapter.IArcGisMapAdapterListener() {
                 @Override
                 public void onArcGisMapSelected(ArcGisMapLayer map) {
-                    mapType = Units.MapType.ArcGIS;
+                    mapType = MapType.ArcGIS;
                     mapId = map.getId();
 
                     onMapSelected();
@@ -241,7 +242,7 @@ public class SelectMapTypeDialog extends DialogFragment {
 
         @Override
         public void onArcGisMapSelected(ArcGisMapLayer map) {
-            mapType = Units.MapType.ArcGIS;
+            mapType = MapType.ArcGIS;
             mapId = map.getId();
 
             gMapAdapter.deselectMap();
@@ -250,8 +251,8 @@ public class SelectMapTypeDialog extends DialogFragment {
         }
 
         @Override
-        public void onGoogleMapSelected(Units.GoogleMapType map) {
-            mapType = Units.MapType.Google;
+        public void onGoogleMapSelected(GoogleMapType map) {
+            mapType = MapType.Google;
             mapId = map.getValue();
 
             arcMapAdapter.deselectMap();
@@ -262,7 +263,7 @@ public class SelectMapTypeDialog extends DialogFragment {
 
 
     public interface OnMapSelectedListener {
-        void mapSelected(Units.MapType mapType, int mapId);
+        void mapSelected(MapType mapType, int mapId);
     }
 
 

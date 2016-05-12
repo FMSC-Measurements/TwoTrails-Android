@@ -9,25 +9,25 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.Units;
+import com.usda.fmsc.twotrails.units.OpType;
 import com.usda.fmsc.twotrails.utilities.AppUnits;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 public class PointOpsAdapter extends BaseAdapter {
 
-    Units.OpType[] opTypes;
+    OpType[] opTypes;
     LayoutInflater inflater;
     Context context;
     AppUnits.IconColor iconColor = AppUnits.IconColor.Light;
 
     public PointOpsAdapter(Context context) {
-        opTypes = Units.OpType.values();
+        opTypes = OpType.values();
         this.context = context;
         inflater = LayoutInflater.from(this.context);
     }
 
     public PointOpsAdapter(Context context, AppUnits.IconColor iconColor) {
-        opTypes = Units.OpType.values();
+        opTypes = OpType.values();
         this.context = context;
         inflater = LayoutInflater.from(this.context);
         this.iconColor = iconColor;
@@ -39,7 +39,7 @@ public class PointOpsAdapter extends BaseAdapter {
     }
 
     @Override
-    public Units.OpType getItem(int position) {
+    public OpType getItem(int position) {
         return opTypes[position];
     }
 
@@ -63,7 +63,7 @@ public class PointOpsAdapter extends BaseAdapter {
             viewHolder = (ViewHolder) view.getTag();
         }
 
-        Units.OpType op = getItem(position);
+        OpType op = getItem(position);
 
         viewHolder.image.setImageDrawable(TtUtils.UI.getTtOpDrawable(op, iconColor, context));
         viewHolder.text.setText(op.toString());

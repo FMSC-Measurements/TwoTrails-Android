@@ -3,7 +3,7 @@ package com.usda.fmsc.twotrails.objects;
 import java.io.Serializable;
 import com.usda.fmsc.utilities.StringEx;
 
-public class TtGroup implements Serializable {
+public class TtGroup extends TtObject implements Serializable {
     public enum GroupType {
         General(0),
         Walk(1),
@@ -38,14 +38,6 @@ public class TtGroup implements Serializable {
     }
 
     //region Get/Set
-    public String getCN() {
-        return _CN;
-    }
-
-    public void setCN(String CN) {
-        this._CN = CN;
-    }
-
     public String getName() {
         return _Name;
     }
@@ -72,47 +64,28 @@ public class TtGroup implements Serializable {
 
     //endregion
 
-    private String _CN;
     private String _Name;
-    private String _Description;
-    private GroupType _GroupType;
+    private String _Description = StringEx.Empty;
+    private GroupType _GroupType = GroupType.General;
 
 
     //region Constructors
-    public TtGroup() {
-        _CN = java.util.UUID.randomUUID().toString();
-        _Name = StringEx.Empty;
-        _GroupType = GroupType.General;
-        _Description = StringEx.Empty;
-    }
+    public TtGroup() { }
 
     public TtGroup(String name) {
-        _CN = java.util.UUID.randomUUID().toString();
         _Name = name;
-        _GroupType = GroupType.General;
-        _Description = StringEx.Empty;
-
     }
 
     public TtGroup(GroupType type) {
-        _CN = java.util.UUID.randomUUID().toString();
         _GroupType = type;
-        _Name = String.format("%s %s", _GroupType.toString(), _CN.substring(0, 8));
-        _Description = StringEx.Empty;
+        _Name = String.format("%s %s", _GroupType.toString(), getCN().substring(0, 8));
     }
 
     public TtGroup(TtGroup ttgroup) {
-        _CN = ttgroup.getCN();
+        setCN(ttgroup.getCN());
         _Name = ttgroup.getName();
         _GroupType = ttgroup.getGroupType();
         _Description = ttgroup.getDescription();
-    }
-
-    public TtGroup(String CN, String Name, GroupType groupType, String Desc) {
-        _CN = CN;
-        _Name = Name;
-        _GroupType = groupType;
-        _Description = Desc;
     }
     //endregion
 

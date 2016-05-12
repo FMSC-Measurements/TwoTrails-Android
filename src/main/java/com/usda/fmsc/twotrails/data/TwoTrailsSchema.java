@@ -9,7 +9,7 @@ public class TwoTrailsSchema {
 
 
     public static class SharedSchema {
-        public static final String CN = "CN";
+        public static final String CN = "_CN";
     }
 
     //region Point Info Table
@@ -24,7 +24,7 @@ public class TwoTrailsSchema {
         public static final String Comment = "Comment";
         public static final String Operation = "Operation";
         public static final String MetadataCN = "MetaCN";
-        public static final String Time = "CreationTime";
+        public static final String CreationTime = "CreationTime";
         public static final String AdjX = "AdjX";
         public static final String AdjY = "AdjY";
         public static final String AdjZ = "AdjZ";
@@ -49,7 +49,7 @@ public class TwoTrailsSchema {
             Operation   + " TEXT NOT NULL, " +
             MetadataCN  + " TEXT REFERENCES " +
             MetadataSchema.TableName + ", " +
-            Time        + " TEXT, " +
+            CreationTime+ " TEXT, " +
             AdjX        + " REAL, " +
             AdjY        + " REAL, " +
             AdjZ        + " REAL, " +
@@ -333,5 +333,70 @@ public class TwoTrailsSchema {
             WayPtsColor     + " INTEGER, " +
             "PRIMARY KEY (" + SharedSchema.CN + "));";
     }
+    //endregion
+
+    //region Media
+
+    //region Media Table
+    public static class MediaSchema {
+        public static final String TableName = "Media";
+
+        public static final String PointCN = "PointCN";
+        public static final String MediaType = "MediaType";
+        public static final String Name = "Name";
+        public static final String FilePath = "FilePath";
+        public static final String CreationTime = "CreationTime";
+        public static final String Comment = "Comment";
+
+        public static final String CreateTable =
+            "CREATE TABLE " + TableName + " (" +
+            SharedSchema.CN + " TEXT NOT NULL, " +
+            PointCN         + " TEXT, " +
+            MediaType       + " INTEGER, " +
+            Name            + " TEXT, " +
+            FilePath        + " TEXT, " +
+            CreationTime    + " TEXT, " +
+            Comment         + " TEXT, " +
+            "PRIMARY KEY (" + SharedSchema.CN + "));";
+
+        public static final String SelectItems =
+                SharedSchema.CN + ", " +
+                PointCN + ", " +
+                MediaType + ", " +
+                Name + ", " +
+                FilePath + ", " +
+                CreationTime + ", " +
+                Comment;
+    }
+    //endregion
+
+
+    //region PictureTable
+    public static class PictureSchema {
+        public static final String TableName = "PictureData";
+
+        public static final String PicType = "Type";
+        public static final String Azimuth = "Azimuth";
+        public static final String Pitch = "Pitch";
+        public static final String Roll = "Roll";
+
+        public static final String CreateTable =
+            "CREATE TABLE " + TableName + " (" +
+            SharedSchema.CN + " TEXT REFERENCES " +
+            MediaSchema.TableName + ", " +
+            PicType     + " INTEGER, " +
+            Azimuth     + " REAL, " +
+            Pitch       + " REAL, " +
+            Roll        + " REAL, " +
+            "PRIMARY KEY (" + SharedSchema.CN + "));";
+
+        public static final String SelectItemsNoCN =
+            PicType + ", " +
+            Azimuth + ", " +
+            Pitch + ", " +
+            Roll;
+    }
+    //endregion
+
     //endregion
 }

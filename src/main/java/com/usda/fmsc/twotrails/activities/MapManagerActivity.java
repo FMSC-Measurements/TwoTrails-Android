@@ -28,12 +28,12 @@ import com.usda.fmsc.android.widget.SheetFab;
 import com.usda.fmsc.android.widget.layoutmanagers.LinearLayoutManagerWithSmoothScroller;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.Units;
 import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.dialogs.NewArcMapDialog;
 import com.usda.fmsc.twotrails.dialogs.SelectMapTypeDialog;
 import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
 import com.usda.fmsc.twotrails.ui.MSFloatingActionButton;
+import com.usda.fmsc.twotrails.units.MapType;
 import com.usda.fmsc.twotrails.utilities.ArcGISTools;
 import com.usda.fmsc.utilities.IListener;
 import com.usda.fmsc.utilities.StringEx;
@@ -307,7 +307,7 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
                         SelectMapTypeDialog.newInstance(maps, SelectMapTypeDialog.SelectMapMode.ALL_ARC)
                                 .setOnMapSelectedListener(new SelectMapTypeDialog.OnMapSelectedListener() {
                                     @Override
-                                    public void mapSelected(Units.MapType mapType, int mapId) {
+                                    public void mapSelected(MapType mapType, int mapId) {
                                         ArcGisMapLayer layer = ArcGISTools.getMapLayer(mapId);
 
                                         if (!layer.isOnline() && StringEx.isEmpty(layer.getUrl())) {

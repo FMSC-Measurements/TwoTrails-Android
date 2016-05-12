@@ -2,7 +2,6 @@ package com.usda.fmsc.twotrails.fragments.map;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewTreeObserver;
 
@@ -24,7 +23,6 @@ import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.Units;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.objects.map.GoogleMapsPolygonGrahpic;
 import com.usda.fmsc.twotrails.objects.map.GoogleMapsTrailGraphic;
@@ -32,6 +30,7 @@ import com.usda.fmsc.twotrails.objects.map.IMarkerDataGraphic;
 import com.usda.fmsc.twotrails.objects.map.PolygonDrawOptions;
 import com.usda.fmsc.twotrails.objects.map.PolygonGraphicManager;
 import com.usda.fmsc.twotrails.objects.map.TrailGraphicManager;
+import com.usda.fmsc.twotrails.units.MapType;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -110,7 +109,7 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
             map.setMapType(mapId);
 
             if (mmlistener != null) {
-                mmlistener.onMapTypeChanged(Units.MapType.Google, mapId, true);
+                mmlistener.onMapTypeChanged(MapType.Google, mapId, true);
             }
         }
     }
@@ -171,7 +170,7 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
 
         if (mmlistener != null) {
             mmlistener.onMapReady();
-            mmlistener.onMapTypeChanged(Units.MapType.Google, map.getMapType(), true);
+            mmlistener.onMapTypeChanged(MapType.Google, map.getMapType(), true);
         }
     }
 

@@ -3,7 +3,6 @@ package com.usda.fmsc.twotrails.fragments.points;
 
 import android.os.Bundle;
 import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,13 +11,13 @@ import android.widget.TextView;
 
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.listeners.SimpleTextWatcher;
+import com.usda.fmsc.geospatial.UomElevation;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.objects.GpsPoint;
-import com.usda.fmsc.twotrails.objects.TtPoint;
+import com.usda.fmsc.twotrails.objects.points.GpsPoint;
+import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
-import com.usda.fmsc.geospatial.Units;
 import com.usda.fmsc.utilities.ParseEx;
 import com.usda.fmsc.utilities.StringEx;
 
@@ -123,7 +122,7 @@ public class GPSPointFragment extends BasePointFragment {
                     }
 
                     //if (value != null) {
-                        value = TtUtils.Convert.distance(value, Units.UomElevation.Meters, getMetadata().getElevation());
+                        value = TtUtils.Convert.distance(value, UomElevation.Meters, getMetadata().getElevation());
 
                         //if (!TtUtils.Math.cmpa(value, _GpsPoint.getUnAdjZ())) {
                             _GpsPoint.setUnAdjZ(value);
@@ -195,7 +194,7 @@ public class GPSPointFragment extends BasePointFragment {
         txtY.setText(StringEx.toString(TtUtils.Math.round(_GpsPoint.getUnAdjY(), Consts.Minimum_Point_Display_Digits)));
 
         txtElev.setText(StringEx.toString(TtUtils.Math.round(
-                TtUtils.Convert.distance(_GpsPoint.getUnAdjZ(), getMetadata().getElevation(), Units.UomElevation.Meters),
+                TtUtils.Convert.distance(_GpsPoint.getUnAdjZ(), getMetadata().getElevation(), UomElevation.Meters),
                 Consts.Minimum_Point_Display_Digits
         )));
 
