@@ -13,6 +13,17 @@ public abstract class TtMedia extends TtObject {
     private DateTime _TimeCreated;
     private String _PointCN;
 
+    public TtMedia() {
+
+    }
+
+    public TtMedia(String Name, String FilePath, String Comment, DateTime TimeCreated, String PointCN) {
+        this._Name = Name;
+        this._FilePath = FilePath;
+        this._Comment = Comment;
+        this._TimeCreated = TimeCreated;
+        this._PointCN = PointCN;
+    }
 
     public abstract MediaType getMediaType();
 

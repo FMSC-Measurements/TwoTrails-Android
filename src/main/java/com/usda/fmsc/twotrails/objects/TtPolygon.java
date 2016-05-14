@@ -45,6 +45,7 @@ public class TtPolygon extends TtObject implements Comparable<TtPolygon>, Compar
     }
 
     public TtPolygon(Parcel source) {
+        setCN(source.readString());
         Name = source.readString();
         Time = (DateTime) source.readSerializable();
         Description = source.readString();

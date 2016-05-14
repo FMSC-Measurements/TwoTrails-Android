@@ -278,7 +278,7 @@
     </style>
 
     <style name="ToolbarElevation2" parent="ToolbarElevationBase">
-        <item name="android:layout_height">3dp</item>
+        <item name="android:layout_height">2dp</item>
     </style>
 
     <style name="ToolbarElevation3" parent="ToolbarElevationBase">

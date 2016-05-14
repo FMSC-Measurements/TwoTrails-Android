@@ -228,31 +228,16 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
             rvPolyOptions.setAdapter(pmmAdapter);
 
             slidingLayout = (SlidingUpPanelLayout)findViewById(R.id.mapSlidingPanelLayout);
-            slidingLayout.setPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
+            slidingLayout.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
                 @Override
                 public void onPanelSlide(View panel, float slideOffset) {
 
                 }
 
                 @Override
-                public void onPanelCollapsed(View panel) {
-                    if (targetLocation == null)
+                public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
+                    if (newState == SlidingUpPanelLayout.PanelState.COLLAPSED && targetLocation == null)
                         slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
-                }
-
-                @Override
-                public void onPanelExpanded(View panel) {
-
-                }
-
-                @Override
-                public void onPanelAnchored(View panel) {
-
-                }
-
-                @Override
-                public void onPanelHidden(View panel) {
-
                 }
             });
         }

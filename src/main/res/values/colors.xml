@@ -35,6 +35,7 @@
     <drawable name="fcb__rear_color">@color/green_500</drawable>
 
 
+    <color name="whiteOverlay">#80FFFFFF</color>
 
     <!-- Android Colors -->
     <item name="primary_100" type="color">#D6DFD7</item>
