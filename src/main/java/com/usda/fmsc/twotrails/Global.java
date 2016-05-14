@@ -17,6 +17,8 @@ import android.support.v4.app.NotificationCompat;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.geospatial.UomElevation;
 import com.usda.fmsc.geospatial.nmea.sentences.GGASentence;
@@ -130,6 +132,8 @@ public class Global {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             AndroidUtils.UI.setOverscrollColor(_ApplicationContext.getResources(), _ApplicationContext, R.color.primary);
         }
+
+        ImageLoader.getInstance().init(new ImageLoaderConfiguration.Builder(_ApplicationContext).build());
     }
 
     public static void destroy() {
@@ -201,6 +205,7 @@ public class Global {
     public static Activity getCurrentActivity() {
         return _CurrentActivity;
     }
+
 
     //region Files
     public static String getTtFilePath(String fileName) {

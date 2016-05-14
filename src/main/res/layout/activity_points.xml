@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.usda.fmsc.twotrails.activities.PointsActivity">
+    tools:context="com.usda.fmsc.twotrails.activities.PointsActivity"
+    android:id="@+id/base">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -42,22 +43,49 @@
         <View style="@style/ToolbarElevation"
               android:layout_below="@id/toolbar"/>
 
-        <android.support.v4.view.ViewPager
-            android:id="@+id/pointsViewPager"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_alignParentBottom="true"
-            android:layout_below="@id/toolbar"/>
+            android:layout_height="match_parent"
+            android:layout_below="@id/toolbar"
+            android:layout_alignParentBottom="true">
+
+            <com.sothree.slidinguppanel.SlidingUpPanelLayout
+                xmlns:sothree="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/pointSlidingPanelLayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="bottom"
+                sothree:umanoPanelHeight="50dp"
+                sothree:umanoShadowHeight="4dp"
+                sothree:umanoFadeColor="@android:color/transparent"
+                sothree:umanoDragView="@+id/pointDragView"
+                sothree:umanoInitialState="collapsed">
+
+                <android.support.v4.view.ViewPager
+                    android:id="@+id/pointsViewPager"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"/>
+
+                <include layout="@layout/content_details_media"/>
+            </com.sothree.slidinguppanel.SlidingUpPanelLayout>
+
+            <include layout="@layout/content_details_media_scroller"/>
+        </FrameLayout>
+
+
     </RelativeLayout>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/pointsFabAqr"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/fab_margin"
+        android:layout_margin="@null"
+        android:layout_marginEnd="@dimen/fab_margin"
+        android:layout_marginRight="@dimen/fab_margin"
+        android:layout_marginBottom="86dp"
         android:src="@drawable/ic_ttpoint_gps_white_mini"
         app:layout_anchor="@id/pointsViewPager"
-        app:layout_anchorGravity="bottom|center"
+        app:layout_anchorGravity="bottom|right|end"
         android:onClick="btnAcquireClick"
         android:visibility="gone"
         android:elevation="4dp"/>
@@ -72,9 +100,6 @@
         app:layout_anchorGravity="bottom|end"
         android:onClick="btnCreatePoint"
         android:elevation="8dp"/>
-    <!--app:fab_colorNormal="@color/primaryLight"-->
-    <!--app:fab_colorPressed="@color/primaryLighter"-->
-    <!--app:fab_colorRipple="@color/primaryLightest"-->
 
     <com.usda.fmsc.android.widget.DimOverlayFrameLayout
         android:id="@+id/overlay"
@@ -103,6 +128,7 @@
 
                 <TextView
                     android:text="@string/op_gps"
+                    android:layout_width="match_parent"
                     android:drawableStart="@drawable/ic_ttpoint_gps_primary"
                     android:drawableLeft="@drawable/ic_ttpoint_gps_primary"
                     android:onClick="btnPointNewGpsClick"
@@ -110,6 +136,7 @@
 
                 <TextView
                     android:text="@string/op_take5"
+                    android:layout_width="match_parent"
                     android:drawableStart="@drawable/ic_ttpoint_take5_primary"
                     android:drawableLeft="@drawable/ic_ttpoint_take5_primary"
                     android:onClick="btnPointNewTake5Click"
@@ -117,6 +144,7 @@
 
                 <TextView
                     android:text="@string/op_trav"
+                    android:layout_width="match_parent"
                     android:drawableStart="@drawable/ic_ttpoint_traverse_primary"
                     android:drawableLeft="@drawable/ic_ttpoint_traverse_primary"
                     android:onClick="btnPointNewTravclick"
@@ -124,6 +152,7 @@
 
                 <TextView
                     android:text="@string/op_ss"
+                    android:layout_width="match_parent"
                     android:drawableStart="@drawable/ic_ttpoint_sideshot_primary"
                     android:drawableLeft="@drawable/ic_ttpoint_sideshot_primary"
                     android:onClick="btnPointNewSideShotClick"
@@ -131,6 +160,7 @@
 
                 <TextView
                     android:text="@string/op_qndm"
+                    android:layout_width="match_parent"
                     android:drawableStart="@drawable/ic_ttpoint_quondam_primary"
                     android:drawableLeft="@drawable/ic_ttpoint_quondam_primary"
                     android:onClick="btnPointNewQuondamClick"
@@ -138,6 +168,7 @@
 
                 <TextView
                     android:text="@string/op_walk"
+                    android:layout_width="match_parent"
                     android:drawableStart="@drawable/ic_ttpoint_walk_primary"
                     android:drawableLeft="@drawable/ic_ttpoint_walk_primary"
                     android:onClick="btnPointNewWalkClick"
@@ -145,6 +176,7 @@
 
                 <TextView
                     android:text="@string/op_way"
+                    android:layout_width="match_parent"
                     android:drawableStart="@drawable/ic_ttpoint_way_primary"
                     android:drawableLeft="@drawable/ic_ttpoint_way_primary"
                     android:onClick="btnPointNewWayClick"

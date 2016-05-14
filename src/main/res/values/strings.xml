@@ -344,7 +344,7 @@
     <!--<string name="points_aqr_walk">Walk</string>-->
     <!--<string name="points_aqr_take5">Take 5</string>-->
     <string name="points_aqr_diag_title">Current Point has NMEA</string>
-    <string name="points_aqr_diag_gps_msg">The current point has NMEA data associated with it. Would you like to overwrite or add to this data.</string>
+    <string name="points_aqr_diag_gps_msg">The current point has a value which may have NMEA data associated with it. Would you like to overwrite or add to this data.</string>
     <string name="points_aqr_diag_add">ADD</string>
     <string name="points_aqr_diag_overwrite">OVERWRITE</string>
     <string name="points_aqr_diag_delete">Delete NMEA</string>

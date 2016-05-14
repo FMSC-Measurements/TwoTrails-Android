@@ -2,9 +2,11 @@ package com.usda.fmsc.twotrails.activities;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v4.app.Fragment;
@@ -13,24 +15,36 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatSpinner;
+import android.support.v7.widget.LinearLayoutManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import com.usda.fmsc.android.adapters.FragmentStatePagerAdapterEx;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.listeners.ComplexOnPageChangeListener;
+import com.usda.fmsc.android.utilities.BitmapCacher;
+import com.usda.fmsc.android.utilities.BitmapManager;
+import com.usda.fmsc.android.widget.RecyclerViewEx;
 import com.usda.fmsc.android.widget.SheetFab;
 import com.usda.fmsc.android.widget.SheetLayoutEx;
+import com.usda.fmsc.android.widget.layoutmanagers.LinearLayoutManagerWithSmoothScroller;
 import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
+import com.usda.fmsc.twotrails.adapters.MediaRvAdapter;
 import com.usda.fmsc.twotrails.adapters.PointDetailsAdapter;
 import com.usda.fmsc.twotrails.Consts;
+import com.usda.fmsc.twotrails.data.TwoTrailsSchema;
 import com.usda.fmsc.twotrails.dialogs.LatLonDialog;
 import com.usda.fmsc.twotrails.dialogs.MoveToPointDialog;
 import com.usda.fmsc.twotrails.dialogs.PointEditorDialog;
@@ -44,6 +58,8 @@ import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.logic.PointNamer;
 import com.usda.fmsc.twotrails.logic.PolygonAdjuster;
+import com.usda.fmsc.twotrails.objects.media.TtMedia;
+import com.usda.fmsc.twotrails.objects.media.TtPicture;
 import com.usda.fmsc.twotrails.objects.points.GpsPoint;
 import com.usda.fmsc.twotrails.objects.points.QuondamPoint;
 import com.usda.fmsc.twotrails.objects.points.TravPoint;
@@ -59,20 +75,26 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.geospatial.utm.UTMTools;
 import com.usda.fmsc.utilities.StringEx;
+
+import org.joda.time.DateTime;
+
+import jp.wasabeef.recyclerview.animators.FadeInAnimator;
 
 public class PointsActivity extends CustomToolbarActivity {
     private HashMap<String, Listener> listeners;
 
     private MenuItem miLock, miLink, miMovePoint, miReset,
             miEnterLatLon, miNmeaRecalc, miDelete, miGoto;
-    SheetLayoutEx slexAqr, slexCreate;
-    android.support.design.widget.FloatingActionButton fabAqr;
-    MSFloatingActionButton fabMenu;
-    SheetFab fabSheet;
+    private SheetLayoutEx slexAqr, slexCreate;
+    private android.support.design.widget.FloatingActionButton fabAqr;
+    private MSFloatingActionButton fabMenu;
+    private SheetFab fabSheet;
+    private ImageView pmdBackground;
 
 
     private boolean ignorePointChange, adjust, menuCreated, aqrVisible = false;
@@ -92,6 +114,26 @@ public class PointsActivity extends CustomToolbarActivity {
 
     private ViewPager mViewPager;
     private SectionsPagerAdapter mSectionsPagerAdapter;
+
+
+    private BitmapManager bitmapManager;
+
+
+
+    private SlidingUpPanelLayout slidingLayout;
+
+    private RecyclerViewEx rvMedia;
+    private MediaRvAdapter rvMediaAdapter;
+
+    private List<TtMedia> mediaList = new ArrayList<>();
+
+    private float collapsedHeight, anchoredPercent;
+    private int height, bitmapHeight;
+    private boolean medialoaded;
+
+    private BitmapManager.ScaleOptions scaleOptions = new BitmapManager.ScaleOptions();
+
+
 
 
     private ComplexOnPageChangeListener onPageChangeListener = new ComplexOnPageChangeListener() {
@@ -201,10 +243,13 @@ public class PointsActivity extends CustomToolbarActivity {
         mSectionsPagerAdapter.saveFragmentStates(false);
 
         mViewPager = (ViewPager)findViewById(R.id.pointsViewPager);
-        mViewPager.setAdapter(mSectionsPagerAdapter);
 
-        mViewPager.addOnPageChangeListener(onPageChangeListener);
+        if (mViewPager != null) {
+            mViewPager.setAdapter(mSectionsPagerAdapter);
+            mViewPager.addOnPageChangeListener(onPageChangeListener);
+        }
 
+        bitmapManager = new BitmapManager(this);
 
         //region Main Buttons
         fabAqr = (android.support.design.widget.FloatingActionButton)findViewById(R.id.pointsFabAqr);
@@ -299,28 +344,125 @@ public class PointsActivity extends CustomToolbarActivity {
         //endregion
 
         slexAqr = (SheetLayoutEx)findViewById(R.id.pointsSLExAqr);
-        slexAqr.setFab(fabAqr);
-        slexAqr.setFabAnimationEndListener(new SheetLayoutEx.OnFabAnimationEndListener() {
-            @Override
-            public void onFabAnimationEnd() {
-                acquireGpsPoint(_CurrentPoint, null);
-            }
-        });
+        if (slexAqr != null) {
+            slexAqr.setFab(fabAqr);
+            slexAqr.setFabAnimationEndListener(new SheetLayoutEx.OnFabAnimationEndListener() {
+                @Override
+                public void onFabAnimationEnd() {
+                    acquireGpsPoint(_CurrentPoint, null);
+                }
+            });
+        }
 
         slexCreate = (SheetLayoutEx)findViewById(R.id.pointsSLExCreate);
-        slexCreate.setFab(fabMenu);
-        slexCreate.setFabAnimationEndListener(new SheetLayoutEx.OnFabAnimationEndListener() {
-            @Override
-            public void onFabAnimationEnd() {
-                if (createOpType == OpType.Take5) {
-                    acquireT5Points(_CurrentPoint);
-                } else if (createOpType == OpType.Walk) {
-                    acquireWalkPoints(_CurrentPoint);
+        if (slexCreate != null) {
+            slexCreate.setFab(fabMenu);
+            slexCreate.setFabAnimationEndListener(new SheetLayoutEx.OnFabAnimationEndListener() {
+                @Override
+                public void onFabAnimationEnd() {
+                    if (createOpType == OpType.Take5) {
+                        acquireT5Points(_CurrentPoint);
+                    } else if (createOpType == OpType.Walk) {
+                        acquireWalkPoints(_CurrentPoint);
+                    }
+
+                    createOpType = null;
+                }
+            });
+        }
+
+        slidingLayout = (SlidingUpPanelLayout)findViewById(R.id.pointSlidingPanelLayout);
+        final View layMDH = findViewById(R.id.pmdHeader);
+        final View pmdScroller = findViewById(R.id.pmdScroller);
+
+        pmdBackground = (ImageView) findViewById(R.id.pmdIvBackground);
+
+        if (slidingLayout != null && layMDH != null && pmdScroller != null) {
+            collapsedHeight = AndroidUtils.Convert.dpToPx(this, 50);
+
+            ViewTreeObserver vto = slidingLayout.getViewTreeObserver();
+            vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                @Override
+                public void onGlobalLayout() {
+                    collapsedHeight = layMDH.getHeight();
+                    height = mViewPager.getHeight();
+                    anchoredPercent = (float) pmdScroller.getHeight() / height;
+                    slidingLayout.setAnchorPoint(anchoredPercent);
+
+                    bitmapHeight = pmdBackground.getHeight();
+                    bitmapManager.setImageLimitSize(bitmapHeight);
+                    scaleOptions.setScaleMode(BitmapManager.ScaleMode.Max);
+                    scaleOptions.setSize(bitmapHeight);
+
+                    rvMediaAdapter = new MediaRvAdapter(PointsActivity.this, mediaList, new MediaRvAdapter.Listener() {
+                        @Override
+                        public void onMediaSelected(TtMedia media) {
+                            slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
+                            setMediaInfo(media);
+                        }
+                    }, pmdScroller.getHeight() - AndroidUtils.Convert.dpToPx(PointsActivity.this, 10), bitmapManager);
+
+                    rvMedia.setAdapter(rvMediaAdapter);
+
+                    ViewTreeObserver obs = slidingLayout.getViewTreeObserver();
+                    obs.removeOnGlobalLayoutListener(this);
+                }
+            });
+
+            rvMedia = (RecyclerViewEx)findViewById(R.id.pmdRvMedia);
+            if (rvMedia != null) {
+                rvMedia.setViewHasFooter(true);
+                 rvMedia.setLayoutManager(new LinearLayoutManagerWithSmoothScroller(this, LinearLayoutManager.HORIZONTAL, false));
+                rvMedia.setHasFixedSize(true);
+                rvMedia.setItemAnimator(new FadeInAnimator());
+            }
+
+            slidingLayout.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
+                @Override
+                public void onPanelSlide(View panel, float slideOffset) {
+                    if (slideOffset < anchoredPercent) {
+                        pmdScroller.setTranslationY(height - slideOffset * height + collapsedHeight - 1);
+                    }
                 }
 
-                createOpType = null;
-            }
-        });
+                @Override
+                public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
+                    switch (newState) {
+                        case EXPANDED:
+                            break;
+                        case COLLAPSED:
+                            break;
+                        case ANCHORED:
+                            if (!medialoaded && _CurrentPoint != null) {
+                                loadMedia(_CurrentPoint);
+                            }
+                            break;
+                        case HIDDEN:
+                            break;
+                        case DRAGGING:
+                            break;
+                    }
+
+                }
+            });
+
+            layMDH.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    switch (slidingLayout.getPanelState()) {
+
+                        case EXPANDED:
+                        case COLLAPSED:
+                            slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
+                            break;
+                        case ANCHORED:
+                        case HIDDEN:
+                            slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+                            break;
+                    }
+                }
+            });
+        }
     }
 
     @Override
@@ -1071,6 +1213,8 @@ public class PointsActivity extends CustomToolbarActivity {
 
     //region Update UI
     private void updateButtons() {
+        lockPoint(true);
+
         boolean setLinkVisible = false;
         boolean setPolyChangeVisible = _Polygons.size() > 1;
         boolean setGpsTypeVisible = false;
@@ -1103,8 +1247,6 @@ public class PointsActivity extends CustomToolbarActivity {
             miNmeaRecalc.setVisible(setGpsTypeVisible);
             miEnterLatLon.setVisible(setGpsTypeVisible);
         }
-
-        lockPoint(true);
     }
 
     private void lockPoint(boolean lockPoint) {
@@ -1121,6 +1263,10 @@ public class PointsActivity extends CustomToolbarActivity {
             }
 
             fabAqr.setEnabled(false);
+            if (_CurrentPoint != null && (_CurrentPoint.getOp() == OpType.GPS || _CurrentPoint.getOp() == OpType.WayPoint)) {
+                fabAqr.hide();
+                aqrVisible = false;
+            }
 
             _PointLocked = true;
             onLockChange();
@@ -1143,6 +1289,10 @@ public class PointsActivity extends CustomToolbarActivity {
             }
 
             fabAqr.setEnabled(true);
+            if (_CurrentPoint != null && (_CurrentPoint.getOp() == OpType.GPS || _CurrentPoint.getOp() == OpType.WayPoint)) {
+                fabAqr.show();
+                aqrVisible = true;
+            }
 
             _PointLocked = false;
             onLockChange();
@@ -1189,8 +1339,8 @@ public class PointsActivity extends CustomToolbarActivity {
     }
 
     private void showAqr() {
-        if (!aqrVisible) {
-            Animation a = AnimationUtils.loadAnimation(this, R.anim.push_up_in_fast);
+        if (!aqrVisible && !_PointLocked) {
+            Animation a = AnimationUtils.loadAnimation(this, R.anim.push_left_in);
 
             a.setAnimationListener(new Animation.AnimationListener() {
                 @Override
@@ -1217,7 +1367,7 @@ public class PointsActivity extends CustomToolbarActivity {
 
     private void hideAqr() {
         if (fabAqr.getVisibility() == View.VISIBLE) {
-            Animation a = AnimationUtils.loadAnimation(this, R.anim.push_down_out_fast);
+            Animation a = AnimationUtils.loadAnimation(this, R.anim.push_right_out);
 
             a.setAnimationListener(new Animation.AnimationListener() {
                 @Override
@@ -1239,6 +1389,48 @@ public class PointsActivity extends CustomToolbarActivity {
             aqrVisible = false;
             fabAqr.setAnimation(a);
             fabAqr.animate();
+        }
+    }
+
+
+    private void loadMedia(TtPoint point) {
+        if (rvMediaAdapter != null) {
+            setMediaInfo(null);
+
+            mediaList.clear();
+
+
+            //TODO load media
+            String base = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + "/Camera/";
+            final TtPicture[] ms = new TtPicture[]{
+            };
+
+            for (final TtPicture p : ms) {
+                ImageLoader.getInstance().loadImage("file://" + p.getFilePath(), new SimpleImageLoadingListener() {
+                    @Override
+                    public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                        bitmapManager.put(p.getFilePath(), p.getFilePath(), AndroidUtils.UI.scaleMinBitmap(loadedImage, bitmapHeight, false), scaleOptions);
+
+                        PointsActivity.this.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mediaList.add(p);
+                                rvMediaAdapter.notifyItemInserted(mediaList.size() - 1);
+                            }
+                        });
+                    }
+                });
+
+                medialoaded = true;
+            }
+        }
+    }
+
+    private void setMediaInfo(TtMedia media) {
+        if (media instanceof TtPicture) {
+            TtPicture pic = (TtPicture)media;
+
+            pmdBackground.setImageBitmap(bitmapManager.get(pic.getFilePath()));
         }
     }
     //endregion
@@ -1326,7 +1518,7 @@ public class PointsActivity extends CustomToolbarActivity {
             intent.putExtra(Consts.Codes.Data.POLYGON_DATA, _CurrentPolygon);
             intent.putExtra(Consts.Codes.Data.METADATA_DATA, _MetaData.get(point.getMetadataCN()));
 
-            if (bursts != null) {
+            if (bursts != null && bursts.size() > 0) {
                 try {
                     intent.putExtra(Consts.Codes.Data.ADDITIVE_NMEA_DATA, TtNmeaBurst.burstsToByteArray(bursts));
                 } catch (Exception e) {
@@ -1431,7 +1623,7 @@ public class PointsActivity extends CustomToolbarActivity {
                     //region GPS
                     if (Global.Settings.DeviceSettings.isGpsConfigured()) {
                         if (TtUtils.pointHasValue(_CurrentPoint)) {
-                            AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+                            AlertDialog.Builder dialog = new AlertDialog.Builder(PointsActivity.this);
 
                             dialog.setMessage(R.string.points_aqr_diag_gps_msg);
 
@@ -1446,7 +1638,7 @@ public class PointsActivity extends CustomToolbarActivity {
                             dialog.setNegativeButton(R.string.points_aqr_diag_overwrite, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    AlertDialog.Builder dialogA = new AlertDialog.Builder(getBaseContext());
+                                    AlertDialog.Builder dialogA = new AlertDialog.Builder(PointsActivity.this);
 
                                     dialogA.setMessage(R.string.points_aqr_diag_del_msg);
 
