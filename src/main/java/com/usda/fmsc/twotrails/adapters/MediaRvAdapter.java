@@ -123,20 +123,17 @@ public class MediaRvAdapter extends RecyclerViewEx.BaseAdapterEx {
     }
 
 
-    public void setMediaList(List<TtMedia> mediaList) {
-        this.mediaList = mediaList;
-    }
-
-    private abstract class MediaViewHolder extends RecyclerViewEx.ViewHolderEx {
+    public abstract class MediaViewHolder extends RecyclerViewEx.ViewHolderEx {
         public MediaViewHolder(View itemView) {
             super(itemView);
         }
 
+        public abstract void select();
         public abstract void deselect();
         public abstract TtMedia getMedia();
     }
 
-    private class ImageViewHolder extends MediaViewHolder {
+    public class ImageViewHolder extends MediaViewHolder {
         private ImageView ivImage;
         private TtPicture picture;
 
@@ -149,10 +146,15 @@ public class MediaRvAdapter extends RecyclerViewEx.BaseAdapterEx {
             ivImage.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    ivImage.setBackgroundColor(colorSelected);
-                    onMediaViewSelected(ImageViewHolder.this);
+                    select();
                 }
             });
+        }
+
+        @Override
+        public void select() {
+            ivImage.setBackgroundColor(colorSelected);
+            onMediaViewSelected(ImageViewHolder.this);
         }
 
         @Override

@@ -25,6 +25,14 @@ public abstract class TtMedia extends TtObject {
         this._PointCN = PointCN;
     }
 
+    public TtMedia(TtMedia media) {
+        this._Name = media._Name;
+        this._FilePath = media._FilePath;
+        this._Comment = media._Comment;
+        this._TimeCreated = media._TimeCreated;
+        this._PointCN = media._PointCN;
+    }
+
     public abstract MediaType getMediaType();
 
     public String getName() {

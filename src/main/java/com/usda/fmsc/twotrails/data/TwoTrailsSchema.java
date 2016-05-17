@@ -9,7 +9,7 @@ public class TwoTrailsSchema {
 
 
     public static class SharedSchema {
-        public static final String CN = "_CN";
+        public static final String CN = "CN";
     }
 
     //region Point Info Table

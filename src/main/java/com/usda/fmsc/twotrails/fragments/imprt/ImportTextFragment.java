@@ -572,7 +572,7 @@ public class ImportTextFragment extends BaseImportFragment {
             }
 
             if (spnParentCN.getSelectedItemPosition() < 1) {
-                toastError("Parent _CN", spnParentCN, true);
+                toastError("Parent CN", spnParentCN, true);
                 return false;
             }
         }

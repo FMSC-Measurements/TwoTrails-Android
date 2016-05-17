@@ -12,6 +12,7 @@
     <string name="str_new">New</string>
     <string name="str_edit">Edit</string>
     <string name="str_exit">Exit</string>
+    <string name="str_remove">Remove</string>
     <string name="str_unlock">Unlock</string>
     <string name="str_lock">Lock</string>
     <string name="str_internal">Internal</string>
@@ -22,6 +23,8 @@
     <string name="str_create">Create</string>
     <string name="str_empty"> </string>
     <string name="str_nullvalue">*</string>
+    <string name="str_view">View</string>
+    <string name="str_fullscreen">View in Gallery</string>
     <string name="str_onbnd">On Boundary</string>
     <string name="str_offbnd">Off Boundary</string>
     <string name="str_onbnd_abv">ON BND</string>
@@ -155,6 +158,9 @@
     <string name="menu_table_edit_columns">Edit Columns</string>
     <string name="menu_table_edit_reset">Reset</string>
     <string name="menu_map_manager_login">Login To ArcGIS</string>
+    <string name="menu_pmd_add">Add Media</string>
+    <string name="menu_pmd_capture">Capture Media</string>
+    <string name="menu_pmd_delete">Delete Media</string>
 
 
     <!-- Transitions -->

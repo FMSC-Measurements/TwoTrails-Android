@@ -2299,7 +2299,7 @@ public class DataAccessLayer {
                     if (!c.isNull(0))
                         cn = c.getString(0);
                     else
-                        throw new RuntimeException("PolygonGraphicOptions has no _CN");
+                        throw new RuntimeException("PolygonGraphicOptions has no CN");
 
                     if (!c.isNull(1))
                         adjbnd = c.getInt(1);
@@ -2444,11 +2444,20 @@ public class DataAccessLayer {
 
     //region Media
     //region Get
+    public ArrayList<TtPicture> getPictureByCN(String cn) {
+        return getPictures(
+                String.format("%s.%s = '%s'",
+                    TwoTrailsSchema.MediaSchema.TableName,
+                    TwoTrailsSchema.SharedSchema.CN,
+                    cn),
+                0);
+    }
+
     public ArrayList<TtPicture> getPicturesInPoint(String pointCN) {
         return getPictures(
-                String.format("%s = %s",
-                    TwoTrailsSchema.SharedSchema.CN,
-                    pointCN),
+                String.format("%s = '%s'",
+                        TwoTrailsSchema.MediaSchema.PointCN,
+                        pointCN),
                 0);
     }
 
@@ -2456,8 +2465,8 @@ public class DataAccessLayer {
         StringBuilder sb = new StringBuilder();
 
         for (String cn : getCNs(TwoTrailsSchema.PointSchema.TableName,
-                String.format("%s = %s", TwoTrailsSchema.PointSchema.PolyCN, polygonCN))) {
-            sb.append(String.format("%s = %s or ", TwoTrailsSchema.MediaSchema.PointCN, cn));
+                String.format("%s = '%s'", TwoTrailsSchema.PointSchema.PolyCN, polygonCN))) {
+            sb.append(String.format("%s = '%s' or ", TwoTrailsSchema.MediaSchema.PointCN, cn));
         }
 
         if (sb.length() < 1)
@@ -2470,8 +2479,8 @@ public class DataAccessLayer {
         StringBuilder sb = new StringBuilder();
 
         for (String cn : getCNs(TwoTrailsSchema.PointSchema.TableName,
-                String.format("%s = %s", TwoTrailsSchema.PointSchema.GroupCN, groupCN))) {
-            sb.append(String.format("%s = %s or ", TwoTrailsSchema.MediaSchema.PointCN, cn));
+                String.format("%s = '%s'", TwoTrailsSchema.PointSchema.GroupCN, groupCN))) {
+            sb.append(String.format("%s = '%s' or ", TwoTrailsSchema.MediaSchema.PointCN, cn));
         }
 
         if (sb.length() < 1)
@@ -2687,7 +2696,7 @@ public class DataAccessLayer {
     //endregion
 
     //region Delete
-    private boolean deleteMedia(TtMedia media) {
+    public boolean deleteMedia(TtMedia media) {
         boolean success = false;
         String cn = media.getCN();
 
@@ -2749,10 +2758,30 @@ public class DataAccessLayer {
         return count;
     }
 
-    public int getItemsCount(String tableName, String limiter, String value) {
+    public int getItemsCount(String tableName, String column, int value) {
+        String countQuery = String.format("SELECT COUNT (*) FROM %s where %s = %d",
+                tableName,
+                column,
+                value);
+
+        Cursor cursor = _db.rawQuery(countQuery, null);
+
+        int count = 0;
+        if (null != cursor) {
+            if (cursor.getCount() > 0) {
+                cursor.moveToFirst();
+                count = cursor.getInt(0);
+            }
+
+            cursor.close();
+        }
+        return count;
+    }
+
+    public int getItemsCount(String tableName, String column, String value) {
         String countQuery = String.format("SELECT COUNT (*) FROM %s where %s = '%s'",
                 tableName,
-                limiter,
+                column,
                 value);
 
         Cursor cursor = _db.rawQuery(countQuery, null);
@@ -2909,7 +2938,8 @@ public class DataAccessLayer {
     //endregion
 
     //region Select Statements
-    private static final String SelectPictures = String.format("select %s, %s from %s left join %s on %s.%s = %s.%s",
+    private static final String SelectPictures = String.format("select %s.%s, %s from %s left join %s on %s.%s = %s.%s",
+            TwoTrailsSchema.MediaSchema.TableName,
             TwoTrailsSchema.MediaSchema.SelectItems,
             TwoTrailsSchema.PictureSchema.SelectItemsNoCN,
             TwoTrailsSchema.MediaSchema.TableName,

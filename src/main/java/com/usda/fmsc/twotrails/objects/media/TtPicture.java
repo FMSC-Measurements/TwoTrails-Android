@@ -44,6 +44,14 @@ public class TtPicture extends TtMedia implements IOrientation {
         _Roll = roll;
     }
 
+    public TtPicture(TtPicture picture) {
+        super(picture);
+
+        _Azimuth = picture._Azimuth;
+        _Pitch = picture._Pitch;
+        _Roll = picture._Roll;
+    }
+
     @Override
     public final MediaType getMediaType() {
         return MediaType.Picture;
