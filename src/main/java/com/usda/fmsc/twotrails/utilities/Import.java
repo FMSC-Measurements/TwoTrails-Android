@@ -605,7 +605,7 @@ public class Import {
         public String toString() {
             switch (this) {
                 case NO_FIELD: return "No Field";
-                case CN: return "_CN";
+                case CN: return "CN";
                 case OPTYPE: return "Op Type";
                 case INDEX: return "Index";
                 case PID: return "PID";
@@ -613,7 +613,7 @@ public class Import {
                 case POLY_NAME: return "Poly Name";
                 case GROUP_NAME: return "Group Name";
                 case COMMENT: return "Comment";
-                case META_CN: return "Metadata _CN";
+                case META_CN: return "Metadata CN";
                 case ONBND: return "On Bnd";
                 case UNADJX: return "UnAdjusted X";
                 case UNADJY: return "UnAdjusted Y";
@@ -630,7 +630,7 @@ public class Import {
                 case SLOPE_DIST_TYPE: return "Slope D Type";
                 case SLOPE_ANG: return "Slope Angle";
                 case SLOPE_ANG_TYPE: return "Slope A Type";
-                case PARENT_CN: return "Parent _CN";
+                case PARENT_CN: return "Parent CN";
                 default: throw new IllegalArgumentException("Invalid TextFieldType id: " + this.getValue());
             }
         }

@@ -16,6 +16,11 @@ public class PositionTimeline {
         _Timeline = positions;
     }
 
+    public PositionTimeline(PositionTimeline timeline) {
+        _Timeline = new ArrayList<>(timeline._Timeline);
+    }
+
+
     FramePosition get(int position) {
         return _Timeline.get(position);
     }

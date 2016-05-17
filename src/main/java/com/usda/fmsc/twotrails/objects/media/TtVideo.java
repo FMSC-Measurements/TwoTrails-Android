@@ -19,6 +19,13 @@ public class TtVideo extends TtMedia {
         this._PositionTimelineFile = _PositionTimelineFile;
     }
 
+    public TtVideo(TtVideo video) {
+        super(video);
+
+        this._Timeline = new PositionTimeline(video._Timeline);
+        this._PositionTimelineFile = video._PositionTimelineFile;
+    }
+
     @Override
     public MediaType getMediaType() {
         return MediaType.Video;

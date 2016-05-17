@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/ctx_menu_capture"
+        android:title="@string/menu_pmd_capture"
+        android:icon="@drawable/ic_camera_alt_black_36dp"/>
+
+    <item
+        android:id="@+id/ctx_menu_add"
+        android:title="@string/menu_pmd_add"
+        android:icon="@drawable/ic_add_a_photo_black_36dp"/>
+
+    <item
+        android:id="@+id/ctx_menu_reset"
+        android:title="@string/str_reset"
+        android:icon="@drawable/ic_refresh_black_36dp"
+        android:enabled="false"/>
+
+    <item android:id="@+id/ctx_menu_delete"
+        android:title="@string/menu_pmd_delete"
+        android:icon="@drawable/ic_delete_black_36dp"/>
+</menu>

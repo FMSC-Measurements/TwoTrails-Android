@@ -87,11 +87,11 @@ public class Export {
                     "Slope A Type",
                     "Parent",
                     "Comment",
-                    "Point _CN",
-                    "Poly _CN",
-                    "Metadata _CN",
-                    "Group _CN",
-                    "Parent _CN",
+                    "Point CN",
+                    "Poly CN",
+                    "Metadata CN",
+                    "Group CN",
+                    "Parent CN",
                     "Linked CNs"
             });
             //endregion
@@ -220,7 +220,7 @@ public class Export {
                     "Name",
                     "Type",
                     "Description",
-                    "_CN"
+                    "CN"
             });
 
 
@@ -257,7 +257,7 @@ public class Export {
                     "Accuracy (M)",
                     "Area (Ac)",
                     "Perimeter (Ft)",
-                    "_CN"
+                    "CN"
             });
 
             ArrayList<String> values = new ArrayList<>(5);
@@ -310,7 +310,7 @@ public class Export {
                     "Compass",
                     "Crew",
                     "Comment",
-                    "_CN"
+                    "CN"
             });
 
             ArrayList<String> values = new ArrayList<>(14);
@@ -392,7 +392,7 @@ public class Export {
             CSVPrinter writer = new CSVPrinter(new FileWriter(nmeaFilename), CSVFormat.DEFAULT);
 
             writer.printRecords(new String[] {
-                    "Point _CN",
+                    "Point CN",
                     "Used",
                     "Time Created",
                     "Time Fix",

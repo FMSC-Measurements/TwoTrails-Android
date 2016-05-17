@@ -23,6 +23,10 @@ public class TtPanorama extends TtPicture {
         super(name, filePath, comment, timeCreated, pointCN, azimuth, pitch, roll);
     }
 
+    public TtPanorama(TtPanorama panorama) {
+        super(panorama);
+    }
+
     @Override
     public PictureType getPictureType() {
         return PictureType.Panorama;

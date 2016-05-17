@@ -23,6 +23,10 @@ public class TtPhotoSphere extends TtPicture {
         super(name, filePath, comment, timeCreated, pointCN, azimuth, pitch, roll);
     }
 
+    public TtPhotoSphere(TtPhotoSphere photoSphere) {
+        super(photoSphere);
+    }
+
     @Override
     public PictureType getPictureType() {
         return PictureType.PhotoSphere;

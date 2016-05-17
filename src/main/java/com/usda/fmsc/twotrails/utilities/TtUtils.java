@@ -26,9 +26,11 @@ import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment;
 import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.objects.FilterOptions;
+import com.usda.fmsc.twotrails.objects.media.TtMedia;
 import com.usda.fmsc.twotrails.objects.media.TtPanorama;
 import com.usda.fmsc.twotrails.objects.media.TtPhotoSphere;
 import com.usda.fmsc.twotrails.objects.media.TtPicture;
+import com.usda.fmsc.twotrails.objects.media.TtVideo;
 import com.usda.fmsc.twotrails.objects.points.GpsPoint;
 import com.usda.fmsc.twotrails.objects.PointD;
 import com.usda.fmsc.twotrails.objects.points.QuondamPoint;
@@ -987,6 +989,25 @@ public class TtUtils {
             default:
                 throw new IllegalArgumentException("Unknown type");
         }
+    }
+
+    public static TtMedia cloneMedia(TtMedia media) {
+        switch (media.getMediaType()) {
+            case Picture:
+                TtPicture picture = (TtPicture)media;
+                switch (picture.getPictureType()) {
+                    case Regular:
+                        return new TtPicture(picture);
+                    case Panorama:
+                        return new TtPanorama((TtPanorama) picture);
+                    case PhotoSphere:
+                        return new TtPhotoSphere((TtPhotoSphere) picture);
+                }
+                break;
+            case Video:
+                return new TtVideo((TtVideo)media);
+        }
+        return null;
     }
 
     //endregion

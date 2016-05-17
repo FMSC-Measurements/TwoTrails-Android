@@ -26,7 +26,7 @@ import com.usda.fmsc.geospatial.DMS;
 import com.usda.fmsc.utilities.StringEx;
 
 public class LatLonDialog extends DialogFragment {
-    private static String CN = "_CN";
+    private static String CN = "CN";
     private static String PID = "PID";
     private static String LAT = "LAT";
     private static String LON = "LON";
