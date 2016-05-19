@@ -382,8 +382,8 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
                 miLock.setTitle(R.string.str_unlock);
                 miLock.setIcon(R.drawable.ic_action_lock_closed);
 
-                TtUtils.UI.disableMenuItem(miReset);
-                TtUtils.UI.disableMenuItem(miDelete);
+                AndroidUtils.UI.disableMenuItem(miReset);
+                AndroidUtils.UI.disableMenuItem(miDelete);
             }
 
             _MetaLocked = true;
@@ -394,15 +394,15 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
                 miLock.setIcon(R.drawable.ic_action_lock_open);
 
                 if (_CurrentIndex > 0) {
-                    TtUtils.UI.enableMenuItem(miDelete);
+                    AndroidUtils.UI.enableMenuItem(miDelete);
                 } else {
-                    TtUtils.UI.disableMenuItem(miDelete);
+                    AndroidUtils.UI.disableMenuItem(miDelete);
                 }
 
                 if (_MetadataUpdated) {
-                    TtUtils.UI.enableMenuItem(miReset);
+                    AndroidUtils.UI.enableMenuItem(miReset);
                 } else {
-                    TtUtils.UI.disableMenuItem(miReset);
+                    AndroidUtils.UI.disableMenuItem(miReset);
                 }
             }
 
@@ -416,9 +416,9 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
 
         if (menuCreated) {
             if (_MetadataUpdated) {
-                TtUtils.UI.enableMenuItem(miReset);
+                AndroidUtils.UI.enableMenuItem(miReset);
             } else {
-                TtUtils.UI.disableMenuItem(miReset);
+                AndroidUtils.UI.disableMenuItem(miReset);
             }
         }
     }

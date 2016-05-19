@@ -63,15 +63,20 @@ public class GpxTracksAdapter extends RecyclerViewEx.AdapterEx<SimpleMultiSelect
     }
 
     @Override
-    public int getItemCountEx() {
-        return tracks.size();
+    public SimpleMultiSelectorBindingHolder onCreateHeaderViewHolder(ViewGroup parent) {
+        return new SimpleMultiSelectorBindingHolder(inflater.inflate(R.layout.rv_header, parent, false), mSelector);
     }
-
 
     @Override
     public SimpleMultiSelectorBindingHolder onCreateFooterViewHolder(ViewGroup parent) {
         return new SimpleMultiSelectorBindingHolder(inflater.inflate(R.layout.content_empty_100dp, parent, false), mSelector);
     }
+
+    @Override
+    public int getItemCountEx() {
+        return tracks.size();
+    }
+
 
     public abstract class GpxBaseTrackHolder extends SimpleMultiSelectorBindingHolder implements MultiStateTouchCheckBox.OnCheckedStateChangeListener {
         protected MultiStateTouchCheckBox mcb;

@@ -379,8 +379,8 @@ public class PolygonsActivity extends CustomToolbarActivity {
                 miLock.setTitle(R.string.str_unlock);
                 miLock.setIcon(R.drawable.ic_action_lock_closed);
 
-                TtUtils.UI.disableMenuItem(miReset);
-                TtUtils.UI.disableMenuItem(miDelete);
+                AndroidUtils.UI.disableMenuItem(miReset);
+                AndroidUtils.UI.disableMenuItem(miDelete);
             }
 
             _PolyLocked = true;
@@ -390,12 +390,12 @@ public class PolygonsActivity extends CustomToolbarActivity {
                 miLock.setTitle(R.string.str_lock);
                 miLock.setIcon(R.drawable.ic_action_lock_open);
 
-                TtUtils.UI.enableMenuItem(miDelete);
+                AndroidUtils.UI.enableMenuItem(miDelete);
 
                 if (_PolygonUpdated) {
-                    TtUtils.UI.enableMenuItem(miReset);
+                    AndroidUtils.UI.enableMenuItem(miReset);
                 } else {
-                    TtUtils.UI.disableMenuItem(miReset);
+                    AndroidUtils.UI.disableMenuItem(miReset);
                 }
             }
 
@@ -409,9 +409,9 @@ public class PolygonsActivity extends CustomToolbarActivity {
 
         if (menuCreated) {
             if (_PolygonUpdated) {
-                TtUtils.UI.enableMenuItem(miReset);
+                AndroidUtils.UI.enableMenuItem(miReset);
             } else {
-                TtUtils.UI.disableMenuItem(miReset);
+                AndroidUtils.UI.disableMenuItem(miReset);
             }
         }
     }
@@ -441,7 +441,7 @@ public class PolygonsActivity extends CustomToolbarActivity {
         if (_CurrentPolygon.getCN().equals(polygon.getCN())) {
             if (_CurrentPolygon.getAccuracy() != polygon.getAccuracy()) {
                 adjust = true;
-                TtUtils.UI.enableMenuItem(miAdjust);
+                AndroidUtils.UI.enableMenuItem(miAdjust);
             }
 
             _CurrentPolygon = polygon;

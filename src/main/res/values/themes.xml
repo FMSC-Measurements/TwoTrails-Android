@@ -142,7 +142,7 @@
     </style>
 
     <style name="OverFlowStyle" parent="android:style/Widget.Holo.ActionButton.Overflow">
-        <item name="android:src">@drawable/ic_action_overflow</item>
+        <item name="android:src">@drawable/ic_action_overflow_white</item>
     </style>
 
     <style name="PopupTheme" parent="AppTheme.Base">

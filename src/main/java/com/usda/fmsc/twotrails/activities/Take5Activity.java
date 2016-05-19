@@ -196,7 +196,7 @@ public class Take5Activity extends AcquireGpsMapActivity {
 
                 try {
                     if (intent.getExtras().containsKey(Consts.Codes.Data.POINT_DATA)) {
-                        _CurrentPoint = (TtPoint) intent.getSerializableExtra(Consts.Codes.Data.POINT_DATA);
+                        _CurrentPoint = intent.getParcelableExtra(Consts.Codes.Data.POINT_DATA);
                         onBnd = _CurrentPoint.isOnBnd();
                     }
 

@@ -86,7 +86,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
             if (intent != null && intent.getExtras() != null) {
                 try {
                     if (intent.getExtras().containsKey(Consts.Codes.Data.POINT_DATA)) {
-                        _PrevPoint = (TtPoint) intent.getSerializableExtra(Consts.Codes.Data.POINT_DATA);
+                        _PrevPoint = intent.getParcelableExtra(Consts.Codes.Data.POINT_DATA);
                         onBnd = _PrevPoint.isOnBnd();
                     }
 
@@ -493,7 +493,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
         lastPointCreationTime = 0;
 
         if (menuCreated) {
-            TtUtils.UI.disableMenuItem(miRenameGroup);
+            AndroidUtils.UI.disableMenuItem(miRenameGroup);
             miWalking.setVisible(true);
             adWalking.start();
         }
@@ -512,7 +512,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
         walking = false;
 
         if (menuCreated) {
-            TtUtils.UI.enableMenuItem(miRenameGroup);
+            AndroidUtils.UI.enableMenuItem(miRenameGroup);
             miWalking.setVisible(false);
             adWalking.stop();
         }

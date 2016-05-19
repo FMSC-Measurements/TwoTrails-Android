@@ -1,8 +1,11 @@
 package com.usda.fmsc.twotrails.objects.media;
 
+import android.os.Parcel;
+
 import com.usda.fmsc.twotrails.objects.TtObject;
 import com.usda.fmsc.twotrails.units.MediaType;
 import com.usda.fmsc.utilities.FileUtils;
+import com.usda.fmsc.utilities.StringEx;
 
 import org.joda.time.DateTime;
 
@@ -13,8 +16,17 @@ public abstract class TtMedia extends TtObject {
     private DateTime _TimeCreated;
     private String _PointCN;
 
-    public TtMedia() {
 
+    public TtMedia() {}
+
+    public TtMedia(Parcel source) {
+        super(source);
+
+        _Name = source.readString();
+        _FilePath = source.readString();
+        _Comment = source.readString();
+        _TimeCreated = (DateTime)source.readSerializable();
+        _PointCN = source.readString();
     }
 
     public TtMedia(String Name, String FilePath, String Comment, DateTime TimeCreated, String PointCN) {
@@ -81,5 +93,17 @@ public abstract class TtMedia extends TtObject {
 
     public void setPointCN(String _PointCN) {
         this._PointCN = _PointCN;
+    }
+
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
+
+        dest.writeString(StringEx.getValueOrEmpty(_Name));
+        dest.writeString(StringEx.getValueOrEmpty(_FilePath));
+        dest.writeString(StringEx.getValueOrEmpty(_Comment));
+        dest.writeSerializable(_TimeCreated);
+        dest.writeString(StringEx.getValueOrEmpty(_PointCN));
     }
 }

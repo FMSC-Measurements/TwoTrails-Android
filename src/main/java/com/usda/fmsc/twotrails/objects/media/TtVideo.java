@@ -1,16 +1,35 @@
 package com.usda.fmsc.twotrails.objects.media;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.usda.fmsc.twotrails.units.MediaType;
 import com.usda.fmsc.utilities.FileUtils;
+import com.usda.fmsc.utilities.StringEx;
 
 import org.joda.time.DateTime;
 
 public class TtVideo extends TtMedia {
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+        @Override
+        public Object createFromParcel(Parcel source) {
+            return new TtVideo(source);
+        }
+
+        @Override
+        public TtVideo[] newArray(int size) {
+            return new TtVideo[size];
+        }
+    };
+
     private PositionTimeline _Timeline;
     private String _PositionTimelineFile;
 
-    public TtVideo() {
+    public TtVideo(Parcel source) {
+        super(source);
 
+        //TODO add PositionTimeline Parcelable
+        _PositionTimelineFile = source.readString();
     }
 
     public TtVideo(String Name, String FilePath, String Comment, DateTime TimeCreated, String PointCN, PositionTimeline _Timeline, String _PositionTimelineFile) {
@@ -39,5 +58,14 @@ public class TtVideo extends TtMedia {
         return _Timeline;
     }
 
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
+
+        dest.writeString(StringEx.getValueOrEmpty(_PositionTimelineFile));
+    }
+
     //get video details (size, length, etc..)
+
 }

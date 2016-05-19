@@ -1,12 +1,26 @@
 package com.usda.fmsc.twotrails.objects.points;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import com.usda.fmsc.android.utilities.ParcelTools;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.units.OpType;
 import com.usda.fmsc.utilities.StringEx;
 
-import java.io.Serializable;
+public class QuondamPoint extends TtPoint implements TtPoint.IManualAccuracy {
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+        @Override
+        public Object createFromParcel(Parcel source) {
+            return new QuondamPoint(source);
+        }
 
-public class QuondamPoint extends TtPoint implements TtPoint.IManualAccuracy, Serializable {
+        @Override
+        public QuondamPoint[] newArray(int size) {
+            return new QuondamPoint[size];
+        }
+    };
+
     //vars
     private TtPoint _ParentPoint;
     private Double _ManualAccuracy;
@@ -15,6 +29,38 @@ public class QuondamPoint extends TtPoint implements TtPoint.IManualAccuracy, Se
     public QuondamPoint() {
         _ParentPoint = null;
         _Op = OpType.Quondam;
+    }
+
+    public QuondamPoint(Parcel source) {
+        super(source);
+
+        if (ParcelTools.readBool(source)) {
+            switch (OpType.parse(source.readInt())) {
+                case GPS:
+                    _ParentPoint = source.readParcelable(GpsPoint.class.getClassLoader());
+                    break;
+                case Take5:
+                    _ParentPoint = source.readParcelable(Take5Point.class.getClassLoader());
+                    break;
+                case Traverse:
+                    _ParentPoint = source.readParcelable(TravPoint.class.getClassLoader());
+                    break;
+                case SideShot:
+                    _ParentPoint = source.readParcelable(SideShotPoint.class.getClassLoader());
+                    break;
+                case Quondam:
+                    _ParentPoint = source.readParcelable(QuondamPoint.class.getClassLoader());
+                    break;
+                case Walk:
+                    _ParentPoint = source.readParcelable(WalkPoint.class.getClassLoader());
+                    break;
+                case WayPoint:
+                    _ParentPoint = source.readParcelable(WayPoint.class.getClassLoader());
+                    break;
+            }
+        }
+
+        _ManualAccuracy = ParcelTools.readNDouble(source);
     }
 
     public QuondamPoint(QuondamPoint p) {
@@ -37,6 +83,19 @@ public class QuondamPoint extends TtPoint implements TtPoint.IManualAccuracy, Se
 
     //endregion
 
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
+
+        if (_ParentPoint != null) {
+            ParcelTools.writeBool(dest, true);
+            dest.writeInt(_ParentPoint.getOp().getValue());
+            dest.writeParcelable(_ParentPoint, flags);
+        }
+
+        ParcelTools.writeNDouble(dest, _ManualAccuracy);
+    }
 
     //region Get/Set
     public TtPoint getParentPoint() {

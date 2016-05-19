@@ -31,7 +31,7 @@
             <!--</FrameLayout>-->
         <!--</ScrollView>-->
 
-        <!--<include layout="@layout/content_details_media"/>-->
+        <!--<include layout="@layout/content_details_media_container"/>-->
     <!--</com.sothree.slidinguppanel.SlidingUpPanelLayout>-->
 
     <!--<include layout="@layout/content_details_media_scroller"/>-->

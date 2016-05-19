@@ -4,6 +4,7 @@ import org.joda.time.DateTime;
 
 import java.util.ArrayList;
 
+//TODO implement PositionTimeline Parcelable
 public class PositionTimeline {
     private ArrayList<FramePosition> _Timeline;
 
@@ -74,11 +75,11 @@ public class PositionTimeline {
         private Double _Roll;
 
 
-        public FramePosition(double az, double pitch, double roll) {
+        public FramePosition(Double az, Double pitch, Double roll) {
             this(az, pitch, roll, DateTime.now());
         }
 
-        public FramePosition(double az, double pitch, double roll, DateTime time) {
+        public FramePosition(Double az, Double pitch, Double roll, DateTime time) {
             _Azimuth = az;
             _Pitch = pitch;
             _Roll = roll;

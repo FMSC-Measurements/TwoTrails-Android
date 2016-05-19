@@ -1,23 +1,22 @@
 package com.usda.fmsc.twotrails.objects.points;
 
-
+import android.os.Parcel;
 import android.support.annotation.NonNull;
 
 import org.joda.time.DateTime;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 
+import com.usda.fmsc.android.utilities.ParcelTools;
 import com.usda.fmsc.twotrails.objects.TtObject;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.units.OpType;
 import com.usda.fmsc.utilities.StringEx;
 
 
-public abstract class TtPoint extends TtObject implements Comparable<TtPoint>, Comparator<TtPoint>, Serializable {
-
-    //region Vars
+public abstract class TtPoint extends TtObject implements Comparable<TtPoint>, Comparator<TtPoint> {
     protected OpType _Op;
     protected long _Index;
     protected int _PID;
@@ -48,13 +47,43 @@ public abstract class TtPoint extends TtObject implements Comparable<TtPoint>, C
 
     protected Double _Accuracy;
 
-    protected ArrayList<String> _LinkedPoints;
-    //endregion
+    protected List<String> _LinkedPoints = new ArrayList<>();
 
 
     //region Constructors
     public TtPoint() {
         _Time = DateTime.now();
+    }
+
+    public TtPoint(Parcel source) {
+        super(source);
+
+        _Op = OpType.parse(source.readInt());
+        _Index = source.readLong();
+        _PID = source.readInt();
+        _Time = (DateTime) source.readSerializable();
+
+        _PolyCN = source.readString();
+        _PolyName = source.readString();
+        _GroupCN = source.readString();
+        _GroupName = source.readString();
+
+        _Comment = source.readString();
+        _MetadataCN = source.readString();
+
+        _OnBnd = ParcelTools.readBool(source);
+
+        _AdjX = ParcelTools.readNDouble(source);
+        _AdjY = ParcelTools.readNDouble(source);
+        _AdjZ = ParcelTools.readNDouble(source);
+
+        _UnAdjX = source.readDouble();
+        _UnAdjY = source.readDouble();
+        _UnAdjZ = source.readDouble();
+
+        _Accuracy = ParcelTools.readNDouble(source);
+
+        source.readStringList(_LinkedPoints);
     }
 
     public TtPoint(TtPoint toCopy) {
@@ -241,8 +270,7 @@ public abstract class TtPoint extends TtObject implements Comparable<TtPoint>, C
     //endregion
 
     //region Linked Points
-    public ArrayList<String> getLinkedPoints() {
-        initLinksList();
+    public List<String> getLinkedPoints() {
         return _LinkedPoints;
     }
 
@@ -263,20 +291,12 @@ public abstract class TtPoint extends TtObject implements Comparable<TtPoint>, C
     }
 
     public void addQuondamLink(String cn) {
-        initLinksList();
         if(_LinkedPoints.indexOf(cn) < 0)
             _LinkedPoints.add(cn);
     }
 
     public void removeQuondamLink(String cn) {
-        initLinksList();
         _LinkedPoints.remove(cn);
-    }
-
-    private void initLinksList() {
-        if (_LinkedPoints == null) {
-            _LinkedPoints = new ArrayList<>();
-        }
     }
     //endregion
     //endregion
@@ -370,6 +390,38 @@ public abstract class TtPoint extends TtObject implements Comparable<TtPoint>, C
     public abstract boolean calculatePoint(TtPolygon polygon, TtPoint previousPoint);
     //endregion
 
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
+
+        dest.writeInt(_Op.getValue());
+        dest.writeLong(_Index);
+        dest.writeInt(_PID);
+        dest.writeSerializable(_Time);
+
+        dest.writeString(StringEx.getValueOrEmpty(_PolyCN));
+        dest.writeString(StringEx.getValueOrEmpty(_PolyName));
+        dest.writeString(StringEx.getValueOrEmpty(_GroupCN));
+        dest.writeString(StringEx.getValueOrEmpty(_GroupName));
+
+        dest.writeString(StringEx.getValueOrEmpty(_Comment));
+        dest.writeString(StringEx.getValueOrEmpty(_MetadataCN));
+
+        ParcelTools.writeBool(dest, _OnBnd);
+
+        ParcelTools.writeNDouble(dest, _AdjX);
+        ParcelTools.writeNDouble(dest, _AdjY);
+        ParcelTools.writeNDouble(dest, _AdjZ);
+
+        dest.writeDouble(_UnAdjX);
+        dest.writeDouble(_UnAdjY);
+        dest.writeDouble(_UnAdjZ);
+
+        ParcelTools.writeNDouble(dest, _Accuracy);
+
+        dest.writeStringList(getLinkedPoints());
+    }
 
     @Override
     public String toString() {

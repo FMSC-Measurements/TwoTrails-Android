@@ -1,12 +1,26 @@
 package com.usda.fmsc.twotrails.objects.points;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import com.usda.fmsc.android.utilities.ParcelTools;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.units.OpType;
 
-import java.io.Serializable;
+public class GpsPoint extends TtPoint implements TtPoint.IManualAccuracy {
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+        @Override
+        public Object createFromParcel(Parcel source) {
+            return new GpsPoint(source);
+        }
 
-public class GpsPoint extends TtPoint implements TtPoint.IManualAccuracy, Serializable {
+        @Override
+        public GpsPoint[] newArray(int size) {
+            return new GpsPoint[size];
+        }
+    };
+
     private Double _ManualAccuracy;
     private Double _RMSEr;
 
@@ -19,6 +33,16 @@ public class GpsPoint extends TtPoint implements TtPoint.IManualAccuracy, Serial
     public GpsPoint() {
         super();
         _Op = OpType.GPS;
+    }
+
+    public GpsPoint(Parcel source) {
+        super(source);
+
+        _ManualAccuracy = ParcelTools.readNDouble(source);
+        _RMSEr = ParcelTools.readNDouble(source);
+        _Latitude = ParcelTools.readNDouble(source);
+        _Longitude = ParcelTools.readNDouble(source);
+        _Elevation = ParcelTools.readNDouble(source);
     }
 
     public GpsPoint(GpsPoint p) {
@@ -35,6 +59,17 @@ public class GpsPoint extends TtPoint implements TtPoint.IManualAccuracy, Serial
     }
     //endregion
 
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
+
+        ParcelTools.writeNDouble(dest, _ManualAccuracy);
+        ParcelTools.writeNDouble(dest, _RMSEr);
+        ParcelTools.writeNDouble(dest, _Latitude);
+        ParcelTools.writeNDouble(dest, _Longitude);
+        ParcelTools.writeNDouble(dest, _Elevation);
+    }
 
     //region Get/Set
     @Override

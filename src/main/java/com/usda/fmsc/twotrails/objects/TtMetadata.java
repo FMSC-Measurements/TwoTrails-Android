@@ -60,7 +60,8 @@ public class TtMetadata extends TtObject implements Parcelable {
     }
 
     public TtMetadata(Parcel source) {
-        setCN(source.readString());
+        super(source);
+
         Name = source.readString();
 
         Zone = source.readInt();
@@ -105,7 +106,8 @@ public class TtMetadata extends TtObject implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(getCN());
+        super.writeToParcel(dest, flags);
+
         dest.writeString(Name);
 
         dest.writeInt(Zone);

@@ -1,7 +1,9 @@
 package com.usda.fmsc.twotrails.utilities;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.Point;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Build;
@@ -48,6 +50,7 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
@@ -1010,6 +1013,26 @@ public class TtUtils {
         return null;
     }
 
+    public static int getMediaIndex(TtMedia media, List<TtMedia> mediaList) {
+        int index = 0;
+
+        if (mediaList.size() > 0) {
+            for (; index < mediaList.size(); index++) {
+                if (media.getTimeCreated().isBefore(mediaList.get(index).getTimeCreated())) {
+                    break;
+                }
+            }
+        }
+
+        return index;
+    }
+
+    public static Comparator<TtMedia> PictureTimeComparator = new Comparator<TtMedia>() {
+        @Override
+        public int compare(TtMedia lhs, TtMedia rhs) {
+            return lhs.getTimeCreated().isAfter(rhs.getTimeCreated()) ? 1 : -1;
+        }
+    };
     //endregion
 
     //region NMEA
@@ -1091,83 +1114,7 @@ public class TtUtils {
     }
     //endregion
 
-
     public static class UI {
-        public static void enableButton(Button button) {
-            button.setEnabled(true);
-            button.setAlpha(Consts.ENABLED_ALPHA);
-        }
-
-        public static void disableButton(Button button) {
-            button.setEnabled(false);
-            button.setAlpha(Consts.DISABLED_ALPHA);
-        }
-
-
-        public static void enableMenuItem(MenuItem menuItem) {
-            menuItem.setEnabled(true);
-
-            Drawable icon = menuItem.getIcon();
-
-            if (icon != null) {
-                icon.setAlpha(Consts.ENABLED_ICON_ALPHA);
-            }
-        }
-
-        public static void enableMenuItem(MenuItem menuItem, int id) {
-            menuItem.setEnabled(true);
-
-            try {
-                menuItem.setIcon(id);
-                menuItem.getIcon().setAlpha(Consts.ENABLED_ICON_ALPHA);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        public static void enableMenuItem(MenuItem menuItem, Drawable drawable) {
-            menuItem.setEnabled(true);
-
-            try {
-                menuItem.setIcon(drawable);
-                menuItem.getIcon().setAlpha(Consts.ENABLED_ICON_ALPHA);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-
-        public static void disableMenuItem(MenuItem menuItem) {
-            menuItem.setEnabled(false);
-
-            Drawable icon = menuItem.getIcon();
-
-            if (icon != null) {
-                icon.setAlpha(Consts.DISABLED_ICON_ALPHA);
-            }
-        }
-
-        public static void disableMenuItem(MenuItem menuItem, int id) {
-            menuItem.setEnabled(false);
-
-            try {
-                menuItem.setIcon(id);
-                menuItem.getIcon().setAlpha(Consts.DISABLED_ICON_ALPHA);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        public static void disableMenuItem(MenuItem menuItem, Drawable drawable) {
-            menuItem.setEnabled(false);
-
-            try {
-                menuItem.setIcon(drawable);
-                menuItem.getIcon().setAlpha(Consts.DISABLED_ICON_ALPHA);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
 
         public static Drawable getTtOpDrawable(OpType op, AppUnits.IconColor iconColor, Context context) {
             int id = R.drawable.ic_ttpoint_gps_full;
@@ -1733,5 +1680,26 @@ public class TtUtils {
                 getInfoWindowSnippet(point.getParentPoint(), adjusted, meta));
         }
 
+    }
+
+
+    public static class is {
+        public static boolean Int(String value) {
+            try {
+                Integer.parseInt(value);
+                return true;
+            } catch (NumberFormatException e) {
+                return false;
+            }
+        }
+
+        public static boolean Double(String value) {
+            try {
+                Double.parseDouble(value);
+                return true;
+            } catch (NumberFormatException e) {
+                return false;
+            }
+        }
     }
 }

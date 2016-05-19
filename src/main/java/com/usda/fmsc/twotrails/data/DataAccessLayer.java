@@ -54,6 +54,14 @@ public class DataAccessLayer {
         return _FilePath;
     }
 
+    private String _FileName;
+    public String getFileName() {
+        if (_FileName == null) {
+            _FileName = FileUtils.getFileNameWoType(_FilePath);
+        }
+        return _FileName;
+    }
+
     public File getDBFile() { return _dbFile; }
 
     public TtDalVersion getDalVersion() { return _DalVersion; }
@@ -2581,6 +2589,8 @@ public class DataAccessLayer {
     }
 
     private boolean insertBaseMedia(TtMedia media) {
+        boolean result = true;
+
         try {
             ContentValues cvs = new ContentValues();
 
@@ -2596,20 +2606,20 @@ public class DataAccessLayer {
 
             switch (media.getMediaType()) {
                 case Picture:
-                    insertPictureData((TtPicture)media);
+                    result = insertPictureData((TtPicture)media);
                     break;
                 case Video:
                     break;
             }
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:insertBaseMedia");
-            return false;
+            result = false;
         }
 
-        return true;
+        return result;
     }
 
-    private void insertPictureData(TtPicture picture) {
+    private boolean insertPictureData(TtPicture picture) {
         try {
             ContentValues cvs = new ContentValues();
 
@@ -2619,11 +2629,14 @@ public class DataAccessLayer {
             cvs.put(TwoTrailsSchema.PictureSchema.Pitch, picture.getPitch());
             cvs.put(TwoTrailsSchema.PictureSchema.Roll, picture.getRoll());
 
-            _db.insert(TwoTrailsSchema.GpsPointSchema.TableName, null, cvs);
+            _db.insert(TwoTrailsSchema.PictureSchema.TableName, null, cvs);
 
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:insertPictureData");
+            return false;
         }
+
+        return true;
     }
     //endregion
 
@@ -2686,7 +2699,7 @@ public class DataAccessLayer {
             cvs.put(TwoTrailsSchema.PictureSchema.Pitch, picture.getPitch());
             cvs.put(TwoTrailsSchema.PictureSchema.Roll, picture.getRoll());
 
-            _db.update(TwoTrailsSchema.GpsPointSchema.TableName, cvs,
+            _db.update(TwoTrailsSchema.PictureSchema.TableName, cvs,
                     TwoTrailsSchema.SharedSchema.CN + "=?", new String[]{ picture.getCN() });
 
         } catch (Exception ex) {
