@@ -136,6 +136,7 @@ public class Consts {
             public static final int BLUETOOH = 5003;
             public static final int INTERNET = 5004;
             public static final int VIBRATE = 5005;
+            public static final int IMAGES = 5006;
         }
     }
 

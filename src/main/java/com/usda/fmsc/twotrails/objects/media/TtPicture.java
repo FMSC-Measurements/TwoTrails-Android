@@ -1,42 +1,54 @@
 package com.usda.fmsc.twotrails.objects.media;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.support.annotation.NonNull;
-import android.util.Log;
-import android.view.View;
+import android.os.Parcel;
+import android.os.Parcelable;
 
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.assist.FailReason;
-import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
-import com.usda.fmsc.twotrails.Consts;
+import com.usda.fmsc.android.utilities.ParcelTools;
 import com.usda.fmsc.twotrails.units.MediaType;
 import com.usda.fmsc.twotrails.units.PictureType;
-import com.usda.fmsc.utilities.FileUtils;
 import com.usda.fmsc.utilities.StringEx;
 
 import org.joda.time.DateTime;
 
 public class TtPicture extends TtMedia implements IOrientation {
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+        @Override
+        public Object createFromParcel(Parcel source) {
+            return new TtPicture(source);
+        }
+
+        @Override
+        public TtPicture[] newArray(int size) {
+            return new TtPicture[size];
+        }
+    };
+
     private Double _Azimuth;
     private Double _Pitch;
     private Double _Roll;
 
-    private Bitmap image;
 
     public TtPicture() {
+        super();
+    }
 
+    public TtPicture(Parcel source) {
+        super(source);
+
+        _Azimuth = ParcelTools.readNDouble(source);
+        _Pitch = ParcelTools.readNDouble(source);
+        _Roll = ParcelTools.readNDouble(source);
     }
 
     public TtPicture(String name, String filePath, DateTime timeCreated, String pointCN) {
-        this(name, filePath, StringEx.Empty, timeCreated, pointCN, 0, 0, 0);
+        this(name, filePath, StringEx.Empty, timeCreated, pointCN, 0d, 0d, 0d);
     }
 
     public TtPicture(String name, String filePath, String comment, DateTime timeCreated, String pointCN) {
-        this(name, filePath, comment, timeCreated, pointCN, 0, 0, 0);
+        this(name, filePath, comment, timeCreated, pointCN, 0d, 0d, 0d);
     }
 
-    public TtPicture(String name, String filePath, String comment, DateTime timeCreated, String pointCN, double azimuth, double pitch, double roll) {
+    public TtPicture(String name, String filePath, String comment, DateTime timeCreated, String pointCN, Double azimuth, Double pitch, Double roll) {
         super(name, filePath, comment, timeCreated, pointCN);
 
         _Azimuth = azimuth;
@@ -87,6 +99,16 @@ public class TtPicture extends TtMedia implements IOrientation {
     public void setRoll(Double roll) {
         _Roll = roll;
     }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
+
+        ParcelTools.writeNDouble(dest, _Azimuth);
+        ParcelTools.writeNDouble(dest, _Pitch);
+        ParcelTools.writeNDouble(dest, _Roll);
+    }
+
 
     //get picture details (size, shutter, flash, aperature, etc..)
 

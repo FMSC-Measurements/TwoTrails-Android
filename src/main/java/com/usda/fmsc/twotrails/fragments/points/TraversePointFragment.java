@@ -29,14 +29,14 @@ public class TraversePointFragment extends BasePointFragment {
     private TravPoint _TravPoint;
 
 
-    public static TraversePointFragment newInstance(String pointCN) {
-        return newInstance(pointCN, false);
+    public static TraversePointFragment newInstance(TravPoint point) {
+        return newInstance(point, false);
     }
 
-    public static TraversePointFragment newInstance(String pointCN, boolean hidden) {
+    public static TraversePointFragment newInstance(TravPoint point, boolean hidden) {
         TraversePointFragment fragment = new TraversePointFragment();
         Bundle args = new Bundle();
-        args.putString(POINT_CN, pointCN);
+        args.putParcelable(POINT, point);
         args.putBoolean(HIDDEN, hidden);
         fragment.setArguments(args);
         return fragment;

@@ -75,7 +75,7 @@ public class CalculateGpsActivity extends CustomToolbarActivity {
             _Bursts = new ArrayList<>();
 
             try {
-                _Point = (GpsPoint)intent.getSerializableExtra(Consts.Codes.Data.POINT_DATA);
+                _Point = intent.getParcelableExtra(Consts.Codes.Data.POINT_DATA);
                 _Metadata = intent.getParcelableExtra(Consts.Codes.Data.METADATA_DATA);
                 _Zone = _Metadata.getZone();
 

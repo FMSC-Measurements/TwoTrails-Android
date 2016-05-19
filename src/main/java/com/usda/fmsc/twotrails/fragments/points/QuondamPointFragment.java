@@ -47,18 +47,14 @@ public class QuondamPointFragment extends BasePointFragment {
 
 
 
-    public static QuondamPointFragment newInstance(String pointCN) {
-        QuondamPointFragment fragment = new QuondamPointFragment();
-        Bundle args = new Bundle();
-        args.putString(POINT_CN, pointCN);
-        fragment.setArguments(args);
-        return fragment;
+    public static QuondamPointFragment newInstance(QuondamPoint point) {
+        return newInstance(point, false);
     }
 
-    public static QuondamPointFragment newInstance(String pointCN, boolean hidden) {
+    public static QuondamPointFragment newInstance(QuondamPoint point, boolean hidden) {
         QuondamPointFragment fragment = new QuondamPointFragment();
         Bundle args = new Bundle();
-        args.putString(POINT_CN, pointCN);
+        args.putParcelable(POINT, point);
         args.putBoolean(HIDDEN, hidden);
         fragment.setArguments(args);
         return fragment;

@@ -1,12 +1,26 @@
 package com.usda.fmsc.twotrails.objects.points;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import com.usda.fmsc.android.utilities.ParcelTools;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.units.OpType;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
-import java.io.Serializable;
+public class TravPoint extends TtPoint {
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+        @Override
+        public Object createFromParcel(Parcel source) {
+            return new TravPoint(source);
+        }
 
-public class TravPoint extends TtPoint implements Serializable {
+        @Override
+        public TravPoint[] newArray(int size) {
+            return new TravPoint[size];
+        }
+    };
+
     private Double _FwdAz;
     private Double _BkAz;
 
@@ -19,6 +33,17 @@ public class TravPoint extends TtPoint implements Serializable {
     public TravPoint() {
         defaultTraverseValues();
         _Op = OpType.Traverse;
+    }
+
+    public TravPoint(Parcel source) {
+        super(source);
+
+        _FwdAz = ParcelTools.readNDouble(source);
+        _BkAz = ParcelTools.readNDouble(source);
+
+        _SlopeDistance = source.readDouble();
+        _SlopeAngle = source.readDouble();
+        _Declination = source.readDouble();
     }
 
     public TravPoint(TravPoint p) {
@@ -39,6 +64,18 @@ public class TravPoint extends TtPoint implements Serializable {
 
     //endregion
 
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
+
+        ParcelTools.writeNDouble(dest, _FwdAz);
+        ParcelTools.writeNDouble(dest, _BkAz);
+
+        dest.writeDouble(_SlopeDistance);
+        dest.writeDouble(_SlopeAngle);
+        dest.writeDouble(_Declination);
+    }
 
     //region Get/Set
     public Double getFwdAz() {

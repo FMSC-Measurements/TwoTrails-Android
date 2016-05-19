@@ -53,7 +53,7 @@ public class AcquireGpsActivity extends AcquireGpsMapActivity {
                 _Bursts = new ArrayList<>();
 
                 try {
-                    _Point = (GpsPoint)intent.getSerializableExtra(Consts.Codes.Data.POINT_DATA);
+                    _Point = intent.getParcelableExtra(Consts.Codes.Data.POINT_DATA);
                     _Metadata = intent.getParcelableExtra(Consts.Codes.Data.METADATA_DATA);
 
                     setZone(_Metadata.getZone());

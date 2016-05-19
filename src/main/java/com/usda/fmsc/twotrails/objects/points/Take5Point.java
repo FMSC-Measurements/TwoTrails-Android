@@ -1,14 +1,31 @@
 package com.usda.fmsc.twotrails.objects.points;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.usda.fmsc.twotrails.units.OpType;
 
-import java.io.Serializable;
+public class Take5Point extends GpsPoint {
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+        @Override
+        public Object createFromParcel(Parcel source) {
+            return new Take5Point(source);
+        }
+
+        @Override
+        public Take5Point[] newArray(int size) {
+            return new Take5Point[size];
+        }
+    };
 
 
-public class Take5Point extends GpsPoint implements Serializable {
     public Take5Point() {
         super();
         _Op = OpType.Take5;
+    }
+
+    public Take5Point(Parcel source) {
+        super(source);
     }
 
     public Take5Point(Take5Point p) {

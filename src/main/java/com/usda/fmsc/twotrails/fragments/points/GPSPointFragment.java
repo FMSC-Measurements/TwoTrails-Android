@@ -30,14 +30,14 @@ public class GPSPointFragment extends BasePointFragment {
     private GpsPoint _GpsPoint;
 
 
-    public static GPSPointFragment newInstance(String pointCN) {
-        return newInstance(pointCN, false);
+    public static GPSPointFragment newInstance(GpsPoint point) {
+        return newInstance(point, false);
     }
 
-    public static GPSPointFragment newInstance(String pointCN, boolean hidden) {
+    public static GPSPointFragment newInstance(GpsPoint point, boolean hidden) {
         GPSPointFragment fragment = new GPSPointFragment();
         Bundle args = new Bundle();
-        args.putString(POINT_CN, pointCN);
+        args.putParcelable(POINT, point);
         args.putBoolean(HIDDEN, hidden);
         fragment.setArguments(args);
         return fragment;

@@ -8,7 +8,6 @@ import com.usda.fmsc.twotrails.Consts;
 
 import org.joda.time.DateTime;
 
-import java.io.Serializable;
 import java.util.Comparator;
 
 public class TtPolygon extends TtObject implements Comparable<TtPolygon>, Comparator<TtPolygon>, Parcelable {
@@ -45,7 +44,8 @@ public class TtPolygon extends TtObject implements Comparable<TtPolygon>, Compar
     }
 
     public TtPolygon(Parcel source) {
-        setCN(source.readString());
+        super(source);
+
         Name = source.readString();
         Time = (DateTime) source.readSerializable();
         Description = source.readString();
@@ -84,7 +84,8 @@ public class TtPolygon extends TtObject implements Comparable<TtPolygon>, Compar
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(getCN());
+        super.writeToParcel(dest, flags);
+
         dest.writeString(Name);
         dest.writeSerializable(Time);
         dest.writeString(Description);

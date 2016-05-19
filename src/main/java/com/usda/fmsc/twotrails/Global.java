@@ -53,7 +53,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public class Global {
-    private static DataAccessLayer DAL;
+    private static DataAccessLayer _DAL;
 
     private static Context _ApplicationContext;
     private static MainActivity _MainActivity;
@@ -87,7 +87,6 @@ public class Global {
 
         Settings.DeviceSettings.init();
 
-        //_LogFilePath = _ApplicationContext.getApplicationInfo().dataDir;// Environment.getDataDirectory().getAbsolutePath(); //TtUtils.getTtFileDir();
         _DefaultMeta = Settings.MetaDataSetting.getDefaultmetaData();
 
         TtUtils.TtReport.changeDirectory(getTtLogFileDir());
@@ -145,11 +144,11 @@ public class Global {
 
 
     public static DataAccessLayer getDAL() {
-        return DAL;
+        return _DAL;
     }
 
     public static void setDAL(DataAccessLayer dal) {
-        DAL = dal;
+        _DAL = dal;
 
         if (dal != null) {
             MapSettings.reset();
@@ -227,16 +226,37 @@ public class Global {
         return dir.getAbsolutePath();
     }
 
+    private static String _OfflineMapsDir;
     public static String getOfflineMapsDir() {
-        return String.format("%s%s%s", getDocumentsDir(), File.separator, "OfflineMaps");
+        if (_OfflineMapsDir == null)
+            _OfflineMapsDir = String.format("%s%s%s", getDocumentsDir(), File.separator, "OfflineMaps");
+        return _OfflineMapsDir;
     }
 
+    private static String _OfflineMapsRecoveryDir;
     public static String getOfflineMapsRecoveryDir() {
-        return String.format("%s%s%s", getOfflineMapsDir(), File.separator, "Recovery");
+        if (_OfflineMapsRecoveryDir == null)
+            _OfflineMapsRecoveryDir = String.format("%s%s%s", getOfflineMapsDir(), File.separator, "Recovery");
+        return _OfflineMapsRecoveryDir;
     }
 
+    private static String _TtFileDir;
     public static String getTtFileDir() {
-        return String.format("%s%s%s", getDocumentsDir(), File.separator, "TwoTrailsFiles");
+        if (_TtFileDir == null)
+            _TtFileDir = String.format("%s%s%s", getDocumentsDir(), File.separator, "TwoTrailsFiles");
+        return _TtFileDir;
+    }
+
+    private static String _TtMediaDir;
+    public static String getTtMediaDir() {
+        if (_TtMediaDir == null)
+            _TtMediaDir = String.format("%s%s%s", getTtFileDir(), File.separator, "Media");
+
+        if (_DAL != null) {
+            return String.format("%s%s%s", _TtMediaDir, File.separator, _DAL.getFileName());
+        }
+
+        return _TtMediaDir;
     }
 
     public static String getTtLogFileDir() {
@@ -370,6 +390,7 @@ public class Global {
     }
 
 
+    //TODO go through settings (xml) and remove hardcoded strings
     public static class Settings {
 
         public static class PreferenceHelper {
@@ -568,6 +589,8 @@ public class Global {
             public static final String MAP_UNADJ_LINE_WIDTH = "MapUnAdjLineWidth";
 
             public static final String ARC_CREDENTIALS = "ArcCredentials";
+
+            public static final String MEDIA_COPY_TO_PROJECT = "CopyToProject";
             //endregion
 
             //region Default Values
@@ -628,6 +651,8 @@ public class Global {
             public static final int DEFAULT_ARC_GIS_MAP_ID_COUNTER = 0;
             public static final int DEFAULT_MAP_ADJ_LINE_WIDTH = 8;
             public static final int DEFAULT_MAP_UNADJ_LINE_WIDTH = 32;
+
+            public static final boolean DEFAULT_MEDIA_COPY_TO_PROJECT = true;
             //endregion
 
 
@@ -698,6 +723,8 @@ public class Global {
                 editor.putInt(ARC_GIS_MAP_ID_COUNTER, DEFAULT_ARC_GIS_MAP_ID_COUNTER);
                 editor.putInt(MAP_ADJ_LINE_WIDTH, DEFAULT_MAP_ADJ_LINE_WIDTH);
                 editor.putInt(MAP_UNADJ_LINE_WIDTH, DEFAULT_MAP_UNADJ_LINE_WIDTH);
+
+                editor.putBoolean(MEDIA_COPY_TO_PROJECT, DEFAULT_MEDIA_COPY_TO_PROJECT);
 
                 editor.putString(ARC_CREDENTIALS, StringEx.Empty);
 
@@ -1276,6 +1303,15 @@ public class Global {
 
             public static void setArcCredentials(String value) {
                 setString(ARC_CREDENTIALS, value);
+            }
+
+
+            public static boolean getMediaCopyToProject() {
+                return getBool(MEDIA_COPY_TO_PROJECT, DEFAULT_MEDIA_COPY_TO_PROJECT);
+            }
+
+            public static void setMediaCopyToProject(boolean value) {
+                setBool(MEDIA_COPY_TO_PROJECT, value);
             }
             //endregion
         }
