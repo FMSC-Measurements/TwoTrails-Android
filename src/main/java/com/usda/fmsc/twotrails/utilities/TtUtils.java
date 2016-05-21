@@ -1,17 +1,19 @@
 package com.usda.fmsc.twotrails.utilities;
 
+import android.content.ClipData;
 import android.content.Context;
-import android.graphics.Color;
+import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Point;
-import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
+import android.media.ExifInterface;
+import android.net.Uri;
 import android.os.Build;
+import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 
 import com.usda.fmsc.android.AndroidUtils;
@@ -31,7 +33,7 @@ import com.usda.fmsc.twotrails.objects.FilterOptions;
 import com.usda.fmsc.twotrails.objects.media.TtMedia;
 import com.usda.fmsc.twotrails.objects.media.TtPanorama;
 import com.usda.fmsc.twotrails.objects.media.TtPhotoSphere;
-import com.usda.fmsc.twotrails.objects.media.TtPicture;
+import com.usda.fmsc.twotrails.objects.media.TtImage;
 import com.usda.fmsc.twotrails.objects.media.TtVideo;
 import com.usda.fmsc.twotrails.objects.points.GpsPoint;
 import com.usda.fmsc.twotrails.objects.PointD;
@@ -45,8 +47,10 @@ import com.usda.fmsc.twotrails.objects.points.WalkPoint;
 import com.usda.fmsc.twotrails.objects.points.WayPoint;
 
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
 
 import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -64,6 +68,7 @@ import com.usda.fmsc.twotrails.units.OpType;
 import com.usda.fmsc.twotrails.units.PictureType;
 import com.usda.fmsc.twotrails.units.Slope;
 import com.usda.fmsc.utilities.FileUtils;
+import com.usda.fmsc.utilities.ParseEx;
 import com.usda.fmsc.utilities.StringEx;
 
 
@@ -422,6 +427,18 @@ public class TtUtils {
             BigDecimal bd = new BigDecimal(value);
             bd = bd.setScale(decimalPlaces, RoundingMode.HALF_UP);
             return bd.doubleValue();
+        }
+
+        @Nullable
+        public static Float round(Float value, int decimalPlaces) {
+            if (decimalPlaces < 0) throw new IllegalArgumentException();
+
+            if (value == null)
+                return null;
+
+            BigDecimal bd = new BigDecimal(value);
+            bd = bd.setScale(decimalPlaces, RoundingMode.HALF_UP);
+            return bd.floatValue();
         }
 
 
@@ -984,9 +1001,9 @@ public class TtUtils {
 
     //region Media
 
-    public static TtPicture getPictureByType(PictureType type) {
+    public static TtImage getPictureByType(PictureType type) {
         switch (type) {
-            case Regular: return new TtPicture();
+            case Regular: return new TtImage();
             case Panorama: return new TtPanorama();
             case PhotoSphere: return new TtPhotoSphere();
             default:
@@ -997,10 +1014,10 @@ public class TtUtils {
     public static TtMedia cloneMedia(TtMedia media) {
         switch (media.getMediaType()) {
             case Picture:
-                TtPicture picture = (TtPicture)media;
+                TtImage picture = (TtImage)media;
                 switch (picture.getPictureType()) {
                     case Regular:
-                        return new TtPicture(picture);
+                        return new TtImage(picture);
                     case Panorama:
                         return new TtPanorama((TtPanorama) picture);
                     case PhotoSphere:
@@ -1033,6 +1050,136 @@ public class TtUtils {
             return lhs.getTimeCreated().isAfter(rhs.getTimeCreated()) ? 1 : -1;
         }
     };
+
+
+    public static TtImage getPictureFromTtCameraIntent(Intent intent) {
+        if (intent.getExtras() != null && intent.getExtras().containsKey(Consts.Codes.Data.TTIMAGE)) {
+            return intent.getExtras().getParcelable(Consts.Codes.Data.TTIMAGE);
+        }
+
+        return null;
+    }
+
+    public static TtImage getPictureFromUri(String path, String pointCN) {
+        return getImageFromFile(path, pointCN);
+    }
+
+    public static ArrayList<TtImage> getPicturesFromImageIntent(Context context, Intent intent, String pointCN) {
+        String[] filePathColumn = { MediaStore.Images.Media.DATA };
+        ArrayList<TtImage> pictures = new ArrayList<>();
+
+        if (intent.getClipData() != null) {
+            ClipData cd = intent.getClipData();
+
+            String mediaDirStr = Global.getTtMediaDir();
+            boolean copyToProject = false;
+            if (Global.Settings.DeviceSettings.getMediaCopyToProject()) {
+                copyToProject = true;
+
+                File mediaDir = new File(mediaDirStr);
+                File noMedia = new File(String.format("%s%s%s", mediaDirStr, File.separator, ".nomedia"));
+                try {
+                    if (!mediaDir.exists() || !mediaDir.isDirectory()) {
+                        mediaDir.mkdirs();
+                    }
+
+                    if (!noMedia.exists()) {
+                        noMedia.createNewFile();
+                    }
+                } catch (Exception e) {
+                    //
+                }
+            }
+
+            for (int i = 0; i < cd.getItemCount(); i++) {
+                ClipData.Item item = cd.getItemAt(i);
+                Uri uri = item.getUri();
+                Cursor cursor = context.getContentResolver().query(uri, filePathColumn, null, null, null);
+
+                if (cursor != null) {
+                    cursor.moveToFirst();
+
+                    int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+                    String filePath = cursor.getString(columnIndex);
+
+                    if (copyToProject) {
+                        String newFilePath = String.format("%s%s%s", mediaDirStr, File.separator, FileUtils.getFileName(filePath));
+                        if (FileUtils.copyFile(filePath, newFilePath)) {
+                            filePath = newFilePath;
+                        }
+                    }
+
+                    TtImage image = getImageFromFile(filePath, pointCN);
+                    if (image != null) {
+                        pictures.add(image);
+                    }
+
+                    cursor.close();
+                }
+            }
+        }
+
+        return pictures;
+    }
+
+    private static TtImage getImageFromFile(String filePath, String pointCN) {
+        String name = FileUtils.getFileNameWoType(filePath);
+        ExifInterface exifInterface;
+        String info;
+
+        PictureType type;
+
+        if (FileUtils.fileExists(filePath)) {
+
+
+            DateTime time = null;
+            Integer width, height;
+            try {
+                exifInterface = new ExifInterface(filePath);
+
+                info = exifInterface.getAttribute(ExifInterface.TAG_DATETIME);
+
+                if (info != null) {
+                    try {
+                        time = DateTimeFormat.forPattern("yyyy:MM:dd HH:mm:ss").parseDateTime(info);
+                    } catch (Exception e) {
+                        //
+                    }
+                }
+
+                type = PictureType.Regular;
+                info = exifInterface.getAttribute(ExifInterface.TAG_IMAGE_WIDTH);
+                if (info != null) {
+                    width = ParseEx.parseInteger(info);
+
+                    if (width != null) {
+                        info = exifInterface.getAttribute(ExifInterface.TAG_IMAGE_LENGTH);
+                        if (info != null) {
+                            height = ParseEx.parseInteger(info);
+
+                            if (height != null && (width / height > 1 || height / width > 1)) {
+                                type = PictureType.Panorama;
+                            }
+                        }
+                    }
+                }
+
+                if (time == null)
+                    time = new DateTime(new File(filePath).lastModified());
+
+                if (type == PictureType.Panorama) {
+                    return new TtPanorama(name, filePath, time, pointCN);
+                } else {
+                    return new TtImage(name, filePath, time, pointCN);
+                }
+
+            } catch (IOException e) {
+                //
+            }
+        }
+
+        return null;
+    }
     //endregion
 
     //region NMEA
@@ -1680,26 +1827,5 @@ public class TtUtils {
                 getInfoWindowSnippet(point.getParentPoint(), adjusted, meta));
         }
 
-    }
-
-
-    public static class is {
-        public static boolean Int(String value) {
-            try {
-                Integer.parseInt(value);
-                return true;
-            } catch (NumberFormatException e) {
-                return false;
-            }
-        }
-
-        public static boolean Double(String value) {
-            try {
-                Double.parseDouble(value);
-                return true;
-            } catch (NumberFormatException e) {
-                return false;
-            }
-        }
     }
 }

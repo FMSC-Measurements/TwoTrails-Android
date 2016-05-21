@@ -12,7 +12,7 @@ import com.usda.fmsc.android.adapters.SelectableAdapterEx;
 import com.usda.fmsc.android.utilities.BitmapManager;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.objects.media.TtMedia;
-import com.usda.fmsc.twotrails.objects.media.TtPicture;
+import com.usda.fmsc.twotrails.objects.media.TtImage;
 
 import java.util.List;
 
@@ -64,7 +64,7 @@ public class MediaRvAdapter extends SelectableAdapterEx<TtMedia, SelectableAdapt
     public MediaViewHolder onCreateViewHolderEx(ViewGroup parent, int viewType) {
         switch (viewType) {
             case PIC: {
-                return new ImageViewHolder(inflater.inflate(R.layout.point_media_image, parent, false));
+                return new ImageViewHolder(inflater.inflate(R.layout.content_point_media_thumbnail, parent, false));
             }
             case VIDEO: {
                 //TODO implement video ViewHolder
@@ -114,7 +114,7 @@ public class MediaRvAdapter extends SelectableAdapterEx<TtMedia, SelectableAdapt
 
         @Override
         public void onBindView(TtMedia item) {
-            TtPicture pic = (TtPicture)getItem();
+            TtImage pic = (TtImage)getItem();
 
             String key = pic.getFilePath() + "_tumb";
 

@@ -89,7 +89,6 @@ public class MapActivity extends BaseMapActivity {
         if (created) {
             if (fabMyPos != null && getLastPosition() != null) {
                 fabMyPos.setVisibility(myPosBtn ? View.VISIBLE : View.GONE);
-                fabMyPos.hide();
             }
 
             setDisplayLocInfoVisible();

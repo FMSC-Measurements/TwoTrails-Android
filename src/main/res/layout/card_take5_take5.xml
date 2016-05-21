@@ -16,7 +16,7 @@
             android:orientation="vertical"
             android:paddingBottom="8dp">
 
-            <include layout="@layout/point_card_header" />
+            <include layout="@layout/content_point_card_header" />
 
             <TableLayout
                 android:layout_width="match_parent"

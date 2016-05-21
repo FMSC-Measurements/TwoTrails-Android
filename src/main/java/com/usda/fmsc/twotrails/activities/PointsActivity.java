@@ -1,25 +1,20 @@
 package com.usda.fmsc.twotrails.activities;
 
-import android.content.ClipData;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
-import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
@@ -29,7 +24,6 @@ import android.support.v7.widget.PopupMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -47,6 +41,7 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import com.usda.fmsc.android.adapters.FragmentStatePagerAdapterEx;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.adapters.SelectableAdapterEx;
+import com.usda.fmsc.android.dialogs.DontAskAgainDialog;
 import com.usda.fmsc.android.listeners.ComplexOnPageChangeListener;
 import com.usda.fmsc.android.utilities.BitmapManager;
 import com.usda.fmsc.android.utilities.PostDelayHandler;
@@ -64,7 +59,6 @@ import com.usda.fmsc.twotrails.dialogs.LatLonDialog;
 import com.usda.fmsc.twotrails.dialogs.MoveToPointDialog;
 import com.usda.fmsc.twotrails.dialogs.PointEditorDialog;
 import com.usda.fmsc.twotrails.fragments.AnimationCardFragment;
-import com.usda.fmsc.twotrails.fragments.media.BaseMediaFragment;
 import com.usda.fmsc.twotrails.fragments.media.PictureMediaFragment;
 import com.usda.fmsc.twotrails.fragments.points.BasePointFragment;
 import com.usda.fmsc.twotrails.fragments.points.GPSPointFragment;
@@ -76,8 +70,7 @@ import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.logic.PointNamer;
 import com.usda.fmsc.twotrails.logic.PolygonAdjuster;
 import com.usda.fmsc.twotrails.objects.media.TtMedia;
-import com.usda.fmsc.twotrails.objects.media.TtPanorama;
-import com.usda.fmsc.twotrails.objects.media.TtPicture;
+import com.usda.fmsc.twotrails.objects.media.TtImage;
 import com.usda.fmsc.twotrails.objects.points.GpsPoint;
 import com.usda.fmsc.twotrails.objects.points.QuondamPoint;
 import com.usda.fmsc.twotrails.objects.points.TravPoint;
@@ -87,7 +80,6 @@ import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.ui.MSFloatingActionButton;
 import com.usda.fmsc.twotrails.units.MediaType;
 import com.usda.fmsc.twotrails.units.OpType;
-import com.usda.fmsc.twotrails.units.PictureType;
 import com.usda.fmsc.twotrails.utilities.AppUnits;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
@@ -96,18 +88,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.geospatial.utm.UTMTools;
-import com.usda.fmsc.utilities.FileUtils;
 import com.usda.fmsc.utilities.StringEx;
 
 import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
 
 import jp.wasabeef.recyclerview.animators.FadeInAnimator;
 
@@ -155,8 +144,10 @@ public class PointsActivity extends CustomToolbarActivity {
     private boolean mediaLoaded;
     private int mediaCount, mediaSelectionIndex;
 
+    private Uri captureImageUri;
+
     private Semaphore semaphore = new Semaphore(1);
-    private PostDelayHandler mediaLoaderDelayedHandler = new PostDelayHandler(250);
+    private PostDelayHandler mediaLoaderDelayedHandler = new PostDelayHandler(500);
 
 
     //region Listeners
@@ -258,13 +249,9 @@ public class PointsActivity extends CustomToolbarActivity {
                 setCurrentMedia(rvMediaAdapter.getItem(position));
                 rvMediaAdapter.selectItem(position);
                 rvMedia.smoothScrollToPosition(position);
+                onLockChange();
             }
             ignoreMediaChange = false;
-        }
-
-        @Override
-        public void onPageChanged() {
-            super.onPageChanged();
         }
     };
 
@@ -272,11 +259,15 @@ public class PointsActivity extends CustomToolbarActivity {
         @Override
         public void onItemSelected(TtMedia media, int adapterPosition, int layoutPosition) {
             if (mediaLoaded) {
+                if (!_CurrentMedia.getCN().equals(media.getCN())) {
+                    ignoreMediaChange = true;
+                }
+
                 saveMedia();
+
                 setCurrentMedia(media);
                 slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
 
-                ignoreMediaChange = true;
                 mediaViewPager.setCurrentItem(adapterPosition, true);
             }
         }
@@ -340,11 +331,34 @@ public class PointsActivity extends CustomToolbarActivity {
                     }
 
                     intent.setType("image/*");
-                    startActivityForResult(intent, Consts.Codes.Requests.IMAGES);
+                    startActivityForResult(intent, Consts.Codes.Requests.ADD_IMAGES);
                     break;
                 }
                 case R.id.ctx_menu_capture: {
-                    //TODO implement custom camera
+                    if (Global.Settings.DeviceSettings.getUseTtCameraAsk()) {
+                        DontAskAgainDialog dialog = new DontAskAgainDialog(PointsActivity.this,
+                                Global.Settings.DeviceSettings.USE_TTCAMERA_ASK,
+                                Global.Settings.DeviceSettings.USE_TTCAMERA,
+                                Global.Settings.PreferenceHelper.getPrefs());
+
+                        dialog.setMessage(PointsActivity.this.getString(R.string.points_camera_diag))
+                        .setPositiveButton("TwoTrails", new DontAskAgainDialog.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i, Object value) {
+                                captureImage((int)value);
+                            }
+                        }, 2)
+                        .setNegativeButton("Android", new DontAskAgainDialog.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i, Object value) {
+                                captureImage((int)value);
+                            }
+                        }, 1)
+                        .setNeutralButton(getString(R.string.str_cancel), null, 0)
+                        .show();
+                    } else {
+                        captureImage(Global.Settings.DeviceSettings.getUseTtCamera());
+                    }
                     break;
                 }
                 case R.id.ctx_menu_reset: {
@@ -890,111 +904,35 @@ public class PointsActivity extends CustomToolbarActivity {
                 addInsertPointsResult(resultCode, data);
                 break;
             }
-            case Consts.Codes.Requests.IMAGES: {
-                if (data != null && data.getClipData() != null) {
-                    String[] filePathColumn = { MediaStore.Images.Media.DATA };
-                    ArrayList<TtPicture> pictures = new ArrayList<>();
-                    ClipData cd = data.getClipData();
-
-                    String mediaDirStr = Global.getTtMediaDir();
-                    boolean copyToProject = false;
-                    if (Global.Settings.DeviceSettings.getMediaCopyToProject()) {
-                        copyToProject = true;
-
-                        File mediaDir = new File(mediaDirStr);
-                        File noMedia = new File(String.format("%s%s%s", mediaDirStr, File.separator, ".nomedia"));
-                        try {
-                            if (!mediaDir.exists() || !mediaDir.isDirectory()) {
-                                mediaDir.mkdirs();
-                            }
-
-                            if (!noMedia.exists()) {
-                                noMedia.createNewFile();
-                            }
-                        } catch (Exception e) {
-                            //
-                        }
-                    }
-
-                    for (int i = 0; i < cd.getItemCount(); i++) {
-                        ClipData.Item item = cd.getItemAt(i);
-                        Uri uri = item.getUri();
-                        Cursor cursor = getContentResolver().query(uri, filePathColumn, null, null, null);
-
-                        if (cursor != null) {
-                            cursor.moveToFirst();
-
-                            int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-                            String filePath = cursor.getString(columnIndex);
-
-                            if (copyToProject) {
-                                String newFilePath = String.format("%s%s%s", mediaDirStr, File.separator, FileUtils.getFileName(filePath));
-                                if (FileUtils.copyFile(filePath, newFilePath)) {
-                                    filePath = newFilePath;
-                                }
-                            }
-
-                            String name = FileUtils.getFileNameWoType(filePath);
-                            ExifInterface exifInterface;
-                            String info;
-
-                            PictureType type;
-
-                            if (FileUtils.fileExists(filePath)) {
-
-
-                                DateTime time = null;
-                                int width, height;
-                                try {
-                                    exifInterface = new ExifInterface(filePath);
-
-                                    info = exifInterface.getAttribute(ExifInterface.TAG_DATETIME);
-
-                                    if (info != null) {
-                                        try {
-                                            time = DateTimeFormat.forPattern("yyyy:MM:dd HH:mm:ss").parseDateTime(info);
-                                        } catch (Exception e) {
-                                            //
-                                        }
-                                    }
-
-                                    type = PictureType.Regular;
-                                    info = exifInterface.getAttribute(ExifInterface.TAG_IMAGE_WIDTH);
-                                    if (info != null && TtUtils.is.Int(info)) {
-                                        width = Integer.parseInt(info);
-
-                                        if (width != 0) {
-                                            info = exifInterface.getAttribute(ExifInterface.TAG_IMAGE_LENGTH);
-                                            if (info != null && TtUtils.is.Int(info)) {
-                                                height = Integer.parseInt(info);
-
-                                                if (height != 0 && (width / height > 1 || height / width > 1)) {
-                                                    type = PictureType.Panorama;
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                    if (time == null)
-                                        time = new DateTime(new File(filePath).lastModified());
-
-                                    if (type == PictureType.Panorama) {
-                                        pictures.add(new TtPanorama(name, filePath, time, _CurrentPoint.getCN()));
-                                    } else {
-                                        pictures.add(new TtPicture(name, filePath, time, _CurrentPoint.getCN()));
-                                    }
-
-                                } catch (IOException e) {
-                                    //
-                                }
-                            }
-
-                            cursor.close();
-                        }
-                    }
-
-                    addPictures(pictures);
+            case Consts.Codes.Requests.ADD_IMAGES: {
+                if (data != null) {
+                    addImages(TtUtils.getPicturesFromImageIntent(PointsActivity.this, data, _CurrentPoint.getCN()));
                 }
+                break;
+            }
+            case Consts.Codes.Activites.TTCAMERA: {
+                if (data != null) {
+                    TtImage image = TtUtils.getPictureFromTtCameraIntent(data);
+
+                    if (image == null) {
+                        Toast.makeText(PointsActivity.this, "Unable to add Image", Toast.LENGTH_LONG).show();
+                    } else {
+                        addImage(image);
+                    }
+                }
+                break;
+            }
+            case Consts.Codes.Requests.CAPTURE_IMAGE: {
+                if (resultCode != RESULT_CANCELED) {
+                    TtImage image = TtUtils.getPictureFromUri(captureImageUri.getPath(), _CurrentPoint.getCN());
+
+                    if (image == null) {
+                        Toast.makeText(PointsActivity.this, "Unable to add Image", Toast.LENGTH_LONG).show();
+                    } else {
+                        addImage(image);
+                    }
+                }
+                break;
             }
         }
     }
@@ -1052,6 +990,34 @@ public class PointsActivity extends CustomToolbarActivity {
             }
 
             adjust = true;
+        }
+    }
+
+
+    private void captureImage(int setting) {
+        if (setting == 2) {
+            Intent intent = new Intent(PointsActivity.this, TtCameraActivity.class);
+
+            if (_CurrentPoint != null) {
+                intent.putExtra(Consts.Codes.Data.POINT_CN, _CurrentPoint.getCN());
+            }
+
+            startActivityForResult(intent, Consts.Codes.Activites.TTCAMERA);
+        } else {
+            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+            DateTime dateTime = DateTime.now();
+            String imageName = String.format("IMG_%d%d%d_%d", dateTime.getYear(), dateTime.getMonthOfYear(), dateTime.getDayOfMonth(), dateTime.getMillisOfDay());
+
+            File photo = new File(String.format("%s%s%s.jpg", Global.getTtMediaDir(), File.separator, imageName));
+            captureImageUri = Uri.fromFile(photo);
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photo));
+
+            if (intent.resolveActivity(getPackageManager()) != null) {
+                startActivityForResult(intent, Consts.Codes.Requests.CAPTURE_IMAGE);
+            } else {
+                Toast.makeText(PointsActivity.this, "Unable to find a Camera application", Toast.LENGTH_LONG).show();
+            }
         }
     }
     //endregion
@@ -1163,8 +1129,10 @@ public class PointsActivity extends CustomToolbarActivity {
                     QuondamPoint qp = (QuondamPoint) point;
                     if (qp.hasParent() && qp.getParentPoint().getPolyCN().equals(_CurrentPolygon.getCN())) {
                         TtPoint tmp = getPoint(qp.getParentCN());
-                        tmp.removeQuondamLink(qp.getCN());
-                        onPointUpdate(tmp);
+                        if (tmp != null) {
+                            tmp.removeQuondamLink(qp.getCN());
+                            onPointUpdate(tmp);
+                        }
                     }
                 }
 
@@ -1379,8 +1347,11 @@ public class PointsActivity extends CustomToolbarActivity {
         List<TtMedia> mediaList = rvMediaAdapter.getItems();
         int index = mediaList.indexOf(media);
 
+        Global.getDAL().deleteMedia(media);
+
         if (delete) {
-            Global.getDAL().deleteMedia(media);
+            File file = new File(media.getFilePath());
+            file.deleteOnExit();
         }
 
         mediaCount--;
@@ -1406,18 +1377,18 @@ public class PointsActivity extends CustomToolbarActivity {
         setCurrentMedia(changeTo);
     }
 
-    private void addPicture(final TtPicture picture) {
+    private void addImage(final TtImage picture) {
         if (picture != null) {
             if (Global.getDAL().insertMedia(picture)) {
                 mediaSelectionIndex = TtUtils.getMediaIndex(picture, rvMediaAdapter.getItems());
-                addPictureToList(picture);
+                addImageToList(picture);
             } else {
                 Toast.makeText(PointsActivity.this, "Error saving picture", Toast.LENGTH_LONG).show();
             }
         }
     }
 
-    private void addPictures(final List<TtPicture> pictures) {
+    private void addImages(final List<TtImage> pictures) {
         if (pictures.size() > 0) {
             int error = 0;
 
@@ -1432,8 +1403,8 @@ public class PointsActivity extends CustomToolbarActivity {
 
             mediaSelectionIndex = TtUtils.getMediaIndex(pictures.get(0), rvMediaAdapter.getItems());
 
-            for (TtPicture p : pictures) {
-                addPictureToList(p);
+            for (TtImage p : pictures) {
+                addImageToList(p);
             }
 
             if (error > 0) {
@@ -1677,9 +1648,6 @@ public class PointsActivity extends CustomToolbarActivity {
 
                 pmbMedia.setItemEnabled(R.id.ctx_menu_delete, false);
                 pmbMedia.setItemEnabled(R.id.ctx_menu_reset, false);
-
-                pmbMedia.setItemEnabled(R.id.ctx_menu_add, false);
-                pmbMedia.setItemEnabled(R.id.ctx_menu_capture, false);
             }
 
             fabAqr.setEnabled(false);
@@ -1711,9 +1679,6 @@ public class PointsActivity extends CustomToolbarActivity {
                     } else {
                         AndroidUtils.UI.disableMenuItem(miReset);
                     }
-
-                    pmbMedia.setItemEnabled(R.id.ctx_menu_add, true);
-                    pmbMedia.setItemEnabled(R.id.ctx_menu_capture, true);
                 }
             }
 
@@ -1847,11 +1812,11 @@ public class PointsActivity extends CustomToolbarActivity {
                     mediaCount = 0;
                     mediaSelectionIndex = INVALID_INDEX;
 
-                    ArrayList<TtPicture> pictures = Global.getDAL().getPicturesInPoint(point.getCN());
+                    ArrayList<TtImage> pictures = Global.getDAL().getPicturesInPoint(point.getCN());
 
                     Collections.sort(pictures, TtUtils.PictureTimeComparator);
-                    for (final TtPicture p : pictures) {
-                        addPictureToList(p);
+                    for (final TtImage p : pictures) {
+                        addImageToList(p);
                     }
 
                     if (mediaCount > 0)
@@ -1875,39 +1840,39 @@ public class PointsActivity extends CustomToolbarActivity {
     }
 
 
-    private void addPictureToList(final TtPicture picture) {
+    private void addImageToList(final TtImage picture) {
         mediaCount++;
 
         if (picture.isFileValid()) {
             ImageLoader.getInstance().loadImage("file://" + picture.getFilePath(), new SimpleImageLoadingListener() {
                 @Override
                 public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
-                    addPictureToList(picture, true, loadedImage);
+                    addImageToList(picture, true, loadedImage);
                 }
 
                 @Override
                 public void onLoadingFailed(String imageUri, View view, final FailReason failReason) {
-                    addInvalidPictureToList(picture);
+                    addInvalidImagesToList(picture);
                 }
             });
         } else {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    addInvalidPictureToList(picture);
+                    addInvalidImagesToList(picture);
                 }
             }).start();
         }
     }
 
-    private void addInvalidPictureToList(final TtPicture picture) {
+    private void addInvalidImagesToList(final TtImage picture) {
         Bitmap bitmap = BitmapFactory.decodeResource(PointsActivity.this.getResources(), R.drawable.ic_error_outline_black_48dp);
         if (bitmap != null) {
-            addPictureToList(picture, false, bitmap);
+            addImageToList(picture, false, bitmap);
         }
     }
 
-    private void addPictureToList(final TtPicture picture, boolean isValid, final Bitmap loadedImage) {
+    private void addImageToList(final TtImage picture, boolean isValid, final Bitmap loadedImage) {
         if (isValid) {
             bitmapManager.put(picture.getFilePath(), picture.getFilePath(), AndroidUtils.UI.scaleMinBitmap(loadedImage, bitmapHeight, false), scaleOptions);
         } else {
@@ -1964,7 +1929,7 @@ public class PointsActivity extends CustomToolbarActivity {
                 tvPmdTitle.setText(media.getName());
             }
 
-            if (media != _CurrentMedia) {
+            if (_CurrentMedia == null || !media.getCN().equals(_CurrentMedia.getCN())) {
                 _BackupMedia = TtUtils.cloneMedia(media);
 
                 setMediaUpdated(false);
@@ -2030,6 +1995,15 @@ public class PointsActivity extends CustomToolbarActivity {
 
         adjust = true;
     }
+
+    public void updateMedia(TtMedia media) {
+        //only update if current media
+        if (_CurrentMedia.getCN().equals(media.getCN())) {
+            setCurrentMedia(media);
+            setMediaUpdated(true);
+        }
+    }
+
 
     public TtMetadata getMetadata(String cn) {
         return _MetaData.get(cn);
@@ -2390,7 +2364,7 @@ public class PointsActivity extends CustomToolbarActivity {
 
             switch (media.getMediaType()) {
                 case Picture:
-                    return PictureMediaFragment.newInstance((TtPicture) media);
+                    return PictureMediaFragment.newInstance((TtImage) media);
                 case Video:
                     break;
             }

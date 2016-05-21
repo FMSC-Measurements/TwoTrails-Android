@@ -570,6 +570,8 @@ public class Global {
             public static final String AUTO_OVERWRITE_PLOTGRID_ASK = "AutoOverwritePlotGridAsk";
             public static final String AUTO_OVERWRITE_EXPORT = "AutoOverwriteExport";
             public static final String AUTO_OVERWRITE_EXPORT_ASK = "AutoOverwriteExportAsk";
+            public static final String USE_TTCAMERA = "UseTtCamera";
+            public static final String USE_TTCAMERA_ASK = "UseTtCameraAsk";
 
             public static final String AUTO_OPEN_LAST_PROJECT = "AutoOpenLastProject";
             public static final String LAST_OPENED_PROJECT = "AutoOpenLastProject";
@@ -708,6 +710,13 @@ public class Global {
                 editor.putInt(AUTO_OVERWRITE_EXPORT, DEFAULT_AUTO_OVERWRITE_EXPORT);
                 editor.putBoolean(AUTO_OVERWRITE_EXPORT_ASK, DEFAULT_AUTO_OVERWRITE_EXPORT_ASK);
 
+                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT_WATCH) {
+                    editor.putInt(USE_TTCAMERA, 2);
+                    editor.putBoolean(USE_TTCAMERA_ASK, true);
+                } else {
+                    editor.putInt(USE_TTCAMERA, 1);
+                    editor.putBoolean(USE_TTCAMERA_ASK, false);
+                }
 
                 editor.putBoolean(AUTO_OPEN_LAST_PROJECT, DEFAULT_AUTO_OPEN_LAST_PROJECT);
 
@@ -1312,6 +1321,24 @@ public class Global {
 
             public static void setMediaCopyToProject(boolean value) {
                 setBool(MEDIA_COPY_TO_PROJECT, value);
+            }
+
+
+
+            public static boolean getUseTtCameraAsk() {
+                return getBool(USE_TTCAMERA_ASK, true);
+            }
+
+            public static void setUseTtCameraAsk(boolean value) {
+                setBool(USE_TTCAMERA_ASK, value);
+            }
+
+            public static int getUseTtCamera() {
+                return getInt(USE_TTCAMERA, Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT_WATCH ? 2 : 1);
+            }
+
+            public static void setUseTtCamera(int value) {
+                setInt(USE_TTCAMERA, value);
             }
             //endregion
         }

@@ -95,6 +95,7 @@ public class Consts {
             public static final int MAP_MANAGER = 1018;
             public static final int MAP_DETAILS = 1019;
             public static final int ARC_GIS_LOGIN = 1020;
+            public static final int TTCAMERA = 1021;
         }
 
         public static class Dialogs {
@@ -112,7 +113,7 @@ public class Consts {
             public static final int MAP_UPDATED = 2006;
             public static final int MAP_DELETED = 2007;
             public static final int DOWNLOADING_MAP = 2008;
-
+            public static final int IMAGE_CAPTURED = 2009;
         }
 
         public static class Services {
@@ -122,11 +123,13 @@ public class Consts {
 
         public static class Data {
             public static final String POINT_DATA = "PointData";
+            public static final String POINT_CN = "PointCN";
             public static final String POLYGON_DATA = "PolygonData";
             public static final String METADATA_DATA = "MetaDataData";
             public static final String ADDITIVE_NMEA_DATA = "AdditiveNmeaData";
             public static final String NUMBER_OF_CREATED_POINTS = "NumOfCreatedPoints";
             public static final String MAP_DATA = "MapData";
+            public static final String TTIMAGE = "TtImage";
         }
 
         public static class Requests {
@@ -136,7 +139,8 @@ public class Consts {
             public static final int BLUETOOH = 5003;
             public static final int INTERNET = 5004;
             public static final int VIBRATE = 5005;
-            public static final int IMAGES = 5006;
+            public static final int CAPTURE_IMAGE = 5006;
+            public static final int ADD_IMAGES = 5007;
         }
     }
 

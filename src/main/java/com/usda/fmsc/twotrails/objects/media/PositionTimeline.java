@@ -68,18 +68,18 @@ public class PositionTimeline {
     }
 
 
-    public class FramePosition implements IOrientation {
+    public class FramePosition implements TtOrientation {
         private DateTime _Time;
-        private Double _Azimuth;
-        private Double _Pitch;
-        private Double _Roll;
+        private Float _Azimuth;
+        private Float _Pitch;
+        private Float _Roll;
 
 
-        public FramePosition(Double az, Double pitch, Double roll) {
+        public FramePosition(Float az, Float pitch, Float roll) {
             this(az, pitch, roll, DateTime.now());
         }
 
-        public FramePosition(Double az, Double pitch, Double roll, DateTime time) {
+        public FramePosition(Float az, Float pitch, Float roll, DateTime time) {
             _Azimuth = az;
             _Pitch = pitch;
             _Roll = roll;
@@ -96,29 +96,29 @@ public class PositionTimeline {
         }
 
         @Override
-        public Double getAzimuth() {
+        public Float getAzimuth() {
             return _Azimuth;
         }
 
-        public void setAzimuth(Double azimuth) {
+        public void setAzimuth(Float azimuth) {
             _Azimuth = azimuth;
         }
 
         @Override
-        public Double getPitch() {
+        public Float getPitch() {
             return _Pitch;
         }
 
-        public void setPitch(Double pitch) {
+        public void setPitch(Float pitch) {
             _Pitch = pitch;
         }
 
         @Override
-        public Double getRoll() {
+        public Float getRoll() {
             return _Roll;
         }
 
-        public void setRoll(Double roll) {
+        public void setRoll(Float roll) {
             _Roll = roll;
         }
     }

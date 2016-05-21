@@ -42,6 +42,11 @@
                     android:key="@string/set_GPS_CHECK"
                     android:title="Check GPS Connection"
                     android:summary="@string/ds_gps_not_connected"/>
+
+                <com.usda.fmsc.android.preferences.SwitchCompatPreference
+                    android:title="Update Metadata on GPS"
+                    android:key="@string/set_AUTO_SET_GPS_NAME_TO_META_ASK"
+                    android:summary="Remember to update metadata on GPS receiver change"/>
             </PreferenceCategory>
         </PreferenceScreen>
 
@@ -224,6 +229,11 @@
                     android:key="@string/set_WALK_INCREMENT"
                     android:defaultValue="2"
                     app:valueInSummary="true" />
+
+                <com.usda.fmsc.android.preferences.SwitchCompatPreference
+                    android:title="OnBoundary"
+                    android:key="@string/set_AUTO_UPDATE_WALK_ONBND_ASK"
+                    android:summary="Remember walk OnBoundary selection"/>
             </PreferenceCategory>
         </PreferenceScreen>
     </PreferenceCategory>
@@ -292,16 +302,16 @@
         <PreferenceScreen
             android:title="Misc Settings"
             android:key="miscSetup">
-
-            <com.usda.fmsc.android.preferences.SwitchCompatPreference
-                android:key="@string/set_DROP"
-                android:title="Drop Zeros"
-                android:summary="Drop Empty Points" />
         </PreferenceScreen>
 
         <com.usda.fmsc.android.preferences.SwitchCompatPreference
             android:title="Open last project on start"
             android:key="@string/set_AUTO_OPEN_LAST_PROJECT"/>
+
+        <com.usda.fmsc.android.preferences.SwitchCompatPreference
+            android:key="@string/set_DROP"
+            android:title="Drop Zeros"
+            android:summary="Drop Empty Points" />
 
         <Preference
             android:title="Export Report"

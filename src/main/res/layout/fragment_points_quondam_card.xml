@@ -30,7 +30,7 @@
                     <!--android:layout_width="match_parent"-->
                     <!--android:layout_height="match_parent">-->
 
-                    <!--<include android:id="@+id/cardHeader" layout="@layout/point_card_header" />-->
+                    <!--<include android:id="@+id/cardHeader" layout="@layout/content_point_card_header" />-->
 
                     <!--<RelativeLayout-->
                         <!--android:layout_height="wrap_content"-->
@@ -166,7 +166,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <include android:id="@+id/cardHeader" layout="@layout/point_card_header" />
+            <include android:id="@+id/cardHeader" layout="@layout/content_point_card_header" />
 
             <RelativeLayout
                 android:layout_height="wrap_content"
@@ -233,7 +233,7 @@
                         android:layout_width="60dp"
                         android:layout_height="wrap_content"
                         android:enabled="false"
-                        style="@style/PointValueTextStyle"
+                        style="@style/NumDecValueTextStyle"
                         android:inputType="number|numberDecimal"
                         android:layout_toStartOf="@+id/tv2"
                         android:layout_toLeftOf="@+id/tv2"

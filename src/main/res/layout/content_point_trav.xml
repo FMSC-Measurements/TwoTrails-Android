@@ -7,7 +7,7 @@
 
     <include
         android:id="@+id/cardHeader"
-        layout="@layout/point_card_header" />
+        layout="@layout/content_point_card_header" />
 
     <View style="@style/ToolbarElevation3" android:layout_below="@id/cardHeader" />
 
@@ -51,7 +51,7 @@
 
                 <EditText
                     android:id="@+id/pointTravTxtAzFwd"
-                    style="@style/PointValueTextStyle"
+                    style="@style/NumDecValueTextStyle"
                     android:layout_height="wrap_content"
                     android:layout_width="0dp"
                     android:layout_weight="1" />
@@ -64,7 +64,7 @@
 
                 <EditText
                     android:id="@+id/pointTravTxtAzBk"
-                    style="@style/PointValueTextStyle"
+                    style="@style/NumDecValueTextStyle"
                     android:layout_height="wrap_content"
                     android:layout_width="0dp"
                     android:layout_weight="1" />
@@ -106,7 +106,7 @@
                     android:layout_height="wrap_content"
                     android:layout_width="0dp"
                     android:layout_weight="1"
-                    style="@style/PointValueTextStyle"
+                    style="@style/NumDecValueTextStyle"
                     android:inputType="numberDecimal" />
 
                 <TextView
@@ -120,7 +120,7 @@
                     android:layout_height="wrap_content"
                     android:layout_width="0dp"
                     android:layout_weight="1"
-                    style="@style/PointValueTextStyle" />
+                    style="@style/NumDecValueTextStyle" />
             </TableRow>
 
             <TableRow>

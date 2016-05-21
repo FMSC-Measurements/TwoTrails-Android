@@ -8,7 +8,7 @@ import com.usda.fmsc.utilities.StringEx;
 
 import org.joda.time.DateTime;
 
-public class TtPanorama extends TtPicture {
+public class TtPanorama extends TtImage {
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
         @Override
         public Object createFromParcel(Parcel source) {
@@ -31,14 +31,14 @@ public class TtPanorama extends TtPicture {
     }
 
     public TtPanorama(String name, String filePath, DateTime timeCreated, String pointCN) {
-        this(name, filePath, StringEx.Empty, timeCreated, pointCN, 0, 0, 0);
+        this(name, filePath, StringEx.Empty, timeCreated, pointCN, null, null, null);
     }
 
     public TtPanorama(String name, String filePath, String comment, DateTime timeCreated, String pointCN) {
-        this(name, filePath, comment, timeCreated, pointCN, 0, 0, 0);
+        this(name, filePath, comment, timeCreated, pointCN, null, null, null);
     }
 
-    public TtPanorama(String name, String filePath, String comment, DateTime timeCreated, String pointCN, double azimuth, double pitch, double roll) {
+    public TtPanorama(String name, String filePath, String comment, DateTime timeCreated, String pointCN, Float azimuth, Float pitch, Float roll) {
         super(name, filePath, comment, timeCreated, pointCN, azimuth, pitch, roll);
     }
 

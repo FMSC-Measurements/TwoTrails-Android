@@ -241,6 +241,8 @@
     <string name="set_AUTO_OVERWRITE_PLOTGRID_ASK">AutoOverwritePlotGridAsk</string>
     <string name="set_AUTO_SET_GPS_NAME_TO_META_ASK">AutoSetGpsNameToMetaAsk</string>
     <string name="set_AUTO_OPEN_LAST_PROJECT">AutoOpenLastProject</string>
+    <string name="set_USE_TTCAMERA_ASK">UseTtCameraAsk</string>
+    <string name="set_USE_TTCAMERA">UseTtCamera</string>
 
     <string name="set_MAP_TRACKING_OPTION">MapTrackingOption</string>
     <string name="set_MAP_ZOOM_BUTTONS">MapZoomButtons</string>
@@ -373,7 +375,15 @@
     <string name="points_trav_slope_angle">Angle</string>
     <string name="points_trav_mag">Mag Dec</string>
     <string name="points_reset_diag">This will reset this point back to all its original values.</string>
+    <string name="points_camera_diag">This device can use the built in TwoTrails camera that can capture the direction of the camera when a photo is taken. Would you like to use it or another camera app?</string>
 
+    <!-- Points Media -->
+    <string name="pmd_name">Name</string>
+    <string name="pmd_pitch">Pitch</string>
+    <string name="pmd_roll">Roll</string>
+    <string name="pmd_azimuth">Azimuth</string>
+    <string name="pmd_file">File</string>
+    <string name="pmd_cmt">Comment</string>
 
     <!-- Acquire -->
     <string name="aqr_log">Log</string>
