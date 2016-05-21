@@ -11,11 +11,6 @@
         android:title="Drop Zeros"
         android:summary="Drop Empty Points" />
 
-    <com.usda.fmsc.android.preferences.SwitchCompatPreference
-        android:key="@string/set_MEDIA_COPY_TO_PROJECT"
-        android:title="Import Media To Project"
-        android:summary="Creates a copy of the imported media files inside the project folder" />
-
     <Preference
         android:title="Export Report"
         android:key="@string/set_EXPORT_REPORT"/>

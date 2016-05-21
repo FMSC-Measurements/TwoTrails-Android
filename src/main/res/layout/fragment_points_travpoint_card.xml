@@ -26,7 +26,7 @@
                 <!--android:layout_height="wrap_content">-->
 
                 <!--<android.support.v7.widget.CardView style="@style/cardStyle">-->
-                    <!--<include layout="@layout/point_trav"/>-->
+                    <!--<include layout="@layout/content_point_trav"/>-->
                 <!--</android.support.v7.widget.CardView>-->
             <!--</FrameLayout>-->
         <!--</ScrollView>-->
@@ -49,7 +49,7 @@
         android:layout_height="wrap_content">
 
         <android.support.v7.widget.CardView style="@style/cardStyle">
-            <include layout="@layout/point_trav"/>
+            <include layout="@layout/content_point_trav"/>
         </android.support.v7.widget.CardView>
     </FrameLayout>
 </ScrollView>

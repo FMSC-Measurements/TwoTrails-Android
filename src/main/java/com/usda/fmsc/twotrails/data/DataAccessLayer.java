@@ -12,7 +12,7 @@ import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
 import com.usda.fmsc.twotrails.objects.media.TtMedia;
-import com.usda.fmsc.twotrails.objects.media.TtPicture;
+import com.usda.fmsc.twotrails.objects.media.TtImage;
 import com.usda.fmsc.twotrails.objects.points.GpsPoint;
 import com.usda.fmsc.twotrails.objects.points.QuondamPoint;
 import com.usda.fmsc.twotrails.objects.points.TravPoint;
@@ -2452,7 +2452,7 @@ public class DataAccessLayer {
 
     //region Media
     //region Get
-    public ArrayList<TtPicture> getPictureByCN(String cn) {
+    public ArrayList<TtImage> getPictureByCN(String cn) {
         return getPictures(
                 String.format("%s.%s = '%s'",
                     TwoTrailsSchema.MediaSchema.TableName,
@@ -2461,7 +2461,7 @@ public class DataAccessLayer {
                 0);
     }
 
-    public ArrayList<TtPicture> getPicturesInPoint(String pointCN) {
+    public ArrayList<TtImage> getPicturesInPoint(String pointCN) {
         return getPictures(
                 String.format("%s = '%s'",
                         TwoTrailsSchema.MediaSchema.PointCN,
@@ -2469,7 +2469,7 @@ public class DataAccessLayer {
                 0);
     }
 
-    public ArrayList<TtPicture> getPicturesInPolygon(String polygonCN) {
+    public ArrayList<TtImage> getPicturesInPolygon(String polygonCN) {
         StringBuilder sb = new StringBuilder();
 
         for (String cn : getCNs(TwoTrailsSchema.PointSchema.TableName,
@@ -2483,7 +2483,7 @@ public class DataAccessLayer {
         return getPictures(sb.substring(0, sb.length() - 5), 0);
     }
 
-    public ArrayList<TtPicture> getPicturesInGroup(String groupCN) {
+    public ArrayList<TtImage> getPicturesInGroup(String groupCN) {
         StringBuilder sb = new StringBuilder();
 
         for (String cn : getCNs(TwoTrailsSchema.PointSchema.TableName,
@@ -2497,8 +2497,8 @@ public class DataAccessLayer {
         return getPictures(sb.substring(0, sb.length() - 5), 0);
     }
 
-    private ArrayList<TtPicture> getPictures(String where, int limit) {
-        ArrayList<TtPicture> pictures = new ArrayList<>();
+    private ArrayList<TtImage> getPictures(String where, int limit) {
+        ArrayList<TtImage> pictures = new ArrayList<>();
 
         try {
             String query = String.format("%s where %s = %d%s order by datetime(%s) asc %s",
@@ -2511,7 +2511,7 @@ public class DataAccessLayer {
 
             Cursor c = _db.rawQuery(query, null);
 
-            TtPicture pic;
+            TtImage pic;
 
             if (c.moveToFirst()) {
                 do {
@@ -2542,13 +2542,13 @@ public class DataAccessLayer {
                         pic.setComment(c.getString(6));
 
                     if (!c.isNull(8))
-                        pic.setAzimuth(c.getDouble(8));
+                        pic.setAzimuth(c.getFloat(8));
 
                     if (!c.isNull(9))
-                        pic.setPitch(c.getDouble(9));
+                        pic.setPitch(c.getFloat(9));
 
                     if (!c.isNull(10))
-                        pic.setRoll(c.getDouble(10));
+                        pic.setRoll(c.getFloat(10));
 
                     pictures.add(pic);
                 } while (c.moveToNext());
@@ -2606,7 +2606,7 @@ public class DataAccessLayer {
 
             switch (media.getMediaType()) {
                 case Picture:
-                    result = insertPictureData((TtPicture)media);
+                    result = insertPictureData((TtImage)media);
                     break;
                 case Video:
                     break;
@@ -2619,7 +2619,7 @@ public class DataAccessLayer {
         return result;
     }
 
-    private boolean insertPictureData(TtPicture picture) {
+    private boolean insertPictureData(TtImage picture) {
         try {
             ContentValues cvs = new ContentValues();
 
@@ -2678,7 +2678,7 @@ public class DataAccessLayer {
 
             switch (media.getMediaType()) {
                 case Picture:
-                    updatePictureData((TtPicture)media);
+                    updatePictureData((TtImage)media);
                     break;
                 case Video:
                     break;
@@ -2691,7 +2691,7 @@ public class DataAccessLayer {
         return true;
     }
 
-    private void updatePictureData(TtPicture picture) {
+    private void updatePictureData(TtImage picture) {
         try {
             ContentValues cvs = new ContentValues();
 
@@ -2721,7 +2721,7 @@ public class DataAccessLayer {
             if (success) {
                 switch (media.getMediaType()) {
                     case Picture:
-                        removePictureData((TtPicture)media);
+                        removePictureData((TtImage)media);
                         break;
                     case Video:
                         break;
@@ -2734,7 +2734,7 @@ public class DataAccessLayer {
         return success;
     }
     
-    private void removePictureData(TtPicture picture) {
+    private void removePictureData(TtImage picture) {
         try {
             _db.delete(TwoTrailsSchema.PictureSchema.TableName,
                     TwoTrailsSchema.SharedSchema.CN + "=?",

@@ -97,11 +97,15 @@
         <item name="android:selectAllOnFocus">true</item>
     </style>
 
-    <style name="PointValueTextStyle" parent="AutoSelectEditTextStyle">
+    <style name="NumDecValueTextStyle" parent="AutoSelectEditTextStyle">
         <item name="android:textSize">20sp</item>
         <item name="android:inputType">number|numberDecimal|numberSigned</item>
     </style>
 
+    <style name="TvEditTextStyleNoFocus" parent="@style/EditTextStyle">
+        <item name="android:focusable">false</item>
+        <item name="android:maxLines">1</item>
+    </style>
 
     <style name="CheckBoxStyle" parent="@android:style/Widget.Holo.Light.CompoundButton.CheckBox">
         <item name="colorPrimary">@color/primary</item>

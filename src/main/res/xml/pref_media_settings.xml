@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <com.usda.fmsc.android.preferences.SwitchCompatPreference
+        android:key="@string/set_MEDIA_COPY_TO_PROJECT"
+        android:title="Import Media To Project"
+        android:summary="Creates a copy of the imported media files inside the project folder" />
+
+    <com.usda.fmsc.android.preferences.SwitchCompatPreference
+        android:title="Use TwoTrails Camera"
+        android:key="@string/set_USE_TTCAMERA_ASK"
+        android:summary="Remember to use the TwoTrails Camera instead of another application to take pictures"/>
+</PreferenceScreen>

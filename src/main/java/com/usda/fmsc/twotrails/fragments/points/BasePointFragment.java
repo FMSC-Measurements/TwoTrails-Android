@@ -71,13 +71,9 @@ public abstract class BasePointFragment extends AnimationCardFragment implements
         ivOp = (ImageView)view.findViewById(R.id.pointHeaderIvOp);
         txtCmt = (EditText)view.findViewById(R.id.pointTxtCmt);
 
-        dOnBnd = AndroidUtils.UI.getDrawable(getContext(), R.drawable.ic_onbnd_dark);
-        dOffBnd = AndroidUtils.UI.getDrawable(getContext(), R.drawable.ic_offbnd_dark);
-
         //region set Values and Listeners
-        tvPID.setText(StringEx.toString(_Point.getPID()));
-        ibBnd.setImageDrawable(_Point.isOnBnd() ? dOnBnd : dOffBnd);
         ivOp.setImageDrawable(TtUtils.UI.getTtOpDrawable(_Point.getOp(), AppUnits.IconColor.Dark, getActivity()));
+        setView();
 
         ibBnd.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -86,7 +82,7 @@ public abstract class BasePointFragment extends AnimationCardFragment implements
 
                 String strBnd = onbnd ? sOnBnd : sOffBnd;
 
-                ibBnd.setImageDrawable(onbnd ? dOnBnd : dOffBnd);
+                ibBnd.setImageDrawable(getBndDrawable(onbnd));
                 ibBnd.setContentDescription(strBnd);
 
                 _Point.setOnBnd(onbnd);
@@ -178,21 +174,38 @@ public abstract class BasePointFragment extends AnimationCardFragment implements
 
     @Override
     public void onPointUpdated(TtPoint point) {
-        updating = true;
 
         _Point = point;
         _Metadata = activity.getMetadata(_Point.getMetadataCN());
-        tvPID.setText(StringEx.toString(point.getPID()));
-        if (!txtCmt.getText().toString().equals(_Point.getComment())) {
-            txtCmt.setText(_Point.getComment());
-        }
+        setView();
 
-        updating = false;
     }
 
     @Override
     public void onMediaUpdated(TtMedia media) {
         //
+    }
+
+    private void setView() {
+        updating = true;
+
+        tvPID.setText(StringEx.toString(_Point.getPID()));
+        txtCmt.setText(_Point.getComment());
+        ibBnd.setImageDrawable(getBndDrawable(_Point.isOnBnd()));
+
+        updating = false;
+    }
+
+    private Drawable getBndDrawable(boolean onBnd) {
+        if (onBnd) {
+            if (dOnBnd == null)
+                dOnBnd = AndroidUtils.UI.getDrawable(getContext(), R.drawable.ic_onbnd_dark);
+            return dOnBnd;
+        } else {
+            if (dOffBnd == null)
+                dOffBnd = AndroidUtils.UI.getDrawable(getContext(), R.drawable.ic_offbnd_dark);
+            return dOffBnd;
+        }
     }
 
     protected TtPoint getBasePoint() {

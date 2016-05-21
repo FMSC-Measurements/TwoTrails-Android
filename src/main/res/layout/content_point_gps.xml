@@ -7,7 +7,7 @@
 
     <include
         android:id="@+id/cardHeader"
-        layout="@layout/point_card_header" />
+        layout="@layout/content_point_card_header" />
 
     <View style="@style/ToolbarElevation3" android:layout_below="@id/cardHeader" />
 
@@ -51,7 +51,7 @@
                     <EditText
                         android:id="@+id/pointsFragGpsTxtX"
                         android:enabled="false"
-                        style="@style/PointValueTextStyle" />
+                        style="@style/NumDecValueTextStyle" />
 
                     <TextView android:text="@string/meas_meters" />
                 </TableRow>
@@ -69,7 +69,7 @@
                     <EditText
                         android:id="@+id/pointsFragGpsTxtY"
                         android:enabled="false"
-                        style="@style/PointValueTextStyle" />
+                        style="@style/NumDecValueTextStyle" />
                 </TableRow>
 
                 <TableRow
@@ -85,7 +85,7 @@
                     <EditText
                         android:id="@+id/pointsFragGpsTxtElev"
                         android:enabled="false"
-                        style="@style/PointValueTextStyle" />
+                        style="@style/NumDecValueTextStyle" />
 
                     <TextView android:id="@+id/pointsFragGpsTvElev" />
                 </TableRow>
@@ -109,7 +109,7 @@
                     <EditText
                         android:id="@+id/pointsFragGpsTvManAcc"
                         android:enabled="false"
-                        style="@style/PointValueTextStyle"
+                        style="@style/NumDecValueTextStyle"
                         android:inputType="number|numberDecimal" />
 
                     <TextView android:text="@string/meas_meters" />
