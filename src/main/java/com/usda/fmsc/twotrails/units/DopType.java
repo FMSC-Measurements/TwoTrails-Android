@@ -6,7 +6,7 @@ public enum DopType {
 
     private final int value;
 
-    private DopType(int value) {
+    DopType(int value) {
         this.value = value;
     }
 

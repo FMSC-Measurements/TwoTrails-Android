@@ -208,10 +208,12 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
                         value = ParseEx.parseDouble(s.toString());
                     }
 
-                    Double ma = _Polygon.getAccuracy();
+                    double ma = _Polygon.getAccuracy();
 
-                    if ((value == null ^ ma == null) ||
-                            value != null && !TtUtils.Math.cmpa(value, ma)) {
+                    if (value == null || !TtUtils.Math.cmpa(value, ma)) {
+                        if (value == null)
+                            value = Consts.Default_Point_Accuracy;
+
                         _Polygon.setAccuracy(value);
                         activity.updatePolygon(_Polygon);
                     }

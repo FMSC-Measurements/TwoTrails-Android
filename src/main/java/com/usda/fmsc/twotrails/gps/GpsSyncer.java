@@ -1,7 +1,5 @@
 package com.usda.fmsc.twotrails.gps;
 
-import java.util.ArrayList;
-
 public class GpsSyncer {
 
 
@@ -11,7 +9,7 @@ public class GpsSyncer {
     byte collectCount;
 
     String startString;
-    Long longestInterval = 0l;
+    Long longestInterval = 0L;
 
 
     public GpsSyncer() {

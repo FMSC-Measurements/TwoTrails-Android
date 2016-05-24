@@ -93,7 +93,6 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
     private static final String MAP_TYPE = "mapType";
     private static final String SELECT_MAP = "selectMap";
 
-
     //region Vars
     private GpsService.GpsBinder binder;
 
@@ -596,14 +595,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
     }
 
     protected IMultiMapFragment.MapOptions getMapStartLocation(MapType mapType, int terrainType) {
-        Extent extents = null;
-        //extents = Global.Settings.DeviceSettings.getLastViewedExtents();
-
-        if (extents == null) {
-            return new IMultiMapFragment.MapOptions(terrainType, Consts.Location.USA_BOUNDS, Consts.Location.PADDING);
-        }
-
-        return new IMultiMapFragment.MapOptions(terrainType, extents);
+        return new IMultiMapFragment.MapOptions(terrainType, Consts.Location.USA_BOUNDS, Consts.Location.PADDING);
     }
 
 
@@ -1054,7 +1046,6 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
         setupMasterPolyControl();
     }
 
-
     View layHeader, layContent;
     MultiStateTouchCheckBox tcbPoly, tcbAdjBnd, tcbAdjNav, tcbUnAdjBnd, tcbUnAdjNav,
             tcbAdjBndPts, tcbAdjNavPts, tcbUnAdjBndPts, tcbUnAdjNavPts,
@@ -1084,8 +1075,6 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
         tcbAdjMiscPts = (MultiStateTouchCheckBox)findViewById(R.id.mpcTcbAdjMiscPts);
         tcbUnadjMiscPts = (MultiStateTouchCheckBox)findViewById(R.id.mpcTcbUnadjMiscPts);
         tcbWayPts = (MultiStateTouchCheckBox)findViewById(R.id.mpcTcbWayPts);
-
-        //ibBndMenu = (ImageButton)findViewById(R.id.mpcIbBndMenu);
 
         tcbAdjBnd.setCheckBoxDrawable(new PolygonProgressDrawable(5, 90));
         tcbUnAdjBnd.setCheckBoxDrawable(new UnadjustedDrawable());
@@ -1402,45 +1391,44 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
     }
 
     public void btnFromPointClick(View view) {
-        if (fromPoly == null) {
+        if (fromPoly == null || !polyPoints.containsKey(fromPoly.getCN())) {
             Toast.makeText(this, "Select polygon first", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        ArrayList<TtPoint> points = polyPoints.get(fromPoly);
-
-        if (points.size() > 0) {
-            AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
-
-            dialogBuilder.setTitle(String.format("From Point in %s", fromPoly.getName()));
-            ListView listView = new ListView(this);
-
-            final PointDetailsAdapter pda = new PointDetailsAdapter(points, this, AppUnits.IconColor.Dark);
-            pda.setShowPolygonName(true);
-
-            listView.setAdapter(pda);
-
-            dialogBuilder.setView(listView);
-            dialogBuilder.setNegativeButton(R.string.str_cancel, null);
-
-            final AlertDialog dialog = dialogBuilder.create();
-
-            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                    fromPoint = pda.getPoint(i);
-                    btnFromPoint.setText(StringEx.toString(fromPoint.getPID()));
-                    calculateDir();
-                    dialog.dismiss();
-                }
-            });
-
-            dialog.show();
         } else {
-            fromPoint = null;
-            calculateDir();
+            ArrayList<TtPoint> points = polyPoints.get(fromPoly.getCN());
 
-            Toast.makeText(this, "No Points in Polygon", Toast.LENGTH_SHORT).show();
+            if (points.size() > 0) {
+                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+
+                dialogBuilder.setTitle(String.format("From Point in %s", fromPoly.getName()));
+                ListView listView = new ListView(this);
+
+                final PointDetailsAdapter pda = new PointDetailsAdapter(points, this, AppUnits.IconColor.Dark);
+                pda.setShowPolygonName(true);
+
+                listView.setAdapter(pda);
+
+                dialogBuilder.setView(listView);
+                dialogBuilder.setNegativeButton(R.string.str_cancel, null);
+
+                final AlertDialog dialog = dialogBuilder.create();
+
+                listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                        fromPoint = pda.getPoint(i);
+                        btnFromPoint.setText(StringEx.toString(fromPoint.getPID()));
+                        calculateDir();
+                        dialog.dismiss();
+                    }
+                });
+
+                dialog.show();
+            } else {
+                fromPoint = null;
+                calculateDir();
+
+                Toast.makeText(this, "No Points in Polygon", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -1480,12 +1468,12 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
     }
 
     public void btnToPointClick(View view) {
-        if (toPoly == null) {
+        if (toPoly == null || !polyPoints.containsKey(toPoly.getCN())) {
             Toast.makeText(this, "Select polygon first", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        ArrayList<TtPoint> points = polyPoints.get(toPoly);
+        ArrayList<TtPoint> points = polyPoints.get(toPoly.getCN());
 
         if (points.size() > 0) {
             AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);

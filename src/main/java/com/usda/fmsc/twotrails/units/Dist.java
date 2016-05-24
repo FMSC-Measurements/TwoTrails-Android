@@ -9,7 +9,7 @@ public enum Dist {
 
     private final int value;
 
-    private Dist(int value) {
+    Dist(int value) {
         this.value = value;
     }
 

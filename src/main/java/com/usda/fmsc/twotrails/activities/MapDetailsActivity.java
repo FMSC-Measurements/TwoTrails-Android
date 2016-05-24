@@ -25,7 +25,6 @@ import com.usda.fmsc.twotrails.utilities.ArcGISTools;
 import com.usda.fmsc.utilities.IListener;
 import com.usda.fmsc.utilities.StringEx;
 
-//TODO Display Details
 public class MapDetailsActivity extends CustomToolbarActivity {
     ArcGisMapLayer arcGisMapLayer, agmlBackup;
     ImageView ivStatusIcon;

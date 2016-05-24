@@ -9,7 +9,7 @@ public enum GoogleMapType {
 
     private final int value;
 
-    private GoogleMapType(int value) {
+    GoogleMapType(int value) {
         this.value = value;
     }
 

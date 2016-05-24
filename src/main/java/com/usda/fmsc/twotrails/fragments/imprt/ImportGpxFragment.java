@@ -157,28 +157,8 @@ public class ImportGpxFragment extends BaseImportFragment {
         if (selector.getSelectionCount() < 1) {
             Toast.makeText(getContext(), "No Polygons selected", Toast.LENGTH_SHORT).show();
             return false;
-        } else if (!validateParams()) {
-            return false;
         }
 
-        return true;
-    }
-
-    private boolean validateParams() {
-            /*
-        for (GpxTracksAdapter.GpxBaseTrackHolder holder : polyParams) {
-
-            if (gpp.PointStartIndex != null && gpp.PointStartIndex < 0) {
-
-            }
-                    (StringEx.isEmpty(gpp.PolyName)) ||
-                    (gpp.IncrementAmount != null && gpp.IncrementAmount < 1) ||
-                    (gpp.Polygon == null) ||
-                    (gpp.Accuracy != null && gpp.Accuracy < 0) ||
-                    (gpp.Metadata == null)) {
-            }
-        }
-    */
         return true;
     }
 
@@ -195,7 +175,6 @@ public class ImportGpxFragment extends BaseImportFragment {
 
     private void scrollToPositionAndExpand(GpxTracksAdapter.GpxBaseTrackHolder holder) {
         rvImport.smoothScrollToPosition(holder.getLayoutPosition());
-        holder.expand();
     }
 
     @Override

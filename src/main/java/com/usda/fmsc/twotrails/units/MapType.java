@@ -7,7 +7,7 @@ public enum MapType {
 
     private final int value;
 
-    private MapType(int value) {
+    MapType(int value) {
         this.value = value;
     }
 

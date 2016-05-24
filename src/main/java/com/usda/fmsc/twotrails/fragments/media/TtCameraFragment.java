@@ -2,7 +2,6 @@ package com.usda.fmsc.twotrails.fragments.media;
 
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.media.ExifInterface;
 import android.media.Image;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -14,7 +13,6 @@ import com.usda.fmsc.twotrails.objects.media.TtImage;
 import com.usda.fmsc.twotrails.objects.media.TtPanorama;
 import com.usda.fmsc.twotrails.units.PictureType;
 import com.usda.fmsc.utilities.FileUtils;
-import com.usda.fmsc.utilities.kml.Point;
 
 import org.joda.time.DateTime;
 

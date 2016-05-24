@@ -315,14 +315,15 @@ public class DataAccessLayer {
         return null;
     }
 
-    //TODO optimize and order select statement
     private ArrayList<TtPolygon> getPolygons(String where) {
         ArrayList<TtPolygon> polys = new ArrayList<>();
 
         try {
-            String query = String.format("select * from %s%s order by datetime(%s) asc",
-                    TwoTrailsSchema.PolygonSchema.TableName,
-                    StringEx.isEmpty(where) ? StringEx.Empty : String.format(" where %s", where),
+            String query = String.format("%s order by datetime(%s) asc",
+                    createSelectQuery(
+                            TwoTrailsSchema.PolygonSchema.TableName,
+                            TwoTrailsSchema.PolygonSchema.SelectItems,
+                            where),
                     TwoTrailsSchema.PolygonSchema.TimeCreated);
 
             Cursor c = _db.rawQuery(query, null);
@@ -524,13 +525,13 @@ public class DataAccessLayer {
         return getPoints(where, 0);
     }
 
-    //TODO optimize and order select statement and use left join
     @Nullable
     private ArrayList<TtPoint> getPoints(String where, int limit) {
         ArrayList<TtPoint> points = new ArrayList<>();
 
         try {
-            String query = String.format("select * from %s%s order by %s, %s %s",
+            String query = String.format("select %s from %s%s order by %s, %s %s",
+                    TwoTrailsSchema.PointSchema.SelectItems,
                     TwoTrailsSchema.PointSchema.TableName,
                     StringEx.isEmpty(where) ? StringEx.Empty : String.format(" where %s", where),
                     TwoTrailsSchema.PointSchema.PolyName,
@@ -645,7 +646,8 @@ public class DataAccessLayer {
         GpsPoint g = (GpsPoint)point;
 
         try {
-            String query = String.format("select * from %s where %s = '%s'",
+            String query = String.format("select %s from %s where %s = '%s'",
+                    TwoTrailsSchema.GpsPointSchema.SelectItems,
                     TwoTrailsSchema.GpsPointSchema.TableName,
                     TwoTrailsSchema.SharedSchema.CN,
                     g.getCN());
@@ -675,7 +677,8 @@ public class DataAccessLayer {
         TravPoint t = (TravPoint)point;
 
         try {
-            String query = String.format("select * from %s where %s = '%s'",
+            String query = String.format("select %s from %s where %s = '%s'",
+                    TwoTrailsSchema.TravPointSchema.SelectItems,
                     TwoTrailsSchema.TravPointSchema.TableName,
                     TwoTrailsSchema.SharedSchema.CN,
                     t.getCN());
@@ -705,7 +708,8 @@ public class DataAccessLayer {
         QuondamPoint q = (QuondamPoint)point;
 
         try {
-            String query = String.format("select * from %s where %s = '%s'",
+            String query = String.format("select %s from %s where %s = '%s'",
+                    TwoTrailsSchema.QuondamPointSchema.SelectItems,
                     TwoTrailsSchema.QuondamPointSchema.TableName,
                     TwoTrailsSchema.SharedSchema.CN,
                     q.getCN());
@@ -1316,12 +1320,15 @@ public class DataAccessLayer {
         return null;
     }
 
-    //TODO optimize and order select statement
     private ArrayList<TtMetadata> getMetadata(String where) {
         ArrayList<TtMetadata> metas = new ArrayList<>();
 
         try {
-            String query = createSelectAllQuery(TwoTrailsSchema.MetadataSchema.TableName, where);
+            String query = createSelectQuery(
+                    TwoTrailsSchema.MetadataSchema.TableName,
+                    TwoTrailsSchema.MetadataSchema.SelectItems,
+                    where);
+
 
             Cursor c = _db.rawQuery(query, null);
 
@@ -1523,12 +1530,15 @@ public class DataAccessLayer {
             return null;
     }
 
-    //TODO optimize and order select statement
     private ArrayList<TtGroup> getGroups(String where) {
         ArrayList<TtGroup> groups = new ArrayList<>();
 
         try {
-            String query = createSelectAllQuery(TwoTrailsSchema.GroupSchema.TableName, where);
+
+            String query = createSelectQuery(
+                            TwoTrailsSchema.GroupSchema.SelectItems,
+                            TwoTrailsSchema.GroupSchema.TableName,
+                            where);
 
             Cursor c = _db.rawQuery(query, null);
 
@@ -1665,12 +1675,14 @@ public class DataAccessLayer {
                 pointCN));
     }
 
-    //TODO optimize and order select statement
     public ArrayList<TtNmeaBurst> getNmeaBursts(String where) {
         ArrayList<TtNmeaBurst> nmeas = new ArrayList<>();
 
         try {
-            String query = createSelectAllQuery(TwoTrailsSchema.TtNmeaSchema.TableName, where);
+            String query = createSelectQuery(
+                    TwoTrailsSchema.TtNmeaSchema.TableName,
+                    TwoTrailsSchema.TtNmeaSchema.SelectItems,
+                    where);
 
             Cursor c = _db.rawQuery(query, null);
 
@@ -1689,7 +1701,6 @@ public class DataAccessLayer {
                     GGASentence.GpsFixType fixQuality;
                     int trackedSatellites, numberOfSatellitesInView;
                     UomElevation geoUom;
-                    //List<Satellite> satellites;
 
                     double lat, lon, elev;
                     NorthSouth latDir;
@@ -1824,8 +1835,6 @@ public class DataAccessLayer {
                     //endregion
 
                     //region SatInfo
-                    //24 not needed
-
                     if (!c.isNull(25))
                         trackedSatellites = c.getInt(25);
                     else
@@ -1843,28 +1852,11 @@ public class DataAccessLayer {
                             satsUsed.add(ParseEx.parseInteger(prn));
                         }
                     }
-
-//                    satellites = new ArrayList<>();
-//
-//                    try {
-//                        for (int i = 28; i < 76; i += 4) {
-//                            if (!c.isNull(i) && !c.isNull(i + 1) && !c.isNull(i + 2) && !c.isNull(i + 3)) {
-//                                satellites.add(new Satellite(
-//                                    c.getInt(i),
-//                                    c.getFloat(i + 1),
-//                                    c.getFloat(i + 2),
-//                                    c.getFloat(i + 3)
-//                                ));
-//                            }
-//                        }
-//                    } catch (Exception e) {
-//                        e.printStackTrace();
-//                    }
                     //endregion
 
                     nmeas.add(new TtNmeaBurst(cn, timeCreated, pointCN, used, new GeoPosition(lat, latDir, lon, lonDir, elev, uomelev), fixTime, groundSpeed,
                             trackAngle, magVar, magVarDir, mode, fix, satsUsed, pdop, hdop, vdop, fixQuality,
-                            trackedSatellites, horizDilution, geoidHeight, geoUom, numberOfSatellitesInView));//, satellites
+                            trackedSatellites, horizDilution, geoidHeight, geoUom, numberOfSatellitesInView));
                 } while (c.moveToNext());
             }
 
@@ -1951,7 +1943,7 @@ public class DataAccessLayer {
             cvs.put(TwoTrailsSchema.TtNmeaSchema.GeiodHeight, burst.getGeoidHeight());
             cvs.put(TwoTrailsSchema.TtNmeaSchema.GeiodHeightUom, burst.getGeoUom().toStringAbv());
             cvs.put(TwoTrailsSchema.TtNmeaSchema.GroundSpeed, burst.getGroundSpeed());
-            cvs.put(TwoTrailsSchema.TtNmeaSchema.Track_Angle, burst.getTrackAngle());
+            cvs.put(TwoTrailsSchema.TtNmeaSchema.TrackAngle, burst.getTrackAngle());
 
             cvs.put(TwoTrailsSchema.TtNmeaSchema.SatellitesUsedCount, burst.getUsedSatellitesCount());
             cvs.put(TwoTrailsSchema.TtNmeaSchema.SatellitesTrackedCount, burst.getTrackedSatellitesCount());
@@ -2049,7 +2041,7 @@ public class DataAccessLayer {
             cvs.put(TwoTrailsSchema.TtNmeaSchema.GeiodHeight, burst.getGeoidHeight());
             cvs.put(TwoTrailsSchema.TtNmeaSchema.GeiodHeightUom, burst.getGeoUom().toStringAbv());
             cvs.put(TwoTrailsSchema.TtNmeaSchema.GroundSpeed, burst.getGroundSpeed());
-            cvs.put(TwoTrailsSchema.TtNmeaSchema.Track_Angle, burst.getTrackAngle());
+            cvs.put(TwoTrailsSchema.TtNmeaSchema.TrackAngle, burst.getTrackAngle());
 
             cvs.put(TwoTrailsSchema.TtNmeaSchema.SatellitesUsedCount, burst.getUsedSatellitesCount());
             cvs.put(TwoTrailsSchema.TtNmeaSchema.SatellitesTrackedCount, burst.getTrackedSatellitesCount());
@@ -2272,8 +2264,7 @@ public class DataAccessLayer {
 
     //region Polygon Attr
     //region Get
-    public ArrayList<PolygonGraphicOptions> getPolygonGraphicOptions()
-    {
+    public ArrayList<PolygonGraphicOptions> getPolygonGraphicOptions() {
         return getPolygonGraphicOptions(null);
     }
 
@@ -2287,17 +2278,16 @@ public class DataAccessLayer {
             return null;
     }
 
-    //TODO optimize and order select statement
     private ArrayList<PolygonGraphicOptions> getPolygonGraphicOptions(String where) {
         ArrayList<PolygonGraphicOptions> graphicOptions = new ArrayList<>();
 
         try {
-            String query = createSelectAllQuery(TwoTrailsSchema.GroupSchema.TableName, where);
+            String query = createSelectQuery(
+                    TwoTrailsSchema.PolygonAttrSchema.TableName,
+                    TwoTrailsSchema.PolygonAttrSchema.SelectItems,
+                    where);
 
             Cursor c = _db.rawQuery(query, null);
-
-            PolygonGraphicOptions master = Global.MapSettings.getMasterPolyGraphicOptions();
-
             String cn;
             int adjbnd, unadjbnd, adjnav, unadjnav, adjpts, unadjpts, waypts;
 
@@ -2312,42 +2302,43 @@ public class DataAccessLayer {
                     if (!c.isNull(1))
                         adjbnd = c.getInt(1);
                     else
-                        adjbnd = master.getAdjBndColor();
+                        adjbnd = Global.MapSettings.defaults.getDefaultAdjBndColor();
 
                     if (!c.isNull(2))
                         unadjbnd = c.getInt(2);
                     else
-                        unadjbnd = master.getUnAdjBndColor();
+                        unadjbnd = Global.MapSettings.defaults.getDefaultUnAdjBndColor();
 
                     if (!c.isNull(3))
                         adjnav = c.getInt(3);
                     else
-                        adjnav = master.getAdjNavColor();
+                        adjnav = Global.MapSettings.defaults.getDefaultAdjNavColor();
 
                     if (!c.isNull(4))
                         unadjnav = c.getInt(4);
                     else
-                        unadjnav = master.getUnAdjNavColor();
+                        unadjnav = Global.MapSettings.defaults.getDefaultUnAdjNavColor();
 
                     if (!c.isNull(5))
                         adjpts = c.getInt(5);
                     else
-                        adjpts = master.getAdjPtsColor();
+                        adjpts = Global.MapSettings.defaults.getDefaultAdjPtsColor();
 
                     if (!c.isNull(6))
                         unadjpts = c.getInt(6);
                     else
-                        unadjpts = master.getUnAdjPtsColor();
+                        unadjpts = Global.MapSettings.defaults.getDefaultUnAdjPtsColor();
 
                     if (!c.isNull(7))
                         waypts = c.getInt(7);
                     else
-                        waypts = master.getWayPtsColor();
+                        waypts = Global.MapSettings.defaults.getDefaultWayPtsColor();
 
                     graphicOptions.add(
                             new PolygonGraphicOptions(cn,
                                     adjbnd, unadjbnd, adjnav, unadjnav, adjpts, unadjpts, waypts,
-                                    master.getAdjWidth(), master.getUnAdjWidth())
+                                    Global.Settings.DeviceSettings.getMapAdjLineWidth(),
+                                    Global.Settings.DeviceSettings.getMapUnAdjLineWidth())
                     );
                 } while (c.moveToNext());
             }
@@ -2364,7 +2355,7 @@ public class DataAccessLayer {
 
     public HashMap<String, PolygonGraphicOptions> getPolygonGraphicOptionsMap() {
         HashMap<String, PolygonGraphicOptions> pgos = new HashMap<>();
-        for(PolygonGraphicOptions pgo : getPolygonGraphicOptions()) {
+        for (PolygonGraphicOptions pgo : getPolygonGraphicOptions()) {
             pgos.put(pgo.getCN(), pgo);
         }
         return  pgos;
@@ -2748,6 +2739,12 @@ public class DataAccessLayer {
 
 
     //region DbTools
+    private String createSelectQuery(String table, String items, String where) {
+        return String.format("select %s from %s%s",
+                items, table, StringEx.isEmpty(where) ? StringEx.Empty : String.format(" where %s", where));
+    }
+
+
     private String createSelectAllQuery(String table, String where) {
         return String.format("select * from %s%s",
                 table, StringEx.isEmpty(where) ?

@@ -25,7 +25,7 @@ public class TtGroup extends TtObject {
 
         private final int value;
 
-        private GroupType(int value) {
+        GroupType(int value) {
             this.value = value;
         }
 

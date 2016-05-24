@@ -36,7 +36,6 @@ public class EditableListDialog extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        //Dialog d = super.onCreateDialog(savedInstanceState);
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
         LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -54,7 +53,7 @@ public class EditableListDialog extends DialogFragment {
         editText.setSelection(selectedItem.length());
 
         final ListView listView = (ListView)view.findViewById(R.id.diagEitableListListValues);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.list_row_diag_editable);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), R.layout.list_row_diag_editable);
 
 
         adapter.addAll(items);

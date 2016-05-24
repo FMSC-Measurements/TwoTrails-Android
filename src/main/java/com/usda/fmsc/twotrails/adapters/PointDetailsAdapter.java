@@ -59,7 +59,7 @@ public class PointDetailsAdapter extends BaseAdapter {
         ViewHolder mViewHolder;
 
         if(convertView == null) {
-            convertView = inflater.inflate(R.layout.content_details_points_ops, null);
+            convertView = inflater.inflate(R.layout.content_details_points_ops, parent, false);
             mViewHolder = new ViewHolder();
             convertView.setTag(mViewHolder);
 

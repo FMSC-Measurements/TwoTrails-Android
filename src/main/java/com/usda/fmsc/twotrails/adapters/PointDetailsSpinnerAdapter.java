@@ -84,7 +84,7 @@ public class PointDetailsSpinnerAdapter extends BaseAdapter {
         DropDownViewHolder mViewHolder;
 
         if(convertView == null) {
-            convertView = inflater.inflate(R.layout.content_details_points_ops, null);
+            convertView = inflater.inflate(R.layout.content_details_points_ops, parent, false);
             mViewHolder = new DropDownViewHolder();
             convertView.setTag(mViewHolder);
 

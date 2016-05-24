@@ -9,7 +9,7 @@ public enum Datum {
 
     private final int value;
 
-    private Datum(int value) {
+    Datum(int value) {
         this.value = value;
     }
 

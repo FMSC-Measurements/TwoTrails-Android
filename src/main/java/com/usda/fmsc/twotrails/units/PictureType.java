@@ -7,7 +7,7 @@ public enum PictureType {
 
     private final int value;
 
-    private PictureType(int value) {
+    PictureType(int value) {
         this.value = value;
     }
 
@@ -42,5 +42,4 @@ public enum PictureType {
             default: throw new IllegalArgumentException();
         }
     }
-
-    }
+}

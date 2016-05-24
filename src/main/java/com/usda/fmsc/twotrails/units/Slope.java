@@ -6,7 +6,7 @@ public enum Slope {
 
     private final int value;
 
-    private Slope(int value) {
+    Slope(int value) {
         this.value = value;
     }
 

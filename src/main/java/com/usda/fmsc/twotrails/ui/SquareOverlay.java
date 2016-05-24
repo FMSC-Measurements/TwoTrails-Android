@@ -2,13 +2,11 @@ package com.usda.fmsc.twotrails.ui;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.View;
 
 import com.usda.fmsc.android.AndroidUtils;
-import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.twotrails.R;
 
 public class SquareOverlay extends View {

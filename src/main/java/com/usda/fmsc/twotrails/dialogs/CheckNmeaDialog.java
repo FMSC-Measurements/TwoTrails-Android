@@ -28,7 +28,6 @@ public class CheckNmeaDialog extends DialogFragment implements GpsService.Listen
     GpsService.GpsBinder binder;
     ListView lvNmea;
 
-    List<String> tids = new ArrayList<>();
     NmeaDetailsAdapter adapter;
     List<NmeaDetailsAdapter.NmeaDetails> nmeaDetails;
     HashMap<String, NmeaDetailsAdapter.NmeaDetails> nmeaDetailsMap;

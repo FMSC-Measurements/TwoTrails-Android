@@ -57,7 +57,7 @@ public class GPSPointFragment extends BasePointFragment {
 
     @Override
     public View onCreateViewEx(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_points_gpspoint_card, null);
+        View view = inflater.inflate(R.layout.fragment_points_gpspoint_card, container, false);
 
         txtX = (EditText)view.findViewById(R.id.pointsFragGpsTxtX);
         txtY = (EditText)view.findViewById(R.id.pointsFragGpsTxtY);

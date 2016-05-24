@@ -133,16 +133,6 @@ public class GpxTracksAdapter extends RecyclerViewEx.AdapterEx<SimpleMultiSelect
 
         abstract int getPointCount(GpxBaseTrack track);
 
-
-
-        public void expand() {
-
-        }
-
-        public void collapse() {
-
-        }
-
         public String getName() {
             return tvName.getText().toString();
         }

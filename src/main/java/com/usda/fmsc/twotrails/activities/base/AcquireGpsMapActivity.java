@@ -37,9 +37,6 @@ import com.usda.fmsc.utilities.StringEx;
 import java.util.ArrayList;
 
 public class AcquireGpsMapActivity extends BaseMapActivity {
-    public static final int GPS_NOT_FOUND = 1910;
-    public static final int GPS_NOT_CONFIGURED = 1911;
-
     private static final String nVal = "*";
 
     private TextView tvGpsStatus, tvGpsMode, tvLat, tvLon, tvUtmX, tvUtmY,
@@ -68,7 +65,7 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
 
         if (!Global.Settings.DeviceSettings.isGpsConfigured()) {
             canceling = true;
-            setResult(GPS_NOT_CONFIGURED);
+            setResult(Consts.Codes.Results.GPS_NOT_CONFIGURED);
             finish();
             return;
         }
@@ -408,10 +405,12 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
             if (!gpsExtraLayoutSet) {
                 RelativeLayout lay = (RelativeLayout) findViewById(R.id.gpsInfoLaySatInfoSub);
 
-                lay.getLayoutParams().width = lay.getWidth();
-                lay.getLayoutParams().height = lay.getHeight();
-                lay.requestLayout();
-                gpsExtraLayoutSet = true;
+                if (lay != null) {
+                    lay.getLayoutParams().width = lay.getWidth();
+                    lay.getLayoutParams().height = lay.getHeight();
+                    lay.requestLayout();
+                    gpsExtraLayoutSet = true;
+                }
             }
 
             if (animate) {

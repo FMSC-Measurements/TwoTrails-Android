@@ -1,6 +1,5 @@
 package com.usda.fmsc.twotrails.logic;
 
-
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
 
@@ -63,5 +62,4 @@ public class PointNamer {
             }
         }
     }
-
 }

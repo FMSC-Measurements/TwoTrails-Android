@@ -6,7 +6,7 @@ public enum DeclinationType {
 
     private final int value;
 
-    private DeclinationType(int value) {
+    DeclinationType(int value) {
         this.value = value;
     }
 

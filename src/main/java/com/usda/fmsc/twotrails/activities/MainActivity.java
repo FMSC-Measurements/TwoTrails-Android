@@ -395,17 +395,22 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
     private void duplicateFile(final String fileName) {
         if (Global.getDAL().duplicate(fileName)) {
-            Snackbar snackbar = Snackbar.make(findViewById(R.id.parent), "File duplicated", Snackbar.LENGTH_LONG).setAction("Open", new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    openFile(fileName);
-                }
-            })
-            .setActionTextColor(AndroidUtils.UI.getColor(getBaseContext(), R.color.primaryLighter));
+            View view = findViewById(R.id.parent);
+            if (view != null) {
+                Snackbar snackbar = Snackbar.make(view, "File duplicated", Snackbar.LENGTH_LONG).setAction("Open", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        openFile(fileName);
+                    }
+                })
+                .setActionTextColor(AndroidUtils.UI.getColor(getBaseContext(), R.color.primaryLighter));
 
-            AndroidUtils.UI.setSnackbarTextColor(snackbar, Color.WHITE);
+                AndroidUtils.UI.setSnackbarTextColor(snackbar, Color.WHITE);
 
-            snackbar.show();
+                snackbar.show();
+            } else {
+                Toast.makeText(this, "File duplicated", Toast.LENGTH_SHORT).show();
+            }
         } else {
             Toast.makeText(this, "File failed to duplicate", Toast.LENGTH_SHORT).show();
         }

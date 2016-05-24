@@ -650,7 +650,6 @@ public class PointsActivity extends CustomToolbarActivity {
                     if (_CurrentMedia != null && _CurrentMedia.getMediaType() == MediaType.Picture &&
                             (slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED ||
                                     slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.ANCHORED)) {
-                        //TODO implement custom gallery that shows media details
                         Intent intent = new Intent();
                         intent.setAction(Intent.ACTION_VIEW);
                         intent.setDataAndType(Uri.parse("file://" + _CurrentMedia.getFilePath()), "image/*");

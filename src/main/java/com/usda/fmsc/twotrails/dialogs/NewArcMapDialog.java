@@ -27,11 +27,8 @@ import com.usda.fmsc.twotrails.activities.GetMapExtentsActivity;
 import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
 import com.usda.fmsc.twotrails.ui.CheckMarkAnimatedView;
 import com.usda.fmsc.twotrails.utilities.ArcGISTools;
-import com.usda.fmsc.twotrails.utilities.TtUtils;
 import com.usda.fmsc.utilities.FileUtils;
 import com.usda.fmsc.utilities.StringEx;
-
-import java.io.File;
 
 import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
 

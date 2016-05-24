@@ -149,9 +149,7 @@ public class QuondamPoint extends TtPoint implements TtPoint.IManualAccuracy {
 
     @Override
     public boolean isCalculated() {
-        if(_ParentPoint == null)
-            return false;
-        return _calculated && _ParentPoint.isCalculated();
+        return _ParentPoint != null && _calculated && _ParentPoint.isCalculated();
     }
 
     @Override

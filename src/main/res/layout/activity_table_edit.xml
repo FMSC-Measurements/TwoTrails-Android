@@ -35,7 +35,7 @@
             android:layout_centerVertical="true"
             android:background="@color/primaryLight"
             android:elevation="10dp"
-            android:src="@drawable/ic_poly"
+            android:src="@drawable/ic_polygon_white_36dp"
             android:adjustViewBounds="true"
             android:contentDescription="@string/str_polygons"
             android:onClick="btnTePolys"/>

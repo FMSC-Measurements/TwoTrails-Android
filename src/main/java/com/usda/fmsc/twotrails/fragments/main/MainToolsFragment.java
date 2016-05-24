@@ -12,19 +12,17 @@ import com.usda.fmsc.twotrails.R;
 
 
 public class MainToolsFragment extends Fragment {
-    Button btnMap, btnGEarth, btnHAID, btnExport,
-            btnPlotGrid, btnMultiPoint, btnGpsLogger;
-    View viewTest;
+    private Button btnMap, btnGEarth, btnHAID, btnExport,
+            btnPlotGrid, btnGpsLogger;
+    private View viewTest;
 
-    boolean enabled = false, viewExists = false;
+    private boolean enabled = false, viewExists = false;
 
     public static MainToolsFragment newInstance() {
         return new MainToolsFragment();
     }
 
-    public MainToolsFragment() {
-        // Required empty public constructor
-    }
+    public MainToolsFragment() { }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -41,7 +39,6 @@ public class MainToolsFragment extends Fragment {
         btnHAID = (Button)view.findViewById(R.id.mainFragToolsBtnHAID);
         btnExport = (Button)view.findViewById(R.id.mainFragToolsBtnExport);
         btnPlotGrid = (Button)view.findViewById(R.id.mainFragToolsBtnPlotGrid);
-        btnMultiPoint = (Button)view.findViewById(R.id.mainFragToolsBtnMultiEdit);
         btnGpsLogger = (Button)view.findViewById(R.id.mainFragToolsBtnGpsLogger);
         viewTest = view.findViewById(R.id.mainFragToolsTest);
 
@@ -66,7 +63,6 @@ public class MainToolsFragment extends Fragment {
             btnHAID.setEnabled(enable);
             btnExport.setEnabled(enable);
             btnPlotGrid.setEnabled(enable);
-            //btnMultiPoint.setEnabled(enable);
             btnGpsLogger.setEnabled(enable);
 
             if (Global.Settings.DeviceSettings.isDeveloperOptionsEnabled()) {
