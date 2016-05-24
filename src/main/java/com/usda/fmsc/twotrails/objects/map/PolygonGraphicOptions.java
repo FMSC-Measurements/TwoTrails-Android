@@ -1,6 +1,7 @@
 package com.usda.fmsc.twotrails.objects.map;
 
 import android.support.annotation.ColorInt;
+import android.support.annotation.Size;
 
 import java.util.ArrayList;
 
@@ -184,11 +185,24 @@ public class PolygonGraphicOptions {
     }
 
 
+    public @Size(7) @ColorInt int[] getColors() {
+        return new int[] {
+                AdjBndColor,
+                AdjNavColor,
+                UnAdjBndColor,
+                UnAdjNavColor,
+                AdjPtsColor,
+                UnAdjPtsColor,
+                WayPtsColor
+        };
+    }
+
     private void onColorChange(GraphicCode code, @ColorInt int value) {
         for (Listener listener : listeners) {
             listener.onOptionChanged(this, code, value);
         }
     }
+
 
     public void addListener(Listener listener) {
         if (!listeners.contains(listener)){

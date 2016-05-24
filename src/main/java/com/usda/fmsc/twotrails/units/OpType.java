@@ -11,7 +11,7 @@ public enum OpType {
 
     private final int value;
 
-    private OpType(int value) {
+    OpType(int value) {
         this.value = value;
     }
 

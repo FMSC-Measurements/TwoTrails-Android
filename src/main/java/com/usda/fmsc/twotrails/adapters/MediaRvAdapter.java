@@ -67,7 +67,6 @@ public class MediaRvAdapter extends SelectableAdapterEx<TtMedia, SelectableAdapt
                 return new ImageViewHolder(inflater.inflate(R.layout.content_point_media_thumbnail, parent, false));
             }
             case VIDEO: {
-                //TODO implement video ViewHolder
                 break;
             }
         }

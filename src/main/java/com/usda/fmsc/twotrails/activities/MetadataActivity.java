@@ -525,7 +525,6 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
                                 ArrayList<TtPoint> points = Global.getDAL().getGpsTypePointsWithMeta(_CurrentMetadata.getCN());
 
                                 if (points.size() > 0) {
-                                    TtPoint point;
                                     for (int i = 0; i < points.size(); i++) {
                                         points.set(i, TtUtils.reCalculateGps(points.get(i), zone, Global.getDAL(), null));
                                     }

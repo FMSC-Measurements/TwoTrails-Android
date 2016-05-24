@@ -492,7 +492,7 @@ public class Global {
                 return prefs.getFloat(settingName, defaultValue);
             }
 
-            protected static boolean setFlaot(String settingName, float value) {
+            protected static boolean setFloat(String settingName, float value) {
                 if(editor == null)
                     loadPrefs();
                 return editor.putFloat(settingName, value).commit();
@@ -625,9 +625,6 @@ public class Global {
             public static final boolean DEFAULT_WALK_SHOW_ALL_POINTS_ON_MAP = true;
 
             public static final boolean DEFAULT_AUTO_OPEN_LAST_PROJECT = true;
-
-            public static final int DEFAULT_POINT_ACCURACY = 6;
-            public static final double MIN_POINT_ACCURACY = 0.0001;
 
             public static final boolean DEFAULT_GPS_LOG_BURST_DETAILS = false;
 
@@ -824,24 +821,6 @@ public class Global {
             public static void setRangeFinderDeviceName(String value) {
                 setString(LASER_DEVICE_NAME, value);
             }
-
-            /*
-            public static String getRangeFinderPort() {
-                return getString(LASER_PORT);
-            }
-
-            public static void setRangeFinderPort(String value) {
-                setString(LASER_PORT, value);
-            }
-
-            public static int getRangeFinderBaud() {
-                return getInt(LASER_BAUD);
-            }
-
-            public static void setRangeFinderBaud(int value) {
-                setInt(LASER_BAUD, value);
-            }
-            */
             //endregion
 
             //region Filters
@@ -1650,6 +1629,57 @@ public class Global {
         private static HashMap<String, PolygonGraphicOptions> _PolyGraphicOptions = new HashMap<>();
         private static PolygonGraphicOptions _MasterPolyGraphicOptions;
 
+        public static class defaults {
+            private static @ColorInt Integer adjBnd;
+            public static @ColorInt int getDefaultAdjBndColor() {
+                if (adjBnd == null)
+                    adjBnd = AndroidUtils.UI.getColor(getApplicationContext(), R.color.map_adj_bnd);
+                return adjBnd;
+            }
+
+            private static @ColorInt Integer adjNav;
+            public static @ColorInt int getDefaultAdjNavColor() {
+                if (adjNav == null)
+                    adjNav = AndroidUtils.UI.getColor(getApplicationContext(), R.color.map_adj_nav);
+                return adjNav;
+            }
+
+            private static @ColorInt Integer unadjBnd;
+            public static @ColorInt int getDefaultUnAdjBndColor() {
+                if (unadjBnd == null)
+                    unadjBnd = AndroidUtils.UI.getColor(getApplicationContext(), R.color.map_unadj_bnd);
+                return unadjBnd;
+            }
+
+            private static @ColorInt Integer unadjNav;
+            public static @ColorInt int getDefaultUnAdjNavColor() {
+                if (unadjNav == null)
+                    unadjNav = AndroidUtils.UI.getColor(getApplicationContext(), R.color.map_unadj_nav);
+                return unadjNav;
+            }
+
+            private static @ColorInt Integer adjpts;
+            public static @ColorInt int getDefaultAdjPtsColor() {
+                if (adjpts == null)
+                    adjpts = AndroidUtils.UI.getColor(getApplicationContext(), R.color.map_adj_pts);
+                return adjpts;
+            }
+
+            private static @ColorInt Integer unadjpts;
+            public static @ColorInt int getDefaultUnAdjPtsColor() {
+                if (unadjpts == null)
+                    unadjpts = AndroidUtils.UI.getColor(getApplicationContext(), R.color.map_unadj_pts);
+                return unadjpts;
+            }
+
+            private static @ColorInt Integer waypts;
+            public static @ColorInt int getDefaultWayPtsColor() {
+                if (waypts == null)
+                    waypts = AndroidUtils.UI.getColor(getApplicationContext(), R.color.map_way_pts);
+                return waypts;
+            }
+        }
+
         public static void reset() {
             for (PolygonGraphicOptions pgo : _PolyGraphicOptions.values()) {
                 pgo.removeListener(updateListener);
@@ -1657,20 +1687,28 @@ public class Global {
 
             _PolyDrawOptions.clear();
 
-            _MasterPolyGraphicOptions = new PolygonGraphicOptions(
-                    Consts.EmptyGuid,
-                    AndroidUtils.UI.getColor(getApplicationContext(), R.color.map_adj_bnd),
-                    AndroidUtils.UI.getColor(getApplicationContext(), R.color.map_unadj_bnd),
-                    AndroidUtils.UI.getColor(getApplicationContext(), R.color.map_adj_nav),
-                    AndroidUtils.UI.getColor(getApplicationContext(), R.color.map_unadj_nav),
-                    AndroidUtils.UI.getColor(getApplicationContext(), R.color.map_adj_pts),
-                    AndroidUtils.UI.getColor(getApplicationContext(), R.color.map_unadj_pts),
-                    AndroidUtils.UI.getColor(getApplicationContext(), R.color.map_way_pts),
-                    Settings.DeviceSettings.getMapAdjLineWidth(),
-                    Settings.DeviceSettings.getMapUnAdjLineWidth()
-            );
-
             _PolyGraphicOptions = getDAL().getPolygonGraphicOptionsMap();
+
+            if (!_PolyGraphicOptions.containsKey(Consts.EmptyGuid)) {
+                _MasterPolyGraphicOptions = new PolygonGraphicOptions(
+                        Consts.EmptyGuid,
+                        defaults.getDefaultAdjBndColor(),
+                        defaults.getDefaultUnAdjNavColor(),
+                        defaults.getDefaultAdjNavColor(),
+                        defaults.getDefaultUnAdjNavColor(),
+                        defaults.getDefaultAdjPtsColor(),
+                        defaults.getDefaultUnAdjPtsColor(),
+                        defaults.getDefaultWayPtsColor(),
+                        Settings.DeviceSettings.getMapAdjLineWidth(),
+                        Settings.DeviceSettings.getMapUnAdjLineWidth()
+                );
+
+                if (getDAL() != null) {
+                    getDAL().insertPolygonGraphicOption(_MasterPolyGraphicOptions);
+                }
+
+                _PolyGraphicOptions.put(Consts.EmptyGuid, _MasterPolyGraphicOptions);
+            }
 
             for (PolygonGraphicOptions pgo : _PolyGraphicOptions.values()) {
                 pgo.addListener(updateListener);

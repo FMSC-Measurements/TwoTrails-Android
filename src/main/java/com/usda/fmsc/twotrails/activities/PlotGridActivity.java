@@ -38,14 +38,13 @@ import com.usda.fmsc.utilities.ParseEx;
 import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
 
 public class PlotGridActivity extends CustomToolbarActivity {
-    private Spinner spnPolys, spnPoints, spnPointLoc, spnSampleType, spnMeta;
+    private Spinner spnPoints, spnPointLoc, spnSampleType;
     private EditText txtGridX, txtGridY, txtTilt, txtSubSample;
     private CheckBox chkSubSample;
     private MaterialProgressBar progressBar;
     private View layControls;
 
     private List<TtPolygon> polygons, allPolys;
-    private List<String> polyNames;
     private HashMap<String, TtMetadata> metadata;
     private HashMap<String, List<TtPoint>> polyPoints;
 
@@ -106,7 +105,7 @@ public class PlotGridActivity extends CustomToolbarActivity {
 
         polygons = new ArrayList<>();
         allPolys = new ArrayList<>();
-        polyNames = new ArrayList<>();
+        ArrayList<String> polyNames = new ArrayList<>();
         polyPoints = new HashMap<>();
 
         List<TtPoint> tmpPoints;
@@ -127,11 +126,11 @@ public class PlotGridActivity extends CustomToolbarActivity {
         }
 
         if (polygons.size() > 0) {
-            spnPolys = (Spinner)findViewById(R.id.plotSpnPoly);
+            Spinner spnPolys = (Spinner)findViewById(R.id.plotSpnPoly);
+            Spinner spnMeta = (Spinner)findViewById(R.id.plotSpnMeta);
             spnPoints = (Spinner)findViewById(R.id.plotSpnPoint);
             spnPointLoc = (Spinner)findViewById(R.id.plotSpnLoc);
             spnSampleType = (Spinner)findViewById(R.id.plotSpnSubsample);
-            spnMeta = (Spinner)findViewById(R.id.plotSpnMeta);
 
             txtGridX = (EditText)findViewById(R.id.plotTxtGridX);
             txtGridY = (EditText)findViewById(R.id.plotTxtGridY);

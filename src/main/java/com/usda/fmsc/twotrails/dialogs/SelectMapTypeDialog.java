@@ -149,15 +149,6 @@ public class SelectMapTypeDialog extends DialogFragment {
         }
 
         dialog.setView(fl)
-//                .setPositiveButton("Set Map", new DialogInterface.OnClickListener() {
-//            @Override
-//            public void onClick(DialogInterface dialog, int which) {
-//                if (listener != null && (mapType != null && mapId != -1 &&
-//                        (mapType != defaultMapType || mapId != defaultMapId))) {
-//                    listener.mapSelected(mapType, mapId);
-//                }
-//            }
-//        })
         .setNeutralButton(R.string.str_cancel, null);
 
         return dialog.create();
@@ -275,7 +266,7 @@ public class SelectMapTypeDialog extends DialogFragment {
 
         private final int value;
 
-        private SelectMapMode(int value) {
+        SelectMapMode(int value) {
             this.value = value;
         }
 

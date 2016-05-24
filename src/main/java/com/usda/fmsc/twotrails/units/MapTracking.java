@@ -8,7 +8,7 @@ public enum MapTracking {
 
     private final int value;
 
-    private MapTracking(int value) {
+    MapTracking(int value) {
         this.value = value;
     }
 

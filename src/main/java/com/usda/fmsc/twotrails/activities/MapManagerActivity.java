@@ -43,20 +43,19 @@ import java.util.Collections;
 
 import jp.wasabeef.recyclerview.animators.SlideInLeftAnimator;
 
-//TODO show icon to indicate whether or not an arcgis acc is connected
 public class MapManagerActivity extends CustomToolbarActivity implements ArcGISTools.IArcToolsListener {
     private static final String SELECT_MAP = "SelectMap";
 
-    RecyclerViewEx rvMaps;
-    SheetFab fabSheet;
+    private SheetFab fabSheet;
 
-    ArcGisMapAdapter adapter;
-    ArrayList<ArcGisMapLayer> maps, visibleMaps;
+    private ArcGisMapAdapter adapter;
+    private ArrayList<ArcGisMapLayer> maps, visibleMaps;
 
-    boolean inDetails = false;
-    int notifyAdapter = -1;
+    private boolean inDetails = false;
+    private int notifyAdapter = -1;
 
 
+    @SuppressWarnings("unchecked")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -107,7 +106,7 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
         }
 
 
-        rvMaps = (RecyclerViewEx) findViewById(R.id.mmRvMaps);
+        RecyclerViewEx rvMaps = (RecyclerViewEx) findViewById(R.id.mmRvMaps);
 
         if (rvMaps != null) {
             rvMaps.setViewHasFooter(true);
@@ -360,7 +359,7 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
 
         @Override
         public RecyclerViewEx.ViewHolderEx onCreateViewHolderEx(ViewGroup parent, int viewType) {
-            return new MapViewHolder(inflater.inflate(R.layout.content_map_info, null));
+            return new MapViewHolder(inflater.inflate(R.layout.content_map_info, parent, false));
         }
 
         @Override
@@ -446,6 +445,7 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
             }
         }
 
+        @SuppressWarnings("unchecked")
         private void viewMapDetails(View view, ArcGisMapLayer agml) {
             Intent i = new Intent(MapManagerActivity.this, MapDetailsActivity.class);
             i.putExtra(Consts.Codes.Data.MAP_DATA, agml);

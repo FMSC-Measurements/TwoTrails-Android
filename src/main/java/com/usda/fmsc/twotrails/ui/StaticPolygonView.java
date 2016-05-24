@@ -84,6 +84,8 @@ public class StaticPolygonView extends View {
             }
         }
     }
+
+    //get points and generate from PolygonActivity
     public void render(final List<TtPoint> points, final HashMap<String, TtMetadata> metadata) {
         if (points.size() > 2) {
             new Thread(new Runnable() {

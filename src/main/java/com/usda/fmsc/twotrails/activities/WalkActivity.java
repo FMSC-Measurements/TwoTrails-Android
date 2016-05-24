@@ -131,10 +131,14 @@ public class WalkActivity extends AcquireGpsMapActivity {
             ibBnd = (ImageButton)findViewById(R.id.pointHeaderIbBnd);
 
             ImageView ivOp = (ImageView)findViewById(R.id.pointHeaderIvOp);
-            TextView tvElevType = (TextView)findViewById(R.id.pointCardTvElevType);
+            if (ivOp != null) {
+                ivOp.setImageDrawable(TtUtils.UI.getTtOpDrawable(OpType.Walk, AppUnits.IconColor.Dark, this));
+            }
 
-            ivOp.setImageDrawable(TtUtils.UI.getTtOpDrawable(OpType.Walk, AppUnits.IconColor.Dark, this));
-            tvElevType.setText(_Metadata.getElevation().toString());
+            TextView tvElevType = (TextView)findViewById(R.id.pointCardTvElevType);
+            if (tvElevType != null) {
+                tvElevType.setText(_Metadata.getElevation().toString());
+            }
 
             dOnBnd = AndroidUtils.UI.getDrawable(this, R.drawable.ic_onbnd_dark);
             dOffBnd = AndroidUtils.UI.getDrawable(this, R.drawable.ic_offbnd_dark);

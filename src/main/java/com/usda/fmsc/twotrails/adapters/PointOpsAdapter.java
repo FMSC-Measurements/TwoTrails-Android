@@ -53,7 +53,7 @@ public class PointOpsAdapter extends BaseAdapter {
         ViewHolder viewHolder;
 
         if (view == null) {
-            view = inflater.inflate(R.layout.content_details_points_ops, null);
+            view = inflater.inflate(R.layout.content_details_points_ops, parent, false);
             viewHolder = new ViewHolder();
             view.setTag(viewHolder);
 

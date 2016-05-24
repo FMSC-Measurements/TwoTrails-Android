@@ -30,9 +30,6 @@ public class PolygonAdjuster {
     private static boolean _processing = false;
     private static boolean _cancelToken = false;
 
-    private static Thread _thread;
-
-
     public static boolean isProcessing() {
         return _processing;
     }
@@ -70,7 +67,8 @@ public class PolygonAdjuster {
 
         _processing = true;
 
-        _thread = new Thread() {
+        new Thread(new Runnable() {
+            @Override
             public void run() {
                 AdjustResult result = AdjustResult.ADJUSTING;
                 boolean success = false;
@@ -80,7 +78,6 @@ public class PolygonAdjuster {
                     listener = (Listener)ctx;
 
                 try {
-
                     if(listener != null)
                         listener.adjusterStarted();
 
@@ -111,9 +108,7 @@ public class PolygonAdjuster {
                     }
                 }
             }
-        };
-
-        _thread.start();
+        }).start();
 
         return AdjustResult.ADJUSTING;
     }

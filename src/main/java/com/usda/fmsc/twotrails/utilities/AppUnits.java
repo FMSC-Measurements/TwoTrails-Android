@@ -1,7 +1,6 @@
 package com.usda.fmsc.twotrails.utilities;
 
 public class AppUnits {
-
     public enum IconColor {
         Light,
         Dark,
@@ -10,5 +9,4 @@ public class AppUnits {
         Primary,
         PrimaryLight
     }
-
 }

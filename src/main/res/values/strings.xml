@@ -262,6 +262,8 @@
         This may be caused by a large amount of points or other variables. Would you like to continue waiting?"</string>
     <string name="diag_latlon_latDD">Latitude (XX.XXXXX)</string>
     <string name="diag_latlon_lonDD">Longitude (XXX.XXXXX)</string>
+    <string name="diag_pcp_adjpts">Adjusted Points</string>
+    <string name="diag_pcp_unadjpts">Unadjusted Points</string>
 
 
     <!-- Activity Titles -->
@@ -436,9 +438,10 @@
     <string name="map_adj_bnd_pts">Adjusted Boundary Points</string>
     <string name="map_unadj_bnd">Unadjusted Boundary Polygon</string>
     <string name="map_unadj_bnd_pts">Unadjusted Boundary Points</string>
-    <string name="map_bnd_menu">More Options</string>
+    <string name="map_menu_extra_options">More Options</string>
     <string name="map_menu_close_adj_bnd">Close Adjusted Boundary</string>
     <string name="map_menu_close_unadj_bnd">Close Unadjusted Boundary</string>
+    <string name="map_menu_colors">Color Settings</string>
 
     <string name="map_adj_nav">Adjusted Navigation Polygon</string>
     <string name="map_adj_nav_pts">Adjusted Navigation Points</string>

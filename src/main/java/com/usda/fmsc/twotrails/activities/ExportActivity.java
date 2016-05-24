@@ -32,7 +32,6 @@ public class ExportActivity extends CustomToolbarActivity {
     private static final int FOLDER_REQUEST = 5001;
 
     private MultiStateTouchCheckBox chkAll, chkPoints, chkPolys, chkMeta, chkProj, chkNmea, chkKmz, chkGpx, chkSum;
-    private FloatingActionButton fabExport;
     private FABProgressCircleEx progCircle;
     private Export.ExportTask exportTask;
 
@@ -41,7 +40,7 @@ public class ExportActivity extends CustomToolbarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_export);
 
-        fabExport = (FloatingActionButton)findViewById(R.id.exportFabExport);
+        FloatingActionButton fabExport = (FloatingActionButton)findViewById(R.id.exportFabExport);
         progCircle = (FABProgressCircleEx)findViewById(R.id.exportFabExportProgressCircle);
 
         chkAll = (MultiStateTouchCheckBox)findViewById(R.id.exportChkAll);
@@ -71,13 +70,15 @@ public class ExportActivity extends CustomToolbarActivity {
             }
         });
 
-        fabExport.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                startExport(true);
-                return true;
-            }
-        });
+        if (fabExport != null) {
+            fabExport.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    startExport(true);
+                    return true;
+                }
+            });
+        }
     }
 
     @Override
@@ -101,57 +102,12 @@ public class ExportActivity extends CustomToolbarActivity {
             }
         }
 
-//        if(requestCode == FilePickerActivity.REQUEST_DIRECTORY && resultCode == RESULT_OK) {
-//            String directory = data.getStringExtra(FilePickerActivity.FILE_EXTRA_DATA_PATH);
-//
-//            if(directory != null) {
-//                startExport(directory);
-//            }
-//        }
-
         super.onActivityResult(requestCode, resultCode, data);
     }
 
     public void btnExport(View view) {
         startExport(false);
     }
-
-    public void chkOnChange(View view, boolean isChecked, MultiStateTouchCheckBox.CheckedState state) {
-        int checkedCount = 0;
-
-        if (chkPoints.isChecked())
-            checkedCount++;
-
-        if (chkPolys.isChecked())
-            checkedCount++;
-
-        if (chkMeta.isChecked())
-            checkedCount++;
-
-        if (chkProj.isChecked())
-            checkedCount++;
-
-        if (chkNmea.isChecked())
-            checkedCount++;
-
-        if (chkKmz.isChecked())
-            checkedCount++;
-
-        if (chkGpx.isChecked())
-            checkedCount++;
-
-        if (chkSum.isChecked())
-            checkedCount++;
-
-        if(checkedCount == 0)
-            chkAll.setCheckedStateNoEvent(MultiStateTouchCheckBox.CheckedState.NotChecked);
-        else if (checkedCount > 7)
-            chkAll.setCheckedStateNoEvent(MultiStateTouchCheckBox.CheckedState.Checked);
-        else
-            chkAll.setCheckedStateNoEvent(MultiStateTouchCheckBox.CheckedState.PartialChecked);
-    }
-
-
 
     private void startExport(boolean selectdir) {
         if (exportTask == null || exportTask.getStatus() == AsyncTask.Status.FINISHED) {
@@ -212,21 +168,8 @@ public class ExportActivity extends CustomToolbarActivity {
     }
 
     private void selectDirectory(String initDir) {
-//        Intent filePickerDialogIntent = new Intent(this, FilePickerActivity.class);
-//        filePickerDialogIntent.putExtra(FilePickerActivity.THEME_TYPE, ThemeType.DIALOG);
-//        filePickerDialogIntent.putExtra(FilePickerActivity.INTENT_EXTRA_COLOR_ID, R.color.primary);
-//        filePickerDialogIntent.putExtra(FilePickerActivity.INTENT_EXTRA_FAB_COLOR_ID, R.color.primaryLight);
-//        //filePickerDialogIntent.putExtra(FilePickerActivity.SCOPE_TYPE, FileScopeType.DIRECTORIES);
-//        filePickerDialogIntent.putExtra(FilePickerActivity.REQUEST_CODE, FilePickerActivity.REQUEST_DIRECTORY);
-//        filePickerDialogIntent.putExtra(FilePickerActivity.FILE_EXTRA_DATA_PATH, initDir);
-//        startActivityForResult(filePickerDialogIntent, FilePickerActivity.REQUEST_DIRECTORY);
-
-        // This always works
         Intent i = new Intent(this, FilePickerActivity.class);
-        // This works if you defined the intent filter
-        // Intent i = new Intent(Intent.ACTION_GET_CONTENT);
 
-        // Set these depending on your use case. These are the defaults.
         i.putExtra(FilePickerActivity.EXTRA_ALLOW_MULTIPLE, false);
         i.putExtra(FilePickerActivity.EXTRA_ALLOW_CREATE_DIR, false);
         i.putExtra(FilePickerActivity.EXTRA_MODE, FilePickerActivity.MODE_DIR);
@@ -244,78 +187,77 @@ public class ExportActivity extends CustomToolbarActivity {
 
     private void export(final File directory) {
         if (exportTask == null || exportTask.getStatus() == AsyncTask.Status.FINISHED) {
-            //if (!directory.canWrite()) {
-            //    Toast.makeText(this, "Folder is readonly. Choose a different location.", Toast.LENGTH_SHORT).show();
-            //} else {
-                progCircle.show();
+            progCircle.show();
 
-                exportTask = new Export.ExportTask();
+            exportTask = new Export.ExportTask();
 
-                exportTask.setListener(new Export.ExportTask.Listener() {
-                    @Override
-                    public void onTaskFinish(Export.ExportResult result) {
-                        switch (result.getCode()) {
-                            case Success:
-                                progCircle.beginFinalAnimation();
-                                snackbar = Snackbar.make(findViewById(R.id.parent), "Files Exported", Snackbar.LENGTH_INDEFINITE).setAction("View", new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-                                        Intent intent = new Intent(Intent.ACTION_VIEW);
-                                        intent.setDataAndType(Uri.parse(directory.getAbsolutePath()), "resource/folder");
+            exportTask.setListener(new Export.ExportTask.Listener() {
+                @Override
+                public void onTaskFinish(Export.ExportResult result) {
+                switch (result.getCode()) {
+                    case Success:
+                        progCircle.beginFinalAnimation();
+                        View view = findViewById(R.id.parent);
+                        if (view != null) {
+                            snackbar = Snackbar.make(view, "Files Exported", Snackbar.LENGTH_INDEFINITE).setAction("View", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                                    intent.setDataAndType(Uri.parse(directory.getAbsolutePath()), "resource/folder");
 
-                                        if (snackbar != null)
-                                            snackbar.dismiss();
+                                    if (snackbar != null)
+                                        snackbar.dismiss();
 
-                                        startActivity(Intent.createChooser(intent, "Open folder"));
+                                    startActivity(Intent.createChooser(intent, "Open folder"));
+                                }
+                            })
+                            .setActionTextColor(AndroidUtils.UI.getColor(getBaseContext(), R.color.primaryLighter));
+
+                            AndroidUtils.UI.setSnackbarTextColor(snackbar, Color.WHITE);
+
+                            snackbar.show();
+
+                            new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        Thread.sleep(5000);
+                                    } catch (Exception ex) {
+                                        //
                                     }
-                                })
-                                .setActionTextColor(AndroidUtils.UI.getColor(getBaseContext(), R.color.primaryLighter));
 
-                                AndroidUtils.UI.setSnackbarTextColor(snackbar, Color.WHITE);
-
-                                snackbar.show();
-
-                                new Thread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        try {
-                                            Thread.sleep(5000);
-                                        } catch (Exception ex) {
-                                            //
-                                        }
-
-                                        if(snackbar != null)
-                                            snackbar.dismiss();
-                                    }
-                                }).start();
-                                break;
-                            case Cancelled:
-                                break;
-                            case ExportFailure:
-                            case InvalidParams:
-                                progCircle.hide();
-                                Toast.makeText(getBaseContext(), "Export error, See log for details", Toast.LENGTH_SHORT).show();
-                                TtUtils.TtReport.writeError("ExportActivity", result.getMessage());
-                                break;
+                                    if(snackbar != null)
+                                        snackbar.dismiss();
+                                }
+                            }).start();
                         }
-                    }
-                });
+                        break;
+                    case Cancelled:
+                        break;
+                    case ExportFailure:
+                    case InvalidParams:
+                        progCircle.hide();
+                        Toast.makeText(getBaseContext(), "Export error, See log for details", Toast.LENGTH_SHORT).show();
+                        TtUtils.TtReport.writeError("ExportActivity", result.getMessage());
+                        break;
+                }
+                }
+            });
 
-                exportTask.execute(
-                        new Export.ExportTask.ExportParams(
-                                Global.getDAL(),
-                                directory,
-                                chkPoints.isChecked(),
-                                chkPolys.isChecked(),
-                                chkMeta.isChecked(),
-                                chkProj.isChecked(),
-                                chkNmea.isChecked(),
-                                chkKmz.isChecked(),
-                                chkGpx.isChecked(),
-                                chkSum.isChecked()
-                        )
-                );
-            //}
+            exportTask.execute(
+                    new Export.ExportTask.ExportParams(
+                            Global.getDAL(),
+                            directory,
+                            chkPoints.isChecked(),
+                            chkPolys.isChecked(),
+                            chkMeta.isChecked(),
+                            chkProj.isChecked(),
+                            chkNmea.isChecked(),
+                            chkKmz.isChecked(),
+                            chkGpx.isChecked(),
+                            chkSum.isChecked()
+                    )
+            );
         } else {
             Toast.makeText(this, "Export in progress", Toast.LENGTH_SHORT).show();
         }

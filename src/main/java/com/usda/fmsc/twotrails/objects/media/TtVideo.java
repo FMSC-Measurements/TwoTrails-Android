@@ -28,7 +28,7 @@ public class TtVideo extends TtMedia {
     public TtVideo(Parcel source) {
         super(source);
 
-        //TODO add PositionTimeline Parcelable
+        _Timeline = source.readParcelable(PositionTimeline.class.getClassLoader());
         _PositionTimelineFile = source.readString();
     }
 
@@ -63,6 +63,7 @@ public class TtVideo extends TtMedia {
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
 
+        dest.writeParcelable(_Timeline != null ? _Timeline : new PositionTimeline(), flags);
         dest.writeString(StringEx.getValueOrEmpty(_PositionTimelineFile));
     }
 

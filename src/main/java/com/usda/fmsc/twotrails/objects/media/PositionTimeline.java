@@ -1,16 +1,37 @@
 package com.usda.fmsc.twotrails.objects.media;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import com.usda.fmsc.android.utilities.ParcelTools;
+
 import org.joda.time.DateTime;
 
 import java.util.ArrayList;
 
-//TODO implement PositionTimeline Parcelable
-public class PositionTimeline {
+public class PositionTimeline implements Parcelable {
+    public final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+        @Override
+        public Object createFromParcel(Parcel source) {
+            return new PositionTimeline(source);
+        }
+
+        @Override
+        public PositionTimeline[] newArray(int size) {
+            return new PositionTimeline[size];
+        }
+    };
+
     private ArrayList<FramePosition> _Timeline;
 
 
     public PositionTimeline() {
         this(new ArrayList<FramePosition>());
+    }
+
+    @SuppressWarnings("unchecked")
+    public PositionTimeline(Parcel source) {
+        _Timeline = source.readArrayList(FramePosition.class.getClassLoader());
     }
 
     public PositionTimeline(ArrayList<FramePosition> positions) {
@@ -19,6 +40,17 @@ public class PositionTimeline {
 
     public PositionTimeline(PositionTimeline timeline) {
         _Timeline = new ArrayList<>(timeline._Timeline);
+    }
+
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeList(_Timeline);
     }
 
 
@@ -68,12 +100,30 @@ public class PositionTimeline {
     }
 
 
-    public class FramePosition implements TtOrientation {
+    public class FramePosition implements TtOrientation, Parcelable {
+        public final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+            @Override
+            public Object createFromParcel(Parcel source) {
+                return new FramePosition(source);
+            }
+
+            @Override
+            public FramePosition[] newArray(int size) {
+                return new FramePosition[size];
+            }
+        };
+
         private DateTime _Time;
         private Float _Azimuth;
         private Float _Pitch;
         private Float _Roll;
 
+        public FramePosition(Parcel source) {
+            _Time = (DateTime) source.readSerializable();
+            _Azimuth = ParcelTools.readNFloat(source);
+            _Pitch = ParcelTools.readNFloat(source);
+            _Roll = ParcelTools.readNFloat(source);
+        }
 
         public FramePosition(Float az, Float pitch, Float roll) {
             this(az, pitch, roll, DateTime.now());
@@ -86,6 +136,18 @@ public class PositionTimeline {
             _Time = time;
         }
 
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeSerializable(_Time);
+            ParcelTools.writeNFloat(dest, _Azimuth);
+            ParcelTools.writeNFloat(dest, _Pitch);
+            ParcelTools.writeNFloat(dest, _Roll);
+        }
 
         public DateTime getTime() {
             return _Time;

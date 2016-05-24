@@ -179,6 +179,10 @@ public class PolygonGraphicManager implements IGraphicManager {
         return polygonGraphic.getDrawOptions();
     }
 
+    public PolygonGraphicOptions getGraphicOptions() {
+        return polygonGraphic.getGraphicOptions();
+    }
+
 
     public boolean isVisible() {
         return polygonGraphic.isVisible();

@@ -20,15 +20,11 @@ public class Consts {
 
     public static final double Default_Point_Accuracy = 6.0;
     public static final double Minimum_Point_Accuracy = 0.000001;
-    public static final int Minimum_Point_Accuracy_Digits = 6;
     public static final int Minimum_Point_Display_Digits = 5;
 
 
     public static final float ENABLED_ALPHA = 1.0f;
     public static final float DISABLED_ALPHA = 0.5f;
-
-    public static final int ENABLED_ICON_ALPHA = (int)(ENABLED_ALPHA * 255);
-    public static final int DISABLED_ICON_ALPHA = (int)(DISABLED_ALPHA * 255);
 
     public static final String NewLine = "\r\n";
 
@@ -114,6 +110,9 @@ public class Consts {
             public static final int MAP_DELETED = 2007;
             public static final int DOWNLOADING_MAP = 2008;
             public static final int IMAGE_CAPTURED = 2009;
+            public static final int GPS_NOT_FOUND = 2010;
+            public static final int GPS_NOT_CONFIGURED = 2011;
+
         }
 
         public static class Services {
@@ -141,6 +140,7 @@ public class Consts {
             public static final int VIBRATE = 5005;
             public static final int CAPTURE_IMAGE = 5006;
             public static final int ADD_IMAGES = 5007;
+            public static final int OPEN_FILE = 5008;
         }
     }
 

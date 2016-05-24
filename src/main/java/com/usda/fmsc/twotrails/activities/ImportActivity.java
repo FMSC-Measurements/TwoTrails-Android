@@ -17,6 +17,7 @@ import android.widget.Toast;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.utilities.PostDelayHandler;
 import com.usda.fmsc.android.widget.FABProgressCircleEx;
+import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.activities.base.TtAjusterCustomToolbarActivity;
 import com.usda.fmsc.twotrails.fragments.imprt.BaseImportFragment;
 import com.usda.fmsc.twotrails.fragments.imprt.ImportGpxFragment;
@@ -29,8 +30,6 @@ import com.usda.fmsc.twotrails.utilities.Import;
 import java.util.regex.Pattern;
 
 public class ImportActivity extends TtAjusterCustomToolbarActivity {
-    private static final int OPEN_FILE = 101;
-
     FloatingActionButton fabImport;
     FABProgressCircleEx fabProgCircle;
 
@@ -54,18 +53,21 @@ public class ImportActivity extends TtAjusterCustomToolbarActivity {
             switch (code) {
                 case Success:
                     fabProgCircle.beginFinalAnimation();
-                    Snackbar snackbar = Snackbar.make(findViewById(R.id.parent), "File Imported", Snackbar.LENGTH_LONG)
-                            .setAction("View Map", new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    PolygonAdjuster.adjust(Global.getDAL(), activity);
-                                }
-                            })
-                            .setActionTextColor(AndroidUtils.UI.getColor(getBaseContext(), R.color.primaryLighter));
+                    View view = findViewById(R.id.parent);
+                    if (view != null) {
+                        Snackbar snackbar = Snackbar.make(view, "File Imported", Snackbar.LENGTH_LONG)
+                                .setAction("View Map", new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        PolygonAdjuster.adjust(Global.getDAL(), activity);
+                                    }
+                                })
+                                .setActionTextColor(AndroidUtils.UI.getColor(getBaseContext(), R.color.primaryLighter));
 
-                    AndroidUtils.UI.setSnackbarTextColor(snackbar, Color.WHITE);
+                        AndroidUtils.UI.setSnackbarTextColor(snackbar, Color.WHITE);
 
-                    snackbar.show();
+                        snackbar.show();
+                    }
 
                     adjust = true;
                     return;
@@ -155,7 +157,7 @@ public class ImportActivity extends TtAjusterCustomToolbarActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         switch (requestCode) {
-            case OPEN_FILE: {
+            case Consts.Codes.Requests.OPEN_FILE: {
                 if (data != null) {
                     updateFileName(data.getData().getPath());
                 }
@@ -258,6 +260,6 @@ public class ImportActivity extends TtAjusterCustomToolbarActivity {
 
     public void btnImportSelect(View view) {
         String[] extraMimes = {"file/*.csv", "file/*.gpx"};
-        AndroidUtils.App.openFileIntent(this, "file/*.txt", extraMimes, OPEN_FILE);
+        AndroidUtils.App.openFileIntent(this, "file/*.txt", extraMimes, Consts.Codes.Requests.OPEN_FILE);
     }
 }

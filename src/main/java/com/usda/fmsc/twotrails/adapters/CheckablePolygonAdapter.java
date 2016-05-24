@@ -40,7 +40,7 @@ public class CheckablePolygonAdapter extends ArrayAdapter<TtPolygon> {
         final Tuple<TtPolygon, Boolean> polygon = _Polygons.get(position);
 
         if (convertView == null) {
-            convertView = inflater.inflate(R.layout.content_checkable_polygon, null);
+            convertView = inflater.inflate(R.layout.content_checkable_polygon, parent, false);
             holder = new ViewHolder(convertView);
             holder.checkBox.setChecked(polygon.Item2);
             convertView.setTag(holder);

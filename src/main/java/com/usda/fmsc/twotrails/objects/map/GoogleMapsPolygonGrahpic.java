@@ -217,7 +217,7 @@ public class GoogleMapsPolygonGrahpic implements IPolygonGraphic, IMarkerDataGra
     private boolean isInList(ArrayList<Marker> markers, Marker marker) {
         String id = marker.getId();
         for (Marker m : markers) {
-            if (m.getId().equals(id));
+            if (m.getId().equals(id))
                 return true;
         }
         return false;
@@ -502,7 +502,7 @@ public class GoogleMapsPolygonGrahpic implements IPolygonGraphic, IMarkerDataGra
         graphicOptions.setAdjPtsColor(color);
 
         for (Marker marker : _AllAdjPts) {
-            marker.setIcon(BitmapDescriptorFactory.defaultMarker(color));
+            marker.setIcon(BitmapDescriptorFactory.defaultMarker(AndroidUtils.Convert.rgbToHsvHue(color)));
         }
     }
 
@@ -512,7 +512,7 @@ public class GoogleMapsPolygonGrahpic implements IPolygonGraphic, IMarkerDataGra
 
         for (Marker marker : _AllUnadjPts) {
             if (!_WayPts.contains(marker)) {
-                marker.setIcon(BitmapDescriptorFactory.defaultMarker(color));
+                marker.setIcon(BitmapDescriptorFactory.defaultMarker(AndroidUtils.Convert.rgbToHsvHue(color)));
             }
         }
     }
@@ -523,7 +523,7 @@ public class GoogleMapsPolygonGrahpic implements IPolygonGraphic, IMarkerDataGra
         graphicOptions.setWayPtsColor(color);
 
         for (Marker marker : _WayPts) {
-            marker.setIcon(BitmapDescriptorFactory.defaultMarker(color));
+            marker.setIcon(BitmapDescriptorFactory.defaultMarker(AndroidUtils.Convert.rgbToHsvHue(color)));
         }
     }
     //endregion

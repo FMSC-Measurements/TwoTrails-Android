@@ -6,7 +6,7 @@ public enum MediaType {
 
     private final int value;
 
-    private MediaType(int value) {
+    MediaType(int value) {
         this.value = value;
     }
 

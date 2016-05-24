@@ -70,26 +70,28 @@ public class HaidActivity extends CustomToolbarActivity {
             i++;
         }
 
-        lvPolys.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, polyNames));
+        if (lvPolys != null) {
+            lvPolys.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, polyNames));
 
-        lvPolys.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                if (i > -1) {
-                    currentPoly = polyinfo[i];
+            lvPolys.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                    if (i > -1) {
+                        currentPoly = polyinfo[i];
 
-                    updateContent();
+                        updateContent();
 
-                    getToolbar().setTitle(currentPoly.getName());
-                } else {
-                    currentPoly = null;
-                    tvInfo.setText("Invalid Option");
-                    getToolbar().setTitle(getString(R.string.title_activity_haid));
+                        getToolbar().setTitle(currentPoly.getName());
+                    } else {
+                        currentPoly = null;
+                        tvInfo.setText("Invalid Option");
+                        getToolbar().setTitle(getString(R.string.title_activity_haid));
+                    }
+
+                    drawerLayout.closeDrawers();
                 }
-
-                drawerLayout.closeDrawers();
-            }
-        });
+            });
+        }
 
         drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, getToolbar(),
                 R.string.str_open, R.string.str_close) {

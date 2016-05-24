@@ -33,7 +33,6 @@ public class GetMapExtentsActivity extends AppCompatActivity implements GpsServi
 
     private ArcGisMapFragment fragment;
     private ArcGisMapLayer agml = null;
-    //private SquareOverlay squareOverlay;
 
     private FloatingActionButton btnMap, btnGps;
 

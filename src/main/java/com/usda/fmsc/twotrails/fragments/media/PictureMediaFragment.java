@@ -51,7 +51,7 @@ public class PictureMediaFragment extends BaseMediaFragment {
     @Nullable
     @Override
     public View onCreateViewEx(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.content_details_media_pic, null);
+        View view = inflater.inflate(R.layout.content_details_media_pic, container, false);
 
         ivBackground = (ImageView) view.findViewById(R.id.pmdIvBackground);
 
