@@ -32,7 +32,6 @@ public class GpsPoint extends TtPoint implements TtPoint.IManualAccuracy {
     //region Constructors
     public GpsPoint() {
         super();
-        _Op = OpType.GPS;
     }
 
     public GpsPoint(Parcel source) {
@@ -72,6 +71,13 @@ public class GpsPoint extends TtPoint implements TtPoint.IManualAccuracy {
     }
 
     //region Get/Set
+
+
+    @Override
+    public OpType getOp() {
+        return OpType.GPS;
+    }
+
     @Override
     public Double getManualAccuracy() {
         return _ManualAccuracy;

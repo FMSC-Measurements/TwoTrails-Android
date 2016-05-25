@@ -20,7 +20,6 @@ public class WayPoint extends GpsPoint {
 
     public WayPoint() {
         super();
-        _Op = OpType.WayPoint;
     }
 
     public WayPoint(Parcel source) {
@@ -29,11 +28,13 @@ public class WayPoint extends GpsPoint {
 
     public WayPoint(WayPoint p) {
         super(p);
-        _Op = OpType.WayPoint;
     }
 
     public WayPoint(TtPoint p) {
         super(p);
-        _Op = OpType.WayPoint;
+    }
+
+    public OpType getOp() {
+        return OpType.WayPoint;
     }
 }

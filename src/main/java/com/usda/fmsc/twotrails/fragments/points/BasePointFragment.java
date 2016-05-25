@@ -40,7 +40,7 @@ public abstract class BasePointFragment extends AnimationCardFragment implements
     private Drawable dOnBnd, dOffBnd;
 
     private boolean locked, updating;
-    private View header;
+    private View header, preFocus;
     private PointsActivity activity;
     private TtPoint _Point;
     private TtMetadata _Metadata;
@@ -70,6 +70,8 @@ public abstract class BasePointFragment extends AnimationCardFragment implements
         ibBnd = (ImageButton)view.findViewById(R.id.pointHeaderIbBnd);
         ivOp = (ImageView)view.findViewById(R.id.pointHeaderIvOp);
         txtCmt = (EditText)view.findViewById(R.id.pointTxtCmt);
+
+        preFocus = view.findViewById(R.id.preFocusView);
 
         //region set Values and Listeners
         ivOp.setImageDrawable(TtUtils.UI.getTtOpDrawable(_Point.getOp(), AppUnits.IconColor.Dark, getActivity()));
@@ -192,6 +194,8 @@ public abstract class BasePointFragment extends AnimationCardFragment implements
         tvPID.setText(StringEx.toString(_Point.getPID()));
         txtCmt.setText(_Point.getComment());
         ibBnd.setImageDrawable(getBndDrawable(_Point.isOnBnd()));
+
+        preFocus.requestFocus();
 
         updating = false;
     }

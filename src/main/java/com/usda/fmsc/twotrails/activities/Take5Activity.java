@@ -328,6 +328,10 @@ public class Take5Activity extends AcquireGpsMapActivity {
                 break;
             }
             case R.id.take5MenuMode: {
+                if (!mapViewMode && _Points.size() > 0 && _CurrentPoint.getOp() == OpType.SideShot && !saved) {
+                    btnCancelClick(null);
+                }
+
                 mapViewMode = !mapViewMode;
                 miMoveToEnd.setVisible(!mapViewMode);
                 setMapGesturesEnabled(mapViewMode);
@@ -428,7 +432,6 @@ public class Take5Activity extends AcquireGpsMapActivity {
         _Bursts = new ArrayList<>();
         _UsedBursts = new ArrayList<>();
 
-        //progressBar.setProgress(0);
         startLogging();
 
         fabT5.setEnabled(false);

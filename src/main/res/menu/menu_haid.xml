@@ -10,5 +10,6 @@
         android:checkable="true"/>
 
     <item android:id="@+id/haidMenuHelp" android:title="@string/haid_menu_item_help"
-          android:orderInCategory="100" app:showAsAction="never" />
+          android:orderInCategory="100" app:showAsAction="never"
+        android:icon="@drawable/ic_help_outline_black_36dp"/>
 </menu>

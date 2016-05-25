@@ -310,7 +310,7 @@ public class PointsActivity extends CustomToolbarActivity {
 
                     fabMenu.show();
 
-                    tvPmdTitle.setText(String.format("Media (%d)", mediaCount));
+                    setMediaTitle(null);
                     break;
                 case DRAGGING:
                     break;
@@ -1366,7 +1366,7 @@ public class PointsActivity extends CustomToolbarActivity {
             } else if (mediaList.size() > 1) {
                 changeTo = mediaList.get(1);
             } else {
-                tvPmdTitle.setText(String.format("Media (%d)", mediaCount));
+                setMediaTitle(null);
             }
         }
 
@@ -1637,7 +1637,7 @@ public class PointsActivity extends CustomToolbarActivity {
         if (lockPoint) {
             if (menuCreated) {
                 miLock.setTitle(R.string.str_unlock);
-                miLock.setIcon(R.drawable.ic_action_lock_closed);
+                miLock.setIcon(R.drawable.ic_action_lock_closed_white_36dp);
 
                 AndroidUtils.UI.disableMenuItem(miMovePoint);
                 AndroidUtils.UI.disableMenuItem(miReset);
@@ -1660,7 +1660,7 @@ public class PointsActivity extends CustomToolbarActivity {
         } else if (_Points.size() > 0) {
             if (menuCreated) {
                 miLock.setTitle(R.string.str_lock);
-                miLock.setIcon(R.drawable.ic_action_lock_open);
+                miLock.setIcon(R.drawable.ic_action_lock_open_white_36dp);
 
                 AndroidUtils.UI.enableMenuItem(miMovePoint);
                 AndroidUtils.UI.enableMenuItem(miDelete);
@@ -1826,10 +1826,6 @@ public class PointsActivity extends CustomToolbarActivity {
                             TwoTrailsSchema.MediaSchema.PointCN,
                             point.getCN());
                 }
-
-                tvPmdTitle.setText(String.format("Media (%d)", mediaCount));
-            } else {
-                tvPmdTitle.setText(StringEx.Empty);
             }
 
             setCurrentMedia(null);
@@ -1916,6 +1912,9 @@ public class PointsActivity extends CustomToolbarActivity {
                     }
 
                     mediaLoaded = true;
+
+                    setMediaTitle(slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED ?
+                        _CurrentMedia.getName() : null);
                 }
             });
         }
@@ -1925,7 +1924,9 @@ public class PointsActivity extends CustomToolbarActivity {
     private void setCurrentMedia(TtMedia media) {
         if (media != null) {
             if (slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
-                tvPmdTitle.setText(media.getName());
+                setMediaTitle(media.getName());
+            } else {
+                setMediaTitle(null);
             }
 
             if (_CurrentMedia == null || !media.getCN().equals(_CurrentMedia.getCN())) {
@@ -1933,12 +1934,22 @@ public class PointsActivity extends CustomToolbarActivity {
 
                 setMediaUpdated(false);
             }
+        } else {
+            setMediaTitle(null);
         }
 
         _CurrentMedia = media;
 
         if (_CurrentMedia == null)
             _BackupMedia = null;
+    }
+
+    private void setMediaTitle(String title) {
+        if (title != null) {
+            tvPmdTitle.setText(title);
+        } else {
+            tvPmdTitle.setText(String.format("Media (%d)", mediaCount));
+        }
     }
 
     private void setMediaUpdated(boolean updated) {

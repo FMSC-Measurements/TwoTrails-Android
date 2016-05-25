@@ -14,7 +14,7 @@
         android:id="@+id/pointsMenuLock"
         android:title="@string/str_unlock"
         app:showAsAction="always"
-        android:icon="@drawable/ic_action_lock_closed" />
+        android:icon="@drawable/ic_action_lock_closed_white_36dp" />
 
     <item
         android:id="@+id/pointsMenuSettings"
