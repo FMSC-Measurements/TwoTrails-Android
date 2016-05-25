@@ -30,22 +30,20 @@ import com.usda.fmsc.twotrails.utilities.Import;
 import java.util.regex.Pattern;
 
 public class ImportActivity extends TtAjusterCustomToolbarActivity {
-    FloatingActionButton fabImport;
-    FABProgressCircleEx fabProgCircle;
+    private FloatingActionButton fabImport;
+    private FABProgressCircleEx fabProgCircle;
 
-    BaseImportFragment fragment;
+    private BaseImportFragment fragment;
 
+    private Activity activity;
+    private EditText txtFile;
+    private PostDelayHandler handler = new PostDelayHandler(1000);
 
-    PostDelayHandler handler;
-
-    String _FileName;
-
-    boolean ignoreChange, adjust;
-
-    Activity activity;
+    private boolean ignoreChange, adjust;
 
 
-    BaseImportFragment.Listener listener = new BaseImportFragment.Listener() {
+
+    private BaseImportFragment.Listener listener = new BaseImportFragment.Listener() {
         String message = null;
 
         @Override
@@ -92,7 +90,6 @@ public class ImportActivity extends TtAjusterCustomToolbarActivity {
         }
     };
 
-    EditText txtFile;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -110,13 +107,9 @@ public class ImportActivity extends TtAjusterCustomToolbarActivity {
             }
         });
 
-        //View view = findViewById(R.id.importSv);
         txtFile = (EditText)findViewById(R.id.importTxtFile);
         AndroidUtils.UI.removeSelectionOnUnfocus(txtFile);
-        //AndroidUtils.UI.hideKeyboardOnTouch(findViewById(R.id.fragmentTouchContent), txtFile);
 
-
-        handler = new PostDelayHandler(1000);
 
         txtFile.addTextChangedListener(new TextWatcher() {
             @Override
@@ -169,27 +162,26 @@ public class ImportActivity extends TtAjusterCustomToolbarActivity {
     private void updateFileName(String filename) {
         boolean fragUpdated = false;
 
-        _FileName = filename;
-        String[] parts = _FileName.split(Pattern.quote("."));
+        String[] parts = filename.split(Pattern.quote("."));
 
         if (parts.length > 1) {
             switch (parts[parts.length - 1].toLowerCase()) {
                 case "txt":
                 case "csv": {
                     if (fragment == null || !(fragment instanceof ImportTextFragment)) {
-                        fragment = ImportTextFragment.newInstance(_FileName);
+                        fragment = ImportTextFragment.newInstance(filename);
                         fragUpdated = true;
                     } else {
-                        fragment.updateFileName(_FileName);
+                        fragment.updateFileName(filename);
                     }
                     break;
                 }
                 case "gpx": {
                     if (fragment == null || !(fragment instanceof ImportGpxFragment)) {
-                        fragment = ImportGpxFragment.newInstance(_FileName);
+                        fragment = ImportGpxFragment.newInstance(filename);
                         fragUpdated = true;
                     } else {
-                        fragment.updateFileName(_FileName);
+                        fragment.updateFileName(filename);
                     }
                     break;
                 }
@@ -201,8 +193,8 @@ public class ImportActivity extends TtAjusterCustomToolbarActivity {
 
             if (fragUpdated) {
                 ignoreChange = true;
-                txtFile.setText(_FileName);
-                txtFile.setSelection(_FileName.length() - 1);
+                txtFile.setText(filename);
+                txtFile.setSelection(filename.length() - 1);
                 fragment.setListener(listener);
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContent, fragment).commit();
             }

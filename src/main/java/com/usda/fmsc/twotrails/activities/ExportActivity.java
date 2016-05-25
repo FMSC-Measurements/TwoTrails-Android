@@ -105,6 +105,43 @@ public class ExportActivity extends CustomToolbarActivity {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
+
+    public void chkOnChange(View view, boolean isChecked, MultiStateTouchCheckBox.CheckedState state) {
+        int checkedCount = 0;
+
+        if (chkPoints.isChecked())
+            checkedCount++;
+
+        if (chkPolys.isChecked())
+            checkedCount++;
+
+        if (chkMeta.isChecked())
+            checkedCount++;
+
+        if (chkProj.isChecked())
+            checkedCount++;
+
+        if (chkNmea.isChecked())
+            checkedCount++;
+
+        if (chkKmz.isChecked())
+            checkedCount++;
+
+        if (chkGpx.isChecked())
+            checkedCount++;
+
+        if (chkSum.isChecked())
+            checkedCount++;
+
+        if(checkedCount == 0)
+            chkAll.setCheckedStateNoEvent(MultiStateTouchCheckBox.CheckedState.NotChecked);
+        else if (checkedCount > 7)
+            chkAll.setCheckedStateNoEvent(MultiStateTouchCheckBox.CheckedState.Checked);
+        else
+            chkAll.setCheckedStateNoEvent(MultiStateTouchCheckBox.CheckedState.PartialChecked);
+    }
+
+
     public void btnExport(View view) {
         startExport(false);
     }

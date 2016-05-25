@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/amdMenuRename"
-        android:title="@string/str_rename"/>
+        android:title="@string/str_rename"
+        android:icon="@drawable/ic_edit_black_36dp"/>
 
     <item android:id="@+id/amdMenuUpdatePath"
           android:title="@string/amd_update_path"/>
@@ -10,8 +11,10 @@
           android:title="@string/amd_update_details"/>
 
     <item android:id="@+id/amdMenuReset"
-          android:title="@string/str_reset"/>
+          android:title="@string/str_reset"
+        android:icon="@drawable/ic_refresh_black_36dp"/>
 
     <item android:id="@+id/amdMenuDelete"
-          android:title="@string/str_delete"/>
+          android:title="@string/str_delete"
+        android:icon="@drawable/ic_delete_black_36dp"/>
 </menu>

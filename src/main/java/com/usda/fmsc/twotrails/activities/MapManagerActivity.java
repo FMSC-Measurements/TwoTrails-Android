@@ -212,6 +212,7 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
         switch (item.getItemId()) {
             case android.R.id.home: {
                 finish();
+                break;
             }
             case R.id.mmMenuLogin: {
                 Intent intent = new Intent(getBaseContext(), ArcGisLoginActivity.class);
@@ -224,6 +225,7 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
                 }
 
                 startActivityForResult(intent, Consts.Codes.Activites.ARC_GIS_LOGIN);
+                break;
             }
         }
 
@@ -359,7 +361,7 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
 
         @Override
         public RecyclerViewEx.ViewHolderEx onCreateViewHolderEx(ViewGroup parent, int viewType) {
-            return new MapViewHolder(inflater.inflate(R.layout.content_map_info, parent, false));
+            return new MapViewHolder(inflater.inflate(R.layout.content_map_info, null));
         }
 
         @Override

@@ -2942,7 +2942,7 @@ public class DataAccessLayer {
                 _db.delete(TwoTrailsSchema.TtNmeaSchema.TableName, nmeaDeleteQuerys.get(i), null);
             }
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:deleteNmea");
+            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:clean");
         }
     }
     //endregion

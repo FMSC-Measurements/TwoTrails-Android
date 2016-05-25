@@ -11,6 +11,7 @@
     <include layout="@layout/pre_focus"/>
 
     <RelativeLayout
+        android:id="@+id/lay1"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -89,7 +90,7 @@
         android:id="@+id/importFabImportProgressCircle"
         style="@style/fabProgressHolderStyle"
         app:finalIcon="@drawable/ic_file_download_white_36dp"
-        app:layout_anchor="@id/parent"
+        app:layout_anchor="@id/lay1"
         app:layout_anchorGravity="bottom|right|end">
 
         <android.support.design.widget.FloatingActionButton
