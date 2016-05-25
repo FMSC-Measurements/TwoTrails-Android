@@ -1689,7 +1689,9 @@ public class Global {
 
             _PolyGraphicOptions = getDAL().getPolygonGraphicOptionsMap();
 
-            if (!_PolyGraphicOptions.containsKey(Consts.EmptyGuid)) {
+            if (_PolyGraphicOptions.containsKey(Consts.EmptyGuid)) {
+                _MasterPolyGraphicOptions = _PolyGraphicOptions.get(Consts.EmptyGuid);
+            } else {
                 _MasterPolyGraphicOptions = new PolygonGraphicOptions(
                         Consts.EmptyGuid,
                         defaults.getDefaultAdjBndColor(),

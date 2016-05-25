@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/ctx_menu_rename"
-          android:title="@string/str_rename"/>
+          android:title="@string/str_rename"
+        android:icon="@drawable/ic_edit_black_36dp"/>
 
     <item android:id="@+id/ctx_menu_delete"
-          android:title="@string/str_delete"/>
+          android:title="@string/str_delete"
+        android:icon="@drawable/ic_delete_black_36dp"/>
 </menu>
