@@ -28,7 +28,6 @@ public class QuondamPoint extends TtPoint implements TtPoint.IManualAccuracy {
     //region Constructors
     public QuondamPoint() {
         _ParentPoint = null;
-        _Op = OpType.Quondam;
     }
 
     public QuondamPoint(Parcel source) {
@@ -66,7 +65,6 @@ public class QuondamPoint extends TtPoint implements TtPoint.IManualAccuracy {
     public QuondamPoint(QuondamPoint p) {
         super(p);
         _ParentPoint = p.getParentPoint();
-        _Op = OpType.Quondam;
     }
 
     public QuondamPoint(TtPoint p) {
@@ -77,8 +75,6 @@ public class QuondamPoint extends TtPoint implements TtPoint.IManualAccuracy {
         } else {
             this._ParentPoint = null;
         }
-
-        _Op = OpType.Quondam;
     }
 
     //endregion
@@ -98,6 +94,10 @@ public class QuondamPoint extends TtPoint implements TtPoint.IManualAccuracy {
     }
 
     //region Get/Set
+    public OpType getOp() {
+        return OpType.Quondam;
+    }
+
     public TtPoint getParentPoint() {
         return _ParentPoint;
     }
@@ -182,7 +182,7 @@ public class QuondamPoint extends TtPoint implements TtPoint.IManualAccuracy {
 
     @Override
     public String toString() {
-        return String.format("%d: %s- %s", _PID, _Op,
+        return String.format("%d: %s- %s", _PID, getOp(),
             (_ParentPoint != null) ? _ParentPoint.getPID() : StringEx.Empty);
     }
 }

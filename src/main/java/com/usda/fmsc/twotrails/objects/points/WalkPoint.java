@@ -21,20 +21,17 @@ public class WalkPoint extends GpsPoint {
 
     public WalkPoint() {
         super();
-        _Op = OpType.Walk;
     }
 
     public WalkPoint(Parcel source) {
         super(source);
     }
 
-    public WalkPoint(WalkPoint p) {
-        super(p);
-        _Op = OpType.Walk;
-    }
-
     public WalkPoint(TtPoint p) {
         super(p);
-        _Op = OpType.Walk;
+    }
+
+    public OpType getOp() {
+        return OpType.Walk;
     }
 }

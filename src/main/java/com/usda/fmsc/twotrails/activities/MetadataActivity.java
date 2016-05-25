@@ -380,7 +380,7 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
         if (lockMeta) {
             if (menuCreated) {
                 miLock.setTitle(R.string.str_unlock);
-                miLock.setIcon(R.drawable.ic_action_lock_closed);
+                miLock.setIcon(R.drawable.ic_action_lock_closed_white_36dp);
 
                 AndroidUtils.UI.disableMenuItem(miReset);
                 AndroidUtils.UI.disableMenuItem(miDelete);
@@ -391,7 +391,7 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
         } else if (_Metadata.size() > 0) {
             if (menuCreated) {
                 miLock.setTitle(R.string.str_lock);
-                miLock.setIcon(R.drawable.ic_action_lock_open);
+                miLock.setIcon(R.drawable.ic_action_lock_open_white_36dp);
 
                 if (_CurrentIndex > 0) {
                     AndroidUtils.UI.enableMenuItem(miDelete);

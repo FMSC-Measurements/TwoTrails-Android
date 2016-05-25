@@ -21,21 +21,18 @@ public class SideShotPoint extends TravPoint {
 
     public SideShotPoint() {
         super();
-        _Op = OpType.SideShot;
     }
 
     public SideShotPoint(Parcel source) {
         super(source);
     }
 
-    public SideShotPoint(SideShotPoint p) {
-        super(p);
-        _Op = OpType.SideShot;
-    }
-
     public SideShotPoint(TtPoint p) {
         super(p);
-        _Op = OpType.SideShot;
     }
 
+
+    public OpType getOp() {
+        return OpType.SideShot;
+    }
 }

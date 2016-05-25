@@ -17,7 +17,6 @@ import com.usda.fmsc.utilities.StringEx;
 
 
 public abstract class TtPoint extends TtObject implements Comparable<TtPoint>, Comparator<TtPoint> {
-    protected OpType _Op;
     protected long _Index;
     protected int _PID;
     protected DateTime _Time;
@@ -58,7 +57,6 @@ public abstract class TtPoint extends TtObject implements Comparable<TtPoint>, C
     public TtPoint(Parcel source) {
         super(source);
 
-        _Op = OpType.parse(source.readInt());
         _Index = source.readLong();
         _PID = source.readInt();
         _Time = (DateTime) source.readSerializable();
@@ -95,9 +93,7 @@ public abstract class TtPoint extends TtObject implements Comparable<TtPoint>, C
 
     //region Get/Set
     //region _CN Op Index PID Time
-    public OpType getOp() {
-        return _Op;
-    }
+    public abstract OpType getOp();
 
 
     public long getIndex() {
@@ -305,7 +301,6 @@ public abstract class TtPoint extends TtObject implements Comparable<TtPoint>, C
     //region copy Point
     public void copy(TtPoint toCopy) {
         setCN(toCopy.getCN());
-        this._Op = toCopy.getOp();
         this._Comment = toCopy.getComment();
         this._Index = toCopy.getIndex();
         this._PolyCN = toCopy.getPolyCN();
@@ -347,21 +342,21 @@ public abstract class TtPoint extends TtObject implements Comparable<TtPoint>, C
 
     //region Point Types
     public boolean isGpsType() {
-        return (_Op == OpType.GPS || _Op == OpType.Take5 ||
-                _Op == OpType.Walk || _Op == OpType.WayPoint);
+        return (getOp() == OpType.GPS || getOp() == OpType.Take5 ||
+                getOp() == OpType.Walk || getOp() == OpType.WayPoint);
     }
 
     public boolean isTravType() {
-        return (_Op == OpType.Traverse || _Op == OpType.SideShot);
+        return (getOp() == OpType.Traverse || getOp() == OpType.SideShot);
     }
 
     public boolean isBndPoint() {
-        return _OnBnd && _Op != OpType.WayPoint;
+        return _OnBnd && getOp() != OpType.WayPoint;
     }
 
     public boolean isNavPoint() {
-        return  (_Op == OpType.GPS || _Op == OpType.Take5 ||
-                _Op == OpType.Walk || _Op == OpType.Traverse);
+        return  (getOp() == OpType.GPS || getOp() == OpType.Take5 ||
+                getOp() == OpType.Walk || getOp() == OpType.Traverse);
     }
     //endregion
 
@@ -395,7 +390,6 @@ public abstract class TtPoint extends TtObject implements Comparable<TtPoint>, C
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
 
-        dest.writeInt(_Op.getValue());
         dest.writeLong(_Index);
         dest.writeInt(_PID);
         dest.writeSerializable(_Time);
@@ -425,7 +419,7 @@ public abstract class TtPoint extends TtObject implements Comparable<TtPoint>, C
 
     @Override
     public String toString() {
-        return String.format("%d: %s", _PID, _Op);
+        return String.format("%d: %s", _PID, getOp());
     }
 
     @Override

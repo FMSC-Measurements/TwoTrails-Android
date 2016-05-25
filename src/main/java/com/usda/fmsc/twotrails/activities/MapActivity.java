@@ -163,7 +163,7 @@ public class MapActivity extends BaseMapActivity {
         super.onNmeaBurstReceived(nmeaBurst);
 
         if (getLastPosition() != null) {
-            if (myPosBtn && fabMyPos != null && fabMyPos.getVisibility() != View.VISIBLE  && getLastPosition() != null) {
+            if (myPosBtn && fabMyPos != null && getLastPosition() != null) {
                 fabMyPos.setVisibility(View.VISIBLE);
                 fabMyPos.show();
             }

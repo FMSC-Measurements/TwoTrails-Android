@@ -32,7 +32,6 @@ public class TravPoint extends TtPoint {
     //region Constructors
     public TravPoint() {
         defaultTraverseValues();
-        _Op = OpType.Traverse;
     }
 
     public TravPoint(Parcel source) {
@@ -78,6 +77,10 @@ public class TravPoint extends TtPoint {
     }
 
     //region Get/Set
+    public OpType getOp() {
+        return OpType.Traverse;
+    }
+
     public Double getFwdAz() {
         return _FwdAz;
     }

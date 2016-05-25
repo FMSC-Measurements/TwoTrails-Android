@@ -377,7 +377,7 @@ public class PolygonsActivity extends CustomToolbarActivity {
         if (lockPoly) {
             if (menuCreated) {
                 miLock.setTitle(R.string.str_unlock);
-                miLock.setIcon(R.drawable.ic_action_lock_closed);
+                miLock.setIcon(R.drawable.ic_action_lock_closed_white_36dp);
 
                 AndroidUtils.UI.disableMenuItem(miReset);
                 AndroidUtils.UI.disableMenuItem(miDelete);
@@ -388,7 +388,7 @@ public class PolygonsActivity extends CustomToolbarActivity {
         } else if (_Polygons.size() > 0) {
             if (menuCreated) {
                 miLock.setTitle(R.string.str_lock);
-                miLock.setIcon(R.drawable.ic_action_lock_open);
+                miLock.setIcon(R.drawable.ic_action_lock_open_white_36dp);
 
                 AndroidUtils.UI.enableMenuItem(miDelete);
 

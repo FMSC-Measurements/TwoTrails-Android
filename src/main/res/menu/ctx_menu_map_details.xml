@@ -5,10 +5,12 @@
         android:icon="@drawable/ic_edit_black_36dp"/>
 
     <item android:id="@+id/amdMenuUpdatePath"
-          android:title="@string/amd_update_path"/>
+          android:title="@string/amd_update_path"
+        android:icon="@drawable/ic_attach_file_black_36dp"/>
 
     <item android:id="@+id/amdMenuUpdateDetails"
-          android:title="@string/amd_update_details"/>
+          android:title="@string/amd_update_details"
+        android:icon="@drawable/ic_renew_black_36dp"/>
 
     <item android:id="@+id/amdMenuReset"
           android:title="@string/str_reset"
