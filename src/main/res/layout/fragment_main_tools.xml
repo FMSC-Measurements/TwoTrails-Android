@@ -138,7 +138,7 @@
             <Button
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Test"
+                android:text="@string/str_test"
                 android:id="@+id/mainFragToolsBtnTest"
                 android:layout_gravity="center_horizontal"
                 android:onClick="btnTest"

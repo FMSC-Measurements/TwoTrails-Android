@@ -31,6 +31,8 @@ public class MediaRvAdapter extends SelectableAdapterEx<TtMedia, SelectableAdapt
 
     Activity activity;
 
+    MediaChangedListener listener;
+
     public MediaRvAdapter(Activity activity, List<TtMedia> mediaList, Listener<TtMedia> listener, int maxHeight, BitmapManager bitmapManager) {
         super(activity, mediaList);
 
@@ -84,6 +86,61 @@ public class MediaRvAdapter extends SelectableAdapterEx<TtMedia, SelectableAdapt
     }
 
 
+    @Override
+    public synchronized void add(TtMedia item, boolean notify) {
+        super.add(item, notify);
+
+        if (notify && listener != null) {
+            listener.onNotifyDatasetChanged();
+        }
+    }
+
+    @Override
+    public synchronized void add(int index, TtMedia item, boolean notify) {
+        super.add(index, item, notify);
+
+        if (notify && listener != null) {
+            listener.onNotifyDatasetChanged();
+        }
+    }
+
+    @Override
+    public synchronized void remove(TtMedia item, boolean notify) {
+        super.remove(item, notify);
+
+        if (notify && listener != null) {
+            listener.onNotifyDatasetChanged();
+        }
+    }
+
+    @Override
+    public synchronized TtMedia remove(int index, boolean notify) {
+        TtMedia media = super.remove(index, notify);
+
+        if (notify && listener != null) {
+            listener.onNotifyDatasetChanged();
+        }
+
+        return media;
+    }
+
+    @Override
+    public synchronized void clear(boolean notify) {
+        super.clear(notify);
+
+        if (notify && listener != null) {
+            listener.onNotifyDatasetChanged();
+        }
+    }
+
+
+    public void setListener(MediaChangedListener listener) {
+        this.listener = listener;
+    }
+
+    public interface MediaChangedListener {
+        void onNotifyDatasetChanged();
+    }
 
     public abstract class MediaViewHolder extends SelectableViewHolderEx {
         public MediaViewHolder(View itemView) {

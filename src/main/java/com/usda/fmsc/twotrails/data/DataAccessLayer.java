@@ -498,6 +498,13 @@ public class DataAccessLayer {
                 TwoTrailsSchema.PointSchema.PolyCN, polyCN));
     }
 
+    public ArrayList<TtPoint> getBoundaryPointsInPolygon(String polyCN) {
+        return getPoints(String.format("%s = '%s' and %s != '%s' and %s = true",
+                TwoTrailsSchema.PointSchema.PolyCN, polyCN,
+                TwoTrailsSchema.PointSchema.Operation, OpType.WayPoint.toString(),
+                TwoTrailsSchema.PointSchema.OnBoundary));
+    }
+
     public ArrayList<TtPoint> getPointsWithMeta(String metaCN) {
         return getPoints(String.format("%s = '%s'",
                 TwoTrailsSchema.PointSchema.MetadataCN, metaCN));
@@ -905,13 +912,22 @@ public class DataAccessLayer {
 
     //region Update
 
-    public boolean updatePoint(TtPoint updatedPoint) {
+
+    public boolean updatePoint(GpsPoint updatedPoint) {
+        return updatePointSame(updatedPoint);
+    }
+
+    public boolean updatePoint(TravPoint updatedPoint) {
+        return updatePointSame(updatedPoint);
+    }
+
+    private boolean updatePointSame(TtPoint updatedPoint) {
         boolean success = false;
 
         try {
             _db.beginTransaction();
 
-            success = updateBasePoint(updatedPoint);
+            success = updateBasePoint(updatedPoint, updatedPoint);
 
             if(success)
                 _db.setTransactionSuccessful();
@@ -948,7 +964,7 @@ public class DataAccessLayer {
             _db.beginTransaction();
 
             for(TtPoint point : updatedPoints) {
-                success = updateBasePoint(point);
+                success = updateBasePoint(point, point);
 
                 if(!success)
                     break;
@@ -990,10 +1006,6 @@ public class DataAccessLayer {
             _db.endTransaction();
         }
         return success;
-    }
-
-    private boolean updateBasePoint(TtPoint updatedPoint) {
-        return updateBasePoint(updatedPoint, updatedPoint);
     }
 
     private boolean updateBasePoint(TtPoint updatedPoint, TtPoint oldPoint) {

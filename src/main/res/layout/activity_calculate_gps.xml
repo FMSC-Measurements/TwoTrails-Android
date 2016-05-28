@@ -6,7 +6,7 @@
 
     <include android:id="@+id/toolbar" layout="@layout/toolbar_default"/>
 
-    <View style="@style/ToolbarElevation" android:layout_below="@id/toolbar"/>
+    <View style="@style/ToolbarShadowViewElevation" android:layout_below="@id/toolbar"/>
 
     <include layout="@layout/pre_focus" />
 
@@ -20,7 +20,7 @@
         <TextView
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
-            android:text="Filters"
+            android:text="@string/calc_filters"
             android:gravity="center"
             android:textSize="25sp"
             android:paddingTop="4dp"/>
@@ -42,12 +42,12 @@
                 android:inputType="number|numberDecimal"/>
 
             <TextView
-                android:text="Fix:"
+                android:text="@string/calc_fix"
                 android:textSize="20sp"
                 android:layout_width="0dp"
                 android:layout_weight=".2"
                 android:layout_height="wrap_content"
-                android:gravity="right"/>
+                android:gravity="end"/>
 
             <Spinner android:id="@+id/calcSpinnerFix"
                 android:layout_width="0dp"
@@ -60,14 +60,16 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:paddingStart="15dp"
-            android:paddingLeft="15dp">
+            android:paddingLeft="15dp"
+            android:paddingEnd="0dp"
+            android:paddingRight="0dp">
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_weight=".3"
                 android:layout_height="wrap_content"
                 android:textSize="20sp"
-                android:text="Group Size"
+                android:text="@string/calc_gs"
                 android:layout_gravity="center"
                 android:gravity="start"/>
 
@@ -84,7 +86,7 @@
                 android:layout_width="0dp"
                 android:layout_weight=".25"
                 android:layout_height="wrap_content"
-                android:text="Range"
+                android:text="@string/calc_range"
                 android:textSize="20sp"
                 android:layout_gravity="center"
                 android:gravity="end"/>
@@ -96,7 +98,8 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:gravity="start"
-                android:digits="0123456789-"/>
+                android:digits="0123456789-"
+                android:inputType="numberSigned"/>
         </LinearLayout>
     </LinearLayout>
 
@@ -110,11 +113,13 @@
         android:stretchColumns="*"
         android:paddingTop="10dp"
         android:paddingStart="5dp"
-        android:paddingLeft="5dp">
+        android:paddingLeft="5dp"
+        android:paddingRight="0dp"
+        android:paddingEnd="0dp">
 
         <TableRow>
             <TextView
-                android:text="@string/calc_group"
+                android:text="@string/str_group"
                 style="@style/calcStyleTvHeader"/>
             <TextView
                 android:text="@string/str_utmx"
@@ -254,7 +259,7 @@
         <Button
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="@string/calc_calc"
+            android:text="@string/str_calc"
             android:id="@+id/calcBtnCalc"
             android:layout_weight="1"
             android:onClick="btnCalculateClick"

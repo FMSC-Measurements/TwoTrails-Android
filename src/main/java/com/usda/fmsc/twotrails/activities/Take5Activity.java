@@ -406,13 +406,13 @@ public class Take5Activity extends AcquireGpsMapActivity {
                     _Bursts = new ArrayList<>();
                     _UsedBursts = new ArrayList<>();
                 } else if (updated) {
-                    Global.getDAL().updatePoint(point);
+                    Global.getDAL().updatePoint(point, point);
                 }
 
                 saved = true;
                 updated = false;
             } else {
-                Global.getDAL().updatePoint(point);
+                Global.getDAL().updatePoint(point, point);
             }
         }
 

@@ -12,7 +12,7 @@
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/main_btn_new"
+            android:text="@string/str_new"
             android:id="@+id/mainFragFileBtnNew"
             android:layout_gravity="center_horizontal"
             android:onClick="btnNewClick"
@@ -26,7 +26,7 @@
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/main_btn_open"
+            android:text="@string/str_open"
             android:id="@+id/mainFragFileBtnOpen"
             android:layout_gravity="center_horizontal"
             android:onClick="btnOpenClick"
@@ -126,7 +126,7 @@
 
                 <TextView
                     android:layout_column="1"
-                    android:text="@string/main_tv_polys"
+                    android:text="@string/str_polygons"
                     android:padding="5dip"/>
 
                 <TextView
@@ -139,7 +139,7 @@
 
                 <TextView
                     android:layout_column="1"
-                    android:text="@string/main_tv_points"
+                    android:text="@string/str_points"
                     android:padding="5dip"/>
 
                 <TextView
@@ -152,7 +152,7 @@
 
                 <TextView
                     android:layout_column="1"
-                    android:text="@string/main_tv_groups"
+                    android:text="@string/str_groups"
                     android:padding="5dip"/>
 
                 <TextView
@@ -165,7 +165,7 @@
 
                 <TextView
                     android:layout_column="1"
-                    android:text="@string/main_tv_meta"
+                    android:text="@string/str_meta"
                     android:padding="5dip"/>
 
                 <TextView

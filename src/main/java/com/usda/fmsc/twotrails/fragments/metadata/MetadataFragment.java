@@ -26,9 +26,6 @@ public class MetadataFragment extends AnimationCardFragment implements MetadataA
         txtSlope, txtGPSRec, txtRangeFinder, txtCompass, txtCrew, txtCmt;
 
     private View layGroup;
-
-    //private boolean settingView;
-
     private TtMetadata _Metadata;
 
 
@@ -163,8 +160,6 @@ public class MetadataFragment extends AnimationCardFragment implements MetadataA
     public void onMetadataUpdated(TtMetadata metadata) {
         _Metadata = metadata;
 
-        //settingView = true;
-
         txtName.setText(_Metadata.getName());
         txtZone.setText(StringEx.toString(_Metadata.getZone()));
         txtDec.setText(StringEx.toString(_Metadata.getMagDec()));
@@ -178,7 +173,5 @@ public class MetadataFragment extends AnimationCardFragment implements MetadataA
         txtCompass.setText(_Metadata.getCompass());
         txtCrew.setText(_Metadata.getCrew());
         txtCmt.setText(_Metadata.getComment());
-
-        //settingView = false;
     }
 }

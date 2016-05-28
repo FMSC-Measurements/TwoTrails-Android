@@ -36,13 +36,13 @@
         app:layout_anchor="@id/container"
         app:layout_anchorGravity="bottom|end"
         android:onClick="btnMmAddClick"
-        android:elevation="8dp"/>
+        style="@style/ToolbarElevation8"/>
 
     <com.usda.fmsc.android.widget.DimOverlayFrameLayout
         android:id="@+id/overlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:elevation="7dp"/>
+        style="@style/ToolbarElevation7"/>
 
     <io.codetail.widget.RevealLinearLayout
         android:layout_width="match_parent"
@@ -50,7 +50,7 @@
         android:orientation="vertical"
         android:gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
-        android:elevation="9dp">
+        style="@style/ToolbarElevation9">
 
         <android.support.v7.widget.CardView
             android:id="@+id/fab_sheet"

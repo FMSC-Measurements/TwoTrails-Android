@@ -24,7 +24,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceLarge"
-                android:text="@string/poly_name"
+                android:text="@string/str_name"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true" />
     
@@ -317,15 +317,15 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="@string/meta_cmt" />
+            android:text="@string/str_cmt" />
 
         <TextView
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:id="@+id/metaFragTxtCmt"
-            android:inputType="textMultiLine" />
-
+            android:maxLines="5"
+            android:ellipsize="end"/>
         </LinearLayout>
             
     </LinearLayout>

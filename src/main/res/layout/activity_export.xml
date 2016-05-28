@@ -51,7 +51,7 @@
             </RelativeLayout>
         </android.support.v7.widget.Toolbar>
 
-        <View style="@style/ToolbarElevation" android:layout_below="@id/toolbar"/>
+        <View style="@style/ToolbarShadowViewElevation" android:layout_below="@id/toolbar"/>
 
         <ScrollView
             android:layout_width="match_parent"

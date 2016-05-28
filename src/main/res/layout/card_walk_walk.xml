@@ -7,7 +7,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@android:color/white"
-        style="@style/pad8088"
+        style="@style/margin8088"
         android:id="@+id/parent">
 
         <LinearLayout
@@ -88,7 +88,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="textMultiLine"
-                    android:hint="@string/points_cmt"
+                    android:hint="@string/str_cmt"
                     android:maxLines="6" />
             </android.support.design.widget.TextInputLayout>
         </LinearLayout>

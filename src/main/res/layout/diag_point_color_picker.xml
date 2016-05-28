@@ -32,7 +32,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:baselineAligned="false">
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -41,7 +42,7 @@
                 android:orientation="vertical">
 
                 <TextView
-                    android:text="@string/map_cat_bound"
+                    android:text="@string/str_bnd"
                     style="@style/mapOptCatTextStyle"/>
 
                 <View style="@style/Dividers"/>
@@ -90,7 +91,7 @@
                 android:orientation="vertical">
 
                 <TextView
-                    android:text="@string/map_cat_nav"
+                    android:text="@string/str_navigation"
                     style="@style/mapOptCatTextStyle"/>
 
                 <View style="@style/Dividers"/>

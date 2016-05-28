@@ -11,7 +11,8 @@
         android:id="@+id/diagEitableListListValues"
         android:layout_weight="1"
         android:paddingLeft="10dp"
-        android:paddingRight="10dp" />
+        android:paddingRight="10dp"
+        android:background="@color/white_1000"/>
 
     <View style="@style/Dividers"/>
 
