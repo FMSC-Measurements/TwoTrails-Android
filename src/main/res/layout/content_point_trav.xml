@@ -9,7 +9,7 @@
         android:id="@+id/cardHeader"
         layout="@layout/content_point_card_header" />
 
-    <View style="@style/ToolbarElevation3" android:layout_below="@id/cardHeader" />
+    <View style="@style/ToolbarShadowViewElevation3" android:layout_below="@id/cardHeader" />
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -22,10 +22,10 @@
             android:id="@+id/cardContent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:elevation="1dp"
             android:padding="8dp"
             android:layout_alignParentTop="true"
-            android:background="@android:color/white">
+            android:background="@android:color/white"
+            style="@style/ToolbarElevation1">
 
             <TableRow
                 android:layout_width="match_parent"
@@ -38,7 +38,6 @@
                     android:text="@string/str_az"
                     android:textSize="22sp"
                     android:layout_gravity="center"
-                    android:textAlignment="center"
                     android:layout_span="4"/>
             </TableRow>
 
@@ -86,17 +85,16 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/points_trav_slope"
+                    android:text="@string/str_slp"
                     android:textSize="22sp"
-                    android:layout_gravity="center"
-                    android:textAlignment="center"
+                    android:gravity="center"
                     android:paddingTop="5dp"
                     android:layout_span="4"/>
             </TableRow>
 
             <TableRow>
                 <TextView
-                    android:text="@string/points_trav_slope_dist"
+                    android:text="@string/str_dist"
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
                     android:textSize="20sp" />
@@ -110,7 +108,7 @@
                     android:inputType="numberDecimal" />
 
                 <TextView
-                    android:text="@string/points_trav_slope_angle"
+                    android:text="@string/str_ang"
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
                     android:textSize="20sp"/>
@@ -140,11 +138,13 @@
                     android:textColor="@android:color/black"
                     android:text="@string/str_nullvalue"
                     android:paddingLeft="8dp"
-                    android:paddingStart="8dp"/>
+                    android:paddingStart="8dp"
+                    android:paddingRight="0dp"
+                    android:paddingEnd="0dp"/>
             </TableRow>
         </TableLayout>
 
-        <View style="@style/ToolbarElevation2" android:layout_below="@id/cardContent" />
+        <View style="@style/ToolbarShadowViewElevation2" android:layout_below="@id/cardContent" />
 
         <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"
@@ -158,7 +158,7 @@
                 android:layout_height="wrap_content"
                 style="@style/EditTextStyle"
                 android:inputType="textMultiLine"
-                android:hint="@string/points_cmt"
+                android:hint="@string/str_cmt"
                 android:maxLines="6"/>
         </android.support.design.widget.TextInputLayout>
     </RelativeLayout>

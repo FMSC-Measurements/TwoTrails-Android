@@ -7,7 +7,7 @@
 
     <include layout="@layout/toolbar_default" android:id="@id/toolbar"/>
 
-    <View style="@style/ToolbarElevation" android:layout_below="@id/toolbar"/>
+    <View style="@style/ToolbarShadowViewElevation" android:layout_below="@id/toolbar"/>
 
     <android.support.v4.widget.DrawerLayout
         android:layout_width="match_parent"

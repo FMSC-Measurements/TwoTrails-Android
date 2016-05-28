@@ -1402,7 +1402,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
                 dialogBuilder.setTitle(String.format("From Point in %s", fromPoly.getName()));
                 ListView listView = new ListView(this);
 
-                final PointDetailsAdapter pda = new PointDetailsAdapter(points, this, AppUnits.IconColor.Dark);
+                final PointDetailsAdapter pda = new PointDetailsAdapter(this, points, AppUnits.IconColor.Dark);
                 pda.setShowPolygonName(true);
 
                 listView.setAdapter(pda);
@@ -1415,7 +1415,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
                 listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                        fromPoint = pda.getPoint(i);
+                        fromPoint = pda.getItem(i);
                         btnFromPoint.setText(StringEx.toString(fromPoint.getPID()));
                         calculateDir();
                         dialog.dismiss();
@@ -1481,7 +1481,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
             dialogBuilder.setTitle(String.format("To Point in %s", toPoly.getName()));
             ListView listView = new ListView(this);
 
-            final PointDetailsAdapter pda = new PointDetailsAdapter(points, this, AppUnits.IconColor.Dark);
+            final PointDetailsAdapter pda = new PointDetailsAdapter(this, points, AppUnits.IconColor.Dark);
             pda.setShowPolygonName(true);
 
             listView.setAdapter(pda);
@@ -1494,7 +1494,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                    toPoint = pda.getPoint(i);
+                    toPoint = pda.getItem(i);
                     btnToPoint.setText(StringEx.toString(toPoint.getPID()));
                     tvNavPid.setText(StringEx.toString(toPoint.getPID()));
                     tvNavPoly.setText(toPoint.getPolyName());

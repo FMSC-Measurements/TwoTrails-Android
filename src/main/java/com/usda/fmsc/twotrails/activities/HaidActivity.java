@@ -101,14 +101,14 @@ public class HaidActivity extends CustomToolbarActivity {
                 if (currentPoly != null) {
                     getToolbar().setTitle(currentPoly.getName());
                 } else {
-                    getToolbar().setTitle(getString(R.string.haid_menu_name));
+                    getToolbar().setTitle(getString(R.string.str_polygons));
                 }
             }
 
             @Override
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
-                getToolbar().setTitle(getString(R.string.haid_menu_name));
+                getToolbar().setTitle(getString(R.string.str_polygons));
             }
         };
 
@@ -178,7 +178,7 @@ public class HaidActivity extends CustomToolbarActivity {
             case R.id.haidMenuHelp: {
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-                builder.setTitle(R.string.haid_menu_item_help)
+                builder.setTitle(R.string.str_help)
                         .setMessage(R.string.haid_help_text)
                         .setPositiveButton(R.string.str_ok, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {

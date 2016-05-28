@@ -1,16 +1,59 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <style name="ToolbarElevationBase" tools:targetApi="21">
+    <style name="ToolbarShadowViewElevationBase" tools:targetApi="21">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:visibility">gone</item>
     </style>
 
-    <style name="ToolbarElevation" parent="ToolbarElevationBase"/>
+    <style name="ToolbarShadowViewElevation" parent="ToolbarShadowViewElevationBase"/>
 
-    <style name="ToolbarElevation2" parent="ToolbarElevationBase"/>
+    <style name="ToolbarShadowViewElevation2" parent="ToolbarShadowViewElevationBase"/>
 
-    <style name="ToolbarElevation3" parent="ToolbarElevationBase"/>
+    <style name="ToolbarShadowViewElevation3" parent="ToolbarShadowViewElevationBase"/>
+
+
+    <style name="ToolbarElevation">
+        <item name="android:elevation">@dimen/toolbar_elevation</item>
+    </style>
+
+    <style name="ToolbarElevation0">
+        <item name="android:elevation">0dp</item>
+    </style>
+
+    <style name="ToolbarElevation1">
+        <item name="android:elevation">1dp</item>
+    </style>
+
+    <style name="ToolbarElevation2">
+        <item name="android:elevation">2dp</item>
+    </style>
+
+    <style name="ToolbarElevation3">
+        <item name="android:elevation">3dp</item>
+    </style>
+
+    <style name="ToolbarElevation4">
+        <item name="android:elevation">4dp</item>
+    </style>
+
+    <style name="ToolbarElevation7">
+        <item name="android:elevation">7dp</item>
+    </style>
+
+    <style name="ToolbarElevation8">
+        <item name="android:elevation">8dp</item>
+    </style>
+
+    <style name="ToolbarElevation9">
+        <item name="android:elevation">9dp</item>
+    </style>
+
+    <style name="ToolbarElevation10">
+        <item name="android:elevation">10dp</item>
+    </style>
+
+
 
     <style name="ArcMapDetailsStyle">
         <item name="android:layout_width">match_parent</item>
@@ -23,5 +66,14 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">@dimen/toolbar_height</item>
         <item name="android:transitionName">@string/trans_toolbar</item>
+    </style>
+
+    <style name="polyDetailTextStyle">
+        <item name="android:textSize">20sp</item>
+        <item name="android:paddingLeft">8dp</item>
+        <item name="android:paddingStart">8dp</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:maxLines">1</item>
     </style>
 </resources>

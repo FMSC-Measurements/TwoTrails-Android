@@ -82,21 +82,21 @@ public class TtUtils {
         //region Coeff
         private final static double HA_Coeff = 2.471;
 
-        private final static double FeetToMeters_Coeff = 1200.0 / 3937.0; //0.3048;
-        private final static double YardsToMeters_Coeff = FeetToMeters_Coeff * 3.0; //0.9144;
-        private final static double ChainsToMeters_Coeff = YardsToMeters_Coeff * 22.0; //20.1168;
+        private final static double FeetToMeters_Coeff = 1200d / 3937d;
+        private final static double YardsToMeters_Coeff = FeetToMeters_Coeff * 3d;
+        private final static double ChainsToMeters_Coeff = FeetToMeters_Coeff * 22d;
 
-        private final static double MetersToFeet_Coeff = 3937.0 / 1200.0; //3.28084;
-        private final static double YardsToFeet_Coeff = 3.0;
-        private final static double ChainsToFeet_Coeff = 66.0;
+        private final static double MetersToFeet_Coeff = 3937d / 1200d;
+        private final static double YardsToFeet_Coeff = 3d;
+        private final static double ChainsToFeet_Coeff = 66d;
 
-        private final static double FeetToYards_Coeff = 1.0 / 3.0; //0.3333
-        private final static double MetersToYards_Coeff = 1.0 / YardsToMeters_Coeff; //1.09361;
-        private final static double ChainsToYards_Coeff = 22.0;
+        private final static double FeetToYards_Coeff = 1d / 3d;
+        private final static double MetersToYards_Coeff = 1d / YardsToMeters_Coeff;
+        private final static double ChainsToYards_Coeff = 22d;
 
-        private final static double FeetToChains_Coeff = 1.0 / 66.0; //0.01515
-        private final static double MetersToChains_Coeff = MetersToFeet_Coeff / 66.0; //0.0497096954;
-        private final static double YardsToChains_Coeff = 3.0 / 66.0; //0.04545
+        private final static double FeetToChains_Coeff = 1d / 66d;
+        private final static double MetersToChains_Coeff = MetersToFeet_Coeff / 66d;
+        private final static double YardsToChains_Coeff = 3d / 66d;
 
         private final static double Meters2ToAcres_Coeff = 0.00024711;
         private final static double Meters2ToHectares_Coeff = 0.0001;
@@ -1318,6 +1318,31 @@ public class TtUtils {
                             break;
                     }
                     break;
+                case Black:
+                    switch(op) {
+                        case GPS:
+                            id = R.drawable.ic_ttpoint_gps_black;
+                            break;
+                        case Traverse:
+                            id = R.drawable.ic_ttpoint_traverse_black;
+                            break;
+                        case WayPoint:
+                            id = R.drawable.ic_ttpoint_way_black;
+                            break;
+                        case Quondam:
+                            id = R.drawable.ic_ttpoint_quondam_black;
+                            break;
+                        case SideShot:
+                            id = R.drawable.ic_ttpoint_sideshot_black;
+                            break;
+                        case Walk:
+                            id = R.drawable.ic_ttpoint_walk_black;
+                            break;
+                        case Take5:
+                            id = R.drawable.ic_ttpoint_take5_black;
+                            break;
+                    }
+                    break;
                 case Dark:
                     switch(op) {
                         case GPS:
@@ -1469,21 +1494,9 @@ public class TtUtils {
                     return createMarkerOptions((TravPoint) point, adjusted, meta.get(point.getMetadataCN()));
                 case Quondam:
                     return createMarkerOptions((QuondamPoint)point, adjusted, meta);
-                default: {
-                    TtMetadata metadata = meta.get(point.getMetadataCN());
-
-                    double x = adjusted ? point.getAdjX() : point.getUnAdjX();
-                    double y = adjusted ? point.getAdjY() : point.getUnAdjY();
-                    double z = adjusted ? point.getAdjZ() : point.getUnAdjZ();
-                    GeoPosition position = getLatLonFromPoint(point, adjusted, metadata);
-
-                    return new MarkerOptions()
-                            .title(Integer.toString(point.getPID()))
-                            .snippet(String.format("UTM X: %.3f\nUTM Y: %.3f\nElev (%s): %.1f",
-                                    x, y, metadata.getElevation().toStringAbv(), z))
-                            .position(new LatLng(position.getLatitudeSignedDecimal(), position.getLongitudeSignedDecimal()));
-                }
             }
+
+            return null;
         }
 
         public static MarkerOptions createMarkerOptions(GpsPoint point, boolean adjusted, TtMetadata meta) {
@@ -1503,7 +1516,6 @@ public class TtUtils {
 
                 double lat, lon;
 
-                //if (point.hasLatLon() && !adjusted) {
                 if (point.hasLatLon()) { //ignore adjust since gps dont adjust to new positions
                     lat = point.getLatitude();
                     lon = point.getLongitude();
@@ -1513,8 +1525,12 @@ public class TtUtils {
                     lon = position.getLongitudeSignedDecimal();
                 }
 
-                String snippet = String.format("UTM X: %.3f\nUTM Y: %.3f\nElev (%s): %.1f\n\nLat: %.4f\nLon: %.4f",
-                        x, y, meta.getElevation().toStringAbv(), z, lat, lon);
+                String snippet = String.format("UTM X: %.3f\nUTM Y: %.3f\nElev (%s): %.1f\n\nLat: %.4f\nLon: %.4f%s",
+                        x, y, meta.getElevation().toStringAbv(), Convert.distance(z, meta.getElevation(), UomElevation.Meters), lat, lon,
+                        !StringEx.isEmpty(point.getComment()) ?
+                                String.format("\n\nComment: %s", point.getComment()) :
+                                StringEx.Empty
+                );
 
 
                 MarkerOptions options = new MarkerOptions();
@@ -1550,29 +1566,23 @@ public class TtUtils {
             String sFaz = faz == null ? StringEx.Empty : String.format("%.2f", faz);
             String sBaz = baz == null ? StringEx.Empty : String.format("%.2f", baz);
 
-            /*
-            String snippetHtml = String.format("<table><tr><td>UTM X:</td><td>%.3f</td></tr>" +
-                            "<tr><td>UTM Y:</td><td>%.3f</td></tr>" +
-                            "<td>Elev (%s):</td><td>%.1f</td></tr></table>\n\n" +
-                            "<table><tr><td>Fwd Az:</td><td>%s</tr>" +
-                            "<tr><td>Bk Az:</td><td>%s</td></tr>" +
-                            "<tr><td>SlpDist (%s):</td><td>%.2f</td><tr>" +
-                            "<tr><td>Slope (%s):</td><td>%.2f</td></tr></table>",
-                    x, y, meta.getElevation().toStringAbv(), z,
-                    sFaz, baz, meta.getDistance().toString(), point.getSlopeAngle(),
-                    meta.getSlope().toStringAbv(), point.getSlopeAngle());
-            */
-
-            String snippet = String.format("UTM X: %.3f\nUTM Y: %.3f\nElev (%s): %.1f\n\nFwd Az: %s\nBk Az:   %s\nSlpDist (%s): %.2f\nSlope (%s): %.2f",
-                    x, y, meta.getElevation().toStringAbv(), z,
+            String snippet = String.format("UTM X: %.3f\nUTM Y: %.3f\nElev (%s): %.1f\n\nFwd Az: %s\nBk Az:   %s\nSlpDist (%s): %.2f\nSlope (%s): %.2f%s",
+                    x, y, meta.getElevation().toStringAbv(), Convert.distance(z, meta.getElevation(), UomElevation.Meters),
                     sFaz, sBaz, meta.getDistance().toString(), point.getSlopeAngle(),
-                    meta.getSlope().toStringAbv(), point.getSlopeAngle());
+                    meta.getSlope().toStringAbv(), point.getSlopeAngle(),
+                    !StringEx.isEmpty(point.getComment()) ?
+                    String.format("\n\nComment: %s", point.getComment()) :
+                    StringEx.Empty
+            );
 
             GeoPosition position = UTMTools.convertUTMtoLatLonSignedDec(x, y, meta.getZone());
 
             return new MarkerOptions()
                     .title(String.format("%d (%s)", point.getPID(), adjusted ? "Adj" : "UnAdj"))
-                    .snippet(String.format("%s\n\n%s", point.getOp(), snippet))
+                    .snippet(String.format("%s\n\n%s%s", point.getOp(), snippet,
+                            !StringEx.isEmpty(point.getComment()) ?
+                                    String.format("\n\nComment: %s", point.getComment()) :
+                                    StringEx.Empty))
                     .position(new LatLng(position.getLatitudeSignedDecimal(), position.getLongitudeSignedDecimal()));
         }
 
@@ -1754,15 +1764,9 @@ public class TtUtils {
                     return getInfoWindowSnippet((TravPoint) point, adjusted, meta);
                 case Quondam:
                     return getInfoWindowSnippet((QuondamPoint) point, adjusted, meta);
-                default: {
-                    double x = adjusted ? point.getAdjX() : point.getUnAdjX();
-                    double y = adjusted ? point.getAdjY() : point.getUnAdjY();
-                    double z = adjusted ? point.getAdjZ() : point.getUnAdjZ();
-
-                    return String.format("UTM X: %.3f\nUTM Y: %.3f\nElev (%s): %.1f",
-                            x, y, meta.getElevation().toStringAbv(), z);
-                }
             }
+
+            return null;
         }
 
         private static String getInfoWindowSnippet(GpsPoint point, boolean adjusted, TtMetadata meta) {
@@ -1782,7 +1786,6 @@ public class TtUtils {
 
                 double lat, lon;
 
-                //if (point.hasLatLon() && !adjusted) {
                 if (point.hasLatLon()) { //ignore adjust since gps dont adjust to new positions
                     lat = point.getLatitude();
                     lon = point.getLongitude();
@@ -1792,9 +1795,12 @@ public class TtUtils {
                     lon = position.getLongitudeSignedDecimal();
                 }
 
-                return String.format("%s\n\nUTM X: %.3f\nUTM Y: %.3f\nElev (%s): %.1f\n\nLat: %.4f\nLon: %.4f",
+                return String.format("%s\n\nUTM X: %.3f\nUTM Y: %.3f\nElev (%s): %.1f\n\nLat: %.4f\nLon: %.4f%s",
                         point.getOp().toString(),
-                        x, y, meta.getElevation().toStringAbv(), z, lat, lon);
+                        x, y, meta.getElevation().toStringAbv(), Convert.distance(z, meta.getElevation(), UomElevation.Meters), lat, lon,
+                        !StringEx.isEmpty(point.getComment()) ?
+                                String.format("\n\nComment: %s", point.getComment()) :
+                                StringEx.Empty);
             } catch (Exception ex) {
                 TtReport.writeError(ex.getMessage(), "TtUtils:getInfoWindowSnippet");
                 return null;
@@ -1813,18 +1819,24 @@ public class TtUtils {
             String sFaz = faz == null ? StringEx.Empty : String.format("%.2f", faz);
             String sBaz = baz == null ? StringEx.Empty : String.format("%.2f", baz);
 
-            return String.format("%s\n\nUTM X: %.3f\nUTM Y: %.3f\nElev (%s): %.1f\n\nFwd Az: %s\nBk Az:   %s\nSlpDist (%s): %.2f\nSlope (%s): %.2f",
+            return String.format("%s\n\nUTM X: %.3f\nUTM Y: %.3f\nElev (%s): %.1f\n\nFwd Az: %s\nBk Az:   %s\nSlpDist (%s): %.2f\nSlope (%s): %.2f%s",
                     point.getOp(),
-                    x, y, meta.getElevation().toStringAbv(), z,
+                    x, y, meta.getElevation().toStringAbv(), Convert.distance(z, meta.getElevation(), UomElevation.Meters),
                     sFaz, sBaz, meta.getDistance().toString(), point.getSlopeAngle(),
-                    meta.getSlope().toStringAbv(), point.getSlopeAngle());
+                    meta.getSlope().toStringAbv(), point.getSlopeAngle(),
+                    !StringEx.isEmpty(point.getComment()) ?
+                            String.format("\n\nComment: %s", point.getComment()) :
+                            StringEx.Empty);
         }
 
         private static String getInfoWindowSnippet(QuondamPoint point, boolean adjusted, TtMetadata meta) {
-            return String.format("%s -> %d %s",
+            return String.format("%s -> %d %s%s",
                 point.getOp().toString(),
                 point.getParentPID(),
-                getInfoWindowSnippet(point.getParentPoint(), adjusted, meta));
+                getInfoWindowSnippet(point.getParentPoint(), adjusted, meta),
+                    !StringEx.isEmpty(point.getComment()) ?
+                            String.format("\n\nComment: %s", point.getComment()) :
+                            StringEx.Empty);
         }
 
     }

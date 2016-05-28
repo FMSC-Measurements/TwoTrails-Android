@@ -50,9 +50,9 @@ import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
 import com.usda.fmsc.utilities.StringEx;
 
 public class MetadataActivity extends TtAjusterCustomToolbarActivity {
-    HashMap<String, Listener> listeners;
+    private HashMap<String, Listener> listeners;
 
-    GpsService.Listener listener;
+    private GpsService.Listener listener;
 
     private MenuItem miLock, miReset, miDelete;
 
@@ -113,9 +113,10 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
         mSectionsPagerAdapter.saveFragmentStates(false);
 
         mViewPager = (ViewPager) findViewById(R.id.metaViewPager);
-        mViewPager.setAdapter(mSectionsPagerAdapter);
-
-        mViewPager.addOnPageChangeListener(onPageChangeListener);
+        if (mViewPager != null) {
+            mViewPager.setAdapter(mSectionsPagerAdapter);
+            mViewPager.addOnPageChangeListener(onPageChangeListener);
+        }
 
         lockMetadata(true);
     }
@@ -753,7 +754,7 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
     public void btnDistClick(View view) {
         if (!_MetaLocked) {
             final EnumSelectionDialog<Dist> edialog =
-                    new EnumSelectionDialog<>(this, Dist.class);
+                    new EnumSelectionDialog<>(this, Dist.getUsedValues());
 
             edialog.setTitle(R.string.str_dist);
 
@@ -895,7 +896,7 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
         if (!_MetaLocked) {
             final InputDialog inputDialog = new InputDialog(this);
 
-            inputDialog.setTitle(R.string.meta_cmt);
+            inputDialog.setTitle(R.string.str_cmt);
             inputDialog.setInputText(_CurrentMetadata.getComment());
 
             inputDialog.setPositiveButton(R.string.str_ok, new DialogInterface.OnClickListener() {

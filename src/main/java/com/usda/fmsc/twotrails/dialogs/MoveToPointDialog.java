@@ -1,5 +1,6 @@
 package com.usda.fmsc.twotrails.dialogs;
 
+import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.app.Dialog;
@@ -13,12 +14,14 @@ import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ListView;
 
+import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.twotrails.adapters.PointDetailsAdapter;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.utilities.AppUnits;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.usda.fmsc.utilities.StringEx;
@@ -26,16 +29,15 @@ import com.usda.fmsc.utilities.StringEx;
 public class MoveToPointDialog extends DialogFragment {
 
     private int currentIndex;
-    private List<TtPoint> points;
+    private ArrayList<TtPoint> points;
     private String posBtnText, negBtnText, title;
-    ImageButton fButton, lButton;
 
     public MoveToPointDialog() {
         posBtnText = negBtnText = StringEx.Empty;
     }
 
-    DialogInterface.OnClickListener onPosClick, onNegClick, onFirstClick, onLastClick;
-    AdapterView.OnItemClickListener onItemClick;
+    private DialogInterface.OnClickListener onPosClick, onNegClick, onFirstClick, onLastClick;
+    private AdapterView.OnItemClickListener onItemClick;
 
 
     @NonNull
@@ -43,21 +45,21 @@ public class MoveToPointDialog extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
-        LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        LayoutInflater inflater = LayoutInflater.from(getContext());
 
         View view = inflater.inflate(R.layout.diag_move_to_location, null);
 
         builder.setView(view);
 
-        fButton = (ImageButton)view.findViewById(R.id.diagMoveToLocFirst);
-        lButton = (ImageButton)view.findViewById(R.id.diagMoveToLocLast);
+        ImageButton fButton = (ImageButton)view.findViewById(R.id.diagMoveToLocFirst);
+        ImageButton lButton = (ImageButton)view.findViewById(R.id.diagMoveToLocLast);
 
-        if (currentIndex < 1) {
+        if (currentIndex < 1 && fButton != null) {
             fButton.setEnabled(false);
             fButton.setAlpha(Consts.DISABLED_ALPHA);
         }
 
-        if (currentIndex > points.size() - 2) {
+        if (currentIndex > points.size() - 2 && lButton != null) {
             lButton.setEnabled(false);
             lButton.setAlpha(Consts.DISABLED_ALPHA);
         }
@@ -65,7 +67,10 @@ public class MoveToPointDialog extends DialogFragment {
 
         final ListView listView = (ListView)view.findViewById(R.id.diagEitableListListValues);
 
-        PointDetailsAdapter adapter = new PointDetailsAdapter(points, getActivity(), AppUnits.IconColor.Primary);
+        PointDetailsAdapter adapter = new PointDetailsAdapter(getActivity(), points, AppUnits.IconColor.Primary);
+        @ColorInt int transparent = AndroidUtils.UI.getColor(getContext(), android.R.color.transparent);
+        adapter.setSelectedColor(transparent);
+        adapter.setNonSelectedColor(transparent);
 
         listView.setAdapter(adapter);
 
@@ -149,7 +154,7 @@ public class MoveToPointDialog extends DialogFragment {
     }
 
 
-    public void setItems(List<TtPoint> points, int currentIndex) {
+    public void setItems(ArrayList<TtPoint> points, int currentIndex) {
         this.points = points;
         this.currentIndex = currentIndex;
     }

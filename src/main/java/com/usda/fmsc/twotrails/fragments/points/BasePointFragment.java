@@ -24,6 +24,7 @@ import com.usda.fmsc.twotrails.fragments.AnimationCardFragment;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.media.TtMedia;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
+import com.usda.fmsc.twotrails.units.OpType;
 import com.usda.fmsc.twotrails.utilities.AppUnits;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 import com.usda.fmsc.utilities.StringEx;
@@ -77,22 +78,26 @@ public abstract class BasePointFragment extends AnimationCardFragment implements
         ivOp.setImageDrawable(TtUtils.UI.getTtOpDrawable(_Point.getOp(), AppUnits.IconColor.Dark, getActivity()));
         setView();
 
-        ibBnd.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                boolean onbnd = !_Point.isOnBnd();
+        if (_Point.getOp() == OpType.WayPoint) {
+            ibBnd.setVisibility(View.INVISIBLE);
+        } else {
+            ibBnd.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    boolean onbnd = !_Point.isOnBnd();
 
-                String strBnd = onbnd ? sOnBnd : sOffBnd;
+                    String strBnd = onbnd ? sOnBnd : sOffBnd;
 
-                ibBnd.setImageDrawable(getBndDrawable(onbnd));
-                ibBnd.setContentDescription(strBnd);
+                    ibBnd.setImageDrawable(getBndDrawable(onbnd));
+                    ibBnd.setContentDescription(strBnd);
 
-                _Point.setOnBnd(onbnd);
-                activity.updatePoint(_Point);
+                    _Point.setOnBnd(onbnd);
+                    activity.updatePoint(_Point);
 
-                Toast.makeText(getContext(), strBnd, Toast.LENGTH_SHORT).show();
-            }
-        });
+                    Toast.makeText(getContext(), strBnd, Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
 
         ibBnd.setOnLongClickListener(new View.OnLongClickListener() {
             @Override

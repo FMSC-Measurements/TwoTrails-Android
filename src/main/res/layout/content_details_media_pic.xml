@@ -32,7 +32,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:shrinkColumns="1"
-            style="@style/pad8880"
+            style="@style/margin8880"
             android:layout_alignParentTop="true">
 
             <TableRow
@@ -40,14 +40,17 @@
                 android:layout_width="match_parent">
 
                 <TextView
-                    android:text="@string/pmd_name"
+                    android:text="@string/str_name"
                     android:textSize="20sp"
                     android:paddingRight="8dp"
-                    android:paddingEnd="8dp" />
+                    android:paddingEnd="8dp"
+                    android:paddingStart="0dp"
+                    android:paddingLeft="0dp" />
 
                 <EditText
                     android:id="@+id/pmdFragTxtName"
                     style="@style/AutoSelectEditTextStyle"
+                    android:inputType="text"
                     android:enabled="false" />
             </TableRow>
 
@@ -59,7 +62,9 @@
                     android:text="@string/pmd_azimuth"
                     android:textSize="20sp"
                     android:paddingRight="8dp"
-                    android:paddingEnd="8dp" />
+                    android:paddingEnd="8dp"
+                    android:paddingStart="0dp"
+                    android:paddingLeft="0dp" />
 
                 <EditText
                     android:id="@+id/pmdFragPicTxtAzimuth"
@@ -75,7 +80,9 @@
                     android:text="@string/pmd_pitch"
                     android:textSize="20sp"
                     android:paddingRight="8dp"
-                    android:paddingEnd="8dp" />
+                    android:paddingEnd="8dp"
+                    android:paddingStart="0dp"
+                    android:paddingLeft="0dp" />
 
                 <EditText
                     android:id="@+id/pmdFragPicTxtPitch"
@@ -91,7 +98,9 @@
                     android:text="@string/pmd_roll"
                     android:textSize="20sp"
                     android:paddingRight="8dp"
-                    android:paddingEnd="8dp" />
+                    android:paddingEnd="8dp"
+                    android:paddingStart="0dp"
+                    android:paddingLeft="0dp" />
 
                 <EditText
                     android:id="@+id/pmdFragPicTxtRoll"
@@ -104,10 +113,12 @@
                 android:layout_width="match_parent">
 
                 <TextView
-                    android:text="@string/pmd_file"
+                    android:text="@string/str_file"
                     android:textSize="20sp"
                     android:paddingRight="8dp"
-                    android:paddingEnd="8dp" />
+                    android:paddingEnd="8dp"
+                    android:paddingStart="0dp"
+                    android:paddingLeft="0dp"/>
 
                 <!--style="@style/EditTextStyle"-->
                 <TextView
@@ -120,7 +131,7 @@
         <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            style="@style/pad8088"
+            style="@style/margin8088"
             android:layout_below="@id/lay1"
             android:layout_alignParentBottom="true"
             android:gravity="top">
@@ -130,7 +141,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textMultiLine"
-                android:hint="@string/pmd_cmt"
+                android:hint="@string/str_cmt"
                 style="@style/EditTextStyle"
                 android:enabled="false"/>
         </android.support.design.widget.TextInputLayout>

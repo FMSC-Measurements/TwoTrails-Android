@@ -77,4 +77,13 @@ public enum Dist {
             default: throw new IllegalArgumentException();
         }
     }
+
+    public static Dist[] getUsedValues() {
+        return new Dist[] {
+                FeetTenths,
+                Meters,
+                Yards,
+                Chains
+        };
+    }
 }

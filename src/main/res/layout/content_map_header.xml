@@ -10,7 +10,8 @@
         android:layout_height="wrap_content"
         android:src="@drawable/ic_online_primary_36"
         android:layout_centerVertical="true"
-        android:padding="8dp"/>
+        android:padding="8dp"
+        android:contentDescription="@null"/>
 
     <com.usda.fmsc.android.widget.PopupMenuButton
         android:id="@+id/mhMenu"

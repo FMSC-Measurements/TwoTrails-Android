@@ -11,9 +11,9 @@
         android:id="@+id/pmdHeaderShadow"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:elevation="1dp"
         android:layout_alignParentTop="true"
-        android:background="@color/grey_400"/>
+        android:background="@color/grey_400"
+        style="@style/ToolbarElevation1"/>
 
     <com.usda.fmsc.android.widget.RecyclerViewEx
         android:id="@+id/pmdRvMedia"

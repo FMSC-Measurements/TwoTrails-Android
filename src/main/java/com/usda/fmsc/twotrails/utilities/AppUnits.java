@@ -6,6 +6,7 @@ public class AppUnits {
         Dark,
         Darker,
         White,
+        Black,
         Primary,
         PrimaryLight
     }

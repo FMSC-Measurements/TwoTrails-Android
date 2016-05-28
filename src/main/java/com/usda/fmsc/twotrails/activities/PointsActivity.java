@@ -168,7 +168,7 @@ public class PointsActivity extends CustomToolbarActivity {
                 if (slidingLayout != null && slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.COLLAPSED) {
                     loadMedia(_CurrentPoint, false);
                 } else {
-                    loadMedia(_CurrentPoint);
+                    loadMedia(_CurrentPoint, true);
                 }
             }
 
@@ -286,7 +286,7 @@ public class PointsActivity extends CustomToolbarActivity {
             switch (newState) {
                 case EXPANDED:
                     if (!mediaLoaded && _CurrentPoint != null) {
-                        loadMedia(_CurrentPoint);
+                        loadMedia(_CurrentPoint, true);
                     }
 
                     fabAqr.hide();
@@ -299,7 +299,7 @@ public class PointsActivity extends CustomToolbarActivity {
                     break;
                 case ANCHORED:
                     if (!mediaLoaded && _CurrentPoint != null) {
-                        loadMedia(_CurrentPoint);
+                        loadMedia(_CurrentPoint, true);
                     }
                 case COLLAPSED:
                 case HIDDEN:
@@ -615,6 +615,13 @@ public class PointsActivity extends CustomToolbarActivity {
                     mediaViewPager.setAdapter(mediaPagerAdapter);
                     mediaViewPager.addOnPageChangeListener(onMediaPageChangeListener);
 
+                    rvMediaAdapter.setListener(new MediaRvAdapter.MediaChangedListener() {
+                        @Override
+                        public void onNotifyDatasetChanged() {
+                            mediaPagerAdapter.notifyDataSetChanged();
+                        }
+                    });
+
                     loadMedia(_CurrentPoint, false);
                 }
             });
@@ -762,6 +769,7 @@ public class PointsActivity extends CustomToolbarActivity {
                 break;
             }
             case R.id.pointsMenuMovePoint: {
+                //TODO move points around in polygon
                 Toast.makeText(this, "Unimplemented", Toast.LENGTH_SHORT).show();
                 break;
             }
@@ -1042,7 +1050,7 @@ public class PointsActivity extends CustomToolbarActivity {
                             return true;
                         }
 
-                        Global.getDAL().updatePoint(_CurrentPoint);
+                        Global.getDAL().updatePoint(_CurrentPoint, _Points.get(_CurrentIndex));
                         updated = true;
                     } else {
                         Global.getDAL().insertPoint(_CurrentPoint);
@@ -1225,7 +1233,24 @@ public class PointsActivity extends CustomToolbarActivity {
         newPoint.setCN(java.util.UUID.randomUUID().toString());
 
         if (_CurrentPoint != null) {
-            newPoint.setOnBnd(_CurrentPoint.isOnBnd());
+            if (op != OpType.WayPoint) {
+                if (_CurrentPoint.getOp() == OpType.WayPoint) {
+                    boolean onBnd = true;
+                    for (int i = _CurrentIndex - 1; i > -1; i--) {
+                        TtPoint p = _Points.get(i);
+                        if (p.getOp() != OpType.WayPoint) {
+                            onBnd = p.isOnBnd();
+                            break;
+                        }
+                    }
+
+                    newPoint.setOnBnd(onBnd);
+                } else {
+                    newPoint.setOnBnd(_CurrentPoint.isOnBnd());
+                }
+            } else {
+                newPoint.setOnBnd(false);
+            }
         } else {
             newPoint.setOnBnd(true);
         }
@@ -1371,7 +1396,6 @@ public class PointsActivity extends CustomToolbarActivity {
         }
 
         rvMediaAdapter.remove(media);
-        mediaPagerAdapter.notifyDataSetChanged();
         mediaViewPager.setCurrentItem(index);
         setCurrentMedia(changeTo);
     }
@@ -1380,7 +1404,7 @@ public class PointsActivity extends CustomToolbarActivity {
         if (picture != null) {
             if (Global.getDAL().insertMedia(picture)) {
                 mediaSelectionIndex = TtUtils.getMediaIndex(picture, rvMediaAdapter.getItems());
-                addImageToList(picture);
+                loadImageToList(picture);
             } else {
                 Toast.makeText(PointsActivity.this, "Error saving picture", Toast.LENGTH_LONG).show();
             }
@@ -1403,7 +1427,7 @@ public class PointsActivity extends CustomToolbarActivity {
             mediaSelectionIndex = TtUtils.getMediaIndex(pictures.get(0), rvMediaAdapter.getItems());
 
             for (TtImage p : pictures) {
-                addImageToList(p);
+                loadImageToList(p);
             }
 
             if (error > 0) {
@@ -1550,7 +1574,7 @@ public class PointsActivity extends CustomToolbarActivity {
                 dialogBuilder.setTitle("Linked Points");
                 ListView listView = new ListView(this);
 
-                final PointDetailsAdapter pda = new PointDetailsAdapter(points, this, AppUnits.IconColor.Dark);
+                final PointDetailsAdapter pda = new PointDetailsAdapter(this, points, AppUnits.IconColor.Dark);
                 pda.setShowPolygonName(true);
 
                 listView.setAdapter(pda);
@@ -1563,7 +1587,7 @@ public class PointsActivity extends CustomToolbarActivity {
                 listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                        moveToPoint(pda.getPoint(i));
+                        moveToPoint(pda.getItem(i));
                         dialog.dismiss();
                     }
                 });
@@ -1793,16 +1817,11 @@ public class PointsActivity extends CustomToolbarActivity {
         }
     }
 
-    private void loadMedia(TtPoint point) {
-        loadMedia(point, true);
-    }
-
-    private void loadMedia(TtPoint point, boolean loadPoints) {
+    private void loadMedia(final TtPoint point, final boolean loadPoints) {
         if (rvMediaAdapter != null) {
             mediaViewPager.removeOnPageChangeListener(onMediaPageChangeListener);
 
             rvMediaAdapter.clear();
-            mediaPagerAdapter.notifyDataSetChanged();
 
             mediaLoaded = false;
 
@@ -1815,7 +1834,7 @@ public class PointsActivity extends CustomToolbarActivity {
 
                     Collections.sort(pictures, TtUtils.PictureTimeComparator);
                     for (final TtImage p : pictures) {
-                        addImageToList(p);
+                        loadImageToList(p);
                     }
 
                     if (mediaCount > 0)
@@ -1835,7 +1854,7 @@ public class PointsActivity extends CustomToolbarActivity {
     }
 
 
-    private void addImageToList(final TtImage picture) {
+    private void loadImageToList(final TtImage picture) {
         mediaCount++;
 
         if (picture.isFileValid()) {
@@ -1868,30 +1887,32 @@ public class PointsActivity extends CustomToolbarActivity {
     }
 
     private void addImageToList(final TtImage picture, boolean isValid, final Bitmap loadedImage) {
-        if (isValid) {
-            bitmapManager.put(picture.getFilePath(), picture.getFilePath(), AndroidUtils.UI.scaleMinBitmap(loadedImage, bitmapHeight, false), scaleOptions);
-        } else {
-            bitmapManager.put(picture.getFilePath(), Integer.toString(R.drawable.ic_error_outline_black_48dp), AndroidUtils.UI.scaleMinBitmap(loadedImage, bitmapHeight, false), scaleOptions, true);
-        }
+        if (picture.getPointCN().equals(_CurrentPoint.getCN())) {
+            if (isValid) {
+                bitmapManager.put(picture.getFilePath(), picture.getFilePath(), AndroidUtils.UI.scaleMinBitmap(loadedImage, bitmapHeight, false), scaleOptions);
+            } else {
+                bitmapManager.put(picture.getFilePath(), Integer.toString(R.drawable.ic_error_outline_black_48dp), AndroidUtils.UI.scaleMinBitmap(loadedImage, bitmapHeight, false), scaleOptions, true);
+            }
 
-        try {
-            semaphore.acquire();
+            try {
+                semaphore.acquire();
 
-            final int order = TtUtils.getMediaIndex(picture, rvMediaAdapter.getItems());
+                final int order = TtUtils.getMediaIndex(picture, rvMediaAdapter.getItems());
 
-            PointsActivity.this.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    rvMediaAdapter.add(order, picture);
+                PointsActivity.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        rvMediaAdapter.add(order, picture);
 
-                    //don't bombard the adapter with lots of changes
-                    mediaLoaderDelayedHandler.post(onMediaChanged);
+                        //don't bombard the adapter with lots of changes
+                        mediaLoaderDelayedHandler.post(onMediaChanged);
 
-                    semaphore.release();
-                }
-            });
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+                        semaphore.release();
+                    }
+                });
+            } catch (InterruptedException e) {
+                //
+            }
         }
     }
 
@@ -1902,8 +1923,6 @@ public class PointsActivity extends CustomToolbarActivity {
             PointsActivity.this.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    mediaPagerAdapter.notifyDataSetChanged();
-
                     if (mediaSelectionIndex > INVALID_INDEX && mediaSelectionIndex < rvMediaAdapter.getItemCountEx()) {
                         setCurrentMedia(rvMediaAdapter.getItem(mediaSelectionIndex));
                         rvMediaAdapter.selectItem(mediaSelectionIndex);
