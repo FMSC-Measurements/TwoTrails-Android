@@ -3,32 +3,19 @@ package com.usda.fmsc.twotrails.activities;
 
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.res.Configuration;
-import android.graphics.Color;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.Preference;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
 import android.preference.PreferenceFragment;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Toast;
 
-import com.usda.fmsc.android.AndroidUtils;
-import com.usda.fmsc.android.dialogs.InputDialog;
 import com.usda.fmsc.android.preferences.AppCompatPreferenceActivity;
 import com.usda.fmsc.twotrails.fragments.settings.PreferenceFragmentEx;
-import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.logic.SettingsLogic;
-import com.usda.fmsc.twotrails.utilities.ArcGISTools;
-import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.util.List;
 
@@ -115,7 +102,7 @@ public class PreferenceActivity extends AppCompatPreferenceActivity {
                 || DeviceSetupPreferenceFragment.class.getName().equals(fragmentName)
                 || MapPreferenceFragment.class.getName().equals(fragmentName)
                 || PointSettingsPreferenceFragment.class.getName().equals(fragmentName)
-                || DialogPreferenceFragment.class.getName().equals(fragmentName)
+                || MediaPreferenceFragment.class.getName().equals(fragmentName)
                 || MiscPreferenceFragment.class.getName().equals(fragmentName);
     }
 
@@ -143,16 +130,16 @@ public class PreferenceActivity extends AppCompatPreferenceActivity {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            addPreferencesFromResource(R.xml.pref_map_options);
+            addPreferencesFromResource(R.xml.pref_map_settings);
             setHasOptionsMenu(true);
         }
     }
 
-    public static class DialogPreferenceFragment extends PreferenceFragmentEx {
+    public static class MediaPreferenceFragment extends PreferenceFragmentEx {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            addPreferencesFromResource(R.xml.pref_diag_options);
+            addPreferencesFromResource(R.xml.pref_media_settings);
             setHasOptionsMenu(true);
         }
     }

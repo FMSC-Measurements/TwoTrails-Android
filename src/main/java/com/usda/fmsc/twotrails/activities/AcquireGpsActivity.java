@@ -11,17 +11,17 @@ import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.widget.SheetLayoutEx;
 import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.twotrails.Consts;
-import com.usda.fmsc.twotrails.Units;
 import com.usda.fmsc.twotrails.activities.base.AcquireGpsMapActivity;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.objects.GpsPoint;
+import com.usda.fmsc.twotrails.objects.points.GpsPoint;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import com.usda.fmsc.twotrails.units.MapTracking;
 import com.usda.fmsc.utilities.StringEx;
 
 public class AcquireGpsActivity extends AcquireGpsMapActivity {
@@ -53,7 +53,7 @@ public class AcquireGpsActivity extends AcquireGpsMapActivity {
                 _Bursts = new ArrayList<>();
 
                 try {
-                    _Point = (GpsPoint)intent.getSerializableExtra(Consts.Codes.Data.POINT_DATA);
+                    _Point = intent.getParcelableExtra(Consts.Codes.Data.POINT_DATA);
                     _Metadata = intent.getParcelableExtra(Consts.Codes.Data.METADATA_DATA);
 
                     setZone(_Metadata.getZone());
@@ -224,7 +224,7 @@ public class AcquireGpsActivity extends AcquireGpsMapActivity {
     }
 
     @Override
-    protected Units.MapTracking getMapTracking() {
-        return Units.MapTracking.FOLLOW;
+    protected MapTracking getMapTracking() {
+        return MapTracking.FOLLOW;
     }
 }

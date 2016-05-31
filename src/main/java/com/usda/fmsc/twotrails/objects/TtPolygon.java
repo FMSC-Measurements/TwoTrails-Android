@@ -2,15 +2,15 @@ package com.usda.fmsc.twotrails.objects;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 
 import com.usda.fmsc.twotrails.Consts;
 
 import org.joda.time.DateTime;
 
-import java.io.Serializable;
 import java.util.Comparator;
 
-public class TtPolygon implements Comparable<TtPolygon>, Comparator<TtPolygon>, Parcelable {
+public class TtPolygon extends TtObject implements Comparable<TtPolygon>, Comparator<TtPolygon>, Parcelable {
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
         @Override
         public Object createFromParcel(Parcel source) {
@@ -23,8 +23,6 @@ public class TtPolygon implements Comparable<TtPolygon>, Comparator<TtPolygon>, 
         }
     };
 
-
-    private String CN;
     private String Name;
     private DateTime Time;
 
@@ -46,7 +44,8 @@ public class TtPolygon implements Comparable<TtPolygon>, Comparator<TtPolygon>, 
     }
 
     public TtPolygon(Parcel source) {
-        CN = source.readString();
+        super(source);
+
         Name = source.readString();
         Time = (DateTime) source.readSerializable();
         Description = source.readString();
@@ -58,7 +57,7 @@ public class TtPolygon implements Comparable<TtPolygon>, Comparator<TtPolygon>, 
     }
 
     public TtPolygon(TtPolygon p) {
-        CN = p.getCN();
+        setCN(p.getCN());
         Name = p.getName();
         Description = p.getDescription();
         Accuracy = p.getAccuracy();
@@ -70,7 +69,6 @@ public class TtPolygon implements Comparable<TtPolygon>, Comparator<TtPolygon>, 
     }
 
     public TtPolygon(int pointStartIndex) {
-        this.CN = java.util.UUID.randomUUID().toString();
         this.IncrementBy = 10;
         this.PointStartIndex = pointStartIndex;
         this.Accuracy = Consts.Default_Point_Accuracy;
@@ -86,7 +84,8 @@ public class TtPolygon implements Comparable<TtPolygon>, Comparator<TtPolygon>, 
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(CN);
+        super.writeToParcel(dest, flags);
+
         dest.writeString(Name);
         dest.writeSerializable(Time);
         dest.writeString(Description);
@@ -98,14 +97,6 @@ public class TtPolygon implements Comparable<TtPolygon>, Comparator<TtPolygon>, 
     }
 
     //region Get/Set
-    public String getCN() {
-        return CN;
-    }
-
-    public void setCN(String CN) {
-        this.CN = CN;
-    }
-
     public String getName() {
         return Name;
     }
@@ -184,7 +175,7 @@ public class TtPolygon implements Comparable<TtPolygon>, Comparator<TtPolygon>, 
 
 
     @Override
-    public int compareTo(TtPolygon another) {
+    public int compareTo(@NonNull TtPolygon another) {
         return compare(this, another);
     }
 

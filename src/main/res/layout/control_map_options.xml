@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/toolbar_height"
         android:background="@color/primary_300"
-        android:elevation="5dp">
+        style="@style/ToolbarElevation4">
 
         <TextView
             android:id="@+id/mpcTvPolyName"
@@ -52,7 +52,7 @@
         <LinearLayout style="@style/mapOptCatStyle">
 
             <TextView
-                android:text="@string/map_cat_bound"
+                android:text="@string/str_bnd"
                 style="@style/mapOptCatTextStyle"/>
 
             <View style="@style/Dividers"/>
@@ -99,7 +99,7 @@
         <LinearLayout style="@style/mapOptCatStyle">
 
             <TextView
-                android:text="@string/map_cat_nav"
+                android:text="@string/str_navigation"
                 style="@style/mapOptCatTextStyle"/>
 
             <View style="@style/Dividers"/>
@@ -135,7 +135,7 @@
         <LinearLayout style="@style/mapOptCatStyle">
 
             <TextView
-                android:text="@string/map_cat_other"
+                android:text="@string/str_other"
                 style="@style/mapOptCatTextStyle"/>
 
             <View style="@style/Dividers"/>
@@ -166,6 +166,6 @@
         </LinearLayout>
     </LinearLayout>
 
-    <View style="@style/ToolbarElevation2" android:layout_below="@id/mpcLayHeader" />
+    <View style="@style/ToolbarShadowViewElevation2" android:layout_below="@id/mpcLayHeader" />
 
 </RelativeLayout>

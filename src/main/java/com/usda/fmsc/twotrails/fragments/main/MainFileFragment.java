@@ -20,11 +20,11 @@ import com.usda.fmsc.utilities.StringEx;
 
 
 public class MainFileFragment extends Fragment {
-    Button btnImport, btnDup, btnCleanDb;
-    TableLayout tblInfo;
-    TextView tvDate, tvPolys, tvPoints, tvGroups, tvMeta;
-    DataAccessLayer _dal;
-    View viewCleanDb;
+    private Button btnImport, btnDup, btnCleanDb;
+    private TableLayout tblInfo;
+    private TextView tvDate, tvPolys, tvPoints, tvGroups, tvMeta;
+    private DataAccessLayer _dal;
+    private View viewCleanDb;
 
     boolean enabled = false, viewExists = false;
 
@@ -42,7 +42,6 @@ public class MainFileFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_main_file, container, false);
         viewExists = true;
 

@@ -17,6 +17,7 @@ import android.widget.Toast;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.utilities.PostDelayHandler;
 import com.usda.fmsc.android.widget.FABProgressCircleEx;
+import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.activities.base.TtAjusterCustomToolbarActivity;
 import com.usda.fmsc.twotrails.fragments.imprt.BaseImportFragment;
 import com.usda.fmsc.twotrails.fragments.imprt.ImportGpxFragment;
@@ -29,24 +30,20 @@ import com.usda.fmsc.twotrails.utilities.Import;
 import java.util.regex.Pattern;
 
 public class ImportActivity extends TtAjusterCustomToolbarActivity {
-    private static final int OPEN_FILE = 101;
+    private FloatingActionButton fabImport;
+    private FABProgressCircleEx fabProgCircle;
 
-    FloatingActionButton fabImport;
-    FABProgressCircleEx fabProgCircle;
+    private BaseImportFragment fragment;
 
-    BaseImportFragment fragment;
+    private Activity activity;
+    private EditText txtFile;
+    private PostDelayHandler handler = new PostDelayHandler(1000);
 
-
-    PostDelayHandler handler;
-
-    String _FileName;
-
-    boolean ignoreChange, adjust;
-
-    Activity activity;
+    private boolean ignoreChange, adjust;
 
 
-    BaseImportFragment.Listener listener = new BaseImportFragment.Listener() {
+
+    private BaseImportFragment.Listener listener = new BaseImportFragment.Listener() {
         String message = null;
 
         @Override
@@ -54,18 +51,21 @@ public class ImportActivity extends TtAjusterCustomToolbarActivity {
             switch (code) {
                 case Success:
                     fabProgCircle.beginFinalAnimation();
-                    Snackbar snackbar = Snackbar.make(findViewById(R.id.parent), "File Imported", Snackbar.LENGTH_LONG)
-                            .setAction("View Map", new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    PolygonAdjuster.adjust(Global.getDAL(), activity);
-                                }
-                            })
-                            .setActionTextColor(AndroidUtils.UI.getColor(getBaseContext(), R.color.primaryLighter));
+                    View view = findViewById(R.id.parent);
+                    if (view != null) {
+                        Snackbar snackbar = Snackbar.make(view, "File Imported", Snackbar.LENGTH_LONG)
+                                .setAction("View Map", new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        PolygonAdjuster.adjust(Global.getDAL(), activity);
+                                    }
+                                })
+                                .setActionTextColor(AndroidUtils.UI.getColor(getBaseContext(), R.color.primaryLighter));
 
-                    AndroidUtils.UI.setSnackbarTextColor(snackbar, Color.WHITE);
+                        AndroidUtils.UI.setSnackbarTextColor(snackbar, Color.WHITE);
 
-                    snackbar.show();
+                        snackbar.show();
+                    }
 
                     adjust = true;
                     return;
@@ -90,7 +90,6 @@ public class ImportActivity extends TtAjusterCustomToolbarActivity {
         }
     };
 
-    EditText txtFile;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -108,13 +107,9 @@ public class ImportActivity extends TtAjusterCustomToolbarActivity {
             }
         });
 
-        //View view = findViewById(R.id.importSv);
         txtFile = (EditText)findViewById(R.id.importTxtFile);
         AndroidUtils.UI.removeSelectionOnUnfocus(txtFile);
-        //AndroidUtils.UI.hideKeyboardOnTouch(findViewById(R.id.fragmentTouchContent), txtFile);
 
-
-        handler = new PostDelayHandler(1000);
 
         txtFile.addTextChangedListener(new TextWatcher() {
             @Override
@@ -155,7 +150,7 @@ public class ImportActivity extends TtAjusterCustomToolbarActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         switch (requestCode) {
-            case OPEN_FILE: {
+            case Consts.Codes.Requests.OPEN_FILE: {
                 if (data != null) {
                     updateFileName(data.getData().getPath());
                 }
@@ -167,27 +162,26 @@ public class ImportActivity extends TtAjusterCustomToolbarActivity {
     private void updateFileName(String filename) {
         boolean fragUpdated = false;
 
-        _FileName = filename;
-        String[] parts = _FileName.split(Pattern.quote("."));
+        String[] parts = filename.split(Pattern.quote("."));
 
         if (parts.length > 1) {
             switch (parts[parts.length - 1].toLowerCase()) {
                 case "txt":
                 case "csv": {
                     if (fragment == null || !(fragment instanceof ImportTextFragment)) {
-                        fragment = ImportTextFragment.newInstance(_FileName);
+                        fragment = ImportTextFragment.newInstance(filename);
                         fragUpdated = true;
                     } else {
-                        fragment.updateFileName(_FileName);
+                        fragment.updateFileName(filename);
                     }
                     break;
                 }
                 case "gpx": {
                     if (fragment == null || !(fragment instanceof ImportGpxFragment)) {
-                        fragment = ImportGpxFragment.newInstance(_FileName);
+                        fragment = ImportGpxFragment.newInstance(filename);
                         fragUpdated = true;
                     } else {
-                        fragment.updateFileName(_FileName);
+                        fragment.updateFileName(filename);
                     }
                     break;
                 }
@@ -199,8 +193,8 @@ public class ImportActivity extends TtAjusterCustomToolbarActivity {
 
             if (fragUpdated) {
                 ignoreChange = true;
-                txtFile.setText(_FileName);
-                txtFile.setSelection(_FileName.length() - 1);
+                txtFile.setText(filename);
+                txtFile.setSelection(filename.length() - 1);
                 fragment.setListener(listener);
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContent, fragment).commit();
             }
@@ -258,6 +252,6 @@ public class ImportActivity extends TtAjusterCustomToolbarActivity {
 
     public void btnImportSelect(View view) {
         String[] extraMimes = {"file/*.csv", "file/*.gpx"};
-        AndroidUtils.App.openFileIntent(this, "file/*.txt", extraMimes, OPEN_FILE);
+        AndroidUtils.App.openFileIntent(this, "file/*.txt", extraMimes, Consts.Codes.Requests.OPEN_FILE);
     }
 }

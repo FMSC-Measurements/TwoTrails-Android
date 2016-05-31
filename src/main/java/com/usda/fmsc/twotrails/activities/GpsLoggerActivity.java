@@ -46,30 +46,32 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
 
         lvNmea = (ListView)findViewById(R.id.logLvNmea);
 
-        lvNmea.setFadingEdgeLength(0);
+        if (lvNmea != null) {
+            lvNmea.setFadingEdgeLength(0);
 
-        binder = Global.getGpsBinder();
+            binder = Global.getGpsBinder();
 
-        if (Global.Settings.DeviceSettings.isGpsConfigured()) {
-            binder.addListener(this);
-            binder.startGps();
-        }
+            if (Global.Settings.DeviceSettings.isGpsConfigured()) {
+                binder.addListener(this);
+                binder.startGps();
+            }
 
-        btnLog = (Button)findViewById(R.id.loggerBtnLog);
+            btnLog = (Button) findViewById(R.id.loggerBtnLog);
 
-        if (savedInstanceState != null) {
-            restoreState(savedInstanceState);
-        } else {
-            strings = new ArrayList<>();
-            strings.add(DateTime.now().toString());
+            if (savedInstanceState != null) {
+                restoreState(savedInstanceState);
+            } else {
+                strings = new ArrayList<>();
+                strings.add(DateTime.now().toString());
 
-            a = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, strings);
+                a = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, strings);
 
-            lvNmea.setAdapter(a);
+                lvNmea.setAdapter(a);
 
-            if (binder.isLogging()) {
-                btnLog.setText(R.string.aqr_log_pause);
-                logging = true;
+                if (binder.isLogging()) {
+                    btnLog.setText(R.string.aqr_log_pause);
+                    logging = true;
+                }
             }
         }
     }

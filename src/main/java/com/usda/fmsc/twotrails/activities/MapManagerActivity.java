@@ -28,12 +28,12 @@ import com.usda.fmsc.android.widget.SheetFab;
 import com.usda.fmsc.android.widget.layoutmanagers.LinearLayoutManagerWithSmoothScroller;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.Units;
 import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.dialogs.NewArcMapDialog;
 import com.usda.fmsc.twotrails.dialogs.SelectMapTypeDialog;
 import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
 import com.usda.fmsc.twotrails.ui.MSFloatingActionButton;
+import com.usda.fmsc.twotrails.units.MapType;
 import com.usda.fmsc.twotrails.utilities.ArcGISTools;
 import com.usda.fmsc.utilities.IListener;
 import com.usda.fmsc.utilities.StringEx;
@@ -43,20 +43,19 @@ import java.util.Collections;
 
 import jp.wasabeef.recyclerview.animators.SlideInLeftAnimator;
 
-//TODO show icon to indicate whether or not an arcgis acc is connected
 public class MapManagerActivity extends CustomToolbarActivity implements ArcGISTools.IArcToolsListener {
     private static final String SELECT_MAP = "SelectMap";
 
-    RecyclerViewEx rvMaps;
-    SheetFab fabSheet;
+    private SheetFab fabSheet;
 
-    ArcGisMapAdapter adapter;
-    ArrayList<ArcGisMapLayer> maps, visibleMaps;
+    private ArcGisMapAdapter adapter;
+    private ArrayList<ArcGisMapLayer> maps, visibleMaps;
 
-    boolean inDetails = false;
-    int notifyAdapter = -1;
+    private boolean inDetails = false;
+    private int notifyAdapter = -1;
 
 
+    @SuppressWarnings("unchecked")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -107,7 +106,7 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
         }
 
 
-        rvMaps = (RecyclerViewEx) findViewById(R.id.mmRvMaps);
+        RecyclerViewEx rvMaps = (RecyclerViewEx) findViewById(R.id.mmRvMaps);
 
         if (rvMaps != null) {
             rvMaps.setViewHasFooter(true);
@@ -213,6 +212,7 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
         switch (item.getItemId()) {
             case android.R.id.home: {
                 finish();
+                break;
             }
             case R.id.mmMenuLogin: {
                 Intent intent = new Intent(getBaseContext(), ArcGisLoginActivity.class);
@@ -225,6 +225,7 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
                 }
 
                 startActivityForResult(intent, Consts.Codes.Activites.ARC_GIS_LOGIN);
+                break;
             }
         }
 
@@ -307,7 +308,7 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
                         SelectMapTypeDialog.newInstance(maps, SelectMapTypeDialog.SelectMapMode.ALL_ARC)
                                 .setOnMapSelectedListener(new SelectMapTypeDialog.OnMapSelectedListener() {
                                     @Override
-                                    public void mapSelected(Units.MapType mapType, int mapId) {
+                                    public void mapSelected(MapType mapType, int mapId) {
                                         ArcGisMapLayer layer = ArcGISTools.getMapLayer(mapId);
 
                                         if (!layer.isOnline() && StringEx.isEmpty(layer.getUrl())) {
@@ -446,6 +447,7 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
             }
         }
 
+        @SuppressWarnings("unchecked")
         private void viewMapDetails(View view, ArcGisMapLayer agml) {
             Intent i = new Intent(MapManagerActivity.this, MapDetailsActivity.class);
             i.putExtra(Consts.Codes.Data.MAP_DATA, agml);

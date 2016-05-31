@@ -54,7 +54,6 @@ import com.usda.fmsc.geospatial.utm.UTMTools;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.Units;
 import com.usda.fmsc.twotrails.activities.SettingsActivity;
 import com.usda.fmsc.twotrails.adapters.PointDetailsAdapter;
 import com.usda.fmsc.twotrails.adapters.PolyMarkerMapRvAdapter;
@@ -64,13 +63,17 @@ import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment;
 import com.usda.fmsc.twotrails.fragments.map.ManagedSupportMapFragment;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
-import com.usda.fmsc.twotrails.objects.TtPoint;
+import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
 import com.usda.fmsc.twotrails.objects.map.PolygonDrawOptions;
 import com.usda.fmsc.twotrails.objects.map.PolygonGraphicManager;
 import com.usda.fmsc.twotrails.objects.map.TrailGraphicManager;
 import com.usda.fmsc.twotrails.ui.UnadjustedDrawable;
+import com.usda.fmsc.twotrails.units.Dist;
+import com.usda.fmsc.twotrails.units.GoogleMapType;
+import com.usda.fmsc.twotrails.units.MapTracking;
+import com.usda.fmsc.twotrails.units.MapType;
 import com.usda.fmsc.twotrails.utilities.AppUnits;
 import com.usda.fmsc.twotrails.utilities.ArcGISTools;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
@@ -90,11 +93,10 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
     private static final String MAP_TYPE = "mapType";
     private static final String SELECT_MAP = "selectMap";
 
-
     //region Vars
     private GpsService.GpsBinder binder;
 
-    private Units.MapType mapType = Units.MapType.None;
+    private MapType mapType = MapType.None;
     private int mapId;
     private Fragment mapFragment;
     private IMultiMapFragment mmFrag;
@@ -122,7 +124,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
     private boolean fromMyLoc = true;
 
     private boolean showCompass, mapMoved = true, showMyPos, polysCreated, mapHasMaxExtents;
-    private Units.MapTracking mapTracking = Units.MapTracking.FOLLOW;
+    private MapTracking mapTracking = MapTracking.FOLLOW;
     private Integer zone;
 
     private float currentDirection;
@@ -145,7 +147,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
         super.onCreate(savedInstanceState);
 
         if (savedInstanceState != null && savedInstanceState.containsKey(FRAGMENT) && savedInstanceState.containsKey(MAP_TYPE)) {
-            mapType = Units.MapType.parse(savedInstanceState.getInt(MAP_TYPE));
+            mapType = MapType.parse(savedInstanceState.getInt(MAP_TYPE));
             mapFragment = getSupportFragmentManager().getFragment(savedInstanceState, FRAGMENT);
         } else {
             mapType = Global.Settings.DeviceSettings.getMapType();
@@ -225,31 +227,16 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
             rvPolyOptions.setAdapter(pmmAdapter);
 
             slidingLayout = (SlidingUpPanelLayout)findViewById(R.id.mapSlidingPanelLayout);
-            slidingLayout.setPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
+            slidingLayout.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
                 @Override
                 public void onPanelSlide(View panel, float slideOffset) {
 
                 }
 
                 @Override
-                public void onPanelCollapsed(View panel) {
-                    if (targetLocation == null)
+                public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
+                    if (newState == SlidingUpPanelLayout.PanelState.COLLAPSED && targetLocation == null)
                         slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
-                }
-
-                @Override
-                public void onPanelExpanded(View panel) {
-
-                }
-
-                @Override
-                public void onPanelAnchored(View panel) {
-
-                }
-
-                @Override
-                public void onPanelHidden(View panel) {
-
                 }
             });
         }
@@ -292,7 +279,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
 
     private void requestOfflineMap() {
         //use empty google map while user decides
-        mapFragment = createMapFragment(Units.MapType.Google, getMapOptions(Units.MapType.Google, Units.GoogleMapType.MAP_TYPE_NONE.getValue()));
+        mapFragment = createMapFragment(MapType.Google, getMapOptions(MapType.Google, GoogleMapType.MAP_TYPE_NONE.getValue()));
         mmFrag = (IMultiMapFragment)mapFragment;
         getSupportFragmentManager().beginTransaction().add(R.id.mapContainer, mapFragment).commit();
 
@@ -306,7 +293,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
                                     SelectMapTypeDialog.SelectMapMode.ARC_OFFLINE)
                             .setOnMapSelectedListener(new SelectMapTypeDialog.OnMapSelectedListener() {
                                 @Override
-                                public void mapSelected(Units.MapType mapType, int mapId) {
+                                public void mapSelected(MapType mapType, int mapId) {
                                     setMapType(mapType, mapId);
                                 }
                             })
@@ -375,12 +362,12 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
     public boolean onCreateOptionsMenu(Menu menu) {
         miResetBounds = menu.findItem(R.id.mapMenuResetBounds);
         if (miResetBounds != null) {
-            miResetBounds.setVisible(getMapTracking() != Units.MapTracking.FOLLOW);
+            miResetBounds.setVisible(getMapTracking() != MapTracking.FOLLOW);
         }
 
         miTrackedPoly = menu.findItem(R.id.mapMenuZoomToPoly);
         if (miTrackedPoly != null) {
-            miTrackedPoly.setVisible(getMapTracking() == Units.MapTracking.POLY_BOUNDS);
+            miTrackedPoly.setVisible(getMapTracking() == MapTracking.POLY_BOUNDS);
         }
 
         miShowMyPos = menu.findItem(R.id.mapMenuShowMyPos);
@@ -577,7 +564,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
     }
 
 
-    protected Fragment createMapFragment(Units.MapType mapType, IMultiMapFragment.MapOptions options) {
+    protected Fragment createMapFragment(MapType mapType, IMultiMapFragment.MapOptions options) {
         Fragment f = null;
         switch (mapType) {
             case Google:
@@ -595,7 +582,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
         return f;
     }
 
-    protected IMultiMapFragment.MapOptions getMapOptions(Units.MapType mapType, int terrainType) {
+    protected IMultiMapFragment.MapOptions getMapOptions(MapType mapType, int terrainType) {
         Extent extents;
 
         if (mmFrag != null) {
@@ -607,15 +594,8 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
         return new IMultiMapFragment.MapOptions(terrainType, extents != null ? extents : Consts.Location.USA_BOUNDS, Consts.Location.PADDING);
     }
 
-    protected IMultiMapFragment.MapOptions getMapStartLocation(Units.MapType mapType, int terrainType) {
-        Extent extents = null;
-        //extents = Global.Settings.DeviceSettings.getLastViewedExtents();
-
-        if (extents == null) {
-            return new IMultiMapFragment.MapOptions(terrainType, Consts.Location.USA_BOUNDS, Consts.Location.PADDING);
-        }
-
-        return new IMultiMapFragment.MapOptions(terrainType, extents);
+    protected IMultiMapFragment.MapOptions getMapStartLocation(MapType mapType, int terrainType) {
+        return new IMultiMapFragment.MapOptions(terrainType, Consts.Location.USA_BOUNDS, Consts.Location.PADDING);
     }
 
 
@@ -629,7 +609,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
 
         dialog.setOnMapSelectedListener(new SelectMapTypeDialog.OnMapSelectedListener() {
             @Override
-            public void mapSelected(Units.MapType mapType, int mapId) {
+            public void mapSelected(MapType mapType, int mapId) {
                 setMapType(mapType, mapId);
             }
         });
@@ -637,7 +617,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
         dialog.show(getSupportFragmentManager(), SELECT_MAP);
     }
 
-    protected void setMapType(Units.MapType mapType, int mapId) {
+    protected void setMapType(MapType mapType, int mapId) {
         if (this.mapType == mapType) {
             if (mmFrag != null) {
                 mmFrag.setMap(mapId);
@@ -645,7 +625,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
                 throw new NullPointerException("MapFragment is null");
             }
         } else {
-            if (mapType == Units.MapType.Google && AndroidUtils.App.checkPlayServices(this, Consts.Codes.Services.REQUEST_GOOGLE_PLAY_SERVICES) != 0) {
+            if (mapType == MapType.Google && AndroidUtils.App.checkPlayServices(this, Consts.Codes.Services.REQUEST_GOOGLE_PLAY_SERVICES) != 0) {
                 throw new RuntimeException("Play Services not available");
             }
 
@@ -762,7 +742,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
     }
 
     @Override
-    public void onMapTypeChanged(Units.MapType mapType, int mapId, boolean isOnline) {
+    public void onMapTypeChanged(MapType mapType, int mapId, boolean isOnline) {
         this.mapType = mapType;
         this.mapId = mapId;
 
@@ -784,7 +764,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
         showMyPos = Global.Settings.DeviceSettings.getMapShowMyPos();
 
         if (miResetBounds != null) {
-            miResetBounds.setVisible(getMapTracking() != Units.MapTracking.FOLLOW);
+            miResetBounds.setVisible(getMapTracking() != MapTracking.FOLLOW);
         }
 
         if (miShowMyPos != null) {
@@ -792,7 +772,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
         }
 
         if (miTrackedPoly != null) {
-            miTrackedPoly.setVisible(getMapTracking() == Units.MapTracking.POLY_BOUNDS);
+            miTrackedPoly.setVisible(getMapTracking() == MapTracking.POLY_BOUNDS);
         }
 
         if (getShowMyPos()) {
@@ -832,7 +812,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
 
     public void setMapFollowMyPosition(boolean followPosition) {
         if (followPosition) {
-            mapTracking = Units.MapTracking.FOLLOW;
+            mapTracking = MapTracking.FOLLOW;
         } else {
             mapTracking = Global.Settings.DeviceSettings.getMapTrackingOption();
         }
@@ -852,16 +832,16 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
     }
 
     private void updateMapView(GeoPosition position) {
-        if (getMapTracking() == Units.MapTracking.FOLLOW) {
+        if (getMapTracking() == MapTracking.FOLLOW) {
             moveToLocation(position, true);
             mapMoved = true;
         }
 
         if (mapMoved) {
-            if (getMapTracking() == Units.MapTracking.POLY_BOUNDS && getTrackedPoly() != null) {
+            if (getMapTracking() == MapTracking.POLY_BOUNDS && getTrackedPoly() != null) {
                 moveToLocation(getTrackedPoly(), Consts.Location.PADDING, true);
                 mapMoved = false;
-            } else if (getMapTracking() == Units.MapTracking.COMPLETE_BOUNDS && getCompleteBounds() != null) {
+            } else if (getMapTracking() == MapTracking.COMPLETE_BOUNDS && getCompleteBounds() != null) {
                 moveToLocation(getCompleteBounds(), Consts.Location.PADDING, true);
                 mapMoved = false;
             }
@@ -1066,7 +1046,6 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
         setupMasterPolyControl();
     }
 
-
     View layHeader, layContent;
     MultiStateTouchCheckBox tcbPoly, tcbAdjBnd, tcbAdjNav, tcbUnAdjBnd, tcbUnAdjNav,
             tcbAdjBndPts, tcbAdjNavPts, tcbUnAdjBndPts, tcbUnAdjNavPts,
@@ -1096,8 +1075,6 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
         tcbAdjMiscPts = (MultiStateTouchCheckBox)findViewById(R.id.mpcTcbAdjMiscPts);
         tcbUnadjMiscPts = (MultiStateTouchCheckBox)findViewById(R.id.mpcTcbUnadjMiscPts);
         tcbWayPts = (MultiStateTouchCheckBox)findViewById(R.id.mpcTcbWayPts);
-
-        //ibBndMenu = (ImageButton)findViewById(R.id.mpcIbBndMenu);
 
         tcbAdjBnd.setCheckBoxDrawable(new PolygonProgressDrawable(5, 90));
         tcbUnAdjBnd.setCheckBoxDrawable(new UnadjustedDrawable());
@@ -1414,45 +1391,44 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
     }
 
     public void btnFromPointClick(View view) {
-        if (fromPoly == null) {
+        if (fromPoly == null || !polyPoints.containsKey(fromPoly.getCN())) {
             Toast.makeText(this, "Select polygon first", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        ArrayList<TtPoint> points = polyPoints.get(fromPoly);
-
-        if (points.size() > 0) {
-            AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
-
-            dialogBuilder.setTitle(String.format("From Point in %s", fromPoly.getName()));
-            ListView listView = new ListView(this);
-
-            final PointDetailsAdapter pda = new PointDetailsAdapter(points, this, AppUnits.IconColor.Dark);
-            pda.setShowPolygonName(true);
-
-            listView.setAdapter(pda);
-
-            dialogBuilder.setView(listView);
-            dialogBuilder.setNegativeButton(R.string.str_cancel, null);
-
-            final AlertDialog dialog = dialogBuilder.create();
-
-            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                    fromPoint = pda.getPoint(i);
-                    btnFromPoint.setText(StringEx.toString(fromPoint.getPID()));
-                    calculateDir();
-                    dialog.dismiss();
-                }
-            });
-
-            dialog.show();
         } else {
-            fromPoint = null;
-            calculateDir();
+            ArrayList<TtPoint> points = polyPoints.get(fromPoly.getCN());
 
-            Toast.makeText(this, "No Points in Polygon", Toast.LENGTH_SHORT).show();
+            if (points.size() > 0) {
+                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+
+                dialogBuilder.setTitle(String.format("From Point in %s", fromPoly.getName()));
+                ListView listView = new ListView(this);
+
+                final PointDetailsAdapter pda = new PointDetailsAdapter(this, points, AppUnits.IconColor.Dark);
+                pda.setShowPolygonName(true);
+
+                listView.setAdapter(pda);
+
+                dialogBuilder.setView(listView);
+                dialogBuilder.setNegativeButton(R.string.str_cancel, null);
+
+                final AlertDialog dialog = dialogBuilder.create();
+
+                listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                        fromPoint = pda.getItem(i);
+                        btnFromPoint.setText(StringEx.toString(fromPoint.getPID()));
+                        calculateDir();
+                        dialog.dismiss();
+                    }
+                });
+
+                dialog.show();
+            } else {
+                fromPoint = null;
+                calculateDir();
+
+                Toast.makeText(this, "No Points in Polygon", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -1492,12 +1468,12 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
     }
 
     public void btnToPointClick(View view) {
-        if (toPoly == null) {
+        if (toPoly == null || !polyPoints.containsKey(toPoly.getCN())) {
             Toast.makeText(this, "Select polygon first", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        ArrayList<TtPoint> points = polyPoints.get(toPoly);
+        ArrayList<TtPoint> points = polyPoints.get(toPoly.getCN());
 
         if (points.size() > 0) {
             AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
@@ -1505,7 +1481,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
             dialogBuilder.setTitle(String.format("To Point in %s", toPoly.getName()));
             ListView listView = new ListView(this);
 
-            final PointDetailsAdapter pda = new PointDetailsAdapter(points, this, AppUnits.IconColor.Dark);
+            final PointDetailsAdapter pda = new PointDetailsAdapter(this, points, AppUnits.IconColor.Dark);
             pda.setShowPolygonName(true);
 
             listView.setAdapter(pda);
@@ -1518,7 +1494,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                    toPoint = pda.getPoint(i);
+                    toPoint = pda.getItem(i);
                     btnToPoint.setText(StringEx.toString(toPoint.getPID()));
                     tvNavPid.setText(StringEx.toString(toPoint.getPID()));
                     tvNavPoly.setText(toPoint.getPolyName());
@@ -1560,7 +1536,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
 
             if (currPos != null) {
                 double distInMt = TtUtils.Math.distance(currPos.getX(), currPos.getY(), toPoint.getUnAdjX(), toPoint.getUnAdjY());
-                double distInFt = TtUtils.Convert.toFeetTenths(distInMt, Units.Dist.Meters);
+                double distInFt = TtUtils.Convert.toFeetTenths(distInMt, Dist.Meters);
 
                 double azimuth = TtUtils.Math.azimuthOfPoint(currPos.getX(), currPos.getY(), toPoint.getUnAdjX(), toPoint.getUnAdjY());
                 double azMag = azimuth - _Metadata.get(toPoint.getMetadataCN()).getMagDec();
@@ -1660,7 +1636,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
         return showMyPos;
     }
 
-    protected Units.MapTracking getMapTracking() {
+    protected MapTracking getMapTracking() {
         return mapTracking;
     }
 }

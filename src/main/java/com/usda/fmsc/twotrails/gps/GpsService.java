@@ -530,7 +530,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
                 });
 
             } catch (Exception ex) {
-
+                //
             }
         }
     }
@@ -547,7 +547,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
                 });
 
             } catch (Exception ex) {
-
+                //
             }
         }
     }
@@ -564,7 +564,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
                 });
 
             } catch (Exception ex) {
-
+                //
             }
         }
     }
@@ -645,7 +645,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
                 });
 
             } catch (Exception ex) {
-
+                //
             }
         }
     }

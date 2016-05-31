@@ -18,12 +18,14 @@ import com.usda.fmsc.android.widget.RecyclerViewEx;
 import com.usda.fmsc.android.widget.RecyclerViewEx.ViewHolderEx;
 import com.usda.fmsc.twotrails.activities.Take5Activity;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.objects.SideShotPoint;
-import com.usda.fmsc.twotrails.objects.Take5Point;
-import com.usda.fmsc.twotrails.objects.TravPoint;
+import com.usda.fmsc.twotrails.objects.points.SideShotPoint;
+import com.usda.fmsc.twotrails.objects.points.Take5Point;
+import com.usda.fmsc.twotrails.objects.points.TravPoint;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
-import com.usda.fmsc.twotrails.objects.TtPoint;
-import com.usda.fmsc.twotrails.Units;
+import com.usda.fmsc.twotrails.objects.points.TtPoint;
+import com.usda.fmsc.twotrails.units.Dist;
+import com.usda.fmsc.twotrails.units.OpType;
+import com.usda.fmsc.twotrails.units.Slope;
 import com.usda.fmsc.twotrails.utilities.AppUnits;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
@@ -153,7 +155,7 @@ public class Take5PointsEditRvAdapter extends RecyclerViewEx.BaseAdapterEx {
                         if (s.length() > 0) {
                             ssp.setSlopeAngle(TtUtils.Convert.angle(
                                     ParseEx.parseDouble(s.toString()),
-                                    Units.Slope.Percent,
+                                    Slope.Percent,
                                     metadata.getSlope()
                             ));
                         } else {
@@ -169,7 +171,7 @@ public class Take5PointsEditRvAdapter extends RecyclerViewEx.BaseAdapterEx {
                     @Override
                     public void afterTextChanged(Editable s) {
                         if (s.length() > 0) {
-                            ssp.setSlopeDistance(TtUtils.Convert.distance(ParseEx.parseDouble(s.toString()), Units.Dist.Meters, metadata.getDistance()));
+                            ssp.setSlopeDistance(TtUtils.Convert.distance(ParseEx.parseDouble(s.toString()), Dist.Meters, metadata.getDistance()));
                         } else {
                             ssp.setSlopeDistance(0);
                         }
@@ -226,7 +228,7 @@ public class Take5PointsEditRvAdapter extends RecyclerViewEx.BaseAdapterEx {
         public Take5ViewHolderEx(View itemView) {
             super(itemView);
 
-            ivOp.setImageDrawable(TtUtils.UI.getTtOpDrawable(Units.OpType.Take5, AppUnits.IconColor.Dark, activity));
+            ivOp.setImageDrawable(TtUtils.UI.getTtOpDrawable(OpType.Take5, AppUnits.IconColor.Dark, activity));
 
             tvX = (TextView)itemView.findViewById(R.id.pointCardTvX);
             tvY = (TextView)itemView.findViewById(R.id.pointCardTvY);
@@ -242,7 +244,7 @@ public class Take5PointsEditRvAdapter extends RecyclerViewEx.BaseAdapterEx {
         public SideShotViewHolderEx(View itemView) {
             super(itemView);
 
-            ivOp.setImageDrawable(TtUtils.UI.getTtOpDrawable(Units.OpType.SideShot, AppUnits.IconColor.Dark, activity));
+            ivOp.setImageDrawable(TtUtils.UI.getTtOpDrawable(OpType.SideShot, AppUnits.IconColor.Dark, activity));
 
             txtFwdAz = (EditText)itemView.findViewById(R.id.pointTravTxtAzFwd);
             txtBkAz = (EditText)itemView.findViewById(R.id.pointTravTxtAzBk);

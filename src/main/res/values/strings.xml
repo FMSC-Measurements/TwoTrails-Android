@@ -12,6 +12,7 @@
     <string name="str_new">New</string>
     <string name="str_edit">Edit</string>
     <string name="str_exit">Exit</string>
+    <string name="str_remove">Remove</string>
     <string name="str_unlock">Unlock</string>
     <string name="str_lock">Lock</string>
     <string name="str_internal">Internal</string>
@@ -22,6 +23,8 @@
     <string name="str_create">Create</string>
     <string name="str_empty"> </string>
     <string name="str_nullvalue">*</string>
+    <string name="str_view">View</string>
+    <string name="str_fullscreen">View in Gallery</string>
     <string name="str_onbnd">On Boundary</string>
     <string name="str_offbnd">Off Boundary</string>
     <string name="str_onbnd_abv">ON BND</string>
@@ -49,6 +52,8 @@
     <string name="str_lon">Longitude</string>
     <string name="str_polygons">Polygons</string>
     <string name="str_polygon">Polygon</string>
+    <string name="str_group">Group</string>
+    <string name="str_groups">Groups</string>
     <string name="str_meta">Metadata</string>
     <string name="str_project">Project</string>
     <string name="str_points">Points</string>
@@ -58,7 +63,8 @@
     <string name="str_gpx">GPX</string>
     <string name="str_summary">Summary</string>
     <string name="str_vis">Visible</string>
-    <string name="str_nav">Navigate</string>
+    <string name="str_navigate">Navigate</string>
+    <string name="str_navigation">Navigation</string>
     <string name="str_zone">Zone</string>
     <string name="str_utmx">UTM X</string>
     <string name="str_utmy">UTM Y</string>
@@ -72,6 +78,8 @@
     <string name="str_to">To</string>
     <string name="str_dist">Distance</string>
     <string name="str_az">Azimuth</string>
+    <string name="str_slp">Slope</string>
+    <string name="str_ang">Angle</string>
     <string name="str_mag">Magnetic</string>
     <string name="str_true">True</string>
     <string name="str_false">False</string>
@@ -89,13 +97,35 @@
     <string name="str_location">Location</string>
     <string name="str_url">Url</string>
     <string name="str_file">File</string>
+    <string name="str_file_name">File Name</string>
+    <string name="str_prj_name">Project Name</string>
     <string name="str_desc">Description</string>
     <string name="str_world_map">World Map</string>
     <string name="str_details">View Details</string>
     <string name="str_min">Min</string>
     <string name="str_max">Max</string>
     <string name="str_reset">Reset</string>
+    <string name="str_ft">FT</string>
+    <string name="str_mt">Mt</string>
+    <string name="str_ac">Ac</string>
+    <string name="str_ha">Ha</string>
+    <string name="str_perim">Perimeter</string>
+    <string name="str_area">Area</string>
+    <string name="str_calc">Calculate</string>
+    <string name="str_bnd">Boundary</string>
+    <string name="str_other">Other</string>
+    <string name="str_cmt">Comment</string>
+    <string name="str_help">Help</string>
+    <string name="str_select_file">Select File</string>
+    <string name="str_tilt">Tilt</string>
+    <string name="str_index">Index</string>
+    <string name="str_cn">CN</string>
+    <string name="str_test">Test</string>
 
+    <string name="zero">0</string>
+    <string name="str_x">X</string>
+    <string name="str_y">Y</string>
+    <string name="str_z">Z</string>
 
     <string name="op_gps">GPS</string>
     <string name="op_take5">Take 5</string>
@@ -128,7 +158,7 @@
     <string name="menu_points_convert_quondam">Convert Quondam</string>
     <string name="menu_points_change_polygon">Change Polygon</string>
     <string name="menu_points_setup_gps">GPS Setting</string>
-    <string name="menu_points_goto">Go To Point</string>
+    <string name="menu_points_jump">Jump To Point</string>
     <string name="menu_points_move">Move Point</string>
     <string name="menu_points_enter_latlon">Enter Lat/Lon</string>
     <string name="menu_points_recalc">Recalc NMEA</string>
@@ -155,6 +185,9 @@
     <string name="menu_table_edit_columns">Edit Columns</string>
     <string name="menu_table_edit_reset">Reset</string>
     <string name="menu_map_manager_login">Login To ArcGIS</string>
+    <string name="menu_pmd_add">Add Media</string>
+    <string name="menu_pmd_capture">Capture Media</string>
+    <string name="menu_pmd_delete">Delete Media</string>
 
 
     <!-- Transitions -->
@@ -191,6 +224,7 @@
     <string name="set_EXPORT_REPORT">prefExportReport</string>
     <string name="set_RESET">prefResetDevice</string>
     <string name="set_CODE">prefEnterCode</string>
+    <string name="set_MEDIA_COPY_TO_PROJECT">prefCopyToProject</string>
 
 
     <string name="set_settings_page">settings_page</string>
@@ -234,6 +268,8 @@
     <string name="set_AUTO_OVERWRITE_PLOTGRID_ASK">AutoOverwritePlotGridAsk</string>
     <string name="set_AUTO_SET_GPS_NAME_TO_META_ASK">AutoSetGpsNameToMetaAsk</string>
     <string name="set_AUTO_OPEN_LAST_PROJECT">AutoOpenLastProject</string>
+    <string name="set_USE_TTCAMERA_ASK">UseTtCameraAsk</string>
+    <string name="set_USE_TTCAMERA">UseTtCamera</string>
 
     <string name="set_MAP_TRACKING_OPTION">MapTrackingOption</string>
     <string name="set_MAP_ZOOM_BUTTONS">MapZoomButtons</string>
@@ -253,6 +289,8 @@
         This may be caused by a large amount of points or other variables. Would you like to continue waiting?"</string>
     <string name="diag_latlon_latDD">Latitude (XX.XXXXX)</string>
     <string name="diag_latlon_lonDD">Longitude (XXX.XXXXX)</string>
+    <string name="diag_pcp_adjpts">Adjusted Points</string>
+    <string name="diag_pcp_unadjpts">Unadjusted Points</string>
 
 
     <!-- Activity Titles -->
@@ -263,8 +301,8 @@
     <string name="title_activity_walk">Walk</string>
     <string name="title_activity_polygons">Polygons</string>
     <string name="title_activity_metadata">Metadata</string>
-    <string name="title_activity_project">Project Settings</string>
-    <string name="title_activity_table_edit">Table Edit</string>
+    <string name="title_activity_project">Project Information</string>
+    <string name="title_activity_table_edit">Table View</string>
     <string name="title_activity_map">Map</string>
     <string name="title_activity_haid">How Am I Doing</string>
     <string name="title_activity_gps_logger">GPS Logger</string>
@@ -283,19 +321,17 @@
     <string name="main_tab_tools">TOOLS</string>
     <string name="main_tab_devices">GPS/RangeFinder</string>
 
-    <string name="main_btn_new">New</string>
-    <string name="main_btn_open">Open</string>
     <string name="main_btn_open_rec">Opened Recently</string>
     <string name="main_btn_import">Import</string>
     <string name="main_btn_duplicate">Duplicate</string>
     <string name="main_btn_exit">Exit</string>
     <string name="main_btn_clean">Clean DB</string>
 
-    <string name="main_btn_point_edit">Point Edit</string>
-    <string name="main_btn_poly_edit">Polygon Edit</string>
-    <string name="main_btn_meta_edit">Metadata Edit</string>
+    <string name="main_btn_point_edit">Points</string>
+    <string name="main_btn_poly_edit">Polygons</string>
+    <string name="main_btn_meta_edit">Metadata</string>
     <string name="main_btn_proj_info">Project Info</string>
-    <string name="main_btn_table_edit">Table Edit</string>
+    <string name="main_btn_table_edit">Table View</string>
 
     <string name="main_btn_gearth">Google Earth</string>
     <string name="main_btn_haid">How am I Doing</string>
@@ -306,16 +342,10 @@
     <string name="main_btn_gps_log">GPS Logger</string>
     <string name="main_btn_map_manager">Map Manager</string>
 
-
     <string name="main_tv_edited">Last Edited</string>
-    <string name="main_tv_polys">Polygons</string>
-    <string name="main_tv_groups">Groups</string>
-    <string name="main_tv_points">Points</string>
-    <string name="main_tv_meta">Metadata</string>
+
 
     <!-- Polygon -->
-    <string name="poly_name">Name</string>
-    <string name="poly_desc">Description</string>
     <string name="poly_acc">Accuracy</string>
     <string name="poly_inc">Increment Amount</string>
     <string name="poly_psi">Point Start Index</string>
@@ -335,23 +365,20 @@
     <string name="meta_range_finder">Range Finder</string>
     <string name="meta_compass">Compass</string>
     <string name="meta_crew">Crew</string>
-    <string name="meta_cmt">Comment</string>
+    <string name="meta_dist">Distance:</string>
+    <string name="meta_elev">Elevation:</string>
     <string name="meta_reset_diag">This will reset this metadata back to all its original values.</string>
 
 
     <!-- Points -->
-    <string name="points_aqr_gps">Acquire</string>
-    <!--<string name="points_aqr_walk">Walk</string>-->
-    <!--<string name="points_aqr_take5">Take 5</string>-->
     <string name="points_aqr_diag_title">Current Point has NMEA</string>
-    <string name="points_aqr_diag_gps_msg">The current point has NMEA data associated with it. Would you like to overwrite or add to this data.</string>
+    <string name="points_aqr_diag_gps_msg">The current point has a value which may have NMEA data associated with it. Would you like to overwrite or add to this data.</string>
     <string name="points_aqr_diag_add">ADD</string>
     <string name="points_aqr_diag_overwrite">OVERWRITE</string>
     <string name="points_aqr_diag_delete">Delete NMEA</string>
     <string name="points_aqr_diag_del_msg">Continuing will delete the NMEA data for this current point.</string>
     <string name="points_aqr_diag_t5_msg">The current point has NMEA data associated with it. Would you like to overwrite this data.</string>
     <string name="points_pid">PID</string>
-    <string name="points_cmt">Comment</string>
     <string name="points_meta_header">Meta:</string>
     <string name="points_gps_nssda">NSSDA</string>
     <string name="points_gps_rmser">RMSEr</string>
@@ -361,30 +388,33 @@
     <string name="points_gps_manacc">Mannual Accuracy</string>
     <string name="point_trav_az_fwd">Fwd</string>
     <string name="points_trav_az_bk">Back</string>
-    <string name="points_trav_slope">Slope</string>
-    <string name="points_trav_slope_dist">Distance</string>
-    <string name="points_trav_slope_angle">Angle</string>
     <string name="points_trav_mag">Mag Dec</string>
     <string name="points_reset_diag">This will reset this point back to all its original values.</string>
+    <string name="points_camera_diag">This device can use the built in TwoTrails camera that can capture the direction of the camera when a photo is taken. Would you like to use it or another camera app?</string>
 
+    <!-- Points Media -->
+    <string name="pmd_pitch">Pitch</string>
+    <string name="pmd_roll">Roll</string>
+    <string name="pmd_azimuth">Azimuth</string>
 
     <!-- Acquire -->
     <string name="aqr_log">Log</string>
     <string name="aqr_log_pause">Pause</string>
-    <string name="aqr_calc">Calcualate</string>
+    <string name="aqr_logged">Logged:</string>
+    <string name="aqr_recv">:Received</string>
 
     <!-- Calculate -->
-    <string name="calc_calc">Calcualate</string>
     <string name="calc_nssda">NSSDA %</string>
-    <string name="calc_group">Group</string>
     <string name="calc_uvx">00000.00</string>
     <string name="calc_uvy">000000.00</string>
     <string name="calc_uvn">00.00</string>
+    <string name="calc_filters">Filters</string>
+    <string name="calc_fix">Fix:</string>
+    <string name="calc_gs">Group Size</string>
+    <string name="calc_range">Range</string>
 
 
     <!-- Take 5 -->
-    <string name="t5_ss">SideShot</string>
-    <string name="t5_t5">Take 5</string>
     <string name="t5_add_ss">Add SS</string>
 
 
@@ -393,9 +423,7 @@
 
 
     <!-- HAID -->
-    <string name="haid_menu_item_help">Help</string>
     <string name="haid_menu_show_points">Show Points</string>
-    <string name="haid_menu_name">Polygons</string>
     <string name="haid_help_text">-GPS Error can be divided by 2 if an appropriate
         ANGLE POINT METHOD is used instead of the WALK METHOD.\n\n-Appropriate means that
         the boundary legs are reasonably long between vertices where the boundary
@@ -411,17 +439,14 @@
     <string name="logger_ltf">Log to File</string>
 
     <!-- Map -->
-    <string name="map_cat_bound">Boundary</string>
-    <string name="map_cat_nav">Navigation</string>
-    <string name="map_cat_other">Other</string>
-
     <string name="map_adj_bnd">Adjusted Boundary Polygon</string>
     <string name="map_adj_bnd_pts">Adjusted Boundary Points</string>
     <string name="map_unadj_bnd">Unadjusted Boundary Polygon</string>
     <string name="map_unadj_bnd_pts">Unadjusted Boundary Points</string>
-    <string name="map_bnd_menu">More Options</string>
+    <string name="map_menu_extra_options">More Options</string>
     <string name="map_menu_close_adj_bnd">Close Adjusted Boundary</string>
     <string name="map_menu_close_unadj_bnd">Close Unadjusted Boundary</string>
+    <string name="map_menu_colors">Color Settings</string>
 
     <string name="map_adj_nav">Adjusted Navigation Polygon</string>
     <string name="map_adj_nav_pts">Adjusted Navigation Points</string>
@@ -437,7 +462,25 @@
     <!-- Plot Grid -->
     <string name="pg_points_loc">Points Location</string>
     <string name="pg_sample_type">Sample Type</string>
+    <string name="pg_startpt">Sample Type</string>
+    <string name="pg_ss">SubSample</string>
+    <string name="pg_gi">Grid Interval</string>
 
+
+    <!-- Import/Export -->
+    <string name="imp_pts">Points:</string>
+    <string name="imp_adv_impt">Advanced Import</string>
+    <string name="imp_poly_name">Polygon Name</string>
+    <string name="imp_grp_name">Group Name</string>
+    <string name="imp_time">Time</string>
+    <string name="imp_man_acc">Manual Acc (M)</string>
+    <string name="imp_fwd_az">Forward Azimuth</string>
+    <string name="imp_bk_az">Backward Azimuth</string>
+    <string name="imp_slp_dist">Slope Distance</string>
+    <string name="imp_slp_dist_type">Slope Distance Type</string>
+    <string name="imp_slp_ang">Slope Angle</string>
+    <string name="imp_slp_ang_type">Slope Angle Type</string>
+    <string name="imp_pcn">Parent CN</string>
 
     <!-- EditArcMap -->
     <string name="amd_update_path">Update File Path</string>
@@ -731,7 +774,6 @@
     <string name="error_invalid_password">This password is too short</string>
     <string name="error_incorrect_password">This password is incorrect</string>
     <string name="error_field_required">This field is required</string>
-    <string name="permission_rationale">"Contacts permissions are needed for providing email
-        completions."
+    <string name="permission_rationale">"Contacts permissions are needed for providing email completions."
     </string>
 </resources>

@@ -5,21 +5,33 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.Nullable;
 
+import com.usda.fmsc.geospatial.EastWest;
+import com.usda.fmsc.geospatial.NorthSouth;
+import com.usda.fmsc.geospatial.UomElevation;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
-import com.usda.fmsc.twotrails.objects.GpsPoint;
-import com.usda.fmsc.twotrails.objects.QuondamPoint;
-import com.usda.fmsc.twotrails.objects.TravPoint;
+import com.usda.fmsc.twotrails.objects.media.TtMedia;
+import com.usda.fmsc.twotrails.objects.media.TtImage;
+import com.usda.fmsc.twotrails.objects.points.GpsPoint;
+import com.usda.fmsc.twotrails.objects.points.QuondamPoint;
+import com.usda.fmsc.twotrails.objects.points.TravPoint;
 import com.usda.fmsc.twotrails.objects.TtGroup;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
-import com.usda.fmsc.twotrails.objects.TtPoint;
+import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
-import com.usda.fmsc.twotrails.Units;
 import com.usda.fmsc.twotrails.objects.map.PolygonGraphicOptions;
+import com.usda.fmsc.twotrails.units.Datum;
+import com.usda.fmsc.twotrails.units.DeclinationType;
+import com.usda.fmsc.twotrails.units.Dist;
+import com.usda.fmsc.twotrails.units.MediaType;
+import com.usda.fmsc.twotrails.units.OpType;
+import com.usda.fmsc.twotrails.units.PictureType;
+import com.usda.fmsc.twotrails.units.Slope;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
 import java.io.File;
@@ -31,16 +43,23 @@ import java.util.List;
 import com.usda.fmsc.geospatial.GeoPosition;
 import com.usda.fmsc.geospatial.nmea.sentences.GGASentence;
 import com.usda.fmsc.geospatial.nmea.sentences.GSASentence;
-import com.usda.fmsc.geospatial.Units.*;
 import com.usda.fmsc.utilities.FileUtils;
 import com.usda.fmsc.utilities.ParseEx;
 import com.usda.fmsc.utilities.StringEx;
 
 public class DataAccessLayer {
-    private static DateTimeFormatter dtf = Consts.DateTimeFormatter;
+    private static DateTimeFormatter dtf = DateTimeFormat.forPattern("M/d/yyyy h:mm:ss.SSS");
 
     public String getFilePath() {
         return _FilePath;
+    }
+
+    private String _FileName;
+    public String getFileName() {
+        if (_FileName == null) {
+            _FileName = FileUtils.getFileNameWoType(_FilePath);
+        }
+        return _FileName;
     }
 
     public File getDBFile() { return _dbFile; }
@@ -117,6 +136,8 @@ public class DataAccessLayer {
             CreateTtNmeaTable();
             CreateGroupTable();
             CreatePolygonAttrTable();
+            CreateMediaTable();
+            CreatePictureTable();
 
             SetupProjInfo();
             insertMetadata(Global.getDefaultMeta());
@@ -245,6 +266,30 @@ public class DataAccessLayer {
             throw ex;
         }
     }
+
+    private void CreateMediaTable() {
+        try
+        {
+            _db.execSQL(TwoTrailsSchema.MediaSchema.CreateTable);
+        }
+        catch (Exception ex)
+        {
+            TtUtils.TtReport.writeError(ex.getMessage(), "DataAccessLayer:CreateMediaTable");
+            throw ex;
+        }
+    }
+
+    private void CreatePictureTable() {
+        try
+        {
+            _db.execSQL(TwoTrailsSchema.PictureSchema.CreateTable);
+        }
+        catch (Exception ex)
+        {
+            TtUtils.TtReport.writeError(ex.getMessage(), "DataAccessLayer:CreatePictureTable");
+            throw ex;
+        }
+    }
     //endregion
 
 
@@ -263,7 +308,7 @@ public class DataAccessLayer {
     }
 
     public TtPolygon getPolygonByCN(String cn) {
-        ArrayList<TtPolygon> polys = getPolygons(String.format("CN = '%s'", cn));
+        ArrayList<TtPolygon> polys = getPolygons(String.format("_CN = '%s'", cn));
 
         if(polys != null && polys.size() > 0)
             return polys.get(0);
@@ -274,9 +319,11 @@ public class DataAccessLayer {
         ArrayList<TtPolygon> polys = new ArrayList<>();
 
         try {
-            String query = String.format("select * from %s%s order by datetime(%s) asc",
-                    TwoTrailsSchema.PolygonSchema.TableName,
-                    StringEx.isEmpty(where) ? StringEx.Empty : String.format(" where %s", where),
+            String query = String.format("%s order by datetime(%s) asc",
+                    createSelectQuery(
+                            TwoTrailsSchema.PolygonSchema.TableName,
+                            TwoTrailsSchema.PolygonSchema.SelectItems,
+                            where),
                     TwoTrailsSchema.PolygonSchema.TimeCreated);
 
             Cursor c = _db.rawQuery(query, null);
@@ -451,6 +498,13 @@ public class DataAccessLayer {
                 TwoTrailsSchema.PointSchema.PolyCN, polyCN));
     }
 
+    public ArrayList<TtPoint> getBoundaryPointsInPolygon(String polyCN) {
+        return getPoints(String.format("%s = '%s' and %s != '%s' and %s = true",
+                TwoTrailsSchema.PointSchema.PolyCN, polyCN,
+                TwoTrailsSchema.PointSchema.Operation, OpType.WayPoint.toString(),
+                TwoTrailsSchema.PointSchema.OnBoundary));
+    }
+
     public ArrayList<TtPoint> getPointsWithMeta(String metaCN) {
         return getPoints(String.format("%s = '%s'",
                 TwoTrailsSchema.PointSchema.MetadataCN, metaCN));
@@ -459,10 +513,10 @@ public class DataAccessLayer {
     public ArrayList<TtPoint> getGpsTypePointsWithMeta(String metaCN) {
         return getPoints(String.format("%s = '%s' and %s = '%s' or %s = '%s' or %s = '%s' or %s = '%s'",
                 TwoTrailsSchema.PointSchema.MetadataCN, metaCN,
-                TwoTrailsSchema.PointSchema.Operation, Units.OpType.GPS.toString(),
-                TwoTrailsSchema.PointSchema.Operation, Units.OpType.Walk.toString(),
-                TwoTrailsSchema.PointSchema.Operation, Units.OpType.Take5.toString(),
-                TwoTrailsSchema.PointSchema.Operation, Units.OpType.WayPoint.toString()));
+                TwoTrailsSchema.PointSchema.Operation, OpType.GPS.toString(),
+                TwoTrailsSchema.PointSchema.Operation, OpType.Walk.toString(),
+                TwoTrailsSchema.PointSchema.Operation, OpType.Take5.toString(),
+                TwoTrailsSchema.PointSchema.Operation, OpType.WayPoint.toString()));
     }
 
     public ArrayList<TtPoint> getPointsInGroup(String groupCN) {
@@ -483,7 +537,8 @@ public class DataAccessLayer {
         ArrayList<TtPoint> points = new ArrayList<>();
 
         try {
-            String query = String.format("select * from %s%s order by %s, %s %s",
+            String query = String.format("select %s from %s%s order by %s, %s %s",
+                    TwoTrailsSchema.PointSchema.SelectItems,
                     TwoTrailsSchema.PointSchema.TableName,
                     StringEx.isEmpty(where) ? StringEx.Empty : String.format(" where %s", where),
                     TwoTrailsSchema.PointSchema.PolyName,
@@ -498,7 +553,7 @@ public class DataAccessLayer {
                 do {
 
                     if(!c.isNull(7)) {
-                        point = TtUtils.getPointByOpType(Units.OpType.parse(c.getString(7)));
+                        point = TtUtils.getPointByOpType(OpType.parse(c.getString(7)));
                     } else {
                         throw new Exception("Point has no OpType");
                     }
@@ -568,7 +623,7 @@ public class DataAccessLayer {
                         getGpsPointData(point);
                     else if (point.isTravType())
                         getTravPointData(point);
-                    else if (point.getOp() == Units.OpType.Quondam)
+                    else if (point.getOp() == OpType.Quondam)
                         getQuondamPointData(point);
 
                     points.add(point);
@@ -598,7 +653,8 @@ public class DataAccessLayer {
         GpsPoint g = (GpsPoint)point;
 
         try {
-            String query = String.format("select * from %s where %s = '%s'",
+            String query = String.format("select %s from %s where %s = '%s'",
+                    TwoTrailsSchema.GpsPointSchema.SelectItems,
                     TwoTrailsSchema.GpsPointSchema.TableName,
                     TwoTrailsSchema.SharedSchema.CN,
                     g.getCN());
@@ -628,7 +684,8 @@ public class DataAccessLayer {
         TravPoint t = (TravPoint)point;
 
         try {
-            String query = String.format("select * from %s where %s = '%s'",
+            String query = String.format("select %s from %s where %s = '%s'",
+                    TwoTrailsSchema.TravPointSchema.SelectItems,
                     TwoTrailsSchema.TravPointSchema.TableName,
                     TwoTrailsSchema.SharedSchema.CN,
                     t.getCN());
@@ -658,7 +715,8 @@ public class DataAccessLayer {
         QuondamPoint q = (QuondamPoint)point;
 
         try {
-            String query = String.format("select * from %s where %s = '%s'",
+            String query = String.format("select %s from %s where %s = '%s'",
+                    TwoTrailsSchema.QuondamPointSchema.SelectItems,
                     TwoTrailsSchema.QuondamPointSchema.TableName,
                     TwoTrailsSchema.SharedSchema.CN,
                     q.getCN());
@@ -766,7 +824,7 @@ public class DataAccessLayer {
             cvs.put(TwoTrailsSchema.PointSchema.GroupName, point.getGroupName());
             cvs.put(TwoTrailsSchema.PointSchema.GroupCN, point.getGroupCN());
 
-            cvs.put(TwoTrailsSchema.PointSchema.Time, dtf.print(point.getTime()));
+            cvs.put(TwoTrailsSchema.PointSchema.CreationTime, dtf.print(point.getTime()));
 
             if (point.hasQuondamLinks()) {
                 cvs.put(TwoTrailsSchema.PointSchema.QuondamLinks, point.getLinkedPointsString());
@@ -854,13 +912,22 @@ public class DataAccessLayer {
 
     //region Update
 
-    public boolean updatePoint(TtPoint updatedPoint) {
+
+    public boolean updatePoint(GpsPoint updatedPoint) {
+        return updatePointSame(updatedPoint);
+    }
+
+    public boolean updatePoint(TravPoint updatedPoint) {
+        return updatePointSame(updatedPoint);
+    }
+
+    private boolean updatePointSame(TtPoint updatedPoint) {
         boolean success = false;
 
         try {
             _db.beginTransaction();
 
-            success = updateBasePoint(updatedPoint);
+            success = updateBasePoint(updatedPoint, updatedPoint);
 
             if(success)
                 _db.setTransactionSuccessful();
@@ -897,7 +964,7 @@ public class DataAccessLayer {
             _db.beginTransaction();
 
             for(TtPoint point : updatedPoints) {
-                success = updateBasePoint(point);
+                success = updateBasePoint(point, point);
 
                 if(!success)
                     break;
@@ -939,10 +1006,6 @@ public class DataAccessLayer {
             _db.endTransaction();
         }
         return success;
-    }
-
-    private boolean updateBasePoint(TtPoint updatedPoint) {
-        return updateBasePoint(updatedPoint, updatedPoint);
     }
 
     private boolean updateBasePoint(TtPoint updatedPoint, TtPoint oldPoint) {
@@ -1262,7 +1325,7 @@ public class DataAccessLayer {
     }
 
     public TtMetadata getMetadataByCN(String cn) {
-        ArrayList<TtMetadata> metas = getMetadata(String.format("CN = '%s'", cn));
+        ArrayList<TtMetadata> metas = getMetadata(String.format("_CN = '%s'", cn));
 
         if(metas != null && metas.size() > 0)
             return metas.get(0);
@@ -1273,7 +1336,11 @@ public class DataAccessLayer {
         ArrayList<TtMetadata> metas = new ArrayList<>();
 
         try {
-            String query = createSelectQuery(TwoTrailsSchema.MetadataSchema.TableName, where);
+            String query = createSelectQuery(
+                    TwoTrailsSchema.MetadataSchema.TableName,
+                    TwoTrailsSchema.MetadataSchema.SelectItems,
+                    where);
+
 
             Cursor c = _db.rawQuery(query, null);
 
@@ -1288,19 +1355,19 @@ public class DataAccessLayer {
                     if (!c.isNull(1))
                         meta.setName(c.getString(1));
                     if (!c.isNull(2))
-                        meta.setDistance(Units.Dist.valueOf(c.getString(2)));
+                        meta.setDistance(Dist.valueOf(c.getString(2)));
                     if (!c.isNull(3))
-                        meta.setSlope(Units.Slope.valueOf(c.getString(3)));
+                        meta.setSlope(Slope.valueOf(c.getString(3)));
                     if (!c.isNull(4))
                         meta.setMagDec(c.getDouble(4));
                     if (!c.isNull(5))
-                        meta.setDecType(Units.DeclinationType.valueOf(c.getString(5)));
+                        meta.setDecType(DeclinationType.valueOf(c.getString(5)));
                     if (!c.isNull(6))
                         meta.setElevation(UomElevation.valueOf(c.getString(6)));
                     if (!c.isNull(7))
                         meta.setComment(c.getString(7));
                     if (!c.isNull(8))
-                        meta.setDatum(Units.Datum.valueOf(c.getString(8)));
+                        meta.setDatum(Datum.valueOf(c.getString(8)));
                     if (!c.isNull(9))
                         meta.setGpsReceiver(c.getString(9));
                     if (!c.isNull(10))
@@ -1479,7 +1546,11 @@ public class DataAccessLayer {
         ArrayList<TtGroup> groups = new ArrayList<>();
 
         try {
-            String query = createSelectQuery(TwoTrailsSchema.GroupSchema.TableName, where);
+
+            String query = createSelectQuery(
+                            TwoTrailsSchema.GroupSchema.SelectItems,
+                            TwoTrailsSchema.GroupSchema.TableName,
+                            where);
 
             Cursor c = _db.rawQuery(query, null);
 
@@ -1620,7 +1691,10 @@ public class DataAccessLayer {
         ArrayList<TtNmeaBurst> nmeas = new ArrayList<>();
 
         try {
-            String query = createSelectQuery(TwoTrailsSchema.TtNmeaSchema.TableName, where);
+            String query = createSelectQuery(
+                    TwoTrailsSchema.TtNmeaSchema.TableName,
+                    TwoTrailsSchema.TtNmeaSchema.SelectItems,
+                    where);
 
             Cursor c = _db.rawQuery(query, null);
 
@@ -1639,7 +1713,6 @@ public class DataAccessLayer {
                     GGASentence.GpsFixType fixQuality;
                     int trackedSatellites, numberOfSatellitesInView;
                     UomElevation geoUom;
-                    //List<Satellite> satellites;
 
                     double lat, lon, elev;
                     NorthSouth latDir;
@@ -1774,8 +1847,6 @@ public class DataAccessLayer {
                     //endregion
 
                     //region SatInfo
-                    //24 not needed
-
                     if (!c.isNull(25))
                         trackedSatellites = c.getInt(25);
                     else
@@ -1793,28 +1864,11 @@ public class DataAccessLayer {
                             satsUsed.add(ParseEx.parseInteger(prn));
                         }
                     }
-
-//                    satellites = new ArrayList<>();
-//
-//                    try {
-//                        for (int i = 28; i < 76; i += 4) {
-//                            if (!c.isNull(i) && !c.isNull(i + 1) && !c.isNull(i + 2) && !c.isNull(i + 3)) {
-//                                satellites.add(new Satellite(
-//                                    c.getInt(i),
-//                                    c.getFloat(i + 1),
-//                                    c.getFloat(i + 2),
-//                                    c.getFloat(i + 3)
-//                                ));
-//                            }
-//                        }
-//                    } catch (Exception e) {
-//                        e.printStackTrace();
-//                    }
                     //endregion
 
                     nmeas.add(new TtNmeaBurst(cn, timeCreated, pointCN, used, new GeoPosition(lat, latDir, lon, lonDir, elev, uomelev), fixTime, groundSpeed,
                             trackAngle, magVar, magVarDir, mode, fix, satsUsed, pdop, hdop, vdop, fixQuality,
-                            trackedSatellites, horizDilution, geoidHeight, geoUom, numberOfSatellitesInView));//, satellites
+                            trackedSatellites, horizDilution, geoidHeight, geoUom, numberOfSatellitesInView));
                 } while (c.moveToNext());
             }
 
@@ -1901,7 +1955,7 @@ public class DataAccessLayer {
             cvs.put(TwoTrailsSchema.TtNmeaSchema.GeiodHeight, burst.getGeoidHeight());
             cvs.put(TwoTrailsSchema.TtNmeaSchema.GeiodHeightUom, burst.getGeoUom().toStringAbv());
             cvs.put(TwoTrailsSchema.TtNmeaSchema.GroundSpeed, burst.getGroundSpeed());
-            cvs.put(TwoTrailsSchema.TtNmeaSchema.Track_Angle, burst.getTrackAngle());
+            cvs.put(TwoTrailsSchema.TtNmeaSchema.TrackAngle, burst.getTrackAngle());
 
             cvs.put(TwoTrailsSchema.TtNmeaSchema.SatellitesUsedCount, burst.getUsedSatellitesCount());
             cvs.put(TwoTrailsSchema.TtNmeaSchema.SatellitesTrackedCount, burst.getTrackedSatellitesCount());
@@ -1999,7 +2053,7 @@ public class DataAccessLayer {
             cvs.put(TwoTrailsSchema.TtNmeaSchema.GeiodHeight, burst.getGeoidHeight());
             cvs.put(TwoTrailsSchema.TtNmeaSchema.GeiodHeightUom, burst.getGeoUom().toStringAbv());
             cvs.put(TwoTrailsSchema.TtNmeaSchema.GroundSpeed, burst.getGroundSpeed());
-            cvs.put(TwoTrailsSchema.TtNmeaSchema.Track_Angle, burst.getTrackAngle());
+            cvs.put(TwoTrailsSchema.TtNmeaSchema.TrackAngle, burst.getTrackAngle());
 
             cvs.put(TwoTrailsSchema.TtNmeaSchema.SatellitesUsedCount, burst.getUsedSatellitesCount());
             cvs.put(TwoTrailsSchema.TtNmeaSchema.SatellitesTrackedCount, burst.getTrackedSatellitesCount());
@@ -2222,8 +2276,7 @@ public class DataAccessLayer {
 
     //region Polygon Attr
     //region Get
-    public ArrayList<PolygonGraphicOptions> getPolygonGraphicOptions()
-    {
+    public ArrayList<PolygonGraphicOptions> getPolygonGraphicOptions() {
         return getPolygonGraphicOptions(null);
     }
 
@@ -2241,12 +2294,12 @@ public class DataAccessLayer {
         ArrayList<PolygonGraphicOptions> graphicOptions = new ArrayList<>();
 
         try {
-            String query = createSelectQuery(TwoTrailsSchema.GroupSchema.TableName, where);
+            String query = createSelectQuery(
+                    TwoTrailsSchema.PolygonAttrSchema.TableName,
+                    TwoTrailsSchema.PolygonAttrSchema.SelectItems,
+                    where);
 
             Cursor c = _db.rawQuery(query, null);
-
-            PolygonGraphicOptions master = Global.MapSettings.getMasterPolyGraphicOptions();
-
             String cn;
             int adjbnd, unadjbnd, adjnav, unadjnav, adjpts, unadjpts, waypts;
 
@@ -2261,42 +2314,43 @@ public class DataAccessLayer {
                     if (!c.isNull(1))
                         adjbnd = c.getInt(1);
                     else
-                        adjbnd = master.getAdjBndColor();
+                        adjbnd = Global.MapSettings.defaults.getDefaultAdjBndColor();
 
                     if (!c.isNull(2))
                         unadjbnd = c.getInt(2);
                     else
-                        unadjbnd = master.getUnAdjBndColor();
+                        unadjbnd = Global.MapSettings.defaults.getDefaultUnAdjBndColor();
 
                     if (!c.isNull(3))
                         adjnav = c.getInt(3);
                     else
-                        adjnav = master.getAdjNavColor();
+                        adjnav = Global.MapSettings.defaults.getDefaultAdjNavColor();
 
                     if (!c.isNull(4))
                         unadjnav = c.getInt(4);
                     else
-                        unadjnav = master.getUnAdjNavColor();
+                        unadjnav = Global.MapSettings.defaults.getDefaultUnAdjNavColor();
 
                     if (!c.isNull(5))
                         adjpts = c.getInt(5);
                     else
-                        adjpts = master.getAdjPtsColor();
+                        adjpts = Global.MapSettings.defaults.getDefaultAdjPtsColor();
 
                     if (!c.isNull(6))
                         unadjpts = c.getInt(6);
                     else
-                        unadjpts = master.getUnAdjPtsColor();
+                        unadjpts = Global.MapSettings.defaults.getDefaultUnAdjPtsColor();
 
                     if (!c.isNull(7))
                         waypts = c.getInt(7);
                     else
-                        waypts = master.getWayPtsColor();
+                        waypts = Global.MapSettings.defaults.getDefaultWayPtsColor();
 
                     graphicOptions.add(
                             new PolygonGraphicOptions(cn,
                                     adjbnd, unadjbnd, adjnav, unadjnav, adjpts, unadjpts, waypts,
-                                    master.getAdjWidth(), master.getUnAdjWidth())
+                                    Global.Settings.DeviceSettings.getMapAdjLineWidth(),
+                                    Global.Settings.DeviceSettings.getMapUnAdjLineWidth())
                     );
                 } while (c.moveToNext());
             }
@@ -2313,7 +2367,7 @@ public class DataAccessLayer {
 
     public HashMap<String, PolygonGraphicOptions> getPolygonGraphicOptionsMap() {
         HashMap<String, PolygonGraphicOptions> pgos = new HashMap<>();
-        for(PolygonGraphicOptions pgo : getPolygonGraphicOptions()) {
+        for (PolygonGraphicOptions pgo : getPolygonGraphicOptions()) {
             pgos.put(pgo.getCN(), pgo);
         }
         return  pgos;
@@ -2399,8 +2453,311 @@ public class DataAccessLayer {
     //endregion
 
 
+    //region Media
+    //region Get
+    public ArrayList<TtImage> getPictureByCN(String cn) {
+        return getPictures(
+                String.format("%s.%s = '%s'",
+                    TwoTrailsSchema.MediaSchema.TableName,
+                    TwoTrailsSchema.SharedSchema.CN,
+                    cn),
+                0);
+    }
+
+    public ArrayList<TtImage> getPicturesInPoint(String pointCN) {
+        return getPictures(
+                String.format("%s = '%s'",
+                        TwoTrailsSchema.MediaSchema.PointCN,
+                        pointCN),
+                0);
+    }
+
+    public ArrayList<TtImage> getPicturesInPolygon(String polygonCN) {
+        StringBuilder sb = new StringBuilder();
+
+        for (String cn : getCNs(TwoTrailsSchema.PointSchema.TableName,
+                String.format("%s = '%s'", TwoTrailsSchema.PointSchema.PolyCN, polygonCN))) {
+            sb.append(String.format("%s = '%s' or ", TwoTrailsSchema.MediaSchema.PointCN, cn));
+        }
+
+        if (sb.length() < 1)
+            return new ArrayList<>();
+
+        return getPictures(sb.substring(0, sb.length() - 5), 0);
+    }
+
+    public ArrayList<TtImage> getPicturesInGroup(String groupCN) {
+        StringBuilder sb = new StringBuilder();
+
+        for (String cn : getCNs(TwoTrailsSchema.PointSchema.TableName,
+                String.format("%s = '%s'", TwoTrailsSchema.PointSchema.GroupCN, groupCN))) {
+            sb.append(String.format("%s = '%s' or ", TwoTrailsSchema.MediaSchema.PointCN, cn));
+        }
+
+        if (sb.length() < 1)
+            return new ArrayList<>();
+
+        return getPictures(sb.substring(0, sb.length() - 5), 0);
+    }
+
+    private ArrayList<TtImage> getPictures(String where, int limit) {
+        ArrayList<TtImage> pictures = new ArrayList<>();
+
+        try {
+            String query = String.format("%s where %s = %d%s order by datetime(%s) asc %s",
+                    SelectPictures,
+                    TwoTrailsSchema.MediaSchema.MediaType,
+                    MediaType.Picture.getValue(),
+                    StringEx.isEmpty(where) ? StringEx.Empty : String.format(" and %s", where),
+                    TwoTrailsSchema.MediaSchema.CreationTime,
+                    limit > 0 ? " limit " + limit : StringEx.Empty);
+
+            Cursor c = _db.rawQuery(query, null);
+
+            TtImage pic;
+
+            if (c.moveToFirst()) {
+                do {
+                    if(!c.isNull(7)) {
+                        pic = TtUtils.getPictureByType(PictureType.parse(c.getInt(7)));
+                    } else {
+                        throw new Exception("Picture has no PictureType");
+                    }
+
+                    if (!c.isNull(0))
+                        pic.setCN(c.getString(0));
+                    else
+                        throw new Exception("Picture has no CN");
+
+                    if (!c.isNull(1))
+                        pic.setPointCN(c.getString(1));
+
+                    if (!c.isNull(3))
+                        pic.setName(c.getString(3));
+
+                    if (!c.isNull(4))
+                        pic.setFilePath(c.getString(4));
+
+                    if (!c.isNull(5))
+                        pic.setTimeCreated(dtf.parseDateTime(c.getString(5)));
+
+                    if (!c.isNull(6))
+                        pic.setComment(c.getString(6));
+
+                    if (!c.isNull(8))
+                        pic.setAzimuth(c.getFloat(8));
+
+                    if (!c.isNull(9))
+                        pic.setPitch(c.getFloat(9));
+
+                    if (!c.isNull(10))
+                        pic.setRoll(c.getFloat(10));
+
+                    pictures.add(pic);
+                } while (c.moveToNext());
+            }
+
+            c.close();
+        } catch (Exception ex) {
+            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:getPictures");
+            return null;
+        }
+
+        return pictures;
+    }
+    //endregion
+
+    //region Insert
+    public boolean insertMedia(TtMedia media) {
+        boolean success = false;
+
+        if (media == null)
+            return false;
+
+        try {
+            _db.beginTransaction();
+
+            success = insertBaseMedia(media);
+
+            if(success)
+                _db.setTransactionSuccessful();
+        } catch (Exception ex) {
+            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:insertMedia");
+            success = false;
+        } finally {
+            _db.endTransaction();
+        }
+
+        return success;
+    }
+
+    private boolean insertBaseMedia(TtMedia media) {
+        boolean result = true;
+
+        try {
+            ContentValues cvs = new ContentValues();
+
+            cvs.put(TwoTrailsSchema.SharedSchema.CN, media.getCN());
+            cvs.put(TwoTrailsSchema.MediaSchema.PointCN, media.getPointCN());
+            cvs.put(TwoTrailsSchema.MediaSchema.MediaType, media.getMediaType().getValue());
+            cvs.put(TwoTrailsSchema.MediaSchema.Name, media.getName());
+            cvs.put(TwoTrailsSchema.MediaSchema.FilePath, media.getFilePath());
+            cvs.put(TwoTrailsSchema.MediaSchema.Comment, media.getComment());
+            cvs.put(TwoTrailsSchema.MediaSchema.CreationTime, dtf.print(media.getTimeCreated()));
+
+            _db.insert(TwoTrailsSchema.MediaSchema.TableName, null, cvs);
+
+            switch (media.getMediaType()) {
+                case Picture:
+                    result = insertPictureData((TtImage)media);
+                    break;
+                case Video:
+                    break;
+            }
+        } catch (Exception ex) {
+            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:insertBaseMedia");
+            result = false;
+        }
+
+        return result;
+    }
+
+    private boolean insertPictureData(TtImage picture) {
+        try {
+            ContentValues cvs = new ContentValues();
+
+            cvs.put(TwoTrailsSchema.SharedSchema.CN, picture.getCN());
+            cvs.put(TwoTrailsSchema.PictureSchema.PicType, picture.getPictureType().getValue());
+            cvs.put(TwoTrailsSchema.PictureSchema.Azimuth, picture.getAzimuth());
+            cvs.put(TwoTrailsSchema.PictureSchema.Pitch, picture.getPitch());
+            cvs.put(TwoTrailsSchema.PictureSchema.Roll, picture.getRoll());
+
+            _db.insert(TwoTrailsSchema.PictureSchema.TableName, null, cvs);
+
+        } catch (Exception ex) {
+            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:insertPictureData");
+            return false;
+        }
+
+        return true;
+    }
+    //endregion
+
+    //region Update
+    public boolean updateMedia(TtMedia media) {
+        boolean success = false;
+
+        if (media == null)
+            return false;
+
+        try {
+            _db.beginTransaction();
+
+            success = updateBaseMedia(media);
+
+            if(success)
+                _db.setTransactionSuccessful();
+        } catch (Exception ex) {
+            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:updateMedia");
+            success = false;
+        } finally {
+            _db.endTransaction();
+        }
+
+        return success;
+    }
+
+    private boolean updateBaseMedia(TtMedia media) {
+        try {
+            ContentValues cvs = new ContentValues();
+
+            cvs.put(TwoTrailsSchema.MediaSchema.PointCN, media.getPointCN());
+            cvs.put(TwoTrailsSchema.MediaSchema.Name, media.getName());
+            cvs.put(TwoTrailsSchema.MediaSchema.FilePath, media.getFilePath());
+            cvs.put(TwoTrailsSchema.MediaSchema.Comment, media.getComment());
+
+            _db.update(TwoTrailsSchema.MediaSchema.TableName, cvs,
+                    TwoTrailsSchema.SharedSchema.CN + "=?", new String[] { media.getCN() });
+
+            switch (media.getMediaType()) {
+                case Picture:
+                    updatePictureData((TtImage)media);
+                    break;
+                case Video:
+                    break;
+            }
+        } catch (Exception ex) {
+            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:updateBaseMedia");
+            return false;
+        }
+
+        return true;
+    }
+
+    private void updatePictureData(TtImage picture) {
+        try {
+            ContentValues cvs = new ContentValues();
+
+            cvs.put(TwoTrailsSchema.PictureSchema.Azimuth, picture.getAzimuth());
+            cvs.put(TwoTrailsSchema.PictureSchema.Pitch, picture.getPitch());
+            cvs.put(TwoTrailsSchema.PictureSchema.Roll, picture.getRoll());
+
+            _db.update(TwoTrailsSchema.PictureSchema.TableName, cvs,
+                    TwoTrailsSchema.SharedSchema.CN + "=?", new String[]{ picture.getCN() });
+
+        } catch (Exception ex) {
+            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:insertPictureData");
+        }
+    }
+    //endregion
+
+    //region Delete
+    public boolean deleteMedia(TtMedia media) {
+        boolean success = false;
+        String cn = media.getCN();
+
+        try {
+            success = _db.delete(TwoTrailsSchema.MediaSchema.TableName,
+                    TwoTrailsSchema.SharedSchema.CN + "=?",
+                    new String[] { cn }) > 0;
+
+            if (success) {
+                switch (media.getMediaType()) {
+                    case Picture:
+                        removePictureData((TtImage)media);
+                        break;
+                    case Video:
+                        break;
+                }
+            }
+        } catch (Exception ex) {
+            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:deleteMedia");
+        }
+
+        return success;
+    }
+    
+    private void removePictureData(TtImage picture) {
+        try {
+            _db.delete(TwoTrailsSchema.PictureSchema.TableName,
+                    TwoTrailsSchema.SharedSchema.CN + "=?",
+                    new String[] { picture.getCN() });
+        } catch (Exception ex) {
+            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:removePictureData");
+        }
+    }
+    //endregion
+    //endregion
+
+
     //region DbTools
-    private String createSelectQuery(String table, String where) {
+    private String createSelectQuery(String table, String items, String where) {
+        return String.format("select %s from %s%s",
+                items, table, StringEx.isEmpty(where) ? StringEx.Empty : String.format(" where %s", where));
+    }
+
+
+    private String createSelectAllQuery(String table, String where) {
         return String.format("select * from %s%s",
                 table, StringEx.isEmpty(where) ?
                         StringEx.Empty : String.format(" where %s", where));
@@ -2423,10 +2780,30 @@ public class DataAccessLayer {
         return count;
     }
 
-    public int getItemsCount(String tableName, String limiter, String value) {
+    public int getItemsCount(String tableName, String column, int value) {
+        String countQuery = String.format("SELECT COUNT (*) FROM %s where %s = %d",
+                tableName,
+                column,
+                value);
+
+        Cursor cursor = _db.rawQuery(countQuery, null);
+
+        int count = 0;
+        if (null != cursor) {
+            if (cursor.getCount() > 0) {
+                cursor.moveToFirst();
+                count = cursor.getInt(0);
+            }
+
+            cursor.close();
+        }
+        return count;
+    }
+
+    public int getItemsCount(String tableName, String column, String value) {
         String countQuery = String.format("SELECT COUNT (*) FROM %s where %s = '%s'",
                 tableName,
-                limiter,
+                column,
                 value);
 
         Cursor cursor = _db.rawQuery(countQuery, null);
@@ -2493,6 +2870,32 @@ public class DataAccessLayer {
         return true;
     }
 
+    public ArrayList<String> getCNs(String tableName, String where) {
+        ArrayList<String> cns = new ArrayList<>();
+
+        try {
+            String query = String.format("select %s from %s%s",
+                    TwoTrailsSchema.SharedSchema.CN,
+                    tableName,
+                    StringEx.isEmpty(where) ? StringEx.Empty : String.format(" where %s", where));
+
+            Cursor c = _db.rawQuery(query, null);
+
+            if (c.moveToFirst()) {
+                do {
+                    if (!c.isNull(0))
+                        cns.add(c.getString(0));
+                } while (c.moveToNext());
+            }
+
+            c.close();
+        } catch (Exception ex) {
+            //
+        }
+
+        return cns;
+    }
+
     public void clean() {
         StringBuilder sbPoly = new StringBuilder();
         StringBuilder sbPoint = new StringBuilder();
@@ -2508,28 +2911,7 @@ public class DataAccessLayer {
             ));
         }
 
-        ArrayList<String> pointCNs = new ArrayList<>();
-
-        try {
-            String query = String.format("select %s from %s where %s",
-                    TwoTrailsSchema.SharedSchema.CN,
-                    TwoTrailsSchema.PointSchema.TableName,
-                    sbPoly.toString());
-
-            Cursor c = _db.rawQuery(query, null);
-
-            if (c.moveToFirst()) {
-                do {
-                    if (!c.isNull(0))
-                        pointCNs.add(c.getString(0));
-                } while (c.moveToNext());
-            }
-
-            c.close();
-        } catch (Exception ex) {
-            //
-        }
-
+        ArrayList<String> pointCNs = getCNs(TwoTrailsSchema.PointSchema.TableName, sbPoly.toString());
         ArrayList<String> pointDeleteQuerys = new ArrayList<>();
         ArrayList<String> nmeaDeleteQuerys = new ArrayList<>();
 
@@ -2572,8 +2954,23 @@ public class DataAccessLayer {
                 _db.delete(TwoTrailsSchema.TtNmeaSchema.TableName, nmeaDeleteQuerys.get(i), null);
             }
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:deleteNmea");
+            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:clean");
         }
     }
+    //endregion
+
+    //region Select Statements
+    private static final String SelectPictures = String.format("select %s.%s, %s from %s left join %s on %s.%s = %s.%s",
+            TwoTrailsSchema.MediaSchema.TableName,
+            TwoTrailsSchema.MediaSchema.SelectItems,
+            TwoTrailsSchema.PictureSchema.SelectItemsNoCN,
+            TwoTrailsSchema.MediaSchema.TableName,
+            TwoTrailsSchema.PictureSchema.TableName,
+            TwoTrailsSchema.MediaSchema.TableName,
+            TwoTrailsSchema.SharedSchema.CN,
+            TwoTrailsSchema.PictureSchema.TableName,
+            TwoTrailsSchema.SharedSchema.CN);
+
+    //private static final String SelectPoints = String.format("");
     //endregion
 }

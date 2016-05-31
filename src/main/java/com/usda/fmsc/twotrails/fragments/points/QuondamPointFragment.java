@@ -16,14 +16,16 @@ import com.usda.fmsc.android.adapters.SelectableStringArrayAdapter;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.objects.QuondamPoint;
-import com.usda.fmsc.twotrails.objects.TtPoint;
+import com.usda.fmsc.twotrails.adapters.PointDetailsAdapter;
+import com.usda.fmsc.twotrails.objects.points.QuondamPoint;
+import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
-import com.usda.fmsc.twotrails.Units;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import com.usda.fmsc.twotrails.units.OpType;
+import com.usda.fmsc.twotrails.utilities.AppUnits;
 import com.usda.fmsc.utilities.ParseEx;
 import com.usda.fmsc.utilities.StringEx;
 
@@ -43,22 +45,19 @@ public class QuondamPointFragment extends BasePointFragment {
 
     private QuondamPoint _Quondam;
 
-    SelectableStringArrayAdapter polysAdapter, pointsAdapter;
+    SelectableStringArrayAdapter polysAdapter;
+    PointDetailsAdapter pointsAdapter;
 
 
 
-    public static QuondamPointFragment newInstance(String pointCN) {
-        QuondamPointFragment fragment = new QuondamPointFragment();
-        Bundle args = new Bundle();
-        args.putString(POINT_CN, pointCN);
-        fragment.setArguments(args);
-        return fragment;
+    public static QuondamPointFragment newInstance(QuondamPoint point) {
+        return newInstance(point, false);
     }
 
-    public static QuondamPointFragment newInstance(String pointCN, boolean hidden) {
+    public static QuondamPointFragment newInstance(QuondamPoint point, boolean hidden) {
         QuondamPointFragment fragment = new QuondamPointFragment();
         Bundle args = new Bundle();
-        args.putString(POINT_CN, pointCN);
+        args.putParcelable(POINT, point);
         args.putBoolean(HIDDEN, hidden);
         fragment.setArguments(args);
         return fragment;
@@ -125,6 +124,10 @@ public class QuondamPointFragment extends BasePointFragment {
                     if (points != null && !settingView) {
                         TtPoint parent = points.get(index);
 
+                        if (parent.getOp() == OpType.Quondam) {
+                            parent = ((QuondamPoint)parent).getParentPoint();
+                        }
+
                         if (!_Quondam.hasParent() || _Quondam.getParentPID() != parent.getPID()) {
                             selectedPoint = parent;
                             _Quondam.setParentPoint(parent);
@@ -156,13 +159,8 @@ public class QuondamPointFragment extends BasePointFragment {
                         value = ParseEx.parseDouble(s.toString());
                     }
 
-                    //Double ma = _GpsPoint.getManualAccuracy();
-
-                    //if ((value == null ^ ma == null) ||
-                    //value != null && !TtUtils.Math.cmpa(value, ma)) {
                     _Quondam.setManualAccuracy(value);
                     getPointsActivity().updatePoint(_Quondam);
-                    //}
                 }
             }
         });
@@ -237,29 +235,33 @@ public class QuondamPointFragment extends BasePointFragment {
 
     @SuppressWarnings("unchecked")
     private void setPoints(int index) {
-        ArrayList<String> pids = new ArrayList<>();
+        ArrayList<TtPoint> points = new ArrayList<>();
 
         if (_Points[index] == null) {
             ArrayList<TtPoint> tmpPoints = new ArrayList<>();
             for (TtPoint point : Global.getDAL().getPointsInPolygon(_Polygons.get(index).getCN())) {
-                if (point.getOp() != Units.OpType.Quondam && point.getOp() != Units.OpType.WayPoint) {
-                    tmpPoints.add(point);
-                    pids.add(StringEx.toString(point.getPID()));
+                if (point.getOp() != OpType.WayPoint) {
+                    if (point.getOp() != OpType.Quondam || !point.getCN().equals(_Quondam.getCN())) {
+                        tmpPoints.add(point);
+                        points.add(point);
+                    }
                 }
             }
 
             _Points[index] = tmpPoints;
         }
 
-        if (pids.size() < 1) {
+        if (points.size() < 1) {
             for (TtPoint point : (ArrayList<TtPoint>) _Points[index]) {
-                pids.add(StringEx.toString(point.getPID()));
+                points.add(point);
             }
         }
+        pointsAdapter = new PointDetailsAdapter(getActivity(), points, AppUnits.IconColor.Black);
 
-        pointsAdapter = new SelectableStringArrayAdapter(getActivity(), android.R.layout.simple_list_item_1, pids);
         pointsAdapter.setSelectedColor(selectedColor);
         pointsAdapter.setNonSelectedColor(nonSelectedColor);
+
+        pointsAdapter.setShowQuondamLinks(true);
 
         lvPoints.setAdapter(pointsAdapter);
     }

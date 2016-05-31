@@ -9,7 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.objects.TtPoint;
+import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.utilities.AppUnits;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
@@ -84,7 +84,7 @@ public class PointDetailsSpinnerAdapter extends BaseAdapter {
         DropDownViewHolder mViewHolder;
 
         if(convertView == null) {
-            convertView = inflater.inflate(R.layout.content_details_points_ops, null);
+            convertView = inflater.inflate(R.layout.content_details_points_ops, parent, false);
             mViewHolder = new DropDownViewHolder();
             convertView.setTag(mViewHolder);
 

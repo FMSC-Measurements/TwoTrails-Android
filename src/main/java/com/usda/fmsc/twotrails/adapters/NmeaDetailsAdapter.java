@@ -37,7 +37,7 @@ public class NmeaDetailsAdapter extends ArrayAdapter<NmeaDetailsAdapter.NmeaDeta
         NmeaDetails details = getItem(position);
 
         if (convertView == null) {
-            convertView = inflater.inflate(R.layout.list_row_nmea_info, null);
+            convertView = inflater.inflate(R.layout.list_row_nmea_info, parent, false);
             holder = new ViewHolder(convertView);
             convertView.setTag(holder);
         } else {

@@ -33,10 +33,11 @@ import com.usda.fmsc.twotrails.logic.PointNamer;
 import com.usda.fmsc.twotrails.objects.FilterOptions;
 import com.usda.fmsc.twotrails.objects.TtGroup;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
-import com.usda.fmsc.twotrails.objects.TtPoint;
+import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
-import com.usda.fmsc.twotrails.objects.WalkPoint;
-import com.usda.fmsc.twotrails.Units;
+import com.usda.fmsc.twotrails.objects.points.WalkPoint;
+import com.usda.fmsc.twotrails.units.MapTracking;
+import com.usda.fmsc.twotrails.units.OpType;
 import com.usda.fmsc.twotrails.utilities.AppUnits;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
@@ -85,7 +86,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
             if (intent != null && intent.getExtras() != null) {
                 try {
                     if (intent.getExtras().containsKey(Consts.Codes.Data.POINT_DATA)) {
-                        _PrevPoint = (TtPoint) intent.getSerializableExtra(Consts.Codes.Data.POINT_DATA);
+                        _PrevPoint = intent.getParcelableExtra(Consts.Codes.Data.POINT_DATA);
                         onBnd = _PrevPoint.isOnBnd();
                     }
 
@@ -130,10 +131,14 @@ public class WalkActivity extends AcquireGpsMapActivity {
             ibBnd = (ImageButton)findViewById(R.id.pointHeaderIbBnd);
 
             ImageView ivOp = (ImageView)findViewById(R.id.pointHeaderIvOp);
-            TextView tvElevType = (TextView)findViewById(R.id.pointCardTvElevType);
+            if (ivOp != null) {
+                ivOp.setImageDrawable(TtUtils.UI.getTtOpDrawable(OpType.Walk, AppUnits.IconColor.Dark, this));
+            }
 
-            ivOp.setImageDrawable(TtUtils.UI.getTtOpDrawable(Units.OpType.Walk, AppUnits.IconColor.Dark, this));
-            tvElevType.setText(_Metadata.getElevation().toString());
+            TextView tvElevType = (TextView)findViewById(R.id.pointCardTvElevType);
+            if (tvElevType != null) {
+                tvElevType.setText(_Metadata.getElevation().toString());
+            }
 
             dOnBnd = AndroidUtils.UI.getDrawable(this, R.drawable.ic_onbnd_dark);
             dOffBnd = AndroidUtils.UI.getDrawable(this, R.drawable.ic_offbnd_dark);
@@ -492,7 +497,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
         lastPointCreationTime = 0;
 
         if (menuCreated) {
-            TtUtils.UI.disableMenuItem(miRenameGroup);
+            AndroidUtils.UI.disableMenuItem(miRenameGroup);
             miWalking.setVisible(true);
             adWalking.start();
         }
@@ -511,7 +516,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
         walking = false;
 
         if (menuCreated) {
-            TtUtils.UI.enableMenuItem(miRenameGroup);
+            AndroidUtils.UI.enableMenuItem(miRenameGroup);
             miWalking.setVisible(false);
             adWalking.stop();
         }
@@ -559,7 +564,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
 
 
     @Override
-    protected Units.MapTracking getMapTracking() {
-        return mapViewMode ? Units.MapTracking.NONE : Units.MapTracking.FOLLOW;
+    protected MapTracking getMapTracking() {
+        return mapViewMode ? MapTracking.NONE : MapTracking.FOLLOW;
     }
 }

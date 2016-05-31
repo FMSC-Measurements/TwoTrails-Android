@@ -3,7 +3,6 @@ package com.usda.fmsc.twotrails.fragments.points;
 
 import android.os.Bundle;
 import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,13 +11,13 @@ import android.widget.TextView;
 
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.listeners.SimpleTextWatcher;
+import com.usda.fmsc.geospatial.UomElevation;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.objects.GpsPoint;
-import com.usda.fmsc.twotrails.objects.TtPoint;
+import com.usda.fmsc.twotrails.objects.points.GpsPoint;
+import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
-import com.usda.fmsc.geospatial.Units;
 import com.usda.fmsc.utilities.ParseEx;
 import com.usda.fmsc.utilities.StringEx;
 
@@ -31,14 +30,14 @@ public class GPSPointFragment extends BasePointFragment {
     private GpsPoint _GpsPoint;
 
 
-    public static GPSPointFragment newInstance(String pointCN) {
-        return newInstance(pointCN, false);
+    public static GPSPointFragment newInstance(GpsPoint point) {
+        return newInstance(point, false);
     }
 
-    public static GPSPointFragment newInstance(String pointCN, boolean hidden) {
+    public static GPSPointFragment newInstance(GpsPoint point, boolean hidden) {
         GPSPointFragment fragment = new GPSPointFragment();
         Bundle args = new Bundle();
-        args.putString(POINT_CN, pointCN);
+        args.putParcelable(POINT, point);
         args.putBoolean(HIDDEN, hidden);
         fragment.setArguments(args);
         return fragment;
@@ -58,7 +57,7 @@ public class GPSPointFragment extends BasePointFragment {
 
     @Override
     public View onCreateViewEx(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_points_gpspoint_card, null);
+        View view = inflater.inflate(R.layout.fragment_points_gpspoint_card, container, false);
 
         txtX = (EditText)view.findViewById(R.id.pointsFragGpsTxtX);
         txtY = (EditText)view.findViewById(R.id.pointsFragGpsTxtY);
@@ -123,7 +122,7 @@ public class GPSPointFragment extends BasePointFragment {
                     }
 
                     //if (value != null) {
-                        value = TtUtils.Convert.distance(value, Units.UomElevation.Meters, getMetadata().getElevation());
+                        value = TtUtils.Convert.distance(value, UomElevation.Meters, getMetadata().getElevation());
 
                         //if (!TtUtils.Math.cmpa(value, _GpsPoint.getUnAdjZ())) {
                             _GpsPoint.setUnAdjZ(value);
@@ -195,7 +194,7 @@ public class GPSPointFragment extends BasePointFragment {
         txtY.setText(StringEx.toString(TtUtils.Math.round(_GpsPoint.getUnAdjY(), Consts.Minimum_Point_Display_Digits)));
 
         txtElev.setText(StringEx.toString(TtUtils.Math.round(
-                TtUtils.Convert.distance(_GpsPoint.getUnAdjZ(), getMetadata().getElevation(), Units.UomElevation.Meters),
+                TtUtils.Convert.distance(_GpsPoint.getUnAdjZ(), getMetadata().getElevation(), UomElevation.Meters),
                 Consts.Minimum_Point_Display_Digits
         )));
 

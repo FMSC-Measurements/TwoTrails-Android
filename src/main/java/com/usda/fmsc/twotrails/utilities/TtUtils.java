@@ -1,16 +1,19 @@
 package com.usda.fmsc.twotrails.utilities;
 
+import android.content.ClipData;
 import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
+import android.media.ExifInterface;
+import android.net.Uri;
 import android.os.Build;
-import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 
 import com.usda.fmsc.android.AndroidUtils;
@@ -27,40 +30,45 @@ import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment;
 import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.objects.FilterOptions;
-import com.usda.fmsc.twotrails.objects.GpsPoint;
+import com.usda.fmsc.twotrails.objects.media.TtMedia;
+import com.usda.fmsc.twotrails.objects.media.TtPanorama;
+import com.usda.fmsc.twotrails.objects.media.TtPhotoSphere;
+import com.usda.fmsc.twotrails.objects.media.TtImage;
+import com.usda.fmsc.twotrails.objects.media.TtVideo;
+import com.usda.fmsc.twotrails.objects.points.GpsPoint;
 import com.usda.fmsc.twotrails.objects.PointD;
-import com.usda.fmsc.twotrails.objects.QuondamPoint;
-import com.usda.fmsc.twotrails.objects.SideShotPoint;
-import com.usda.fmsc.twotrails.objects.Take5Point;
-import com.usda.fmsc.twotrails.objects.TravPoint;
+import com.usda.fmsc.twotrails.objects.points.QuondamPoint;
+import com.usda.fmsc.twotrails.objects.points.SideShotPoint;
+import com.usda.fmsc.twotrails.objects.points.Take5Point;
+import com.usda.fmsc.twotrails.objects.points.TravPoint;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
-import com.usda.fmsc.twotrails.objects.TtPoint;
-import com.usda.fmsc.twotrails.objects.WalkPoint;
-import com.usda.fmsc.twotrails.objects.WayPoint;
-import com.usda.fmsc.twotrails.Units;
-import com.usda.fmsc.twotrails.Units.Dist;
-import com.usda.fmsc.twotrails.Units.OpType;
-import com.usda.fmsc.twotrails.Units.Slope;
+import com.usda.fmsc.twotrails.objects.points.TtPoint;
+import com.usda.fmsc.twotrails.objects.points.WalkPoint;
+import com.usda.fmsc.twotrails.objects.points.WayPoint;
 
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
 import com.usda.fmsc.geospatial.GeoPosition;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.geospatial.utm.UTMTools;
-import com.usda.fmsc.geospatial.Units.UomElevation;
+import com.usda.fmsc.geospatial.UomElevation;
+import com.usda.fmsc.twotrails.units.Dist;
+import com.usda.fmsc.twotrails.units.DopType;
+import com.usda.fmsc.twotrails.units.OpType;
+import com.usda.fmsc.twotrails.units.PictureType;
+import com.usda.fmsc.twotrails.units.Slope;
 import com.usda.fmsc.utilities.FileUtils;
+import com.usda.fmsc.utilities.ParseEx;
 import com.usda.fmsc.utilities.StringEx;
 
 
@@ -74,21 +82,21 @@ public class TtUtils {
         //region Coeff
         private final static double HA_Coeff = 2.471;
 
-        private final static double FeetToMeters_Coeff = 1200.0 / 3937.0; //0.3048;
-        private final static double YardsToMeters_Coeff = FeetToMeters_Coeff * 3.0; //0.9144;
-        private final static double ChainsToMeters_Coeff = YardsToMeters_Coeff * 22.0; //20.1168;
+        private final static double FeetToMeters_Coeff = 1200d / 3937d;
+        private final static double YardsToMeters_Coeff = FeetToMeters_Coeff * 3d;
+        private final static double ChainsToMeters_Coeff = FeetToMeters_Coeff * 22d;
 
-        private final static double MetersToFeet_Coeff = 3937.0 / 1200.0; //3.28084;
-        private final static double YardsToFeet_Coeff = 3.0;
-        private final static double ChainsToFeet_Coeff = 66.0;
+        private final static double MetersToFeet_Coeff = 3937d / 1200d;
+        private final static double YardsToFeet_Coeff = 3d;
+        private final static double ChainsToFeet_Coeff = 66d;
 
-        private final static double FeetToYards_Coeff = 1.0 / 3.0; //0.3333
-        private final static double MetersToYards_Coeff = 1.0 / YardsToMeters_Coeff; //1.09361;
-        private final static double ChainsToYards_Coeff = 22.0;
+        private final static double FeetToYards_Coeff = 1d / 3d;
+        private final static double MetersToYards_Coeff = 1d / YardsToMeters_Coeff;
+        private final static double ChainsToYards_Coeff = 22d;
 
-        private final static double FeetToChains_Coeff = 1.0 / 66.0; //0.01515
-        private final static double MetersToChains_Coeff = MetersToFeet_Coeff / 66.0; //0.0497096954;
-        private final static double YardsToChains_Coeff = 3.0 / 66.0; //0.04545
+        private final static double FeetToChains_Coeff = 1d / 66d;
+        private final static double MetersToChains_Coeff = MetersToFeet_Coeff / 66d;
+        private final static double YardsToChains_Coeff = 3d / 66d;
 
         private final static double Meters2ToAcres_Coeff = 0.00024711;
         private final static double Meters2ToHectares_Coeff = 0.0001;
@@ -419,6 +427,18 @@ public class TtUtils {
             BigDecimal bd = new BigDecimal(value);
             bd = bd.setScale(decimalPlaces, RoundingMode.HALF_UP);
             return bd.doubleValue();
+        }
+
+        @Nullable
+        public static Float round(Float value, int decimalPlaces) {
+            if (decimalPlaces < 0) throw new IllegalArgumentException();
+
+            if (value == null)
+                return null;
+
+            BigDecimal bd = new BigDecimal(value);
+            bd = bd.setScale(decimalPlaces, RoundingMode.HALF_UP);
+            return bd.floatValue();
         }
 
 
@@ -979,6 +999,188 @@ public class TtUtils {
     }
     //endregion
 
+    //region Media
+
+    public static TtImage getPictureByType(PictureType type) {
+        switch (type) {
+            case Regular: return new TtImage();
+            case Panorama: return new TtPanorama();
+            case PhotoSphere: return new TtPhotoSphere();
+            default:
+                throw new IllegalArgumentException("Unknown type");
+        }
+    }
+
+    public static TtMedia cloneMedia(TtMedia media) {
+        switch (media.getMediaType()) {
+            case Picture:
+                TtImage picture = (TtImage)media;
+                switch (picture.getPictureType()) {
+                    case Regular:
+                        return new TtImage(picture);
+                    case Panorama:
+                        return new TtPanorama((TtPanorama) picture);
+                    case PhotoSphere:
+                        return new TtPhotoSphere((TtPhotoSphere) picture);
+                }
+                break;
+            case Video:
+                return new TtVideo((TtVideo)media);
+        }
+        return null;
+    }
+
+    public static int getMediaIndex(TtMedia media, List<TtMedia> mediaList) {
+        int index = 0;
+
+        if (mediaList.size() > 0) {
+            for (; index < mediaList.size(); index++) {
+                if (media.getTimeCreated().isBefore(mediaList.get(index).getTimeCreated())) {
+                    break;
+                }
+            }
+        }
+
+        return index;
+    }
+
+    public static Comparator<TtMedia> PictureTimeComparator = new Comparator<TtMedia>() {
+        @Override
+        public int compare(TtMedia lhs, TtMedia rhs) {
+            return lhs.getTimeCreated().isAfter(rhs.getTimeCreated()) ? 1 : -1;
+        }
+    };
+
+
+    public static TtImage getPictureFromTtCameraIntent(Intent intent) {
+        if (intent.getExtras() != null && intent.getExtras().containsKey(Consts.Codes.Data.TTIMAGE)) {
+            return intent.getExtras().getParcelable(Consts.Codes.Data.TTIMAGE);
+        }
+
+        return null;
+    }
+
+    public static TtImage getPictureFromUri(String path, String pointCN) {
+        return getImageFromFile(path, pointCN);
+    }
+
+    public static ArrayList<TtImage> getPicturesFromImageIntent(Context context, Intent intent, String pointCN) {
+        String[] filePathColumn = { MediaStore.Images.Media.DATA };
+        ArrayList<TtImage> pictures = new ArrayList<>();
+
+        if (intent.getClipData() != null) {
+            ClipData cd = intent.getClipData();
+
+            String mediaDirStr = Global.getTtMediaDir();
+            boolean copyToProject = false;
+            if (Global.Settings.DeviceSettings.getMediaCopyToProject()) {
+                copyToProject = true;
+
+                File mediaDir = new File(mediaDirStr);
+                File noMedia = new File(String.format("%s%s%s", mediaDirStr, File.separator, ".nomedia"));
+                try {
+                    if (!mediaDir.exists() || !mediaDir.isDirectory()) {
+                        mediaDir.mkdirs();
+                    }
+
+                    if (!noMedia.exists()) {
+                        noMedia.createNewFile();
+                    }
+                } catch (Exception e) {
+                    //
+                }
+            }
+
+            for (int i = 0; i < cd.getItemCount(); i++) {
+                ClipData.Item item = cd.getItemAt(i);
+                Uri uri = item.getUri();
+                Cursor cursor = context.getContentResolver().query(uri, filePathColumn, null, null, null);
+
+                if (cursor != null) {
+                    cursor.moveToFirst();
+
+                    int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+                    String filePath = cursor.getString(columnIndex);
+
+                    if (copyToProject) {
+                        String newFilePath = String.format("%s%s%s", mediaDirStr, File.separator, FileUtils.getFileName(filePath));
+                        if (FileUtils.copyFile(filePath, newFilePath)) {
+                            filePath = newFilePath;
+                        }
+                    }
+
+                    TtImage image = getImageFromFile(filePath, pointCN);
+                    if (image != null) {
+                        pictures.add(image);
+                    }
+
+                    cursor.close();
+                }
+            }
+        }
+
+        return pictures;
+    }
+
+    private static TtImage getImageFromFile(String filePath, String pointCN) {
+        String name = FileUtils.getFileNameWoType(filePath);
+        ExifInterface exifInterface;
+        String info;
+
+        PictureType type;
+
+        if (FileUtils.fileExists(filePath)) {
+
+
+            DateTime time = null;
+            Integer width, height;
+            try {
+                exifInterface = new ExifInterface(filePath);
+
+                info = exifInterface.getAttribute(ExifInterface.TAG_DATETIME);
+
+                if (info != null) {
+                    try {
+                        time = DateTimeFormat.forPattern("yyyy:MM:dd HH:mm:ss").parseDateTime(info);
+                    } catch (Exception e) {
+                        //
+                    }
+                }
+
+                type = PictureType.Regular;
+                info = exifInterface.getAttribute(ExifInterface.TAG_IMAGE_WIDTH);
+                if (info != null) {
+                    width = ParseEx.parseInteger(info);
+
+                    if (width != null) {
+                        info = exifInterface.getAttribute(ExifInterface.TAG_IMAGE_LENGTH);
+                        if (info != null) {
+                            height = ParseEx.parseInteger(info);
+
+                            if (height != null && (width / height > 1 || height / width > 1)) {
+                                type = PictureType.Panorama;
+                            }
+                        }
+                    }
+                }
+
+                if (time == null)
+                    time = new DateTime(new File(filePath).lastModified());
+
+                if (type == PictureType.Panorama) {
+                    return new TtPanorama(name, filePath, time, pointCN);
+                } else {
+                    return new TtImage(name, filePath, time, pointCN);
+                }
+
+            } catch (IOException e) {
+                //
+            }
+        }
+
+        return null;
+    }
+    //endregion
 
     //region NMEA
     public static boolean isUsableNmeaBurst(INmeaBurst nmeaBurst, FilterOptions options) {
@@ -998,8 +1200,8 @@ public class TtUtils {
                 value = 4;
 
             if (value >= options.Fix.getValue() &&
-                    (options.DopType == Units.DopType.HDOP && nmeaBurst.getHDOP() <= options.DopValue) ||
-                    (options.DopType == Units.DopType.PDOP && nmeaBurst.getPDOP() <= options.DopValue)) {
+                    (options.DopType == DopType.HDOP && nmeaBurst.getHDOP() <= options.DopValue) ||
+                    (options.DopType == DopType.PDOP && nmeaBurst.getPDOP() <= options.DopValue)) {
                 valid = true;
             }
         }
@@ -1024,8 +1226,8 @@ public class TtUtils {
                 value = 4;
 
             if (value >= options.Fix.getValue() &&
-                    (options.DopType == Units.DopType.HDOP && nmeaBurst.getHDOP() <= options.DopValue) ||
-                    (options.DopType == Units.DopType.PDOP && nmeaBurst.getPDOP() <= options.DopValue)) {
+                    (options.DopType == DopType.HDOP && nmeaBurst.getHDOP() <= options.DopValue) ||
+                    (options.DopType == DopType.PDOP && nmeaBurst.getPDOP() <= options.DopValue)) {
                 valid = true;
             }
         }
@@ -1059,83 +1261,7 @@ public class TtUtils {
     }
     //endregion
 
-
     public static class UI {
-        public static void enableButton(Button button) {
-            button.setEnabled(true);
-            button.setAlpha(Consts.ENABLED_ALPHA);
-        }
-
-        public static void disableButton(Button button) {
-            button.setEnabled(false);
-            button.setAlpha(Consts.DISABLED_ALPHA);
-        }
-
-
-        public static void enableMenuItem(MenuItem menuItem) {
-            menuItem.setEnabled(true);
-
-            Drawable icon = menuItem.getIcon();
-
-            if (icon != null) {
-                icon.setAlpha(Consts.ENABLED_ICON_ALPHA);
-            }
-        }
-
-        public static void enableMenuItem(MenuItem menuItem, int id) {
-            menuItem.setEnabled(true);
-
-            try {
-                menuItem.setIcon(id);
-                menuItem.getIcon().setAlpha(Consts.ENABLED_ICON_ALPHA);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        public static void enableMenuItem(MenuItem menuItem, Drawable drawable) {
-            menuItem.setEnabled(true);
-
-            try {
-                menuItem.setIcon(drawable);
-                menuItem.getIcon().setAlpha(Consts.ENABLED_ICON_ALPHA);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-
-        public static void disableMenuItem(MenuItem menuItem) {
-            menuItem.setEnabled(false);
-
-            Drawable icon = menuItem.getIcon();
-
-            if (icon != null) {
-                icon.setAlpha(Consts.DISABLED_ICON_ALPHA);
-            }
-        }
-
-        public static void disableMenuItem(MenuItem menuItem, int id) {
-            menuItem.setEnabled(false);
-
-            try {
-                menuItem.setIcon(id);
-                menuItem.getIcon().setAlpha(Consts.DISABLED_ICON_ALPHA);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        public static void disableMenuItem(MenuItem menuItem, Drawable drawable) {
-            menuItem.setEnabled(false);
-
-            try {
-                menuItem.setIcon(drawable);
-                menuItem.getIcon().setAlpha(Consts.DISABLED_ICON_ALPHA);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
 
         public static Drawable getTtOpDrawable(OpType op, AppUnits.IconColor iconColor, Context context) {
             int id = R.drawable.ic_ttpoint_gps_full;
@@ -1189,6 +1315,31 @@ public class TtUtils {
                             break;
                         case Take5:
                             id = R.drawable.ic_ttpoint_take5_white;
+                            break;
+                    }
+                    break;
+                case Black:
+                    switch(op) {
+                        case GPS:
+                            id = R.drawable.ic_ttpoint_gps_black;
+                            break;
+                        case Traverse:
+                            id = R.drawable.ic_ttpoint_traverse_black;
+                            break;
+                        case WayPoint:
+                            id = R.drawable.ic_ttpoint_way_black;
+                            break;
+                        case Quondam:
+                            id = R.drawable.ic_ttpoint_quondam_black;
+                            break;
+                        case SideShot:
+                            id = R.drawable.ic_ttpoint_sideshot_black;
+                            break;
+                        case Walk:
+                            id = R.drawable.ic_ttpoint_walk_black;
+                            break;
+                        case Take5:
+                            id = R.drawable.ic_ttpoint_take5_black;
                             break;
                     }
                     break;
@@ -1343,21 +1494,9 @@ public class TtUtils {
                     return createMarkerOptions((TravPoint) point, adjusted, meta.get(point.getMetadataCN()));
                 case Quondam:
                     return createMarkerOptions((QuondamPoint)point, adjusted, meta);
-                default: {
-                    TtMetadata metadata = meta.get(point.getMetadataCN());
-
-                    double x = adjusted ? point.getAdjX() : point.getUnAdjX();
-                    double y = adjusted ? point.getAdjY() : point.getUnAdjY();
-                    double z = adjusted ? point.getAdjZ() : point.getUnAdjZ();
-                    GeoPosition position = getLatLonFromPoint(point, adjusted, metadata);
-
-                    return new MarkerOptions()
-                            .title(Integer.toString(point.getPID()))
-                            .snippet(String.format("UTM X: %.3f\nUTM Y: %.3f\nElev (%s): %.1f",
-                                    x, y, metadata.getElevation().toStringAbv(), z))
-                            .position(new LatLng(position.getLatitudeSignedDecimal(), position.getLongitudeSignedDecimal()));
-                }
             }
+
+            return null;
         }
 
         public static MarkerOptions createMarkerOptions(GpsPoint point, boolean adjusted, TtMetadata meta) {
@@ -1377,7 +1516,6 @@ public class TtUtils {
 
                 double lat, lon;
 
-                //if (point.hasLatLon() && !adjusted) {
                 if (point.hasLatLon()) { //ignore adjust since gps dont adjust to new positions
                     lat = point.getLatitude();
                     lon = point.getLongitude();
@@ -1387,8 +1525,12 @@ public class TtUtils {
                     lon = position.getLongitudeSignedDecimal();
                 }
 
-                String snippet = String.format("UTM X: %.3f\nUTM Y: %.3f\nElev (%s): %.1f\n\nLat: %.4f\nLon: %.4f",
-                        x, y, meta.getElevation().toStringAbv(), z, lat, lon);
+                String snippet = String.format("UTM X: %.3f\nUTM Y: %.3f\nElev (%s): %.1f\n\nLat: %.4f\nLon: %.4f%s",
+                        x, y, meta.getElevation().toStringAbv(), Convert.distance(z, meta.getElevation(), UomElevation.Meters), lat, lon,
+                        !StringEx.isEmpty(point.getComment()) ?
+                                String.format("\n\nComment: %s", point.getComment()) :
+                                StringEx.Empty
+                );
 
 
                 MarkerOptions options = new MarkerOptions();
@@ -1424,29 +1566,23 @@ public class TtUtils {
             String sFaz = faz == null ? StringEx.Empty : String.format("%.2f", faz);
             String sBaz = baz == null ? StringEx.Empty : String.format("%.2f", baz);
 
-            /*
-            String snippetHtml = String.format("<table><tr><td>UTM X:</td><td>%.3f</td></tr>" +
-                            "<tr><td>UTM Y:</td><td>%.3f</td></tr>" +
-                            "<td>Elev (%s):</td><td>%.1f</td></tr></table>\n\n" +
-                            "<table><tr><td>Fwd Az:</td><td>%s</tr>" +
-                            "<tr><td>Bk Az:</td><td>%s</td></tr>" +
-                            "<tr><td>SlpDist (%s):</td><td>%.2f</td><tr>" +
-                            "<tr><td>Slope (%s):</td><td>%.2f</td></tr></table>",
-                    x, y, meta.getElevation().toStringAbv(), z,
-                    sFaz, baz, meta.getDistance().toString(), point.getSlopeAngle(),
-                    meta.getSlope().toStringAbv(), point.getSlopeAngle());
-            */
-
-            String snippet = String.format("UTM X: %.3f\nUTM Y: %.3f\nElev (%s): %.1f\n\nFwd Az: %s\nBk Az:   %s\nSlpDist (%s): %.2f\nSlope (%s): %.2f",
-                    x, y, meta.getElevation().toStringAbv(), z,
+            String snippet = String.format("UTM X: %.3f\nUTM Y: %.3f\nElev (%s): %.1f\n\nFwd Az: %s\nBk Az:   %s\nSlpDist (%s): %.2f\nSlope (%s): %.2f%s",
+                    x, y, meta.getElevation().toStringAbv(), Convert.distance(z, meta.getElevation(), UomElevation.Meters),
                     sFaz, sBaz, meta.getDistance().toString(), point.getSlopeAngle(),
-                    meta.getSlope().toStringAbv(), point.getSlopeAngle());
+                    meta.getSlope().toStringAbv(), point.getSlopeAngle(),
+                    !StringEx.isEmpty(point.getComment()) ?
+                    String.format("\n\nComment: %s", point.getComment()) :
+                    StringEx.Empty
+            );
 
             GeoPosition position = UTMTools.convertUTMtoLatLonSignedDec(x, y, meta.getZone());
 
             return new MarkerOptions()
                     .title(String.format("%d (%s)", point.getPID(), adjusted ? "Adj" : "UnAdj"))
-                    .snippet(String.format("%s\n\n%s", point.getOp(), snippet))
+                    .snippet(String.format("%s\n\n%s%s", point.getOp(), snippet,
+                            !StringEx.isEmpty(point.getComment()) ?
+                                    String.format("\n\nComment: %s", point.getComment()) :
+                                    StringEx.Empty))
                     .position(new LatLng(position.getLatitudeSignedDecimal(), position.getLongitudeSignedDecimal()));
         }
 
@@ -1628,15 +1764,9 @@ public class TtUtils {
                     return getInfoWindowSnippet((TravPoint) point, adjusted, meta);
                 case Quondam:
                     return getInfoWindowSnippet((QuondamPoint) point, adjusted, meta);
-                default: {
-                    double x = adjusted ? point.getAdjX() : point.getUnAdjX();
-                    double y = adjusted ? point.getAdjY() : point.getUnAdjY();
-                    double z = adjusted ? point.getAdjZ() : point.getUnAdjZ();
-
-                    return String.format("UTM X: %.3f\nUTM Y: %.3f\nElev (%s): %.1f",
-                            x, y, meta.getElevation().toStringAbv(), z);
-                }
             }
+
+            return null;
         }
 
         private static String getInfoWindowSnippet(GpsPoint point, boolean adjusted, TtMetadata meta) {
@@ -1656,7 +1786,6 @@ public class TtUtils {
 
                 double lat, lon;
 
-                //if (point.hasLatLon() && !adjusted) {
                 if (point.hasLatLon()) { //ignore adjust since gps dont adjust to new positions
                     lat = point.getLatitude();
                     lon = point.getLongitude();
@@ -1666,9 +1795,12 @@ public class TtUtils {
                     lon = position.getLongitudeSignedDecimal();
                 }
 
-                return String.format("%s\n\nUTM X: %.3f\nUTM Y: %.3f\nElev (%s): %.1f\n\nLat: %.4f\nLon: %.4f",
+                return String.format("%s\n\nUTM X: %.3f\nUTM Y: %.3f\nElev (%s): %.1f\n\nLat: %.4f\nLon: %.4f%s",
                         point.getOp().toString(),
-                        x, y, meta.getElevation().toStringAbv(), z, lat, lon);
+                        x, y, meta.getElevation().toStringAbv(), Convert.distance(z, meta.getElevation(), UomElevation.Meters), lat, lon,
+                        !StringEx.isEmpty(point.getComment()) ?
+                                String.format("\n\nComment: %s", point.getComment()) :
+                                StringEx.Empty);
             } catch (Exception ex) {
                 TtReport.writeError(ex.getMessage(), "TtUtils:getInfoWindowSnippet");
                 return null;
@@ -1687,18 +1819,24 @@ public class TtUtils {
             String sFaz = faz == null ? StringEx.Empty : String.format("%.2f", faz);
             String sBaz = baz == null ? StringEx.Empty : String.format("%.2f", baz);
 
-            return String.format("%s\n\nUTM X: %.3f\nUTM Y: %.3f\nElev (%s): %.1f\n\nFwd Az: %s\nBk Az:   %s\nSlpDist (%s): %.2f\nSlope (%s): %.2f",
+            return String.format("%s\n\nUTM X: %.3f\nUTM Y: %.3f\nElev (%s): %.1f\n\nFwd Az: %s\nBk Az:   %s\nSlpDist (%s): %.2f\nSlope (%s): %.2f%s",
                     point.getOp(),
-                    x, y, meta.getElevation().toStringAbv(), z,
+                    x, y, meta.getElevation().toStringAbv(), Convert.distance(z, meta.getElevation(), UomElevation.Meters),
                     sFaz, sBaz, meta.getDistance().toString(), point.getSlopeAngle(),
-                    meta.getSlope().toStringAbv(), point.getSlopeAngle());
+                    meta.getSlope().toStringAbv(), point.getSlopeAngle(),
+                    !StringEx.isEmpty(point.getComment()) ?
+                            String.format("\n\nComment: %s", point.getComment()) :
+                            StringEx.Empty);
         }
 
         private static String getInfoWindowSnippet(QuondamPoint point, boolean adjusted, TtMetadata meta) {
-            return String.format("%s -> %d %s",
+            return String.format("%s -> %d %s%s",
                 point.getOp().toString(),
                 point.getParentPID(),
-                getInfoWindowSnippet(point.getParentPoint(), adjusted, meta));
+                getInfoWindowSnippet(point.getParentPoint(), adjusted, meta),
+                    !StringEx.isEmpty(point.getComment()) ?
+                            String.format("\n\nComment: %s", point.getComment()) :
+                            StringEx.Empty);
         }
 
     }

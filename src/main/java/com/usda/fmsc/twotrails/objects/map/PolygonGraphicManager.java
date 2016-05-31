@@ -4,7 +4,7 @@ import android.support.annotation.ColorInt;
 
 import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
-import com.usda.fmsc.twotrails.objects.TtPoint;
+import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
 
 import java.util.ArrayList;
@@ -177,6 +177,10 @@ public class PolygonGraphicManager implements IGraphicManager {
 
     public PolygonDrawOptions getDrawOptions() {
         return polygonGraphic.getDrawOptions();
+    }
+
+    public PolygonGraphicOptions getGraphicOptions() {
+        return polygonGraphic.getGraphicOptions();
     }
 
 

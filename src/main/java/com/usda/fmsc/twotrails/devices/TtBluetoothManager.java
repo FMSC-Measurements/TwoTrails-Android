@@ -126,31 +126,6 @@ public class TtBluetoothManager {
                         conn.register(btListener);
 
                         conn.start();
-
-                        //backup timeout
-//                        new Thread(new Runnable() {
-//                            @Override
-//                            public void run() {
-//                                try {
-//                                    int timeout = 5000;
-//
-//                                    while (!gpsConnected) {
-//                                        Thread.sleep(250);
-//                                        timeout -= 250;
-//
-//                                        if (!gpsConnected && timeout == 0) {
-//                                            if (listener != null) {
-//                                                listener.error(BluetoothDeviceError.Timeout);
-//                                            }
-//                                            conn.disconnect();
-//                                            break;
-//                                        }
-//                                    }
-//                                } catch (InterruptedException e) {
-//                                    e.printStackTrace();
-//                                }
-//                            }
-//                        }).start();
                     } else {
                         error = BluetoothDeviceError.BadSocket;
                     }
@@ -160,21 +135,19 @@ public class TtBluetoothManager {
             } catch (IOException e) {
                 error = BluetoothDeviceError.Unknown;
 
-                if (socket != null) {
-                    if (socket.isConnected()) {
-                        error = BluetoothDeviceError.BadSocket;
-                    } else {
-                        switch (socket.getRemoteDevice().getBondState()) {
-                            case BluetoothDevice.BOND_BONDED:
-                                error = BluetoothDeviceError.Timeout;
-                                break;
-                            case BluetoothDevice.BOND_BONDING:
-                                error = BluetoothDeviceError.ConnectionClosed;
-                                break;
-                            case BluetoothDevice.BOND_NONE:
-                                error = BluetoothDeviceError.NoDevice;
-                                break;
-                        }
+                if (socket.isConnected()) {
+                    error = BluetoothDeviceError.BadSocket;
+                } else {
+                    switch (socket.getRemoteDevice().getBondState()) {
+                        case BluetoothDevice.BOND_BONDED:
+                            error = BluetoothDeviceError.Timeout;
+                            break;
+                        case BluetoothDevice.BOND_BONDING:
+                            error = BluetoothDeviceError.ConnectionClosed;
+                            break;
+                        case BluetoothDevice.BOND_NONE:
+                            error = BluetoothDeviceError.NoDevice;
+                            break;
                     }
                 }
             } catch (Exception e) {
@@ -182,6 +155,14 @@ public class TtBluetoothManager {
                 TtUtils.TtReport.writeError(e.getMessage(), "TtBluetoothManager:checkGPS", e.getStackTrace());
             } finally {
                 connecting = false;
+
+                if (socket != null) {
+                    try {
+                        socket.close();
+                    } catch (Exception e){
+                        //
+                    }
+                }
             }
         }
 

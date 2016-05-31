@@ -125,7 +125,7 @@
             </LinearLayout>
         </android.support.v7.widget.Toolbar>
 
-        <View style="@style/ToolbarElevation" android:layout_below="@id/toolbar" />
+        <View style="@style/ToolbarShadowViewElevation" android:layout_below="@id/toolbar" />
     </RelativeLayout>
 
     <android.support.design.widget.FloatingActionButton

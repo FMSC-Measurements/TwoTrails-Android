@@ -23,11 +23,16 @@ import com.usda.fmsc.twotrails.fragments.polygon.PolygonFragment;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.logic.PolygonAdjuster;
+import com.usda.fmsc.twotrails.objects.PointD;
+import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
+import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.usda.fmsc.utilities.StringEx;
 
@@ -36,7 +41,7 @@ public class PolygonsActivity extends CustomToolbarActivity {
 
     private MenuItem miLock, miReset, miDelete, miAdjust;
 
-    private List<TtPolygon> _Polygons;
+    private ArrayList<TtPolygon> _Polygons;
     private TtPolygon _CurrentPolygon, _deletePolygon;
     private int _CurrentIndex = INVALID_INDEX, _deleteIndex = INVALID_INDEX;
     private boolean _PolygonUpdated, adjust, _PolyLocked = true, menuCreated = false;
@@ -46,7 +51,10 @@ public class PolygonsActivity extends CustomToolbarActivity {
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private ViewPager mViewPager;
 
-    private ComplexOnPageChangeListener onPageChangeListener = new ComplexOnPageChangeListener() {
+    private ConcurrentHashMap<String, ArrayList<PointD>> drawPoints;
+    private HashMap<String, TtMetadata> metadata;
+
+    private ComplexOnPageChangeListener onPageChangeArrayListener = new ComplexOnPageChangeListener() {
         @Override
         public void onPageSelected(int position) {
             super.onPageSelected(position);
@@ -83,6 +91,7 @@ public class PolygonsActivity extends CustomToolbarActivity {
 
         listeners = new HashMap<>();
 
+        metadata = Global.getDAL().getMetadataMap();
         _Polygons = Global.getDAL().getPolygons();
         if (_Polygons.size() > 0) {
             _CurrentIndex = 0;
@@ -96,8 +105,10 @@ public class PolygonsActivity extends CustomToolbarActivity {
         if (mViewPager != null) {
             mViewPager.setAdapter(mSectionsPagerAdapter);
 
-            mViewPager.addOnPageChangeListener(onPageChangeListener);
+            mViewPager.addOnPageChangeListener(onPageChangeArrayListener);
         }
+
+        drawPoints = new ConcurrentHashMap<>();
 
         lockPolygon(true);
     }
@@ -377,10 +388,10 @@ public class PolygonsActivity extends CustomToolbarActivity {
         if (lockPoly) {
             if (menuCreated) {
                 miLock.setTitle(R.string.str_unlock);
-                miLock.setIcon(R.drawable.ic_action_lock_closed);
+                miLock.setIcon(R.drawable.ic_action_lock_closed_white_36dp);
 
-                TtUtils.UI.disableMenuItem(miReset);
-                TtUtils.UI.disableMenuItem(miDelete);
+                AndroidUtils.UI.disableMenuItem(miReset);
+                AndroidUtils.UI.disableMenuItem(miDelete);
             }
 
             _PolyLocked = true;
@@ -388,14 +399,14 @@ public class PolygonsActivity extends CustomToolbarActivity {
         } else if (_Polygons.size() > 0) {
             if (menuCreated) {
                 miLock.setTitle(R.string.str_lock);
-                miLock.setIcon(R.drawable.ic_action_lock_open);
+                miLock.setIcon(R.drawable.ic_action_lock_open_white_36dp);
 
-                TtUtils.UI.enableMenuItem(miDelete);
+                AndroidUtils.UI.enableMenuItem(miDelete);
 
                 if (_PolygonUpdated) {
-                    TtUtils.UI.enableMenuItem(miReset);
+                    AndroidUtils.UI.enableMenuItem(miReset);
                 } else {
-                    TtUtils.UI.disableMenuItem(miReset);
+                    AndroidUtils.UI.disableMenuItem(miReset);
                 }
             }
 
@@ -409,9 +420,9 @@ public class PolygonsActivity extends CustomToolbarActivity {
 
         if (menuCreated) {
             if (_PolygonUpdated) {
-                TtUtils.UI.enableMenuItem(miReset);
+                AndroidUtils.UI.enableMenuItem(miReset);
             } else {
-                TtUtils.UI.disableMenuItem(miReset);
+                AndroidUtils.UI.disableMenuItem(miReset);
             }
         }
     }
@@ -436,12 +447,18 @@ public class PolygonsActivity extends CustomToolbarActivity {
         }
     }
 
+    private void onPolygonUpdate(String cn) {
+        if (listeners.containsKey(cn)) {
+            listeners.get(cn).onPolygonUpdated(_CurrentPolygon);
+        }
+    }
+
     public void updatePolygon(TtPolygon polygon) {
         //only update if current poly
         if (_CurrentPolygon.getCN().equals(polygon.getCN())) {
             if (_CurrentPolygon.getAccuracy() != polygon.getAccuracy()) {
                 adjust = true;
-                TtUtils.UI.enableMenuItem(miAdjust);
+                AndroidUtils.UI.enableMenuItem(miAdjust);
             }
 
             _CurrentPolygon = polygon;
@@ -456,6 +473,40 @@ public class PolygonsActivity extends CustomToolbarActivity {
                 return new TtPolygon(polygon);
             }
         }
+
+        return null;
+    }
+    
+    public ArrayList<PointD> getDrawPoints(final String cn, final int width) {
+            if (drawPoints.containsKey(cn)) {
+                return drawPoints.get(cn);
+            } else {
+                if (width > 0) {
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (Global.getDAL().getPointCountInPolygon(cn) > 2) {
+                                final List<TtPoint> points = Global.getDAL().getBoundaryPointsInPolygon(cn);
+
+                                if (points.size() > 2) {
+                                    new Thread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            int zone = metadata.get(Consts.EmptyGuid).getZone();
+
+                                            drawPoints.put(cn, TtUtils.generateStaticPolyPoints(points, metadata, zone, (int)(width * 0.9)));
+
+                                            onPolygonUpdate(cn);
+                                        }
+                                    }).start();
+                                } else {
+                                    drawPoints.put(cn, null);
+                                }
+                            }
+                        }
+                    }).start();
+                }
+            }
 
         return null;
     }

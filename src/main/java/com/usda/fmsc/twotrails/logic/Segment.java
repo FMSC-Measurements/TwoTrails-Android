@@ -1,13 +1,12 @@
 package com.usda.fmsc.twotrails.logic;
 
 
-import com.usda.fmsc.twotrails.objects.QuondamPoint;
-import com.usda.fmsc.twotrails.objects.SideShotPoint;
-import com.usda.fmsc.twotrails.objects.TravPoint;
-import com.usda.fmsc.twotrails.objects.TtPoint;
+import com.usda.fmsc.twotrails.objects.points.QuondamPoint;
+import com.usda.fmsc.twotrails.objects.points.SideShotPoint;
+import com.usda.fmsc.twotrails.objects.points.TravPoint;
+import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
-import com.usda.fmsc.twotrails.Units;
-import com.usda.fmsc.twotrails.Units.OpType;
+import com.usda.fmsc.twotrails.units.OpType;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.util.ArrayList;
@@ -78,11 +77,11 @@ public class Segment {
 
             TtPoint endPoint = points.get(len - 1);
 
-            if (endPoint.getOp() == Units.OpType.SideShot) {
+            if (endPoint.getOp() == OpType.SideShot) {
                 if (!endPoint.isAdjusted()) {
                     adjusted = adjustSideShot(startPoint, (SideShotPoint)points.get(1));
                 }
-            } else if (len > 2 && points.get(1).getOp() == Units.OpType.Traverse) {
+            } else if (len > 2 && points.get(1).getOp() == OpType.Traverse) {
                 adjusted = adjustTraverse();
             } else {
                 for (TtPoint point : points) {
@@ -109,7 +108,7 @@ public class Segment {
         adj_perimeter = getAdjustmentPerimeter();
 
         //No adjustment if there isn't a closing point
-        if (tmpPoint.getOp() == Units.OpType.Traverse) {
+        if (tmpPoint.getOp() == OpType.Traverse) {
             deltaX = 0;
             deltaY = 0;
             deltaZ = 0;
@@ -145,7 +144,7 @@ public class Segment {
         for (int i = 0; i < size; i++) {
             currPoint = points.get(i);
 
-            if (i == size - 1 && currPoint.getOp() == Units.OpType.Quondam)
+            if (i == size - 1 && currPoint.getOp() == OpType.Quondam)
                 break;
 
             if (currPoint.isGpsType()) {

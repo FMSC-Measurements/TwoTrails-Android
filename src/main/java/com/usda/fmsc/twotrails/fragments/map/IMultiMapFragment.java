@@ -6,12 +6,12 @@ import android.os.Parcelable;
 import com.google.android.gms.common.internal.safeparcel.SafeParcelable;
 import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.geospatial.Position;
-import com.usda.fmsc.twotrails.Units;
 import com.usda.fmsc.twotrails.objects.map.PolygonDrawOptions;
 import com.usda.fmsc.twotrails.objects.map.PolygonGraphicManager;
 import com.usda.fmsc.twotrails.objects.map.TrailGraphicManager;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
-import com.usda.fmsc.twotrails.objects.TtPoint;
+import com.usda.fmsc.twotrails.objects.points.TtPoint;
+import com.usda.fmsc.twotrails.units.MapType;
 
 public interface IMultiMapFragment {
     String MAP_OPTIONS_EXTRA = "MapOptionsEx";
@@ -56,7 +56,7 @@ public interface IMultiMapFragment {
     interface MultiMapListener {
         void onMapReady();
         void onMapLoaded();
-        void onMapTypeChanged(Units.MapType mapType, int mapId, boolean isOnline);
+        void onMapTypeChanged(MapType mapType, int mapId, boolean isOnline);
         void onMapLocationChanged();
         void onMapClick(Position position);
         void onMarkerClick(MarkerData markerData);

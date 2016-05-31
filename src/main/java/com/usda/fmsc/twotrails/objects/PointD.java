@@ -16,7 +16,7 @@ public class PointD {
 
     public final void set(double X, double Y){
         this.X = X;
-        this.X = Y;
+        this.Y = Y;
     }
 
     @Override

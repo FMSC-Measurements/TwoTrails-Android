@@ -18,10 +18,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 
+import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.twotrails.adapters.MetadataDetailsAdapter;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
-import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -141,7 +141,7 @@ public class PointEditorDialog extends DialogFragment {
                 newMetacn = m.getCN();
 
                 if (lastSelected == null && ds > -1) {
-                    lvcMeta.getChildAt(ds).setBackground(getResources().getDrawable(R.drawable.list_item_selector));
+                    lvcMeta.getChildAt(ds).setBackground(AndroidUtils.UI.getDrawable(getContext(), R.drawable.list_item_selector));
                     ds = -1;
                 } else if (lastSelected != null && lastSelected != view) {
                     lastSelected.setSelected(false);

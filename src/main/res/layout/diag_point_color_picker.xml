@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:id="@id/lay1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentTop="true">
+
+        <com.larswerkman.holocolorpicker.ColorPicker
+            android:id="@+id/picker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <com.larswerkman.holocolorpicker.ValueBar
+            android:id="@+id/valuebar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/picker"/>
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/lay1"
+        android:orientation="vertical"
+        android:padding="8dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:baselineAligned="false">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:text="@string/str_bnd"
+                    style="@style/mapOptCatTextStyle"/>
+
+                <View style="@style/Dividers"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <RelativeLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@color/black_1000"
+                        android:layout_margin="2dp">
+
+                        <ImageView
+                            android:id="@+id/ivPCPAdjBnd"
+                            android:contentDescription="@string/map_adj_bnd"
+                            style="@style/mapOptFlipCheckBoxStyle"
+                            android:src="@drawable/ic_polygon_white_36dp"
+                            android:background="@color/map_adj_bnd"
+                            android:layout_margin="4dp"/>
+                    </RelativeLayout>
+
+
+                    <RelativeLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="2dp">
+
+                        <ImageView
+                            android:id="@+id/ivPCPUnAdjBnd"
+                            android:contentDescription="@string/map_adj_bnd_pts"
+                            style="@style/mapOptFlipCheckBoxStyle"
+                            android:src="@drawable/ic_unadjusted_polygon_white_36dp"
+                            android:background="@color/map_unadj_bnd"
+                            android:layout_margin="4dp"/>
+                    </RelativeLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:text="@string/str_navigation"
+                    style="@style/mapOptCatTextStyle"/>
+
+                <View style="@style/Dividers"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <RelativeLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="2dp">
+
+                        <ImageView
+                            android:id="@+id/ivPCPAdjNav"
+                            android:contentDescription="@string/map_adj_nav"
+                            style="@style/mapOptFlipCheckBoxStyle"
+                            android:src="@drawable/ic_polygon_white_36dp"
+                            android:background="@color/map_adj_nav"
+                            android:layout_margin="4dp"/>
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="2dp">
+
+                        <ImageView
+                            android:id="@+id/ivPCPUnadjNav"
+                            android:contentDescription="@string/map_unadj_nav"
+                            style="@style/mapOptFlipCheckBoxStyle"
+                            android:src="@drawable/ic_unadjusted_polygon_white_36dp"
+                            android:background="@color/map_unadj_nav"
+                            android:layout_margin="4dp"/>
+                    </RelativeLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="4dp">
+
+            <TextView
+                android:text="@string/str_points"
+                style="@style/mapOptCatTextStyle" />
+
+            <View style="@style/Dividers" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="2dp">
+
+                    <ImageView
+                        android:id="@+id/ivPCPWayPts"
+                        android:contentDescription="@string/map_way_pts"
+                        style="@style/mapOptFlipCheckBoxStyle"
+                        android:src="@drawable/ic_ttpoint_way_white"
+                        android:background="@color/map_way_pts"
+                        android:layout_margin="4dp"/>
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="2dp">
+
+                    <ImageView
+                        android:id="@+id/ivPCPAdjPts"
+                        android:contentDescription="@string/diag_pcp_adjpts"
+                        style="@style/mapOptFlipCheckBoxStyle"
+                        android:src="@drawable/ic_polygon_pts_white_36dp"
+                        android:background="@color/map_adj_pts"
+                        android:layout_margin="4dp"/>
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="2dp">
+
+                    <ImageView
+                        android:id="@+id/ivPCPUnadjPts"
+                        android:contentDescription="@string/diag_pcp_unadjpts"
+                        style="@style/mapOptFlipCheckBoxStyle"
+                        android:src="@drawable/ic_unadjusted_polygon_pts_white_36dp"
+                        android:background="@color/map_unadj_pts"
+                        android:layout_margin="4dp"/>
+                </RelativeLayout>
+
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</RelativeLayout>

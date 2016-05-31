@@ -3,7 +3,6 @@ package com.usda.fmsc.twotrails.utilities;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.os.Environment;
 import android.support.v7.app.AlertDialog;
 import android.util.Base64;
 import android.widget.Toast;
@@ -37,7 +36,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collection;

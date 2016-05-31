@@ -6,7 +6,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,19 +17,20 @@ import android.widget.Toast;
 
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.listeners.SimpleTextWatcher;
-import com.usda.fmsc.twotrails.activities.PointsActivity;
 import com.usda.fmsc.twotrails.Consts;
-import com.usda.fmsc.twotrails.fragments.AnimationCardFragment;
 import com.usda.fmsc.twotrails.R;
+import com.usda.fmsc.twotrails.activities.PointsActivity;
+import com.usda.fmsc.twotrails.fragments.AnimationCardFragment;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
-import com.usda.fmsc.twotrails.objects.TtPoint;
+import com.usda.fmsc.twotrails.objects.media.TtMedia;
+import com.usda.fmsc.twotrails.objects.points.TtPoint;
+import com.usda.fmsc.twotrails.units.OpType;
 import com.usda.fmsc.twotrails.utilities.AppUnits;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
-
 import com.usda.fmsc.utilities.StringEx;
 
 public abstract class BasePointFragment extends AnimationCardFragment implements PointsActivity.Listener {
-    public static final String POINT_CN = "PointCN";
+    public static final String POINT = "Point";
 
     private static String sOnBnd = "On Boundary", sOffBnd = "Off Boundary";
 
@@ -41,7 +41,7 @@ public abstract class BasePointFragment extends AnimationCardFragment implements
     private Drawable dOnBnd, dOffBnd;
 
     private boolean locked, updating;
-    private View header;
+    private View header, preFocus;
     private PointsActivity activity;
     private TtPoint _Point;
     private TtMetadata _Metadata;
@@ -51,13 +51,12 @@ public abstract class BasePointFragment extends AnimationCardFragment implements
         super.onCreate(savedInstanceState);
         Bundle bundle = getArguments();
 
-        if (bundle != null) {
-            String pointCN = bundle.getString(POINT_CN);
+        if (bundle != null && bundle.containsKey(POINT)) {
+            _Point = bundle.getParcelable(POINT);
 
-            if (activity != null) {
-                _Point = activity.getPoint(pointCN);
+            if (activity != null && _Point != null) {
                 _Metadata = activity.getMetadata(_Point.getMetadataCN());
-                activity.register(pointCN, this);
+                activity.register(_Point.getCN(), this);
             }
         }
     }
@@ -65,7 +64,7 @@ public abstract class BasePointFragment extends AnimationCardFragment implements
     @Nullable
     @Override
     public final View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = onCreateViewEx(inflater, container, savedInstanceState);
+        final View view = onCreateViewEx(inflater, container, savedInstanceState);
         header = view.findViewById(R.id.cardHeader);
 
         tvPID = (TextView)view.findViewById(R.id.pointHeaderTvPid);
@@ -73,31 +72,32 @@ public abstract class BasePointFragment extends AnimationCardFragment implements
         ivOp = (ImageView)view.findViewById(R.id.pointHeaderIvOp);
         txtCmt = (EditText)view.findViewById(R.id.pointTxtCmt);
 
+        preFocus = view.findViewById(R.id.preFocusView);
 
-
-        dOnBnd = AndroidUtils.UI.getDrawable(getContext(), R.drawable.ic_onbnd_dark);
-        dOffBnd = AndroidUtils.UI.getDrawable(getContext(), R.drawable.ic_offbnd_dark);
-
-        tvPID.setText(StringEx.toString(_Point.getPID()));
-        ibBnd.setImageDrawable(_Point.isOnBnd() ? dOnBnd : dOffBnd);
+        //region set Values and Listeners
         ivOp.setImageDrawable(TtUtils.UI.getTtOpDrawable(_Point.getOp(), AppUnits.IconColor.Dark, getActivity()));
+        setView();
 
-        ibBnd.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                boolean onbnd = !_Point.isOnBnd();
+        if (_Point.getOp() == OpType.WayPoint) {
+            ibBnd.setVisibility(View.INVISIBLE);
+        } else {
+            ibBnd.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    boolean onbnd = !_Point.isOnBnd();
 
-                String strBnd = onbnd ? sOnBnd : sOffBnd;
+                    String strBnd = onbnd ? sOnBnd : sOffBnd;
 
-                ibBnd.setImageDrawable(onbnd ? dOnBnd : dOffBnd);
-                ibBnd.setContentDescription(strBnd);
+                    ibBnd.setImageDrawable(getBndDrawable(onbnd));
+                    ibBnd.setContentDescription(strBnd);
 
-                _Point.setOnBnd(onbnd);
-                activity.updatePoint(_Point);
+                    _Point.setOnBnd(onbnd);
+                    activity.updatePoint(_Point);
 
-                Toast.makeText(getContext(), strBnd, Toast.LENGTH_SHORT).show();
-            }
-        });
+                    Toast.makeText(getContext(), strBnd, Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
 
         ibBnd.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
@@ -126,11 +126,13 @@ public abstract class BasePointFragment extends AnimationCardFragment implements
                 }
             }
         });
+        //endregion
 
         return view;
     }
 
     public abstract View onCreateViewEx(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState);
+
 
     @Override
     public void onAttach(Context activity) {
@@ -179,19 +181,41 @@ public abstract class BasePointFragment extends AnimationCardFragment implements
 
     @Override
     public void onPointUpdated(TtPoint point) {
-        updating = true;
 
         _Point = point;
         _Metadata = activity.getMetadata(_Point.getMetadataCN());
-        tvPID.setText(StringEx.toString(point.getPID()));
-        if (!txtCmt.getText().toString().equals(_Point.getComment())) {
-            txtCmt.setText(_Point.getComment());
-        }
+        setView();
+
+    }
+
+    @Override
+    public void onMediaUpdated(TtMedia media) {
+        //
+    }
+
+    private void setView() {
+        updating = true;
+
+        tvPID.setText(StringEx.toString(_Point.getPID()));
+        txtCmt.setText(_Point.getComment());
+        ibBnd.setImageDrawable(getBndDrawable(_Point.isOnBnd()));
+
+        preFocus.requestFocus();
 
         updating = false;
     }
 
-
+    private Drawable getBndDrawable(boolean onBnd) {
+        if (onBnd) {
+            if (dOnBnd == null)
+                dOnBnd = AndroidUtils.UI.getDrawable(getContext(), R.drawable.ic_onbnd_dark);
+            return dOnBnd;
+        } else {
+            if (dOffBnd == null)
+                dOffBnd = AndroidUtils.UI.getDrawable(getContext(), R.drawable.ic_offbnd_dark);
+            return dOffBnd;
+        }
+    }
 
     protected TtPoint getBasePoint() {
         return _Point;

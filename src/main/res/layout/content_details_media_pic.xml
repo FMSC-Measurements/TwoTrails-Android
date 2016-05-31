@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/parentLayout">
+
+    <include layout="@layout/pre_focus"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/pmdIvBackground"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:contentDescription="@null"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/whiteOverlay"/>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TableLayout
+            android:id="@id/lay1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:shrinkColumns="1"
+            style="@style/margin8880"
+            android:layout_alignParentTop="true">
+
+            <TableRow
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent">
+
+                <TextView
+                    android:text="@string/str_name"
+                    android:textSize="20sp"
+                    android:paddingRight="8dp"
+                    android:paddingEnd="8dp"
+                    android:paddingStart="0dp"
+                    android:paddingLeft="0dp" />
+
+                <EditText
+                    android:id="@+id/pmdFragTxtName"
+                    style="@style/AutoSelectEditTextStyle"
+                    android:inputType="text"
+                    android:enabled="false" />
+            </TableRow>
+
+            <TableRow
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent">
+
+                <TextView
+                    android:text="@string/pmd_azimuth"
+                    android:textSize="20sp"
+                    android:paddingRight="8dp"
+                    android:paddingEnd="8dp"
+                    android:paddingStart="0dp"
+                    android:paddingLeft="0dp" />
+
+                <EditText
+                    android:id="@+id/pmdFragPicTxtAzimuth"
+                    style="@style/NumDecValueTextStyle"
+                    android:enabled="false" />
+            </TableRow>
+
+            <TableRow
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent">
+
+                <TextView
+                    android:text="@string/pmd_pitch"
+                    android:textSize="20sp"
+                    android:paddingRight="8dp"
+                    android:paddingEnd="8dp"
+                    android:paddingStart="0dp"
+                    android:paddingLeft="0dp" />
+
+                <EditText
+                    android:id="@+id/pmdFragPicTxtPitch"
+                    style="@style/NumDecValueTextStyle"
+                    android:enabled="false" />
+            </TableRow>
+
+            <TableRow
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent">
+
+                <TextView
+                    android:text="@string/pmd_roll"
+                    android:textSize="20sp"
+                    android:paddingRight="8dp"
+                    android:paddingEnd="8dp"
+                    android:paddingStart="0dp"
+                    android:paddingLeft="0dp" />
+
+                <EditText
+                    android:id="@+id/pmdFragPicTxtRoll"
+                    style="@style/NumDecValueTextStyle"
+                    android:enabled="false" />
+            </TableRow>
+
+            <TableRow
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent">
+
+                <TextView
+                    android:text="@string/str_file"
+                    android:textSize="20sp"
+                    android:paddingRight="8dp"
+                    android:paddingEnd="8dp"
+                    android:paddingStart="0dp"
+                    android:paddingLeft="0dp"/>
+
+                <!--style="@style/EditTextStyle"-->
+                <TextView
+                    android:id="@+id/pmdFragTvFile"
+                    style="@style/TvEditTextStyleNoFocus"
+                    android:ellipsize="start"/>
+            </TableRow>
+        </TableLayout>
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            style="@style/margin8088"
+            android:layout_below="@id/lay1"
+            android:layout_alignParentBottom="true"
+            android:gravity="top">
+
+            <EditText
+                android:id="@+id/pmdFragTxtCmt"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textMultiLine"
+                android:hint="@string/str_cmt"
+                style="@style/EditTextStyle"
+                android:enabled="false"/>
+        </android.support.design.widget.TextInputLayout>
+    </RelativeLayout>
+</RelativeLayout>

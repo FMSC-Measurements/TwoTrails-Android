@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/pmdScroller"
+    android:layout_width="match_parent"
+    android:layout_height="100dp"
+    android:translationY="-150dp"
+    android:background="@color/background_card">
+
+    <View
+        android:id="@+id/pmdHeaderShadow"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_alignParentTop="true"
+        android:background="@color/grey_400"
+        style="@style/ToolbarElevation1"/>
+
+    <com.usda.fmsc.android.widget.RecyclerViewEx
+        android:id="@+id/pmdRvMedia"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"/>
+
+</RelativeLayout>

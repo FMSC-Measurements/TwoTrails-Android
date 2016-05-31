@@ -20,15 +20,11 @@ public class Consts {
 
     public static final double Default_Point_Accuracy = 6.0;
     public static final double Minimum_Point_Accuracy = 0.000001;
-    public static final int Minimum_Point_Accuracy_Digits = 6;
     public static final int Minimum_Point_Display_Digits = 5;
 
 
     public static final float ENABLED_ALPHA = 1.0f;
     public static final float DISABLED_ALPHA = 0.5f;
-
-    public static final int ENABLED_ICON_ALPHA = (int)(ENABLED_ALPHA * 255);
-    public static final int DISABLED_ICON_ALPHA = (int)(DISABLED_ALPHA * 255);
 
     public static final String NewLine = "\r\n";
 
@@ -95,6 +91,7 @@ public class Consts {
             public static final int MAP_MANAGER = 1018;
             public static final int MAP_DETAILS = 1019;
             public static final int ARC_GIS_LOGIN = 1020;
+            public static final int TTCAMERA = 1021;
         }
 
         public static class Dialogs {
@@ -112,6 +109,9 @@ public class Consts {
             public static final int MAP_UPDATED = 2006;
             public static final int MAP_DELETED = 2007;
             public static final int DOWNLOADING_MAP = 2008;
+            public static final int IMAGE_CAPTURED = 2009;
+            public static final int GPS_NOT_FOUND = 2010;
+            public static final int GPS_NOT_CONFIGURED = 2011;
 
         }
 
@@ -122,11 +122,13 @@ public class Consts {
 
         public static class Data {
             public static final String POINT_DATA = "PointData";
+            public static final String POINT_CN = "PointCN";
             public static final String POLYGON_DATA = "PolygonData";
             public static final String METADATA_DATA = "MetaDataData";
             public static final String ADDITIVE_NMEA_DATA = "AdditiveNmeaData";
             public static final String NUMBER_OF_CREATED_POINTS = "NumOfCreatedPoints";
             public static final String MAP_DATA = "MapData";
+            public static final String TTIMAGE = "TtImage";
         }
 
         public static class Requests {
@@ -136,6 +138,9 @@ public class Consts {
             public static final int BLUETOOH = 5003;
             public static final int INTERNET = 5004;
             public static final int VIBRATE = 5005;
+            public static final int CAPTURE_IMAGE = 5006;
+            public static final int ADD_IMAGES = 5007;
+            public static final int OPEN_FILE = 5008;
         }
     }
 

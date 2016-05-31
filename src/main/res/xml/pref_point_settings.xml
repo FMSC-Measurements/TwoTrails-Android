@@ -27,4 +27,13 @@
             <extra android:name="@string/set_settings_page" android:value="walkPointSetup" />
         </intent>
     </Preference>
+
+    <PreferenceCategory
+        android:title="Misc Point Settings">
+
+        <com.usda.fmsc.android.preferences.SwitchCompatPreference
+            android:title="Overwrite PlotGrid"
+            android:key="@string/set_AUTO_OVERWRITE_PLOTGRID_ASK"
+            android:summary="Remember to overwrite the PlotGrid on regenerate"/>
+    </PreferenceCategory>
 </PreferenceScreen>

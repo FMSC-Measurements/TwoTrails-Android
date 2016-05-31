@@ -14,15 +14,16 @@ import android.widget.TextView;
 
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.listeners.SimpleTextWatcher;
+import com.usda.fmsc.geospatial.UomElevation;
 import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.objects.FilterOptions;
-import com.usda.fmsc.twotrails.objects.GpsPoint;
+import com.usda.fmsc.twotrails.objects.points.GpsPoint;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
-import com.usda.fmsc.twotrails.Units.DopType;
+import com.usda.fmsc.twotrails.units.DopType;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.util.ArrayList;
@@ -33,7 +34,6 @@ import java.util.regex.Pattern;
 import com.usda.fmsc.geospatial.GeoPosition;
 import com.usda.fmsc.geospatial.GeoTools;
 import com.usda.fmsc.geospatial.nmea.sentences.GGASentence;
-import com.usda.fmsc.geospatial.Units;
 import com.usda.fmsc.utilities.EnumEx;
 import com.usda.fmsc.utilities.ParseEx;
 import com.usda.fmsc.utilities.StringEx;
@@ -75,7 +75,7 @@ public class CalculateGpsActivity extends CustomToolbarActivity {
             _Bursts = new ArrayList<>();
 
             try {
-                _Point = (GpsPoint)intent.getSerializableExtra(Consts.Codes.Data.POINT_DATA);
+                _Point = intent.getParcelableExtra(Consts.Codes.Data.POINT_DATA);
                 _Metadata = intent.getParcelableExtra(Consts.Codes.Data.METADATA_DATA);
                 _Zone = _Metadata.getZone();
 
@@ -471,7 +471,7 @@ public class CalculateGpsActivity extends CustomToolbarActivity {
 
                 _Point.setLatitude(position.getLatitudeSignedDecimal());
                 _Point.setLongitude(position.getLongitudeSignedDecimal());
-                _Point.setElevation(TtUtils.Convert.distance(zF, Units.UomElevation.Meters, _Metadata.getElevation()));
+                _Point.setElevation(TtUtils.Convert.distance(zF, UomElevation.Meters, _Metadata.getElevation()));
                 _Point.setUnAdjX(xF);
                 _Point.setUnAdjY(yF);
                 _Point.setUnAdjZ(_Point.getElevation());

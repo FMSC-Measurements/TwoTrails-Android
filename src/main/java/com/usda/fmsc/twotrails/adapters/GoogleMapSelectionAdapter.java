@@ -10,7 +10,7 @@ import android.widget.TextView;
 
 import com.usda.fmsc.android.widget.PopupMenuButton;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.Units;
+import com.usda.fmsc.twotrails.units.GoogleMapType;
 
 import java.util.Arrays;
 import java.util.List;
@@ -22,7 +22,7 @@ public class GoogleMapSelectionAdapter extends BaseAdapter {
     LayoutInflater inflater;
     IGoogleMapAdapterListener listener;
 
-    List<Units.GoogleMapType> mapTypes = Arrays.asList(Units.GoogleMapType.values());
+    List<GoogleMapType> mapTypes = Arrays.asList(GoogleMapType.values());
     private View selectedView;
     private int selectedIndex;
 
@@ -42,7 +42,7 @@ public class GoogleMapSelectionAdapter extends BaseAdapter {
     }
 
     @Override
-    public Units.GoogleMapType getItem(int position) {
+    public GoogleMapType getItem(int position) {
         return mapTypes.get(position + 1);
     }
 
@@ -53,7 +53,7 @@ public class GoogleMapSelectionAdapter extends BaseAdapter {
 
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
-        final Units.GoogleMapType map = getItem(position);
+        final GoogleMapType map = getItem(position);
 
         MapViewHolder holder;
 
@@ -114,7 +114,7 @@ public class GoogleMapSelectionAdapter extends BaseAdapter {
         return selectedIndex > -1;
     }
 
-    public Units.GoogleMapType getSelectedMap() {
+    public GoogleMapType getSelectedMap() {
         if (selectedIndex > -1) {
             return getItem(selectedIndex);
         }
@@ -142,6 +142,6 @@ public class GoogleMapSelectionAdapter extends BaseAdapter {
     }
 
     public interface IGoogleMapAdapterListener {
-        void onGoogleMapSelected(Units.GoogleMapType map);
+        void onGoogleMapSelected(GoogleMapType map);
     }
 }

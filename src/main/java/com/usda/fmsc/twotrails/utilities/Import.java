@@ -2,23 +2,23 @@ package com.usda.fmsc.twotrails.utilities;
 
 import android.os.AsyncTask;
 
-import com.usda.fmsc.geospatial.Units.UomElevation;
+import com.usda.fmsc.geospatial.UomElevation;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.geospatial.utm.UTMTools;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.Global;
-import com.usda.fmsc.twotrails.Units;
-import com.usda.fmsc.twotrails.Units.Dist;
-import com.usda.fmsc.twotrails.Units.Slope;
+import com.usda.fmsc.twotrails.units.Dist;
+import com.usda.fmsc.twotrails.units.OpType;
+import com.usda.fmsc.twotrails.units.Slope;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
 import com.usda.fmsc.twotrails.data.TwoTrailsSchema;
 import com.usda.fmsc.twotrails.logic.PointNamer;
-import com.usda.fmsc.twotrails.objects.GpsPoint;
-import com.usda.fmsc.twotrails.objects.QuondamPoint;
-import com.usda.fmsc.twotrails.objects.TravPoint;
+import com.usda.fmsc.twotrails.objects.points.GpsPoint;
+import com.usda.fmsc.twotrails.objects.points.QuondamPoint;
+import com.usda.fmsc.twotrails.objects.points.TravPoint;
 import com.usda.fmsc.twotrails.objects.TtGroup;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
-import com.usda.fmsc.twotrails.objects.TtPoint;
+import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.utilities.ParseEx;
 import com.usda.fmsc.utilities.StringEx;
@@ -154,7 +154,7 @@ public class Import {
                     }
 
                     if (ip.isAdvImport()) {
-                        Units.OpType op = Units.OpType.parse(record.get(fOp));
+                        OpType op = OpType.parse(record.get(fOp));
                         point = TtUtils.getPointByOpType(op);
 
                         switch (op) {

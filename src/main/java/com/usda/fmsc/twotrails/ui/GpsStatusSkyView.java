@@ -161,8 +161,6 @@ public class GpsStatusSkyView extends GpsStatusView implements SensorEventListen
             for (Satellite sat : getSatellites().values()) {
                 drawSatellite(canvas, sat);
             }
-
-            //canvas.drawText(String.format("%d/%d/%d", getUsedSatelliteCount(), getTrackedSatelliteCount(), getVisibleSatelliteCount()), 30, 30, paintText);
         }
     }
 

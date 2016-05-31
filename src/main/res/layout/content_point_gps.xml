@@ -1,0 +1,194 @@
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <include layout="@layout/pre_focus" />
+
+    <include
+        android:id="@+id/cardHeader"
+        layout="@layout/content_point_card_header" />
+
+    <View style="@style/ToolbarShadowViewElevation3" android:layout_below="@id/cardHeader" />
+
+    <RelativeLayout
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:layout_below="@id/cardHeader"
+        style="@style/ToolbarElevation1">
+
+        <LinearLayout
+            android:id="@+id/cardContent"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:orientation="vertical"
+            android:paddingLeft="8dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingRight="8dp"
+            android:layout_alignParentTop="true"
+            android:background="@android:color/white"
+            style="@style/ToolbarElevation2">
+
+            <TableLayout
+                android:id="@+id/pointsFragLayGps"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:stretchColumns="1,*,1"
+                android:paddingBottom="8dp">
+
+                <TableRow
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent">
+
+                    <TextView
+                        android:text="@string/points_gps_utm_x"
+                        android:textSize="20sp"
+                        android:paddingRight="8dp"
+                        android:paddingEnd="8dp"
+                        android:paddingStart="0dp"
+                        android:paddingLeft="0dp" />
+
+                    <EditText
+                        android:id="@+id/pointsFragGpsTxtX"
+                        android:enabled="false"
+                        style="@style/NumDecValueTextStyle" />
+
+                    <TextView android:text="@string/meas_meters" />
+                </TableRow>
+
+                <TableRow
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent">
+
+                    <TextView
+                        android:text="@string/points_gps_utm_y"
+                        android:textSize="20sp"
+                        android:paddingRight="8dp"
+                        android:paddingEnd="8dp"
+                        android:paddingStart="0dp"
+                        android:paddingLeft="0dp" />
+
+                    <EditText
+                        android:id="@+id/pointsFragGpsTxtY"
+                        android:enabled="false"
+                        style="@style/NumDecValueTextStyle" />
+                </TableRow>
+
+                <TableRow
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent">
+
+                    <TextView
+                        android:text="@string/points_gps_elev"
+                        android:textSize="20sp"
+                        android:paddingRight="8dp"
+                        android:paddingEnd="8dp"
+                        android:paddingStart="0dp"
+                        android:paddingLeft="0dp" />
+
+                    <EditText
+                        android:id="@+id/pointsFragGpsTxtElev"
+                        android:enabled="false"
+                        style="@style/NumDecValueTextStyle" />
+
+                    <TextView android:id="@+id/pointsFragGpsTvElev" />
+                </TableRow>
+            </TableLayout>
+
+            <LinearLayout
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:text="@string/points_gps_manacc"
+                    android:textSize="18sp"
+                    android:paddingRight="8dp"
+                    android:paddingEnd="8dp"
+                    android:paddingStart="0dp"
+                    android:paddingLeft="0dp"/>
+
+                <EditText
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:id="@+id/pointsFragGpsTvManAcc"
+                    android:enabled="false"
+                    style="@style/NumDecValueTextStyle"
+                    android:inputType="number|numberDecimal"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:text="@string/meas_meters" />
+            </LinearLayout>
+
+            <TableLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:stretchColumns="*"
+                android:paddingBottom="8dp">
+
+                <TableRow
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:paddingTop="5dp">
+
+                    <TextView
+                        android:text="@string/points_gps_rmser"
+                        android:textSize="18sp"
+                        android:gravity="center"
+                        android:layout_gravity="end"
+                        android:paddingRight="8dp"
+                        android:paddingEnd="8dp"
+                        android:paddingStart="0dp"
+                        android:paddingLeft="0dp" />
+
+                    <TextView
+                        android:id="@+id/pointsFragGpsTvRMSEr"
+                        android:textSize="18sp"
+                        android:textColor="@android:color/black"
+                        android:text="@string/str_nullvalue" />
+
+                    <TextView
+                        android:text="@string/points_gps_nssda"
+                        android:textSize="18sp"
+                        android:gravity="center"
+                        android:layout_gravity="end"
+                        android:paddingEnd="8dp"
+                        android:paddingRight="8dp"
+                        android:paddingStart="0dp"
+                        android:paddingLeft="0dp" />
+
+                    <TextView
+                        android:id="@+id/pointsFragGpsTvNSSDA"
+                        android:textSize="18sp"
+                        android:textColor="@android:color/black"
+                        android:text="@string/str_nullvalue" />
+                </TableRow>
+            </TableLayout>
+        </LinearLayout>
+
+        <View style="@style/ToolbarShadowViewElevation2" android:layout_below="@id/cardContent" />
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:layout_below="@id/cardContent">
+
+            <EditText
+                android:id="@+id/pointTxtCmt"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textMultiLine"
+                android:hint="@string/str_cmt"
+                android:maxLines="6"
+                style="@style/EditTextStyle"/>
+        </android.support.design.widget.TextInputLayout>
+    </RelativeLayout>
+</RelativeLayout>

@@ -17,18 +17,20 @@ import com.usda.fmsc.android.adapters.BaseTableAdapter;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.animation.ViewAnimator;
 import com.usda.fmsc.android.widget.SpreadsheetView;
+import com.usda.fmsc.twotrails.units.Dist;
+import com.usda.fmsc.twotrails.units.OpType;
+import com.usda.fmsc.twotrails.units.Slope;
 import com.usda.fmsc.utilities.StringEx;
 import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
 
-import com.usda.fmsc.twotrails.objects.GpsPoint;
-import com.usda.fmsc.twotrails.objects.QuondamPoint;
-import com.usda.fmsc.twotrails.objects.TravPoint;
+import com.usda.fmsc.twotrails.objects.points.GpsPoint;
+import com.usda.fmsc.twotrails.objects.points.QuondamPoint;
+import com.usda.fmsc.twotrails.objects.points.TravPoint;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
-import com.usda.fmsc.twotrails.objects.TtPoint;
+import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
-import com.usda.fmsc.twotrails.Units;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import org.joda.time.format.DateTimeFormat;
@@ -83,7 +85,7 @@ public class TableEditActivity extends CustomToolbarActivity {
     private HashMap<String, TtMetadata> _Metadata;
 
     private HashMap<String, Boolean> _PolygonFilter;
-    private HashMap<Units.OpType, Boolean> _OpFilter;
+    private HashMap<OpType, Boolean> _OpFilter;
 
     private HashMap<String, String> _MetaNames;
     private ArrayList<TtPoint> _DisplayedPoints, _Points;
@@ -257,7 +259,7 @@ public class TableEditActivity extends CustomToolbarActivity {
         _PolygonFilter = new HashMap<>();
         _OpFilter = new HashMap<>();
 
-        for (Units.OpType op : Units.OpType.values()) {
+        for (OpType op : OpType.values()) {
             _OpFilter.put(op, true);
         }
 
@@ -495,7 +497,7 @@ public class TableEditActivity extends CustomToolbarActivity {
         filterGps = !filterGps;
         setButtonPressed(view, filterGps);
 
-        _OpFilter.put(Units.OpType.GPS, filterGps);
+        _OpFilter.put(OpType.GPS, filterGps);
 
         filterPoints();
         pointsAdapter.notifyDataSetChanged();
@@ -505,7 +507,7 @@ public class TableEditActivity extends CustomToolbarActivity {
         filterT5 = !filterT5;
         setButtonPressed(view, filterT5);
 
-        _OpFilter.put(Units.OpType.Take5, filterT5);
+        _OpFilter.put(OpType.Take5, filterT5);
 
         filterPoints();
         pointsAdapter.notifyDataSetChanged();
@@ -515,7 +517,7 @@ public class TableEditActivity extends CustomToolbarActivity {
         filterTrav = !filterTrav;
         setButtonPressed(view, filterTrav);
 
-        _OpFilter.put(Units.OpType.Traverse, filterTrav);
+        _OpFilter.put(OpType.Traverse, filterTrav);
 
         filterPoints();
         pointsAdapter.notifyDataSetChanged();
@@ -525,7 +527,7 @@ public class TableEditActivity extends CustomToolbarActivity {
         filterSS = !filterSS;
         setButtonPressed(view, filterSS);
 
-        _OpFilter.put(Units.OpType.SideShot, filterSS);
+        _OpFilter.put(OpType.SideShot, filterSS);
 
         filterPoints();
         pointsAdapter.notifyDataSetChanged();
@@ -535,7 +537,7 @@ public class TableEditActivity extends CustomToolbarActivity {
         filterQdnm = !filterQdnm;
         setButtonPressed(view, filterQdnm);
 
-        _OpFilter.put(Units.OpType.Quondam, filterQdnm);
+        _OpFilter.put(OpType.Quondam, filterQdnm);
 
         filterPoints();
         pointsAdapter.notifyDataSetChanged();
@@ -545,7 +547,7 @@ public class TableEditActivity extends CustomToolbarActivity {
         filterWalk = !filterWalk;
         setButtonPressed(view, filterWalk);
 
-        _OpFilter.put(Units.OpType.Walk, filterWalk);
+        _OpFilter.put(OpType.Walk, filterWalk);
 
         filterPoints();
         pointsAdapter.notifyDataSetChanged();
@@ -555,7 +557,7 @@ public class TableEditActivity extends CustomToolbarActivity {
         filterWay = !filterWay;
         setButtonPressed(view, filterWay);
 
-        _OpFilter.put(Units.OpType.WayPoint, filterWay);
+        _OpFilter.put(OpType.WayPoint, filterWay);
 
         filterPoints();
         pointsAdapter.notifyDataSetChanged();
@@ -681,7 +683,7 @@ public class TableEditActivity extends CustomToolbarActivity {
                     return StringEx.toString(point.getAdjY(), 4);
                 case 8:
                     return (point.getAdjZ() != null) ? StringEx.toString(
-                            TtUtils.Convert.distance(point.getAdjZ(), _Metadata.get(point.getMetadataCN()).getDistance(), Units.Dist.Meters),
+                            TtUtils.Convert.distance(point.getAdjZ(), _Metadata.get(point.getMetadataCN()).getDistance(), Dist.Meters),
                             4) : StringEx.Empty;
                 case 9:
                     return StringEx.toString(point.getUnAdjX(), 4);
@@ -689,7 +691,7 @@ public class TableEditActivity extends CustomToolbarActivity {
                     return StringEx.toString(point.getUnAdjY(), 4);
                 case 11:
                     return StringEx.toString(
-                            TtUtils.Convert.distance(point.getUnAdjZ(), _Metadata.get(point.getMetadataCN()).getDistance(), Units.Dist.Meters),
+                            TtUtils.Convert.distance(point.getUnAdjZ(), _Metadata.get(point.getMetadataCN()).getDistance(), Dist.Meters),
                             4);
                 case 12:
                     return StringEx.toString(point.getAccuracy(), 2);
@@ -707,15 +709,15 @@ public class TableEditActivity extends CustomToolbarActivity {
                     return (point instanceof TravPoint) ? StringEx.toString(((TravPoint)point).getBkAz(), 2) : StringEx.Empty;
                 case 19:
                     return (point instanceof TravPoint) ? StringEx.toString(
-                            TtUtils.Convert.distance(((TravPoint)point).getHorizontalDistance(), _Metadata.get(point.getMetadataCN()).getDistance(), Units.Dist.Meters),
+                            TtUtils.Convert.distance(((TravPoint)point).getHorizontalDistance(), _Metadata.get(point.getMetadataCN()).getDistance(), Dist.Meters),
                             3) : StringEx.Empty;
                 case 20:
                     return (point instanceof TravPoint) ? StringEx.toString(
-                            TtUtils.Convert.distance(((TravPoint)point).getSlopeDistance(), _Metadata.get(point.getMetadataCN()).getDistance(), Units.Dist.Meters),
+                            TtUtils.Convert.distance(((TravPoint)point).getSlopeDistance(), _Metadata.get(point.getMetadataCN()).getDistance(), Dist.Meters),
                             3) : StringEx.Empty;
                 case 21:
                     return (point instanceof TravPoint) ? StringEx.toString(
-                            TtUtils.Convert.angle(((TravPoint)point).getSlopeAngle(), _Metadata.get(point.getMetadataCN()).getSlope(), Units.Slope.Percent),
+                            TtUtils.Convert.angle(((TravPoint)point).getSlopeAngle(), _Metadata.get(point.getMetadataCN()).getSlope(), Slope.Percent),
                             3) : StringEx.Empty;
                 case 22:
                     if (point instanceof QuondamPoint)
