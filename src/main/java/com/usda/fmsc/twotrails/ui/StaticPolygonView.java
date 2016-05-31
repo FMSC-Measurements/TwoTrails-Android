@@ -12,7 +12,7 @@ import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.objects.PointD;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
-import com.usda.fmsc.twotrails.objects.TtPoint;
+import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.util.HashMap;
@@ -21,7 +21,6 @@ import java.util.List;
 public class StaticPolygonView extends View {
     List<PointD> points;
     Paint paint;
-    boolean rendered;
 
 
     public StaticPolygonView(Context context) {
@@ -53,9 +52,9 @@ public class StaticPolygonView extends View {
     public void onMeasure(int widthMeasureSpec, int heightMeasureSpec){
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
-        int w = this.getMeasuredWidth();
+        int width = this.getMeasuredWidth();
 
-        setMeasuredDimension(w, w);
+        setMeasuredDimension(width, width);
     }
 
     @Override
@@ -78,39 +77,17 @@ public class StaticPolygonView extends View {
 
                 lastPt = pt;
             }
+        }
+    }
 
-            if (!rendered) {
-                rendered = true;
+    public void render(List<PointD> points) {
+        StaticPolygonView.this.points = points;
+
+        ((Activity)getContext()).runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                StaticPolygonView.this.invalidate();
             }
-        }
-    }
-    public void render(final List<TtPoint> points, final HashMap<String, TtMetadata> metadata) {
-        if (points.size() > 2) {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    int zone = metadata.get(Consts.EmptyGuid).getZone();
-
-                    int width = getWidth();
-
-                    width = (int)(width * 0.9);
-
-                    if (width > 0) {
-                        StaticPolygonView.this.points = TtUtils.generateStaticPolyPoints(points, metadata, zone, width);
-
-                        ((Activity)getContext()).runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                StaticPolygonView.this.invalidate();
-                            }
-                        });
-                    }
-                }
-            }).start();
-        }
-    }
-
-    public boolean isRendered() {
-        return rendered;
+        });
     }
 }

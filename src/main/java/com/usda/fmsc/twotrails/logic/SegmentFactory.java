@@ -2,12 +2,12 @@ package com.usda.fmsc.twotrails.logic;
 
 
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
-import com.usda.fmsc.twotrails.objects.QuondamPoint;
-import com.usda.fmsc.twotrails.objects.TravPoint;
+import com.usda.fmsc.twotrails.objects.points.QuondamPoint;
+import com.usda.fmsc.twotrails.objects.points.TravPoint;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
-import com.usda.fmsc.twotrails.objects.TtPoint;
+import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
-import com.usda.fmsc.twotrails.Units;
+import com.usda.fmsc.twotrails.units.OpType;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,7 +26,7 @@ public class SegmentFactory {
         Hashtable<String, TtPoint> tmpPoints = new Hashtable<>();
 
         for (TtPoint p : dal.getPoints()) {
-            if(p.getOp() == Units.OpType.WayPoint) {
+            if(p.getOp() == OpType.WayPoint) {
                 p.calculatePoint(polys.get(p.getPolyCN()));
                 p.adjustPoint();
                 tmpWayPoints.add(p);
@@ -46,7 +46,7 @@ public class SegmentFactory {
         QuondamPoint qp;
         for (TtPoint p : tmpPoints.values())
         {
-            if(p.getOp() == Units.OpType.Quondam) {
+            if(p.getOp() == OpType.Quondam) {
                 qp = (QuondamPoint)p;
                 qp.setParentPoint(tmpPoints.get(qp.getParentCN()));
             }
@@ -74,7 +74,7 @@ public class SegmentFactory {
         seg.addPoint(prev);
         boolean finished = false;
         boolean travStarted = false;
-        boolean startTypeFound = (prev.isGpsType() || (prev.getOp() == Units.OpType.Quondam &&
+        boolean startTypeFound = (prev.isGpsType() || (prev.getOp() == OpType.Quondam &&
                 ((QuondamPoint)prev).getParentPoint().isGpsType()));
         boolean savePrev = false;
 
@@ -93,10 +93,10 @@ public class SegmentFactory {
                 continue;
             }
 
-            Units.OpType tmpOp = current.getOp();
+            OpType tmpOp = current.getOp();
             TtPoint tmpQp = null;
 
-            while (tmpOp == Units.OpType.Quondam) {
+            while (tmpOp == OpType.Quondam) {
                 if (tmpQp == null)
                     tmpQp = ((QuondamPoint)current).getParentPoint();
                 else
@@ -130,9 +130,9 @@ public class SegmentFactory {
                     break;
                 }
                 case Traverse: {
-                    if (prev.getOp() == Units.OpType.Traverse ||
-                            prev.getOp() == Units.OpType.Quondam &&
-                                    ((QuondamPoint)prev).getParentOp() == Units.OpType.Traverse) {
+                    if (prev.getOp() == OpType.Traverse ||
+                            prev.getOp() == OpType.Quondam &&
+                                    ((QuondamPoint)prev).getParentOp() == OpType.Traverse) {
                         //finished = true;
                         seg.addPoint(current);
 

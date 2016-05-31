@@ -1,9 +1,23 @@
 package com.usda.fmsc.twotrails.objects;
 
-import java.io.Serializable;
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.usda.fmsc.utilities.StringEx;
 
-public class TtGroup implements Serializable {
+public class TtGroup extends TtObject {
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+        @Override
+        public Object createFromParcel(Parcel source) {
+            return new TtGroup(source);
+        }
+
+        @Override
+        public TtGroup[] newArray(int size) {
+            return new TtGroup[size];
+        }
+    };
+
     public enum GroupType {
         General(0),
         Walk(1),
@@ -11,7 +25,7 @@ public class TtGroup implements Serializable {
 
         private final int value;
 
-        private GroupType(int value) {
+        GroupType(int value) {
             this.value = value;
         }
 
@@ -19,7 +33,7 @@ public class TtGroup implements Serializable {
             return value;
         }
 
-        public static GroupType fromInt(int id) {
+        public static GroupType parse(int id) {
             GroupType[] gts = values();
             if(gts.length > id && id > -1)
                 return gts[id];
@@ -37,15 +51,39 @@ public class TtGroup implements Serializable {
         }
     }
 
+
+    private String _Name;
+    private String _Description = StringEx.Empty;
+    private GroupType _GroupType = GroupType.General;
+
+    public TtGroup() { }
+
+    public TtGroup(Parcel source) {
+        super(source);
+
+        _Name = source.readString();
+        _Description = source.readString();
+        _GroupType = GroupType.parse(source.readInt());
+    }
+
+    public TtGroup(String name) {
+        _Name = name;
+    }
+
+    public TtGroup(GroupType type) {
+        _GroupType = type;
+        _Name = String.format("%s %s", _GroupType.toString(), getCN().substring(0, 8));
+    }
+
+    public TtGroup(TtGroup ttgroup) {
+        setCN(ttgroup.getCN());
+        _Name = ttgroup.getName();
+        _GroupType = ttgroup.getGroupType();
+        _Description = ttgroup.getDescription();
+    }
+
+
     //region Get/Set
-    public String getCN() {
-        return _CN;
-    }
-
-    public void setCN(String CN) {
-        this._CN = CN;
-    }
-
     public String getName() {
         return _Name;
     }
@@ -72,49 +110,15 @@ public class TtGroup implements Serializable {
 
     //endregion
 
-    private String _CN;
-    private String _Name;
-    private String _Description;
-    private GroupType _GroupType;
 
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
 
-    //region Constructors
-    public TtGroup() {
-        _CN = java.util.UUID.randomUUID().toString();
-        _Name = StringEx.Empty;
-        _GroupType = GroupType.General;
-        _Description = StringEx.Empty;
+        dest.writeString(StringEx.getValueOrEmpty(_Name));
+        dest.writeString(StringEx.getValueOrEmpty(_Description));
+        dest.writeInt(_GroupType.getValue());
     }
-
-    public TtGroup(String name) {
-        _CN = java.util.UUID.randomUUID().toString();
-        _Name = name;
-        _GroupType = GroupType.General;
-        _Description = StringEx.Empty;
-
-    }
-
-    public TtGroup(GroupType type) {
-        _CN = java.util.UUID.randomUUID().toString();
-        _GroupType = type;
-        _Name = String.format("%s %s", _GroupType.toString(), _CN.substring(0, 8));
-        _Description = StringEx.Empty;
-    }
-
-    public TtGroup(TtGroup ttgroup) {
-        _CN = ttgroup.getCN();
-        _Name = ttgroup.getName();
-        _GroupType = ttgroup.getGroupType();
-        _Description = ttgroup.getDescription();
-    }
-
-    public TtGroup(String CN, String Name, GroupType groupType, String Desc) {
-        _CN = CN;
-        _Name = Name;
-        _GroupType = groupType;
-        _Description = Desc;
-    }
-    //endregion
 
     @Override
     public String toString()

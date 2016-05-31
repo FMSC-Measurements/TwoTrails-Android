@@ -3,11 +3,12 @@ package com.usda.fmsc.twotrails.logic;
 
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.objects.PointD;
-import com.usda.fmsc.twotrails.objects.QuondamPoint;
-import com.usda.fmsc.twotrails.objects.TtPoint;
+import com.usda.fmsc.twotrails.objects.points.QuondamPoint;
+import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
-import com.usda.fmsc.twotrails.Units;
+import com.usda.fmsc.twotrails.units.Dist;
+import com.usda.fmsc.twotrails.units.OpType;
 import com.usda.fmsc.utilities.StringEx;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
@@ -62,7 +63,7 @@ public class HaidLogic {
 
             if (points.size() > 0) {
                 if (points.size() > 2) {
-                    points = TtUtils.filterOut(points, Units.OpType.WayPoint);
+                    points = TtUtils.filterOut(points, OpType.WayPoint);
 
                     if (points.size() > 0) {
                         if (points.size() > 2) {
@@ -141,9 +142,9 @@ public class HaidLogic {
         sb.append(String.format("\tTraverse Total Segments: %d%s",
                 traverseSegments, Consts.NewLine));
         sb.append(String.format("\tTraverse Total Distance: %.3f feet.%s",
-                TtUtils.Convert.toFeetTenths(travLength, Units.Dist.Meters), Consts.NewLine));
+                TtUtils.Convert.toFeetTenths(travLength, Dist.Meters), Consts.NewLine));
         sb.append(String.format("\tTraverse Closing Distance: %.3f feet.%s",
-                TtUtils.Convert.toFeetTenths(closeError, Units.Dist.Meters), Consts.NewLine));
+                TtUtils.Convert.toFeetTenths(closeError, Dist.Meters), Consts.NewLine));
         sb.append(String.format("\tTraverse Close Error: 1 part in %d.%s", Math.round(travError), Consts.NewLine));
 
         totalTravError += (travLength * closeError / 2);
@@ -252,7 +253,7 @@ public class HaidLogic {
             {
                 QuondamPoint qp = (QuondamPoint)point;
 
-                if (qp.getParentOp() == Units.OpType.Traverse && _LastTtPoint != null) {
+                if (qp.getParentOp() == OpType.Traverse && _LastTtPoint != null) {
                     if (traversing)
                     {
                         closeTraverse(point, sb);
@@ -297,7 +298,7 @@ public class HaidLogic {
             sb.append(String.format("The polygon exterior perimeter is: %s%.3f M (%.3f ft).%s",
                             save ? "     " : "",
                             polygon.getPerimeter(),
-                            TtUtils.Convert.toFeetTenths(polygon.getPerimeter(), Units.Dist.Meters),
+                            TtUtils.Convert.toFeetTenths(polygon.getPerimeter(), Dist.Meters),
                             Consts.NewLine));
         }
 

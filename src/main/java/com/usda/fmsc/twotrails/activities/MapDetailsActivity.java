@@ -25,7 +25,6 @@ import com.usda.fmsc.twotrails.utilities.ArcGISTools;
 import com.usda.fmsc.utilities.IListener;
 import com.usda.fmsc.utilities.StringEx;
 
-//TODO Display Details
 public class MapDetailsActivity extends CustomToolbarActivity {
     ArcGisMapLayer arcGisMapLayer, agmlBackup;
     ImageView ivStatusIcon;
@@ -48,7 +47,7 @@ public class MapDetailsActivity extends CustomToolbarActivity {
 
         getToolbar().setTitle(getString(R.string.title_activity_edit_arc_map));
 
-        ivStatusIcon = (ImageView) findViewById(R.id.mhIcon);
+        ivStatusIcon = (ImageView) findViewById(R.id.amdIcon);
         tvName = (TextView) findViewById(R.id.amdName);
         tvUrl = (TextView)findViewById(R.id.amdTvUrl);
         tvFile = (TextView)findViewById(R.id.amdTvFile);

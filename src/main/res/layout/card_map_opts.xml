@@ -2,7 +2,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    style="@style/pad8880">
+    style="@style/margin8880">
 
     <android.support.v7.widget.CardView
         android:id="@+id/card"
@@ -19,8 +19,8 @@
                 android:id="@+id/pmcLayHeader"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
-                android:elevation="2dp"
-                android:background="@android:color/white">
+                android:background="@android:color/white"
+                style="@style/ToolbarElevation2">
 
                 <com.usda.fmsc.android.widget.MultiStateTouchCheckBox
                     android:id="@+id/pmcTcbPoly"
@@ -63,7 +63,7 @@
                     android:layout_alignParentTop="true">
 
                     <TextView
-                        android:text="@string/map_cat_bound"
+                        android:text="@string/str_bnd"
                         style="@style/mapOptCatTextStyle" />
 
                     <View style="@style/Dividers" />
@@ -78,44 +78,58 @@
                             android:contentDescription="@string/map_adj_bnd"
                             style="@style/mapOptFlipCheckBoxStyle"
                             app:acceptColor="@color/map_adj_bnd"
-                            app:acceptImage="@drawable/ic_poly"
-                            app:declineImage="@drawable/ic_poly"/>
+                            app:acceptImage="@drawable/ic_polygon_white_36dp"
+                            app:declineImage="@drawable/ic_polygon_white_36dp"/>
 
                         <com.usda.fmsc.android.widget.FlipCheckBoxEx
                             android:id="@+id/pmcFcbAdjBndPts"
                             android:contentDescription="@string/map_adj_bnd_pts"
                             style="@style/mapOptFlipCheckBoxStyle"
                             app:acceptColor="@color/map_adj_pts"
-                            app:acceptImage="@drawable/ic_location_white_36dp"
-                            app:declineImage="@drawable/ic_location_white_36dp"/>
+                            app:acceptImage="@drawable/ic_polygon_pts_white_36dp"
+                            app:declineImage="@drawable/ic_polygon_pts_white_36dp"/>
 
                         <com.usda.fmsc.android.widget.FlipCheckBoxEx
                             android:id="@+id/pmcFcbUnadjBnd"
                             android:contentDescription="@string/map_unadj_bnd"
                             style="@style/mapOptFlipCheckBoxStyle"
                             app:acceptColor="@color/map_unadj_bnd"
-                            app:acceptImage="@drawable/ic_unpoly"
-                            app:declineImage="@drawable/ic_unpoly"/>
+                            app:acceptImage="@drawable/ic_unadjusted_polygon_white_36dp"
+                            app:declineImage="@drawable/ic_unadjusted_polygon_white_36dp"/>
 
                         <com.usda.fmsc.android.widget.FlipCheckBoxEx
                             android:id="@+id/pmcFcbUnadjBndPts"
                             android:contentDescription="@string/map_unadj_bnd_pts"
                             style="@style/mapOptFlipCheckBoxStyle"
                             app:acceptColor="@color/map_unadj_pts"
-                            app:acceptImage="@drawable/ic_location_white_36dp"
-                            app:declineImage="@drawable/ic_location_white_36dp"/>
+                            app:acceptImage="@drawable/ic_unadjusted_polygon_pts_white_36dp"
+                            app:declineImage="@drawable/ic_unadjusted_polygon_pts_white_36dp"/>
 
                         <View
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"/>
 
-                        <ImageButton
-                            android:id="@+id/pmcIbBndMenu"
-                            style="@style/mapOptFlipCheckBoxStyle"
+                        <com.usda.fmsc.android.widget.PopupMenuButton
+                            android:id="@+id/pmcPmbMenu"
+                            android:layout_width="50dp"
+                            android:layout_height="50dp"
                             android:src="@drawable/ic_action_overflow_dark"
-                            android:contentDescription="@string/map_bnd_menu"
-                            android:background="@android:color/transparent" />
+                            app:menuRes="@menu/ctx_menu_map_extra_options"
+                            android:contentDescription="@string/map_menu_extra_options"
+                            android:paddingTop="8dp"
+                            android:paddingBottom="8dp"
+                            android:paddingStart="8dp"
+                            android:paddingLeft="8dp"
+                            android:paddingEnd="12dp"
+                            android:paddingRight="12dp"/>
+
+                        <!--<ImageButton-->
+                            <!--android:id="@+id/pmcIbBndMenu"-->
+                            <!--style="@style/mapOptFlipCheckBoxStyle"-->
+                            <!--android:src="@drawable/ic_action_overflow_dark"-->
+                            <!--android:contentDescription="@string/map_bnd_menu"-->
+                            <!--android:background="@android:color/transparent" />-->
                     </LinearLayout>
                 </LinearLayout>
 
@@ -125,7 +139,7 @@
                     android:layout_below="@id/lay1">
 
                     <TextView
-                        android:text="@string/map_cat_nav"
+                        android:text="@string/str_navigate"
                         style="@style/mapOptCatTextStyle" />
 
                     <View style="@style/Dividers" />
@@ -140,32 +154,32 @@
                             android:contentDescription="@string/map_adj_nav"
                             style="@style/mapOptFlipCheckBoxStyle"
                             app:acceptColor="@color/map_adj_nav"
-                            app:acceptImage="@drawable/ic_poly"
-                            app:declineImage="@drawable/ic_poly"/>
+                            app:acceptImage="@drawable/ic_polygon_white_36dp"
+                            app:declineImage="@drawable/ic_polygon_white_36dp"/>
 
                         <com.usda.fmsc.android.widget.FlipCheckBoxEx
                             android:id="@+id/pmcFcbAdjNavPts"
                             android:contentDescription="@string/map_adj_nav_pts"
                             style="@style/mapOptFlipCheckBoxStyle"
                             app:acceptColor="@color/map_adj_pts"
-                            app:acceptImage="@drawable/ic_location_white_36dp"
-                            app:declineImage="@drawable/ic_location_white_36dp"/>
+                            app:acceptImage="@drawable/ic_polygon_pts_white_36dp"
+                            app:declineImage="@drawable/ic_polygon_pts_white_36dp"/>
 
                         <com.usda.fmsc.android.widget.FlipCheckBoxEx
                             android:id="@+id/pmcFcbUnadjNav"
                             android:contentDescription="@string/map_unadj_nav"
                             style="@style/mapOptFlipCheckBoxStyle"
                             app:acceptColor="@color/map_unadj_nav"
-                            app:acceptImage="@drawable/ic_unpoly"
-                            app:declineImage="@drawable/ic_unpoly"/>
+                            app:acceptImage="@drawable/ic_unadjusted_polygon_white_36dp"
+                            app:declineImage="@drawable/ic_unadjusted_polygon_white_36dp"/>
 
                         <com.usda.fmsc.android.widget.FlipCheckBoxEx
                             android:id="@+id/pmcFcbUnadjNavPts"
                             android:contentDescription="@string/map_unadj_nav_pts"
                             style="@style/mapOptFlipCheckBoxStyle"
                             app:acceptColor="@color/map_unadj_pts"
-                            app:acceptImage="@drawable/ic_location_white_36dp"
-                            app:declineImage="@drawable/ic_location_white_36dp"/>
+                            app:acceptImage="@drawable/ic_unadjusted_polygon_pts_white_36dp"
+                            app:declineImage="@drawable/ic_unadjusted_polygon_pts_white_36dp"/>
                     </LinearLayout>
                 </LinearLayout>
 
@@ -174,7 +188,7 @@
                     android:layout_below="@id/lay2">
 
                     <TextView
-                        android:text="@string/map_cat_other"
+                        android:text="@string/str_other"
                         style="@style/mapOptCatTextStyle" />
 
                     <View style="@style/Dividers" />
@@ -197,20 +211,20 @@
                             android:contentDescription="@string/map_adj_misc_pts"
                             style="@style/mapOptFlipCheckBoxStyle"
                             app:acceptColor="@color/map_adj_pts"
-                            app:acceptImage="@drawable/ic_location_white_36dp"
-                            app:declineImage="@drawable/ic_location_white_36dp"/>
+                            app:acceptImage="@drawable/ic_polygon_pts_white_36dp"
+                            app:declineImage="@drawable/ic_polygon_pts_white_36dp"/>
 
                         <com.usda.fmsc.android.widget.FlipCheckBoxEx
                             android:id="@+id/pmcFcbUnadjMiscPts"
                             android:contentDescription="@string/map_unadj_misc_pts"
                             style="@style/mapOptFlipCheckBoxStyle"
                             app:acceptColor="@color/map_unadj_pts"
-                            app:acceptImage="@drawable/ic_location_white_36dp"
-                            app:declineImage="@drawable/ic_location_white_36dp"/>
+                            app:acceptImage="@drawable/ic_unadjusted_polygon_pts_white_36dp"
+                            app:declineImage="@drawable/ic_unadjusted_polygon_pts_white_36dp"/>
                     </LinearLayout>
                 </LinearLayout>
 
-                <View style="@style/ToolbarElevation2" android:layout_alignParentTop="true" />
+                <View style="@style/ToolbarShadowViewElevation2" android:layout_alignParentTop="true" />
             </RelativeLayout>
         </LinearLayout>
     </android.support.v7.widget.CardView>

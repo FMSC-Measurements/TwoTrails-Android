@@ -19,7 +19,7 @@ import android.widget.EditText;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.animation.ViewAnimator;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.objects.GpsPoint;
+import com.usda.fmsc.twotrails.objects.points.GpsPoint;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import com.usda.fmsc.geospatial.DMS;

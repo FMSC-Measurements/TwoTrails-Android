@@ -97,11 +97,15 @@
         <item name="android:selectAllOnFocus">true</item>
     </style>
 
-    <style name="PointValueTextStyle" parent="AutoSelectEditTextStyle">
+    <style name="NumDecValueTextStyle" parent="AutoSelectEditTextStyle">
         <item name="android:textSize">20sp</item>
         <item name="android:inputType">number|numberDecimal|numberSigned</item>
     </style>
 
+    <style name="TvEditTextStyleNoFocus" parent="@style/EditTextStyle">
+        <item name="android:focusable">false</item>
+        <item name="android:maxLines">1</item>
+    </style>
 
     <style name="CheckBoxStyle" parent="@android:style/Widget.Holo.Light.CompoundButton.CheckBox">
         <item name="colorPrimary">@color/primary</item>
@@ -137,7 +141,7 @@
 
 
     <!--Map-->
-    <style name="mapOptCatStyle" parent="pad8088">
+    <style name="mapOptCatStyle" parent="margin8088">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:orientation">vertical</item>
@@ -197,10 +201,6 @@
         <item name="android:background">#f9f9f9</item>
     </style>
 
-    <!--<style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />-->
-
-    <!--<style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />-->
-
     <style name="fabStyle">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
@@ -210,18 +210,13 @@
         <item name="layout_anchorGravity">bottom|end|right</item>
         <item name="elevation">6dp</item>
         <item name="pressedTranslationZ">12dp</item>
-        <!--<item name="fab_colorNormal">@color/primaryLight</item>-->
-        <!--<item name="fab_colorRipple">@color/primaryLighter</item>-->
     </style>
 
     <style name="fabProgressHolderStyle">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
-        <!--<item name="android:layout_gravity">bottom|end</item>-->
-        <!--<item name="layout_anchorGravity">bottom|end|right</item>-->
 
         <item name="arcColor">@color/green_700</item>
-        <!--<item name="arcColor">@color/primaryLighter</item>-->
         <item name="arcWidth">3dp</item>
     </style>
 
@@ -231,8 +226,6 @@
 
         <item name="android:elevation" tools:targetApi="21">6dp</item>
         <item name="pressedTranslationZ">12dp</item>
-        <!--<item name="fab_colorNormal">@color/primaryLight</item>-->
-        <!--<item name="fab_colorRipple">@color/primaryLighter</item>-->
     </style>
 
 
@@ -266,28 +259,59 @@
         <item name="android:layout_gravity">center_vertical</item>
     </style>
 
+    <style name="polyDetailTextStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:paddingLeft">8dp</item>
+        <item name="android:maxLines">1</item>
+    </style>
+
+    <style name="polyDetailTextValueStyle" parent="polyDetailTextStyle">
+        <item name="android:gravity">end</item>
+        <item name="android:ellipsize">end</item>
+    </style>
 
     <!--Toolbars-->
-    <style name="ToolbarElevationBase">
+    <style name="ToolbarShadowViewElevationBase">
         <item name="android:layout_width">match_parent</item>
         <item name="android:background">@drawable/shadow</item>
     </style>
 
-    <style name="ToolbarElevation" parent="ToolbarElevationBase">
+    <style name="ToolbarShadowViewElevation" parent="ToolbarShadowViewElevationBase">
         <item name="android:layout_height">@dimen/toolbar_elevation</item>
     </style>
 
-    <style name="ToolbarElevation2" parent="ToolbarElevationBase">
+    <style name="ToolbarShadowViewElevation2" parent="ToolbarShadowViewElevationBase">
+        <item name="android:layout_height">2dp</item>
+    </style>
+
+    <style name="ToolbarShadowViewElevation3" parent="ToolbarShadowViewElevationBase">
         <item name="android:layout_height">3dp</item>
     </style>
 
-    <style name="ToolbarElevation3" parent="ToolbarElevationBase">
-        <item name="android:layout_height">3dp</item>
-    </style>
+
+    <style name="ToolbarElevation"/>
+
+    <style name="ToolbarElevation0"/>
+
+    <style name="ToolbarElevation1"/>
+
+    <style name="ToolbarElevation2"/>
+
+    <style name="ToolbarElevation3"/>
+
+    <style name="ToolbarElevation4"/>
+
+    <style name="ToolbarElevation7"/>
+
+    <style name="ToolbarElevation8"/>
+
+    <style name="ToolbarElevation9"/>
 
 
     <!-- Common -->
-    <style name="pad8484">
+    <style name="margin8484">
         <item name="android:layout_marginLeft">8dp</item>
         <item name="android:layout_marginStart" tools:targetApi="17">8dp</item>
         <item name="android:layout_marginRight">8dp</item>
@@ -296,7 +320,7 @@
         <item name="android:layout_marginBottom">4dp</item>
     </style>
 
-    <style name="pad8088">
+    <style name="margin8088">
         <item name="android:layout_marginLeft">8dp</item>
         <item name="android:layout_marginStart" tools:targetApi="17">8dp</item>
         <item name="android:layout_marginRight">8dp</item>
@@ -304,7 +328,7 @@
         <item name="android:layout_marginBottom">8dp</item>
     </style>
 
-    <style name="pad8880">
+    <style name="margin8880">
         <item name="android:layout_marginLeft">8dp</item>
         <item name="android:layout_marginStart" tools:targetApi="17">8dp</item>
         <item name="android:layout_marginRight">8dp</item>
@@ -312,12 +336,28 @@
         <item name="android:layout_marginTop">8dp</item>
     </style>
 
-    <style name="pad4440">
+    <style name="margin4440">
         <item name="android:layout_marginLeft">4dp</item>
         <item name="android:layout_marginStart" tools:targetApi="17">4dp</item>
         <item name="android:layout_marginRight">4dp</item>
         <item name="android:layout_marginEnd" tools:targetApi="17">4dp</item>
         <item name="android:layout_marginTop">4dp</item>
+    </style>
+
+    <style name="padding8880">
+        <item name="android:paddingLeft">8dp</item>
+        <item name="android:paddingStart" tools:targetApi="17">8dp</item>
+        <item name="android:paddingRight">8dp</item>
+        <item name="android:paddingEnd" tools:targetApi="17">8dp</item>
+        <item name="android:paddingTop">8dp</item>
+    </style>
+
+    <style name="padding8088">
+        <item name="android:paddingLeft">8dp</item>
+        <item name="android:paddingStart" tools:targetApi="17">8dp</item>
+        <item name="android:paddingRight">8dp</item>
+        <item name="android:paddingEnd" tools:targetApi="17">8dp</item>
+        <item name="android:paddingBottom">8dp</item>
     </style>
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>

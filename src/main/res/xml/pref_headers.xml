@@ -13,8 +13,8 @@
         android:title="Map Options" />
 
     <header
-        android:fragment="com.usda.fmsc.twotrails.activities.PreferenceActivity$DialogPreferenceFragment"
-        android:title="Dialog Options" />
+        android:fragment="com.usda.fmsc.twotrails.activities.PreferenceActivity$MediaPreferenceFragment"
+        android:title="Media Options" />
 
     <header
         android:fragment="com.usda.fmsc.twotrails.activities.PreferenceActivity$MiscPreferenceFragment"

@@ -25,7 +25,7 @@ import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.gps.GpsService;
-import com.usda.fmsc.twotrails.objects.TtPoint;
+import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.objects.map.PolygonGraphicOptions;
 import com.usda.fmsc.twotrails.objects.map.TrailGraphicManager;
@@ -37,9 +37,6 @@ import com.usda.fmsc.utilities.StringEx;
 import java.util.ArrayList;
 
 public class AcquireGpsMapActivity extends BaseMapActivity {
-    public static final int GPS_NOT_FOUND = 1910;
-    public static final int GPS_NOT_CONFIGURED = 1911;
-
     private static final String nVal = "*";
 
     private TextView tvGpsStatus, tvGpsMode, tvLat, tvLon, tvUtmX, tvUtmY,
@@ -68,7 +65,7 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
 
         if (!Global.Settings.DeviceSettings.isGpsConfigured()) {
             canceling = true;
-            setResult(GPS_NOT_CONFIGURED);
+            setResult(Consts.Codes.Results.GPS_NOT_CONFIGURED);
             finish();
             return;
         }
@@ -408,10 +405,12 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
             if (!gpsExtraLayoutSet) {
                 RelativeLayout lay = (RelativeLayout) findViewById(R.id.gpsInfoLaySatInfoSub);
 
-                lay.getLayoutParams().width = lay.getWidth();
-                lay.getLayoutParams().height = lay.getHeight();
-                lay.requestLayout();
-                gpsExtraLayoutSet = true;
+                if (lay != null) {
+                    lay.getLayoutParams().width = lay.getWidth();
+                    lay.getLayoutParams().height = lay.getHeight();
+                    lay.requestLayout();
+                    gpsExtraLayoutSet = true;
+                }
             }
 
             if (animate) {

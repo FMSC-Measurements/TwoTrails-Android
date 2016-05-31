@@ -12,9 +12,10 @@ import android.widget.TextView;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.objects.TravPoint;
-import com.usda.fmsc.twotrails.objects.TtPoint;
-import com.usda.fmsc.twotrails.Units;
+import com.usda.fmsc.twotrails.objects.points.TravPoint;
+import com.usda.fmsc.twotrails.objects.points.TtPoint;
+import com.usda.fmsc.twotrails.units.Dist;
+import com.usda.fmsc.twotrails.units.Slope;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import com.usda.fmsc.utilities.ParseEx;
@@ -28,14 +29,14 @@ public class TraversePointFragment extends BasePointFragment {
     private TravPoint _TravPoint;
 
 
-    public static TraversePointFragment newInstance(String pointCN) {
-        return newInstance(pointCN, false);
+    public static TraversePointFragment newInstance(TravPoint point) {
+        return newInstance(point, false);
     }
 
-    public static TraversePointFragment newInstance(String pointCN, boolean hidden) {
+    public static TraversePointFragment newInstance(TravPoint point, boolean hidden) {
         TraversePointFragment fragment = new TraversePointFragment();
         Bundle args = new Bundle();
-        args.putString(POINT_CN, pointCN);
+        args.putParcelable(POINT, point);
         args.putBoolean(HIDDEN, hidden);
         fragment.setArguments(args);
         return fragment;
@@ -144,7 +145,7 @@ public class TraversePointFragment extends BasePointFragment {
                     }
 
                     //if (value != null) {
-                        value = TtUtils.Convert.distance(value, Units.Dist.Meters, getMetadata().getDistance());
+                        value = TtUtils.Convert.distance(value, Dist.Meters, getMetadata().getDistance());
 
                         //if (!TtUtils.Math.cmpa(value, _TravPoint.getSlopeDistance())) {
                             _TravPoint.setSlopeDistance(value);
@@ -172,7 +173,7 @@ public class TraversePointFragment extends BasePointFragment {
                     }
 
                     //if (value != null) {
-                        value = TtUtils.Convert.angle(value, Units.Slope.Percent, getMetadata().getSlope());
+                        value = TtUtils.Convert.angle(value, Slope.Percent, getMetadata().getSlope());
 
                         //if (!TtUtils.Math.cmpa(value, _TravPoint.getSlopeAngle())) {
                             _TravPoint.setSlopeAngle(value);
@@ -220,12 +221,12 @@ public class TraversePointFragment extends BasePointFragment {
         txtBk.setText(StringEx.toString(TtUtils.Math.round(_TravPoint.getBkAz(), Consts.Minimum_Point_Display_Digits)));
 
         txtSlopeDist.setText(StringEx.toString(TtUtils.Math.round(
-                TtUtils.Convert.distance(_TravPoint.getSlopeDistance(), getMetadata().getDistance(), Units.Dist.Meters),
+                TtUtils.Convert.distance(_TravPoint.getSlopeDistance(), getMetadata().getDistance(), Dist.Meters),
                 Consts.Minimum_Point_Display_Digits
         )));
 
         txtSlopeAng.setText(StringEx.toString(TtUtils.Math.round(
-                TtUtils.Convert.angle(_TravPoint.getSlopeAngle(), getMetadata().getSlope(), Units.Slope.Percent),
+                TtUtils.Convert.angle(_TravPoint.getSlopeAngle(), getMetadata().getSlope(), Slope.Percent),
                 Consts.Minimum_Point_Display_Digits
         )));
 

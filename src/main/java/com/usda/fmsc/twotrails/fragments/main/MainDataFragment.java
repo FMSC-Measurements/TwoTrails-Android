@@ -11,9 +11,9 @@ import com.usda.fmsc.twotrails.R;
 
 
 public class MainDataFragment extends Fragment {
-    Button btnPoint, btnPoly, btnMeta, btnProj, btnTable;
+    private Button btnPoint, btnPoly, btnMeta, btnProj, btnTable;
 
-    boolean enabled = false, viewExists = false;
+    private boolean enabled = false, viewExists = false;
 
     public static MainDataFragment newInstance() {
         return new MainDataFragment();
@@ -29,7 +29,6 @@ public class MainDataFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_main_data, container, false);
         viewExists = true;
 

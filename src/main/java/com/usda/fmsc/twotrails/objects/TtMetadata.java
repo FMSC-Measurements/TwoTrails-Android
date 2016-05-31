@@ -3,17 +3,13 @@ package com.usda.fmsc.twotrails.objects;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.usda.fmsc.twotrails.Units;
-import com.usda.fmsc.twotrails.Units.Datum;
-import com.usda.fmsc.twotrails.Units.DeclinationType;
-import com.usda.fmsc.twotrails.Units.Dist;
-import com.usda.fmsc.twotrails.Units.Slope;
+import com.usda.fmsc.geospatial.UomElevation;
+import com.usda.fmsc.twotrails.units.DeclinationType;
+import com.usda.fmsc.twotrails.units.Dist;
+import com.usda.fmsc.twotrails.units.Datum;
+import com.usda.fmsc.twotrails.units.Slope;
 
-import java.io.Serializable;
-
-import com.usda.fmsc.geospatial.Units.UomElevation;
-
-public class TtMetadata implements Parcelable {
+public class TtMetadata extends TtObject implements Parcelable {
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
         @Override
         public Object createFromParcel(Parcel source) {
@@ -26,81 +22,80 @@ public class TtMetadata implements Parcelable {
         }
     };
 
-    private String CN;
     private String Name;
 
     private int Zone;
 
-    private Datum Datum;
-    private Dist Distance;
-    private UomElevation Elevation;
-    private Slope Slope;
+    private Datum _Datum;
+    private Dist _Distance;
+    private UomElevation _Elevation;
+    private Slope _Slope;
 
-    private DeclinationType DecType;
-    private double MagDec;
+    private DeclinationType _DecType;
+    private double _MagDec;
 
-    private String GpsReceiver;
-    private String RangeFinder;
-    private String Compass;
-    private String Crew;
-    private String Comment;
+    private String _GpsReceiver;
+    private String _RangeFinder;
+    private String _Compass;
+    private String _Crew;
+    private String _Comment;
 
 
 
     public TtMetadata() {
-        this.CN = java.util.UUID.randomUUID().toString();
         this.Name = "Metadata";
         this.Zone = 13;
-        this.Datum = Units.Datum.NAD83;
-        this.Distance = Dist.FeetInches;
-        this.Elevation = UomElevation.Meters;
-        this.Slope = Units.Slope.Percent;
-        this.DecType = DeclinationType.MagDec;
-        this.MagDec = 0;
+        this._Datum = Datum.NAD83;
+        this._Distance = Dist.FeetInches;
+        this._Elevation = UomElevation.Meters;
+        this._Slope = Slope.Percent;
+        this._DecType = DeclinationType.MagDec;
+        this._MagDec = 0;
 
-        this.GpsReceiver = null;
-        this.RangeFinder = null;
-        this.Compass = null;
-        this.Crew = null;
-        this.Comment = null;
+        this._GpsReceiver = null;
+        this._RangeFinder = null;
+        this._Compass = null;
+        this._Crew = null;
+        this._Comment = null;
     }
 
     public TtMetadata(Parcel source) {
-        CN = source.readString();
+        super(source);
+
         Name = source.readString();
 
         Zone = source.readInt();
-        Datum = Units.Datum.parse(source.readInt());
-        Distance = Dist.parse(source.readInt());
-        Elevation = UomElevation.parse(source.readInt());
-        Slope = Units.Slope.parse(source.readInt());
-        DecType = DeclinationType.parse(source.readInt());
+        _Datum = Datum.parse(source.readInt());
+        _Distance = Dist.parse(source.readInt());
+        _Elevation = UomElevation.parse(source.readInt());
+        _Slope = Slope.parse(source.readInt());
+        _DecType = DeclinationType.parse(source.readInt());
 
-        MagDec = source.readDouble();
+        _MagDec = source.readDouble();
 
-        GpsReceiver = source.readString();
-        RangeFinder = source.readString();
-        Compass = source.readString();
-        Crew = source.readString();
-        Comment = source.readString();
+        _GpsReceiver = source.readString();
+        _RangeFinder = source.readString();
+        _Compass = source.readString();
+        _Crew = source.readString();
+        _Comment = source.readString();
     }
 
     public TtMetadata(TtMetadata meta) {
-        this.CN = meta.getCN();
+        setCN(meta.getCN());
         this.Name = meta.getName();
         this.Zone = meta.getZone();
-        this.Datum = meta.getDatum();
-        this.Distance = meta.getDistance();
-        this.Elevation = meta.getElevation();
-        this.Slope = meta.getSlope();
-        this.DecType = meta.getDecType();
-        this.MagDec = meta.getMagDec();
+        this._Datum = meta.getDatum();
+        this._Distance = meta.getDistance();
+        this._Elevation = meta.getElevation();
+        this._Slope = meta.getSlope();
+        this._DecType = meta.getDecType();
+        this._MagDec = meta.getMagDec();
 
-        this.GpsReceiver = meta.getGpsReceiver();
-        this.RangeFinder = meta.getRangeFinder();
-        this.Compass = meta.getCompass();
-        this.Crew = meta.getCrew();
-        this.Comment = meta.getComment();
+        this._GpsReceiver = meta.getGpsReceiver();
+        this._RangeFinder = meta.getRangeFinder();
+        this._Compass = meta.getCompass();
+        this._Crew = meta.getCrew();
+        this._Comment = meta.getComment();
     }
 
 
@@ -111,32 +106,24 @@ public class TtMetadata implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(CN);
+        super.writeToParcel(dest, flags);
+
         dest.writeString(Name);
 
         dest.writeInt(Zone);
-        dest.writeInt(Datum.getValue());
-        dest.writeInt(Distance.getValue());
-        dest.writeInt(Elevation.getValue());
-        dest.writeInt(Slope.getValue());
-        dest.writeInt(DecType.getValue());
+        dest.writeInt(_Datum.getValue());
+        dest.writeInt(_Distance.getValue());
+        dest.writeInt(_Elevation.getValue());
+        dest.writeInt(_Slope.getValue());
+        dest.writeInt(_DecType.getValue());
 
-        dest.writeDouble(MagDec);
+        dest.writeDouble(_MagDec);
 
-        dest.writeString(GpsReceiver);
-        dest.writeString(RangeFinder);
-        dest.writeString(Compass);
-        dest.writeString(Crew);
-        dest.writeString(Comment);
-    }
-
-
-    public String getCN() {
-        return CN;
-    }
-
-    public void setCN(String CN) {
-        this.CN = CN;
+        dest.writeString(_GpsReceiver);
+        dest.writeString(_RangeFinder);
+        dest.writeString(_Compass);
+        dest.writeString(_Crew);
+        dest.writeString(_Comment);
     }
 
 
@@ -158,102 +145,102 @@ public class TtMetadata implements Parcelable {
     }
 
 
-    public Units.Datum getDatum() {
-        return Datum;
+    public Datum getDatum() {
+        return _Datum;
     }
 
-    public void setDatum(Units.Datum datum) {
-        Datum = datum;
+    public void setDatum(Datum datum) {
+        _Datum = datum;
     }
 
 
     public Dist getDistance() {
-        return Distance;
+        return _Distance;
     }
 
     public void setDistance(Dist distance) {
-        Distance = distance;
+        _Distance = distance;
     }
 
 
     public UomElevation getElevation() {
-        return Elevation;
+        return _Elevation;
     }
 
     public void setElevation(UomElevation elevation) {
-        Elevation = elevation;
+        _Elevation = elevation;
     }
 
 
-    public Units.Slope getSlope() {
-        return Slope;
+    public Slope getSlope() {
+        return _Slope;
     }
 
-    public void setSlope(Units.Slope slope) {
-        Slope = slope;
+    public void setSlope(Slope slope) {
+        _Slope = slope;
     }
 
 
     public DeclinationType getDecType() {
-        return DecType;
+        return _DecType;
     }
 
     public void setDecType(DeclinationType decType) {
-        DecType = decType;
+        _DecType = decType;
     }
 
 
     public double getMagDec() {
-        return MagDec;
+        return _MagDec;
     }
 
     public void setMagDec(double magDec) {
-        MagDec = magDec;
+        _MagDec = magDec;
     }
 
 
     public String getGpsReceiver() {
-        return GpsReceiver;
+        return _GpsReceiver;
     }
 
     public void setGpsReceiver(String gpsReceiver) {
-        GpsReceiver = gpsReceiver;
+        _GpsReceiver = gpsReceiver;
     }
 
 
     public String getRangeFinder() {
-        return RangeFinder;
+        return _RangeFinder;
     }
 
     public void setRangeFinder(String rangeFinder) {
-        RangeFinder = rangeFinder;
+        _RangeFinder = rangeFinder;
     }
 
 
     public String getCompass() {
-        return Compass;
+        return _Compass;
     }
 
     public void setCompass(String compass) {
-        Compass = compass;
+        _Compass = compass;
     }
 
 
     public String getCrew() {
-        return Crew;
+        return _Crew;
     }
 
     public void setCrew(String crew) {
-        Crew = crew;
+        _Crew = crew;
     }
 
 
     public String getComment() {
-        return Comment;
+        return _Comment;
     }
 
     public void setComment(String comment) {
-        Comment = comment;
+        _Comment = comment;
     }
 
     @Override

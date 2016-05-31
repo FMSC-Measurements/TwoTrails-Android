@@ -2,6 +2,7 @@ package com.usda.fmsc.twotrails.fragments.polygon;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -15,19 +16,21 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.usda.fmsc.android.AndroidUtils;
-import com.usda.fmsc.android.animation.ViewAnimator;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.activities.PolygonsActivity;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.fragments.AnimationCardFragment;
 import com.usda.fmsc.twotrails.R;
+import com.usda.fmsc.twotrails.objects.PointD;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.ui.StaticPolygonView;
+import com.usda.fmsc.twotrails.units.Dist;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
-import com.usda.fmsc.utilities.IListener;
 import com.usda.fmsc.utilities.ParseEx;
 import com.usda.fmsc.utilities.StringEx;
+
+import java.util.List;
 
 public class PolygonFragment extends AnimationCardFragment implements PolygonsActivity.Listener {
     private static final String POLYGON_CN = "PolygonCN";
@@ -36,12 +39,15 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
 
     private View viewPreFocus;
     private ScrollView scrollView;
-    private TextView tvName;
+    private TextView tvName, tvPerimFt, tvPerimMt, tvAreaAc, tvAreaHa;
     private EditText txtName, txtDesc, txtInc, txtPsi, txtAcc;
+    private StaticPolygonView spv;
 
     private boolean settingView;
 
     private TtPolygon _Polygon;
+
+    private List<PointD> polyPoints;
 
 
     public static PolygonFragment newInstance(String polyCN, boolean hidden) {
@@ -86,11 +92,34 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
         txtInc = (EditText)view.findViewById(R.id.polyFragTxtInc);
         txtPsi = (EditText)view.findViewById(R.id.polyFragTxtPsi);
         txtAcc = (EditText)view.findViewById(R.id.polyFragTxtAcc);
+
+        tvPerimFt = (TextView)view.findViewById(R.id.polyFragTvPerimFt);
+        tvPerimMt = (TextView)view.findViewById(R.id.polyFragTvPerimMt);
+        tvAreaAc = (TextView)view.findViewById(R.id.polyFragTvAreaAc);
+        tvAreaHa = (TextView)view.findViewById(R.id.polyFragTvAreaHa);
+
         scrollView = (ScrollView)view.findViewById(R.id.polyFragScrollView);
+        spv = (StaticPolygonView)view.findViewById(R.id.polySPView);
 
         viewPreFocus = view.findViewById(R.id.preFocusView);
-        
+
         if (_Polygon != null) {
+            final View v = view;
+
+            polyPoints = activity.getDrawPoints(_Polygon.getCN(), 0);
+
+            if (polyPoints == null) {
+                v.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        if (spv != null && activity != null) {
+                            polyPoints = activity.getDrawPoints(_Polygon.getCN(), spv.getWidth());
+                            v.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                        }
+                    }
+                });
+            }
+
             onPolygonUpdated(_Polygon);
         }
 
@@ -208,10 +237,12 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
                         value = ParseEx.parseDouble(s.toString());
                     }
 
-                    Double ma = _Polygon.getAccuracy();
+                    double ma = _Polygon.getAccuracy();
 
-                    if ((value == null ^ ma == null) ||
-                            value != null && !TtUtils.Math.cmpa(value, ma)) {
+                    if (value == null || !TtUtils.Math.cmpa(value, ma)) {
+                        if (value == null)
+                            value = Consts.Default_Point_Accuracy;
+
                         _Polygon.setAccuracy(value);
                         activity.updatePolygon(_Polygon);
                     }
@@ -251,7 +282,6 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
         return view;
     }
 
-
     @Override
     public void onAttach(Context activity) {
         super.onAttach(activity);
@@ -290,8 +320,6 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
         txtPsi.setEnabled(!locked);
         txtAcc.setEnabled(!locked);
 
-        //tvName.setAlpha(locked ? Consts.DISABLED_ALPHA : Consts.ENABLED_ALPHA);
-
         if (locked) {
             viewPreFocus.requestFocus();
         }
@@ -300,7 +328,20 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
     @Override
     public void onPolygonUpdated(TtPolygon polygon) {
         _Polygon = polygon;
+        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
+            setViews();
+        } else {
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    setViews();
+                }
+            });
+        }
+    }
 
+
+    private void setViews() {
         settingView = true;
 
         tvName.setText(_Polygon.getName());
@@ -308,41 +349,26 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
         txtDesc.setText(_Polygon.getDescription());
         txtInc.setText(StringEx.toString(_Polygon.getIncrementBy()));
         txtPsi.setText(StringEx.toString(_Polygon.getPointStartIndex()));
-        txtAcc.setText(StringEx.toString(_Polygon.getAccuracy()));
+        txtAcc.setText(StringEx.toString(TtUtils.Math.round(_Polygon.getAccuracy(), 2)));
+
+        tvPerimFt.setText(StringEx.toString(TtUtils.Math.round(TtUtils.Convert.toFeetTenths(_Polygon.getPerimeter(), Dist.Meters), 2)));
+        tvPerimMt.setText(StringEx.toString(TtUtils.Math.round(_Polygon.getPerimeter(), 2)));
+        tvAreaAc.setText(StringEx.toString(TtUtils.Math.round(TtUtils.Convert.metersSquaredToAcres(_Polygon.getArea()), 2)));
+        tvAreaHa.setText(StringEx.toString(TtUtils.Math.round(TtUtils.Convert.metersSquaredToHa(_Polygon.getArea()), 2)));
+
+
+        if (polyPoints == null && activity != null) {
+            polyPoints = activity.getDrawPoints(_Polygon.getCN(), 0);
+        }
+
+        spv.render(polyPoints);
 
         settingView = false;
     }
 
-
     public void scrollToTop() {
         if (scrollView != null) {
             scrollView.fullScroll(ScrollView.FOCUS_UP);
-        }
-    }
-
-    @Override
-    public void onCardFocused() {
-        super.onCardFocused();
-
-        View view = getView();
-
-        if (view != null) {
-            final StaticPolygonView spv = (StaticPolygonView)view.findViewById(R.id.polySPView);
-
-            if (spv != null && !spv.isRendered() && Global.getDAL().getPointCountInPolygon(_Polygon.getCN()) > 2) {
-                if (spv.getWidth() < 1) {
-                    view.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-                        @Override
-                        public void onGlobalLayout() {
-                            if (!spv.isRendered()) {
-                                spv.render(Global.getDAL().getPointsInPolygon(_Polygon.getCN()), Global.getDAL().getMetadataMap());
-                            }
-                        }
-                    });
-                } else {
-                    spv.render(Global.getDAL().getPointsInPolygon(_Polygon.getCN()), Global.getDAL().getMetadataMap());
-                }
-            }
         }
     }
 }

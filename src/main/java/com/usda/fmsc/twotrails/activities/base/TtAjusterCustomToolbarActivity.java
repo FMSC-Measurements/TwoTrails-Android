@@ -105,10 +105,6 @@ public abstract class TtAjusterCustomToolbarActivity extends CustomToolbarActivi
         });
     }
 
-    protected void onAdjusterStarted() {
-
-    }
-
     @Override
     public final void adjusterStopped(final PolygonAdjuster.AdjustResult result){
         final Context ctx = this;

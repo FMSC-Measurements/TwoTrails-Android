@@ -24,7 +24,7 @@
             android:layout_width="match_parent"
             android:background="@color/white_1000"
             android:layout_alignParentTop="true"
-            android:elevation="2dp">
+            style="@style/ToolbarElevation2">
 
             <ImageView
                 android:id="@+id/amdIcon"
@@ -32,7 +32,8 @@
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_online_primary_36"
                 android:layout_centerVertical="true"
-                android:padding="8dp"/>
+                android:padding="8dp"
+                android:contentDescription="@null"/>
 
             <com.usda.fmsc.android.widget.PopupMenuButton
                 android:id="@+id/amdMenu"
@@ -76,7 +77,8 @@
 
             <TableLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:shrinkColumns="1">
 
                 <TableRow>
                     <TextView
@@ -143,55 +145,71 @@
                 android:orientation="horizontal"
                 android:baselineAligned="false">
 
-                <LinearLayout
+                <RelativeLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
                     android:layout_weight="1">
 
                     <TextView
+                        android:id="@+id/text3"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textSize="18sp"
                         android:paddingEnd="4dp"
                         android:paddingRight="4dp"
-                        android:text="@string/str_min"/>
+                        android:paddingStart="0dp"
+                        android:paddingLeft="0dp"
+                        android:text="@string/str_min"
+                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"/>
 
                     <TextView
                         android:id="@+id/amdTvScaleMin"
-                        android:layout_weight="1"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         style="@style/EditTextStyle"
                         android:textSize="18sp"
                         android:maxLines="1"
-                        android:ellipsize="end"/>
-                </LinearLayout>
+                        android:ellipsize="end"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentRight="true"
+                        android:layout_toEndOf="@id/text3"
+                        android:layout_toRightOf="@id/text3"/>
+                </RelativeLayout>
 
-                <LinearLayout
+                <RelativeLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
                     android:layout_weight="1">
 
                     <TextView
+                        android:id="@+id/lay4"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textSize="18sp"
                         android:paddingEnd="4dp"
                         android:paddingRight="4dp"
-                        android:text="@string/str_max"/>
+                        android:paddingStart="0dp"
+                        android:paddingLeft="0dp"
+                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentStart="true"
+                        android:text="@string/str_max"
+                        android:layout_centerVertical="true"/>
 
                     <TextView
                         android:id="@+id/amdTvScaleMax"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
                         style="@style/EditTextStyle"
                         android:textSize="18sp"
                         android:maxLines="1"
-                        android:ellipsize="end"/>
-                </LinearLayout>
+                        android:ellipsize="end"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentRight="true"
+                        android:layout_toRightOf="@id/lay4"
+                        android:layout_toEndOf="@id/lay4"/>
+                </RelativeLayout>
             </LinearLayout>
 
             <android.support.design.widget.TextInputLayout
@@ -207,14 +225,6 @@
                     android:maxLines="1"
                     android:ellipsize="end"/>
             </android.support.design.widget.TextInputLayout>
-
-            <!--<RelativeLayout-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="@dimen/toolbar_height"-->
-                <!--android:background="@color/primary_300"-->
-                <!--android:paddingTop="4dp">-->
-                <!--&lt;!&ndash;Details levels&ndash;&gt;-->
-            <!--</RelativeLayout>-->
 
             <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"

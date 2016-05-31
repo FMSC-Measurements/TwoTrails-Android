@@ -13,7 +13,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <include android:id="@+id/cardHeader" layout="@layout/point_card_header" />
+            <include android:id="@+id/cardHeader" layout="@layout/content_point_card_header" />
 
             <RelativeLayout
                 android:layout_height="wrap_content"
@@ -31,8 +31,8 @@
                     android:paddingStart="8dp"
                     android:paddingEnd="8dp"
                     android:paddingRight="8dp"
-                    android:elevation="1dp"
-                    android:background="@android:color/white">
+                    android:background="@android:color/white"
+                    style="@style/ToolbarElevation1">
 
                     <ListView
                         android:id="@+id/pointsFragQndmLvPolys"
@@ -54,7 +54,7 @@
                     </ListView>
                 </LinearLayout>
 
-                <View style="@style/ToolbarElevation3" android:layout_below="@id/pointsFragQndmLayLv" />
+                <View style="@style/ToolbarShadowViewElevation3" android:layout_below="@id/pointsFragQndmLayLv" />
 
                 <RelativeLayout
                     android:id="@+id/pointsFragQndmLayManAcc"
@@ -80,7 +80,7 @@
                         android:layout_width="60dp"
                         android:layout_height="wrap_content"
                         android:enabled="false"
-                        style="@style/PointValueTextStyle"
+                        style="@style/NumDecValueTextStyle"
                         android:inputType="number|numberDecimal"
                         android:layout_toStartOf="@+id/tv2"
                         android:layout_toLeftOf="@+id/tv2"
@@ -115,13 +115,13 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="textMultiLine"
-                        android:hint="@string/points_cmt"
+                        android:hint="@string/str_cmt"
                         android:maxLines="6"
                         style="@style/EditTextStyle"/>
                 </android.support.design.widget.TextInputLayout>
             </RelativeLayout>
 
-            <View style="@style/ToolbarElevation2" android:layout_below="@id/cardHeader" />
+            <View style="@style/ToolbarShadowViewElevation2" android:layout_below="@id/cardHeader" />
         </RelativeLayout>
 
     </android.support.v7.widget.CardView>

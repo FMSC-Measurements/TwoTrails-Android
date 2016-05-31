@@ -5,10 +5,10 @@ import android.content.Context;
 
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
 import com.usda.fmsc.twotrails.data.TwoTrailsSchema;
-import com.usda.fmsc.twotrails.objects.QuondamPoint;
-import com.usda.fmsc.twotrails.objects.TtPoint;
+import com.usda.fmsc.twotrails.objects.points.QuondamPoint;
+import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
-import com.usda.fmsc.twotrails.Units;
+import com.usda.fmsc.twotrails.units.OpType;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.util.ArrayList;
@@ -29,9 +29,6 @@ public class PolygonAdjuster {
 
     private static boolean _processing = false;
     private static boolean _cancelToken = false;
-
-    private static Thread _thread;
-
 
     public static boolean isProcessing() {
         return _processing;
@@ -56,7 +53,7 @@ public class PolygonAdjuster {
                 TtPoint p = dal.getFirstPointInPolygon(poly.getCN());
 
                 if(p != null) {
-                    if(p.isTravType() || (p.getOp() == Units.OpType.Quondam &&
+                    if(p.isTravType() || (p.getOp() == OpType.Quondam &&
                             ((QuondamPoint)p).getParentPoint().isTravType()))
                         return AdjustResult.STARTS_WITH_TRAV_TYPE;
                 }
@@ -70,7 +67,8 @@ public class PolygonAdjuster {
 
         _processing = true;
 
-        _thread = new Thread() {
+        new Thread(new Runnable() {
+            @Override
             public void run() {
                 AdjustResult result = AdjustResult.ADJUSTING;
                 boolean success = false;
@@ -80,7 +78,6 @@ public class PolygonAdjuster {
                     listener = (Listener)ctx;
 
                 try {
-
                     if(listener != null)
                         listener.adjusterStarted();
 
@@ -111,9 +108,7 @@ public class PolygonAdjuster {
                     }
                 }
             }
-        };
-
-        _thread.start();
+        }).start();
 
         return AdjustResult.ADJUSTING;
     }
@@ -200,7 +195,7 @@ public class PolygonAdjuster {
 
                 /*
                 //set sideshot accuracies
-                if(TtUtils.filterOnly(points, Units.OpType.SideShot).size() > 0) {
+                if(TtUtils.filterOnly(points, OpType.SideShot).size() > 0) {
                     Collections.sort(points);
                     HashMap<String, TtPolygon> polys = dal.getPolygonsMap();
                     TtPoint currPoint, lastPoint = points.get(0);
@@ -209,7 +204,7 @@ public class PolygonAdjuster {
                     {
                         currPoint = points.get(i);
 
-                        if (currPoint.getOp() == Units.OpType.SideShot)
+                        if (currPoint.getOp() == OpType.SideShot)
                         {
                             ((TravPoint)currPoint).setAccuracy(TtUtils.getPointAcc(lastPoint, polys));
                         }

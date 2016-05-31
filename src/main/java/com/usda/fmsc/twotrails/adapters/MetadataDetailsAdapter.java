@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 
@@ -19,17 +20,13 @@ public class MetadataDetailsAdapter extends BaseAdapter {
     boolean autoHighlight;
 
     public MetadataDetailsAdapter(Context context, List<TtMetadata> metadata, int ds) {
-        this.metadata = metadata;
-        inflater = LayoutInflater.from(context);
-        color = context.getResources().getColor(R.color.primaryLightest);
-        this.ds = ds;
-        this.autoHighlight = true;
+        this(context, metadata, ds, true);
     }
 
     public MetadataDetailsAdapter(Context context, List<TtMetadata> metadata, int ds, boolean autoHighlight) {
         this.metadata = metadata;
         inflater = LayoutInflater.from(context);
-        color = context.getResources().getColor(R.color.primaryLightest);
+        color = AndroidUtils.UI.getColor(context, R.color.primaryLightest);
         this.ds = ds;
         this.autoHighlight = autoHighlight;
     }
@@ -55,7 +52,7 @@ public class MetadataDetailsAdapter extends BaseAdapter {
         ViewHolder mViewHolder;
 
         if(convertView == null) {
-            convertView = inflater.inflate(R.layout.content_details_meta, null);
+            convertView = inflater.inflate(R.layout.content_details_meta, parent, false);
             mViewHolder = new ViewHolder();
             convertView.setTag(mViewHolder);
 

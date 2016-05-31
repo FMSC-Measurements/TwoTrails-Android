@@ -11,16 +11,15 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.List;
 
+import com.usda.fmsc.geospatial.EastWest;
 import com.usda.fmsc.geospatial.GeoPosition;
+import com.usda.fmsc.geospatial.NorthSouth;
+import com.usda.fmsc.geospatial.UomElevation;
 import com.usda.fmsc.geospatial.nmea.INmeaBurst;
-import com.usda.fmsc.geospatial.nmea.NmeaIDs;
-import com.usda.fmsc.geospatial.nmea.Satellite;
 import com.usda.fmsc.geospatial.nmea.sentences.GGASentence;
 import com.usda.fmsc.geospatial.nmea.sentences.GSASentence;
-import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.geospatial.utm.UTMTools;
-import com.usda.fmsc.geospatial.Units;
 import com.usda.fmsc.utilities.StringEx;
 
 public class TtNmeaBurst implements Serializable {
@@ -40,7 +39,7 @@ public class TtNmeaBurst implements Serializable {
     private double groundSpeed; //groud speed in knots
     private double trackAngle;  //in degrees, true
     private double magVar;
-    private Units.EastWest magVarDir;
+    private EastWest magVarDir;
 
     //gsa
     private GSASentence.Mode mode;
@@ -53,7 +52,7 @@ public class TtNmeaBurst implements Serializable {
     private int trackedSatellites;
     private double horizDilution;
     private double geoidHeight;
-    private Units.UomElevation geoUom;
+    private UomElevation geoUom;
 
     //gsv
     private int numberOfSatellitesInView;
@@ -62,9 +61,9 @@ public class TtNmeaBurst implements Serializable {
 
     public TtNmeaBurst(String cn, DateTime timeCreated, String pointCN, boolean used,
                        GeoPosition position, DateTime fixTime, double groundSpeed, double trackAngle,
-                       double magVar, Units.EastWest magVarDir, GSASentence.Mode mode, GSASentence.Fix fix,
+                       double magVar, EastWest magVarDir, GSASentence.Mode mode, GSASentence.Fix fix,
                        List<Integer> satsUsed, double pdop, double hdop, double vdop, GGASentence.GpsFixType fixQuality,
-                       int trackedSatellites, double horizDilution, double geoidHeight, Units.UomElevation geoUom,
+                       int trackedSatellites, double horizDilution, double geoidHeight, UomElevation geoUom,
                        int numberOfSatellitesInView) {//, List<Satellite> satellites) {
         this.cn = cn;
         this.timeCreated = timeCreated;
@@ -191,7 +190,7 @@ public class TtNmeaBurst implements Serializable {
         return magVar;
     }
 
-    public Units.EastWest getMagVarDir() {
+    public EastWest getMagVarDir() {
         return magVarDir;
     }
 
@@ -216,7 +215,7 @@ public class TtNmeaBurst implements Serializable {
         return position.getLatitude().toDecimal();
     }
 
-    public Units.NorthSouth getLatDir() {
+    public NorthSouth getLatDir() {
         return position.getLatitude().getHemisphere();
     }
 
@@ -224,7 +223,7 @@ public class TtNmeaBurst implements Serializable {
         return position.getLongitude().toDecimal();
     }
 
-    public Units.EastWest getLonDir() {
+    public EastWest getLonDir() {
         return position.getLongitude().getHemisphere();
     }
 
@@ -233,7 +232,7 @@ public class TtNmeaBurst implements Serializable {
         return position.getElevation();
     }
 
-    public Units.UomElevation getUomElevation() {
+    public UomElevation getUomElevation() {
         return position.getUomElevation();
     }
 
@@ -255,7 +254,7 @@ public class TtNmeaBurst implements Serializable {
         return geoidHeight;
     }
 
-    public Units.UomElevation getGeoUom() {
+    public UomElevation getGeoUom() {
         return geoUom;
     }
 

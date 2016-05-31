@@ -27,7 +27,7 @@ public class TtDalVersion {
                 Major = Integer.parseInt(vals[0]);
             }
             catch (Exception ex) {
-
+                //
             }
         }
 
@@ -37,7 +37,7 @@ public class TtDalVersion {
                 Minor = Integer.parseInt(vals[1]);
             }
             catch (Exception ex) {
-
+                //
             }
         }
 
@@ -47,7 +47,7 @@ public class TtDalVersion {
                 Update = Integer.parseInt(vals[2]);
             }
             catch (Exception ex) {
-
+                //
             }
         }
     }

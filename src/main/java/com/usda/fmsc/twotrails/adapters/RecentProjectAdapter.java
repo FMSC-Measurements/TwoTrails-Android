@@ -45,7 +45,7 @@ public class RecentProjectAdapter extends BaseAdapter {
         ViewHolder mViewHolder;
 
         if(convertView == null) {
-            convertView = inflater.inflate(R.layout.list_row_main_recent_projs, null);
+            convertView = inflater.inflate(R.layout.list_row_main_recent_projs, parent, false);
             mViewHolder = new ViewHolder();
             convertView.setTag(mViewHolder);
         } else {

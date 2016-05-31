@@ -24,7 +24,7 @@ public class TwoTrailsSchema {
         public static final String Comment = "Comment";
         public static final String Operation = "Operation";
         public static final String MetadataCN = "MetaCN";
-        public static final String Time = "CreationTime";
+        public static final String CreationTime = "CreationTime";
         public static final String AdjX = "AdjX";
         public static final String AdjY = "AdjY";
         public static final String AdjZ = "AdjZ";
@@ -49,7 +49,7 @@ public class TwoTrailsSchema {
             Operation   + " TEXT NOT NULL, " +
             MetadataCN  + " TEXT REFERENCES " +
             MetadataSchema.TableName + ", " +
-            Time        + " TEXT, " +
+            CreationTime+ " TEXT, " +
             AdjX        + " REAL, " +
             AdjY        + " REAL, " +
             AdjZ        + " REAL, " +
@@ -61,6 +61,29 @@ public class TwoTrailsSchema {
             GroupName   + " TEXT, " +
             GroupCN     + " TEXT NOT NULL, " +
             "PRIMARY KEY (" + TwoTrailsSchema.SharedSchema.CN + "));";
+
+
+        public static final String SelectItems =
+            SharedSchema.CN + ", " +
+            Order + ", " +
+            ID + ", " +
+            PolyName + ", " +
+            PolyCN + ", " +
+            OnBoundary + ", " +
+            Comment + ", " +
+            Operation + ", " +
+            MetadataCN + ", " +
+            CreationTime + ", " +
+            AdjX + ", " +
+            AdjY + ", " +
+            AdjZ + ", " +
+            UnAdjX + ", " +
+            UnAdjY + ", " +
+            UnAdjZ + ", " +
+            Accuracy + ", " +
+            QuondamLinks + ", " +
+            GroupName + ", " +
+            GroupCN;
     }
     //endregion
 
@@ -84,6 +107,15 @@ public class TwoTrailsSchema {
             UserAccuracy    + " REAL, " +
             RMSEr           + " REAL, " +
             "PRIMARY KEY (" + SharedSchema.CN + "));";
+
+
+        public static final String SelectItems =
+            SharedSchema.CN + ", " +
+            Latitude + ", " +
+            Longitude + ", " +
+            Elevation + ", " +
+            UserAccuracy + ", " +
+            RMSEr;
     }
     //endregion
 
@@ -107,6 +139,15 @@ public class TwoTrailsSchema {
             VerticalAngle       + " REAL NOT NULL, " +
             HorizDistance       + " REAL, " +
             "PRIMARY KEY (" + SharedSchema.CN + "));";
+
+
+        public static final String SelectItems =
+            SharedSchema.CN + ", " +
+            ForwardAz + ", " +
+            BackAz + ", " +
+            SlopeDistance + ", " +
+            VerticalAngle + ", " +
+            HorizDistance;
     }
     //endregion
 
@@ -124,6 +165,12 @@ public class TwoTrailsSchema {
             ParentPointCN           + " TEXT NOT NULL, " +
             ManualAccuracy          + " REAL, " +
             "PRIMARY KEY (" + SharedSchema.CN + "));";
+
+
+        public static final String SelectItems =
+            SharedSchema.CN + ", " +
+            ParentPointCN + ", " +
+            ManualAccuracy;
     }
     //endregion
 
@@ -152,6 +199,18 @@ public class TwoTrailsSchema {
             PointStartIndex + " INTEGER, " +
             TimeCreated     + " TEXT, " +
             "PRIMARY KEY (" + SharedSchema.CN + "));";
+
+
+        public static final String SelectItems =
+            SharedSchema.CN + ", " +
+            Name + ", " +
+            Accuracy + ", " +
+            Description + ", " +
+            Area + ", " +
+            Perimeter + ", " +
+            IncrementBy + ", " +
+            PointStartIndex + ", " +
+            TimeCreated;
     }
     //endregion
 
@@ -170,6 +229,13 @@ public class TwoTrailsSchema {
             Description     + " TEXT, " +
             Type            + " TEXT, " +
             "PRIMARY KEY (" + SharedSchema.CN + "));";
+
+
+        public static final String SelectItems =
+            SharedSchema.CN + ", " +
+            Name + ", " +
+            Description + ", " +
+            Type;
     }
     //endregion
 
@@ -199,7 +265,7 @@ public class TwoTrailsSchema {
         public static final String GeiodHeight = "GeiodHeight";
         public static final String GeiodHeightUom = "GeiodHeightUom";
         public static final String GroundSpeed = "GroundSpeed";
-        public static final String Track_Angle = "Track_Angle";
+        public static final String TrackAngle = "TrackAngle";
         public static final String SatellitesUsedCount = "SatUsedCount";
         public static final String SatellitesTrackedCount = "SatTrackCount";
         public static final String SatellitesInViewCount = "SatInViewCount";
@@ -230,12 +296,42 @@ public class TwoTrailsSchema {
             GeiodHeight     + " REAL, " +
             GeiodHeightUom  + " TEXT, " +
             GroundSpeed     + " REAL, " +
-            Track_Angle     + " REAL, " +
+            TrackAngle      + " REAL, " +
             SatellitesUsedCount     + " INTEGER, " +
             SatellitesTrackedCount  + " INTEGER, " +
             SatellitesInViewCount   + " INTEGER, " +
             UsedSatPRNS + " TEXT, " +
             "PRIMARY KEY (" + SharedSchema.CN + "));";
+
+        public static final String SelectItems =
+            SharedSchema.CN + ", " +
+            PointCN + ", " +
+            Used + ", " +
+            TimeCreated + ", " +
+            FixTime + ", " +
+            Latitude + ", " +
+            LatDir + ", " +
+            Longitude + ", " +
+            LonDir + ", " +
+            Elevation + ", " +
+            ElevUom + ", " +
+            MagVar + ", " +
+            MagDir + ", " +
+            Fix + ", " +
+            FixQuality + ", " +
+            Mode + ", " +
+            PDOP + ", " +
+            HDOP + ", " +
+            VDOP + ", " +
+            HorizDilution + ", " +
+            GeiodHeight + ", " +
+            GeiodHeightUom + ", " +
+            GroundSpeed + ", " +
+            TrackAngle + ", " +
+            SatellitesUsedCount + ", " +
+            SatellitesTrackedCount + ", " +
+            SatellitesInViewCount + ", " +
+            UsedSatPRNS;
     }
     //endregion
 
@@ -274,6 +370,22 @@ public class TwoTrailsSchema {
             Crew            + " TEXT, " +
             UtmZone         + " INTEGER, " +
             "PRIMARY KEY (" + SharedSchema.CN + "));";
+
+        public static final String SelectItems =
+            SharedSchema.CN + ", " +
+            Name + ", " +
+            Distance + ", " +
+            Slope + ", " +
+            MagDec + ", " +
+            DeclinationType + ", " +
+            Elevation + ", " +
+            Comment + ", " +
+            Datum + ", " +
+            GpsReceiver + ", " +
+            RangeFinder + ", " +
+            Compass + ", " +
+            Crew + ", " +
+            UtmZone;
     }
     //endregion
 
@@ -332,6 +444,81 @@ public class TwoTrailsSchema {
             UnAdjPtsColor   + " INTEGER, " +
             WayPtsColor     + " INTEGER, " +
             "PRIMARY KEY (" + SharedSchema.CN + "));";
+
+        public static final String SelectItems =
+            SharedSchema.CN + ", " +
+            AdjBndColor + ", " +
+            UnAdjBndColor + ", " +
+            AdjNavColor + ", " +
+            UnAdjNavColor + ", " +
+            AdjPtsColor + ", " +
+            UnAdjPtsColor + ", " +
+            WayPtsColor;
     }
+    //endregion
+
+    //region Media
+
+    //region Media Table
+    public static class MediaSchema {
+        public static final String TableName = "Media";
+
+        public static final String PointCN = "PointCN";
+        public static final String MediaType = "MediaType";
+        public static final String Name = "Name";
+        public static final String FilePath = "FilePath";
+        public static final String CreationTime = "CreationTime";
+        public static final String Comment = "Comment";
+
+        public static final String CreateTable =
+            "CREATE TABLE " + TableName + " (" +
+            SharedSchema.CN + " TEXT NOT NULL, " +
+            PointCN         + " TEXT, " +
+            MediaType       + " INTEGER, " +
+            Name            + " TEXT, " +
+            FilePath        + " TEXT, " +
+            CreationTime    + " TEXT, " +
+            Comment         + " TEXT, " +
+            "PRIMARY KEY (" + SharedSchema.CN + "));";
+
+        public static final String SelectItems =
+                SharedSchema.CN + ", " +
+                PointCN + ", " +
+                MediaType + ", " +
+                Name + ", " +
+                FilePath + ", " +
+                CreationTime + ", " +
+                Comment;
+    }
+    //endregion
+
+
+    //region PictureTable
+    public static class PictureSchema {
+        public static final String TableName = "PictureData";
+
+        public static final String PicType = "Type";
+        public static final String Azimuth = "Azimuth";
+        public static final String Pitch = "Pitch";
+        public static final String Roll = "Roll";
+
+        public static final String CreateTable =
+            "CREATE TABLE " + TableName + " (" +
+            SharedSchema.CN + " TEXT REFERENCES " +
+            MediaSchema.TableName + ", " +
+            PicType     + " INTEGER, " +
+            Azimuth     + " REAL, " +
+            Pitch       + " REAL, " +
+            Roll        + " REAL, " +
+            "PRIMARY KEY (" + SharedSchema.CN + "));";
+
+        public static final String SelectItemsNoCN =
+            PicType + ", " +
+            Azimuth + ", " +
+            Pitch + ", " +
+            Roll;
+    }
+    //endregion
+
     //endregion
 }

@@ -10,7 +10,9 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:paddingRight="36dp"
-        android:paddingEnd="36dp">
+        android:paddingEnd="36dp"
+        android:paddingStart="0dp"
+        android:paddingLeft="0dp">
 
         <EditText
             android:id="@+id/txtUri"
@@ -49,7 +51,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:src="@drawable/ic_error_outline_black_24dp"
-            android:visibility="invisible"/>
+            android:visibility="invisible"
+            android:contentDescription="@null"/>
     </RelativeLayout>
 
     <android.support.design.widget.TextInputLayout

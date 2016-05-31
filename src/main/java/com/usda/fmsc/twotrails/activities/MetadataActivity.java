@@ -22,6 +22,7 @@ import com.usda.fmsc.android.dialogs.EnumSelectionDialog;
 import com.usda.fmsc.android.dialogs.InputDialog;
 import com.usda.fmsc.android.dialogs.NumericInputDialog;
 import com.usda.fmsc.android.listeners.ComplexOnPageChangeListener;
+import com.usda.fmsc.geospatial.UomElevation;
 import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.twotrails.activities.base.TtAjusterCustomToolbarActivity;
 import com.usda.fmsc.twotrails.Consts;
@@ -34,22 +35,24 @@ import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.logic.PolygonAdjuster;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
-import com.usda.fmsc.twotrails.objects.TtPoint;
-import com.usda.fmsc.twotrails.Units;
+import com.usda.fmsc.twotrails.objects.points.TtPoint;
+import com.usda.fmsc.twotrails.units.Datum;
+import com.usda.fmsc.twotrails.units.DeclinationType;
+import com.usda.fmsc.twotrails.units.Dist;
+import com.usda.fmsc.twotrails.units.Slope;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import com.usda.fmsc.geospatial.Units.UomElevation;
 import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
 import com.usda.fmsc.utilities.StringEx;
 
 public class MetadataActivity extends TtAjusterCustomToolbarActivity {
-    HashMap<String, Listener> listeners;
+    private HashMap<String, Listener> listeners;
 
-    GpsService.Listener listener;
+    private GpsService.Listener listener;
 
     private MenuItem miLock, miReset, miDelete;
 
@@ -110,9 +113,10 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
         mSectionsPagerAdapter.saveFragmentStates(false);
 
         mViewPager = (ViewPager) findViewById(R.id.metaViewPager);
-        mViewPager.setAdapter(mSectionsPagerAdapter);
-
-        mViewPager.addOnPageChangeListener(onPageChangeListener);
+        if (mViewPager != null) {
+            mViewPager.setAdapter(mSectionsPagerAdapter);
+            mViewPager.addOnPageChangeListener(onPageChangeListener);
+        }
 
         lockMetadata(true);
     }
@@ -377,10 +381,10 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
         if (lockMeta) {
             if (menuCreated) {
                 miLock.setTitle(R.string.str_unlock);
-                miLock.setIcon(R.drawable.ic_action_lock_closed);
+                miLock.setIcon(R.drawable.ic_action_lock_closed_white_36dp);
 
-                TtUtils.UI.disableMenuItem(miReset);
-                TtUtils.UI.disableMenuItem(miDelete);
+                AndroidUtils.UI.disableMenuItem(miReset);
+                AndroidUtils.UI.disableMenuItem(miDelete);
             }
 
             _MetaLocked = true;
@@ -388,18 +392,18 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
         } else if (_Metadata.size() > 0) {
             if (menuCreated) {
                 miLock.setTitle(R.string.str_lock);
-                miLock.setIcon(R.drawable.ic_action_lock_open);
+                miLock.setIcon(R.drawable.ic_action_lock_open_white_36dp);
 
                 if (_CurrentIndex > 0) {
-                    TtUtils.UI.enableMenuItem(miDelete);
+                    AndroidUtils.UI.enableMenuItem(miDelete);
                 } else {
-                    TtUtils.UI.disableMenuItem(miDelete);
+                    AndroidUtils.UI.disableMenuItem(miDelete);
                 }
 
                 if (_MetadataUpdated) {
-                    TtUtils.UI.enableMenuItem(miReset);
+                    AndroidUtils.UI.enableMenuItem(miReset);
                 } else {
-                    TtUtils.UI.disableMenuItem(miReset);
+                    AndroidUtils.UI.disableMenuItem(miReset);
                 }
             }
 
@@ -413,9 +417,9 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
 
         if (menuCreated) {
             if (_MetadataUpdated) {
-                TtUtils.UI.enableMenuItem(miReset);
+                AndroidUtils.UI.enableMenuItem(miReset);
             } else {
-                TtUtils.UI.disableMenuItem(miReset);
+                AndroidUtils.UI.disableMenuItem(miReset);
             }
         }
     }
@@ -522,7 +526,6 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
                                 ArrayList<TtPoint> points = Global.getDAL().getGpsTypePointsWithMeta(_CurrentMetadata.getCN());
 
                                 if (points.size() > 0) {
-                                    TtPoint point;
                                     for (int i = 0; i < points.size(); i++) {
                                         points.set(i, TtUtils.reCalculateGps(points.get(i), zone, Global.getDAL(), null));
                                     }
@@ -712,8 +715,8 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
 
     public void btnDecTypeClick(View view) {
         if (!_MetaLocked) {
-            final EnumSelectionDialog<Units.DeclinationType> edialog =
-                    new EnumSelectionDialog<>(this, Units.DeclinationType.class);
+            final EnumSelectionDialog<DeclinationType> edialog =
+                    new EnumSelectionDialog<>(this, DeclinationType.class);
 
             edialog.setTitle(R.string.meta_dec_type);
 
@@ -731,8 +734,8 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
 
     public void btnDatumClick(View view) {
         if (!_MetaLocked) {
-            final EnumSelectionDialog<Units.Datum> edialog =
-                    new EnumSelectionDialog<>(this, Units.Datum.class);
+            final EnumSelectionDialog<Datum> edialog =
+                    new EnumSelectionDialog<>(this, Datum.class);
 
             edialog.setTitle(R.string.meta_datum);
 
@@ -750,8 +753,8 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
 
     public void btnDistClick(View view) {
         if (!_MetaLocked) {
-            final EnumSelectionDialog<Units.Dist> edialog =
-                    new EnumSelectionDialog<>(this, Units.Dist.class);
+            final EnumSelectionDialog<Dist> edialog =
+                    new EnumSelectionDialog<>(this, Dist.getUsedValues());
 
             edialog.setTitle(R.string.str_dist);
 
@@ -788,8 +791,8 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
 
     public void btnSlopeClick(View view) {
         if (!_MetaLocked) {
-            final EnumSelectionDialog<Units.Slope> edialog =
-                    new EnumSelectionDialog<>(this, Units.Slope.class);
+            final EnumSelectionDialog<Slope> edialog =
+                    new EnumSelectionDialog<>(this, Slope.class);
 
             edialog.setTitle(R.string.meta_slope);
 
@@ -893,7 +896,7 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
         if (!_MetaLocked) {
             final InputDialog inputDialog = new InputDialog(this);
 
-            inputDialog.setTitle(R.string.meta_cmt);
+            inputDialog.setTitle(R.string.str_cmt);
             inputDialog.setInputText(_CurrentMetadata.getComment());
 
             inputDialog.setPositiveButton(R.string.str_ok, new DialogInterface.OnClickListener() {

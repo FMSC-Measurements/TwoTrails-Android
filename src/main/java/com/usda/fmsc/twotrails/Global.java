@@ -17,8 +17,10 @@ import android.support.v4.app.NotificationCompat;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.usda.fmsc.android.AndroidUtils;
-import com.usda.fmsc.geospatial.Units.UomElevation;
+import com.usda.fmsc.geospatial.UomElevation;
 import com.usda.fmsc.geospatial.nmea.sentences.GGASentence;
 import com.usda.fmsc.twotrails.activities.MainActivity;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
@@ -31,6 +33,13 @@ import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
 import com.usda.fmsc.twotrails.objects.map.PolygonDrawOptions;
 import com.usda.fmsc.twotrails.objects.map.PolygonGraphicOptions;
 import com.usda.fmsc.twotrails.objects.map.PolygonGraphicOptions.GraphicCode;
+import com.usda.fmsc.twotrails.units.Datum;
+import com.usda.fmsc.twotrails.units.DeclinationType;
+import com.usda.fmsc.twotrails.units.Dist;
+import com.usda.fmsc.twotrails.units.DopType;
+import com.usda.fmsc.twotrails.units.MapTracking;
+import com.usda.fmsc.twotrails.units.MapType;
+import com.usda.fmsc.twotrails.units.Slope;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 import com.usda.fmsc.utilities.FileUtils;
 import com.usda.fmsc.utilities.StringEx;
@@ -44,7 +53,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public class Global {
-    private static DataAccessLayer DAL;
+    private static DataAccessLayer _DAL;
 
     private static Context _ApplicationContext;
     private static MainActivity _MainActivity;
@@ -78,7 +87,6 @@ public class Global {
 
         Settings.DeviceSettings.init();
 
-        //_LogFilePath = _ApplicationContext.getApplicationInfo().dataDir;// Environment.getDataDirectory().getAbsolutePath(); //TtUtils.getTtFileDir();
         _DefaultMeta = Settings.MetaDataSetting.getDefaultmetaData();
 
         TtUtils.TtReport.changeDirectory(getTtLogFileDir());
@@ -123,6 +131,8 @@ public class Global {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             AndroidUtils.UI.setOverscrollColor(_ApplicationContext.getResources(), _ApplicationContext, R.color.primary);
         }
+
+        ImageLoader.getInstance().init(new ImageLoaderConfiguration.Builder(_ApplicationContext).build());
     }
 
     public static void destroy() {
@@ -134,11 +144,11 @@ public class Global {
 
 
     public static DataAccessLayer getDAL() {
-        return DAL;
+        return _DAL;
     }
 
     public static void setDAL(DataAccessLayer dal) {
-        DAL = dal;
+        _DAL = dal;
 
         if (dal != null) {
             MapSettings.reset();
@@ -195,6 +205,7 @@ public class Global {
         return _CurrentActivity;
     }
 
+
     //region Files
     public static String getTtFilePath(String fileName) {
         if(!fileName.endsWith(".tt"))
@@ -215,16 +226,37 @@ public class Global {
         return dir.getAbsolutePath();
     }
 
+    private static String _OfflineMapsDir;
     public static String getOfflineMapsDir() {
-        return String.format("%s%s%s", getDocumentsDir(), File.separator, "OfflineMaps");
+        if (_OfflineMapsDir == null)
+            _OfflineMapsDir = String.format("%s%s%s", getDocumentsDir(), File.separator, "OfflineMaps");
+        return _OfflineMapsDir;
     }
 
+    private static String _OfflineMapsRecoveryDir;
     public static String getOfflineMapsRecoveryDir() {
-        return String.format("%s%s%s", getOfflineMapsDir(), File.separator, "Recovery");
+        if (_OfflineMapsRecoveryDir == null)
+            _OfflineMapsRecoveryDir = String.format("%s%s%s", getOfflineMapsDir(), File.separator, "Recovery");
+        return _OfflineMapsRecoveryDir;
     }
 
+    private static String _TtFileDir;
     public static String getTtFileDir() {
-        return String.format("%s%s%s", getDocumentsDir(), File.separator, "TwoTrailsFiles");
+        if (_TtFileDir == null)
+            _TtFileDir = String.format("%s%s%s", getDocumentsDir(), File.separator, "TwoTrailsFiles");
+        return _TtFileDir;
+    }
+
+    private static String _TtMediaDir;
+    public static String getTtMediaDir() {
+        if (_TtMediaDir == null)
+            _TtMediaDir = String.format("%s%s%s", getTtFileDir(), File.separator, "Media");
+
+        if (_DAL != null) {
+            return String.format("%s%s%s", _TtMediaDir, File.separator, _DAL.getFileName());
+        }
+
+        return _TtMediaDir;
     }
 
     public static String getTtLogFileDir() {
@@ -358,6 +390,7 @@ public class Global {
     }
 
 
+    //TODO go through settings (xml) and remove hardcoded strings
     public static class Settings {
 
         public static class PreferenceHelper {
@@ -459,7 +492,7 @@ public class Global {
                 return prefs.getFloat(settingName, defaultValue);
             }
 
-            protected static boolean setFlaot(String settingName, float value) {
+            protected static boolean setFloat(String settingName, float value) {
                 if(editor == null)
                     loadPrefs();
                 return editor.putFloat(settingName, value).commit();
@@ -537,6 +570,8 @@ public class Global {
             public static final String AUTO_OVERWRITE_PLOTGRID_ASK = "AutoOverwritePlotGridAsk";
             public static final String AUTO_OVERWRITE_EXPORT = "AutoOverwriteExport";
             public static final String AUTO_OVERWRITE_EXPORT_ASK = "AutoOverwriteExportAsk";
+            public static final String USE_TTCAMERA = "UseTtCamera";
+            public static final String USE_TTCAMERA_ASK = "UseTtCameraAsk";
 
             public static final String AUTO_OPEN_LAST_PROJECT = "AutoOpenLastProject";
             public static final String LAST_OPENED_PROJECT = "AutoOpenLastProject";
@@ -556,17 +591,19 @@ public class Global {
             public static final String MAP_UNADJ_LINE_WIDTH = "MapUnAdjLineWidth";
 
             public static final String ARC_CREDENTIALS = "ArcCredentials";
+
+            public static final String MEDIA_COPY_TO_PROJECT = "CopyToProject";
             //endregion
 
             //region Default Values
             public static final boolean DEFAULT_DROP_ZERO = true;
             public static final boolean DEFAULT_ROUND_POINTS = true;
 
-            public static final Units.DopType DEFAULT_GPS_DOP_TYPE = Units.DopType.HDOP;
+            public static final DopType DEFAULT_GPS_DOP_TYPE = DopType.HDOP;
             public static final GGASentence.GpsFixType DEFAULT_GPS_FIX_TYPE = GGASentence.GpsFixType.GPS;
             public static final int DEFAULT_GPS_DOP_VALUE = 20;
 
-            public static final Units.DopType DEFAULT_TAKE5_DOP_TYPE = Units.DopType.HDOP;
+            public static final DopType DEFAULT_TAKE5_DOP_TYPE = DopType.HDOP;
             public static final GGASentence.GpsFixType DEFAULT_TAKE5_FIX_TYPE = GGASentence.GpsFixType.GPS;
             public static final int DEFAULT_TAKE5_DOP_VALUE = 20;
             public static final int DEFAULT_TAKE5_INCREMENT = 5;
@@ -577,7 +614,7 @@ public class Global {
             public static final boolean DEFAULT_TAKE5_VIB_ON_CREATE = true;
             public static final boolean DEFAULT_TAKE5_RING_ON_CREATE = true;
 
-            public static final Units.DopType DEFAULT_WALK_DOP_TYPE = Units.DopType.HDOP;
+            public static final DopType DEFAULT_WALK_DOP_TYPE = DopType.HDOP;
             public static final GGASentence.GpsFixType DEFAULT_WALK_FIX_TYPE = GGASentence.GpsFixType.GPS;
             public static final int DEFAULT_WALK_DOP_VALUE = 20;
             public static final int DEFAULT_WALK_INCREMENT = 2;
@@ -588,9 +625,6 @@ public class Global {
             public static final boolean DEFAULT_WALK_SHOW_ALL_POINTS_ON_MAP = true;
 
             public static final boolean DEFAULT_AUTO_OPEN_LAST_PROJECT = true;
-
-            public static final int DEFAULT_POINT_ACCURACY = 6;
-            public static final double MIN_POINT_ACCURACY = 0.0001;
 
             public static final boolean DEFAULT_GPS_LOG_BURST_DETAILS = false;
 
@@ -603,7 +637,7 @@ public class Global {
             public static final int DEFAULT_AUTO_OVERWRITE_EXPORT = 0;
             public static final boolean DEFAULT_AUTO_OVERWRITE_EXPORT_ASK = true;
 
-            public static final Units.MapTracking DEFAULT_MAP_TRACKING_OPTION = Units.MapTracking.POLY_BOUNDS;
+            public static final MapTracking DEFAULT_MAP_TRACKING_OPTION = MapTracking.POLY_BOUNDS;
             public static final boolean DEFAULT_MAP_COMPASS_ENABLED = true;
             public static final boolean DEFAULT_MAP_MYPOS_BUTTON = true;
             public static final double DEFAULT_MAP_MIN_DIST = 50;
@@ -616,6 +650,8 @@ public class Global {
             public static final int DEFAULT_ARC_GIS_MAP_ID_COUNTER = 0;
             public static final int DEFAULT_MAP_ADJ_LINE_WIDTH = 8;
             public static final int DEFAULT_MAP_UNADJ_LINE_WIDTH = 32;
+
+            public static final boolean DEFAULT_MEDIA_COPY_TO_PROJECT = true;
             //endregion
 
 
@@ -671,6 +707,13 @@ public class Global {
                 editor.putInt(AUTO_OVERWRITE_EXPORT, DEFAULT_AUTO_OVERWRITE_EXPORT);
                 editor.putBoolean(AUTO_OVERWRITE_EXPORT_ASK, DEFAULT_AUTO_OVERWRITE_EXPORT_ASK);
 
+                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT_WATCH) {
+                    editor.putInt(USE_TTCAMERA, 2);
+                    editor.putBoolean(USE_TTCAMERA_ASK, true);
+                } else {
+                    editor.putInt(USE_TTCAMERA, 1);
+                    editor.putBoolean(USE_TTCAMERA_ASK, false);
+                }
 
                 editor.putBoolean(AUTO_OPEN_LAST_PROJECT, DEFAULT_AUTO_OPEN_LAST_PROJECT);
 
@@ -686,6 +729,8 @@ public class Global {
                 editor.putInt(ARC_GIS_MAP_ID_COUNTER, DEFAULT_ARC_GIS_MAP_ID_COUNTER);
                 editor.putInt(MAP_ADJ_LINE_WIDTH, DEFAULT_MAP_ADJ_LINE_WIDTH);
                 editor.putInt(MAP_UNADJ_LINE_WIDTH, DEFAULT_MAP_UNADJ_LINE_WIDTH);
+
+                editor.putBoolean(MEDIA_COPY_TO_PROJECT, DEFAULT_MEDIA_COPY_TO_PROJECT);
 
                 editor.putString(ARC_CREDENTIALS, StringEx.Empty);
 
@@ -776,32 +821,14 @@ public class Global {
             public static void setRangeFinderDeviceName(String value) {
                 setString(LASER_DEVICE_NAME, value);
             }
-
-            /*
-            public static String getRangeFinderPort() {
-                return getString(LASER_PORT);
-            }
-
-            public static void setRangeFinderPort(String value) {
-                setString(LASER_PORT, value);
-            }
-
-            public static int getRangeFinderBaud() {
-                return getInt(LASER_BAUD);
-            }
-
-            public static void setRangeFinderBaud(int value) {
-                setInt(LASER_BAUD, value);
-            }
-            */
             //endregion
 
             //region Filters
-            public static Units.DopType getGpsFilterDopType() {
-                return Units.DopType.parse(getInt(GPS_FILTER_DOP_TYPE, DEFAULT_GPS_DOP_TYPE.getValue()));
+            public static DopType getGpsFilterDopType() {
+                return DopType.parse(getInt(GPS_FILTER_DOP_TYPE, DEFAULT_GPS_DOP_TYPE.getValue()));
             }
 
-            public static void setGpsFilterDopType(Units.DopType value) {
+            public static void setGpsFilterDopType(DopType value) {
                 setInt(GPS_FILTER_DOP_TYPE, value.getValue());
             }
 
@@ -822,11 +849,11 @@ public class Global {
             }
 
 
-            public static Units.DopType getTake5FilterDopType() {
-                return Units.DopType.parse(getInt(TAKE5_FILTER_DOP_TYPE, DEFAULT_TAKE5_DOP_TYPE.getValue()));
+            public static DopType getTake5FilterDopType() {
+                return DopType.parse(getInt(TAKE5_FILTER_DOP_TYPE, DEFAULT_TAKE5_DOP_TYPE.getValue()));
             }
 
-            public static void setTake5FilterDopType(Units.DopType value) {
+            public static void setTake5FilterDopType(DopType value) {
                 setInt(TAKE5_FILTER_DOP_TYPE, value.getValue());
             }
 
@@ -847,11 +874,11 @@ public class Global {
             }
             
             
-            public static Units.DopType getWalkFilterDopType() {
-                return Units.DopType.parse(getInt(WALK_FILTER_DOP_TYPE, DEFAULT_WALK_DOP_TYPE.getValue()));
+            public static DopType getWalkFilterDopType() {
+                return DopType.parse(getInt(WALK_FILTER_DOP_TYPE, DEFAULT_WALK_DOP_TYPE.getValue()));
             }
 
-            public static void setWalkFilterDopType(Units.DopType value) {
+            public static void setWalkFilterDopType(DopType value) {
                 setInt(WALK_FILTER_DOP_TYPE, value.getValue());
             }
 
@@ -997,11 +1024,11 @@ public class Global {
             //endregion
 
             //region Map
-            public static Units.MapTracking getMapTrackingOption() {
-                return Units.MapTracking.parse(getInt(MAP_TRACKING_OPTION, DEFAULT_MAP_TRACKING_OPTION.getValue()));
+            public static MapTracking getMapTrackingOption() {
+                return MapTracking.parse(getInt(MAP_TRACKING_OPTION, DEFAULT_MAP_TRACKING_OPTION.getValue()));
             }
 
-            public static void setMapTrackingOption(Units.MapTracking mapTrackingOption) {
+            public static void setMapTrackingOption(MapTracking mapTrackingOption) {
                 setInt(MAP_TRACKING_OPTION, mapTrackingOption.getValue());
             }
 
@@ -1061,11 +1088,11 @@ public class Global {
 
 
 
-            public static Units.MapType getMapType() {
-                return Units.MapType.parse(getInt(MAP_TYPE, DEFAULT_MAP_TYPE));
+            public static MapType getMapType() {
+                return MapType.parse(getInt(MAP_TYPE, DEFAULT_MAP_TYPE));
             }
 
-            public static void setMapType(Units.MapType value) {
+            public static void setMapType(MapType value) {
                 setInt(MAP_TYPE, value.getValue());
             }
 
@@ -1265,6 +1292,33 @@ public class Global {
             public static void setArcCredentials(String value) {
                 setString(ARC_CREDENTIALS, value);
             }
+
+
+            public static boolean getMediaCopyToProject() {
+                return getBool(MEDIA_COPY_TO_PROJECT, DEFAULT_MEDIA_COPY_TO_PROJECT);
+            }
+
+            public static void setMediaCopyToProject(boolean value) {
+                setBool(MEDIA_COPY_TO_PROJECT, value);
+            }
+
+
+
+            public static boolean getUseTtCameraAsk() {
+                return getBool(USE_TTCAMERA_ASK, true);
+            }
+
+            public static void setUseTtCameraAsk(boolean value) {
+                setBool(USE_TTCAMERA_ASK, value);
+            }
+
+            public static int getUseTtCamera() {
+                return getInt(USE_TTCAMERA, Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT_WATCH ? 2 : 1);
+            }
+
+            public static void setUseTtCamera(int value) {
+                setInt(USE_TTCAMERA, value);
+            }
             //endregion
         }
 
@@ -1440,20 +1494,20 @@ public class Global {
             }
 
 
-            public static Units.Datum getDatum() {
-                return Units.Datum.parse(getInt(META_DATUM, Units.Datum.NAD83.getValue()));
+            public static Datum getDatum() {
+                return Datum.parse(getInt(META_DATUM, Datum.NAD83.getValue()));
             }
 
-            public static void setDatm(Units.Datum value) {
+            public static void setDatm(Datum value) {
                 setInt(META_ZONE, value.getValue());
             }
 
 
-            public static Units.Dist getDistance() {
-                return Units.Dist.parse(getInt(META_DISTANCE, Units.Dist.FeetTenths.getValue()));
+            public static Dist getDistance() {
+                return Dist.parse(getInt(META_DISTANCE, Dist.FeetTenths.getValue()));
             }
 
-            public static void setDistance(Units.Dist value) {
+            public static void setDistance(Dist value) {
                 setInt(META_DISTANCE, value.getValue());
             }
 
@@ -1467,20 +1521,20 @@ public class Global {
             }
 
 
-            public static Units.Slope getSlope() {
-                return Units.Slope.parse(getInt(META_SLOPE, Units.Slope.Percent.getValue()));
+            public static Slope getSlope() {
+                return Slope.parse(getInt(META_SLOPE, Slope.Percent.getValue()));
             }
 
-            public static void setSlope(Units.Slope value) {
+            public static void setSlope(Slope value) {
                 setInt(META_SLOPE, value.getValue());
             }
 
 
-            public static Units.DeclinationType getDeclinationType() {
-                return Units.DeclinationType.parse(getInt(META_DECTYPE, Units.DeclinationType.MagDec.getValue()));
+            public static DeclinationType getDeclinationType() {
+                return DeclinationType.parse(getInt(META_DECTYPE, DeclinationType.MagDec.getValue()));
             }
 
-            public static void setDeclinationType(Units.DeclinationType value) {
+            public static void setDeclinationType(DeclinationType value) {
                 setInt(META_DECTYPE, value.getValue());
             }
 
@@ -1575,6 +1629,57 @@ public class Global {
         private static HashMap<String, PolygonGraphicOptions> _PolyGraphicOptions = new HashMap<>();
         private static PolygonGraphicOptions _MasterPolyGraphicOptions;
 
+        public static class defaults {
+            private static @ColorInt Integer adjBnd;
+            public static @ColorInt int getDefaultAdjBndColor() {
+                if (adjBnd == null)
+                    adjBnd = AndroidUtils.UI.getColor(getApplicationContext(), R.color.map_adj_bnd);
+                return adjBnd;
+            }
+
+            private static @ColorInt Integer adjNav;
+            public static @ColorInt int getDefaultAdjNavColor() {
+                if (adjNav == null)
+                    adjNav = AndroidUtils.UI.getColor(getApplicationContext(), R.color.map_adj_nav);
+                return adjNav;
+            }
+
+            private static @ColorInt Integer unadjBnd;
+            public static @ColorInt int getDefaultUnAdjBndColor() {
+                if (unadjBnd == null)
+                    unadjBnd = AndroidUtils.UI.getColor(getApplicationContext(), R.color.map_unadj_bnd);
+                return unadjBnd;
+            }
+
+            private static @ColorInt Integer unadjNav;
+            public static @ColorInt int getDefaultUnAdjNavColor() {
+                if (unadjNav == null)
+                    unadjNav = AndroidUtils.UI.getColor(getApplicationContext(), R.color.map_unadj_nav);
+                return unadjNav;
+            }
+
+            private static @ColorInt Integer adjpts;
+            public static @ColorInt int getDefaultAdjPtsColor() {
+                if (adjpts == null)
+                    adjpts = AndroidUtils.UI.getColor(getApplicationContext(), R.color.map_adj_pts);
+                return adjpts;
+            }
+
+            private static @ColorInt Integer unadjpts;
+            public static @ColorInt int getDefaultUnAdjPtsColor() {
+                if (unadjpts == null)
+                    unadjpts = AndroidUtils.UI.getColor(getApplicationContext(), R.color.map_unadj_pts);
+                return unadjpts;
+            }
+
+            private static @ColorInt Integer waypts;
+            public static @ColorInt int getDefaultWayPtsColor() {
+                if (waypts == null)
+                    waypts = AndroidUtils.UI.getColor(getApplicationContext(), R.color.map_way_pts);
+                return waypts;
+            }
+        }
+
         public static void reset() {
             for (PolygonGraphicOptions pgo : _PolyGraphicOptions.values()) {
                 pgo.removeListener(updateListener);
@@ -1582,20 +1687,30 @@ public class Global {
 
             _PolyDrawOptions.clear();
 
-            _MasterPolyGraphicOptions = new PolygonGraphicOptions(
-                    Consts.EmptyGuid,
-                    AndroidUtils.UI.getColor(getApplicationContext(), R.color.map_adj_bnd),
-                    AndroidUtils.UI.getColor(getApplicationContext(), R.color.map_unadj_bnd),
-                    AndroidUtils.UI.getColor(getApplicationContext(), R.color.map_adj_nav),
-                    AndroidUtils.UI.getColor(getApplicationContext(), R.color.map_unadj_nav),
-                    AndroidUtils.UI.getColor(getApplicationContext(), R.color.map_adj_pts),
-                    AndroidUtils.UI.getColor(getApplicationContext(), R.color.map_unadj_pts),
-                    AndroidUtils.UI.getColor(getApplicationContext(), R.color.map_way_pts),
-                    Settings.DeviceSettings.getMapAdjLineWidth(),
-                    Settings.DeviceSettings.getMapUnAdjLineWidth()
-            );
-
             _PolyGraphicOptions = getDAL().getPolygonGraphicOptionsMap();
+
+            if (_PolyGraphicOptions.containsKey(Consts.EmptyGuid)) {
+                _MasterPolyGraphicOptions = _PolyGraphicOptions.get(Consts.EmptyGuid);
+            } else {
+                _MasterPolyGraphicOptions = new PolygonGraphicOptions(
+                        Consts.EmptyGuid,
+                        defaults.getDefaultAdjBndColor(),
+                        defaults.getDefaultUnAdjNavColor(),
+                        defaults.getDefaultAdjNavColor(),
+                        defaults.getDefaultUnAdjNavColor(),
+                        defaults.getDefaultAdjPtsColor(),
+                        defaults.getDefaultUnAdjPtsColor(),
+                        defaults.getDefaultWayPtsColor(),
+                        Settings.DeviceSettings.getMapAdjLineWidth(),
+                        Settings.DeviceSettings.getMapUnAdjLineWidth()
+                );
+
+                if (getDAL() != null) {
+                    getDAL().insertPolygonGraphicOption(_MasterPolyGraphicOptions);
+                }
+
+                _PolyGraphicOptions.put(Consts.EmptyGuid, _MasterPolyGraphicOptions);
+            }
 
             for (PolygonGraphicOptions pgo : _PolyGraphicOptions.values()) {
                 pgo.addListener(updateListener);

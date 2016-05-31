@@ -14,9 +14,4 @@
         <item>Points</item>
         <item>Percent</item>
     </string-array>
-
-    <string-array name="arr_extra_map_opts">
-        <item>@string/map_menu_close_adj_bnd</item>
-        <item>@string/map_menu_close_unadj_bnd</item>
-    </string-array>
 </resources>

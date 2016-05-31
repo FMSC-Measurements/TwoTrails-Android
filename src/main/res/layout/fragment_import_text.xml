@@ -9,17 +9,8 @@
         android:layout_height="wrap_content"
         android:paddingBottom="4dp"
         android:paddingTop="4dp"
-        android:elevation="4dp"
-        android:padding="8dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            style="@style/importItemTextStyle"
-            android:text="Advanced Import"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"/>
+        android:padding="8dp"
+        style="@style/ToolbarElevation4">
 
         <android.support.v7.widget.SwitchCompat
             android:id="@+id/importFragSwtAdvanced"
@@ -30,9 +21,20 @@
             android:layout_centerVertical="true"
             android:background="@null"
             android:checked="false"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/importItemTextStyle"
+            android:text="@string/imp_adv_impt"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@id/importFragSwtAdvanced"
+            android:layout_toStartOf="@id/importFragSwtAdvanced"/>
     </RelativeLayout>
 
-    <View style="@style/ToolbarElevation3"
+    <View style="@style/ToolbarShadowViewElevation3"
         android:layout_below="@id/importFragLayOpts"/>
 
     <ScrollView
@@ -56,7 +58,7 @@
 
                 <TextView
                     style="@style/importItemTextStyle"
-                    android:text="X"/>
+                    android:text="@string/str_x"/>
 
                 <Spinner
                     android:id="@+id/importFragSpnX"
@@ -69,7 +71,7 @@
 
                 <TextView
                     style="@style/importItemTextStyle"
-                    android:text="Y"/>
+                    android:text="@string/str_y"/>
 
                 <Spinner
                     android:id="@+id/importFragSpnY"
@@ -82,7 +84,7 @@
 
                 <TextView
                     style="@style/importItemTextStyle"
-                    android:text="Z"/>
+                    android:text="@string/str_z"/>
 
                 <Spinner
                     android:id="@+id/importFragSpnZ"
@@ -97,7 +99,7 @@
 
                 <TextView
                     style="@style/importItemTextStyle"
-                    android:text="Op Type"/>
+                    android:text="@string/str_op_type"/>
 
                 <Spinner
                     android:id="@+id/importFragSpnOp"
@@ -113,7 +115,7 @@
 
                 <TextView
                     style="@style/importItemTextStyle"
-                    android:text="Index"/>
+                    android:text="@string/str_index"/>
 
                 <Spinner
                     android:id="@+id/importFragSpnIndex"
@@ -128,7 +130,7 @@
 
                 <TextView
                     style="@style/importItemTextStyle"
-                    android:text="CN"/>
+                    android:text="@string/str_cn"/>
 
                 <Spinner
                     android:id="@+id/importFragSpnCN"
@@ -144,7 +146,7 @@
 
                 <TextView
                     style="@style/importItemTextStyle"
-                    android:text="PID"/>
+                    android:text="@string/str_pid"/>
 
                 <Spinner
                     android:id="@+id/importFragSpnPID"
@@ -157,7 +159,7 @@
 
                 <TextView
                     style="@style/importItemTextStyle"
-                    android:text="Polygon Name"/>
+                    android:text="@string/imp_poly_name"/>
 
                 <Spinner
                     android:id="@+id/importFragSpnPoly"
@@ -170,7 +172,7 @@
 
                 <TextView
                     style="@style/importItemTextStyle"
-                    android:text="Group Name"/>
+                    android:text="@string/imp_grp_name"/>
 
                 <Spinner
                     android:id="@+id/importFragSpnGroup"
@@ -183,7 +185,7 @@
 
                 <TextView
                     style="@style/importItemTextStyle"
-                    android:text="Comment"/>
+                    android:text="@string/str_cmt"/>
 
                 <Spinner
                     android:id="@+id/importFragSpnCmt"
@@ -196,7 +198,7 @@
 
                 <TextView
                     style="@style/importItemTextStyle"
-                    android:text="Boundary"/>
+                    android:text="@string/str_bnd"/>
 
                 <Spinner
                     android:id="@+id/importFragSpnBnd"
@@ -209,7 +211,7 @@
 
                 <TextView
                     style="@style/importItemTextStyle"
-                    android:text="Time"/>
+                    android:text="@string/imp_time"/>
 
                 <Spinner
                     android:id="@+id/importFragSpnTime"
@@ -218,37 +220,11 @@
 
             <View style="@style/Dividers"/>
 
-            <!--<TableRow android:id="@+id/importFragItemRowMeta">-->
-
-            <!--<TextView-->
-            <!--style="@style/importItemTextStyle"-->
-            <!--android:text="Metadata"/>-->
-
-            <!--<Spinner-->
-            <!--android:id="@+id/importFragSpnMeta"-->
-            <!--style="@style/importItemSpinnerStyle"/>-->
-            <!--</TableRow>-->
-
-            <!--<View style="@style/Dividers" android:id="@+id/importFragDivMeta"/>-->
-
-            <!--<TableRow android:id="@+id/importFragItemRowAcc">-->
-
-            <!--<TextView-->
-            <!--style="@style/importItemTextStyle"-->
-            <!--android:text="Accuracy"/>-->
-
-            <!--<Spinner-->
-            <!--android:id="@+id/importFragSpnAcc"-->
-            <!--style="@style/importItemSpinnerStyle"/>-->
-            <!--</TableRow>-->
-
-            <!--<View style="@style/Dividers" android:id="@+id/importFragDivAcc"/>-->
-
             <TableRow android:id="@+id/importFragItemRowManAcc">
 
                 <TextView
                     style="@style/importItemTextStyle"
-                    android:text="Manual Acc (M)"/>
+                    android:text="@string/imp_man_acc"/>
 
                 <Spinner
                     android:id="@+id/importFragSpnManAcc"
@@ -266,7 +242,7 @@
 
                 <TextView
                     style="@style/importItemTextStyle"
-                    android:text="Latitude"/>
+                    android:text="@string/str_lat"/>
 
                 <Spinner
                     android:id="@+id/importFragSpnLat"
@@ -284,7 +260,7 @@
 
                 <TextView
                     style="@style/importItemTextStyle"
-                    android:text="Longitide"/>
+                    android:text="@string/str_lon"/>
 
                 <Spinner
                     android:id="@+id/importFragSpnLon"
@@ -302,7 +278,7 @@
 
                 <TextView
                     style="@style/importItemTextStyle"
-                    android:text="Elevation"/>
+                    android:text="@string/str_elev"/>
 
                 <Spinner
                     android:id="@+id/importFragSpnElev"
@@ -320,7 +296,7 @@
 
                 <TextView
                     style="@style/importItemTextStyle"
-                    android:text="RMSEr"/>
+                    android:text="@string/points_gps_rmser"/>
 
                 <Spinner
                     android:id="@+id/importFragSpnRMSEr"
@@ -338,7 +314,7 @@
 
                 <TextView
                     style="@style/importItemTextStyle"
-                    android:text="Forward Azimuth"/>
+                    android:text="@string/imp_fwd_az"/>
 
                 <Spinner
                     android:id="@+id/importFragSpnFwdAz"
@@ -356,7 +332,7 @@
 
                 <TextView
                     style="@style/importItemTextStyle"
-                    android:text="Back Azimuth"/>
+                    android:text="@string/imp_bk_az"/>
 
                 <Spinner
                     android:id="@+id/importFragSpnBkAz"
@@ -374,7 +350,7 @@
 
                 <TextView
                     style="@style/importItemTextStyle"
-                    android:text="Slope Distance"/>
+                    android:text="@string/imp_slp_dist"/>
 
                 <Spinner
                     android:id="@+id/importFragSpnSlpDist"
@@ -392,7 +368,7 @@
 
                 <TextView
                     style="@style/importItemTextStyle"
-                    android:text="Slope Dist Type"/>
+                    android:text="@string/imp_slp_dist_type"/>
 
                 <Spinner
                     android:id="@+id/importFragSpnSlpDistType"
@@ -410,7 +386,7 @@
 
                 <TextView
                     style="@style/importItemTextStyle"
-                    android:text="Slope Angle"/>
+                    android:text="@string/imp_slp_ang"/>
 
                 <Spinner
                     android:id="@+id/importFragSpnSlpAng"
@@ -428,7 +404,7 @@
 
                 <TextView
                     style="@style/importItemTextStyle"
-                    android:text="Slope Angle Type"/>
+                    android:text="@string/imp_slp_ang_type"/>
 
                 <Spinner
                     android:id="@+id/importFragSpnSlpAngType"
@@ -446,7 +422,7 @@
 
                 <TextView
                     style="@style/importItemTextStyle"
-                    android:text="Parent CN"/>
+                    android:text="@string/imp_pcn"/>
 
                 <Spinner
                     android:id="@+id/importFragSpnParentCN"
@@ -457,8 +433,5 @@
             <View style="@style/Dividers"
                   android:id="@+id/importFragDivParentCN"/>
         </TableLayout>
-    </ScrollView
->
-
-
+    </ScrollView>
 </RelativeLayout>

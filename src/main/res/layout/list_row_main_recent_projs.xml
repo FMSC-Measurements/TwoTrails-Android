@@ -10,13 +10,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Project Name"
+        android:text="@string/str_prj_name"
         android:id="@+id/recProjTvName" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="File Name"
+        android:text="@string/str_file_name"
         android:id="@+id/recFileTvName" />
 </LinearLayout>

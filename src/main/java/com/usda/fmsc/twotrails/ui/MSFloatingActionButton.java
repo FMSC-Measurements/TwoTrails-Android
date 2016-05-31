@@ -31,10 +31,6 @@ public class MSFloatingActionButton extends FloatingActionButton implements Shee
 
     @Override
     public void show(float translationX, float translationY) {
-        // NOTE: Using the parameters is only needed if you want
-        // to support moving the FAB around the screen.
-        // NOTE: This immediately hides the FAB. An animation can
-        // be used instead - see the sample app.
         setVisibility(View.VISIBLE);
     }
 
@@ -44,8 +40,6 @@ public class MSFloatingActionButton extends FloatingActionButton implements Shee
      */
     @Override
     public void hide() {
-        // NOTE: This immediately hides the FAB. An animation can
-        // be used instead - see the sample app.
         setVisibility(View.INVISIBLE);
     }
 }

@@ -8,7 +8,7 @@
         android:id="@+id/listRowTalkerId"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        style="@style/pad4440"
+        style="@style/margin4440"
         android:textSize="22sp"
         android:maxLines="1"
         android:ellipsize="end"/>
@@ -17,9 +17,8 @@
         android:id="@+id/listRowNmeaIds"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        style="@style/pad4440"
+        style="@style/margin4440"
         android:textSize="18sp"
         android:maxLines="2"
         android:ellipsize="end"/>
-
 </LinearLayout>

@@ -74,7 +74,7 @@ public class MetadataDetailsSpinnerAdapter extends BaseAdapter {
         DropDownViewHolder mViewHolder;
 
         if(convertView == null) {
-            convertView = inflater.inflate(R.layout.content_details_meta, null);
+            convertView = inflater.inflate(R.layout.content_details_meta, parent, false);
             mViewHolder = new DropDownViewHolder();
             convertView.setTag(mViewHolder);
 

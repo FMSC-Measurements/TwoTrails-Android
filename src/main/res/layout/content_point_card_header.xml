@@ -1,0 +1,48 @@
+<RelativeLayout  xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/cardHeader"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/toolbar_height"
+    android:paddingStart="10dp"
+    android:paddingEnd="10dp"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp"
+    android:orientation="horizontal"
+    android:clickable="true"
+    android:onClick="btnPointInfo"
+    android:background="@android:color/white"
+    style="@style/ToolbarElevation3">
+
+    <ImageView
+        android:id="@+id/pointHeaderIvOp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:src="@drawable/ic_ttpoint_gps_dark"
+        android:background="@android:color/transparent"
+        android:contentDescription="@string/op_gps"
+        android:layout_centerVertical="true"/>
+
+    <ImageButton
+        android:id="@+id/pointHeaderIbBnd"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:src="@drawable/ic_onbnd_dark"
+        android:background="@android:color/transparent"
+        android:contentDescription="@string/str_onbnd"
+        android:layout_centerVertical="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"/>
+
+    <TextView
+        android:id="@+id/pointHeaderTvPid"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="40sp"
+        android:layout_toEndOf="@id/pointHeaderIvOp"
+        android:layout_toRightOf="@id/pointHeaderIvOp"
+        android:layout_toStartOf="@id/pointHeaderIbBnd"
+        android:layout_toLeftOf="@id/pointHeaderIbBnd"
+        android:layout_centerInParent="true"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:gravity="center"/>
+</RelativeLayout>

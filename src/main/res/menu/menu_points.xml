@@ -14,7 +14,7 @@
         android:id="@+id/pointsMenuLock"
         android:title="@string/str_unlock"
         app:showAsAction="always"
-        android:icon="@drawable/ic_action_lock_closed" />
+        android:icon="@drawable/ic_action_lock_closed_white_36dp" />
 
     <item
         android:id="@+id/pointsMenuSettings"
@@ -24,7 +24,7 @@
 
     <item
         android:id="@+id/pointsMenuGotoPoint"
-        android:title="@string/menu_points_goto"
+        android:title="@string/menu_points_jump"
         android:icon="@drawable/ic_redo_black_36dp"
         app:showAsAction="never"/>
 
@@ -32,7 +32,8 @@
         android:id="@+id/pointsMenuMovePoint"
         android:title="@string/menu_points_move"
         android:icon="@drawable/ic_move_black_36dp"
-        app:showAsAction="never"/>
+        app:showAsAction="never"
+        android:visible="false"/>
 
     <item
         android:id="@+id/pointsMenuDelete"

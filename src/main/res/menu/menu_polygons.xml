@@ -6,7 +6,7 @@
     <item android:id="@+id/polyMenuLock"
         android:title="@string/str_unlock"
         app:showAsAction="always"
-        android:icon="@drawable/ic_action_lock_closed"/>
+        android:icon="@drawable/ic_action_lock_closed_white_36dp"/>
 
     <item
         android:id="@+id/polyMenuDelete"
@@ -24,5 +24,6 @@
     <item android:id="@+id/polyMenuAdjust"
         android:title="@string/menu_poly_adjust"
         android:enabled="false"
-        app:showAsAction="never" />
+        app:showAsAction="never"
+        android:icon="@drawable/ic_polygon_black_36dp"/>
 </menu>

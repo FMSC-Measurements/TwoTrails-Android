@@ -2,39 +2,64 @@ package com.usda.fmsc.twotrails.activities;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.MediaStore;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatSpinner;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.PopupMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.FailReason;
+import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import com.usda.fmsc.android.adapters.FragmentStatePagerAdapterEx;
 import com.usda.fmsc.android.AndroidUtils;
+import com.usda.fmsc.android.adapters.SelectableAdapterEx;
+import com.usda.fmsc.android.dialogs.DontAskAgainDialog;
 import com.usda.fmsc.android.listeners.ComplexOnPageChangeListener;
+import com.usda.fmsc.android.utilities.BitmapManager;
+import com.usda.fmsc.android.utilities.PostDelayHandler;
+import com.usda.fmsc.android.widget.PopupMenuButton;
+import com.usda.fmsc.android.widget.RecyclerViewEx;
 import com.usda.fmsc.android.widget.SheetFab;
 import com.usda.fmsc.android.widget.SheetLayoutEx;
+import com.usda.fmsc.android.widget.layoutmanagers.LinearLayoutManagerWithSmoothScroller;
 import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
+import com.usda.fmsc.twotrails.adapters.MediaRvAdapter;
 import com.usda.fmsc.twotrails.adapters.PointDetailsAdapter;
 import com.usda.fmsc.twotrails.Consts;
+import com.usda.fmsc.twotrails.data.TwoTrailsSchema;
 import com.usda.fmsc.twotrails.dialogs.LatLonDialog;
 import com.usda.fmsc.twotrails.dialogs.MoveToPointDialog;
 import com.usda.fmsc.twotrails.dialogs.PointEditorDialog;
 import com.usda.fmsc.twotrails.fragments.AnimationCardFragment;
+import com.usda.fmsc.twotrails.fragments.media.PictureMediaFragment;
 import com.usda.fmsc.twotrails.fragments.points.BasePointFragment;
 import com.usda.fmsc.twotrails.fragments.points.GPSPointFragment;
 import com.usda.fmsc.twotrails.fragments.points.QuondamPointFragment;
@@ -44,38 +69,59 @@ import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.logic.PointNamer;
 import com.usda.fmsc.twotrails.logic.PolygonAdjuster;
-import com.usda.fmsc.twotrails.objects.GpsPoint;
-import com.usda.fmsc.twotrails.objects.QuondamPoint;
-import com.usda.fmsc.twotrails.objects.TravPoint;
+import com.usda.fmsc.twotrails.objects.media.TtMedia;
+import com.usda.fmsc.twotrails.objects.media.TtImage;
+import com.usda.fmsc.twotrails.objects.points.GpsPoint;
+import com.usda.fmsc.twotrails.objects.points.QuondamPoint;
+import com.usda.fmsc.twotrails.objects.points.TravPoint;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
-import com.usda.fmsc.twotrails.objects.TtPoint;
+import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
-import com.usda.fmsc.twotrails.Units.OpType;
 import com.usda.fmsc.twotrails.ui.MSFloatingActionButton;
+import com.usda.fmsc.twotrails.units.MediaType;
+import com.usda.fmsc.twotrails.units.OpType;
 import com.usda.fmsc.twotrails.utilities.AppUnits;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.Semaphore;
 
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.geospatial.utm.UTMTools;
 import com.usda.fmsc.utilities.StringEx;
 
+import org.joda.time.DateTime;
+
+import jp.wasabeef.recyclerview.animators.FadeInAnimator;
+
 public class PointsActivity extends CustomToolbarActivity {
     private HashMap<String, Listener> listeners;
 
-    private MenuItem miLock, miLink, miMovePoint, miReset,
-            miEnterLatLon, miNmeaRecalc, miDelete, miGoto;
-    SheetLayoutEx slexAqr, slexCreate;
-    android.support.design.widget.FloatingActionButton fabAqr;
-    MSFloatingActionButton fabMenu;
-    SheetFab fabSheet;
+    private MenuItem miLock, miLink, miMovePoint, miReset, miEnterLatLon, miNmeaRecalc, miDelete, miGoto;
+    private SheetLayoutEx slexAqr, slexCreate;
+    private android.support.design.widget.FloatingActionButton fabAqr;
+    private MSFloatingActionButton fabMenu;
+    private SheetFab fabSheet;
 
+    private SlidingUpPanelLayout slidingLayout;
+    private View pmdScroller;
+    private TextView tvPmdTitle;
 
-    private boolean ignorePointChange, adjust, menuCreated, aqrVisible = false;
+    private ViewPager pointViewPager, mediaViewPager;
+    private PointsPagerAdapter pointSectionsPagerAdapter;
+    private MediaPagerAdapter mediaPagerAdapter;
+
+    private RecyclerViewEx rvMedia;
+    private MediaRvAdapter rvMediaAdapter;
+    private PopupMenuButton pmbMedia;
+
+    private boolean ignorePointChange, ignoreMediaChange, adjust, menuCreated, aqrVisible = false;
     private OpType currentAqrOp = OpType.GPS, createOpType;
 
     private ArrayList<TtPoint> _Points;
@@ -85,27 +131,45 @@ public class PointsActivity extends CustomToolbarActivity {
     private TtPolygon _CurrentPolygon;
     private TtMetadata _CurrentMetadata;
     private int _CurrentIndex = INVALID_INDEX, _deleteIndex = INVALID_INDEX;
-    private boolean _PointUpdated, _PointLocked;
-
+    private boolean _PointUpdated, _PointLocked, _MediaUpdated;
     private String addedPoint;
 
+    private BitmapManager bitmapManager;
+    private BitmapManager.ScaleOptions scaleOptions = new BitmapManager.ScaleOptions();
 
-    private ViewPager mViewPager;
-    private SectionsPagerAdapter mSectionsPagerAdapter;
+    private TtMedia _CurrentMedia, _BackupMedia;
+
+    private float collapsedHeight, anchoredPercent;
+    private int height, bitmapHeight;
+    private boolean mediaLoaded;
+    private int mediaCount, mediaSelectionIndex;
+
+    private Uri captureImageUri;
+
+    private Semaphore semaphore = new Semaphore(1);
+    private PostDelayHandler mediaLoaderDelayedHandler = new PostDelayHandler(500);
 
 
-    private ComplexOnPageChangeListener onPageChangeListener = new ComplexOnPageChangeListener() {
+    //region Listeners
+    private ComplexOnPageChangeListener onPointPageChangeListener = new ComplexOnPageChangeListener() {
         @Override
         public void onPageSelected(int position) {
             super.onPageSelected(position);
 
             if (!ignorePointChange) {
                 savePoint();
+                saveMedia();
 
                 _CurrentIndex = position;
                 _CurrentPoint = getPointAtIndex(_CurrentIndex);
                 _CurrentMetadata = _MetaData.get(_CurrentPoint.getMetadataCN());
                 updateButtons();
+
+                if (slidingLayout != null && slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.COLLAPSED) {
+                    loadMedia(_CurrentPoint, false);
+                } else {
+                    loadMedia(_CurrentPoint, true);
+                }
             }
 
             ignorePointChange = false;
@@ -156,7 +220,7 @@ public class PointsActivity extends CustomToolbarActivity {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
                             ignorePointChange = true;
-                            mViewPager.setCurrentItem(_deleteIndex);
+                            pointViewPager.setCurrentItem(_deleteIndex);
 
                             _CurrentPoint = _deletePoint;
                             _CurrentIndex = _deleteIndex;
@@ -174,6 +238,175 @@ public class PointsActivity extends CustomToolbarActivity {
         }
     };
 
+    private ComplexOnPageChangeListener onMediaPageChangeListener = new ComplexOnPageChangeListener() {
+        @Override
+        public void onPageSelected(int position) {
+            super.onPageSelected(position);
+
+            if (!ignoreMediaChange && rvMediaAdapter.getItemCountEx() > 0) {
+                saveMedia();
+
+                setCurrentMedia(rvMediaAdapter.getItem(position));
+                rvMediaAdapter.selectItem(position);
+                rvMedia.smoothScrollToPosition(position);
+                onLockChange();
+            }
+            ignoreMediaChange = false;
+        }
+    };
+
+    private SelectableAdapterEx.Listener<TtMedia> mediaListener = new SelectableAdapterEx.Listener<TtMedia>() {
+        @Override
+        public void onItemSelected(TtMedia media, int adapterPosition, int layoutPosition) {
+            if (mediaLoaded) {
+                if (!_CurrentMedia.getCN().equals(media.getCN())) {
+                    ignoreMediaChange = true;
+                }
+
+                saveMedia();
+
+                setCurrentMedia(media);
+                slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
+
+                mediaViewPager.setCurrentItem(adapterPosition, true);
+            }
+        }
+    };
+
+    private SlidingUpPanelLayout.PanelSlideListener panelSlideListener = new SlidingUpPanelLayout.PanelSlideListener() {
+        @Override
+        public void onPanelSlide(View panel, float slideOffset) {
+            if (slideOffset < anchoredPercent) {
+                pmdScroller.setTranslationY(height - slideOffset * height + collapsedHeight - 1);
+            }
+        }
+
+        @Override
+        public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
+            switch (newState) {
+                case EXPANDED:
+                    if (!mediaLoaded && _CurrentPoint != null) {
+                        loadMedia(_CurrentPoint, true);
+                    }
+
+                    fabAqr.hide();
+                    fabMenu.hide();
+                    aqrVisible = false;
+
+                    setCurrentMedia(_CurrentMedia);
+
+                    pmdScroller.setTranslationY(height - collapsedHeight - 1);
+                    break;
+                case ANCHORED:
+                    if (!mediaLoaded && _CurrentPoint != null) {
+                        loadMedia(_CurrentPoint, true);
+                    }
+                case COLLAPSED:
+                case HIDDEN:
+                    if (!_PointLocked && _CurrentPoint != null && (_CurrentPoint.getOp() == OpType.GPS || _CurrentPoint.getOp() == OpType.WayPoint)) {
+                        fabAqr.show();
+                        aqrVisible = true;
+                    }
+
+                    fabMenu.show();
+
+                    setMediaTitle(null);
+                    break;
+                case DRAGGING:
+                    break;
+            }
+
+        }
+    };
+
+    private PopupMenu.OnMenuItemClickListener menuPopupListener = new PopupMenu.OnMenuItemClickListener() {
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+            switch (item.getItemId()) {
+                case R.id.ctx_menu_add: {
+                    Intent intent = new Intent(Intent.ACTION_PICK);
+
+                    if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+                    }
+
+                    intent.setType("image/*");
+                    startActivityForResult(intent, Consts.Codes.Requests.ADD_IMAGES);
+                    break;
+                }
+                case R.id.ctx_menu_capture: {
+                    if (Global.Settings.DeviceSettings.getUseTtCameraAsk()) {
+                        DontAskAgainDialog dialog = new DontAskAgainDialog(PointsActivity.this,
+                                Global.Settings.DeviceSettings.USE_TTCAMERA_ASK,
+                                Global.Settings.DeviceSettings.USE_TTCAMERA,
+                                Global.Settings.PreferenceHelper.getPrefs());
+
+                        dialog.setMessage(PointsActivity.this.getString(R.string.points_camera_diag))
+                        .setPositiveButton("TwoTrails", new DontAskAgainDialog.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i, Object value) {
+                                captureImage((int)value);
+                            }
+                        }, 2)
+                        .setNegativeButton("Android", new DontAskAgainDialog.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i, Object value) {
+                                captureImage((int)value);
+                            }
+                        }, 1)
+                        .setNeutralButton(getString(R.string.str_cancel), null, 0)
+                        .show();
+                    } else {
+                        captureImage(Global.Settings.DeviceSettings.getUseTtCamera());
+                    }
+                    break;
+                }
+                case R.id.ctx_menu_reset: {
+                    resetMedia();
+                    break;
+                }
+                case R.id.ctx_menu_delete: {
+                    if (!_PointLocked && _CurrentMedia != null) {
+                        new AlertDialog.Builder(PointsActivity.this)
+                                .setMessage(String.format(
+                                        "Would you like to delete %s '%s' from storage or only remove its association with the point?",
+                                        _CurrentMedia.getMediaType().toString().toLowerCase(),
+                                        _CurrentMedia.getName()))
+                                .setPositiveButton(R.string.str_remove, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        removeMedia(_CurrentMedia, false);
+                                    }
+                                })
+                                .setNegativeButton(R.string.str_delete, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        new AlertDialog.Builder(PointsActivity.this)
+                                                .setMessage(String.format("You are about to delete file '%s'.", _CurrentMedia.getFilePath()))
+                                                .setPositiveButton(R.string.str_delete, new DialogInterface.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(DialogInterface dialog, int which) {
+                                                        removeMedia(_CurrentMedia, true);
+                                                    }
+                                                })
+                                                .setNeutralButton(R.string.str_cancel, null)
+                                                .show();
+                                    }
+                                })
+                                .setNeutralButton(R.string.str_cancel, null)
+                                .show();
+                    }
+                    break;
+                }
+            }
+
+            return false;
+        }
+    };
+    //endregion
+
+
+    //region Activity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -197,17 +430,20 @@ public class PointsActivity extends CustomToolbarActivity {
         _Points = new ArrayList<>();
         _CurrentIndex = INVALID_INDEX;
 
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-        mSectionsPagerAdapter.saveFragmentStates(false);
+        pointSectionsPagerAdapter = new PointsPagerAdapter(getSupportFragmentManager());
+        pointSectionsPagerAdapter.saveFragmentStates(false);
 
-        mViewPager = (ViewPager)findViewById(R.id.pointsViewPager);
-        mViewPager.setAdapter(mSectionsPagerAdapter);
+        pointViewPager = (ViewPager)findViewById(R.id.pointsViewPager);
 
-        mViewPager.addOnPageChangeListener(onPageChangeListener);
+        if (pointViewPager != null) {
+            pointViewPager.setAdapter(pointSectionsPagerAdapter);
+            pointViewPager.addOnPageChangeListener(onPointPageChangeListener);
+        }
 
+        bitmapManager = new BitmapManager(getResources());
 
         //region Main Buttons
-        fabAqr = (android.support.design.widget.FloatingActionButton)findViewById(R.id.pointsFabAqr);
+        fabAqr = (FloatingActionButton)findViewById(R.id.pointsFabAqr);
         fabMenu = (MSFloatingActionButton)findViewById(R.id.pointsFabMenu);
         View overlay = findViewById(R.id.overlay);
         View sheetView = findViewById(R.id.fab_sheet);
@@ -262,77 +498,190 @@ public class PointsActivity extends CustomToolbarActivity {
         polyAdapter.setDropDownViewResource(R.layout.list_item_fill);
 
         final AppCompatSpinner spinnerPoly = (AppCompatSpinner)findViewById(R.id.pointsToolBarSpinnerPoly);
-        spinnerPoly.setAdapter(polyAdapter);
+        if (spinnerPoly != null) {
+            spinnerPoly.setAdapter(polyAdapter);
 
-        String lastPolyCN = Global.Settings.ProjectSettings.getLastEditedPolyCN();
-        if (_Polygons.containsKey(lastPolyCN)) {
-            TtPolygon tmp;
-            boolean lastSet = false;
-            for (int i = 0; i < _Polygons.size(); i++) {
-                tmp = polyArray[i];
+            String lastPolyCN = Global.Settings.ProjectSettings.getLastEditedPolyCN();
+            if (_Polygons.containsKey(lastPolyCN)) {
+                TtPolygon tmp;
+                boolean lastSet = false;
+                for (int i = 0; i < _Polygons.size(); i++) {
+                    tmp = polyArray[i];
 
-                if (tmp.getCN().equals(lastPolyCN)) {
-                    changePolygon(tmp);
-                    spinnerPoly.setSelection(i);
-                    lastSet = true;
+                    if (tmp.getCN().equals(lastPolyCN)) {
+                        changePolygon(tmp);
+                        spinnerPoly.setSelection(i);
+                        lastSet = true;
+                    }
                 }
-            }
 
-            if (!lastSet) {
+                if (!lastSet) {
+                    changePolygon(polyArray[0]);
+                }
+            } else {
                 changePolygon(polyArray[0]);
             }
-        } else {
-            changePolygon(polyArray[0]);
-        }
 
-        spinnerPoly.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                changePolygon(polyAdapter.getItem(position));
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-        //endregion
-
-        slexAqr = (SheetLayoutEx)findViewById(R.id.pointsSLExAqr);
-        slexAqr.setFab(fabAqr);
-        slexAqr.setFabAnimationEndListener(new SheetLayoutEx.OnFabAnimationEndListener() {
-            @Override
-            public void onFabAnimationEnd() {
-                acquireGpsPoint(_CurrentPoint, null);
-            }
-        });
-
-        slexCreate = (SheetLayoutEx)findViewById(R.id.pointsSLExCreate);
-        slexCreate.setFab(fabMenu);
-        slexCreate.setFabAnimationEndListener(new SheetLayoutEx.OnFabAnimationEndListener() {
-            @Override
-            public void onFabAnimationEnd() {
-                if (createOpType == OpType.Take5) {
-                    acquireT5Points(_CurrentPoint);
-                } else if (createOpType == OpType.Walk) {
-                    acquireWalkPoints(_CurrentPoint);
+            spinnerPoly.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    changePolygon(polyAdapter.getItem(position));
                 }
 
-                createOpType = null;
-            }
-        });
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+
+                }
+            });
+        }
+        //endregion
+
+        //region Transitions
+        slexAqr = (SheetLayoutEx)findViewById(R.id.pointsSLExAqr);
+        if (slexAqr != null) {
+            slexAqr.setFab(fabAqr);
+            slexAqr.setFabAnimationEndListener(new SheetLayoutEx.OnFabAnimationEndListener() {
+                @Override
+                public void onFabAnimationEnd() {
+                    acquireGpsPoint(_CurrentPoint, null);
+                }
+            });
+        }
+
+        slexCreate = (SheetLayoutEx)findViewById(R.id.pointsSLExCreate);
+        if (slexCreate != null) {
+            slexCreate.setFab(fabMenu);
+            slexCreate.setFabAnimationEndListener(new SheetLayoutEx.OnFabAnimationEndListener() {
+                @Override
+                public void onFabAnimationEnd() {
+                    if (createOpType == OpType.Take5) {
+                        acquireT5Points(_CurrentPoint);
+                    } else if (createOpType == OpType.Walk) {
+                        acquireWalkPoints(_CurrentPoint);
+                    }
+
+                    createOpType = null;
+                }
+            });
+        }
+        //endregion
+
+        //region Media Layouts
+        pmbMedia = (PopupMenuButton)findViewById(R.id.pmdMenu);
+        if (pmbMedia != null) {
+            pmbMedia.setListener(menuPopupListener);
+        }
+
+        tvPmdTitle = (TextView)findViewById(R.id.pmdTitle);
+
+        slidingLayout = (SlidingUpPanelLayout) findViewById(R.id.pointSlidingPanelLayout);
+        pmdScroller = findViewById(R.id.pmdScroller);
+        final View layMDH = findViewById(R.id.pmdHeader);
+        rvMedia = (RecyclerViewEx) findViewById(R.id.pmdRvMedia);
+        if (rvMedia != null) {
+            rvMedia.setViewHasFooter(true);
+            rvMedia.setLayoutManager(new LinearLayoutManagerWithSmoothScroller(this, LinearLayoutManager.HORIZONTAL, false));
+            rvMedia.setHasFixedSize(true);
+            rvMedia.setItemAnimator(new FadeInAnimator());
+        }
+
+        mediaViewPager = (ViewPager)findViewById(R.id.pmdViewPager);
+        if (slidingLayout != null && layMDH != null && pmdScroller != null && mediaViewPager != null) {
+            collapsedHeight = AndroidUtils.Convert.dpToPx(this, 50);
+
+            ViewTreeObserver vto = slidingLayout.getViewTreeObserver();
+            vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                @Override
+                public void onGlobalLayout() {
+                    collapsedHeight = layMDH.getHeight();
+                    height = pointViewPager.getHeight();
+                    anchoredPercent = (float) pmdScroller.getHeight() / height;
+                    slidingLayout.setAnchorPoint(anchoredPercent);
+
+                    bitmapHeight = mediaViewPager.getHeight();
+                    bitmapManager.setImageLimitSize(bitmapHeight);
+                    scaleOptions.setScaleMode(BitmapManager.ScaleMode.Max);
+                    scaleOptions.setSize(bitmapHeight);
+
+                    rvMediaAdapter = new MediaRvAdapter(PointsActivity.this, Collections.synchronizedList(new ArrayList<TtMedia>()), mediaListener,
+                            pmdScroller.getHeight() - AndroidUtils.Convert.dpToPx(PointsActivity.this, 10), bitmapManager);
+
+                    rvMedia.setAdapter(rvMediaAdapter);
+
+                    ViewTreeObserver obs = slidingLayout.getViewTreeObserver();
+                    obs.removeOnGlobalLayoutListener(this);
+
+                    mediaPagerAdapter = new MediaPagerAdapter(getSupportFragmentManager());
+                    mediaViewPager.setAdapter(mediaPagerAdapter);
+                    mediaViewPager.addOnPageChangeListener(onMediaPageChangeListener);
+
+                    rvMediaAdapter.setListener(new MediaRvAdapter.MediaChangedListener() {
+                        @Override
+                        public void onNotifyDatasetChanged() {
+                            mediaPagerAdapter.notifyDataSetChanged();
+                        }
+                    });
+
+                    loadMedia(_CurrentPoint, false);
+                }
+            });
+
+            slidingLayout.addPanelSlideListener(panelSlideListener);
+
+            layMDH.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    switch (slidingLayout.getPanelState()) {
+
+                        case EXPANDED:
+                        case COLLAPSED:
+                            slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
+                            break;
+                        case ANCHORED:
+                        case HIDDEN:
+                            if (mediaLoaded || mediaCount == 0) {
+                                slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+                            }
+                            break;
+                    }
+                }
+            });
+        }
+
+
+        ImageView ivFullscreen = (ImageView)findViewById(R.id.pmdIvFullscreen);
+        if (ivFullscreen != null) {
+            ivFullscreen.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (_CurrentMedia != null && _CurrentMedia.getMediaType() == MediaType.Picture &&
+                            (slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED ||
+                                    slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.ANCHORED)) {
+                        Intent intent = new Intent();
+                        intent.setAction(Intent.ACTION_VIEW);
+                        intent.setDataAndType(Uri.parse("file://" + _CurrentMedia.getFilePath()), "image/*");
+                        startActivity(intent);
+                    }
+                }
+            });
+
+            AndroidUtils.UI.setContentDescToast(ivFullscreen, "View in Fullscreen");
+        }
+        //endregion
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         savePoint();
+        saveMedia();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         savePoint();
+        saveMedia();
 
         if (adjust) {
             PolygonAdjuster.adjust(Global.getDAL(), Global.getMainActivity(), true);
@@ -353,8 +702,8 @@ public class PointsActivity extends CustomToolbarActivity {
         miGoto = menu.findItem(R.id.pointsMenuGotoPoint);
 
         if (_Points.size() < 1) {
-            TtUtils.UI.disableMenuItem(miGoto);
-            TtUtils.UI.disableMenuItem(miLock);
+            AndroidUtils.UI.disableMenuItem(miGoto);
+            AndroidUtils.UI.disableMenuItem(miLock);
         }
 
         menuCreated = true;
@@ -420,11 +769,14 @@ public class PointsActivity extends CustomToolbarActivity {
                 break;
             }
             case R.id.pointsMenuMovePoint: {
+                //TODO move points around in polygon
                 Toast.makeText(this, "Unimplemented", Toast.LENGTH_SHORT).show();
                 break;
             }
             case R.id.pointsMenuDelete: {
                 if (!_PointLocked) {
+                    anchorMediaIfExpanded();
+
                     AlertDialog.Builder alert = new AlertDialog.Builder(this);
                     alert.setMessage(String.format("Delete Point %d", _CurrentPoint.getPID()));
 
@@ -432,7 +784,7 @@ public class PointsActivity extends CustomToolbarActivity {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
 
-                            AnimationCardFragment card = ((AnimationCardFragment) mSectionsPagerAdapter.getFragments().get(_CurrentIndex));
+                            AnimationCardFragment card = ((AnimationCardFragment) pointSectionsPagerAdapter.getFragments().get(_CurrentIndex));
 
                             card.setVisibilityListener(new AnimationCardFragment.VisibilityListener() {
                                 @Override
@@ -447,7 +799,7 @@ public class PointsActivity extends CustomToolbarActivity {
                                                     _CurrentPoint = null;
                                                     _CurrentIndex = INVALID_INDEX;
                                                     lockPoint(true);
-                                                    TtUtils.UI.disableMenuItem(miLock);
+                                                    AndroidUtils.UI.disableMenuItem(miLock);
                                                     hideAqr();
                                                 }
                                             } else {
@@ -484,11 +836,14 @@ public class PointsActivity extends CustomToolbarActivity {
                 break;
             }
             case R.id.pointsMenuReset: {
+                anchorMediaIfExpanded();
                 resetPoint();
                 break;
             }
             case R.id.pointsMenuEnterLatLon: {
                 if (_CurrentPoint.isGpsType()) {
+                    anchorMediaIfExpanded();
+
                     LatLonDialog dialog = LatLonDialog.newInstance((GpsPoint)_CurrentPoint);
 
                     dialog.setOnEditedListener(new LatLonDialog.OnEditedListener() {
@@ -515,6 +870,7 @@ public class PointsActivity extends CustomToolbarActivity {
                 break;
             }
             case R.id.pointsMenuRecalcNmea: {
+                anchorMediaIfExpanded();
                 calculateGpsPoint();
                 break;
             }
@@ -531,6 +887,8 @@ public class PointsActivity extends CustomToolbarActivity {
     public void onBackPressed() {
         if (fabSheet.isSheetVisible()) {
             fabSheet.hideSheet();
+        } else if (slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
+            slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
         } else {
             super.onBackPressed();
         }
@@ -553,12 +911,42 @@ public class PointsActivity extends CustomToolbarActivity {
                 addInsertPointsResult(resultCode, data);
                 break;
             }
+            case Consts.Codes.Requests.ADD_IMAGES: {
+                if (data != null) {
+                    addImages(TtUtils.getPicturesFromImageIntent(PointsActivity.this, data, _CurrentPoint.getCN()));
+                }
+                break;
+            }
+            case Consts.Codes.Activites.TTCAMERA: {
+                if (data != null) {
+                    TtImage image = TtUtils.getPictureFromTtCameraIntent(data);
+
+                    if (image == null) {
+                        Toast.makeText(PointsActivity.this, "Unable to add Image", Toast.LENGTH_LONG).show();
+                    } else {
+                        addImage(image);
+                    }
+                }
+                break;
+            }
+            case Consts.Codes.Requests.CAPTURE_IMAGE: {
+                if (resultCode != RESULT_CANCELED) {
+                    TtImage image = TtUtils.getPictureFromUri(captureImageUri.getPath(), _CurrentPoint.getCN());
+
+                    if (image == null) {
+                        Toast.makeText(PointsActivity.this, "Unable to add Image", Toast.LENGTH_LONG).show();
+                    } else {
+                        addImage(image);
+                    }
+                }
+                break;
+            }
         }
     }
 
     private void calculateResult(int resultCode, Intent data) {
         if (resultCode == Consts.Codes.Results.POINT_CREATED) {
-            GpsPoint point = (GpsPoint)data.getSerializableExtra(Consts.Codes.Data.POINT_DATA);
+            GpsPoint point = data.getParcelableExtra(Consts.Codes.Data.POINT_DATA);
 
             updatePoint(point);
             onPointUpdate();
@@ -591,14 +979,14 @@ public class PointsActivity extends CustomToolbarActivity {
 
             _Points = Global.getDAL().getPointsInPolygon(_CurrentPolygon.getCN());
 
-            mSectionsPagerAdapter.notifyDataSetChanged();
+            pointSectionsPagerAdapter.notifyDataSetChanged();
 
             int pointSize = _Points.size();
 
             if (pointSize > 0) {
                 if (menuCreated) {
-                    TtUtils.UI.enableMenuItem(miGoto);
-                    TtUtils.UI.enableMenuItem(miLock);
+                    AndroidUtils.UI.enableMenuItem(miGoto);
+                    AndroidUtils.UI.enableMenuItem(miLock);
                 }
             }
 
@@ -609,6 +997,34 @@ public class PointsActivity extends CustomToolbarActivity {
             }
 
             adjust = true;
+        }
+    }
+
+
+    private void captureImage(int setting) {
+        if (setting == 2) {
+            Intent intent = new Intent(PointsActivity.this, TtCameraActivity.class);
+
+            if (_CurrentPoint != null) {
+                intent.putExtra(Consts.Codes.Data.POINT_CN, _CurrentPoint.getCN());
+            }
+
+            startActivityForResult(intent, Consts.Codes.Activites.TTCAMERA);
+        } else {
+            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+            DateTime dateTime = DateTime.now();
+            String imageName = String.format("IMG_%d%d%d_%d", dateTime.getYear(), dateTime.getMonthOfYear(), dateTime.getDayOfMonth(), dateTime.getMillisOfDay());
+
+            File photo = new File(String.format("%s%s%s.jpg", Global.getTtMediaDir(), File.separator, imageName));
+            captureImageUri = Uri.fromFile(photo);
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photo));
+
+            if (intent.resolveActivity(getPackageManager()) != null) {
+                startActivityForResult(intent, Consts.Codes.Requests.CAPTURE_IMAGE);
+            } else {
+                Toast.makeText(PointsActivity.this, "Unable to find a Camera application", Toast.LENGTH_LONG).show();
+            }
         }
     }
     //endregion
@@ -634,7 +1050,7 @@ public class PointsActivity extends CustomToolbarActivity {
                             return true;
                         }
 
-                        Global.getDAL().updatePoint(_CurrentPoint);
+                        Global.getDAL().updatePoint(_CurrentPoint, _Points.get(_CurrentIndex));
                         updated = true;
                     } else {
                         Global.getDAL().insertPoint(_CurrentPoint);
@@ -656,8 +1072,11 @@ public class PointsActivity extends CustomToolbarActivity {
                             if (updated) {
                                 //remove link from old linked point in list
                                 tmp = getPoint(oldQndm.getParentCN());
-                                tmp.removeQuondamLink(currQndm.getCN());
-                                onPointUpdate(tmp);
+
+                                if (tmp != null) {
+                                    tmp.removeQuondamLink(currQndm.getCN());
+                                    onPointUpdate(tmp);
+                                }
                             }
                         }
                     }
@@ -717,8 +1136,10 @@ public class PointsActivity extends CustomToolbarActivity {
                     QuondamPoint qp = (QuondamPoint) point;
                     if (qp.hasParent() && qp.getParentPoint().getPolyCN().equals(_CurrentPolygon.getCN())) {
                         TtPoint tmp = getPoint(qp.getParentCN());
-                        tmp.removeQuondamLink(qp.getCN());
-                        onPointUpdate(tmp);
+                        if (tmp != null) {
+                            tmp.removeQuondamLink(qp.getCN());
+                            onPointUpdate(tmp);
+                        }
                     }
                 }
 
@@ -736,7 +1157,7 @@ public class PointsActivity extends CustomToolbarActivity {
 
                 if (index > INVALID_INDEX) {
                     _Points.remove(index);
-                    mSectionsPagerAdapter.notifyDataSetChanged();
+                    pointSectionsPagerAdapter.notifyDataSetChanged();
                 } else {
                     _deleteIndex = INVALID_INDEX;
                     _deletePoint = null;
@@ -769,7 +1190,7 @@ public class PointsActivity extends CustomToolbarActivity {
                 return;
             }
 
-            BasePointFragment fragment = (BasePointFragment) mSectionsPagerAdapter.getFragments().get(_CurrentIndex);
+            BasePointFragment fragment = (BasePointFragment) pointSectionsPagerAdapter.getFragments().get(_CurrentIndex);
 
             fragment.setVisibilityListener(new BasePointFragment.VisibilityListener() {
                 @Override
@@ -780,7 +1201,7 @@ public class PointsActivity extends CustomToolbarActivity {
                         _CurrentIndex--;
 
                         if (_CurrentIndex > INVALID_INDEX) {
-                            _CurrentPoint = _Points.get(_CurrentIndex);
+                            _CurrentPoint = getPointAtIndex(_CurrentIndex);
                         } else {
                             _CurrentPoint = null;
                         }
@@ -790,7 +1211,7 @@ public class PointsActivity extends CustomToolbarActivity {
 
                     createPoint(op);
 
-                    BasePointFragment fragment = (BasePointFragment) mSectionsPagerAdapter.getFragments().get(_CurrentIndex);
+                    BasePointFragment fragment = (BasePointFragment) pointSectionsPagerAdapter.getFragments().get(_CurrentIndex);
                     fragment.showCard();
                 }
 
@@ -804,6 +1225,7 @@ public class PointsActivity extends CustomToolbarActivity {
             return;
         } else {
             savePoint();
+            saveMedia();
         }
 
 
@@ -811,7 +1233,24 @@ public class PointsActivity extends CustomToolbarActivity {
         newPoint.setCN(java.util.UUID.randomUUID().toString());
 
         if (_CurrentPoint != null) {
-            newPoint.setOnBnd(_CurrentPoint.isOnBnd());
+            if (op != OpType.WayPoint) {
+                if (_CurrentPoint.getOp() == OpType.WayPoint) {
+                    boolean onBnd = true;
+                    for (int i = _CurrentIndex - 1; i > -1; i--) {
+                        TtPoint p = _Points.get(i);
+                        if (p.getOp() != OpType.WayPoint) {
+                            onBnd = p.isOnBnd();
+                            break;
+                        }
+                    }
+
+                    newPoint.setOnBnd(onBnd);
+                } else {
+                    newPoint.setOnBnd(_CurrentPoint.isOnBnd());
+                }
+            } else {
+                newPoint.setOnBnd(false);
+            }
         } else {
             newPoint.setOnBnd(true);
         }
@@ -851,12 +1290,13 @@ public class PointsActivity extends CustomToolbarActivity {
 
         try {
             addedPoint = newPoint.getCN();
-            mSectionsPagerAdapter.notifyDataSetChanged();
+            pointSectionsPagerAdapter.notifyDataSetChanged();
             moveToPoint(_CurrentIndex);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
+        AndroidUtils.UI.enableMenuItem(miLock);
         lockPoint(false);
         adjust = true;
     }
@@ -895,13 +1335,10 @@ public class PointsActivity extends CustomToolbarActivity {
 
     private void resetPoint() {
         if (_PointUpdated) {
-
-            AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-
-            dialog.setTitle(String.format("Reset Point %d", _CurrentPoint.getPID()));
-            dialog.setMessage(getString(R.string.points_reset_diag));
-
-            dialog.setPositiveButton("Reset", new DialogInterface.OnClickListener() {
+            new AlertDialog.Builder(this)
+            .setTitle(String.format("Reset Point %d", _CurrentPoint.getPID()))
+            .setMessage(getString(R.string.points_reset_diag))
+            .setPositiveButton("Reset", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
                     _CurrentPoint = getPointAtIndex(_CurrentIndex);
@@ -910,11 +1347,110 @@ public class PointsActivity extends CustomToolbarActivity {
                     setPointUpdated(false);
                     lockPoint(false);
                 }
-            });
+            })
+            .setNeutralButton(getString(R.string.str_cancel), null)
+            .show();
+        }
+    }
 
-            dialog.setNeutralButton(getString(R.string.str_cancel), null);
 
-            dialog.show();
+    private void saveMedia() {
+        if (_MediaUpdated && _CurrentMedia != null) {
+            if (!Global.getDAL().updateMedia(_CurrentMedia)) {
+                Toast.makeText(PointsActivity.this,
+                        String.format("Unable to save %s", _CurrentMedia.getMediaType().toString()),
+                        Toast.LENGTH_LONG
+                ).show();
+            } else {
+                setMediaUpdated(false);
+            }
+        }
+    }
+
+    private void removeMedia(TtMedia media, boolean delete) {
+        List<TtMedia> mediaList = rvMediaAdapter.getItems();
+        int index = mediaList.indexOf(media);
+
+        Global.getDAL().deleteMedia(media);
+
+        if (delete) {
+            File file = new File(media.getFilePath());
+            file.deleteOnExit();
+        }
+
+        mediaCount--;
+        TtMedia changeTo = null;
+
+        if (index > INVALID_INDEX) {
+            if (index > 0) {
+                if (index < mediaList.size() - 1) {
+                    changeTo = mediaList.get(index + 1);
+                } else {
+                    changeTo = mediaList.get(--index);
+                }
+            } else if (mediaList.size() > 1) {
+                changeTo = mediaList.get(1);
+            } else {
+                setMediaTitle(null);
+            }
+        }
+
+        rvMediaAdapter.remove(media);
+        mediaViewPager.setCurrentItem(index);
+        setCurrentMedia(changeTo);
+    }
+
+    private void addImage(final TtImage picture) {
+        if (picture != null) {
+            if (Global.getDAL().insertMedia(picture)) {
+                mediaSelectionIndex = TtUtils.getMediaIndex(picture, rvMediaAdapter.getItems());
+                loadImageToList(picture);
+            } else {
+                Toast.makeText(PointsActivity.this, "Error saving picture", Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+    private void addImages(final List<TtImage> pictures) {
+        if (pictures.size() > 0) {
+            int error = 0;
+
+            Collections.sort(pictures, TtUtils.PictureTimeComparator);
+
+            for (int i = 0; i <pictures.size(); i++) {
+                if (!Global.getDAL().insertMedia(pictures.get(i))) {
+                    pictures.remove(i--);
+                    error++;
+                }
+            }
+
+            mediaSelectionIndex = TtUtils.getMediaIndex(pictures.get(0), rvMediaAdapter.getItems());
+
+            for (TtImage p : pictures) {
+                loadImageToList(p);
+            }
+
+            if (error > 0) {
+                Toast.makeText(PointsActivity.this, String.format("Error saving %d pictures"), Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+    private void resetMedia() {
+        if (_MediaUpdated) {
+            new AlertDialog.Builder(this)
+                    .setTitle(String.format("Reset Media %s", _CurrentMedia.getName()))
+                    .setMessage(String.format("This will reset this %s back to its original values.",
+                            _CurrentMedia.getMediaType().toString().toLowerCase()))
+                    .setPositiveButton("Reset", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            _CurrentMedia = TtUtils.cloneMedia(_BackupMedia);
+                            setMediaUpdated(false);
+                        }
+                    })
+                    .setNeutralButton(getString(R.string.str_cancel), null)
+                    .show();
         }
     }
     //endregion
@@ -929,6 +1465,16 @@ public class PointsActivity extends CustomToolbarActivity {
         }
 
         return point;
+    }
+
+    private TtPoint getPoint(String cn) {
+        for (TtPoint point : _Points) {
+            if (point.getCN().equals(cn)) {
+                return TtUtils.clonePoint(point);
+            }
+        }
+
+        return null;
     }
 
     private void moveToPoint(TtPoint point) {
@@ -954,7 +1500,7 @@ public class PointsActivity extends CustomToolbarActivity {
 
     private void moveToPoint(int index, boolean smoothScroll) {
         if (index > INVALID_INDEX && index < _Points.size()) {
-            mViewPager.setCurrentItem(index, smoothScroll);
+            pointViewPager.setCurrentItem(index, smoothScroll);
             _CurrentPoint = getPointAtIndex(index);
             _CurrentMetadata = _MetaData.get(_CurrentPoint.getMetadataCN());
             _CurrentIndex = index;
@@ -962,6 +1508,8 @@ public class PointsActivity extends CustomToolbarActivity {
             _CurrentPoint = null;
             _CurrentMetadata = null;
             _CurrentIndex = INVALID_INDEX;
+            loadMedia(null, false);
+            slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
         }
 
         updateButtons();
@@ -970,6 +1518,8 @@ public class PointsActivity extends CustomToolbarActivity {
     private void changePolygon(TtPolygon polygon) {
         if (_CurrentPolygon == null || !_CurrentPolygon.getCN().equals(polygon.getCN())) {
             if (savePoint()) {
+                saveMedia();
+
                 if (_deleteIndex > INVALID_INDEX) {
                     deletePoint(_deletePoint, INVALID_INDEX);
                 }
@@ -985,23 +1535,23 @@ public class PointsActivity extends CustomToolbarActivity {
                     return;
                 }
 
-                mSectionsPagerAdapter.notifyDataSetChanged();
+                pointSectionsPagerAdapter.notifyDataSetChanged();
 
                 int pointSize = _Points.size();
                 if (pointSize > 0) {
                     moveToPoint(pointSize - 1);
 
                     if (menuCreated) {
-                        TtUtils.UI.enableMenuItem(miGoto);
-                        TtUtils.UI.enableMenuItem(miLock);
+                        AndroidUtils.UI.enableMenuItem(miGoto);
+                        AndroidUtils.UI.enableMenuItem(miLock);
                     }
                 } else {
                     _CurrentMetadata = null;
                     updateButtons();
 
                     if (menuCreated) {
-                        TtUtils.UI.disableMenuItem(miGoto);
-                        TtUtils.UI.disableMenuItem(miLock);
+                        AndroidUtils.UI.disableMenuItem(miGoto);
+                        AndroidUtils.UI.disableMenuItem(miLock);
                     }
                 }
 
@@ -1024,7 +1574,7 @@ public class PointsActivity extends CustomToolbarActivity {
                 dialogBuilder.setTitle("Linked Points");
                 ListView listView = new ListView(this);
 
-                final PointDetailsAdapter pda = new PointDetailsAdapter(points, this, AppUnits.IconColor.Dark);
+                final PointDetailsAdapter pda = new PointDetailsAdapter(this, points, AppUnits.IconColor.Dark);
                 pda.setShowPolygonName(true);
 
                 listView.setAdapter(pda);
@@ -1037,7 +1587,7 @@ public class PointsActivity extends CustomToolbarActivity {
                 listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                        moveToPoint(pda.getPoint(i));
+                        moveToPoint(pda.getItem(i));
                         dialog.dismiss();
                     }
                 });
@@ -1071,6 +1621,8 @@ public class PointsActivity extends CustomToolbarActivity {
 
     //region Update UI
     private void updateButtons() {
+        lockPoint(true);
+
         boolean setLinkVisible = false;
         boolean setPolyChangeVisible = _Polygons.size() > 1;
         boolean setGpsTypeVisible = false;
@@ -1103,46 +1655,62 @@ public class PointsActivity extends CustomToolbarActivity {
             miNmeaRecalc.setVisible(setGpsTypeVisible);
             miEnterLatLon.setVisible(setGpsTypeVisible);
         }
-
-        lockPoint(true);
     }
 
     private void lockPoint(boolean lockPoint) {
         if (lockPoint) {
             if (menuCreated) {
                 miLock.setTitle(R.string.str_unlock);
-                miLock.setIcon(R.drawable.ic_action_lock_closed);
+                miLock.setIcon(R.drawable.ic_action_lock_closed_white_36dp);
 
-                TtUtils.UI.disableMenuItem(miMovePoint);
-                TtUtils.UI.disableMenuItem(miReset);
-                TtUtils.UI.disableMenuItem(miDelete);
-                TtUtils.UI.disableMenuItem(miNmeaRecalc);
-                TtUtils.UI.disableMenuItem(miEnterLatLon);
+                AndroidUtils.UI.disableMenuItem(miMovePoint);
+                AndroidUtils.UI.disableMenuItem(miReset);
+                AndroidUtils.UI.disableMenuItem(miDelete);
+                AndroidUtils.UI.disableMenuItem(miNmeaRecalc);
+                AndroidUtils.UI.disableMenuItem(miEnterLatLon);
+
+                pmbMedia.setItemEnabled(R.id.ctx_menu_delete, false);
+                pmbMedia.setItemEnabled(R.id.ctx_menu_reset, false);
             }
 
             fabAqr.setEnabled(false);
+            if (_CurrentPoint != null && (_CurrentPoint.getOp() == OpType.GPS || _CurrentPoint.getOp() == OpType.WayPoint)) {
+                fabAqr.hide();
+                aqrVisible = false;
+            }
 
             _PointLocked = true;
             onLockChange();
         } else if (_Points.size() > 0) {
             if (menuCreated) {
                 miLock.setTitle(R.string.str_lock);
-                miLock.setIcon(R.drawable.ic_action_lock_open);
+                miLock.setIcon(R.drawable.ic_action_lock_open_white_36dp);
 
+                AndroidUtils.UI.enableMenuItem(miMovePoint);
+                AndroidUtils.UI.enableMenuItem(miDelete);
+                AndroidUtils.UI.enableMenuItem(miNmeaRecalc);
+                AndroidUtils.UI.enableMenuItem(miEnterLatLon);
 
-                TtUtils.UI.enableMenuItem(miMovePoint);
-                TtUtils.UI.enableMenuItem(miDelete);
-                TtUtils.UI.enableMenuItem(miNmeaRecalc);
-                TtUtils.UI.enableMenuItem(miEnterLatLon);
+                if (_CurrentMedia != null) {
+                    pmbMedia.setItemEnabled(R.id.ctx_menu_delete, true);
+                    pmbMedia.setItemEnabled(R.id.ctx_menu_reset, _MediaUpdated);
+                }
 
-                if (_PointUpdated) {
-                    TtUtils.UI.enableMenuItem(miReset);
-                } else {
-                    TtUtils.UI.disableMenuItem(miReset);
+                if (_CurrentPoint != null) {
+                    if (_PointUpdated) {
+                        AndroidUtils.UI.enableMenuItem(miReset);
+                    } else {
+                        AndroidUtils.UI.disableMenuItem(miReset);
+                    }
                 }
             }
 
             fabAqr.setEnabled(true);
+            if (_CurrentPoint != null &&(_CurrentPoint.getOp() == OpType.GPS || _CurrentPoint.getOp() == OpType.WayPoint) &&
+                        slidingLayout.getPanelState() != SlidingUpPanelLayout.PanelState.EXPANDED) {
+                fabAqr.show();
+                aqrVisible = true;
+            }
 
             _PointLocked = false;
             onLockChange();
@@ -1154,9 +1722,9 @@ public class PointsActivity extends CustomToolbarActivity {
 
         if (menuCreated) {
             if (_PointUpdated) {
-                TtUtils.UI.enableMenuItem(miReset);
+                AndroidUtils.UI.enableMenuItem(miReset);
             } else {
-                TtUtils.UI.disableMenuItem(miReset);
+                AndroidUtils.UI.disableMenuItem(miReset);
             }
         }
 
@@ -1189,8 +1757,8 @@ public class PointsActivity extends CustomToolbarActivity {
     }
 
     private void showAqr() {
-        if (!aqrVisible) {
-            Animation a = AnimationUtils.loadAnimation(this, R.anim.push_up_in_fast);
+        if (!aqrVisible && !_PointLocked) {
+            Animation a = AnimationUtils.loadAnimation(this, R.anim.push_left_in);
 
             a.setAnimationListener(new Animation.AnimationListener() {
                 @Override
@@ -1217,7 +1785,7 @@ public class PointsActivity extends CustomToolbarActivity {
 
     private void hideAqr() {
         if (fabAqr.getVisibility() == View.VISIBLE) {
-            Animation a = AnimationUtils.loadAnimation(this, R.anim.push_down_out_fast);
+            Animation a = AnimationUtils.loadAnimation(this, R.anim.push_right_out);
 
             a.setAnimationListener(new Animation.AnimationListener() {
                 @Override
@@ -1241,10 +1809,177 @@ public class PointsActivity extends CustomToolbarActivity {
             fabAqr.animate();
         }
     }
+
+
+    private void anchorMediaIfExpanded() {
+        if (slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
+            slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
+        }
+    }
+
+    private void loadMedia(final TtPoint point, final boolean loadPoints) {
+        if (rvMediaAdapter != null) {
+            mediaViewPager.removeOnPageChangeListener(onMediaPageChangeListener);
+
+            rvMediaAdapter.clear();
+
+            mediaLoaded = false;
+
+            if (point != null) {
+                if (loadPoints) {
+                    mediaCount = 0;
+                    mediaSelectionIndex = INVALID_INDEX;
+
+                    ArrayList<TtImage> pictures = Global.getDAL().getPicturesInPoint(point.getCN());
+
+                    Collections.sort(pictures, TtUtils.PictureTimeComparator);
+                    for (final TtImage p : pictures) {
+                        loadImageToList(p);
+                    }
+
+                    if (mediaCount > 0)
+                        mediaSelectionIndex = 0;
+                } else {
+                    mediaCount = Global.getDAL().getItemsCount(
+                            TwoTrailsSchema.MediaSchema.TableName,
+                            TwoTrailsSchema.MediaSchema.PointCN,
+                            point.getCN());
+                }
+            }
+
+            setCurrentMedia(null);
+
+            mediaViewPager.addOnPageChangeListener(onMediaPageChangeListener);
+        }
+    }
+
+
+    private void loadImageToList(final TtImage picture) {
+        mediaCount++;
+
+        if (picture.isFileValid()) {
+            ImageLoader.getInstance().loadImage("file://" + picture.getFilePath(), new SimpleImageLoadingListener() {
+                @Override
+                public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                    addImageToList(picture, true, loadedImage);
+                }
+
+                @Override
+                public void onLoadingFailed(String imageUri, View view, final FailReason failReason) {
+                    addInvalidImagesToList(picture);
+                }
+            });
+        } else {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    addInvalidImagesToList(picture);
+                }
+            }).start();
+        }
+    }
+
+    private void addInvalidImagesToList(final TtImage picture) {
+        Bitmap bitmap = BitmapFactory.decodeResource(PointsActivity.this.getResources(), R.drawable.ic_error_outline_black_48dp);
+        if (bitmap != null) {
+            addImageToList(picture, false, bitmap);
+        }
+    }
+
+    private void addImageToList(final TtImage picture, boolean isValid, final Bitmap loadedImage) {
+        if (picture.getPointCN().equals(_CurrentPoint.getCN())) {
+            if (isValid) {
+                bitmapManager.put(picture.getFilePath(), picture.getFilePath(), AndroidUtils.UI.scaleMinBitmap(loadedImage, bitmapHeight, false), scaleOptions);
+            } else {
+                bitmapManager.put(picture.getFilePath(), Integer.toString(R.drawable.ic_error_outline_black_48dp), AndroidUtils.UI.scaleMinBitmap(loadedImage, bitmapHeight, false), scaleOptions, true);
+            }
+
+            try {
+                semaphore.acquire();
+
+                final int order = TtUtils.getMediaIndex(picture, rvMediaAdapter.getItems());
+
+                PointsActivity.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        rvMediaAdapter.add(order, picture);
+
+                        //don't bombard the adapter with lots of changes
+                        mediaLoaderDelayedHandler.post(onMediaChanged);
+
+                        semaphore.release();
+                    }
+                });
+            } catch (InterruptedException e) {
+                //
+            }
+        }
+    }
+
+
+    private Runnable onMediaChanged = new Runnable() {
+        @Override
+        public void run() {
+            PointsActivity.this.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (mediaSelectionIndex > INVALID_INDEX && mediaSelectionIndex < rvMediaAdapter.getItemCountEx()) {
+                        setCurrentMedia(rvMediaAdapter.getItem(mediaSelectionIndex));
+                        rvMediaAdapter.selectItem(mediaSelectionIndex);
+                        mediaViewPager.setCurrentItem(mediaSelectionIndex);
+                        mediaSelectionIndex = INVALID_INDEX;
+                    }
+
+                    mediaLoaded = true;
+
+                    setMediaTitle(slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED ?
+                        _CurrentMedia.getName() : null);
+                }
+            });
+        }
+    };
+
+
+    private void setCurrentMedia(TtMedia media) {
+        if (media != null) {
+            if (slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
+                setMediaTitle(media.getName());
+            } else {
+                setMediaTitle(null);
+            }
+
+            if (_CurrentMedia == null || !media.getCN().equals(_CurrentMedia.getCN())) {
+                _BackupMedia = TtUtils.cloneMedia(media);
+
+                setMediaUpdated(false);
+            }
+        } else {
+            setMediaTitle(null);
+        }
+
+        _CurrentMedia = media;
+
+        if (_CurrentMedia == null)
+            _BackupMedia = null;
+    }
+
+    private void setMediaTitle(String title) {
+        if (title != null) {
+            tvPmdTitle.setText(title);
+        } else {
+            tvPmdTitle.setText(String.format("Media (%d)", mediaCount));
+        }
+    }
+
+    private void setMediaUpdated(boolean updated) {
+        _MediaUpdated = updated;
+
+        pmbMedia.setItemEnabled(R.id.ctx_menu_reset, _MediaUpdated);
+    }
     //endregion
 
 
-    //region Fragment Calls
+    //region Fragment Interaction
     private void onLockChange() {
         for (Listener listener : listeners.values()) {
             listener.onLockChange(_PointLocked);
@@ -1265,6 +2000,20 @@ public class PointsActivity extends CustomToolbarActivity {
         }
     }
 
+    private void onMediaUpdate() {
+        setMediaUpdated(true);
+
+        if (listeners.containsKey(_CurrentMedia.getCN())) {
+            listeners.get(_CurrentMedia.getCN()).onMediaUpdated(_CurrentMedia);
+        }
+    }
+
+    private void onMediaUpdate(TtMedia media) {
+        if (listeners.containsKey(media.getCN())) {
+            listeners.get(media.getCN()).onMediaUpdated(media);
+        }
+    }
+
 
     public void updatePoint(TtPoint point) {
         //only update if current point
@@ -1276,15 +2025,14 @@ public class PointsActivity extends CustomToolbarActivity {
         adjust = true;
     }
 
-    public TtPoint getPoint(String cn) {
-        for (TtPoint point : _Points) {
-            if (point.getCN().equals(cn)) {
-                return TtUtils.clonePoint(point);
-            }
+    public void updateMedia(TtMedia media) {
+        //only update if current media
+        if (_CurrentMedia.getCN().equals(media.getCN())) {
+            setCurrentMedia(media);
+            setMediaUpdated(true);
         }
-
-        return null;
     }
+
 
     public TtMetadata getMetadata(String cn) {
         return _MetaData.get(cn);
@@ -1292,6 +2040,10 @@ public class PointsActivity extends CustomToolbarActivity {
 
     public HashMap<String, TtPolygon> getPolygons() {
         return _Polygons;
+    }
+
+    public BitmapManager getBitmapManager() {
+        return bitmapManager;
     }
     //endregion
 
@@ -1326,7 +2078,7 @@ public class PointsActivity extends CustomToolbarActivity {
             intent.putExtra(Consts.Codes.Data.POLYGON_DATA, _CurrentPolygon);
             intent.putExtra(Consts.Codes.Data.METADATA_DATA, _MetaData.get(point.getMetadataCN()));
 
-            if (bursts != null) {
+            if (bursts != null && bursts.size() > 0) {
                 try {
                     intent.putExtra(Consts.Codes.Data.ADDITIVE_NMEA_DATA, TtNmeaBurst.burstsToByteArray(bursts));
                 } catch (Exception e) {
@@ -1431,7 +2183,7 @@ public class PointsActivity extends CustomToolbarActivity {
                     //region GPS
                     if (Global.Settings.DeviceSettings.isGpsConfigured()) {
                         if (TtUtils.pointHasValue(_CurrentPoint)) {
-                            AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+                            AlertDialog.Builder dialog = new AlertDialog.Builder(PointsActivity.this);
 
                             dialog.setMessage(R.string.points_aqr_diag_gps_msg);
 
@@ -1446,7 +2198,7 @@ public class PointsActivity extends CustomToolbarActivity {
                             dialog.setNegativeButton(R.string.points_aqr_diag_overwrite, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    AlertDialog.Builder dialogA = new AlertDialog.Builder(getBaseContext());
+                                    AlertDialog.Builder dialogA = new AlertDialog.Builder(PointsActivity.this);
 
                                     dialogA.setMessage(R.string.points_aqr_diag_del_msg);
 
@@ -1555,6 +2307,7 @@ public class PointsActivity extends CustomToolbarActivity {
     //endregion
     //endregion
 
+
     public void register(String pointCN, Listener listener) {
         if (listener != null && !listeners.containsKey(pointCN)) {
             listeners.put(pointCN, listener);
@@ -1568,17 +2321,15 @@ public class PointsActivity extends CustomToolbarActivity {
     }
 
 
+    public class PointsPagerAdapter extends FragmentStatePagerAdapterEx {
 
-    public class SectionsPagerAdapter extends FragmentStatePagerAdapterEx {
-
-        public SectionsPagerAdapter(FragmentManager fm) {
+        public PointsPagerAdapter(FragmentManager fm) {
             super(fm);
         }
 
         @Override
         public Fragment getItem(int position) {
-
-            TtPoint point = _Points.get(position);
+            TtPoint point = getPointAtIndex(position);
 
             boolean hideCard = !StringEx.isEmpty(addedPoint) && point.getCN().equals(addedPoint);
 
@@ -1591,14 +2342,14 @@ public class PointsActivity extends CustomToolbarActivity {
                 case Take5:
                 case Walk:
                 case WayPoint: {
-                    return GPSPointFragment.newInstance(point.getCN(), hideCard);
+                    return GPSPointFragment.newInstance((GpsPoint)point, hideCard);
                 }
                 case SideShot:
                 case Traverse: {
-                    return TraversePointFragment.newInstance(point.getCN(), hideCard);
+                    return TraversePointFragment.newInstance((TravPoint)point, hideCard);
                 }
                 case Quondam: {
-                    return QuondamPointFragment.newInstance(point.getCN(), hideCard);
+                    return QuondamPointFragment.newInstance((QuondamPoint)point, hideCard);
                 }
             }
 
@@ -1629,8 +2380,36 @@ public class PointsActivity extends CustomToolbarActivity {
         }
     }
 
+
+    public class MediaPagerAdapter extends FragmentStatePagerAdapterEx {
+        public MediaPagerAdapter(FragmentManager fm) {
+            super(fm);
+            saveFragmentStates(false);
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            TtMedia media = rvMediaAdapter.getItem(position);
+
+            switch (media.getMediaType()) {
+                case Picture:
+                    return PictureMediaFragment.newInstance((TtImage) media);
+                case Video:
+                    break;
+            }
+
+            return null;
+        }
+
+        @Override
+        public int getCount() {
+            return rvMediaAdapter.getItemCountEx();
+        }
+    }
+
     public interface Listener {
         void onLockChange(boolean locked);
         void onPointUpdated(TtPoint point);
+        void onMediaUpdated(TtMedia media);
     }
 }
