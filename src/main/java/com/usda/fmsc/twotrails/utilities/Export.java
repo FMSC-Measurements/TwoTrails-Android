@@ -57,7 +57,7 @@ public class Export {
             //region Point Headers
             CSVPrinter printer = new CSVPrinter(new FileWriter(pointsFilename), CSVFormat.DEFAULT);
 
-            printer.printRecord(new String[] {
+            printer.printRecord(
                     "Point Name",
                     "OpType",
                     "Index",
@@ -93,7 +93,7 @@ public class Export {
                     "Group CN",
                     "Parent CN",
                     "Linked CNs"
-            });
+            );
             //endregion
 
             //region Point Values
@@ -216,12 +216,12 @@ public class Export {
             //region Groups
             printer = new CSVPrinter(new FileWriter(groupsFilename), CSVFormat.DEFAULT);
 
-            printer.printRecords(new String[] {
+            printer.printRecords(
                     "Name",
                     "Type",
                     "Description",
                     "CN"
-            });
+            );
 
 
             values = new ArrayList<>(4);
@@ -252,13 +252,13 @@ public class Export {
         try {
             CSVPrinter printer = new CSVPrinter(new FileWriter(polysFilename), CSVFormat.DEFAULT);
 
-            printer.printRecords(new String[] {
+            printer.printRecords(
                     "Name",
                     "Accuracy (M)",
                     "Area (Ac)",
                     "Perimeter (Ft)",
                     "CN"
-            });
+            );
 
             ArrayList<String> values = new ArrayList<>(5);
 
@@ -296,7 +296,7 @@ public class Export {
         try {
             CSVPrinter writer = new CSVPrinter(new FileWriter(metaFilename), CSVFormat.DEFAULT);
 
-            writer.printRecords(new String[] {
+            writer.printRecords(
                     "Name",
                     "Zone",
                     "Datum",
@@ -311,7 +311,7 @@ public class Export {
                     "Crew",
                     "Comment",
                     "CN"
-            });
+            );
 
             ArrayList<String> values = new ArrayList<>(14);
 
@@ -350,7 +350,7 @@ public class Export {
         try {
             CSVPrinter writer = new CSVPrinter(new FileWriter(projFilename), CSVFormat.DEFAULT);
 
-            writer.printRecords(new String[] {
+            writer.printRecords(
                     "Project Name",
                     "Region",
                     "Forest",
@@ -361,9 +361,9 @@ public class Export {
                     "TtDbVersion",
                     "TtVersion",
                     "CreatedTtVersion"
-            });
+            );
 
-            writer.printRecords(new String[] {
+            writer.printRecords(
                     dal.getProjectID(),
                     dal.getProjectRegion(),
                     dal.getProjectForest(),
@@ -374,7 +374,7 @@ public class Export {
                     dal.getTtDbVersion(),
                     dal.getProjectTtVersion(),
                     dal.getProjectCreatedTtVersion()
-            });
+            );
 
             writer.close();
         } catch (Exception ex) {
@@ -391,7 +391,7 @@ public class Export {
             //region NMEA Headers
             CSVPrinter writer = new CSVPrinter(new FileWriter(nmeaFilename), CSVFormat.DEFAULT);
 
-            writer.printRecords(new String[] {
+            writer.printRecords(
                     "Point CN",
                     "Used",
                     "Time Created",
@@ -415,7 +415,7 @@ public class Export {
                     "Satellites In View",
                     "Satellites Used Count",
                     "Satellites Used"
-            });
+            );
             //endregion
 
             //region NMEA Values
