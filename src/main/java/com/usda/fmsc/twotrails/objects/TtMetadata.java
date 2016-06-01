@@ -247,5 +247,4 @@ public class TtMetadata extends TtObject implements Parcelable {
     public String toString() {
         return Name != null ? Name : "[No Name]";
     }
-
 }

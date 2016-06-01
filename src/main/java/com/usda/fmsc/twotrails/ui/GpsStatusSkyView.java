@@ -20,7 +20,6 @@ import com.usda.fmsc.geospatial.nmea.Satellite;
 import com.usda.fmsc.twotrails.R;
 
 public class GpsStatusSkyView extends GpsStatusView implements SensorEventListener {
-
     private PointF center;
     private Paint paintCompass, paintVisSatellite, paintInvisSatellite, paintText, northPaint, southPaint;
     private RectF outerCircle, innerCircle;

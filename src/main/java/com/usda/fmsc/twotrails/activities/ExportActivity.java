@@ -19,6 +19,7 @@ import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.dialogs.DontAskAgainDialog;
 import com.usda.fmsc.android.widget.FABProgressCircleEx;
 import com.usda.fmsc.android.widget.MultiStateTouchCheckBox;
+import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
@@ -28,9 +29,6 @@ import com.usda.fmsc.twotrails.utilities.TtUtils;
 import java.io.File;
 
 public class ExportActivity extends CustomToolbarActivity {
-
-    private static final int FOLDER_REQUEST = 5001;
-
     private MultiStateTouchCheckBox chkAll, chkPoints, chkPolys, chkMeta, chkProj, chkNmea, chkKmz, chkGpx, chkSum;
     private FABProgressCircleEx progCircle;
     private Export.ExportTask exportTask;
@@ -94,7 +92,7 @@ public class ExportActivity extends CustomToolbarActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(requestCode == FOLDER_REQUEST && resultCode == RESULT_OK) {
+        if(requestCode == Consts.Codes.Requests.FOLDER && resultCode == RESULT_OK) {
             String directory = data.getData().getPath();
 
             if(directory != null) {
@@ -214,7 +212,7 @@ public class ExportActivity extends CustomToolbarActivity {
         i.putExtra(FilePickerActivity.EXTRA_START_PATH, initDir);
 
         try {
-            startActivityForResult(i, FOLDER_REQUEST);
+            startActivityForResult(i, Consts.Codes.Requests.FOLDER);
         } catch (Exception e) {
             e.printStackTrace();
         }

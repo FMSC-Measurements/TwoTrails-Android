@@ -22,8 +22,8 @@ import com.usda.fmsc.utilities.ParseEx;
 import com.usda.fmsc.utilities.StringEx;
 
 public class GPSPointFragment extends BasePointFragment {
-    EditText txtX, txtY, txtElev, txtManAcc;
-    TextView tvElev, tvRMSEr, tvNSSDA;
+    private EditText txtX, txtY, txtElev, txtManAcc;
+    private TextView tvElev, tvRMSEr, tvNSSDA;
 
     private boolean settingView = false;
 

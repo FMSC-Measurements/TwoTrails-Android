@@ -19,9 +19,7 @@ public abstract class TtObject implements Parcelable {
     }
 
 
-    public TtObject() {
-
-    }
+    public TtObject() { }
 
     public TtObject(Parcel source) {
         _CN = source.readString();

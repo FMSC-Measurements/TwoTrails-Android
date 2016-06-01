@@ -21,7 +21,6 @@ import com.usda.fmsc.utilities.ParseEx;
 import com.usda.fmsc.utilities.StringEx;
 
 public class PictureMediaFragment extends BaseMediaFragment {
-
     private ImageView ivBackground;
 
     private TtImage _Picture;

@@ -22,8 +22,8 @@ import com.usda.fmsc.utilities.ParseEx;
 import com.usda.fmsc.utilities.StringEx;
 
 public class TraversePointFragment extends BasePointFragment {
-    EditText txtFwd, txtBk, txtSlopeDist, txtSlopeAng;
-    TextView tvMagDec, tvAzDiff;
+    private EditText txtFwd, txtBk, txtSlopeDist, txtSlopeAng;
+    private TextView tvMagDec, tvAzDiff;
 
     private boolean settingView = false;
     private TravPoint _TravPoint;

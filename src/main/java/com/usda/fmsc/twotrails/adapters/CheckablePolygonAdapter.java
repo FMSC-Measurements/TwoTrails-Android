@@ -16,9 +16,9 @@ import com.usda.fmsc.twotrails.objects.TtPolygon;
 import java.util.ArrayList;
 
 public class CheckablePolygonAdapter extends ArrayAdapter<TtPolygon> {
-    ArrayList<Tuple<TtPolygon, Boolean>> _Polygons;
-    ArrayList<Integer> _PointInPolygonsCount;
-    LayoutInflater inflater;
+    private ArrayList<Tuple<TtPolygon, Boolean>> _Polygons;
+    private ArrayList<Integer> _PointInPolygonsCount;
+    private LayoutInflater inflater;
 
     public CheckablePolygonAdapter(Context context, int resource, ArrayList<TtPolygon> polygons, ArrayList<Integer> pointInPolysCounts) {
         super(context, resource);

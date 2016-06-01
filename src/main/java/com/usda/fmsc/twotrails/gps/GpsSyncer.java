@@ -1,12 +1,9 @@
 package com.usda.fmsc.twotrails.gps;
 
 public class GpsSyncer {
-
-
-
-    boolean gpsSynced = false, syncing = false, discarding = false;
-    long timeStart, timeStop;
-    byte collectCount;
+    private boolean gpsSynced = false, syncing = false, discarding = false;
+    private long timeStart;
+    private byte collectCount;
 
     String startString;
     Long longestInterval = 0L;
@@ -27,7 +24,7 @@ public class GpsSyncer {
                     syncing = false;
                 }
             } else {
-                timeStop = System.currentTimeMillis();
+                long timeStop = System.currentTimeMillis();
 
                 long timeElapsed = timeStop - timeStart;
 

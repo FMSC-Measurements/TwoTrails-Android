@@ -21,7 +21,6 @@ import java.util.List;
 import com.usda.fmsc.utilities.StringEx;
 
 public class EditableListDialog extends DialogFragment {
-
     private String[] items;
     private String selectedItem = StringEx.Empty;
 
@@ -31,7 +30,8 @@ public class EditableListDialog extends DialogFragment {
         posBtnText = negBtnText = StringEx.Empty;
     }
 
-    DialogInterface.OnClickListener onPosClick, onNegClick;
+    private DialogInterface.OnClickListener onPosClick, onNegClick;
+
 
     @NonNull
     @Override

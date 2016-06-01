@@ -22,6 +22,7 @@ import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.geospatial.utm.UTMTools;
 import com.usda.fmsc.utilities.StringEx;
 
+//TODO convert to parcelable
 public class TtNmeaBurst implements Serializable {
     private String cn;
     private String pointCN;

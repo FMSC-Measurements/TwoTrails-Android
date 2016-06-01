@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 
 public interface IPolygonGraphic {
-
     void build(TtPolygon polygon, List<TtPoint> points, HashMap<String, TtMetadata> meta, PolygonGraphicOptions graphicOptions, PolygonDrawOptions drawOptions);
 
     TtPolygon getPolygon();

@@ -7,8 +7,7 @@ import android.graphics.PointF;
 import com.usda.fmsc.android.widget.drawables.PolygonProgressDrawable;
 
 public class UnadjustedDrawable extends PolygonProgressDrawable {
-
-    public UnadjustedDrawable(){
+    public UnadjustedDrawable() {
         super(5, 90);
         points = new PointF[6];
     }

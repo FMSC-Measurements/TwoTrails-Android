@@ -23,14 +23,14 @@ import java.util.HashMap;
 import java.util.List;
 
 public class CheckNmeaDialog extends DialogFragment implements GpsService.Listener {
-    boolean postAllStrings;
+    private boolean postAllStrings;
 
-    GpsService.GpsBinder binder;
-    ListView lvNmea;
+    private GpsService.GpsBinder binder;
+    private ListView lvNmea;
 
-    NmeaDetailsAdapter adapter;
-    List<NmeaDetailsAdapter.NmeaDetails> nmeaDetails;
-    HashMap<String, NmeaDetailsAdapter.NmeaDetails> nmeaDetailsMap;
+    private NmeaDetailsAdapter adapter;
+    private List<NmeaDetailsAdapter.NmeaDetails> nmeaDetails;
+    private HashMap<String, NmeaDetailsAdapter.NmeaDetails> nmeaDetailsMap;
 
 
     public static CheckNmeaDialog newInstance() {

@@ -16,13 +16,12 @@ import java.util.Arrays;
 import java.util.List;
 
 public class GoogleMapSelectionAdapter extends BaseAdapter {
+    private Context context;
 
-    Context context;
+    private LayoutInflater inflater;
+    private IGoogleMapAdapterListener listener;
 
-    LayoutInflater inflater;
-    IGoogleMapAdapterListener listener;
-
-    List<GoogleMapType> mapTypes = Arrays.asList(GoogleMapType.values());
+    private List<GoogleMapType> mapTypes = Arrays.asList(GoogleMapType.values());
     private View selectedView;
     private int selectedIndex;
 

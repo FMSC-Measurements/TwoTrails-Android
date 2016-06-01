@@ -180,13 +180,9 @@ public class AnimationCardFragment extends Fragment {
             listener.onHidden();
     }
 
-    protected void onCardFocused() {
+    protected void onCardFocused() { }
 
-    }
-
-    protected void onCardUnFocused() {
-
-    }
+    protected void onCardUnFocused() { }
 
     public void setVisibilityListener(VisibilityListener listener) {
         this.listener = listener;

@@ -69,7 +69,6 @@ public class GpsService extends Service implements LocationListener, LocationSou
     @Override
     public void onCreate() {
         super.onCreate();
-        //android.os.Debug.waitForDebugger();
 
         bluetoothManager = Global.getBluetoothManager();
 
@@ -375,26 +374,10 @@ public class GpsService extends Service implements LocationListener, LocationSou
     public void connectionLost() {
 
         postError(GpsError.LostDeviceConnection);
-
-//        BluetoothSocket socket = bluetoothManager.getSocket(_deviceUUID);
-//
-//        if (btConn != null) {
-//            btConn.disconnect();
-//        }
-
-//        if (socket != null) {
-//            btConn = new GpsBluetoothConnection(socket);
-
-//            btConn.register(this);
-//            btConn.start();
-//        } else {
-//            postError(GpsError.NoExternalGpsSocket);
-//        }
     }
 
     @Override
     public void connectionEnded() {
-        //stopExternalGps();
         Global.TtNotifyManager.setGpsOff();
         postError(GpsError.DeviceConnectionEnded);
     }
@@ -427,9 +410,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
 
     @Override
     public void onLocationChanged(Location location) {
-//        if (gmapListener != null) {
-//            gmapListener.onLocationChanged(location);
-//        }
+        //
     }
 
     @Override
@@ -690,7 +671,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
         GpsAlreadyStarted,
         GpsAlreadyStopped,
         GpsServiceInUse,
-        Unkown
+        Unknown
     }
 
     public enum GpsProvider {

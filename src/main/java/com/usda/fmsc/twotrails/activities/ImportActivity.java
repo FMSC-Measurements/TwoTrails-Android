@@ -42,7 +42,6 @@ public class ImportActivity extends TtAjusterCustomToolbarActivity {
     private boolean ignoreChange, adjust;
 
 
-
     private BaseImportFragment.Listener listener = new BaseImportFragment.Listener() {
         String message = null;
 

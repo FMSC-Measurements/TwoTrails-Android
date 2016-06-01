@@ -14,9 +14,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NmeaDetailsAdapter extends ArrayAdapter<NmeaDetailsAdapter.NmeaDetails> {
-    List<NmeaDetails> nmeaDetails;
+    private List<NmeaDetails> nmeaDetails;
 
-    LayoutInflater inflater;
+    private LayoutInflater inflater;
 
 
     public NmeaDetailsAdapter(Context context) {

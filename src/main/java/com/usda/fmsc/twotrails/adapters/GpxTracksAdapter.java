@@ -23,7 +23,7 @@ public class GpxTracksAdapter extends RecyclerViewEx.AdapterEx<SimpleMultiSelect
 
     private List<GpxBaseTrack> tracks;
 
-    MultiSelector mSelector;
+    private MultiSelector mSelector;
 
 
     public GpxTracksAdapter(Context context, List<GpxBaseTrack> tracks, MultiSelector selector) {

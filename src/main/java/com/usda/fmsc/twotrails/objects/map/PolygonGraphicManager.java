@@ -12,10 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 
 public class PolygonGraphicManager implements IGraphicManager {
-
     private ArrayList<PolygonDrawOptions.Listener> polygonDrawListeners = new ArrayList<>();
     private ArrayList<PolygonGraphicOptions.Listener> polygonGraphicListeners = new ArrayList<>();
-    
 
     private TtPolygon polygon;
     private List<TtPoint> points;

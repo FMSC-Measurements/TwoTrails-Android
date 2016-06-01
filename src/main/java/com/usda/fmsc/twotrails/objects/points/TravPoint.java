@@ -198,12 +198,13 @@ public class TravPoint extends TtPoint {
             _calculated = false;
             throw new RuntimeException("Null Azimuth");
         }
+
         //Adjust by the declination
-            /* Apply the magnetic declination */
-            /* East declination is positve, west is negative */
+        /* Apply the magnetic declination */
+        /* East declination is positve, west is negative */
         azimuth += getDeclination();
 
-            /* azimuth conversion from north to mathematic postive X-axis */
+        /* azimuth conversion from north to mathematic postive X-axis */
         azimuth = 90 - azimuth;
         double x, y, z;
 

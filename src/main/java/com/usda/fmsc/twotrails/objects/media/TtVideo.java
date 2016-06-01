@@ -68,5 +68,4 @@ public class TtVideo extends TtMedia {
     }
 
     //get video details (size, length, etc..)
-
 }
