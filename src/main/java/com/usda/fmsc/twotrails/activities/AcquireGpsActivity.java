@@ -31,7 +31,7 @@ public class AcquireGpsActivity extends AcquireGpsMapActivity {
     private TtMetadata _Metadata;
     private List<TtNmeaBurst> _Bursts;
 
-    Button btnLog, btnCalc;
+    private Button btnLog, btnCalc;
 
     private int loggedCount = 0, receivedCount = 0;
 

@@ -390,7 +390,6 @@ public class Global {
     }
 
 
-    //TODO go through settings (xml) and remove hardcoded strings
     public static class Settings {
 
         public static class PreferenceHelper {

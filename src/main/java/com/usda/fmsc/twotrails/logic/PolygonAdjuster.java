@@ -40,28 +40,23 @@ public class PolygonAdjuster {
     }
 
     public static AdjustResult adjust(final DataAccessLayer dal, final Context ctx, final boolean updateIndexes) {
-        if(_processing)
+        if (_processing)
             return AdjustResult.ADJUSTING;
 
         _cancelToken = false;
 
         //check for point issues
-        if(dal.getItemCount(TwoTrailsSchema.PolygonSchema.TableName) < 1)
+        if (dal.getItemCount(TwoTrailsSchema.PolygonSchema.TableName) < 1)
             return AdjustResult.NO_POLYS;
         else {
-            for(TtPolygon poly : dal.getPolygons()) {
+            for (TtPolygon poly : dal.getPolygons()) {
                 TtPoint p = dal.getFirstPointInPolygon(poly.getCN());
 
-                if(p != null) {
+                if (p != null) {
                     if(p.isTravType() || (p.getOp() == OpType.Quondam &&
                             ((QuondamPoint)p).getParentPoint().isTravType()))
                         return AdjustResult.STARTS_WITH_TRAV_TYPE;
                 }
-                /* no point (empty polygon)
-                else {
-                    return AdjustResult.BAD_POINT;
-                }
-                */
             }
         }
 
@@ -193,27 +188,6 @@ public class PolygonAdjuster {
 
                 ArrayList<TtPoint> points = new ArrayList<>(pointsTable.values());
 
-                /*
-                //set sideshot accuracies
-                if(TtUtils.filterOnly(points, OpType.SideShot).size() > 0) {
-                    Collections.sort(points);
-                    HashMap<String, TtPolygon> polys = dal.getPolygonsMap();
-                    TtPoint currPoint, lastPoint = points.get(0);
-
-                    for (int i = 0; i < points.size(); i++)
-                    {
-                        currPoint = points.get(i);
-
-                        if (currPoint.getOp() == OpType.SideShot)
-                        {
-                            ((TravPoint)currPoint).setAccuracy(TtUtils.getPointAcc(lastPoint, polys));
-                        }
-
-                        lastPoint = currPoint;
-                    }
-                }
-                */
-
                 dal.updatePoints(points);
 
                 calculateAreaAndPerimeter(dal);
@@ -240,8 +214,7 @@ public class PolygonAdjuster {
 
                         points.add(points.get(0));
                         TtPoint p1, p2;
-                        for (int i = 0; i < points.size() - 1; i++)
-                        {
+                        for (int i = 0; i < points.size() - 1; i++) {
                             p1 = points.get(i);
                             p2 = points.get(i + 1);
 

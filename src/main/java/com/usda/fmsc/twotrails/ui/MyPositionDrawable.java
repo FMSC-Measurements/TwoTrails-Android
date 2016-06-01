@@ -15,13 +15,11 @@ public class MyPositionDrawable extends Drawable {
     private static final int DEFAULT_RADIUS = 10;
     private static final int DEFAULT_STROKE_WIDTH = 1;
 
-    Paint paintColor, paintInnerStroke, paintColorOuter, paintOuterStroke;
+    private Paint paintColor, paintInnerStroke, paintColorOuter, paintOuterStroke;
 
     private float radius, outerRadius;
 
-    int innerXY, outerXY, size;
-
-    int alpha;
+    private int innerXY, outerXY, size;
 
 
     public MyPositionDrawable(Context context) {
@@ -64,9 +62,7 @@ public class MyPositionDrawable extends Drawable {
     }
 
     @Override
-    public void setAlpha(int alpha) {
-        this.alpha = alpha;
-    }
+    public void setAlpha(int alpha) { }
 
     @Override
     public void setColorFilter(ColorFilter colorFilter) {

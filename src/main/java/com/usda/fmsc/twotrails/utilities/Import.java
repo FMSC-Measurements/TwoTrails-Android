@@ -696,7 +696,7 @@ public class Import {
                     } else if (gpp.Polygon instanceof GpxRoute) {
                         gpxPoints.addAll(((GpxRoute)gpp.Polygon).getPoints());
                     } else {
-                        throw new RuntimeException("Unkown GPX track type");
+                        throw new RuntimeException("Unknown GPX track type");
                     }
 
                     long index = 0;
@@ -844,6 +844,7 @@ public class Import {
         }
     }
 
+
     public static abstract class ImportParams {
         DataAccessLayer dal;
         String filePath;
@@ -862,10 +863,12 @@ public class Import {
         }
     }
 
+
     public interface ImportTaskListener {
         void onTaskFinish(ImportResult result);
     }
-    
+
+
     public static class ImportResult {
         private ImportResultCode code;
         private String message;
@@ -887,6 +890,7 @@ public class Import {
             return code;
         }
     }
+
 
     public enum ImportResultCode {
         Success,

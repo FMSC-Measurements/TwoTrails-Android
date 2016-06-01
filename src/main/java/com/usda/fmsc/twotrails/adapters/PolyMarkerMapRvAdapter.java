@@ -30,6 +30,7 @@ public class PolyMarkerMapRvAdapter extends RecyclerView.Adapter<PolyMarkerMapRv
     private List<PolygonGraphicManager> markerMaps;
     private Listener listener;
 
+
     public PolyMarkerMapRvAdapter(AppCompatActivity activity, List<PolygonGraphicManager> markerMaps) {
         this.activity = activity;
         this.markerMaps = markerMaps;

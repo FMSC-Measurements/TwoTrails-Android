@@ -24,10 +24,11 @@ import java.util.List;
 import com.usda.fmsc.utilities.StringEx;
 
 public class PointDetailsAdapter extends SelectableArrayAdapter<TtPoint> {
-    LayoutInflater inflater;
-    AppUnits.IconColor iconColor = AppUnits.IconColor.Light;
-    boolean showPolygon = false;
-    boolean showQuondamLinks = false;
+    private LayoutInflater inflater;
+    private AppUnits.IconColor iconColor = AppUnits.IconColor.Light;
+    private boolean showPolygon = false;
+    private boolean showQuondamLinks = false;
+
 
     public PointDetailsAdapter(Activity activity, ArrayList<TtPoint> points) {
         super(activity, 0, points);

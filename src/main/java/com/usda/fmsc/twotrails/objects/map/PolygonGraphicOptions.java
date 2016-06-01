@@ -19,9 +19,9 @@ public class PolygonGraphicOptions {
     private ArrayList<Listener> listeners = new ArrayList<>();
 
     private String CN;
-    @ColorInt private int AdjBndColor, UnAdjBndColor;
-    @ColorInt private int AdjNavColor, UnAdjNavColor;
-    @ColorInt private int AdjPtsColor, UnAdjPtsColor, WayPtsColor;
+    private @ColorInt int AdjBndColor, UnAdjBndColor;
+    private @ColorInt int AdjNavColor, UnAdjNavColor;
+    private @ColorInt int AdjPtsColor, UnAdjPtsColor, WayPtsColor;
     private float AdjWidth, UnAdjWidth;
 
 

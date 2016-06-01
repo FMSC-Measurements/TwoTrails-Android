@@ -70,18 +70,6 @@ public class TtReport {
             e.printStackTrace();
         }
 
-//        File file = new File(_FlePath);
-//        FileOutputStream stream = null;
-
-
-//        try {
-//            stream = new FileOutputStream(file);
-//            stream.write(String.format("%s%n", text).getBytes());
-//            stream.close();
-//        } catch (Exception e){
-//            e.printStackTrace();
-//        }
-
         Log.d(Consts.LOG_TAG, text);
     }
 

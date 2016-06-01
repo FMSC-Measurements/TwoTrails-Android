@@ -9,7 +9,6 @@ import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.dialogs.PointColorPickerDialog;
 
 public class TestActivity extends AppCompatActivity {
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

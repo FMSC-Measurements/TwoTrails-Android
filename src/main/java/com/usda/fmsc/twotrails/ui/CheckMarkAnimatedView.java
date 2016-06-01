@@ -15,7 +15,7 @@ public class CheckMarkAnimatedView extends View {
     private float[] points = new float[6];
     private Paint paint;
 
-    float progress;
+    private float progress;
 
 
     public CheckMarkAnimatedView(Context context) {

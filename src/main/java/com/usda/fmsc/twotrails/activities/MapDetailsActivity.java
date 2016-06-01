@@ -26,15 +26,15 @@ import com.usda.fmsc.utilities.IListener;
 import com.usda.fmsc.utilities.StringEx;
 
 public class MapDetailsActivity extends CustomToolbarActivity {
-    ArcGisMapLayer arcGisMapLayer, agmlBackup;
-    ImageView ivStatusIcon;
-    TextView tvName, tvFile, tvUrl, tvScaleMin, tvScaleMax;
-    EditText txtDesc, txtLoc;
-    PopupMenuButton ofmb;
+    private ArcGisMapLayer arcGisMapLayer, agmlBackup;
+    private ImageView ivStatusIcon;
+    private TextView tvName, tvFile, tvUrl, tvScaleMin, tvScaleMax;
+    private EditText txtDesc, txtLoc;
+    private PopupMenuButton ofmb;
 
-    boolean updated = false;
+    private boolean updated = false;
 
-    boolean[] overwrites = new boolean[3];
+    private boolean[] overwrites = new boolean[3];
 
 
     @Override

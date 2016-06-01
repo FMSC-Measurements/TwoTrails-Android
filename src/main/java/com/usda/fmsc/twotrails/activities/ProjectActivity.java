@@ -8,7 +8,6 @@ import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.fragments.project.ProjectFragment;
 
 public class ProjectActivity extends CustomToolbarActivity {
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -25,6 +24,7 @@ public class ProjectActivity extends CustomToolbarActivity {
             finish();
             return true;
         }
+
         return super.onOptionsItemSelected(item);
     }
 }

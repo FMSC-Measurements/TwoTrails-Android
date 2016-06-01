@@ -19,8 +19,8 @@ import java.util.HashMap;
 import java.util.List;
 
 public class StaticPolygonView extends View {
-    List<PointD> points;
-    Paint paint;
+    private List<PointD> points;
+    private Paint paint;
 
 
     public StaticPolygonView(Context context) {

@@ -27,11 +27,11 @@ public class MediaRvAdapter extends SelectableAdapterEx<TtMedia, SelectableAdapt
 
     private LayoutInflater inflater;
 
-    BitmapManager bitmapManager;
+    private BitmapManager bitmapManager;
 
-    Activity activity;
+    private Activity activity;
 
-    MediaChangedListener listener;
+    private MediaChangedListener listener;
 
     public MediaRvAdapter(Activity activity, List<TtMedia> mediaList, Listener<TtMedia> listener, int maxHeight, BitmapManager bitmapManager) {
         super(activity, mediaList);

@@ -31,21 +31,19 @@ public class SelectMapTypeDialog extends DialogFragment {
     private static final String ARC_MAP_LAYERS = "ArcMapLayers";
     private static final String SELECT_MAP_MODE = "MadeMode";
 
-    OnMapSelectedListener listener;
+    private OnMapSelectedListener listener;
 
-    List<ArcGisMapLayer> mapLayers;
+    private List<ArcGisMapLayer> mapLayers;
 
-    ViewPager viewPager;
+    private SelectMapMode mode;
+    private MapType mapType, defaultMapType;
+    private int mapId = -1, defaultMapId;
 
-    SelectMapMode mode;
-    MapType mapType, defaultMapType;
-    int mapId = -1, defaultMapId;
-
-    LayoutInflater inflater;
-    View arcView, gmapView;
-    ListView lvArcMap, lvGmap;
-    ArcGisMapSelectionAdapter arcMapAdapter;
-    GoogleMapSelectionAdapter gMapAdapter;
+    private LayoutInflater inflater;
+    private View arcView, gmapView;
+    private ListView lvArcMap;
+    private ArcGisMapSelectionAdapter arcMapAdapter;
+    private GoogleMapSelectionAdapter gMapAdapter;
 
 
     public static SelectMapTypeDialog newInstance(ArrayList<ArcGisMapLayer> layers) {
@@ -140,7 +138,7 @@ public class SelectMapTypeDialog extends DialogFragment {
             final MapTypePagerAdapter pagerAdapter = new MapTypePagerAdapter();
 
             // Set up the ViewPager with the sections arcMapAdapter.
-            viewPager = (ViewPager)view.findViewById(R.id.diagViewPager);
+            ViewPager viewPager = (ViewPager)view.findViewById(R.id.diagViewPager);
             viewPager.setAdapter(pagerAdapter);
 
             //Setup Tabs
@@ -198,7 +196,7 @@ public class SelectMapTypeDialog extends DialogFragment {
                 if (gmapView == null) {
                     gmapView = inflater.inflate(R.layout.content_list_view, null);
 
-                    lvGmap = (ListView)gmapView.findViewById(R.id.listView);
+                    ListView lvGmap = (ListView)gmapView.findViewById(R.id.listView);
                     gMapAdapter = new GoogleMapSelectionAdapter(getContext(), -1, this);
                     lvGmap.setAdapter(gMapAdapter);
                 }

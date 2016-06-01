@@ -350,17 +350,12 @@ public class TtUtils {
             return diff;
         }
 
-        public static double azimuthOfPoint(PointD p1, PointD p2)
-        {
+        public static double azimuthOfPoint(PointD p1, PointD p2) {
             return azimuthOfPoint(p1.X, p1.Y, p2.X, p2.Y);
         }
 
-        public static double azimuthOfPoint(double fromX, double fromY, double toX, double toY)
-        {
-            double Xcord = toX - fromX;
-            double Ycord = toY - fromY;
-
-            double azimuth = java.lang.Math.atan2(Xcord, Ycord) * (180d / java.lang.Math.PI);
+        public static double azimuthOfPoint(double fromX, double fromY, double toX, double toY) {
+            double azimuth = java.lang.Math.atan2(toX - fromX, toY - fromY) * (180d / java.lang.Math.PI);
 
             if (azimuth < 0)
                 azimuth += 360;

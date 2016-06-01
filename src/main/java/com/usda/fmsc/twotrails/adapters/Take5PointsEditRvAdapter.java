@@ -35,10 +35,10 @@ import com.usda.fmsc.utilities.ParseEx;
 import com.usda.fmsc.utilities.StringEx;
 
 public class Take5PointsEditRvAdapter extends RecyclerViewEx.BaseAdapterEx {
-    Take5Activity activity;
-    List<TtPoint> points;
-    Drawable dOnBnd, dOffBnd;
-    TtMetadata metadata;
+    private Take5Activity activity;
+    private List<TtPoint> points;
+    private Drawable dOnBnd, dOffBnd;
+    private TtMetadata metadata;
 
     public Take5PointsEditRvAdapter(Take5Activity activity, List<TtPoint> points, TtMetadata metadata) {
         super(activity);

@@ -37,7 +37,7 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
 
     private boolean logging;
 
-    GpsService.GpsBinder binder;
+    private GpsService.GpsBinder binder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

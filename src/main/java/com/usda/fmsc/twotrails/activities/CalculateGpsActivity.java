@@ -40,6 +40,7 @@ import com.usda.fmsc.utilities.StringEx;
 
 public class CalculateGpsActivity extends CustomToolbarActivity {
     private static final Pattern pattern = Pattern.compile("[a-zA-Z]");
+    private static String nVal = "*";
 
     private GpsPoint _Point;
     private TtMetadata _Metadata;
@@ -50,18 +51,17 @@ public class CalculateGpsActivity extends CustomToolbarActivity {
 
     private FilterOptions options = new FilterOptions();
 
-    Button btnCalc, btnCreate;
+    private Button btnCreate;
 
-    TextView tvUtmX1, tvUtmX2,tvUtmX3,tvUtmXF, tvUtmY1, tvUtmY2,tvUtmY3,tvUtmYF,
+    private TextView tvUtmX1, tvUtmX2,tvUtmX3,tvUtmXF, tvUtmY1, tvUtmY2,tvUtmY3,tvUtmYF,
             tvNssda1, tvNssda2, tvNssda3, tvNssdaF;
-    
-    CheckBox chkG1, chkG2, chkG3;
 
-    Spinner spDop, spFix;
-    EditText txtRange, txtGroup, txtDop;
+    private CheckBox chkG1, chkG2, chkG3;
 
-    String nVal = "-";
-    Integer manualGroupSize = null;
+    private EditText txtDop;
+
+    private Integer manualGroupSize = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,7 +95,7 @@ public class CalculateGpsActivity extends CustomToolbarActivity {
         options.Fix = Global.Settings.DeviceSettings.getGpsFilterFixType();
 
         //region Control Assign
-        btnCalc = (Button)findViewById(R.id.calcBtnCalc);
+        Button btnCalc = (Button)findViewById(R.id.calcBtnCalc);
         btnCreate = (Button)findViewById(R.id.calcBtnCreate);
 
         chkG1 = (CheckBox)findViewById(R.id.calcChkGroup1);
@@ -117,17 +117,17 @@ public class CalculateGpsActivity extends CustomToolbarActivity {
         tvNssda3 = (TextView)findViewById(R.id.calcTvNssdaG3);
         tvNssdaF = (TextView)findViewById(R.id.calcTvNssdaF);
 
-        spDop = (Spinner)findViewById(R.id.calcSpinnerDopType);
-        spFix = (Spinner)findViewById(R.id.calcSpinnerFix);
+        Spinner spDop = (Spinner)findViewById(R.id.calcSpinnerDopType);
+        Spinner spFix = (Spinner)findViewById(R.id.calcSpinnerFix);
 
         txtDop = (EditText)findViewById(R.id.calcTxtDopValue);
-        txtGroup = (EditText)findViewById(R.id.calcTxtGroup);
-        txtRange = (EditText)findViewById(R.id.calcTxtRange);
+        EditText txtGroup = (EditText)findViewById(R.id.calcTxtGroup);
+        EditText txtRange = (EditText)findViewById(R.id.calcTxtRange);
         //endregion
 
 
 
-        if (_Bursts.size() > 0) {
+        if (txtRange != null && _Bursts.size() > 0) {
             txtRange.setText(String.format("1-%d", _Bursts.size()));
         }
 
@@ -138,11 +138,13 @@ public class CalculateGpsActivity extends CustomToolbarActivity {
         dopAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         fixAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-        spDop.setAdapter(dopAdapter);
-        spDop.setSelection(options.DopType.getValue());
+        if (spDop != null && spFix != null) {
+            spDop.setAdapter(dopAdapter);
+            spDop.setSelection(options.DopType.getValue());
 
-        spFix.setAdapter(fixAdapter);
-        spFix.setSelection(options.Fix.getValue());
+            spFix.setAdapter(fixAdapter);
+            spFix.setSelection(options.Fix.getValue());
+        }
 
         spDop.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override

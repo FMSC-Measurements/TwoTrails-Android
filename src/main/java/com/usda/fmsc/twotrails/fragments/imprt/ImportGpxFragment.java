@@ -32,17 +32,17 @@ public class ImportGpxFragment extends BaseImportFragment {
     private RecyclerViewEx rvImport;
     private MultiSelector selector;
 
-    Import.GPXImportTask task;
+    private Import.GPXImportTask task;
 
     private String _FileName;
 
     private GpxDocument gpxDocument;
 
-    List<GpxTracksAdapter.GpxBaseTrackHolder> polyParams;
-    List<GpxBaseTrack> tracks;
+    private List<GpxTracksAdapter.GpxBaseTrackHolder> polyParams;
+    private List<GpxBaseTrack> tracks;
 
 
-    MultiSelector.Listener mSelectionListener = new MultiSelector.Listener() {
+    private MultiSelector.Listener mSelectionListener = new MultiSelector.Listener() {
         @Override
         public void onItemSelectionChange(SelectableHolder holder, boolean isSelected) {
             if (holder instanceof GpxTracksAdapter.GpxBaseTrackHolder) {

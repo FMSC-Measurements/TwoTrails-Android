@@ -19,13 +19,12 @@ import java.util.List;
 import com.usda.fmsc.utilities.StringEx;
 
 public class PointDetailsSpinnerAdapter extends BaseAdapter {
-
-    List<TtPoint> points;
-    LayoutInflater inflater;
-    Context context;
-    AppUnits.IconColor iconColor;
-    boolean showPolygon = false;
-    int itemView;
+    private List<TtPoint> points;
+    private LayoutInflater inflater;
+    private Context context;
+    private AppUnits.IconColor iconColor;
+    private boolean showPolygon = false;
+    private int itemView;
 
     public PointDetailsSpinnerAdapter(ArrayList<TtPoint> points, Context context) {
         this(points, context, AppUnits.IconColor.Light, android.R.layout.simple_spinner_item);

@@ -19,7 +19,6 @@ import com.usda.fmsc.twotrails.utilities.ArcGISTools;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 public class SettingsLogic {
-
     public static void reset(final Context context) {
         AlertDialog.Builder alert = new AlertDialog.Builder(context);
 

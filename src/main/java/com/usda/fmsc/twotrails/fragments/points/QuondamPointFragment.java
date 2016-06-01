@@ -45,8 +45,8 @@ public class QuondamPointFragment extends BasePointFragment {
 
     private QuondamPoint _Quondam;
 
-    SelectableStringArrayAdapter polysAdapter;
-    PointDetailsAdapter pointsAdapter;
+    private SelectableStringArrayAdapter polysAdapter;
+    private PointDetailsAdapter pointsAdapter;
 
 
 

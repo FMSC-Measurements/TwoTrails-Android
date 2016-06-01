@@ -5,15 +5,13 @@ public class TtDalVersion {
     public int Minor;
     public int Update;
 
-    public TtDalVersion(int maj, int min, int up)
-    {
+    public TtDalVersion(int maj, int min, int up) {
         Major = maj;
         Minor = min;
         Update = up;
     }
 
-    public TtDalVersion(String versionString)
-    {
+    public TtDalVersion(String versionString) {
         Major = Minor = Update = 0;
 
         if (versionString == null)

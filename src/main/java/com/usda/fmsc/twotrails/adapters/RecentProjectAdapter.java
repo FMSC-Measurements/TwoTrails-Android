@@ -14,15 +14,13 @@ import java.io.File;
 import java.util.ArrayList;
 
 public class RecentProjectAdapter extends BaseAdapter {
+    private ArrayList<RecentProject> projList = new ArrayList<>();
+    private LayoutInflater inflater;
 
-    ArrayList<RecentProject> projList = new ArrayList<>();
-    LayoutInflater inflater;
-    Context context;
 
     public RecentProjectAdapter(Context context, ArrayList<RecentProject> values) {
         projList = values;
-        this.context = context;
-        inflater = LayoutInflater.from(this.context);
+        inflater = LayoutInflater.from(context);
     }
 
     @Override

@@ -17,7 +17,7 @@ public class MetadataDetailsAdapter extends BaseAdapter {
     private LayoutInflater inflater;
     private List<TtMetadata> metadata;
     private int color, ds = -1;
-    boolean autoHighlight;
+    private boolean autoHighlight;
 
     public MetadataDetailsAdapter(Context context, List<TtMetadata> metadata, int ds) {
         this(context, metadata, ds, true);

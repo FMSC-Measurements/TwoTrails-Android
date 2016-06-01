@@ -15,7 +15,8 @@ import java.util.List;
 public class MetadataDetailsSpinnerAdapter extends BaseAdapter {
     private LayoutInflater inflater;
     private List<TtMetadata> metadata;
-    int itemView;
+    private int itemView;
+
 
     public MetadataDetailsSpinnerAdapter(Context context, List<TtMetadata> metadata) {
         this(context, metadata, android.R.layout.simple_spinner_item);

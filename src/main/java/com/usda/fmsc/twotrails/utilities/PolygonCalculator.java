@@ -7,8 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PolygonCalculator {
-    int polyCorners;
-    double[] polyX, polyY, constant, multiple;
+    private int polyCorners;
+    private double[] polyX, polyY, constant, multiple;
 
     public PolygonCalculator(List<PointD> points) {
         if (points == null || points.size() < 3) {

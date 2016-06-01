@@ -27,7 +27,6 @@ import java.util.List;
 import com.usda.fmsc.utilities.StringEx;
 
 public class MoveToPointDialog extends DialogFragment {
-
     private int currentIndex;
     private ArrayList<TtPoint> points;
     private String posBtnText, negBtnText, title;
