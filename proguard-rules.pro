@@ -62,6 +62,13 @@
 -keep interface javax.servlet.http.** { *; }
 
 -keep class org.joda.time.** { *; }
--keep interface class org.joda.time.** { *; }
+-keep interface org.joda.time.** { *; }
 
 -dontwarn android.support.**
+-dontwarn jcifs.http**
+-dontwarn org.w3c.dom.bootstrap.**
+-dontwarn org.apache.http.**
+-dontwarn android.net.http.AndroidHttpClient
+-dontwarn com.google.android.gms.**
+-dontwarn com.android.volley.toolbox.**
+-dontwarn org.joda.time.**
