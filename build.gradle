@@ -35,7 +35,7 @@ android {
     buildTypes {
         release {
             minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles 'proguard-rules.pro'
             signingConfig signingConfigs.release_config
             resValue "string", "maps_api_key", project.property("TwoTrails.release_maps_key")
         }
