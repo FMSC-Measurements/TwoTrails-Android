@@ -106,18 +106,26 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
         if (_Polygon != null) {
             final View v = view;
 
-            polyPoints = activity.getDrawPoints(_Polygon.getCN(), 0);
+            if (Global.getDAL().getPointCountInPolygon(_Polygon.getCN()) < 3) {
+                View polyLayImage = view.findViewById(R.id.polyLayImage);
 
-            if (polyPoints == null) {
-                v.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-                    @Override
-                    public void onGlobalLayout() {
-                        if (spv != null && activity != null) {
-                            polyPoints = activity.getDrawPoints(_Polygon.getCN(), spv.getWidth());
-                            v.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                if (polyLayImage != null) {
+                    polyLayImage.setVisibility(View.GONE);
+                }
+            } else {
+                polyPoints = activity.getDrawPoints(_Polygon.getCN(), 0);
+
+                if (polyPoints == null) {
+                    v.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                        @Override
+                        public void onGlobalLayout() {
+                            if (spv != null && activity != null) {
+                                polyPoints = activity.getDrawPoints(_Polygon.getCN(), spv.getWidth());
+                                v.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                            }
                         }
-                    }
-                });
+                    });
+                }
             }
 
             onPolygonUpdated(_Polygon);
@@ -270,14 +278,6 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
         };
 
         AndroidUtils.UI.hideKeyboardOnSelect(parent, ets);
-
-        if (Global.getDAL().getPointCountInPolygon(_Polygon.getCN()) > 2) {
-            View polyLayImage = view.findViewById(R.id.polyLayImage);
-
-            if (polyLayImage != null) {
-                polyLayImage.setVisibility(View.VISIBLE);
-            }
-        }
 
         return view;
     }
