@@ -488,21 +488,15 @@ public class DataAccessLayer {
     }
 
     public ArrayList<TtPoint> getBoundaryPointsInPoly(String polyCN) {
-        return getPoints(String.format("%s = '%s' and %s = 1",
+        return getPoints(String.format("%s = '%s' and %s != '%s' and %s = 1",
                 TwoTrailsSchema.PointSchema.PolyCN, polyCN,
+                TwoTrailsSchema.PointSchema.Operation, OpType.WayPoint.toString(),
                 TwoTrailsSchema.PointSchema.OnBoundary));
     }
 
     public ArrayList<TtPoint> getPointsInPolygon(String polyCN) {
         return getPoints(String.format("%s = '%s'",
                 TwoTrailsSchema.PointSchema.PolyCN, polyCN));
-    }
-
-    public ArrayList<TtPoint> getBoundaryPointsInPolygon(String polyCN) {
-        return getPoints(String.format("%s = '%s' and %s != '%s' and %s = true",
-                TwoTrailsSchema.PointSchema.PolyCN, polyCN,
-                TwoTrailsSchema.PointSchema.Operation, OpType.WayPoint.toString(),
-                TwoTrailsSchema.PointSchema.OnBoundary));
     }
 
     public ArrayList<TtPoint> getPointsWithMeta(String metaCN) {

@@ -51,7 +51,7 @@ public class PolygonsActivity extends CustomToolbarActivity {
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private ViewPager mViewPager;
 
-    private ConcurrentHashMap<String, ArrayList<PointD>> drawPoints;
+    private ConcurrentHashMap<String, ArrayList<PointD>> drawPoints = new ConcurrentHashMap<>();
     private HashMap<String, TtMetadata> metadata;
 
     private ComplexOnPageChangeListener onPageChangeArrayListener = new ComplexOnPageChangeListener() {
@@ -107,8 +107,6 @@ public class PolygonsActivity extends CustomToolbarActivity {
 
             mViewPager.addOnPageChangeListener(onPageChangeArrayListener);
         }
-
-        drawPoints = new ConcurrentHashMap<>();
 
         lockPolygon(true);
     }
@@ -486,9 +484,9 @@ public class PolygonsActivity extends CustomToolbarActivity {
                         @Override
                         public void run() {
                             if (Global.getDAL().getPointCountInPolygon(cn) > 2) {
-                                final List<TtPoint> points = Global.getDAL().getBoundaryPointsInPolygon(cn);
+                                final List<TtPoint> points = Global.getDAL().getBoundaryPointsInPoly(cn);
 
-                                if (points.size() > 2) {
+                                if (points != null && points.size() > 2) {
                                     new Thread(new Runnable() {
                                         @Override
                                         public void run() {
@@ -499,8 +497,6 @@ public class PolygonsActivity extends CustomToolbarActivity {
                                             onPolygonUpdate(cn);
                                         }
                                     }).start();
-                                } else {
-                                    drawPoints.put(cn, null);
                                 }
                             }
                         }

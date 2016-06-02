@@ -30,6 +30,7 @@ import com.usda.fmsc.twotrails.objects.map.IMarkerDataGraphic;
 import com.usda.fmsc.twotrails.objects.map.PolygonDrawOptions;
 import com.usda.fmsc.twotrails.objects.map.PolygonGraphicManager;
 import com.usda.fmsc.twotrails.objects.map.TrailGraphicManager;
+import com.usda.fmsc.twotrails.units.GoogleMapType;
 import com.usda.fmsc.twotrails.units.MapType;
 
 import java.util.ArrayDeque;
@@ -140,7 +141,7 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
 
         setMapPadding(0, (int) (getResources().getDimension(R.dimen.toolbar_height)), 0, 0);
 
-        if (startUpMapOptions != null) {
+        if (startUpMapOptions != null && startUpMapOptions.getMapId() != GoogleMapType.MAP_TYPE_NONE.getValue()) {
             if (startUpMapOptions.hasExtents()) {
                 map.moveCamera(CameraUpdateFactory.newLatLngBounds(
                         new LatLngBounds(

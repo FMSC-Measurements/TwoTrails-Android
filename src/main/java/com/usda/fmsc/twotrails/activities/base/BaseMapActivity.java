@@ -283,31 +283,36 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
         mmFrag = (IMultiMapFragment)mapFragment;
         getSupportFragmentManager().beginTransaction().add(R.id.mapContainer, mapFragment).commit();
 
-        if (ArcGISTools.offlineMapsAvailable()) {
-            new AlertDialog.Builder(this)
-                    .setMessage("There is no internet connection. Would you like to use an offline map?")
-                    .setPositiveButton(R.string.str_ok, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            SelectMapTypeDialog.newInstance(new ArrayList<>(ArcGISTools.getMapLayers()),
-                                    SelectMapTypeDialog.SelectMapMode.ARC_OFFLINE)
-                            .setOnMapSelectedListener(new SelectMapTypeDialog.OnMapSelectedListener() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (ArcGISTools.offlineMapsAvailable()) {
+                    new AlertDialog.Builder(BaseMapActivity.this)
+                            .setMessage("There is no internet connection. Would you like to use an offline map?")
+                            .setPositiveButton(R.string.str_yes, new DialogInterface.OnClickListener() {
                                 @Override
-                                public void mapSelected(MapType mapType, int mapId) {
-                                    setMapType(mapType, mapId);
+                                public void onClick(DialogInterface dialog, int which) {
+                                    SelectMapTypeDialog.newInstance(new ArrayList<>(ArcGISTools.getMapLayers()),
+                                            SelectMapTypeDialog.SelectMapMode.ARC_OFFLINE)
+                                            .setOnMapSelectedListener(new SelectMapTypeDialog.OnMapSelectedListener() {
+                                                @Override
+                                                public void mapSelected(MapType mapType, int mapId) {
+                                                    setMapType(mapType, mapId);
+                                                }
+                                            })
+                                            .show(getSupportFragmentManager(), SELECT_MAP);
                                 }
                             })
-                            .show(getSupportFragmentManager(), SELECT_MAP);
-                        }
-                    })
-                    .setNegativeButton(R.string.str_no, null)
-                    .show();
-        } else {
-            new AlertDialog.Builder(this)
-                    .setMessage("There is no internet connection and there are no Offline maps are available. No Map can be displayed.")
-                    .setPositiveButton(R.string.str_ok, null)
-                    .show();
-        }
+                            .setNegativeButton(R.string.str_no, null)
+                            .show();
+                } else {
+                    new AlertDialog.Builder(BaseMapActivity.this)
+                            .setMessage("There is no internet connection and there are no Offline maps are available. No Map can be displayed.")
+                            .setPositiveButton(R.string.str_ok, null)
+                            .show();
+                }
+            }
+        });
     }
 
     @Override
