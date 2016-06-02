@@ -119,7 +119,13 @@ public class TravPoint extends TtPoint {
             return null;
         }
 
-        return TtUtils.Math.azimuthModulo((_FwdAz + adjustedBackAz) / 2);
+        double aaz = (_FwdAz + adjustedBackAz) / 2;
+
+        if (Math.abs(aaz - adjustedBackAz) > 100) {
+            return TtUtils.Math.azimuthModulo(aaz + 180);
+        } else {
+            return TtUtils.Math.azimuthModulo(aaz);
+        }
     }
 
 
