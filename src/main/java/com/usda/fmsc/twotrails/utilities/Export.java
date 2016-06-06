@@ -216,7 +216,7 @@ public class Export {
             //region Groups
             printer = new CSVPrinter(new FileWriter(groupsFilename), CSVFormat.DEFAULT);
 
-            printer.printRecords(
+            printer.printRecord(
                     "Name",
                     "Type",
                     "Description",
@@ -227,12 +227,12 @@ public class Export {
             values = new ArrayList<>(4);
 
             for (TtGroup group : dal.getGroups()) {
-                values.add(0, group.getName());
-                values.add(1, group.getGroupType().toString());
-                values.add(2, group.getDescription());
-                values.add(3, group.getCN());
+                values.add(group.getName());
+                values.add(group.getGroupType().toString());
+                values.add(group.getDescription());
+                values.add(group.getCN());
 
-                printer.printRecords(values);
+                printer.printRecord(values);
                 values.clear();
             }
 
@@ -252,7 +252,7 @@ public class Export {
         try {
             CSVPrinter printer = new CSVPrinter(new FileWriter(polysFilename), CSVFormat.DEFAULT);
 
-            printer.printRecords(
+            printer.printRecord(
                     "Name",
                     "Accuracy (M)",
                     "Area (Ac)",
@@ -275,9 +275,9 @@ public class Export {
                                 Dist.Meters)
                 ));
 
-                values.add(4, poly.getCN());
+                values.add(poly.getCN());
 
-                printer.printRecords(values);
+                printer.printRecord(values);
                 values.clear();
             }
 
@@ -296,7 +296,7 @@ public class Export {
         try {
             CSVPrinter writer = new CSVPrinter(new FileWriter(metaFilename), CSVFormat.DEFAULT);
 
-            writer.printRecords(
+            writer.printRecord(
                     "Name",
                     "Zone",
                     "Datum",
@@ -331,7 +331,7 @@ public class Export {
                 values.add(meta.getComment());
                 values.add(meta.getCN());
 
-                writer.printRecords(values);
+                writer.printRecord(values);
                 values.clear();
             }
 
@@ -350,7 +350,7 @@ public class Export {
         try {
             CSVPrinter writer = new CSVPrinter(new FileWriter(projFilename), CSVFormat.DEFAULT);
 
-            writer.printRecords(
+            writer.printRecord(
                     "Project Name",
                     "Region",
                     "Forest",
@@ -363,7 +363,7 @@ public class Export {
                     "CreatedTtVersion"
             );
 
-            writer.printRecords(
+            writer.printRecord(
                     dal.getProjectID(),
                     dal.getProjectRegion(),
                     dal.getProjectForest(),
@@ -391,7 +391,7 @@ public class Export {
             //region NMEA Headers
             CSVPrinter writer = new CSVPrinter(new FileWriter(nmeaFilename), CSVFormat.DEFAULT);
 
-            writer.printRecords(
+            writer.printRecord(
                     "Point CN",
                     "Used",
                     "Time Created",
@@ -446,7 +446,7 @@ public class Export {
                 values.add(StringEx.toString(burst.getUsedSatellitesCount()));
                 values.add(burst.getUsedSatelliteIDsString());
 
-                writer.printRecords(values);
+                writer.printRecord(values);
                 values.clear();
             }
 

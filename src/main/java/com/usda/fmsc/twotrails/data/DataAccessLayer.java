@@ -1542,8 +1542,8 @@ public class DataAccessLayer {
         try {
 
             String query = createSelectQuery(
-                            TwoTrailsSchema.GroupSchema.SelectItems,
                             TwoTrailsSchema.GroupSchema.TableName,
+                            TwoTrailsSchema.GroupSchema.SelectItems,
                             where);
 
             Cursor c = _db.rawQuery(query, null);
