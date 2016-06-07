@@ -2080,7 +2080,7 @@ public class PointsActivity extends CustomToolbarActivity {
 
             if (bursts != null && bursts.size() > 0) {
                 try {
-                    intent.putExtra(Consts.Codes.Data.ADDITIVE_NMEA_DATA, TtNmeaBurst.burstsToByteArray(bursts));
+                    intent.putParcelableArrayListExtra(Consts.Codes.Data.ADDITIVE_NMEA_DATA, bursts);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -2144,7 +2144,7 @@ public class PointsActivity extends CustomToolbarActivity {
                 intent.putExtra(Consts.Codes.Data.METADATA_DATA, _MetaData.get(_CurrentPoint.getMetadataCN()));
 
                 try {
-                    intent.putExtra(Consts.Codes.Data.ADDITIVE_NMEA_DATA, TtNmeaBurst.burstsToByteArray(bursts));
+                    intent.putParcelableArrayListExtra(Consts.Codes.Data.ADDITIVE_NMEA_DATA, bursts);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

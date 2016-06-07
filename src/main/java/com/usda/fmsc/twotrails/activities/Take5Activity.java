@@ -498,17 +498,16 @@ public class Take5Activity extends AcquireGpsMapActivity {
                         if (tmp.getOp().isGpsType()) {
                             ssp.calculatePoint(_Polygon, tmp);
                             addPosition(ssp);
-                            //addMapMarker(ssp, _Metadata, true);
                             break;
                         }
                     }
 
                     return true;
                 } else {
-                    Toast.makeText(this, "SideShot requires a distance of greater than zero", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(Take5Activity.this, "SideShot requires a distance of greater than zero", Toast.LENGTH_SHORT).show();
                 }
             } else {
-                Toast.makeText(this, "SideShot requires a forward or back azimuth", Toast.LENGTH_SHORT).show();
+                Toast.makeText(Take5Activity.this, "SideShot requires a forward or back azimuth", Toast.LENGTH_SHORT).show();
             }
 
             return false;

@@ -1703,7 +1703,7 @@ public class DataAccessLayer {
                     EastWest magVarDir;
                     GSASentence.Mode mode;
                     GSASentence.Fix fix;
-                    List<Integer> satsUsed;
+                    ArrayList<Integer> satsUsed;
                     GGASentence.GpsFixType fixQuality;
                     int trackedSatellites, numberOfSatellitesInView;
                     UomElevation geoUom;

@@ -647,8 +647,8 @@ public class Global {
             public static final int DEFAULT_MAP_ID = 1;
             public static final String DEFAULT_ARC_GIS_MAPS = StringEx.Empty;
             public static final int DEFAULT_ARC_GIS_MAP_ID_COUNTER = 0;
-            public static final int DEFAULT_MAP_ADJ_LINE_WIDTH = 8;
-            public static final int DEFAULT_MAP_UNADJ_LINE_WIDTH = 32;
+            public static final int DEFAULT_MAP_ADJ_LINE_WIDTH = 6;
+            public static final int DEFAULT_MAP_UNADJ_LINE_WIDTH = 16;
 
             public static final boolean DEFAULT_MEDIA_COPY_TO_PROJECT = true;
             //endregion

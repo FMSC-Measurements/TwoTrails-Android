@@ -1,6 +1,9 @@
 package com.usda.fmsc.twotrails.gps;
 
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import org.joda.time.DateTime;
 
 import java.io.ByteArrayInputStream;
@@ -8,7 +11,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.usda.fmsc.geospatial.EastWest;
@@ -20,13 +23,24 @@ import com.usda.fmsc.geospatial.nmea.sentences.GGASentence;
 import com.usda.fmsc.geospatial.nmea.sentences.GSASentence;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.geospatial.utm.UTMTools;
+import com.usda.fmsc.twotrails.objects.TtObject;
 import com.usda.fmsc.utilities.StringEx;
 
-//TODO convert to parcelable
-public class TtNmeaBurst implements Serializable {
-    private String cn;
+public class TtNmeaBurst extends TtObject implements Parcelable {
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+        @Override
+        public Object createFromParcel(Parcel source) {
+            return new TtNmeaBurst(source);
+        }
+
+        @Override
+        public TtNmeaBurst[] newArray(int size) {
+            return new TtNmeaBurst[size];
+        }
+    };
+
     private String pointCN;
-    private Boolean used;
+    private boolean used;
     private DateTime timeCreated;
 
     private Double _X, _Y;
@@ -45,7 +59,7 @@ public class TtNmeaBurst implements Serializable {
     //gsa
     private GSASentence.Mode mode;
     private GSASentence.Fix fix;
-    private List<Integer> satsUsed;
+    private ArrayList<Integer> satsUsed;
     double pdop, hdop, vdop;
 
     //gga
@@ -57,16 +71,47 @@ public class TtNmeaBurst implements Serializable {
 
     //gsv
     private int numberOfSatellitesInView;
-    //private List<Satellite> satellites;
     //endregion
+
+    @SuppressWarnings("unchecked")
+    public TtNmeaBurst(Parcel source) {
+        super(source);
+
+        this.timeCreated = (DateTime) source.readSerializable();
+        this.pointCN = source.readString();
+        this.used = source.readInt() > 0;
+
+        this.position = (GeoPosition) source.readSerializable();
+
+        this.fixTime = (DateTime) source.readSerializable();
+        this.groundSpeed = source.readDouble();
+        this.trackAngle = source.readDouble();
+        this.magVar = source.readDouble();
+        this.magVarDir = EastWest.parse(source.readInt());
+
+        this.mode = GSASentence.Mode.parse(source.readInt());
+        this.fix = GSASentence.Fix.parse(source.readInt());
+        this.satsUsed = source.readArrayList(Integer.class.getClassLoader());
+        this.pdop = source.readDouble();
+        this.hdop = source.readDouble();
+        this.vdop = source.readDouble();
+
+        this.fixQuality = GGASentence.GpsFixType.parse(source.readInt());
+        this.trackedSatellites = source.readInt();
+        this.horizDilution = source.readDouble();
+        this.geoidHeight = source.readDouble();
+        this.geoUom = UomElevation.parse(source.readInt());
+
+        this.numberOfSatellitesInView = source.readInt();
+    }
 
     public TtNmeaBurst(String cn, DateTime timeCreated, String pointCN, boolean used,
                        GeoPosition position, DateTime fixTime, double groundSpeed, double trackAngle,
                        double magVar, EastWest magVarDir, GSASentence.Mode mode, GSASentence.Fix fix,
-                       List<Integer> satsUsed, double pdop, double hdop, double vdop, GGASentence.GpsFixType fixQuality,
+                       ArrayList<Integer> satsUsed, double pdop, double hdop, double vdop, GGASentence.GpsFixType fixQuality,
                        int trackedSatellites, double horizDilution, double geoidHeight, UomElevation geoUom,
-                       int numberOfSatellitesInView) {//, List<Satellite> satellites) {
-        this.cn = cn;
+                       int numberOfSatellitesInView) {
+        setCN(cn);
         this.timeCreated = timeCreated;
         this.pointCN = pointCN;
         this.used = used;
@@ -74,7 +119,6 @@ public class TtNmeaBurst implements Serializable {
         this.position = position;
 
         this.fixTime = fixTime;
-        //this.status =
         this.groundSpeed = groundSpeed;
         this.trackAngle = trackAngle;
         this.magVar = magVar;
@@ -87,7 +131,6 @@ public class TtNmeaBurst implements Serializable {
         this.hdop = hdop;
         this.vdop = vdop;
 
-        //this.fixTimeGGA = burst.getF
         this.fixQuality = fixQuality;
         this.trackedSatellites = trackedSatellites;
         this.horizDilution = horizDilution;
@@ -95,7 +138,6 @@ public class TtNmeaBurst implements Serializable {
         this.geoUom = geoUom;
 
         this.numberOfSatellitesInView = numberOfSatellitesInView;
-        //this.satellites = satellites;
     }
     
     public static TtNmeaBurst create(String pointCN, boolean used, INmeaBurst burst) {
@@ -121,19 +163,47 @@ public class TtNmeaBurst implements Serializable {
                 burst.getGeoidHeight(),
                 burst.getGeoUom(),
                 burst.getSatellitesInViewCount());
-                //burst.getSatellitesInView()
-
     }
 
 
-    public String getCN() {
-        return cn;
+
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
-    public void setCN(String cn) {
-        this.cn = cn;
-    }
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
 
+        dest.writeSerializable(timeCreated);
+        dest.writeString(pointCN);
+        dest.writeInt(used ? 1 : 0);
+
+        dest.writeSerializable(position);
+
+        dest.writeSerializable(fixTime);
+        dest.writeDouble(groundSpeed);
+        dest.writeDouble(trackAngle);
+        dest.writeDouble(magVar);
+        dest.writeInt(magVarDir.getValue());
+
+        dest.writeInt(mode.getValue());
+        dest.writeInt(fix.getValue());
+        dest.writeList(satsUsed);
+        dest.writeDouble(pdop);
+        dest.writeDouble(hdop);
+        dest.writeDouble(vdop);
+
+        dest.writeInt(fixQuality.getValue());
+        dest.writeInt(trackedSatellites);
+        dest.writeDouble(horizDilution);
+        dest.writeDouble(geoidHeight);
+        dest.writeInt(geoUom.getValue());
+
+        dest.writeInt(numberOfSatellitesInView);
+    }
 
     public String getPointCN() {
         return pointCN;
@@ -267,10 +337,6 @@ public class TtNmeaBurst implements Serializable {
         return trackedSatellites;
     }
 
-    //public List<Satellite> getSatellitesInView() {
-    //    return satellites;
-    //}
-
     public int getSatellitesInViewCount() {
         return numberOfSatellitesInView;
     }
@@ -322,22 +388,5 @@ public class TtNmeaBurst implements Serializable {
 
     public boolean hasDifferential() {
         return fixQuality == GGASentence.GpsFixType.DGPS;
-    }
-
-
-    public static byte[] burstsToByteArray(List<TtNmeaBurst> bursts) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ObjectOutputStream oos = new ObjectOutputStream(baos);
-        oos.writeObject(bursts);
-        oos.close();
-        baos.close();
-        return baos.toByteArray();
-    }
-
-    @SuppressWarnings("unchecked")
-    public static List<TtNmeaBurst> bytesToBursts(byte[] bytes) throws IOException, ClassNotFoundException {
-        ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-        ObjectInputStream ois = new ObjectInputStream(bais);
-        return (List<TtNmeaBurst>) ois.readObject();
     }
 }

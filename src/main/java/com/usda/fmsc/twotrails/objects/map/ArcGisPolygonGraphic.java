@@ -537,40 +537,54 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
 
     @Override
     public void setAdjBndColor(@ColorInt int adjBndColor) {
+        graphicOptions.setAdjBndColor(adjBndColor);
+
         setLineColor(adjBndColor, _AdjBnd);
         setLineColor(adjBndColor, _AdjBndCB);
     }
 
     @Override
     public void setUnAdjBndColor(@ColorInt int unAdjBndColor) {
+        graphicOptions.setUnAdjBndColor(unAdjBndColor);
+
         setLineColor(unAdjBndColor, _UnadjBnd);
         setLineColor(unAdjBndColor, _UnadjBndCB);
     }
 
     @Override
     public void setAdjNavColor(@ColorInt int adjNavColor) {
+        graphicOptions.setAdjNavColor(adjNavColor);
+
         setLineColor(adjNavColor, _AdjNav);
     }
 
     @Override
     public void setUnAdjNavColor(@ColorInt int unAdjNavColor) {
+        graphicOptions.setUnAdjNavColor(unAdjNavColor);
+
         setLineColor(unAdjNavColor, _UnadjNav);
     }
 
     @Override
     public void setAdjPtsColor(@ColorInt int adjPtsColor) {
+        graphicOptions.setAdjPtsColor(adjPtsColor);
+
         setPtsColor(adjPtsColor, _AdjBndPts);
         setPtsColor(adjPtsColor, _AdjNavPts);
     }
 
     @Override
     public void setUnAdjPtsColor(@ColorInt int unAdjPtsColor) {
+        graphicOptions.setUnAdjPtsColor(unAdjPtsColor);
+
         setPtsColor(unAdjPtsColor, _UnadjBndPts);
         setPtsColor(unAdjPtsColor, _UnadjNavPts);
     }
 
     @Override
     public void setWayPtsColor(@ColorInt int wayPtsColor) {
+        graphicOptions.setWayPtsColor(wayPtsColor);
+
         setPtsColor(wayPtsColor, _WayPts);
     }
 
@@ -586,6 +600,8 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
                 if (s instanceof SimpleLineSymbol) {
                     SimpleLineSymbol sls = (SimpleLineSymbol)s;
                     sls.setColor(color);
+
+                    graphicLayer.updateGraphic(id, sls);
                 }
             }
         }
@@ -602,6 +618,8 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
                 if (s instanceof SimpleMarkerSymbol) {
                     SimpleMarkerSymbol sms = (SimpleMarkerSymbol)s;
                     sms.setColor(color);
+
+                    graphicLayer.updateGraphic(id, sms);
                 }
             }
         }

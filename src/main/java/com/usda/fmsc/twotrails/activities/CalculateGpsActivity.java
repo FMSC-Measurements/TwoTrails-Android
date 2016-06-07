@@ -79,7 +79,7 @@ public class CalculateGpsActivity extends CustomToolbarActivity {
                 _Metadata = intent.getParcelableExtra(Consts.Codes.Data.METADATA_DATA);
                 _Zone = _Metadata.getZone();
 
-                _Bursts = TtNmeaBurst.bytesToBursts(intent.getByteArrayExtra(Consts.Codes.Data.ADDITIVE_NMEA_DATA));
+                _Bursts = intent.getParcelableArrayListExtra(Consts.Codes.Data.ADDITIVE_NMEA_DATA);
                 _FilteredBursts = new ArrayList<>();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -95,7 +95,6 @@ public class CalculateGpsActivity extends CustomToolbarActivity {
         options.Fix = Global.Settings.DeviceSettings.getGpsFilterFixType();
 
         //region Control Assign
-        Button btnCalc = (Button)findViewById(R.id.calcBtnCalc);
         btnCreate = (Button)findViewById(R.id.calcBtnCreate);
 
         chkG1 = (CheckBox)findViewById(R.id.calcChkGroup1);

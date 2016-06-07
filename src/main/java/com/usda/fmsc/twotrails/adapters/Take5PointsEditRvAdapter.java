@@ -76,17 +76,7 @@ public class Take5PointsEditRvAdapter extends RecyclerViewEx.BaseAdapterEx {
         final PointViewHolderEx pvh = (PointViewHolderEx)holder;
 
         pvh.tvPID.setText(StringEx.toString(point.getPID()));
-        pvh.txtCmt.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
+        pvh.txtCmt.addTextChangedListener(new SimpleTextWatcher() {
             @Override
             public void afterTextChanged(Editable s) {
                 point.setComment(s.toString());
@@ -120,6 +110,9 @@ public class Take5PointsEditRvAdapter extends RecyclerViewEx.BaseAdapterEx {
             case SideShot: {
                 final SideShotViewHolderEx ssHolder = (SideShotViewHolderEx)holder;
                 final SideShotPoint ssp = (SideShotPoint)point;
+
+                ssHolder.txtSlpDist.setText(StringEx.toString(ssp.getSlopeDistance()));
+                ssHolder.txtSlpAng.setText(StringEx.toString(ssp.getSlopeAngle()));
 
                 ssHolder.txtFwdAz.addTextChangedListener(new SimpleTextWatcher() {
                     @Override
