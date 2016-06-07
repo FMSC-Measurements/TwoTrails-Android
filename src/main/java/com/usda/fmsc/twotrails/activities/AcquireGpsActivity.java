@@ -29,7 +29,7 @@ public class AcquireGpsActivity extends AcquireGpsMapActivity {
 
     private GpsPoint _Point;
     private TtMetadata _Metadata;
-    private List<TtNmeaBurst> _Bursts;
+    private ArrayList<TtNmeaBurst> _Bursts;
 
     private Button btnLog, btnCalc;
 
@@ -59,7 +59,7 @@ public class AcquireGpsActivity extends AcquireGpsMapActivity {
                     setZone(_Metadata.getZone());
 
                     if (intent.getExtras().containsKey(Consts.Codes.Data.ADDITIVE_NMEA_DATA)) {
-                        _Bursts = TtNmeaBurst.bytesToBursts(intent.getByteArrayExtra(Consts.Codes.Data.ADDITIVE_NMEA_DATA));
+                        _Bursts = intent.getParcelableArrayListExtra(Consts.Codes.Data.ADDITIVE_NMEA_DATA);
                         setLoggedCount(_Bursts.size());
                     }
 
@@ -214,7 +214,7 @@ public class AcquireGpsActivity extends AcquireGpsMapActivity {
             intent.putExtra(Consts.Codes.Data.POINT_DATA, _Point);
             intent.putExtra(Consts.Codes.Data.METADATA_DATA, _Metadata);
 
-            intent.putExtra(Consts.Codes.Data.ADDITIVE_NMEA_DATA, TtNmeaBurst.burstsToByteArray(_Bursts));
+            intent.putParcelableArrayListExtra(Consts.Codes.Data.ADDITIVE_NMEA_DATA, _Bursts);
 
             startActivityForResult(intent, Consts.Codes.Activites.CALCULATE);
         } catch (Exception e) {

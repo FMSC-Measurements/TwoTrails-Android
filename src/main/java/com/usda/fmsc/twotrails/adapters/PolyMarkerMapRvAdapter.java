@@ -230,6 +230,7 @@ public class PolyMarkerMapRvAdapter extends RecyclerView.Adapter<PolyMarkerMapRv
         graphicManager.addPolygonDrawListener(holder);
     }
 
+
     private void setButtonColors(PolyMarkerMapViewHolder holder, PolygonGraphicManager graphicManager) {
         holder.fcbAdjBnd.setAcceptColor(graphicManager.getAdjBndColor());
         holder.fcbUnAdjBnd.setAcceptColor(graphicManager.getUnAdjBndColor());

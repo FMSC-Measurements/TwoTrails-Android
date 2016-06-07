@@ -1087,11 +1087,14 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
         tcbAdjNav.setCheckBoxDrawable(new PolygonProgressDrawable(5, 90));
         tcbUnAdjNav.setCheckBoxDrawable(new UnadjustedDrawable());
 
-        Bitmap b = BitmapFactory.decodeResource(getResources(), R.drawable.ic_location_white_36dp);
+        Bitmap b = BitmapFactory.decodeResource(getResources(), R.drawable.ic_polygon_pts_white_36dp);
 
         tcbAdjBndPts.setCheckBoxDrawable(new FadeBitmapProgressDrawable(b));
-        tcbUnAdjBndPts.setCheckBoxDrawable(new FadeBitmapProgressDrawable(b));
         tcbAdjNavPts.setCheckBoxDrawable(new FadeBitmapProgressDrawable(b));
+
+        b = BitmapFactory.decodeResource(getResources(), R.drawable.ic_unadjusted_polygon_pts_white_36dp);
+
+        tcbUnAdjBndPts.setCheckBoxDrawable(new FadeBitmapProgressDrawable(b));
         tcbUnAdjNavPts.setCheckBoxDrawable(new FadeBitmapProgressDrawable(b));
 
         b = BitmapFactory.decodeResource(getResources(), R.drawable.ic_ttpoint_way_white);

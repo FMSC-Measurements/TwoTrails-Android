@@ -86,13 +86,6 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"/>
-
-                <!--<ImageButton-->
-                <!--android:id="@+id/mpcIbBndMenu"-->
-                <!--style="@style/mapOptTouchCheckBoxStyle"-->
-                <!--android:src="@drawable/ic_action_overflow_dark"-->
-                <!--android:contentDescription="@string/map_bnd_menu"-->
-                <!--android:background="@android:color/transparent" />-->
             </LinearLayout>
         </LinearLayout>
 
