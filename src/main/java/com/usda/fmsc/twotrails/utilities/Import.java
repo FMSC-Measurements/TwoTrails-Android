@@ -146,6 +146,9 @@ public class Import {
                 Iterator<CSVRecord> iterator = parser.iterator();
                 CSVRecord record;
 
+                //skip first line
+                iterator.next();
+
                 while (iterator.hasNext() && !isCancelled()) {
                     record = iterator.next();
 
@@ -251,6 +254,18 @@ public class Import {
                         point.setUnAdjZ(0d);
                     }
 
+                    //Time
+                    if (hasTime) {
+                        try {
+                            tempDT = Consts.DateTimeFormatter.parseDateTime(record.get(fTime));
+                        } catch (Exception ex) {
+                            tempDT = DateTime.now();
+                        }
+                    } else {
+                        tempDT = DateTime.now();
+                    }
+
+                    point.setTime(tempDT);
 
                     //Polygons
                     if (usePolyNames) {
@@ -264,6 +279,7 @@ public class Import {
                             tempPoly = new TtPolygon(polyCount * 1000 + 1010);
                             tempPoly.setName(String.format("%s (Import)", temp));
                             tempPoly.setAccuracy(Consts.Default_Point_Accuracy);
+                            tempPoly.setTime(point.getTime());
                             polyCount++;
                             polyNameToCN.put(temp, tempPoly.getCN());
                             polygons.put(tempPoly.getCN(), tempPoly);
@@ -320,19 +336,6 @@ public class Import {
 
                     //Metadata
                     point.setMetadataCN(Consts.EmptyGuid);
-
-                    //Time
-                    if (hasTime) {
-                        try {
-                            tempDT = Consts.DateTimeFormatter.parseDateTime(record.get(fTime));
-                        } catch (Exception ex) {
-                            tempDT = DateTime.now();
-                        }
-                    } else {
-                        tempDT = DateTime.now();
-                    }
-
-                    point.setTime(tempDT);
 
                     tempIndex = indexes.get(point.getPolyCN());
                     
@@ -513,6 +516,7 @@ public class Import {
                 case "optype":
                 case "op type": return OPTYPE;
                 case "index": return INDEX;
+                case "point name":
                 case "point id":
                 case "pid": return PID;
                 case "datetime":

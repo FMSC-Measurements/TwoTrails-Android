@@ -58,7 +58,7 @@ public class Export {
             CSVPrinter printer = new CSVPrinter(new FileWriter(pointsFilename), CSVFormat.DEFAULT);
 
             printer.printRecord(
-                    "Point Name",
+                    "Point ID",
                     "OpType",
                     "Index",
                     "Polygon",

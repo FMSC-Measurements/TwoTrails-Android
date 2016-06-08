@@ -1,13 +1,16 @@
 package com.usda.fmsc.twotrails.adapters;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.widget.PopupMenuButton;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.units.GoogleMapType;
@@ -21,6 +24,8 @@ public class GoogleMapSelectionAdapter extends BaseAdapter {
     private LayoutInflater inflater;
     private IGoogleMapAdapterListener listener;
 
+    private Drawable dMapOffline;
+
     private List<GoogleMapType> mapTypes = Arrays.asList(GoogleMapType.values());
     private View selectedView;
     private int selectedIndex;
@@ -30,19 +35,21 @@ public class GoogleMapSelectionAdapter extends BaseAdapter {
         this.context = context;
         inflater = LayoutInflater.from(context);
 
-        selectedIndex = defaultType - 1;
+        selectedIndex = defaultType;
+
+        dMapOffline = AndroidUtils.UI.getDrawable(context, R.drawable.ic_offline_primary_36);
 
         this.listener = listener;
     }
 
     @Override
     public int getCount() {
-        return 4;
+        return 5;
     }
 
     @Override
     public GoogleMapType getItem(int position) {
-        return mapTypes.get(position + 1);
+        return mapTypes.get(position);
     }
 
     @Override
@@ -61,8 +68,6 @@ public class GoogleMapSelectionAdapter extends BaseAdapter {
 
             holder = new MapViewHolder(convertView);
             convertView.setTag(holder);
-
-            //convertView.setBackgroundResource(R.drawable.list_item_selector);
 
             final View fview = convertView;
             convertView.setOnClickListener(new View.OnClickListener() {
@@ -102,6 +107,10 @@ public class GoogleMapSelectionAdapter extends BaseAdapter {
         holder.ofmbMenu.setVisibility(View.INVISIBLE);
         holder.ofmbMenu.setEnabled(false);
 
+        if (map == GoogleMapType.MAP_TYPE_NONE) {
+            holder.ivMhIcon.setImageDrawable(dMapOffline);
+        }
+
         if (position == selectedIndex) {
             convertView.setSelected(true);
         }
@@ -133,10 +142,12 @@ public class GoogleMapSelectionAdapter extends BaseAdapter {
     private class MapViewHolder {
         TextView tvName;
         PopupMenuButton ofmbMenu;
+        ImageView ivMhIcon;
 
         public MapViewHolder(View view) {
             tvName = (TextView)view.findViewById(R.id.mhName);
             ofmbMenu = (PopupMenuButton)view.findViewById(R.id.mhMenu);
+            ivMhIcon = (ImageView) view.findViewById(R.id.mhIcon);
         }
     }
 

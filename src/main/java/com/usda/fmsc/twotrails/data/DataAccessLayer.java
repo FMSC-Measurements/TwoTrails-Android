@@ -494,6 +494,27 @@ public class DataAccessLayer {
                 TwoTrailsSchema.PointSchema.OnBoundary));
     }
 
+    public int getBoundaryPointsCountInPoly(String polyCN) {
+        String countQuery = String.format("SELECT COUNT (*) FROM %s where %s = '%s' and %s != '%s' and %s = 1",
+                TwoTrailsSchema.PointSchema.TableName,
+                TwoTrailsSchema.PointSchema.PolyCN, polyCN,
+                TwoTrailsSchema.PointSchema.Operation, OpType.WayPoint.toString(),
+                TwoTrailsSchema.PointSchema.OnBoundary);
+
+        Cursor cursor = _db.rawQuery(countQuery, null);
+
+        int count = 0;
+        if (null != cursor) {
+            if (cursor.getCount() > 0) {
+                cursor.moveToFirst();
+                count = cursor.getInt(0);
+            }
+
+            cursor.close();
+        }
+        return count;
+    }
+
     public ArrayList<TtPoint> getPointsInPolygon(String polyCN) {
         return getPoints(String.format("%s = '%s'",
                 TwoTrailsSchema.PointSchema.PolyCN, polyCN));
