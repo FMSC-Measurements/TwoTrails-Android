@@ -158,7 +158,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
                 public void onCheckInternet(boolean internetAvailable) {
                     switch (mapType) {
                         case Google:
-                            if (internetAvailable) {
+                            if (internetAvailable || mapId == GoogleMapType.MAP_TYPE_NONE.getValue()) {
                                 // check google play services and setup map
                                 Integer code = AndroidUtils.App.checkPlayServices(BaseMapActivity.this, Consts.Codes.Services.REQUEST_GOOGLE_PLAY_SERVICES);
                                 if (code == 0) {

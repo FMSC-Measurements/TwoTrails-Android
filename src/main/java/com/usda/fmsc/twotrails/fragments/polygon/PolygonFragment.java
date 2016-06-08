@@ -106,21 +106,21 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
         if (_Polygon != null) {
             final View v = view;
 
-            if (Global.getDAL().getPointCountInPolygon(_Polygon.getCN()) < 3) {
+            if (Global.getDAL().getBoundaryPointsCountInPoly(_Polygon.getCN()) < 3) {
                 View polyLayImage = view.findViewById(R.id.polyLayImage);
 
                 if (polyLayImage != null) {
                     polyLayImage.setVisibility(View.GONE);
                 }
             } else {
-                polyPoints = activity.getDrawPoints(_Polygon.getCN(), 0);
+                polyPoints = activity.getDrawPoints(_Polygon, 0);
 
                 if (polyPoints == null) {
                     v.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                         @Override
                         public void onGlobalLayout() {
                             if (spv != null && activity != null) {
-                                polyPoints = activity.getDrawPoints(_Polygon.getCN(), spv.getWidth());
+                                polyPoints = activity.getDrawPoints(_Polygon, spv.getWidth());
                                 v.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                             }
                         }
@@ -358,7 +358,7 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
 
 
         if (polyPoints == null && activity != null) {
-            polyPoints = activity.getDrawPoints(_Polygon.getCN(), 0);
+            polyPoints = activity.getDrawPoints(_Polygon, 0);
         }
 
         spv.render(polyPoints);

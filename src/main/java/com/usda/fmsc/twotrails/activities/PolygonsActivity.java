@@ -52,6 +52,7 @@ public class PolygonsActivity extends CustomToolbarActivity {
     private ViewPager mViewPager;
 
     private ConcurrentHashMap<String, ArrayList<PointD>> drawPoints = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, Boolean> hasDrawPoints = new ConcurrentHashMap<>();
     private HashMap<String, TtMetadata> metadata;
 
     private ComplexOnPageChangeListener onPageChangeArrayListener = new ComplexOnPageChangeListener() {
@@ -445,9 +446,9 @@ public class PolygonsActivity extends CustomToolbarActivity {
         }
     }
 
-    private void onPolygonUpdate(String cn) {
-        if (listeners.containsKey(cn)) {
-            listeners.get(cn).onPolygonUpdated(_CurrentPolygon);
+    private void onPolygonUpdate(TtPolygon poly) {
+        if (listeners.containsKey(poly.getCN())) {
+            listeners.get(poly.getCN()).onPolygonUpdated(poly);
         }
     }
 
@@ -475,34 +476,39 @@ public class PolygonsActivity extends CustomToolbarActivity {
         return null;
     }
     
-    public ArrayList<PointD> getDrawPoints(final String cn, final int width) {
-            if (drawPoints.containsKey(cn)) {
-                return drawPoints.get(cn);
-            } else {
-                if (width > 0) {
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (Global.getDAL().getPointCountInPolygon(cn) > 2) {
-                                final List<TtPoint> points = Global.getDAL().getBoundaryPointsInPoly(cn);
+    public ArrayList<PointD> getDrawPoints(final TtPolygon poly, final int width) {
+        boolean hdpk = hasDrawPoints.containsKey(poly.getCN());
 
-                                if (points != null && points.size() > 2) {
-                                    new Thread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            int zone = metadata.get(Consts.EmptyGuid).getZone();
+        if (hdpk && hasDrawPoints.get(poly.getCN())) {
+            return drawPoints.get(poly.getCN());
+        } else if (!hdpk) {
+            if (width > 0) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (Global.getDAL().getBoundaryPointsCountInPoly(poly.getCN()) > 2) {
+                            final List<TtPoint> points = Global.getDAL().getBoundaryPointsInPoly(poly.getCN());
 
-                                            drawPoints.put(cn, TtUtils.generateStaticPolyPoints(points, metadata, zone, (int)(width * 0.9)));
+                            if (points != null && points.size() > 2) {
+                                new Thread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        int zone = metadata.get(Consts.EmptyGuid).getZone();
 
-                                            onPolygonUpdate(cn);
-                                        }
-                                    }).start();
-                                }
+                                        drawPoints.put(poly.getCN(), TtUtils.generateStaticPolyPoints(points, metadata, zone, (int)(width * 0.9)));
+                                        hasDrawPoints.put(poly.getCN(), true);
+
+                                        onPolygonUpdate(poly);
+                                    }
+                                }).start();
                             }
+                        } else {
+                            hasDrawPoints.put(poly.getCN(), false);
                         }
-                    }).start();
-                }
+                    }
+                }).start();
             }
+        }
 
         return null;
     }

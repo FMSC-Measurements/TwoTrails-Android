@@ -426,8 +426,7 @@
 
                 <Spinner
                     android:id="@+id/importFragSpnParentCN"
-                    style="@style/importItemSpinnerStyle"
-                    android:visibility="gone"/>
+                    style="@style/importItemSpinnerStyle"/>
             </TableRow>
 
             <View style="@style/Dividers"
