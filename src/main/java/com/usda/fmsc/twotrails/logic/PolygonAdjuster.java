@@ -113,7 +113,7 @@ public class PolygonAdjuster {
         ArrayList<TtPoint> savePoints = new ArrayList<>();
 
         for (TtPolygon poly : dal.getPolygons()) {
-            long index = 0;
+            int index = 0;
 
             for(TtPoint point : dal.getPointsInPolygon(poly.getCN())) {
                 if (point.getIndex() != index)

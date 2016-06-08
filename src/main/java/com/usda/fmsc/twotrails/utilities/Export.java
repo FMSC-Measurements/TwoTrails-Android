@@ -433,8 +433,8 @@ public class Export {
                 values.add(StringEx.toString(burst.getTrackAngle()));
                 values.add(StringEx.toString(burst.getMagVar()));
                 values.add(burst.getMagVarDir() == null ? StringEx.Empty : burst.getMagVarDir().toString());
-                values.add(burst.getMode() == null ? StringEx.Empty : burst.getMode().toString());
-                values.add(burst.getFix() == null ? StringEx.Empty : burst.getFix().toString());
+                values.add(StringEx.toString(burst.getMode().getValue()));
+                values.add(StringEx.toString(burst.getFix().getValue()));
                 values.add(StringEx.toString(burst.getPDOP()));
                 values.add(StringEx.toString(burst.getHDOP()));
                 values.add(StringEx.toString(burst.getVDOP()));
@@ -634,8 +634,13 @@ public class Export {
         sUnAdjNav.setPolygonOutline(true);
         sUnAdjNav.setBalloonDisplayMode(DisplayMode.Default);
 
+        sAdjMisc.setIconColorMode(ColorMode.normal);
+        sAdjMisc.setIconColor(AdjMiscColor);
+        sAdjMisc.setIconScale(1d);
+        sAdjMisc.setBalloonDisplayMode(DisplayMode.Default);
+
         sUnAdjMisc.setIconColorMode(ColorMode.normal);
-        sUnAdjMisc.setIconColor(AdjMiscColor);
+        sUnAdjMisc.setIconColor(UnAdjMiscColor);
         sUnAdjMisc.setIconScale(1d);
         sUnAdjMisc.setBalloonDisplayMode(DisplayMode.Default);
 
@@ -836,6 +841,7 @@ public class Export {
 
                     Properties pointProp = new Properties();
                     pointProp.setSnippit(snippit);
+                    adjPm.setProperties(pointProp);
 
                     adjPm.setStyleUrl(sAdjBoundMap.getStyleUrl());
                     adjPm.setOpen(false);
@@ -853,7 +859,7 @@ public class Export {
                     view.setCoordinates(unAdjCoord);
                     view.setTilt(15d);
                     view.setAltMode(AltitudeMode.clampToGround);
-                    view.setRange(150);
+                    view.setRange(150d);
 
                     unAdjPm.setProperties(pointProp);
 
@@ -1040,20 +1046,45 @@ public class Export {
 
             //region Add Folders To eachother
             //added point folders to bound/nav/misc folders
-            fAdjBound.addFolder(fAdjBoundPoints);
-            fUnAdjBound.addFolder(fUnAdjBoundPoints);
-            fAdjNav.addFolder(fAdjNavPoints);
-            fUnAdjNav.addFolder(fUnAdjNavPoints);
-            fMiscPoints.addFolder(fAdjMiscPoints);
-            fMiscPoints.addFolder(fUnAdjMiscPoints);
+            if (fAdjBoundPoints.getPlacemarks().size() > 0)
+                fAdjBound.addFolder(fAdjBoundPoints);
+
+            if (fUnAdjBoundPoints.getPlacemarks().size() > 0)
+                fUnAdjBound.addFolder(fUnAdjBoundPoints);
+
+            if (fAdjNavPoints.getPlacemarks().size() > 0)
+                fAdjNav.addFolder(fAdjNavPoints);
+
+            if (fUnAdjNavPoints.getPlacemarks().size() > 0)
+                fUnAdjNav.addFolder(fUnAdjNavPoints);
+
+            if (fAdjMiscPoints.getPlacemarks().size() > 0)
+                fMiscPoints.addFolder(fAdjMiscPoints);
+
+            if (fUnAdjMiscPoints.getPlacemarks().size() > 0)
+                fMiscPoints.addFolder(fUnAdjMiscPoints);
 
             //add bound/nav/misc/way folders to root polygon folder
-            folder.addFolder(fAdjBound);
-            folder.addFolder(fUnAdjBound);
-            folder.addFolder(fAdjNav);
-            folder.addFolder(fUnAdjNav);
-            folder.addFolder(fMiscPoints);
-            folder.addFolder(fWayPoints);
+            if (fAdjBound.getSubFolders().size() > 0)
+                folder.addFolder(fAdjBound);
+
+            if (fUnAdjBound.getSubFolders().size() > 0)
+                folder.addFolder(fUnAdjBound);
+
+            if (fAdjNav.getSubFolders().size() > 0)
+                folder.addFolder(fAdjNav);
+
+            if (fUnAdjNav.getSubFolders().size() > 0)
+                folder.addFolder(fUnAdjNav);
+
+            if (fMiscPoints.getSubFolders().size() > 0)
+                folder.addFolder(fMiscPoints);
+
+            if (fMiscPoints.getSubFolders().size() > 0)
+                folder.addFolder(fMiscPoints);
+
+            if (fWayPoints.getPlacemarks().size() > 0)
+                folder.addFolder(fWayPoints);
 
             //add polygon root to KmlDoc
             doc.addFolder(folder);
