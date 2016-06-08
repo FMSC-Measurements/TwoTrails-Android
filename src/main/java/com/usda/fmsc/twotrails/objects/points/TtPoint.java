@@ -17,7 +17,7 @@ import com.usda.fmsc.utilities.StringEx;
 
 
 public abstract class TtPoint extends TtObject implements Comparable<TtPoint>, Comparator<TtPoint> {
-    protected long _Index;
+    protected int _Index;
     protected int _PID;
     protected DateTime _Time;
 
@@ -57,7 +57,7 @@ public abstract class TtPoint extends TtObject implements Comparable<TtPoint>, C
     public TtPoint(Parcel source) {
         super(source);
 
-        _Index = source.readLong();
+        _Index = source.readInt();
         _PID = source.readInt();
         _Time = (DateTime) source.readSerializable();
 
@@ -96,11 +96,11 @@ public abstract class TtPoint extends TtObject implements Comparable<TtPoint>, C
     public abstract OpType getOp();
 
 
-    public long getIndex() {
+    public int getIndex() {
         return _Index;
     }
 
-    public void setIndex(long index) {
+    public void setIndex(int index) {
         _Index = index;
     }
 
@@ -444,7 +444,7 @@ public abstract class TtPoint extends TtObject implements Comparable<TtPoint>, C
             return val;
         else
         {
-            val = Long.valueOf(p1.getIndex()).compareTo(p2.getIndex());
+            val = Integer.valueOf(p1.getIndex()).compareTo(p2.getIndex());
 
             if (val != 0)
                 return val;

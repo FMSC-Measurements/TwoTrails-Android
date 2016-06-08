@@ -63,7 +63,7 @@ public class Import {
 
                 HashMap<String, TtPolygon> polygons = new HashMap<>();
                 HashMap<String, String> polyNameToCN = new HashMap<>();
-                HashMap<String, Long> indexes = new HashMap<>();
+                HashMap<String, Integer> indexes = new HashMap<>();
                 HashMap<String, String> remapCNs = new HashMap<>();
 
                 HashMap<String, TtGroup> groups = new HashMap<>();
@@ -86,7 +86,7 @@ public class Import {
                 String temp;
                 double tempD;
                 int tempI;
-                long tempIndex;
+                int tempIndex;
                 DateTime tempDT;
 
                 
@@ -283,7 +283,7 @@ public class Import {
                             polyCount++;
                             polyNameToCN.put(temp, tempPoly.getCN());
                             polygons.put(tempPoly.getCN(), tempPoly);
-                            indexes.put(tempPoly.getCN(), 0l);
+                            indexes.put(tempPoly.getCN(), 0);
                         } else {
                             tempPoly = polygons.get(polyNameToCN.get(temp));
                         }
@@ -296,7 +296,7 @@ public class Import {
                             tempPoly.setName("Imported Poly");
                             tempPoly.setAccuracy(Consts.Default_Point_Accuracy);
                             polygons.put(tempPoly.getCN(), tempPoly);
-                            indexes.put(tempPoly.getCN(), 0l);
+                            indexes.put(tempPoly.getCN(), 0);
                         } else {
                             point.setPolyName(tempPoly.getName());
                             point.setPolyCN(tempPoly.getCN());
@@ -341,7 +341,7 @@ public class Import {
                     
                     //Index
                     if (hasIndex) {
-                        tempIndex = ParseEx.parseLong(record.get(fIndex), tempIndex);
+                        tempIndex = ParseEx.parseInteger(record.get(fIndex), tempIndex);
                     }
                     
                     point.setIndex(tempIndex);
@@ -703,7 +703,7 @@ public class Import {
                         throw new RuntimeException("Unknown GPX track type");
                     }
 
-                    long index = 0;
+                    int index = 0;
                     GpsPoint point, prevPoint = null;
 
                     for (GpxPoint gpxPoint : gpxPoints) {
