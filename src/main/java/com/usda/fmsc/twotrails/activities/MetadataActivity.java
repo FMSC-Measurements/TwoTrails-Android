@@ -697,7 +697,7 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
                 public void onClick(DialogInterface dialog, int which) {
                     Double acc = inputDialog.getDouble();
 
-                    if (acc != null && acc >= 0) {
+                    if (acc != null) {
                         _CurrentMetadata.setMagDec(acc);
                         onMetadataUpdate();
                         adjust = true;

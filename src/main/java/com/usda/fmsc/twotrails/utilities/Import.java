@@ -232,7 +232,7 @@ public class Import {
                     }
 
                     //XYZ
-                    Double d = Double.parseDouble(record.get(fUnAjX));
+                    Double d = ParseEx.parseDouble(record.get(fUnAjX));
 
                     if (d != null) {
                         point.setUnAdjX(d);
@@ -240,7 +240,7 @@ public class Import {
                         throw new Exception("No X value");
                     }
 
-                    d = Double.parseDouble(record.get(fUnAjY));
+                    d = ParseEx.parseDouble(record.get(fUnAjY));
 
                     if (d != null) {
                         point.setUnAdjY(d);
@@ -249,7 +249,11 @@ public class Import {
                     }
 
                     if (hasUnAdjZ) {
-                        point.setUnAdjZ(ParseEx.parseDouble(record.get(fUnAjZ), 0d));
+                        d = ParseEx.parseDouble(record.get(fUnAjZ), 0d);
+
+                        if (d != null) {
+                            point.setUnAdjZ(d);
+                        }
                     } else {
                         point.setUnAdjZ(0d);
                     }

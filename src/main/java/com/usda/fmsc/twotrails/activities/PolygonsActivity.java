@@ -15,8 +15,8 @@ import android.widget.Toast;
 import com.usda.fmsc.android.adapters.FragmentStatePagerAdapterEx;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.listeners.ComplexOnPageChangeListener;
-import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.Consts;
+import com.usda.fmsc.twotrails.activities.base.TtAjusterCustomToolbarActivity;
 import com.usda.fmsc.twotrails.data.TwoTrailsSchema;
 import com.usda.fmsc.twotrails.fragments.AnimationCardFragment;
 import com.usda.fmsc.twotrails.fragments.polygon.PolygonFragment;
@@ -36,7 +36,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.usda.fmsc.utilities.StringEx;
 
-public class PolygonsActivity extends CustomToolbarActivity {
+public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
     private HashMap<String, Listener> listeners;
 
     private MenuItem miLock, miReset, miDelete, miAdjust;
@@ -109,7 +109,7 @@ public class PolygonsActivity extends CustomToolbarActivity {
             mViewPager.addOnPageChangeListener(onPageChangeArrayListener);
         }
 
-        lockPolygon(true);
+        updateButtons();
     }
 
     @Override
@@ -128,9 +128,8 @@ public class PolygonsActivity extends CustomToolbarActivity {
         }
     }
 
-
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenuEx(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_polygons, menu);
         miLock = menu.findItem(R.id.polyMenuLock);
         miReset = menu.findItem(R.id.polyMenuReset);
@@ -218,7 +217,7 @@ public class PolygonsActivity extends CustomToolbarActivity {
                 break;
             }
             case R.id.polyMenuAdjust: {
-                Toast.makeText(this, "Unimplemented", Toast.LENGTH_SHORT).show();
+                PolygonAdjuster.adjust(Global.getDAL(), this);
                 break;
             }
             case android.R.id.home: {
@@ -238,6 +237,24 @@ public class PolygonsActivity extends CustomToolbarActivity {
         return null;
     }
 
+    @Override
+    protected void onAdjusterStopped(PolygonAdjuster.AdjustResult result) {
+        super.onAdjusterStopped(result);
+
+        if (result == PolygonAdjuster.AdjustResult.SUCCESSFUL) {
+            final int index = _CurrentIndex;
+
+            _Polygons = Global.getDAL().getPolygons();
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mSectionsPagerAdapter.notifyDataSetChanged();
+                    moveToPolygon(index);
+                }
+            });
+        }
+    }
 
     //region Save Delete Create Reset
     private void savePolygon() {
@@ -286,6 +303,8 @@ public class PolygonsActivity extends CustomToolbarActivity {
                     _deletePolygon = null;
                 }
 
+                updateButtons();
+
                 setPolygonUpdated(false);
 
                 adjust = true;
@@ -314,6 +333,8 @@ public class PolygonsActivity extends CustomToolbarActivity {
         mSectionsPagerAdapter.notifyDataSetChanged();
 
         moveToPolygon(_Polygons.size() - 1);
+
+        updateButtons();
 
         lockPolygon(false);
     }
@@ -374,11 +395,12 @@ public class PolygonsActivity extends CustomToolbarActivity {
 
     //region Update UI
     private void updateButtons() {
-        /*
-        if (_CurrentPolygon != null) {
-
+        if (menuCreated) {
+            if (_Polygons.size() > 0)
+                AndroidUtils.UI.enableMenuItem(miAdjust);
+            else
+                AndroidUtils.UI.disableMenuItem(miAdjust);
         }
-        */
 
         lockPolygon(true);
     }

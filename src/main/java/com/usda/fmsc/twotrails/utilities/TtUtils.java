@@ -599,6 +599,16 @@ public class TtUtils {
             return true;
 
         if (point != null) {
+            if (point.isOnBnd() != origPoint.isOnBnd() ||
+                    point.getIndex() != origPoint.getIndex() ||
+                    point.getPID() != origPoint.getPID() ||
+                    !point.getMetadataCN().equals(origPoint.getMetadataCN()) ||
+                    !point.getGroupCN().equals(origPoint.getGroupCN()) ||
+                    !point.getPolyCN().equals(origPoint.getPolyCN()) ||
+                    !point.getLinkedPoints().equals(origPoint.getLinkedPoints())) {
+                return true;
+            }
+
             if (point.getComment() == null ^ origPoint.getComment() == null) {
                 return true;
             } else if (point.getComment() != null && !point.getComment().equals(origPoint.getComment())) {
@@ -718,6 +728,9 @@ public class TtUtils {
     public static UTMCoords forcePointZone(TtPoint point, int targetZone, int currentZone, boolean adjusted) {
         if (targetZone == currentZone) {
             if (adjusted) {
+
+                if (point.getAdjX() == null || point.getAdjY() == null)
+                    return new UTMCoords(0, 0, targetZone);
                 return new UTMCoords(point.getAdjX(), point.getAdjY(), targetZone);
             } else {
                 return new UTMCoords(point.getUnAdjX(), point.getUnAdjY(), targetZone);
@@ -732,6 +745,9 @@ public class TtUtils {
             GeoPosition position;
 
             if (adjusted) {
+                if (point.getAdjX() == null || point.getAdjY() == null)
+                    return new UTMCoords(0, 0, targetZone);
+
                 position = UTMTools.convertUTMtoLatLonSignedDec(point.getAdjX(), point.getAdjY(), currentZone);
             } else {
                 position = UTMTools.convertUTMtoLatLonSignedDec(point.getUnAdjX(), point.getUnAdjY(), currentZone);
@@ -1063,28 +1079,28 @@ public class TtUtils {
         String[] filePathColumn = { MediaStore.Images.Media.DATA };
         ArrayList<TtImage> pictures = new ArrayList<>();
 
+        String mediaDirStr = Global.getTtMediaDir();
+        boolean copyToProject = false;
+        if (Global.Settings.DeviceSettings.getMediaCopyToProject()) {
+            copyToProject = true;
+
+            File mediaDir = new File(mediaDirStr);
+            File noMedia = new File(String.format("%s%s%s", mediaDirStr, File.separator, ".nomedia"));
+            try {
+                if (!mediaDir.exists() || !mediaDir.isDirectory()) {
+                    mediaDir.mkdirs();
+                }
+
+                if (!noMedia.exists()) {
+                    noMedia.createNewFile();
+                }
+            } catch (Exception e) {
+                //
+            }
+        }
+
         if (intent.getClipData() != null) {
             ClipData cd = intent.getClipData();
-
-            String mediaDirStr = Global.getTtMediaDir();
-            boolean copyToProject = false;
-            if (Global.Settings.DeviceSettings.getMediaCopyToProject()) {
-                copyToProject = true;
-
-                File mediaDir = new File(mediaDirStr);
-                File noMedia = new File(String.format("%s%s%s", mediaDirStr, File.separator, ".nomedia"));
-                try {
-                    if (!mediaDir.exists() || !mediaDir.isDirectory()) {
-                        mediaDir.mkdirs();
-                    }
-
-                    if (!noMedia.exists()) {
-                        noMedia.createNewFile();
-                    }
-                } catch (Exception e) {
-                    //
-                }
-            }
 
             for (int i = 0; i < cd.getItemCount(); i++) {
                 ClipData.Item item = cd.getItemAt(i);
@@ -1110,6 +1126,28 @@ public class TtUtils {
                     }
 
                     cursor.close();
+                }
+            }
+        } else if (intent.getData() != null) {
+            Cursor cursor = context.getContentResolver().query(intent.getData(), filePathColumn, null, null, null);
+
+            if (cursor != null) {
+                cursor.moveToFirst();
+
+                int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+                String uri  = cursor.getString(columnIndex);
+                cursor.close();
+
+                if (copyToProject) {
+                    String newFilePath = String.format("%s%s%s", mediaDirStr, File.separator, FileUtils.getFileName(uri));
+                    if (FileUtils.copyFile(uri, newFilePath)) {
+                        uri = newFilePath;
+                    }
+                }
+
+                TtImage image = getImageFromFile(uri, pointCN);
+                if (image != null) {
+                    pictures.add(image);
                 }
             }
         }

@@ -716,8 +716,6 @@ public class DataAccessLayer {
                     t.setSlopeDistance(c.getDouble(3));
                 if(!c.isNull(4))
                     t.setSlopeAngle(c.getDouble(4));
-                if(!c.isNull(5))
-                    t.setAccuracy(c.getDouble(5));
             }
 
             c.close();
@@ -926,8 +924,6 @@ public class DataAccessLayer {
     //endregion
 
     //region Update
-
-
     public boolean updatePoint(GpsPoint updatedPoint) {
         return updatePointSame(updatedPoint);
     }
