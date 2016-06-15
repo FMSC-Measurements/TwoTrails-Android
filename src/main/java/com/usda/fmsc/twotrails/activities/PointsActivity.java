@@ -187,8 +187,7 @@ public class PointsActivity extends CustomToolbarActivity {
                 if (_deletePoint.isTravType()) {
                     TravPoint tp = (TravPoint)_deletePoint;
 
-                    if ((tp.getFwdAz() != null || tp.getBkAz() != null) ||
-                            tp.getSlopeAngle() != 0 || tp.getSlopeDistance() > 0) {
+                    if ((tp.getFwdAz() != null || tp.getBkAz() != null) && tp.getSlopeDistance() <= 0) {
                         halfFinishedTrav = true;
                     }
                 }

@@ -61,8 +61,7 @@ public class SegmentFactory {
         return points.size() > 0;
     }
 
-    public Segment next()
-    {
+    public Segment next() {
         if (!hasNext())
             return null;
 

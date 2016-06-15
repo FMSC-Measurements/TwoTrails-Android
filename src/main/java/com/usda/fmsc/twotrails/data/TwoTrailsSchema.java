@@ -146,8 +146,7 @@ public class TwoTrailsSchema {
             ForwardAz + ", " +
             BackAz + ", " +
             SlopeDistance + ", " +
-            VerticalAngle + ", " +
-            HorizDistance;
+            VerticalAngle;
     }
     //endregion
 

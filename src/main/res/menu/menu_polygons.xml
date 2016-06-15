@@ -3,6 +3,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.usda.fmsc.twotrails.activities.PolygonsActivity">
 
+    <item android:id="@+id/miAdjPoly"
+          android:title="@string/str_poly_adjusting"
+          app:showAsAction="always"
+          android:icon="@drawable/ica_adjpoly"
+          android:visible="false"/>
+
     <item android:id="@+id/polyMenuLock"
         android:title="@string/str_unlock"
         app:showAsAction="always"
