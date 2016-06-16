@@ -60,6 +60,8 @@ public interface IMultiMapFragment {
         void onMapLocationChanged();
         void onMapClick(Position position);
         void onMarkerClick(MarkerData markerData);
+        boolean shouldStartGps();
+        boolean shouldStopGps();
     }
 
 

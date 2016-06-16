@@ -12,6 +12,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.support.annotation.ColorInt;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -1409,9 +1410,13 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
 
                 dialogBuilder.setTitle(String.format("From Point in %s", fromPoly.getName()));
                 ListView listView = new ListView(this);
+                listView.setBackgroundColor(AndroidUtils.UI.getColor(BaseMapActivity.this, android.R.color.white));
 
-                final PointDetailsAdapter pda = new PointDetailsAdapter(this, points, AppUnits.IconColor.Dark);
+                final PointDetailsAdapter pda = new PointDetailsAdapter(this, points, AppUnits.IconColor.Primary);
                 pda.setShowPolygonName(true);
+                @ColorInt int transparent = AndroidUtils.UI.getColor(BaseMapActivity.this, android.R.color.transparent);
+                pda.setSelectedColor(transparent);
+                pda.setNonSelectedColor(transparent);
 
                 listView.setAdapter(pda);
 
@@ -1488,9 +1493,13 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
 
             dialogBuilder.setTitle(String.format("To Point in %s", toPoly.getName()));
             ListView listView = new ListView(this);
+            listView.setBackgroundColor(AndroidUtils.UI.getColor(BaseMapActivity.this, android.R.color.white));
 
-            final PointDetailsAdapter pda = new PointDetailsAdapter(this, points, AppUnits.IconColor.Dark);
+            final PointDetailsAdapter pda = new PointDetailsAdapter(this, points, AppUnits.IconColor.Primary);
             pda.setShowPolygonName(true);
+            @ColorInt int transparent = AndroidUtils.UI.getColor(BaseMapActivity.this, android.R.color.transparent);
+            pda.setSelectedColor(transparent);
+            pda.setNonSelectedColor(transparent);
 
             listView.setAdapter(pda);
 
@@ -1598,7 +1607,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
         }
     }
 
-    protected boolean shouldStartGps() {
+    public boolean shouldStartGps() {
         return getShowMyPos();
     }
 
@@ -1608,7 +1617,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
         }
     }
 
-    protected boolean shouldStopGps() {
+    public boolean shouldStopGps() {
         return !getShowMyPos();
     }
 

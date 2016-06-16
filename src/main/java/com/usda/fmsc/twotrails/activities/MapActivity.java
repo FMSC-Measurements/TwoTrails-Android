@@ -48,7 +48,7 @@ public class MapActivity extends BaseMapActivity {
         fabMyPos.setVisibility(myPosBtn && getLastPosition() != null ? View.VISIBLE : View.GONE);
         setDisplayLocInfoVisible();
 
-        if (Global.Settings.DeviceSettings.isGpsConfigured()) {
+        if (Global.Settings.DeviceSettings.isGpsConfigured() && shouldStartGps()) {
             Global.getGpsBinder().startGps();
         }
 
@@ -192,6 +192,9 @@ public class MapActivity extends BaseMapActivity {
         }
     }
 
-
+    @Override
+    public boolean shouldStartGps() {
+        return true; //for position bar
+    }
     //endregion
 }
