@@ -130,7 +130,6 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
         if (Global.Settings.DeviceSettings.isGpsConfigured()) {
             binder = Global.getGpsBinder();
             binder.addListener(this);
-            binder.startGps();
         }
     }
 
@@ -171,6 +170,10 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
 
         if (binder != null) {
             binder.removeListener(this);
+        }
+
+        if (mmListener != null && mmListener.shouldStopGps()) {
+            binder.stopGps();
         }
 
         // Release MapView resources
@@ -487,6 +490,12 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
         super.onAttach(context);
         if (context instanceof MultiMapListener) {
             mmListener = (MultiMapListener) context;
+
+            if (mmListener.shouldStartGps()) {
+                if (binder == null)
+                    binder = Global.getGpsBinder();
+                binder.startGps();
+            }
         }
     }
 
@@ -575,6 +584,9 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
             callout.show(point, TtUtils.ArcMap.createInfoWindow(inflater, markerData));
         }
     }
+
+
+
 
 
     @Override

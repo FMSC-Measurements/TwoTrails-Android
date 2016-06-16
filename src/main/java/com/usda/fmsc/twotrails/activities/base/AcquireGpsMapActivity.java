@@ -472,12 +472,12 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
 
 
     @Override
-    protected boolean shouldStartGps() {
+    public boolean shouldStartGps() {
         return true;
     }
 
     @Override
-    protected boolean shouldStopGps() {
+    public boolean shouldStopGps() {
         return false;
     }
 
