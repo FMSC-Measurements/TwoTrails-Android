@@ -180,10 +180,8 @@ public class QuondamPointFragment extends BasePointFragment {
 
 
     @Override
-    public void onPointUpdated(TtPoint point) {
-        super.onPointUpdated(point);
-        _Quondam = (QuondamPoint)point;
-
+    protected void onBasePointUpdated() {
+        _Quondam = (QuondamPoint)getBasePoint();
         setViews();
     }
 

@@ -208,9 +208,8 @@ public class TraversePointFragment extends BasePointFragment {
     }
 
     @Override
-    public void onPointUpdated(TtPoint point) {
-        super.onPointUpdated(point);
-        _TravPoint = (TravPoint)point;
+    protected void onBasePointUpdated() {
+        _TravPoint = (TravPoint)getBasePoint();
         setViews();
     }
 

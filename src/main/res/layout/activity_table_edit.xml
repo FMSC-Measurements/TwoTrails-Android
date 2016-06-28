@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context=".activities.TableEditActivity"
+    tools:context=".activities.TableViewActivity"
     android:clipChildren="true">
 
     <include layout="@layout/toolbar_default" android:id="@id/toolbar" />

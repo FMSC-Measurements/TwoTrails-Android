@@ -405,7 +405,6 @@ public class TwoTrailsSchema {
 
         public static final String CreateTable =
             "CREATE TABLE " + TableName + " (" +
-            SharedSchema.CN     + " TEXT, " +
             ID                  + " TEXT, " +
             District            + " TEXT, " +
             Forest              + " TEXT, " +
@@ -416,7 +415,7 @@ public class TwoTrailsSchema {
             TtDbSchemaVersion   + " TEXT, " +
             TtVersion           + " TEXT, " +
             CreatedTtVersion    + " TEXT, " +
-            "PRIMARY KEY (" + SharedSchema.CN + "));";
+            ");";
     }
     //endregion
 

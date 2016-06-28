@@ -180,13 +180,16 @@ public abstract class BasePointFragment extends AnimationCardFragment implements
     }
 
     @Override
-    public void onPointUpdated(TtPoint point) {
-
+    public final void onPointUpdated(TtPoint point) {
         _Point = point;
         _Metadata = activity.getMetadata(_Point.getMetadataCN());
-        setView();
 
+        onBasePointUpdated();
+
+        setView();
     }
+
+    protected abstract void onBasePointUpdated();
 
     @Override
     public void onMediaUpdated(TtMedia media) {
