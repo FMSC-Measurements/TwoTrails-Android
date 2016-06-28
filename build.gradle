@@ -4,12 +4,38 @@ android {
     compileSdkVersion 23
     buildToolsVersion "23.0.3"
 
+    def versionPropsFile = file('version.properties')
+
+    def vName = "0.9"
+    def vCode = 0
+
+    if (versionPropsFile.canRead()) {
+        def Properties versionProps = new Properties()
+
+        versionProps.load(new FileInputStream(versionPropsFile))
+
+        vCode = versionProps['VERSION_CODE'].toInteger() + 1
+
+        def major = versionProps['MAJOR'].toInteger()
+        def minor = versionProps['MINOR'].toInteger()
+        def build = versionProps['BUILD'].toInteger() + 1
+
+        versionProps['BUILD'] = build.toString()
+
+        versionProps.store(versionPropsFile.newWriter(), null)
+
+        vName = String.format("%d.%d.%d", major, minor, build)
+    } else {
+        throw new GradleException("Could not read version.properties")
+    }
+
+
     defaultConfig {
         applicationId "com.usda.fmsc.twotrails"
         minSdkVersion 16
         targetSdkVersion 23
-        versionCode 0
-        versionName "0.9"
+        versionCode vCode
+        versionName vName
         multiDexEnabled true
 
         resValue "string", "arcgis_client_id", project.property("TwoTrails.ArcGIS.ClientID")
@@ -89,14 +115,14 @@ dependencies {
     compile project(':AndroidEx')
     compile project(':GeoSpatial')
     compile project(':Utilities')
-    compile 'com.google.android.gms:play-services:9.0.1'
+    compile 'com.google.android.gms:play-services:9.2.0'
     compile 'com.google.code.gson:gson:2.4'
-    compile 'com.android.support:recyclerview-v7:23.4.0'
-    compile 'com.android.support:appcompat-v7:23.4.0'
-    compile 'com.android.support:cardview-v7:23.4.0'
-    compile 'com.android.support:support-v4:23.4.0'
+    compile 'com.android.support:recyclerview-v7:24.0.0'
+    compile 'com.android.support:appcompat-v7:24.0.0'
+    compile 'com.android.support:cardview-v7:24.0.0'
+    compile 'com.android.support:support-v4:24.0.0'
     compile 'com.android.support:multidex:1.0.1'
-    compile 'com.android.support:design:23.4.0'
+    compile 'com.android.support:design:24.0.0'
     compile 'joda-time:joda-time:2.9.2'
     compile 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
     compile 'me.zhanghai.android.materialprogressbar:library:1.1.4'

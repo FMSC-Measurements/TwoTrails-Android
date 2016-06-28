@@ -10,9 +10,9 @@ import com.usda.fmsc.twotrails.units.Datum;
 import com.usda.fmsc.twotrails.units.Slope;
 
 public class TtMetadata extends TtObject implements Parcelable {
-    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+    public static final Parcelable.Creator<TtMetadata> CREATOR = new Parcelable.Creator<TtMetadata>() {
         @Override
-        public Object createFromParcel(Parcel source) {
+        public TtMetadata createFromParcel(Parcel source) {
             return new TtMetadata(source);
         }
 

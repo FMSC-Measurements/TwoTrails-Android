@@ -9,9 +9,9 @@ import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.units.OpType;
 
 public class GpsPoint extends TtPoint implements TtPoint.IManualAccuracy {
-    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+    public static final Parcelable.Creator<GpsPoint> CREATOR = new Parcelable.Creator<GpsPoint>() {
         @Override
-        public Object createFromParcel(Parcel source) {
+        public GpsPoint createFromParcel(Parcel source) {
             return new GpsPoint(source);
         }
 

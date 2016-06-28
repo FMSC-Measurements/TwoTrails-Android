@@ -5,15 +5,16 @@ import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
 import com.usda.fmsc.twotrails.Consts;
+import com.usda.fmsc.utilities.StringEx;
 
 import org.joda.time.DateTime;
 
 import java.util.Comparator;
 
 public class TtPolygon extends TtObject implements Comparable<TtPolygon>, Comparator<TtPolygon>, Parcelable {
-    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+    public static final Parcelable.Creator<TtPolygon> CREATOR = new Parcelable.Creator<TtPolygon>() {
         @Override
-        public Object createFromParcel(Parcel source) {
+        public TtPolygon createFromParcel(Parcel source) {
             return new TtPolygon(source);
         }
 
@@ -69,6 +70,7 @@ public class TtPolygon extends TtObject implements Comparable<TtPolygon>, Compar
     }
 
     public TtPolygon(int pointStartIndex) {
+        this.Description = StringEx.Empty;
         this.IncrementBy = 10;
         this.PointStartIndex = pointStartIndex;
         this.Accuracy = Consts.Default_Point_Accuracy;
@@ -86,9 +88,9 @@ public class TtPolygon extends TtObject implements Comparable<TtPolygon>, Compar
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
 
-        dest.writeString(Name);
+        dest.writeString(StringEx.getValueOrEmpty(Name));
         dest.writeSerializable(Time);
-        dest.writeString(Description);
+        dest.writeString(StringEx.getValueOrEmpty(Description));
         dest.writeInt(IncrementBy);
         dest.writeInt(PointStartIndex);
         dest.writeDouble(Accuracy);

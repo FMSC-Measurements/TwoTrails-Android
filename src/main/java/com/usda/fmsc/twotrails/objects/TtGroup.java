@@ -6,9 +6,9 @@ import android.os.Parcelable;
 import com.usda.fmsc.utilities.StringEx;
 
 public class TtGroup extends TtObject {
-    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+    public static final Parcelable.Creator<TtGroup> CREATOR = new Parcelable.Creator<TtGroup>() {
         @Override
-        public Object createFromParcel(Parcel source) {
+        public TtGroup createFromParcel(Parcel source) {
             return new TtGroup(source);
         }
 

@@ -401,19 +401,11 @@ public class SettingsFragment extends PreferenceFragment {
             boolean sucess = false;
 
             if (useExternal) {
-                if (AndroidUtils.App.requestPermission(getActivity(), new String[] {
-                        Manifest.permission.BLUETOOTH,
-                        Manifest.permission.BLUETOOTH_ADMIN
-                }, Consts.Codes.Requests.BLUETOOH, null)) {
+                if (AndroidUtils.App.requestBluetoothPermission(getActivity(), Consts.Codes.Requests.BLUETOOH)) {
                     sucess = switchToExternal();
                 }
-            } else {
-                if (AndroidUtils.App.requestPermission(getActivity(), new String[] {
-                        Manifest.permission.ACCESS_COARSE_LOCATION,
-                        Manifest.permission.ACCESS_FINE_LOCATION
-                }, Consts.Codes.Requests.LOCATION, null)) {
-                    sucess = switchToInternal();
-                }
+            } else if (AndroidUtils.App.requestLocationPermission(getActivity(), Consts.Codes.Requests.LOCATION)) {
+                sucess = switchToInternal();
             }
 
             if (sucess) {

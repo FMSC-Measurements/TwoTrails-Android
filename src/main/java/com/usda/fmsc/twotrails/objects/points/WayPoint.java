@@ -6,9 +6,9 @@ import android.os.Parcelable;
 import com.usda.fmsc.twotrails.units.OpType;
 
 public class WayPoint extends GpsPoint {
-    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+    public static final Parcelable.Creator<WayPoint> CREATOR = new Parcelable.Creator<WayPoint>() {
         @Override
-        public Object createFromParcel(Parcel source) {
+        public WayPoint createFromParcel(Parcel source) {
             return new WayPoint(source);
         }
 

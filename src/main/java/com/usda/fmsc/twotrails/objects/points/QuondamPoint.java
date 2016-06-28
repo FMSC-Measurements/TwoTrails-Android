@@ -9,9 +9,9 @@ import com.usda.fmsc.twotrails.units.OpType;
 import com.usda.fmsc.utilities.StringEx;
 
 public class QuondamPoint extends TtPoint implements TtPoint.IManualAccuracy {
-    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+    public static final Parcelable.Creator<QuondamPoint> CREATOR = new Parcelable.Creator<QuondamPoint>() {
         @Override
-        public Object createFromParcel(Parcel source) {
+        public QuondamPoint createFromParcel(Parcel source) {
             return new QuondamPoint(source);
         }
 

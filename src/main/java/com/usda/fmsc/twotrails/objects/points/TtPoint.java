@@ -390,7 +390,7 @@ public abstract class TtPoint extends TtObject implements Comparable<TtPoint>, C
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
 
-        dest.writeLong(_Index);
+        dest.writeInt(_Index);
         dest.writeInt(_PID);
         dest.writeSerializable(_Time);
 
