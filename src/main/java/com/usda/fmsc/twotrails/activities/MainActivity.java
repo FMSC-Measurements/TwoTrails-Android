@@ -18,7 +18,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -57,7 +56,9 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
     private ViewPager mViewPager;
 
-    private boolean _fileOpen = false, exitOnAdjusted;
+    private boolean _fileOpen = false, exitOnAdjusted, askLocation;
+
+    private String tmpFile;
 
 
     //region Main Activity Functions
@@ -117,6 +118,10 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     protected void onResume() {
         super.onResume();
         updateAppInfo();
+
+        if (!askLocation && !AndroidUtils.App.requestLocationPermission(MainActivity.this, Consts.Codes.Requests.LOCATION)) {
+            askLocation = true;
+        }
     }
 
     @Override
@@ -148,6 +153,12 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
             case R.id.mainMenuRangeFinderSettings:
                 startActivity(new Intent(this, SettingsActivity.class).
                         putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.LASER_SETTINGS_PAGE));
+                break;
+            case R.id.mainMenuAbout:
+                new AlertDialog.Builder(MainActivity.this)
+                        .setTitle(R.string.app_name)
+                        .setMessage(String.format("App: %s\nData: %s", AndroidUtils.App.getVersionName(MainActivity.this), TwoTrailsSchema.SchemaVersion))
+                        .show();
                 break;
         }
 
@@ -201,8 +212,38 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        if (requestCode == Consts.Codes.Requests.INTERNET && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            startActivity(new Intent(this, MapActivity.class));
+        if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            switch (requestCode) {
+                case Consts.Codes.Requests.INTERNET:
+                    startActivity(new Intent(this, MapActivity.class));
+                    break;
+                case Consts.Codes.Requests.CREATE_FILE:
+                    if (tmpFile != null)
+                        createFile(tmpFile);
+                    break;
+                case Consts.Codes.Requests.OPEN_FILE:
+                    if (tmpFile != null)
+                        openFile(tmpFile);
+                    break;
+            }
+        } else {
+            if (requestCode == Consts.Codes.Requests.LOCATION) {
+                new AlertDialog.Builder(MainActivity.this)
+                        .setMessage("TwoTrails requires Location Services in order to work.")
+                        .setPositiveButton(R.string.str_ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                finish();
+                            }
+                        })
+                        .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                            @Override
+                            public void onCancel(DialogInterface dialog) {
+                                finish();
+                            }
+                        })
+                        .show();
+            }
         }
     }
 
@@ -298,9 +339,15 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
         if(PolygonAdjuster.isProcessing()) {
             Toast.makeText(this, "Currently Adjusting Polygons.", Toast.LENGTH_LONG).show();
         } else {
-
             if (_fileOpen) {
                 closeFile();
+            }
+
+            if (!AndroidUtils.App.requestStoragePermission(MainActivity.this, Consts.Codes.Requests.OPEN_FILE)) {
+                tmpFile = filePath;
+                return;
+            } else {
+                tmpFile = null;
             }
 
             try {
@@ -335,6 +382,13 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     private void createFile(String filePath) {
         closeFile();
 
+        if (!AndroidUtils.App.requestStoragePermission(MainActivity.this, Consts.Codes.Requests.CREATE_FILE)) {
+            tmpFile = filePath;
+            return;
+        } else {
+            tmpFile = null;
+        }
+
         File file = new File(filePath);
 
         CharSequence toastMessage = "Project Created";
@@ -363,7 +417,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     }
 
     private void closeFile() {
-        if(Global.getDAL() != null) {
+        if (Global.getDAL() != null) {
             Global.getDAL().close();
             Global.setDAL(null);
         }
@@ -430,7 +484,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
                 //filePath = TtUtils.getTtFilePath(inputDialog.getContext(), value);
                 String filePath = Global.getTtFilePath(value);
 
-                if(FileUtils.fileExists(filePath)) {
+                if (FileUtils.fileExists(filePath)) {
                     OverwriteFileDialog(filePath);
                 } else {
                     createFile(filePath);
@@ -612,7 +666,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
     //region Tools
     public void btnMapClick(View view) {
-        if (AndroidUtils.App.requestPermission(this, Manifest.permission.INTERNET, Consts.Codes.Requests.INTERNET, null)) {
+        if (AndroidUtils.App.requestNetworkPermission(this, Consts.Codes.Requests.INTERNET)) {
             startActivity(new Intent(this, MapActivity.class));
         }
     }

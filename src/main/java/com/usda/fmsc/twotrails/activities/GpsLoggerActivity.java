@@ -1,5 +1,6 @@
 package com.usda.fmsc.twotrails.activities;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.support.v7.app.AlertDialog;
@@ -12,7 +13,9 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 
+import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.geospatial.nmea.INmeaBurst;
+import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.gps.GpsService;
@@ -123,7 +126,6 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
         miCheckLtf.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-
                 if (item.isChecked()) {
                     item.setChecked(false);
 
@@ -132,10 +134,12 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
                         logging = false;
                     }
                 } else {
-                    item.setChecked(true);
+                    if (AndroidUtils.App.requestStoragePermission(GpsLoggerActivity.this, Consts.Codes.Requests.OPEN_FILE)) {
+                        item.setChecked(true);
 
-                    if (logging) {
-                        Global.getGpsBinder().startLogging(Global.getLogFileName());
+                        if (logging) {
+                            Global.getGpsBinder().startLogging(Global.getLogFileName());
+                        }
                     }
                 }
                 return true;

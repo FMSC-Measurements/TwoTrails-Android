@@ -1,7 +1,9 @@
 package com.usda.fmsc.twotrails.activities;
 
+import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
@@ -12,6 +14,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -894,6 +897,21 @@ public class PointsActivity extends CustomToolbarActivity {
     }
 
     @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == Consts.Codes.Requests.CAMERA && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            Intent intent = new Intent(PointsActivity.this, TtCameraActivity.class);
+
+            if (_CurrentPoint != null) {
+                intent.putExtra(Consts.Codes.Data.POINT_CN, _CurrentPoint.getCN());
+            }
+
+            startActivityForResult(intent, Consts.Codes.Activites.TTCAMERA);
+        }
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
@@ -1002,13 +1020,15 @@ public class PointsActivity extends CustomToolbarActivity {
 
     private void captureImage(int setting) {
         if (setting == 2) {
-            Intent intent = new Intent(PointsActivity.this, TtCameraActivity.class);
+            if (AndroidUtils.App.requestCameraPermission(PointsActivity.this, Consts.Codes.Requests.CAMERA)) {
+                Intent intent = new Intent(PointsActivity.this, TtCameraActivity.class);
 
-            if (_CurrentPoint != null) {
-                intent.putExtra(Consts.Codes.Data.POINT_CN, _CurrentPoint.getCN());
+                if (_CurrentPoint != null) {
+                    intent.putExtra(Consts.Codes.Data.POINT_CN, _CurrentPoint.getCN());
+                }
+
+                startActivityForResult(intent, Consts.Codes.Activites.TTCAMERA);
             }
-
-            startActivityForResult(intent, Consts.Codes.Activites.TTCAMERA);
         } else {
             Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
@@ -2159,6 +2179,7 @@ public class PointsActivity extends CustomToolbarActivity {
                     public void onClick(DialogInterface dialogInterface, int i) {
                         Intent intent = new Intent(getBaseContext(), AcquireGpsActivity.class);
                         intent.putExtra(Consts.Codes.Data.POINT_DATA, new GpsPoint(_CurrentPoint));
+                        intent.putExtra(Consts.Codes.Data.POLYGON_DATA, _CurrentPolygon);
                         intent.putExtra(Consts.Codes.Data.METADATA_DATA, _MetaData.get(_CurrentPoint.getMetadataCN()));
 
                         startActivityForResult(intent, Consts.Codes.Activites.ACQUIRE);

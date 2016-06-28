@@ -6,9 +6,9 @@ import android.os.Parcelable;
 import com.usda.fmsc.twotrails.units.OpType;
 
 public class SideShotPoint extends TravPoint {
-    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+    public static final Parcelable.Creator<SideShotPoint> CREATOR = new Parcelable.Creator<SideShotPoint>() {
         @Override
-        public Object createFromParcel(Parcel source) {
+        public SideShotPoint createFromParcel(Parcel source) {
             return new SideShotPoint(source);
         }
 

@@ -17,11 +17,16 @@
         android:title="@string/menu_x_range_finder_settings"
         app:showAsAction="never"
         android:icon="@drawable/ic_laser_black_36dp"
-        android:enabled="false"/>
+        android:enabled="false"
+        android:visible="false"/>
 
     <item android:id="@+id/mainMenuGpsSettings"
           android:title="@string/menu_x_gps_settings"
           app:showAsAction="never"
           android:icon="@drawable/ic_my_location_black_36dp" />
 
+    <item android:id="@+id/mainMenuAbout"
+          android:title="@string/menu_main_about"
+          app:showAsAction="never"
+          android:icon="@drawable/ic_info_outline_black_36dp"/>
 </menu>

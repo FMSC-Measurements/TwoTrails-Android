@@ -6,9 +6,9 @@ import android.os.Parcelable;
 import com.usda.fmsc.twotrails.units.OpType;
 
 public class Take5Point extends GpsPoint {
-    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+    public static final Parcelable.Creator<Take5Point> CREATOR = new Parcelable.Creator<Take5Point>() {
         @Override
-        public Object createFromParcel(Parcel source) {
+        public Take5Point createFromParcel(Parcel source) {
             return new Take5Point(source);
         }
 

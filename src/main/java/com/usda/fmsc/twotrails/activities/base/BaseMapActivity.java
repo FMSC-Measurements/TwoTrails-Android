@@ -156,36 +156,41 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
 
             AndroidUtils.Device.isInternetAvailable(new AndroidUtils.Device.InternetAvailableCallback() {
                 @Override
-                public void onCheckInternet(boolean internetAvailable) {
-                    switch (mapType) {
-                        case Google:
-                            if (internetAvailable || mapId == GoogleMapType.MAP_TYPE_NONE.getValue()) {
-                                // check google play services and setup map
-                                Integer code = AndroidUtils.App.checkPlayServices(BaseMapActivity.this, Consts.Codes.Services.REQUEST_GOOGLE_PLAY_SERVICES);
-                                if (code == 0) {
-                                    startGMap();
-                                } else {
-                                    String str = GoogleApiAvailability.getInstance().getErrorString(code);
-                                    Toast.makeText(BaseMapActivity.this, str, Toast.LENGTH_LONG).show();
-                                }
-                            } else {
-                                requestOfflineMap();
-                            }
-                            break;
-                        case ArcGIS:
-                            ArcGisMapLayer agml = ArcGISTools.getMapLayer(mapId);
-                            if (agml == null) {
-                                mapId = 0;
-                                agml = ArcGISTools.getMapLayer(mapId);
-                            }
+                public void onCheckInternet(final boolean internetAvailable) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            switch (mapType) {
+                                case Google:
+                                    if (internetAvailable || mapId == GoogleMapType.MAP_TYPE_NONE.getValue()) {
+                                        // check google play services and setup map
+                                        Integer code = AndroidUtils.App.checkPlayServices(BaseMapActivity.this, Consts.Codes.Services.REQUEST_GOOGLE_PLAY_SERVICES);
+                                        if (code == 0) {
+                                            startGMap();
+                                        } else {
+                                            String str = GoogleApiAvailability.getInstance().getErrorString(code);
+                                            Toast.makeText(BaseMapActivity.this, str, Toast.LENGTH_LONG).show();
+                                        }
+                                    } else {
+                                        requestOfflineMap();
+                                    }
+                                    break;
+                                case ArcGIS:
+                                    ArcGisMapLayer agml = ArcGISTools.getMapLayer(mapId);
+                                    if (agml == null) {
+                                        mapId = 0;
+                                        agml = ArcGISTools.getMapLayer(mapId);
+                                    }
 
-                            if (agml.isOnline() && !internetAvailable) {
-                                requestOfflineMap();
-                            } else {
-                                startArcMap();
+                                    if (agml.isOnline() && !internetAvailable) {
+                                        requestOfflineMap();
+                                    } else {
+                                        startArcMap();
+                                    }
+                                    break;
                             }
-                            break;
-                    }
+                        }
+                    });
                 }
             });
         }
@@ -837,6 +842,10 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
         updateMapView(position);
     }
 
+    protected void onPositionReceived(GeoPosition position) {
+        updateMapView(position);
+    }
+
     private void updateMapView(GeoPosition position) {
         if (getMapTracking() == MapTracking.FOLLOW) {
             moveToLocation(position, true);
@@ -874,7 +883,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
             if (lastPosition == null) {
                 onFirstPositionReceived(position);
             } else {
-                updateMapView(position);
+                onPositionReceived(position);
             }
 
             if (fromMyLoc && slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {

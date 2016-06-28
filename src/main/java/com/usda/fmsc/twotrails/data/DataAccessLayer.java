@@ -488,17 +488,17 @@ public class DataAccessLayer {
     }
 
     public ArrayList<TtPoint> getBoundaryPointsInPoly(String polyCN) {
-        return getPoints(String.format("%s = '%s' and %s != '%s' and %s = 1",
+        return getPoints(String.format("%s = '%s' and %s != %s and %s = 1",
                 TwoTrailsSchema.PointSchema.PolyCN, polyCN,
-                TwoTrailsSchema.PointSchema.Operation, OpType.WayPoint.toString(),
+                TwoTrailsSchema.PointSchema.Operation, OpType.WayPoint.getValue(),
                 TwoTrailsSchema.PointSchema.OnBoundary));
     }
 
     public int getBoundaryPointsCountInPoly(String polyCN) {
-        String countQuery = String.format("SELECT COUNT (*) FROM %s where %s = '%s' and %s != '%s' and %s = 1",
+        String countQuery = String.format("SELECT COUNT (*) FROM %s where %s = '%s' and %s != %s and %s = 1",
                 TwoTrailsSchema.PointSchema.TableName,
                 TwoTrailsSchema.PointSchema.PolyCN, polyCN,
-                TwoTrailsSchema.PointSchema.Operation, OpType.WayPoint.toString(),
+                TwoTrailsSchema.PointSchema.Operation, OpType.WayPoint.getValue(),
                 TwoTrailsSchema.PointSchema.OnBoundary);
 
         Cursor cursor = _db.rawQuery(countQuery, null);
@@ -526,12 +526,12 @@ public class DataAccessLayer {
     }
 
     public ArrayList<TtPoint> getGpsTypePointsWithMeta(String metaCN) {
-        return getPoints(String.format("%s = '%s' and %s = '%s' or %s = '%s' or %s = '%s' or %s = '%s'",
+        return getPoints(String.format("%s = '%s' and %s = %s or %s = %s or %s = %s or %s = %s",
                 TwoTrailsSchema.PointSchema.MetadataCN, metaCN,
-                TwoTrailsSchema.PointSchema.Operation, OpType.GPS.toString(),
-                TwoTrailsSchema.PointSchema.Operation, OpType.Walk.toString(),
-                TwoTrailsSchema.PointSchema.Operation, OpType.Take5.toString(),
-                TwoTrailsSchema.PointSchema.Operation, OpType.WayPoint.toString()));
+                TwoTrailsSchema.PointSchema.Operation, OpType.GPS.getValue(),
+                TwoTrailsSchema.PointSchema.Operation, OpType.Walk.getValue(),
+                TwoTrailsSchema.PointSchema.Operation, OpType.Take5.getValue(),
+                TwoTrailsSchema.PointSchema.Operation, OpType.WayPoint.getValue()));
     }
 
     public ArrayList<TtPoint> getPointsInGroup(String groupCN) {
@@ -568,7 +568,7 @@ public class DataAccessLayer {
                 do {
 
                     if(!c.isNull(7)) {
-                        point = TtUtils.getPointByOpType(OpType.parse(c.getString(7)));
+                        point = TtUtils.getPointByOpType(OpType.parse(c.getInt(7)));
                     } else {
                         throw new Exception("Point has no OpType");
                     }
@@ -817,7 +817,7 @@ public class DataAccessLayer {
 
             cvs.put(TwoTrailsSchema.SharedSchema.CN, point.getCN());
             cvs.put(TwoTrailsSchema.PointSchema.Order, point.getIndex());
-            cvs.put(TwoTrailsSchema.PointSchema.Operation, point.getOp().toString());
+            cvs.put(TwoTrailsSchema.PointSchema.Operation, point.getOp().getValue());
             cvs.put(TwoTrailsSchema.PointSchema.ID, point.getPID());
             cvs.put(TwoTrailsSchema.PointSchema.PolyName, point.getPolyName());
             cvs.put(TwoTrailsSchema.PointSchema.PolyCN, point.getPolyCN());
@@ -874,7 +874,7 @@ public class DataAccessLayer {
             ContentValues cvs = new ContentValues();
 
             cvs.put(TwoTrailsSchema.SharedSchema.CN, point.getCN());
-            cvs.put(TwoTrailsSchema.GpsPointSchema.UserAccuracy, point.getManualAccuracy());
+            cvs.put(TwoTrailsSchema.GpsPointSchema.ManualAccuracy, point.getManualAccuracy());
             cvs.put(TwoTrailsSchema.GpsPointSchema.RMSEr, point.getRMSEr());
             cvs.put(TwoTrailsSchema.GpsPointSchema.Latitude, point.getLatitude());
             cvs.put(TwoTrailsSchema.GpsPointSchema.Longitude, point.getLongitude());
@@ -1033,7 +1033,7 @@ public class DataAccessLayer {
                 ContentValues cvs = new ContentValues();
 
                 cvs.put(TwoTrailsSchema.PointSchema.Order, updatedPoint.getIndex());
-                cvs.put(TwoTrailsSchema.PointSchema.Operation, updatedPoint.getOp().toString());
+                cvs.put(TwoTrailsSchema.PointSchema.Operation, updatedPoint.getOp().getValue());
                 cvs.put(TwoTrailsSchema.PointSchema.ID, updatedPoint.getPID());
                 cvs.put(TwoTrailsSchema.PointSchema.PolyName, updatedPoint.getPolyName());
                 cvs.put(TwoTrailsSchema.PointSchema.PolyCN, updatedPoint.getPolyCN());
@@ -1133,7 +1133,7 @@ public class DataAccessLayer {
         ContentValues cvs = new ContentValues();
 
         cvs.put(TwoTrailsSchema.SharedSchema.CN, updatedPoint.getCN());
-        cvs.put(TwoTrailsSchema.GpsPointSchema.UserAccuracy, updatedPoint.getManualAccuracy());
+        cvs.put(TwoTrailsSchema.GpsPointSchema.ManualAccuracy, updatedPoint.getManualAccuracy());
         cvs.put(TwoTrailsSchema.GpsPointSchema.RMSEr, updatedPoint.getRMSEr());
         cvs.put(TwoTrailsSchema.GpsPointSchema.Latitude, updatedPoint.getLatitude());
         cvs.put(TwoTrailsSchema.GpsPointSchema.Longitude, updatedPoint.getLongitude());
@@ -1762,7 +1762,7 @@ public class DataAccessLayer {
                         continue;
 
                     if (!c.isNull(6))
-                        latDir = NorthSouth.parse(c.getString(6));
+                        latDir = NorthSouth.parse(c.getInt(6));
                     else
                         continue;
 
@@ -1772,7 +1772,7 @@ public class DataAccessLayer {
                         continue;
 
                     if (!c.isNull(8))
-                        lonDir = EastWest.parse(c.getString(8));
+                        lonDir = EastWest.parse(c.getInt(8));
                     else
                         continue;
 
@@ -1782,7 +1782,7 @@ public class DataAccessLayer {
                         continue;
 
                     if (!c.isNull(10))
-                        uomelev = UomElevation.parse(c.getString(10));
+                        uomelev = UomElevation.parse(c.getInt(10));
                     else
                         continue;
                     //endregion
@@ -1794,7 +1794,7 @@ public class DataAccessLayer {
                         continue;
 
                     if (!c.isNull(12))
-                        magVarDir = EastWest.parse(c.getString(12));
+                        magVarDir = EastWest.parse(c.getInt(12));
                     else
                         magVarDir = null;
 
@@ -1842,7 +1842,7 @@ public class DataAccessLayer {
                         continue;
 
                     if (!c.isNull(21))
-                        geoUom = UomElevation.parse(c.getString(21));
+                        geoUom = UomElevation.parse(c.getInt(21));
                     else
                         continue;
 
@@ -1947,14 +1947,14 @@ public class DataAccessLayer {
 
             cvs.put(TwoTrailsSchema.TtNmeaSchema.FixTime, dtf.print(burst.getFixTime()));
             cvs.put(TwoTrailsSchema.TtNmeaSchema.Latitude, burst.getLatitude());
-            cvs.put(TwoTrailsSchema.TtNmeaSchema.LatDir, burst.getLatDir().toStringAbv());
+            cvs.put(TwoTrailsSchema.TtNmeaSchema.LatDir, burst.getLatDir().getValue());
             cvs.put(TwoTrailsSchema.TtNmeaSchema.Longitude, burst.getLongitude());
-            cvs.put(TwoTrailsSchema.TtNmeaSchema.LonDir, burst.getLonDir().toStringAbv());
+            cvs.put(TwoTrailsSchema.TtNmeaSchema.LonDir, burst.getLonDir().getValue());
             cvs.put(TwoTrailsSchema.TtNmeaSchema.Elevation, burst.getElevation());
-            cvs.put(TwoTrailsSchema.TtNmeaSchema.ElevUom, burst.getUomElevation().toStringAbv());
+            cvs.put(TwoTrailsSchema.TtNmeaSchema.ElevUom, burst.getUomElevation().getValue());
 
             cvs.put(TwoTrailsSchema.TtNmeaSchema.MagVar, burst.getMagVar());
-            if (burst.getMagVarDir() != null) { cvs.put(TwoTrailsSchema.TtNmeaSchema.MagDir,burst.getMagVarDir().toStringAbv()); }
+            if (burst.getMagVarDir() != null) { cvs.put(TwoTrailsSchema.TtNmeaSchema.MagDir,burst.getMagVarDir().getValue()); }
             cvs.put(TwoTrailsSchema.TtNmeaSchema.Fix, burst.getFix().getValue());
             cvs.put(TwoTrailsSchema.TtNmeaSchema.FixQuality, burst.getFixQuality().getValue());
             cvs.put(TwoTrailsSchema.TtNmeaSchema.Mode, burst.getMode().getValue());
@@ -1964,7 +1964,7 @@ public class DataAccessLayer {
             cvs.put(TwoTrailsSchema.TtNmeaSchema.VDOP, burst.getVDOP());
             cvs.put(TwoTrailsSchema.TtNmeaSchema.HorizDilution, burst.getHorizDilution());
             cvs.put(TwoTrailsSchema.TtNmeaSchema.GeiodHeight, burst.getGeoidHeight());
-            cvs.put(TwoTrailsSchema.TtNmeaSchema.GeiodHeightUom, burst.getGeoUom().toStringAbv());
+            cvs.put(TwoTrailsSchema.TtNmeaSchema.GeiodHeightUom, burst.getGeoUom().getValue());
             cvs.put(TwoTrailsSchema.TtNmeaSchema.GroundSpeed, burst.getGroundSpeed());
             cvs.put(TwoTrailsSchema.TtNmeaSchema.TrackAngle, burst.getTrackAngle());
 
@@ -1972,19 +1972,7 @@ public class DataAccessLayer {
             cvs.put(TwoTrailsSchema.TtNmeaSchema.SatellitesTrackedCount, burst.getTrackedSatellitesCount());
             cvs.put(TwoTrailsSchema.TtNmeaSchema.SatellitesInViewCount, burst.getSatellitesInViewCount());
 
-
             cvs.put(TwoTrailsSchema.TtNmeaSchema.UsedSatPRNS, burst.getUsedSatelliteIDsString());
-
-            /*
-            int i = 0;
-            for (Satellite sat : burst.getSatellitesInView()) {
-                cvs.put(TwoTrailsSchema.TtNmeaSchema.SatIDs[i], sat.getNmeaID());
-                cvs.put(TwoTrailsSchema.TtNmeaSchema.SatElevs[i], sat.getElevation());
-                cvs.put(TwoTrailsSchema.TtNmeaSchema.SatAzs[i], sat.getAzimuth());
-                cvs.put(TwoTrailsSchema.TtNmeaSchema.SatSRNs[i], sat.getSRN());
-                i++;
-            }
-            */
 
             _db.insert(TwoTrailsSchema.TtNmeaSchema.TableName, null, cvs);
 
@@ -2045,14 +2033,14 @@ public class DataAccessLayer {
 
             cvs.put(TwoTrailsSchema.TtNmeaSchema.FixTime, dtf.print(burst.getFixTime()));
             cvs.put(TwoTrailsSchema.TtNmeaSchema.Latitude, burst.getLatitude());
-            cvs.put(TwoTrailsSchema.TtNmeaSchema.LatDir, burst.getLatDir().toStringAbv());
+            cvs.put(TwoTrailsSchema.TtNmeaSchema.LatDir, burst.getLatDir().getValue());
             cvs.put(TwoTrailsSchema.TtNmeaSchema.Longitude, burst.getLongitude());
-            cvs.put(TwoTrailsSchema.TtNmeaSchema.LonDir, burst.getLonDir().toStringAbv());
+            cvs.put(TwoTrailsSchema.TtNmeaSchema.LonDir, burst.getLonDir().getValue());
             cvs.put(TwoTrailsSchema.TtNmeaSchema.Elevation, burst.getElevation());
-            cvs.put(TwoTrailsSchema.TtNmeaSchema.ElevUom, burst.getUomElevation().toStringAbv());
+            cvs.put(TwoTrailsSchema.TtNmeaSchema.ElevUom, burst.getUomElevation().getValue());
 
             cvs.put(TwoTrailsSchema.TtNmeaSchema.MagVar, burst.getMagVar());
-            cvs.put(TwoTrailsSchema.TtNmeaSchema.MagDir, burst.getMagVarDir().toStringAbv());
+            cvs.put(TwoTrailsSchema.TtNmeaSchema.MagDir, burst.getMagVarDir().getValue());
             cvs.put(TwoTrailsSchema.TtNmeaSchema.Fix, burst.getFix().getValue());
             cvs.put(TwoTrailsSchema.TtNmeaSchema.FixQuality, burst.getFixQuality().getValue());
             cvs.put(TwoTrailsSchema.TtNmeaSchema.Mode, burst.getMode().getValue());
@@ -2062,7 +2050,7 @@ public class DataAccessLayer {
             cvs.put(TwoTrailsSchema.TtNmeaSchema.VDOP, burst.getVDOP());
             cvs.put(TwoTrailsSchema.TtNmeaSchema.HorizDilution, burst.getHorizDilution());
             cvs.put(TwoTrailsSchema.TtNmeaSchema.GeiodHeight, burst.getGeoidHeight());
-            cvs.put(TwoTrailsSchema.TtNmeaSchema.GeiodHeightUom, burst.getGeoUom().toStringAbv());
+            cvs.put(TwoTrailsSchema.TtNmeaSchema.GeiodHeightUom, burst.getGeoUom().getValue());
             cvs.put(TwoTrailsSchema.TtNmeaSchema.GroundSpeed, burst.getGroundSpeed());
             cvs.put(TwoTrailsSchema.TtNmeaSchema.TrackAngle, burst.getTrackAngle());
 

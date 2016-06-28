@@ -74,7 +74,7 @@ public class ArcGisLoginActivity extends CustomToolbarActivity {
     }
 
     private void requestPhoneState() {
-        AndroidUtils.App.requestPermission(ArcGisLoginActivity.this, Manifest.permission.READ_PHONE_STATE, Consts.Codes.Requests.PHONE,
+        AndroidUtils.App.requestPhonePermission(ArcGisLoginActivity.this, Consts.Codes.Requests.PHONE,
                 "In order to securely save your credentials we need to use your phone's ID.");
     }
 

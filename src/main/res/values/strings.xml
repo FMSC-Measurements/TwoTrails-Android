@@ -142,6 +142,7 @@
 
 
     <!-- Settings -->
+    <string name="menu_main_about">About</string>
     <string name="menu_x_gps_settings">GPS Setup</string>
     <string name="menu_x_range_finder_settings">Range Finder</string>
     <string name="menu_x_filter">Filter</string>

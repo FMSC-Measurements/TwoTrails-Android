@@ -141,7 +141,9 @@ public class Consts {
             public static final int CAPTURE_IMAGE = 5006;
             public static final int ADD_IMAGES = 5007;
             public static final int OPEN_FILE = 5008;
-            public static final int FOLDER = 5009;
+            public static final int CREATE_FILE = 5009;
+            public static final int FOLDER = 5010;
+            public static final int CAMERA = 5011;
         }
     }
 

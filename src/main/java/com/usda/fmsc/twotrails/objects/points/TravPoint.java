@@ -9,9 +9,9 @@ import com.usda.fmsc.twotrails.units.OpType;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 public class TravPoint extends TtPoint {
-    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+    public static final Parcelable.Creator<TravPoint> CREATOR = new Parcelable.Creator<TravPoint>() {
         @Override
-        public Object createFromParcel(Parcel source) {
+        public TravPoint createFromParcel(Parcel source) {
             return new TravPoint(source);
         }
 

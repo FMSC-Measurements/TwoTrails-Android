@@ -46,7 +46,7 @@ public class TwoTrailsSchema {
             PolyCN      + " TEXT NOT NULL, " +
             OnBoundary  + " BOOLEAN NOT NULL," +
             Comment     + " TEXT, " +
-            Operation   + " TEXT NOT NULL, " +
+            Operation   + " INTEGER NOT NULL, " +
             MetadataCN  + " TEXT REFERENCES " +
             MetadataSchema.TableName + ", " +
             CreationTime+ " TEXT, " +
@@ -94,7 +94,7 @@ public class TwoTrailsSchema {
         public static final String Latitude = "UnAdjLatitude";
         public static final String Longitude = "UnAdjLongitude";
         public static final String Elevation = "Elevation";
-        public static final String UserAccuracy = "UserAccuracy";
+        public static final String ManualAccuracy = "ManualAccuracy";
         public static final String RMSEr = "RMSEr";
 
         public static final String CreateTable =
@@ -104,7 +104,7 @@ public class TwoTrailsSchema {
             Latitude        + " REAL, " +
             Longitude       + " REAL, " +
             Elevation       + " REAL, " +
-            UserAccuracy    + " REAL, " +
+            ManualAccuracy  + " REAL, " +
             RMSEr           + " REAL, " +
             "PRIMARY KEY (" + SharedSchema.CN + "));";
 
@@ -114,7 +114,7 @@ public class TwoTrailsSchema {
             Latitude + ", " +
             Longitude + ", " +
             Elevation + ", " +
-            UserAccuracy + ", " +
+            ManualAccuracy + ", " +
             RMSEr;
     }
     //endregion
@@ -278,13 +278,13 @@ public class TwoTrailsSchema {
             TimeCreated     + " TEXT, " +
             FixTime         + " TEXT, " +
             Latitude        + " REAL, " +
-            LatDir          + " TEXT, " +
+            LatDir          + " INTEGER, " +
             Longitude       + " REAL, " +
-            LonDir          + " TEXT, " +
+            LonDir          + " INTEGER, " +
             Elevation       + " REAL, " +
-            ElevUom         + " TEXT, " +
+            ElevUom         + " INTEGER, " +
             MagVar          + " REAL, " +
-            MagDir          + " TEXT, " +
+            MagDir          + " INTEGER, " +
             Fix             + " INTEGER, " +
             FixQuality      + " INTEGER, " +
             Mode            + " INTEGER, " +
@@ -293,7 +293,7 @@ public class TwoTrailsSchema {
             VDOP            + " REAL, " +
             HorizDilution   + " REAL, " +
             GeiodHeight     + " REAL, " +
-            GeiodHeightUom  + " TEXT, " +
+            GeiodHeightUom  + " INTEGER, " +
             GroundSpeed     + " REAL, " +
             TrackAngle      + " REAL, " +
             SatellitesUsedCount     + " INTEGER, " +

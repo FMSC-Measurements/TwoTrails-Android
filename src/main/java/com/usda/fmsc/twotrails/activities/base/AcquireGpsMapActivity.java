@@ -17,6 +17,7 @@ import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.animation.ViewAnimator;
 import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.geospatial.GeoPosition;
+import com.usda.fmsc.geospatial.Longitude;
 import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.geospatial.nmea.NmeaIDs;
 import com.usda.fmsc.geospatial.nmea.sentences.GGASentence;
@@ -59,6 +60,8 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
 
     private TrailGraphicManager trailGraphicManager;
 
+    private long firstPositionFixTime = 0;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,7 +76,8 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
         Intent intent = getIntent();
 
         if (intent != null) {
-            polygon = intent.getParcelableExtra(Consts.Codes.Data.POLYGON_DATA);
+            if (intent.getExtras().containsKey(Consts.Codes.Data.POLYGON_DATA))
+                polygon = intent.getParcelableExtra(Consts.Codes.Data.POLYGON_DATA);
 
             if (polygon == null) {
                 setResult(Consts.Codes.Results.NO_POLYGON_DATA);
@@ -389,6 +393,16 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
     @Override
     protected void onFirstPositionReceived(GeoPosition position) {
         moveToLocation(position, Consts.Location.ZOOM_CLOSE, true);
+
+        firstPositionFixTime = System.currentTimeMillis();
+    }
+
+    @Override
+    protected void onPositionReceived(GeoPosition position) {
+        if (firstPositionFixTime == Long.MAX_VALUE || System.currentTimeMillis() - firstPositionFixTime > 3000) {
+            super.onPositionReceived(position);
+            firstPositionFixTime = Long.MAX_VALUE;
+        }
     }
 
     protected boolean isCanceling() {
