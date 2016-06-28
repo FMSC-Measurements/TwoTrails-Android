@@ -4,7 +4,6 @@ package com.usda.fmsc.twotrails.logic;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.objects.PointD;
 import com.usda.fmsc.twotrails.objects.points.QuondamPoint;
-import com.usda.fmsc.twotrails.objects.points.TravPoint;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
@@ -22,7 +21,7 @@ public class HaidLogic {
     private static final String INFINITE_SYMBOL = "\u221E";
 
     private static StringBuilder pointStats;
-    private static double travLength, totalTravError, totalGpsError, travGpsError;
+    private static double travLength, totalTravError, totalGpsError;
     private static boolean traversing;
     private static int traverseSegments, lastGpsPtPID;
 
@@ -43,7 +42,7 @@ public class HaidLogic {
             _Polygons.put(poly.getCN(), poly);
         }
 
-        totalTravError = totalGpsError = travGpsError = 0;
+        totalTravError = totalGpsError = 0;
         traversing = false;
         traverseSegments = 0;
 
@@ -152,7 +151,7 @@ public class HaidLogic {
         sb.append(String.format("\tTraverse Closing Distance: %.2f feet.%s",
                 TtUtils.Math.round(TtUtils.Convert.toFeetTenths(closeError, Dist.Meters), 2), Consts.NewLine));
         sb.append(String.format("\tTraverse Close Error: 1 part in %s.%s",
-                Double.isInfinite(travError) ? INFINITE_SYMBOL : StringEx.toString(TtUtils.Math.round(travError, 2), 2),
+                Double.isInfinite(travError) ? INFINITE_SYMBOL : StringEx.toStringRound(travError, 2),
                 Consts.NewLine));
 
 

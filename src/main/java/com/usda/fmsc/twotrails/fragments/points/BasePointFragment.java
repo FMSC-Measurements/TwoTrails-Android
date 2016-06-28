@@ -9,6 +9,7 @@ import android.text.Editable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -46,6 +47,9 @@ public abstract class BasePointFragment extends AnimationCardFragment implements
     private TtPoint _Point;
     private TtMetadata _Metadata;
 
+    private InputMethodManager input;
+
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,6 +69,9 @@ public abstract class BasePointFragment extends AnimationCardFragment implements
     @Override
     public final View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View view = onCreateViewEx(inflater, container, savedInstanceState);
+
+        input = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+
         header = view.findViewById(R.id.cardHeader);
 
         tvPID = (TextView)view.findViewById(R.id.pointHeaderTvPid);
@@ -133,7 +140,6 @@ public abstract class BasePointFragment extends AnimationCardFragment implements
 
     public abstract View onCreateViewEx(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState);
 
-
     @Override
     public void onAttach(Context activity) {
         super.onAttach(activity);
@@ -176,6 +182,11 @@ public abstract class BasePointFragment extends AnimationCardFragment implements
                 ibBnd.setAlpha(locked ? Consts.DISABLED_ALPHA : Consts.ENABLED_ALPHA);
                 ivOp.setAlpha(locked ? Consts.DISABLED_ALPHA : Consts.ENABLED_ALPHA);
             }
+
+            if (locked) {
+                preFocus.requestFocus();
+                input.hideSoftInputFromWindow(preFocus.getWindowToken(), 0);
+            }
         }
     }
 
@@ -202,9 +213,6 @@ public abstract class BasePointFragment extends AnimationCardFragment implements
         tvPID.setText(StringEx.toString(_Point.getPID()));
         txtCmt.setText(_Point.getComment());
         ibBnd.setImageDrawable(getBndDrawable(_Point.isOnBnd()));
-
-        preFocus.requestFocus();
-
         updating = false;
     }
 

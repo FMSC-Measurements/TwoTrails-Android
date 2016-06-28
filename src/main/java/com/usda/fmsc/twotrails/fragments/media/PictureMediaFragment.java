@@ -16,7 +16,6 @@ import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.activities.PointsActivity;
 import com.usda.fmsc.twotrails.objects.media.TtMedia;
 import com.usda.fmsc.twotrails.objects.media.TtImage;
-import com.usda.fmsc.twotrails.utilities.TtUtils;
 import com.usda.fmsc.utilities.ParseEx;
 import com.usda.fmsc.utilities.StringEx;
 
@@ -158,9 +157,9 @@ public class PictureMediaFragment extends BaseMediaFragment {
             ivBackground.setImageBitmap(bitmapManager.get(_Picture.getFilePath()));
         }
 
-        txtAz.setText(StringEx.toString(TtUtils.Math.round(_Picture.getAzimuth(), 3)));
-        txtPitch.setText(StringEx.toString(TtUtils.Math.round(_Picture.getPitch(), 3)));
-        txtRoll.setText(StringEx.toString(TtUtils.Math.round(_Picture.getRoll(), 3)));
+        txtAz.setText(StringEx.toStringRound(_Picture.getAzimuth(), 3));
+        txtPitch.setText(StringEx.toStringRound(_Picture.getPitch(), 3));
+        txtRoll.setText(StringEx.toStringRound(_Picture.getRoll(), 3));
 
         settingView = false;
     }

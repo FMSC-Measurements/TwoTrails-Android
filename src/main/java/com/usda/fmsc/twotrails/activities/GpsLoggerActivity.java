@@ -1,6 +1,5 @@
 package com.usda.fmsc.twotrails.activities;
 
-import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.support.v7.app.AlertDialog;

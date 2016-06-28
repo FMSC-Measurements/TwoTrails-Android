@@ -40,7 +40,6 @@ import com.usda.fmsc.utilities.StringEx;
 
 public class CalculateGpsActivity extends CustomToolbarActivity {
     private static final Pattern pattern = Pattern.compile("[a-zA-Z]");
-    private static String nVal = "*";
 
     private GpsPoint _Point;
     private TtMetadata _Metadata;
@@ -184,7 +183,7 @@ public class CalculateGpsActivity extends CustomToolbarActivity {
                 if (value != null) {
                     options.DopValue = value;
                     Global.Settings.DeviceSettings.setGpsFilterDopValue(value);
-                    txtDop.setTextColor(AndroidUtils.UI.getColor(getBaseContext(), R.color.abc_primary_text_material_light));
+                    txtDop.setTextColor(AndroidUtils.UI.getColor(getBaseContext(), R.color.black_1000));
                     calculate();
                 } else {
                     txtDop.setTextColor(AndroidUtils.UI.getColor(getBaseContext(), android.R.color.holo_red_dark));
@@ -302,6 +301,7 @@ public class CalculateGpsActivity extends CustomToolbarActivity {
 
         int count = 0, countF;
 
+        String nVal = "*";
         if (_FilteredBursts.size() > 0) {
             //region Group 1
             for (int i = 0; i < _FilteredBursts.size() && i < groupSize; i++) {
@@ -332,9 +332,9 @@ public class CalculateGpsActivity extends CustomToolbarActivity {
             dRMSEr = Math.sqrt(Math.pow(dRMSEx, 2) + Math.pow(dRMSEy, 2)) * Consts.RMSEr95_Coeff;
 
 
-            tvUtmX1.setText(String.format("%.2f", x));
-            tvUtmY1.setText(String.format("%.2f", y));
-            tvNssda1.setText(String.format("%.2f", dRMSEr));
+            tvUtmX1.setText(StringEx.toString(x, 2));
+            tvUtmY1.setText(StringEx.toString(y, 2));
+            tvNssda1.setText(StringEx.toString(dRMSEr, 2));
             chkG1.setEnabled(true);
             chkG1.setText(String.format("(%d)", count));
             //endregion
@@ -371,9 +371,9 @@ public class CalculateGpsActivity extends CustomToolbarActivity {
                 dRMSEy = Math.sqrt(dRMSEy / count);
                 dRMSEr = Math.sqrt(Math.pow(dRMSEx, 2) + Math.pow(dRMSEy, 2)) * Consts.RMSEr95_Coeff;
 
-                tvUtmX2.setText(String.format("%.2f", x));
-                tvUtmY2.setText(String.format("%.2f", y));
-                tvNssda2.setText(String.format("%.2f", dRMSEr));
+                tvUtmX2.setText(StringEx.toString(x, 2));
+                tvUtmY2.setText(StringEx.toString(y, 2));
+                tvNssda2.setText(StringEx.toString(dRMSEr, 2));
 
 
                 if (!chkG2.isEnabled()) {
@@ -424,9 +424,9 @@ public class CalculateGpsActivity extends CustomToolbarActivity {
                 dRMSEy = Math.sqrt(dRMSEy / count);
                 dRMSEr = Math.sqrt(Math.pow(dRMSEx, 2) + Math.pow(dRMSEy, 2)) * Consts.RMSEr95_Coeff;
 
-                tvUtmX3.setText(String.format("%.2f", x));
-                tvUtmY3.setText(String.format("%.2f", y));
-                tvNssda3.setText(String.format("%.2f", dRMSEr));
+                tvUtmX3.setText(StringEx.toString(x, 2));
+                tvUtmY3.setText(StringEx.toString(y, 2));
+                tvNssda3.setText(StringEx.toString(dRMSEr, 2));
 
                 if (!chkG3.isEnabled()) {
                     chkG3.setChecked(true);
@@ -478,9 +478,9 @@ public class CalculateGpsActivity extends CustomToolbarActivity {
                 _Point.setUnAdjZ(_Point.getElevation());
                 _Point.setRMSEr(dRMSErf);
 
-                tvUtmXF.setText(String.format("%.3f", xF));
-                tvUtmYF.setText(String.format("%.3f", yF));
-                tvNssdaF.setText(String.format("%.2f", dRMSErf));
+                tvUtmXF.setText(StringEx.toString(xF, 3));
+                tvUtmYF.setText(StringEx.toString(yF, 3));
+                tvNssdaF.setText(StringEx.toString(dRMSErf, 2));
 
                 setCalculated(true);
             } else {

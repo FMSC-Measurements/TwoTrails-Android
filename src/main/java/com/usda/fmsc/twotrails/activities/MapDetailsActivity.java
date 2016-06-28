@@ -174,9 +174,9 @@ public class MapDetailsActivity extends CustomToolbarActivity {
 
         txtDesc.setText(agml.getDescription());
 
-        tvScaleMin.setText(agml.getMinScale() < 0 ? StringEx.Empty : String.format("%.4f", agml.getMinScale()));
+        tvScaleMin.setText(agml.getMinScale() < 0 ? StringEx.Empty : StringEx.toString(agml.getMinScale(), 4));
 
-        tvScaleMax.setText(agml.getMaxScale() < 0 ? StringEx.Empty : String.format("%.4f", agml.getMaxScale()));
+        tvScaleMax.setText(agml.getMaxScale() < 0 ? StringEx.Empty : StringEx.toString(agml.getMaxScale(), 4));
     }
 
     @Override

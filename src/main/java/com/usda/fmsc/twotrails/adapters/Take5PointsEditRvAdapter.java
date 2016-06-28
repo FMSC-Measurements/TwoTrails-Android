@@ -2,7 +2,6 @@ package com.usda.fmsc.twotrails.adapters;
 
 import android.graphics.drawable.Drawable;
 import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -262,7 +261,7 @@ public class Take5PointsEditRvAdapter extends RecyclerViewEx.BaseAdapterEx {
                 double diff = TtUtils.Math.azimuthDiff(point.getFwdAz(), point.getBkAz());
 
                 if (diff >= 0.01) {
-                    tvDiff.setText(StringEx.toString(TtUtils.Math.round(diff, 2)));
+                    tvDiff.setText(StringEx.toStringRound(diff, 2));
                     tvDiff.setVisibility(View.VISIBLE);
                     return;
                 }
