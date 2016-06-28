@@ -42,7 +42,7 @@ import java.util.List;
 
 import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
 
-public class TableEditActivity extends CustomToolbarActivity {
+public class TableViewActivity extends CustomToolbarActivity {
     private static final DateTimeFormatter DateTimeFormatter = DateTimeFormat.forPattern("h:mm:ss a M/d/yyyy");
 
     private static String[] Headers = new String[] {

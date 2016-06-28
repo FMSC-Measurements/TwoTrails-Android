@@ -1,6 +1,5 @@
 package com.usda.fmsc.twotrails.activities;
 
-import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.pm.PackageManager;
@@ -657,7 +656,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
     public void btnPointTableClick(View view) {
         if(Global.getDAL().getItemCount(TwoTrailsSchema.PointSchema.TableName) > 0) {
-            startActivityForResult(new Intent(this, TableEditActivity.class), UPDATE_INFO);
+            startActivityForResult(new Intent(this, TableViewActivity.class), UPDATE_INFO);
         } else {
             Toast.makeText(this, "No Points in Project", Toast.LENGTH_SHORT).show();
         }

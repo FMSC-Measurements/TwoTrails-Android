@@ -163,7 +163,7 @@
             android:screenOrientation="portrait"
             android:label="@string/title_activity_project"/>
         <activity
-            android:name=".activities.TableEditActivity"
+            android:name=".activities.TableViewActivity"
             android:screenOrientation="portrait"
             android:label="@string/title_activity_table_edit"/>
         <activity

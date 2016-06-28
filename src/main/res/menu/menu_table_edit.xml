@@ -1,7 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".activities.TableEditActivity">
+    tools:context=".activities.TableViewActivity">
 
     <item android:id="@+id/teMenuFilter"
           android:title="@string/menu_table_edit_filter"

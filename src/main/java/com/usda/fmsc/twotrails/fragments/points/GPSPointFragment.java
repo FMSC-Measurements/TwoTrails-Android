@@ -181,9 +181,8 @@ public class GPSPointFragment extends BasePointFragment {
     }
 
     @Override
-    public void onPointUpdated(TtPoint point) {
-        super.onPointUpdated(point);
-        _GpsPoint = (GpsPoint)point;
+    protected void onBasePointUpdated() {
+        _GpsPoint = (GpsPoint)getBasePoint();
         setViews();
     }
 
