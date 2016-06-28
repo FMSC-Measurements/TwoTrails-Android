@@ -19,7 +19,6 @@ import com.usda.fmsc.twotrails.objects.points.GpsPoint;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import com.usda.fmsc.twotrails.units.MapTracking;
 import com.usda.fmsc.utilities.StringEx;

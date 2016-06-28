@@ -19,6 +19,7 @@ import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.geospatial.GeoPosition;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.geospatial.utm.UTMTools;
+import com.usda.fmsc.utilities.StringEx;
 
 public class MapActivity extends BaseMapActivity {
     private TextView tvLocX, tvLocY, tvLocZone, tvLocXType, tvLocYType, tvZoneLbl;
@@ -102,7 +103,7 @@ public class MapActivity extends BaseMapActivity {
             if (locUtm) {
                 tvLocZone.setVisibility(View.VISIBLE);
                 tvZoneLbl.setVisibility(View.VISIBLE);
-                tvLocZone.setText(String.format("%d", getZone()));
+                tvLocZone.setText(StringEx.toString(getZone()));
 
                 tvLocXType.setText(R.string.str_utmx);
                 tvLocYType.setText(R.string.str_utmy);
@@ -183,11 +184,11 @@ public class MapActivity extends BaseMapActivity {
                         lastPosition.getLongitudeSignedDecimal(),
                         getZone());
 
-                tvLocX.setText(String.format("%.3f", coords.getX()));
-                tvLocY.setText(String.format("%.3f", coords.getY()));
+                tvLocX.setText(StringEx.toString(coords.getX(), 3));
+                tvLocY.setText(StringEx.toString(coords.getY(), 3));
             } else {
-                tvLocX.setText(String.format("%.3f", lastPosition.getLatitudeSignedDecimal()));
-                tvLocY.setText(String.format("%.3f", lastPosition.getLongitudeSignedDecimal()));
+                tvLocX.setText(StringEx.toString(lastPosition.getLatitudeSignedDecimal(), 3));
+                tvLocY.setText(StringEx.toString(lastPosition.getLongitudeSignedDecimal(), 3));
             }
         }
     }

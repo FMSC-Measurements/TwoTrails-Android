@@ -108,7 +108,7 @@ public class TableViewActivity extends CustomToolbarActivity {
 
             AlertDialog.Builder dialog = new AlertDialog.Builder(activity);
             dialog.setTitle(String.format("Point: %s", tv.getTag(R.id.tag1)))
-                    .setMessage(String.format("%s: %s", tv.getTag(R.id.tag2), tv.getText()))
+                    .setMessage(String.format("%s: %s", tv.getTag(R.id.tag2), tv.getTag(R.id.tag3)))
                     .show();
         }
     };
@@ -610,10 +610,7 @@ public class TableViewActivity extends CustomToolbarActivity {
             } else if (row < 0) {
                 setText(getColumnHeader(column), convertView);
             } else {
-                setText(getValue(row, columnKeys.get(column)),
-                        Integer.toString(_DisplayedPoints.get(row).getPID()),
-                        headers.get(column),
-                        convertView);
+                setText(row, column, convertView);
             }
 
             return convertView;
@@ -639,13 +636,17 @@ public class TableViewActivity extends CustomToolbarActivity {
             ((TextView) view.findViewById(android.R.id.text1)).setText(text);
         }
 
-        private void setText(String value, String point, String column, View view) {
+        private void setText(int row, int columnIndex, View view) {
             TextView tv = ((TextView) view.findViewById(android.R.id.text1));
+
+            String value = getValue(row, columnIndex);
+
             tv.setText(value);
 
             if (!StringEx.isEmpty(value)) {
-                tv.setTag(R.id.tag1, point);
-                tv.setTag(R.id.tag2, column);
+                tv.setTag(R.id.tag1, Integer.toString(_DisplayedPoints.get(row).getPID()));
+                tv.setTag(R.id.tag2, headers.get(columnKeys.get(columnIndex)));
+                tv.setTag(R.id.tag3, getFullValue(row, columnIndex));
                 tv.setOnClickListener(cellClickedListener);
             } else {
                 tv.setOnClickListener(null);
@@ -736,6 +737,76 @@ public class TableViewActivity extends CustomToolbarActivity {
             return null;
         }
 
+        private String getFullValue(int row, int columnKey) {
+            TtPoint point = _DisplayedPoints.get(row);
+
+            switch (columnKey)
+            {
+                case 0:
+                    return point.getOp().toString();
+                case 1:
+                    return Long.toString(point.getIndex());
+                case 2:
+                    return point.getPolyName();
+                case 3:
+                    return DateTimeFormatter.print(point.getTime());
+                case 4:
+                    return Boolean.toString(point.isOnBnd());
+                case 5:
+                    return _MetaNames.get(point.getMetadataCN());
+                case 6:
+                    return StringEx.toString(point.getAdjX());
+                case 7:
+                    return StringEx.toString(point.getAdjY());
+                case 8:
+                    return (point.getAdjZ() != null) ? StringEx.toString(
+                            TtUtils.Convert.distance(point.getAdjZ(), _Metadata.get(point.getMetadataCN()).getDistance(), Dist.Meters)) : StringEx.Empty;
+                case 9:
+                    return StringEx.toString(point.getUnAdjX());
+                case 10:
+                    return StringEx.toString(point.getUnAdjY());
+                case 11:
+                    return StringEx.toString(
+                            TtUtils.Convert.distance(point.getUnAdjZ(), _Metadata.get(point.getMetadataCN()).getDistance(), Dist.Meters));
+                case 12:
+                    return StringEx.toString(point.getAccuracy());
+                case 13:
+                    return (point instanceof TtPoint.IManualAccuracy) ? StringEx.toString(((TtPoint.IManualAccuracy)point).getManualAccuracy()) : StringEx.Empty;
+                case 14:
+                    return (point instanceof GpsPoint) ? StringEx.toString(((GpsPoint)point).getLatitude()) : StringEx.Empty;
+                case 15:
+                    return (point instanceof GpsPoint) ? StringEx.toString(((GpsPoint)point).getLongitude()) : StringEx.Empty;
+                case 16:
+                    return (point instanceof GpsPoint) ? StringEx.toString(((GpsPoint)point).getElevation()) : StringEx.Empty;
+                case 17:
+                    return (point instanceof TravPoint) ? StringEx.toString(((TravPoint)point).getFwdAz()) : StringEx.Empty;
+                case 18:
+                    return (point instanceof TravPoint) ? StringEx.toString(((TravPoint)point).getBkAz()) : StringEx.Empty;
+                case 19:
+                    return (point instanceof TravPoint) ? StringEx.toString(
+                            TtUtils.Convert.distance(((TravPoint)point).getHorizontalDistance(), _Metadata.get(point.getMetadataCN()).getDistance(), Dist.Meters)) : StringEx.Empty;
+                case 20:
+                    return (point instanceof TravPoint) ? StringEx.toString(
+                            TtUtils.Convert.distance(((TravPoint)point).getSlopeDistance(), _Metadata.get(point.getMetadataCN()).getDistance(), Dist.Meters)) : StringEx.Empty;
+                case 21:
+                    return (point instanceof TravPoint) ? StringEx.toString(
+                            TtUtils.Convert.angle(((TravPoint)point).getSlopeAngle(), _Metadata.get(point.getMetadataCN()).getSlope(), Slope.Percent)) : StringEx.Empty;
+                case 22:
+                    if (point instanceof QuondamPoint)
+                    {
+                        QuondamPoint qp = ((QuondamPoint)point);
+                        if (qp.hasParent())
+                            return Integer.toString(qp.getParentPID());
+                    }
+                    return StringEx.Empty;
+                case 23:
+                    return point.getComment();
+                case 24:
+                    return point.hasQuondamLinks() ? "Yes" : "No";
+            }
+
+            return null;
+        }
 
         @Override
         public int getWidth(int column) {

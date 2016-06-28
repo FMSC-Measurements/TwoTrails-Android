@@ -79,7 +79,7 @@ android {
 
     dexOptions {
 //        incremental true  //last resort
-        javaMaxHeapSize "2g" //1g is too small
+        javaMaxHeapSize "4g" //1g is too small
 //        jumboMode false
         preDexLibraries true //faster incremental builds
 //        threadCount 8

@@ -9,8 +9,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -349,12 +347,12 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
         txtDesc.setText(_Polygon.getDescription());
         txtInc.setText(StringEx.toString(_Polygon.getIncrementBy()));
         txtPsi.setText(StringEx.toString(_Polygon.getPointStartIndex()));
-        txtAcc.setText(StringEx.toString(TtUtils.Math.round(_Polygon.getAccuracy(), 2)));
+        txtAcc.setText(StringEx.toStringRound(_Polygon.getAccuracy(), 2));
 
-        tvPerimFt.setText(StringEx.toString(TtUtils.Math.round(TtUtils.Convert.toFeetTenths(_Polygon.getPerimeter(), Dist.Meters), 2)));
-        tvPerimMt.setText(StringEx.toString(TtUtils.Math.round(_Polygon.getPerimeter(), 2)));
-        tvAreaAc.setText(StringEx.toString(TtUtils.Math.round(TtUtils.Convert.metersSquaredToAcres(_Polygon.getArea()), 2)));
-        tvAreaHa.setText(StringEx.toString(TtUtils.Math.round(TtUtils.Convert.metersSquaredToHa(_Polygon.getArea()), 2)));
+        tvPerimFt.setText(StringEx.toStringRound(TtUtils.Convert.toFeetTenths(_Polygon.getPerimeter(), Dist.Meters), 2));
+        tvPerimMt.setText(StringEx.toStringRound(_Polygon.getPerimeter(), 2));
+        tvAreaAc.setText(StringEx.toStringRound(TtUtils.Convert.metersSquaredToAcres(_Polygon.getArea()), 2));
+        tvAreaHa.setText(StringEx.toStringRound(TtUtils.Convert.metersSquaredToHa(_Polygon.getArea()), 2));
 
 
         if (polyPoints == null && activity != null) {

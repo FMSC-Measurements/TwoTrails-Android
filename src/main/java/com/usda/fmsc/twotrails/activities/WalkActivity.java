@@ -403,9 +403,9 @@ public class WalkActivity extends AcquireGpsMapActivity {
                     tvPID.setText(StringEx.toString(_CurrentPoint.getPID()));
                     ibBnd.setImageDrawable(_CurrentPoint.isOnBnd() ? dOnBnd : dOffBnd);
 
-                    tvX.setText(StringEx.toString(TtUtils.Math.round(_CurrentPoint.getUnAdjX(), Consts.Minimum_Point_Display_Digits)));
-                    tvY.setText(StringEx.toString(TtUtils.Math.round(_CurrentPoint.getUnAdjY(), Consts.Minimum_Point_Display_Digits)));
-                    tvElev.setText(StringEx.toString(TtUtils.Math.round(_CurrentPoint.getUnAdjZ(), Consts.Minimum_Point_Display_Digits)));
+                    tvX.setText(StringEx.toStringRound(_CurrentPoint.getUnAdjX(), Consts.Minimum_Point_Display_Digits));
+                    tvY.setText(StringEx.toStringRound(_CurrentPoint.getUnAdjY(), Consts.Minimum_Point_Display_Digits));
+                    tvElev.setText(StringEx.toStringRound(_CurrentPoint.getUnAdjZ(), Consts.Minimum_Point_Display_Digits));
 
                     txtCmt.setText(_CurrentPoint.getComment());
 
@@ -451,9 +451,9 @@ public class WalkActivity extends AcquireGpsMapActivity {
             tvPID.setText(StringEx.toString(_CurrentPoint.getPID()));
             ibBnd.setImageDrawable(_CurrentPoint.isOnBnd() ? dOnBnd : dOffBnd);
 
-            tvX.setText(StringEx.toString(TtUtils.Math.round(_CurrentPoint.getUnAdjX(), Consts.Minimum_Point_Display_Digits)));
-            tvY.setText(StringEx.toString(TtUtils.Math.round(_CurrentPoint.getUnAdjY(), Consts.Minimum_Point_Display_Digits)));
-            tvElev.setText(StringEx.toString(TtUtils.Math.round(_CurrentPoint.getUnAdjZ(), Consts.Minimum_Point_Display_Digits)));
+            tvX.setText(StringEx.toStringRound(_CurrentPoint.getUnAdjX(), Consts.Minimum_Point_Display_Digits));
+            tvY.setText(StringEx.toStringRound(_CurrentPoint.getUnAdjY(), Consts.Minimum_Point_Display_Digits));
+            tvElev.setText(StringEx.toStringRound(_CurrentPoint.getUnAdjZ(), Consts.Minimum_Point_Display_Digits));
 
             txtCmt.setText(_CurrentPoint.getComment());
 

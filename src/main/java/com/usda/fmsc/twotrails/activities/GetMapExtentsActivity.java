@@ -9,7 +9,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
 import com.esri.core.ags.MapServiceInfo;
-import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.geospatial.GeoPosition;
 import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
@@ -20,7 +19,6 @@ import com.usda.fmsc.twotrails.fragments.map.ArcGisMapFragment;
 import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
-import com.usda.fmsc.twotrails.ui.SquareOverlay;
 import com.usda.fmsc.twotrails.utilities.ArcGISTools;
 import com.usda.fmsc.twotrails.utilities.DownloadOfflineArcGISMapTask;
 import com.usda.fmsc.utilities.FileUtils;

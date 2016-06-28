@@ -13,7 +13,6 @@ import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.objects.points.TravPoint;
-import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.units.Dist;
 import com.usda.fmsc.twotrails.units.Slope;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
@@ -216,18 +215,18 @@ public class TraversePointFragment extends BasePointFragment {
     private void setViews() {
         settingView = true;
 
-        txtFwd.setText(StringEx.toString(TtUtils.Math.round(_TravPoint.getFwdAz(), Consts.Minimum_Point_Display_Digits)));
-        txtBk.setText(StringEx.toString(TtUtils.Math.round(_TravPoint.getBkAz(), Consts.Minimum_Point_Display_Digits)));
+        txtFwd.setText(StringEx.toStringRound(_TravPoint.getFwdAz(), Consts.Minimum_Point_Display_Digits));
+        txtBk.setText(StringEx.toStringRound(_TravPoint.getBkAz(), Consts.Minimum_Point_Display_Digits));
 
-        txtSlopeDist.setText(StringEx.toString(TtUtils.Math.round(
+        txtSlopeDist.setText(StringEx.toStringRound(
                 TtUtils.Convert.distance(_TravPoint.getSlopeDistance(), getMetadata().getDistance(), Dist.Meters),
                 Consts.Minimum_Point_Display_Digits
-        )));
+        ));
 
-        txtSlopeAng.setText(StringEx.toString(TtUtils.Math.round(
+        txtSlopeAng.setText(StringEx.toStringRound(
                 TtUtils.Convert.angle(_TravPoint.getSlopeAngle(), getMetadata().getSlope(), Slope.Percent),
                 Consts.Minimum_Point_Display_Digits
-        )));
+        ));
 
         tvMagDec.setText(StringEx.toString(getMetadata().getMagDec()));
 
@@ -241,7 +240,7 @@ public class TraversePointFragment extends BasePointFragment {
             double diff = TtUtils.Math.azimuthDiff(_TravPoint.getFwdAz(), _TravPoint.getBkAz());
 
             if (diff >= 0.01) {
-                tvAzDiff.setText(StringEx.toString(TtUtils.Math.round(diff, 2)));
+                tvAzDiff.setText(StringEx.toStringRound(diff, 2));
                 tvAzDiff.setVisibility(View.VISIBLE);
                 return;
             }

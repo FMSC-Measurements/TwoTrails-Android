@@ -1,6 +1,7 @@
 package com.usda.fmsc.twotrails.activities;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.support.v7.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -445,26 +446,6 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
         }
     }
 
-    public void updateMetadata(TtMetadata metadata) {
-        //only update if current poly
-        if (_CurrentMetadata.getCN().equals(metadata.getCN())) {
-
-            if (_CurrentMetadata.getMagDec() != metadata.getMagDec()) {
-                adjust = true;
-            }
-
-            if (_CurrentMetadata.getZone() != metadata.getZone()) {
-                adjust = true;
-
-                //recalc
-            }
-
-            _CurrentMetadata = metadata;
-
-            setMetadataUpdated(true);
-        }
-    }
-
     public TtMetadata getMetadata(String cn) {
         for (TtMetadata metadata : _Metadata) {
             if (metadata.getCN().equals(cn)) {
@@ -520,18 +501,30 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
                     final Integer zone = inputDialog.getInt();
 
                     if (zone != null && zone >= 0) {
+                        final ProgressDialog progressDialog = new ProgressDialog(MetadataActivity.this);
+                        progressDialog.setMessage("Recalculating Positions");
+                        progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                        progressDialog.show();
+
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
                                 ArrayList<TtPoint> points = Global.getDAL().getGpsTypePointsWithMeta(_CurrentMetadata.getCN());
+                                progressDialog.setMax(points.size() * 2);
 
                                 if (points.size() > 0) {
                                     for (int i = 0; i < points.size(); i++) {
                                         points.set(i, TtUtils.reCalculateGps(points.get(i), zone, Global.getDAL(), null));
+
+                                        progressDialog.setProgress(i);
                                     }
 
                                     Global.getDAL().updatePoints(points);
+
+                                    progressDialog.setProgress(points.size() * 2);
                                 }
+
+                                progressDialog.dismiss();
                             }
                         }).start();
 

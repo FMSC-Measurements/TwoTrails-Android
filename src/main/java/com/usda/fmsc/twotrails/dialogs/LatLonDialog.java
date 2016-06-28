@@ -268,8 +268,8 @@ public class LatLonDialog extends DialogFragment {
                     this.lat = TtUtils.Math.round(lat.toDecimal() * (latDeg.contains("-") ? -1 : 1), 6);
                     this.lon = TtUtils.Math.round(lon.toDecimal() * (lonDeg.contains("-") ? -1 : 1), 6);
 
-                    txtLat.setText(Double.toString(this.lat));
-                    txtLon.setText(Double.toString(this.lon));
+                    txtLat.setText(StringEx.toString(this.lat));
+                    txtLon.setText(StringEx.toString(this.lon));
                 } else {
                     String lat = txtLat.getText().toString();
                     String lon = txtLon.getText().toString();
@@ -286,13 +286,13 @@ public class LatLonDialog extends DialogFragment {
                     DMS dmsLat = new DMS(this.lat);
                     DMS dmsLon = new DMS(this.lon);
 
-                    txtLatDeg.setText(Integer.toString(dmsLat.getDegrees() * (lat.contains("-") ? -1 : 1)));
-                    txtLatMin.setText(Integer.toString(dmsLat.getMinutes()));
-                    txtLatSec.setText(StringEx.toString(TtUtils.Math.round(dmsLat.getSeconds(), 4), 4));
+                    txtLatDeg.setText(StringEx.toString(dmsLat.getDegrees() * (lat.contains("-") ? -1 : 1)));
+                    txtLatMin.setText(StringEx.toString(dmsLat.getMinutes()));
+                    txtLatSec.setText(StringEx.toStringRound(dmsLat.getSeconds(), 4));
 
-                    txtLonDeg.setText(Integer.toString(dmsLon.getDegrees() * (lon.contains("-") ? -1 : 1)));
-                    txtLonMin.setText(Integer.toString(dmsLon.getMinutes()));
-                    txtLonSec.setText(StringEx.toString(TtUtils.Math.round(dmsLon.getSeconds(), 4), 4));
+                    txtLonDeg.setText(StringEx.toString(dmsLon.getDegrees() * (lon.contains("-") ? -1 : 1)));
+                    txtLonMin.setText(StringEx.toString(dmsLon.getMinutes()));
+                    txtLonSec.setText(StringEx.toStringRound(dmsLon.getSeconds(), 4));
                 }
 
                 posButton.setEnabled(true);

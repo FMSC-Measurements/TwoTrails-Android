@@ -12,8 +12,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-//import com.devpaul.filepickerlibrary.FilePickerActivity;
-//import com.devpaul.filepickerlibrary.enums.ThemeType;
 import com.nononsenseapps.filepicker.FilePickerActivity;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.dialogs.DontAskAgainDialog;

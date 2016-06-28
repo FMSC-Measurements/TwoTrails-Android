@@ -189,15 +189,15 @@ public class GPSPointFragment extends BasePointFragment {
     private void setViews() {
         settingView = true;
 
-        txtX.setText(StringEx.toString(TtUtils.Math.round(_GpsPoint.getUnAdjX(), Consts.Minimum_Point_Display_Digits)));
-        txtY.setText(StringEx.toString(TtUtils.Math.round(_GpsPoint.getUnAdjY(), Consts.Minimum_Point_Display_Digits)));
+        txtX.setText(StringEx.toStringRound(_GpsPoint.getUnAdjX(), Consts.Minimum_Point_Display_Digits));
+        txtY.setText(StringEx.toStringRound(_GpsPoint.getUnAdjY(), Consts.Minimum_Point_Display_Digits));
 
-        txtElev.setText(StringEx.toString(TtUtils.Math.round(
+        txtElev.setText(StringEx.toStringRound(
                 TtUtils.Convert.distance(_GpsPoint.getUnAdjZ(), getMetadata().getElevation(), UomElevation.Meters),
                 Consts.Minimum_Point_Display_Digits
-        )));
+        ));
 
-        txtManAcc.setText(StringEx.toString(TtUtils.Math.round(_GpsPoint.getManualAccuracy(), 5)));
+        txtManAcc.setText(StringEx.toStringRound(_GpsPoint.getManualAccuracy(), 5));
 
         tvElev.setText(getMetadata().getElevation().toString());
 
@@ -205,11 +205,11 @@ public class GPSPointFragment extends BasePointFragment {
         String nssda = rmser;
 
         if (_GpsPoint.getRMSEr() != null) {
-            rmser = String.format("%.2f", _GpsPoint.getRMSEr());
+            rmser = StringEx.toString( _GpsPoint.getRMSEr(), 2);
         }
 
         if (_GpsPoint.getNSSDA_RMSEr() != null) {
-            nssda = String.format("%.2f", _GpsPoint.getNSSDA_RMSEr());
+            nssda = StringEx.toString(_GpsPoint.getNSSDA_RMSEr(), 2);
         }
 
         tvRMSEr.setText(rmser);
