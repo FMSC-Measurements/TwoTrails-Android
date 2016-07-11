@@ -20,9 +20,15 @@ public enum OpType {
     }
 
     public static OpType parse(int id) {
-        OpType[] dists = values();
-        if(dists.length > id && id > -1)
-            return dists[id];
+        OpType[] ops = values();
+        if(ops.length > id && id > -1)
+        {
+            for (OpType o : ops)
+            {
+                if (o.getValue() == id)
+                    return o;
+            }
+        }
         throw new IllegalArgumentException("Invalid OpType id: " + id);
     }
 
