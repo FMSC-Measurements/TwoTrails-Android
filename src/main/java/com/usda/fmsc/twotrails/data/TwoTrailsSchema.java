@@ -414,7 +414,7 @@ public class TwoTrailsSchema {
             Description         + " TEXT, " +
             TtDbSchemaVersion   + " TEXT, " +
             TtVersion           + " TEXT, " +
-            CreatedTtVersion    + " TEXT, " +
+            CreatedTtVersion    + " TEXT" +
             ");";
     }
     //endregion
