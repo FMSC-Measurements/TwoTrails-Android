@@ -463,7 +463,7 @@
     <!-- Plot Grid -->
     <string name="pg_points_loc">Points Location</string>
     <string name="pg_sample_type">Sample Type</string>
-    <string name="pg_startpt">Sample Type</string>
+    <string name="pg_startpt">Start Point</string>
     <string name="pg_ss">SubSample</string>
     <string name="pg_gi">Grid Interval</string>
 

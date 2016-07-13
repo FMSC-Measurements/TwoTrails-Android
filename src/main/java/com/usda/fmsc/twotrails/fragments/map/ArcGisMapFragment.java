@@ -360,26 +360,30 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
 
     @Override
     public void moveToLocation(float lat, float lon, float zoomLevel, boolean animate) {
-        if (animate) {
-            float zLevel = -1;
+        if (mMapView != null) {
+            if (animate) {
+                float zLevel = -1;
 
-            if (currentGisMapLayer != null && zoomLevel > -1 && currentGisMapLayer.getNumberOfLevels() > zoomLevel) {
-                zLevel = (float)currentGisMapLayer.getLevelsOfDetail()[(int)zoomLevel].getResolution();
-            }
+                if (currentGisMapLayer != null && zoomLevel > -1 && currentGisMapLayer.getNumberOfLevels() > zoomLevel) {
+                    zLevel = (float)currentGisMapLayer.getLevelsOfDetail()[(int)zoomLevel].getResolution();
+                }
 
-            if (zLevel > -1) {
-                mMapView.zoomToResolution(ArcGISTools.latLngToMapSpatial(lat, lon, mMapView), zLevel);
+                if (zLevel > -1) {
+                    mMapView.zoomToResolution(ArcGISTools.latLngToMapSpatial(lat, lon, mMapView), zLevel);
+                } else {
+                    mMapView.centerAt(lat, lon, true);
+                }
             } else {
-                mMapView.centerAt(lat, lon, true);
+                mMapView.centerAt(lat, lon, false);
             }
-        } else {
-            mMapView.centerAt(lat, lon, false);
         }
     }
 
     @Override
     public void moveToLocation(Extent extents, int padding, boolean animate) {
-        mMapView.setExtent(ArcGISTools.getEnvelopFromLatLngExtents(extents, mMapView), padding, animate);
+        if (mMapView != null) {
+            mMapView.setExtent(ArcGISTools.getEnvelopFromLatLngExtents(extents, mMapView), padding, animate);
+        }
     }
 
 
