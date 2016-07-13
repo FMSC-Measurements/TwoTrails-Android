@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -51,6 +52,7 @@ public class EditableListDialog extends DialogFragment {
         final EditText editText = (EditText)view.findViewById(R.id.diagEitableListTxtValue);
         editText.setText(selectedItem);
         editText.setSelection(selectedItem.length());
+        editText.setInputType(InputType.TYPE_CLASS_TEXT);
 
         final ListView listView = (ListView)view.findViewById(R.id.diagEitableListListValues);
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), R.layout.list_row_diag_editable);

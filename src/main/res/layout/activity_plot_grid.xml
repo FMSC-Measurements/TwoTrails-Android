@@ -35,7 +35,7 @@
             <TableLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:stretchColumns="1"
+                android:stretchColumns="2"
                 android:padding="8dp">
 
                 <TableRow>
@@ -49,7 +49,8 @@
                         android:layout_height="40dp"
                         android:gravity="center_vertical"
                         android:layout_gravity="center_vertical"
-                        android:id="@+id/plotSpnPoly" />
+                        android:id="@+id/plotSpnPoly"
+                        android:layout_span="2"/>
                 </TableRow>
 
                 <TableRow>
@@ -64,7 +65,8 @@
                         android:layout_height="40dp"
                         android:gravity="center_vertical"
                         android:layout_gravity="center_vertical"
-                        android:id="@+id/plotSpnPoint" />
+                        android:id="@+id/plotSpnPoint"
+                        android:layout_span="2" />
                 </TableRow>
 
                 <TableRow>
@@ -80,7 +82,8 @@
                         android:layout_height="40dp"
                         android:gravity="center_vertical"
                         android:layout_gravity="center_vertical"
-                        android:prompt="@string/pg_points_loc" />
+                        android:prompt="@string/pg_points_loc"
+                        android:layout_span="2" />
                 </TableRow>
 
                 <TableRow>
@@ -95,11 +98,11 @@
                         android:id="@+id/plotSpnMeta"
                         android:layout_height="40dp"
                         android:gravity="center_vertical"
-                        android:layout_gravity="center_vertical" />
+                        android:layout_gravity="center_vertical"
+                        android:layout_span="2" />
                 </TableRow>
 
                 <TableRow>
-
                     <TextView
                         android:text="@string/pg_gi"
                         android:textSize="22sp"
@@ -109,7 +112,8 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal">
+                        android:orientation="horizontal"
+                        android:layout_span="2">
 
                         <EditText
                             android:id="@+id/plotTxtGridX"
@@ -135,7 +139,6 @@
                 </TableRow>
 
                 <TableRow>
-
                     <TextView
                         android:text="@string/str_tilt"
                         android:textSize="22sp"
@@ -148,11 +151,11 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         style="@style/EditTextStyle"
-                        android:inputType="numberSigned" />
+                        android:inputType="numberSigned"
+                        android:layout_span="2" />
                 </TableRow>
 
                 <TableRow>
-
                     <CheckBox
                         android:id="@+id/plotChkSubSample"
                         android:text="@string/pg_ss"
@@ -162,6 +165,11 @@
                 </TableRow>
 
                 <TableRow>
+                    <TextView
+                        android:text="@string/pg_sample_type"
+                        android:textSize="22sp"
+                        android:gravity="center_vertical"
+                        android:layout_gravity="center_vertical" />
 
                     <Spinner
                         android:id="@+id/plotSpnSubsample"

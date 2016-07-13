@@ -110,8 +110,24 @@ public class Take5PointsEditRvAdapter extends RecyclerViewEx.BaseAdapterEx {
                 final SideShotViewHolderEx ssHolder = (SideShotViewHolderEx)holder;
                 final SideShotPoint ssp = (SideShotPoint)point;
 
-                ssHolder.txtSlpDist.setText(StringEx.toString(ssp.getSlopeDistance()));
-                ssHolder.txtSlpAng.setText(StringEx.toString(ssp.getSlopeAngle()));
+                ssHolder.txtFwdAz.setText(StringEx.toString(ssp.getFwdAz()));
+                ssHolder.txtBkAz.setText(StringEx.toString(ssp.getBkAz()));
+
+                ssHolder.txtSlpDist.setText(StringEx.toString(
+                        TtUtils.Convert.distance(
+                                ssp.getSlopeDistance(),
+                                metadata.getDistance(),
+                                Dist.Meters)
+                ));
+
+
+                ssHolder.txtSlpAng.setText(StringEx.toString(
+                        TtUtils.Convert.angle(
+                                ssp.getSlopeAngle(),
+                                metadata.getSlope(),
+                                Slope.Percent
+                        )
+                ));
 
                 ssHolder.txtFwdAz.addTextChangedListener(new SimpleTextWatcher() {
                     @Override
@@ -174,6 +190,8 @@ public class Take5PointsEditRvAdapter extends RecyclerViewEx.BaseAdapterEx {
                 break;
             }
         }
+
+        pvh.setLocked(position < points.size() - 1);
     }
 
     @Override
@@ -211,7 +229,6 @@ public class Take5PointsEditRvAdapter extends RecyclerViewEx.BaseAdapterEx {
             ibBnd.setEnabled(!lock);
             txtCmt.setEnabled(!lock);
         }
-
     }
 
     public class Take5ViewHolderEx extends PointViewHolderEx {
