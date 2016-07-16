@@ -97,6 +97,7 @@ import java.util.concurrent.Semaphore;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.geospatial.utm.UTMTools;
 import com.usda.fmsc.utilities.StringEx;
+import com.usda.fmsc.utilities.kml.Point;
 
 import org.joda.time.DateTime;
 
@@ -2087,28 +2088,133 @@ public class PointsActivity extends CustomToolbarActivity {
 
 
     //region Acquire Calculate
-    private void acquireGpsPoint(TtPoint point, ArrayList<TtNmeaBurst> bursts) {
+    private void acquireGpsPoint(final TtPoint point, final ArrayList<TtNmeaBurst> bursts) {
         if (!Global.Settings.DeviceSettings.isGpsConfigured()) {
             configGps();
-        } else {
-            Intent intent = new Intent(this, AcquireGpsActivity.class);
-            intent.putExtra(Consts.Codes.Data.POINT_DATA, TtUtils.clonePoint(point));
-            intent.putExtra(Consts.Codes.Data.POLYGON_DATA, _CurrentPolygon);
-            intent.putExtra(Consts.Codes.Data.METADATA_DATA, _MetaData.get(point.getMetadataCN()));
-
-            if (bursts != null && bursts.size() > 0) {
-                try {
-                    intent.putParcelableArrayListExtra(Consts.Codes.Data.ADDITIVE_NMEA_DATA, bursts);
-                } catch (Exception e) {
-                    e.printStackTrace();
+        } else if (Global.getDAL().needsAdjusting()) {
+            PolygonAdjuster.adjust(Global.getDAL(), new PolygonAdjuster.Listener() {
+                @Override
+                public void adjusterStarted() {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(PointsActivity.this, "Adjusting Points. Starting Acquire soon.", Toast.LENGTH_SHORT).show();
+                        }
+                    });
                 }
-            }
 
-            startActivityForResult(intent, Consts.Codes.Activites.ACQUIRE);
+                @Override
+                public void adjusterStopped(final PolygonAdjuster.AdjustResult result) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (result == PolygonAdjuster.AdjustResult.SUCCESSFUL) {
+                                startAquireGpsActivity(point, bursts);
+                            } else if (result != PolygonAdjuster.AdjustResult.ADJUSTING) {
+                                Toast.makeText(PointsActivity.this, "Adjusting Failed. See error log for details", Toast.LENGTH_LONG).show();
+                            }
+                        }
+                    });
+                }
+
+                @Override
+                public void adjusterRunningSlow() {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            new AlertDialog.Builder(getBaseContext())
+                            .setTitle(R.string.diag_slow_adjusting_title)
+                            .setMessage(R.string.diag_slow_adjusting)
+                            .setPositiveButton("Wait", null)
+                            .setNegativeButton(R.string.str_cancel, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    PolygonAdjuster.cancel();
+                                }
+                            })
+                            .show();
+                        }
+                    });
+                }
+            });
+        } else {
+            startAquireGpsActivity(point, bursts);
         }
     }
 
-    private void acquireT5Points(TtPoint currentPoint) {
+    private void startAquireGpsActivity(TtPoint point, ArrayList<TtNmeaBurst> bursts) {
+        Intent intent = new Intent(this, AcquireGpsActivity.class);
+        intent.putExtra(Consts.Codes.Data.POINT_DATA, TtUtils.clonePoint(point));
+        intent.putExtra(Consts.Codes.Data.POLYGON_DATA, _CurrentPolygon);
+        intent.putExtra(Consts.Codes.Data.METADATA_DATA, _MetaData.get(point.getMetadataCN()));
+
+        if (bursts != null && bursts.size() > 0) {
+            try {
+                intent.putParcelableArrayListExtra(Consts.Codes.Data.ADDITIVE_NMEA_DATA, bursts);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        startActivityForResult(intent, Consts.Codes.Activites.ACQUIRE);
+    }
+
+
+    private void acquireT5Points(final TtPoint point) {
+        if (!Global.Settings.DeviceSettings.isGpsConfigured()) {
+            configGps();
+        } else if (Global.getDAL().needsAdjusting()) {
+            PolygonAdjuster.adjust(Global.getDAL(), new PolygonAdjuster.Listener() {
+                @Override
+                public void adjusterStarted() {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(PointsActivity.this, "Adjusting Points. Starting Acquire soon.", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+
+                @Override
+                public void adjusterStopped(final PolygonAdjuster.AdjustResult result) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (result == PolygonAdjuster.AdjustResult.SUCCESSFUL) {
+                                startTakeActivity(point);
+                            } else if (result != PolygonAdjuster.AdjustResult.ADJUSTING) {
+                                Toast.makeText(PointsActivity.this, "Adjusting Failed. See error log for details", Toast.LENGTH_LONG).show();
+                            }
+                        }
+                    });
+                }
+
+                @Override
+                public void adjusterRunningSlow() {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            new AlertDialog.Builder(getBaseContext())
+                                    .setTitle(R.string.diag_slow_adjusting_title)
+                                    .setMessage(R.string.diag_slow_adjusting)
+                                    .setPositiveButton("Wait", null)
+                                    .setNegativeButton(R.string.str_cancel, new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int i) {
+                                            PolygonAdjuster.cancel();
+                                        }
+                                    })
+                                    .show();
+                        }
+                    });
+                }
+            });
+        } else {
+            startTakeActivity(point);
+        }
+    }
+
+    private void startTakeActivity(TtPoint currentPoint) {
         if (!Global.Settings.DeviceSettings.isGpsConfigured()) {
             configGps();
         } else {
@@ -2130,7 +2236,62 @@ public class PointsActivity extends CustomToolbarActivity {
         }
     }
 
-    private void acquireWalkPoints(TtPoint currentPoint) {
+
+    private void acquireWalkPoints(final TtPoint point) {
+        if (!Global.Settings.DeviceSettings.isGpsConfigured()) {
+            configGps();
+        } else if (Global.getDAL().needsAdjusting()) {
+            PolygonAdjuster.adjust(Global.getDAL(), new PolygonAdjuster.Listener() {
+                @Override
+                public void adjusterStarted() {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(PointsActivity.this, "Adjusting Points. Starting Acquire soon.", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+
+                @Override
+                public void adjusterStopped(final PolygonAdjuster.AdjustResult result) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (result == PolygonAdjuster.AdjustResult.SUCCESSFUL) {
+                                startWalkActivity(point);
+                            } else if (result != PolygonAdjuster.AdjustResult.ADJUSTING) {
+                                Toast.makeText(PointsActivity.this, "Adjusting Failed. See error log for details", Toast.LENGTH_LONG).show();
+                            }
+                        }
+                    });
+                }
+
+                @Override
+                public void adjusterRunningSlow() {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            new AlertDialog.Builder(getBaseContext())
+                                    .setTitle(R.string.diag_slow_adjusting_title)
+                                    .setMessage(R.string.diag_slow_adjusting)
+                                    .setPositiveButton("Wait", null)
+                                    .setNegativeButton(R.string.str_cancel, new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int i) {
+                                            PolygonAdjuster.cancel();
+                                        }
+                                    })
+                                    .show();
+                        }
+                    });
+                }
+            });
+        } else {
+            startWalkActivity(point);
+        }
+    }
+
+    private void startWalkActivity(TtPoint currentPoint) {
         if (!Global.Settings.DeviceSettings.isGpsConfigured()) {
             configGps();
         } else {
@@ -2151,6 +2312,7 @@ public class PointsActivity extends CustomToolbarActivity {
             startActivityForResult(intent, Consts.Codes.Activites.WALK);
         }
     }
+
 
     private void calculateGpsPoint() {
         if (_CurrentPoint != null && _CurrentPoint.isGpsType()) {

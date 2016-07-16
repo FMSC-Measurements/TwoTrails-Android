@@ -7,6 +7,7 @@ import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -383,6 +384,18 @@ public class Take5Activity extends AcquireGpsMapActivity {
     }
 
     @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if ((keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)){
+            if (validateSideShot()) {
+                setupTake5();
+            }
+
+        }
+
+        return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
     public void onMapReady() {
         super.onMapReady();
 
@@ -444,7 +457,7 @@ public class Take5Activity extends AcquireGpsMapActivity {
             savePoint(_CurrentPoint);
         }
 
-        lockLastPoint();
+        lockLastPoint(true);
 
         _PrevPoint = _CurrentPoint;
         _CurrentPoint = new SideShotPoint();
@@ -492,7 +505,7 @@ public class Take5Activity extends AcquireGpsMapActivity {
 
                     //temp adjust for map
                     TtPoint tmp;
-                    for (int i = _Points.size() - 2; i > -1; i++) {
+                    for (int i = _Points.size() - 2; i > -1 && i < _Points.size(); i++) {
                         tmp =_Points.get(i);
 
                         if (tmp.getOp().isGpsType()) {
@@ -525,7 +538,7 @@ public class Take5Activity extends AcquireGpsMapActivity {
 
             hideCancel();
 
-            lockLastPoint();
+            lockLastPoint(true);
 
             _PrevPoint = _CurrentPoint;
             _CurrentPoint = point;
@@ -614,16 +627,15 @@ public class Take5Activity extends AcquireGpsMapActivity {
         }
     }
 
-    private void lockLastPoint() {
+    private void lockLastPoint(boolean lock) {
         if (_Points.size() > 0) {
             Take5PointsEditRvAdapter.PointViewHolderEx holder = (Take5PointsEditRvAdapter.PointViewHolderEx) rvPoints.findViewHolderForAdapterPosition(_Points.size() - 1);
 
             if (holder != null) {
-                holder.setLocked(true);
+                holder.setLocked(lock);
             }
         }
     }
-
 
     private void showCancel() {
         if (!cancelVisible) {
@@ -760,22 +772,18 @@ public class Take5Activity extends AcquireGpsMapActivity {
 
 
     public void btnTake5Click(View view) {
-        if (!validateSideShot()) {
-            return;
+        if (validateSideShot()) {
+            setupTake5();
         }
-
-        setupTake5();
     }
 
     public void btnSideShotClick(View view) {
-        if (!validateSideShot()) {
-            return;
+        if (validateSideShot()) {
+            if (isGpsExtraInfoVisible())
+                hideExtraGpsStatus();
+
+            setupSideShot();
         }
-
-        if (isGpsExtraInfoVisible())
-            hideExtraGpsStatus();
-
-        setupSideShot();
     }
 
     public void btnCancelClick(View view) {
