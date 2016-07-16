@@ -885,14 +885,11 @@ public class TtUtils {
         Double z = adjusted ? point.getAdjZ() : point.getUnAdjZ();
 
         if (z == null) {
-            z = point.getUnAdjZ();
-
-            if (z == null) {
-                throw new RuntimeException("Point not adjusted");
-            }
+            z = 0d;
+            //throw new RuntimeException("Point not adjusted");
+        } else {
+            z = TtUtils.Convert.distance(z, meta.getElevation(), UomElevation.Meters);
         }
-
-        z = TtUtils.Convert.distance(z, meta.getElevation(), UomElevation.Meters);
 
         double lat, lon;
 

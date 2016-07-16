@@ -1,8 +1,5 @@
 package com.usda.fmsc.twotrails.logic;
 
-
-import android.content.Context;
-
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
 import com.usda.fmsc.twotrails.data.TwoTrailsSchema;
 import com.usda.fmsc.twotrails.objects.points.QuondamPoint;
@@ -35,11 +32,11 @@ public class PolygonAdjuster {
     }
 
 
-    public static AdjustResult adjust(DataAccessLayer dal, Context ctx) {
-        return adjust(dal, ctx, false);
+    public static AdjustResult adjust(DataAccessLayer dal, final Listener listener) {
+        return adjust(dal, listener, false);
     }
 
-    public static AdjustResult adjust(final DataAccessLayer dal, final Context ctx, final boolean updateIndexes) {
+    public static AdjustResult adjust(final DataAccessLayer dal, final Listener listener, final boolean updateIndexes) {
         if (_processing)
             return AdjustResult.ADJUSTING;
 
@@ -67,10 +64,6 @@ public class PolygonAdjuster {
             public void run() {
                 AdjustResult result = AdjustResult.ADJUSTING;
                 boolean success = false;
-                Listener listener = null;
-
-                if(ctx instanceof Listener)
-                    listener = (Listener)ctx;
 
                 try {
                     if(listener != null)

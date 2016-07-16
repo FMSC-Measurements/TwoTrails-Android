@@ -2895,6 +2895,27 @@ public class DataAccessLayer {
         return cns;
     }
 
+    public boolean needsAdjusting()
+    {
+        String countQuery = String.format("SELECT COUNT (*) FROM %s where %s = NULL",
+                TwoTrailsSchema.PointSchema.TableName,
+                TwoTrailsSchema.PointSchema.AdjX);
+
+        Cursor cursor = _db.rawQuery(countQuery, null);
+
+        int count = 0;
+        if (null != cursor) {
+            if (cursor.getCount() > 0) {
+                cursor.moveToFirst();
+                count = cursor.getInt(0);
+            }
+
+            cursor.close();
+        }
+
+        return count > 0;
+    }
+
     public void clean() {
         StringBuilder sbPoly = new StringBuilder();
         StringBuilder sbPoint = new StringBuilder();

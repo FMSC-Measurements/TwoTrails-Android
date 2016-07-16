@@ -1,6 +1,5 @@
 package com.usda.fmsc.twotrails.activities;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.support.design.widget.FloatingActionButton;
@@ -35,7 +34,7 @@ public class ImportActivity extends TtAjusterCustomToolbarActivity {
 
     private BaseImportFragment fragment;
 
-    private Activity activity;
+    private PolygonAdjuster.Listener polyAdjustListener;
     private EditText txtFile;
     private PostDelayHandler handler = new PostDelayHandler(1000);
 
@@ -56,7 +55,7 @@ public class ImportActivity extends TtAjusterCustomToolbarActivity {
                                 .setAction("View Map", new View.OnClickListener() {
                                     @Override
                                     public void onClick(View v) {
-                                        PolygonAdjuster.adjust(Global.getDAL(), activity);
+                                        PolygonAdjuster.adjust(Global.getDAL(), polyAdjustListener);
                                     }
                                 })
                                 .setActionTextColor(AndroidUtils.UI.getColor(getBaseContext(), R.color.primaryLighter));
@@ -94,7 +93,7 @@ public class ImportActivity extends TtAjusterCustomToolbarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_import);
 
-        activity = this;
+        polyAdjustListener = this;
 
         fabImport = (FloatingActionButton)findViewById(R.id.importFabImport);
         fabProgCircle = (FABProgressCircleEx)findViewById(R.id.importFabImportProgressCircle);

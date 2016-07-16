@@ -515,6 +515,19 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
                 });
         alert.show();
     }
+
+    private void askToAdjust() {
+        new AlertDialog.Builder(MainActivity.this)
+        .setMessage("It looks like the data layer needs to be adjusted. Would you like to try and adjust it now?")
+            .setPositiveButton(R.string.str_yes, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    PolygonAdjuster.adjust(Global.getDAL(), MainActivity.this, true);
+                }
+            })
+            .setNeutralButton(R.string.str_no, null)
+            .show();
+    }
     //endregion
 
 
@@ -676,17 +689,21 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
         if (AndroidUtils.App.isPackageInstalled(this, gEarth)) {
 
-            progressLayout.setVisibility(View.VISIBLE);
+            if (Global.getDAL().needsAdjusting()) {
+                askToAdjust();
+            } else {
+                progressLayout.setVisibility(View.VISIBLE);
 
-            String kmlPath = Export.kml(Global.getDAL(), Global.getTtFileDir());
+                String kmlPath = Export.kml(Global.getDAL(), Global.getTtFileDir());
 
-            progressLayout.setVisibility(View.GONE);
+                progressLayout.setVisibility(View.GONE);
 
-            if (!StringEx.isEmpty(kmlPath)) {
-                File KML = new File(kmlPath);
-                Intent i = getPackageManager().getLaunchIntentForPackage(gEarth);
-                i.setDataAndType(Uri.fromFile(KML), "application/vnd.google-earth.kml+xml");
-                startActivity(i);
+                if (!StringEx.isEmpty(kmlPath)) {
+                    File KML = new File(kmlPath);
+                    Intent i = getPackageManager().getLaunchIntentForPackage(gEarth);
+                    i.setDataAndType(Uri.fromFile(KML), "application/vnd.google-earth.kml+xml");
+                    startActivity(i);
+                }
             }
         } else {
             AlertDialog.Builder dialog = new AlertDialog.Builder(this);
@@ -713,7 +730,12 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
     public void btnExportClick(View view) {
         if(Global.getDAL().hasPolygons()) {
-            startActivity(new Intent(this, ExportActivity.class));
+            if (Global.getDAL().needsAdjusting())
+            {
+                askToAdjust();
+            } else {
+                startActivity(new Intent(this, ExportActivity.class));
+            }
         } else {
             Toast.makeText(this, "No Polygons in Project", Toast.LENGTH_SHORT).show();
         }
