@@ -648,7 +648,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
     //region Data
     public void btnPointsClick(View view) {
-        if(Global.getDAL().hasPolygons()) {
+        if (Global.getDAL().hasPolygons()) {
             startActivityForResult(new Intent(this, PointsActivity.class), UPDATE_INFO);
         } else {
             Toast.makeText(this, "No Polygons in Project", Toast.LENGTH_SHORT).show();
@@ -668,7 +668,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     }
 
     public void btnPointTableClick(View view) {
-        if(Global.getDAL().getItemCount(TwoTrailsSchema.PointSchema.TableName) > 0) {
+        if (Global.getDAL().getItemCount(TwoTrailsSchema.PointSchema.TableName) > 0) {
             startActivityForResult(new Intent(this, TableViewActivity.class), UPDATE_INFO);
         } else {
             Toast.makeText(this, "No Points in Project", Toast.LENGTH_SHORT).show();
@@ -679,7 +679,11 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     //region Tools
     public void btnMapClick(View view) {
         if (AndroidUtils.App.requestNetworkPermission(this, Consts.Codes.Requests.INTERNET)) {
-            startActivity(new Intent(this, MapActivity.class));
+            if (Global.getDAL().needsAdjusting()) {
+                askToAdjust();
+            } else {
+                startActivity(new Intent(this, MapActivity.class));
+            }
         }
     }
 
@@ -688,7 +692,6 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
         final Activity activity = this;
 
         if (AndroidUtils.App.isPackageInstalled(this, gEarth)) {
-
             if (Global.getDAL().needsAdjusting()) {
                 askToAdjust();
             } else {
@@ -721,17 +724,20 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     }
 
     public void btnHAIDClick(View view) {
-        if(Global.getDAL().hasPolygons()) {
-            startActivity(new Intent(this, HaidActivity.class));
+        if (Global.getDAL().hasPolygons()) {
+            if (Global.getDAL().needsAdjusting()) {
+                askToAdjust();
+            } else {
+                startActivity(new Intent(this, HaidActivity.class));
+            }
         } else {
             Toast.makeText(this, "No Polygons in Project", Toast.LENGTH_SHORT).show();
         }
     }
 
     public void btnExportClick(View view) {
-        if(Global.getDAL().hasPolygons()) {
-            if (Global.getDAL().needsAdjusting())
-            {
+        if (Global.getDAL().hasPolygons()) {
+            if (Global.getDAL().needsAdjusting()) {
                 askToAdjust();
             } else {
                 startActivity(new Intent(this, ExportActivity.class));

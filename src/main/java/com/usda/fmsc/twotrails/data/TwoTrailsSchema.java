@@ -226,7 +226,7 @@ public class TwoTrailsSchema {
             SharedSchema.CN + " TEXT, " +
             Name            + " TEXT, " +
             Description     + " TEXT, " +
-            Type            + " TEXT, " +
+            Type            + " INTEGER, " +
             "PRIMARY KEY (" + SharedSchema.CN + "));";
 
 
@@ -355,19 +355,19 @@ public class TwoTrailsSchema {
         public static final String CreateTable =
             "CREATE TABLE " + TableName + " (" +
             SharedSchema.CN + " TEXT NOT NULL, " +
-            Name            + " TEXT, " +
-            Distance        + " TEXT, " +
-            Slope           + " TEXT, " +
+            Name            + " TEXT NOT NULL, " +
+            Distance        + " INTEGER NOT NULL, " +
+            Slope           + " INTEGER NOT NULL, " +
             MagDec          + " REAL, " +
-            DeclinationType + " TEXT, " +
-            Elevation       + " TEXT, " +
+            DeclinationType + " INTEGER NOT NULL, " +
+            Elevation       + " INTEGER NOT NULL, " +
             Comment         + " TEXT, " +
-            Datum           + " TEXT, " +
+            Datum           + " INTEGER NOT NULL, " +
             GpsReceiver     + " TEXT, " +
             RangeFinder     + " TEXT, " +
             Compass         + " TEXT, " +
             Crew            + " TEXT, " +
-            UtmZone         + " INTEGER, " +
+            UtmZone         + " INTEGER NOT NULL, " +
             "PRIMARY KEY (" + SharedSchema.CN + "));";
 
         public static final String SelectItems =

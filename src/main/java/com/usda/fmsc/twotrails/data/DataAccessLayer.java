@@ -1366,19 +1366,19 @@ public class DataAccessLayer {
                     if (!c.isNull(1))
                         meta.setName(c.getString(1));
                     if (!c.isNull(2))
-                        meta.setDistance(Dist.valueOf(c.getString(2)));
+                        meta.setDistance(Dist.parse(c.getInt(2)));
                     if (!c.isNull(3))
-                        meta.setSlope(Slope.valueOf(c.getString(3)));
+                        meta.setSlope(Slope.parse(c.getInt(3)));
                     if (!c.isNull(4))
                         meta.setMagDec(c.getDouble(4));
                     if (!c.isNull(5))
-                        meta.setDecType(DeclinationType.valueOf(c.getString(5)));
+                        meta.setDecType(DeclinationType.parse(c.getInt(5)));
                     if (!c.isNull(6))
-                        meta.setElevation(UomElevation.valueOf(c.getString(6)));
+                        meta.setElevation(UomElevation.parse(c.getInt(6)));
                     if (!c.isNull(7))
                         meta.setComment(c.getString(7));
                     if (!c.isNull(8))
-                        meta.setDatum(Datum.valueOf(c.getString(8)));
+                        meta.setDatum(Datum.parse(c.getInt(8)));
                     if (!c.isNull(9))
                         meta.setGpsReceiver(c.getString(9));
                     if (!c.isNull(10))
@@ -1425,13 +1425,13 @@ public class DataAccessLayer {
             cvs.put(TwoTrailsSchema.SharedSchema.CN, meta.getCN());
             cvs.put(TwoTrailsSchema.MetadataSchema.Name, meta.getName());
             cvs.put(TwoTrailsSchema.MetadataSchema.Comment, meta.getComment());
-            cvs.put(TwoTrailsSchema.MetadataSchema.Distance, meta.getDistance().toString());
-            cvs.put(TwoTrailsSchema.MetadataSchema.Slope, meta.getSlope().toString());
+            cvs.put(TwoTrailsSchema.MetadataSchema.Distance, meta.getDistance().getValue());
+            cvs.put(TwoTrailsSchema.MetadataSchema.Slope, meta.getSlope().getValue());
             cvs.put(TwoTrailsSchema.MetadataSchema.MagDec, meta.getMagDec());
-            cvs.put(TwoTrailsSchema.MetadataSchema.DeclinationType, meta.getDecType().toString());
-            cvs.put(TwoTrailsSchema.MetadataSchema.Elevation, meta.getElevation().toString());
+            cvs.put(TwoTrailsSchema.MetadataSchema.DeclinationType, meta.getDecType().getValue());
+            cvs.put(TwoTrailsSchema.MetadataSchema.Elevation, meta.getElevation().getValue());
 
-            cvs.put(TwoTrailsSchema.MetadataSchema.Datum, meta.getDatum().toString());
+            cvs.put(TwoTrailsSchema.MetadataSchema.Datum, meta.getDatum().getValue());
             cvs.put(TwoTrailsSchema.MetadataSchema.GpsReceiver, meta.getGpsReceiver());
             cvs.put(TwoTrailsSchema.MetadataSchema.RangeFinder, meta.getRangeFinder());
             cvs.put(TwoTrailsSchema.MetadataSchema.Compass, meta.getCompass());
@@ -1462,13 +1462,13 @@ public class DataAccessLayer {
             ContentValues cvs = new ContentValues();
             cvs.put(TwoTrailsSchema.MetadataSchema.Name, meta.getName());
             cvs.put(TwoTrailsSchema.MetadataSchema.Comment, meta.getComment());
-            cvs.put(TwoTrailsSchema.MetadataSchema.Distance, meta.getDistance().toString());
-            cvs.put(TwoTrailsSchema.MetadataSchema.Slope, meta.getSlope().toString());
+            cvs.put(TwoTrailsSchema.MetadataSchema.Distance, meta.getDistance().getValue());
+            cvs.put(TwoTrailsSchema.MetadataSchema.Slope, meta.getSlope().getValue());
             cvs.put(TwoTrailsSchema.MetadataSchema.MagDec, meta.getMagDec());
-            cvs.put(TwoTrailsSchema.MetadataSchema.DeclinationType, meta.getDecType().toString());
-            cvs.put(TwoTrailsSchema.MetadataSchema.Elevation, meta.getElevation().toString());
+            cvs.put(TwoTrailsSchema.MetadataSchema.DeclinationType, meta.getDecType().getValue());
+            cvs.put(TwoTrailsSchema.MetadataSchema.Elevation, meta.getElevation().getValue());
 
-            cvs.put(TwoTrailsSchema.MetadataSchema.Datum, meta.getDatum().toString());
+            cvs.put(TwoTrailsSchema.MetadataSchema.Datum, meta.getDatum().getValue());
             cvs.put(TwoTrailsSchema.MetadataSchema.GpsReceiver, meta.getGpsReceiver());
             cvs.put(TwoTrailsSchema.MetadataSchema.RangeFinder, meta.getRangeFinder());
             cvs.put(TwoTrailsSchema.MetadataSchema.Compass, meta.getCompass());
@@ -1538,9 +1538,9 @@ public class DataAccessLayer {
     }
 
     public ArrayList<TtGroup> getGroupsByType(TtGroup.GroupType type) {
-        return getGroups(String.format("%s = '%s'",
+        return getGroups(String.format("%s = %d",
                 TwoTrailsSchema.GroupSchema.Type,
-                type.toString()));
+                type.getValue()));
     }
 
     public TtGroup getGroupByCN(String cn) {
@@ -1578,7 +1578,7 @@ public class DataAccessLayer {
                     if (!c.isNull(2))
                         group.setDescription(c.getString(2));
                     if (!c.isNull(3))
-                        group.setGroupType(TtGroup.GroupType.valueOf(c.getString(3)));
+                        group.setGroupType(TtGroup.GroupType.parse(c.getInt(3)));
 
                     groups.add(group);
 
@@ -1615,7 +1615,7 @@ public class DataAccessLayer {
             cvs.put(TwoTrailsSchema.SharedSchema.CN, group.getCN());
             cvs.put(TwoTrailsSchema.GroupSchema.Name, group.getName());
             cvs.put(TwoTrailsSchema.GroupSchema.Description, group.getDescription());
-            cvs.put(TwoTrailsSchema.GroupSchema.Type, group.getGroupType().toString());
+            cvs.put(TwoTrailsSchema.GroupSchema.Type, group.getGroupType().getValue());
 
             _db.insert(TwoTrailsSchema.GroupSchema.TableName, null, cvs);
 
@@ -1641,7 +1641,7 @@ public class DataAccessLayer {
             ContentValues cvs = new ContentValues();
             cvs.put(TwoTrailsSchema.GroupSchema.Name, group.getName());
             cvs.put(TwoTrailsSchema.GroupSchema.Description, group.getDescription());
-            cvs.put(TwoTrailsSchema.GroupSchema.Type, group.getGroupType().toString());
+            cvs.put(TwoTrailsSchema.GroupSchema.Type, group.getGroupType().getValue());
 
             success = _db.update(TwoTrailsSchema.GroupSchema.TableName, cvs,
                     String.format("%s = '%s'", TwoTrailsSchema.SharedSchema.CN, group.getCN()), null);

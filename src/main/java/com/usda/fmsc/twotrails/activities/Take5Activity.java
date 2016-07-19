@@ -162,7 +162,13 @@ public class Take5Activity extends AcquireGpsMapActivity {
                                 }
 
                                 if (pos > -1 && pos < _Points.size()) {
-                                    moveToMapPoint(pos);
+                                    final int fpos = pos;
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            moveToMapPoint(fpos);
+                                        }
+                                    });
                                 }
                             } catch (InterruptedException e) {
                                 e.printStackTrace();

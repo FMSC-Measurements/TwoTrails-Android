@@ -245,24 +245,26 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
     }
 
     private void moveToLocation(CameraUpdate cu, boolean animate) {
-        if (animate) {
-            if (cameraQueueEnabled) {
-                if (isMoving) {
-                    cameraQueue.add(cu);
+        if (map != null && cu != null) {
+            if (animate) {
+                if (cameraQueueEnabled) {
+                    if (isMoving) {
+                        cameraQueue.add(cu);
+                    } else {
+                        isMoving = true;
+                        map.animateCamera(cu, cancelableCallback);
+                    }
                 } else {
-                    isMoving = true;
-                    map.animateCamera(cu, cancelableCallback);
+                    map.animateCamera(cu);
                 }
             } else {
-                map.animateCamera(cu);
-            }
-        } else {
-            if (cameraQueueEnabled) {
-                cameraQueue.clear();
-                isMoving = false;
-            }
+                if (cameraQueueEnabled) {
+                    cameraQueue.clear();
+                    isMoving = false;
+                }
 
-            map.moveCamera(cu);
+                map.moveCamera(cu);
+            }
         }
     }
 
