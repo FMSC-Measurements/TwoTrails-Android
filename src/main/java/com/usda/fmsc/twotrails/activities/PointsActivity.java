@@ -2004,7 +2004,7 @@ public class PointsActivity extends CustomToolbarActivity {
 //            listener.onLockChange(_PointLocked);
 //        }
 
-        if (listeners.containsKey(_CurrentPoint.getCN())) {
+        if (_CurrentPoint != null && listeners.containsKey(_CurrentPoint.getCN())) {
             listeners.get(_CurrentPoint.getCN()).onLockChange(_PointLocked);
         }
     }
@@ -2012,7 +2012,7 @@ public class PointsActivity extends CustomToolbarActivity {
     private void onPointUpdate() {
         setPointUpdated(true);
 
-        if (listeners.containsKey(_CurrentPoint.getCN())) {
+        if (_CurrentPoint != null && listeners.containsKey(_CurrentPoint.getCN())) {
             listeners.get(_CurrentPoint.getCN()).onPointUpdated(_CurrentPoint);
         }
     }
