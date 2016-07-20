@@ -83,11 +83,9 @@ public class GPSPointFragment extends BasePointFragment {
                         value = ParseEx.parseDouble(s.toString(), 0d);
                     }
 
-                    //if (value != null && !TtUtils.Math.cmpa(value, _GpsPoint.getUnAdjX())) {
-                        _GpsPoint.setUnAdjX(value);
-                        _GpsPoint.clearLatLon();
-                        getPointsActivity().updatePoint(_GpsPoint);
-                    //}
+                    _GpsPoint.setUnAdjX(value);
+                    _GpsPoint.clearLatLon();
+                    getPointsActivity().updatePoint(_GpsPoint);
                 }
             }
         });
@@ -102,11 +100,9 @@ public class GPSPointFragment extends BasePointFragment {
                         value = ParseEx.parseDouble(s.toString(), 0d);
                     }
 
-                    //if (value != null && !TtUtils.Math.cmpa(value, _GpsPoint.getUnAdjY())) {
-                        _GpsPoint.setUnAdjY(value);
-                        _GpsPoint.clearLatLon();
-                        getPointsActivity().updatePoint(_GpsPoint);
-                    //}
+                    _GpsPoint.setUnAdjY(value);
+                    _GpsPoint.clearLatLon();
+                    getPointsActivity().updatePoint(_GpsPoint);
                 }
             }
         });
@@ -121,15 +117,11 @@ public class GPSPointFragment extends BasePointFragment {
                         value = ParseEx.parseDouble(s.toString(), 0d);
                     }
 
-                    //if (value != null) {
-                        value = TtUtils.Convert.distance(value, UomElevation.Meters, getMetadata().getElevation());
+                    value = TtUtils.Convert.distance(value, UomElevation.Meters, getMetadata().getElevation());
 
-                        //if (!TtUtils.Math.cmpa(value, _GpsPoint.getUnAdjZ())) {
-                            _GpsPoint.setUnAdjZ(value);
-                            _GpsPoint.clearLatLon();
-                            getPointsActivity().updatePoint(_GpsPoint);
-                        //}
-                    //}
+                    _GpsPoint.setUnAdjZ(value);
+                    _GpsPoint.clearLatLon();
+                    getPointsActivity().updatePoint(_GpsPoint);
                 }
             }
         });
@@ -144,13 +136,8 @@ public class GPSPointFragment extends BasePointFragment {
                         value = ParseEx.parseDouble(s.toString());
                     }
 
-                    //Double ma = _GpsPoint.getManualAccuracy();
-
-                    //if ((value == null ^ ma == null) ||
-                            //value != null && !TtUtils.Math.cmpa(value, ma)) {
-                        _GpsPoint.setManualAccuracy(value);
-                        getPointsActivity().updatePoint(_GpsPoint);
-                    //}
+                    _GpsPoint.setManualAccuracy(value);
+                    getPointsActivity().updatePoint(_GpsPoint);
                 }
             }
         });
@@ -219,9 +206,7 @@ public class GPSPointFragment extends BasePointFragment {
     }
 
     @Override
-    public void onLockChange(boolean locked) {
-        super.onLockChange(locked);
-
+    protected void onBaseLockChanged(boolean locked) {
         txtX.setEnabled(!locked);
         txtY.setEnabled(!locked);
         txtElev.setEnabled(!locked);

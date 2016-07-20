@@ -178,7 +178,6 @@ public class QuondamPointFragment extends BasePointFragment {
         return view;
     }
 
-
     @Override
     protected void onBasePointUpdated() {
         _Quondam = (QuondamPoint)getBasePoint();
@@ -221,9 +220,7 @@ public class QuondamPointFragment extends BasePointFragment {
     }
 
     @Override
-    public void onLockChange(boolean locked) {
-        super.onLockChange(locked);
-
+    protected void onBaseLockChanged(boolean locked) {
         lvPoints.setAlpha(locked ? Consts.DISABLED_ALPHA : Consts.ENABLED_ALPHA);
         lvPolys.setAlpha(locked ? Consts.DISABLED_ALPHA : Consts.ENABLED_ALPHA);
         lvPoints.setEnabled(!locked);

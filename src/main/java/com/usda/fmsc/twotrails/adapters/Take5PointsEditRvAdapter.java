@@ -112,6 +112,7 @@ public class Take5PointsEditRvAdapter extends RecyclerViewEx.BaseAdapterEx {
 
                 ssHolder.txtFwdAz.setText(StringEx.toString(ssp.getFwdAz()));
                 ssHolder.txtBkAz.setText(StringEx.toString(ssp.getBkAz()));
+                ssHolder.tvMagDec.setText(StringEx.toString(metadata.getMagDec()));
 
                 ssHolder.txtSlpDist.setText(StringEx.toString(
                         TtUtils.Convert.distance(
@@ -248,7 +249,7 @@ public class Take5PointsEditRvAdapter extends RecyclerViewEx.BaseAdapterEx {
 
     public class SideShotViewHolderEx extends PointViewHolderEx {
         EditText txtFwdAz, txtBkAz, txtSlpDist, txtSlpAng;
-        TextView tvDiff;
+        TextView tvDiff, tvMagDec;
 
         public SideShotViewHolderEx(View itemView) {
             super(itemView);
@@ -261,6 +262,7 @@ public class Take5PointsEditRvAdapter extends RecyclerViewEx.BaseAdapterEx {
             txtSlpAng = (EditText)itemView.findViewById(R.id.pointTravTxtSlopeAng);
 
             tvDiff = (TextView)itemView.findViewById(R.id.pointTravAzDiff);
+            tvMagDec = (TextView)itemView.findViewById(R.id.pointTravTvMagDec);
         }
 
         @Override

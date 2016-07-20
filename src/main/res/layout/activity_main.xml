@@ -47,7 +47,7 @@
         android:layout_height="100dp"
         android:gravity="center"
         android:layout_gravity="center"
-        android:visibility="gone">
+        android:visibility="visible">
 
         <ProgressBar
             android:id="@+id/progress"

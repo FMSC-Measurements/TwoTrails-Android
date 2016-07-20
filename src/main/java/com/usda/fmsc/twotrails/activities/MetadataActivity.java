@@ -682,7 +682,7 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
         if (!_MetaLocked) {
             final NumericInputDialog inputDialog = new NumericInputDialog(this);
 
-            inputDialog.setTitle(R.string.poly_acc);
+            inputDialog.setTitle(R.string.str_mag_dec);
             inputDialog.setInputText(StringEx.toString(_CurrentMetadata.getMagDec()));
 
             inputDialog.setPositiveButton(R.string.str_ok, new DialogInterface.OnClickListener() {
@@ -846,7 +846,7 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
             final InputDialog inputDialog = new InputDialog(this);
 
             inputDialog.setTitle(R.string.meta_compass);
-            inputDialog.setInputText(_CurrentMetadata.getName());
+            inputDialog.setInputText(_CurrentMetadata.getCompass());
 
             inputDialog.setPositiveButton(R.string.str_ok, new DialogInterface.OnClickListener() {
                 @Override

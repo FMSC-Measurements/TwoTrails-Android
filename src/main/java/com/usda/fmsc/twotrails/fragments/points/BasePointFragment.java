@@ -170,7 +170,9 @@ public abstract class BasePointFragment extends AnimationCardFragment implements
     }
 
     @Override
-    public void onLockChange(boolean locked) {
+    public final void onLockChange(boolean locked) {
+        onBaseLockChanged(locked);
+
         if (header != null) {
             if (this.locked != locked) {
                 this.locked = locked;
@@ -184,11 +186,12 @@ public abstract class BasePointFragment extends AnimationCardFragment implements
             }
 
             if (locked) {
-                preFocus.requestFocus();
                 input.hideSoftInputFromWindow(preFocus.getWindowToken(), 0);
             }
         }
     }
+
+    protected abstract void onBaseLockChanged(boolean locked);
 
     @Override
     public final void onPointUpdated(TtPoint point) {
@@ -213,6 +216,7 @@ public abstract class BasePointFragment extends AnimationCardFragment implements
         tvPID.setText(StringEx.toString(_Point.getPID()));
         txtCmt.setText(_Point.getComment());
         ibBnd.setImageDrawable(getBndDrawable(_Point.isOnBnd()));
+
         updating = false;
     }
 

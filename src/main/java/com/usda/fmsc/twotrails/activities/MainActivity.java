@@ -95,22 +95,27 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
         }
 
         //setup values
-        Global.init(getApplicationContext(), this);  //setup all the values using the application context
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Global.init(getApplicationContext(), MainActivity.this);
 
-        final Intent intent = getIntent();
-        final String action = intent.getAction();
+                final Intent intent = getIntent();
+                final String action = intent.getAction();
 
-        if(Intent.ACTION_VIEW.equals(action)){
-            Uri uri = intent.getData();
-            openFile(uri);
-        }
+                if (Intent.ACTION_VIEW.equals(action)){
+                    Uri uri = intent.getData();
+                    openFile(uri);
+                }
 
-        if (Global.Settings.DeviceSettings.getAutoOpenLastProject()) {
-            ArrayList<RecentProject> recentProjects = Global.Settings.ProjectSettings.getRecentProjects();
-            if (recentProjects.size() > 0) {
-                openFile(recentProjects.get(0).File);
+                if (Global.Settings.DeviceSettings.getAutoOpenLastProject()) {
+                    ArrayList<RecentProject> recentProjects = Global.Settings.ProjectSettings.getRecentProjects();
+                    if (recentProjects.size() > 0) {
+                        openFile(recentProjects.get(0).File);
+                    }
+                }
             }
-        }
+        }).start();
     }
 
     @Override
@@ -120,6 +125,10 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
         if (!askLocation && !AndroidUtils.App.requestLocationPermission(MainActivity.this, Consts.Codes.Requests.LOCATION)) {
             askLocation = true;
+        }
+
+        if (progressLayout != null) {
+            progressLayout.setVisibility(View.GONE);
         }
     }
 
@@ -335,7 +344,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     }
 
     private void openFile(String filePath) {
-        if(PolygonAdjuster.isProcessing()) {
+        if (PolygonAdjuster.isProcessing()) {
             Toast.makeText(this, "Currently Adjusting Polygons.", Toast.LENGTH_LONG).show();
         } else {
             if (_fileOpen) {
@@ -362,18 +371,33 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
                         //else
                         Global.setDAL(null);
-                        Toast.makeText(this, "Upgrade Canceled", Toast.LENGTH_SHORT).show();
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(MainActivity.this, "Upgrade Canceled", Toast.LENGTH_SHORT).show();
+                            }
+                        });
 
                     } else {
-                        gotoDataTab();
-                        _fileOpen = true;
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                gotoDataTab();
+                                _fileOpen = true;
+                                updateAppInfo();
+                            }
+                        });
                     }
-
-                    updateAppInfo();
                 }
             } catch (Exception e) {
-                Toast.makeText(this, "File Failed to Open", Toast.LENGTH_SHORT).show();
-                _fileOpen = false;
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        _fileOpen = false;
+                        Toast.makeText(MainActivity.this, "File Failed to Open", Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
         }
     }

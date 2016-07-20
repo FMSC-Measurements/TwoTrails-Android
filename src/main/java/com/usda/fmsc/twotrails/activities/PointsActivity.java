@@ -1450,7 +1450,7 @@ public class PointsActivity extends CustomToolbarActivity {
             }
 
             if (error > 0) {
-                Toast.makeText(PointsActivity.this, String.format("Error saving %d pictures"), Toast.LENGTH_LONG).show();
+                Toast.makeText(PointsActivity.this, String.format("Error saving %d pictures", pictures.size()), Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -2000,8 +2000,12 @@ public class PointsActivity extends CustomToolbarActivity {
 
     //region Fragment Interaction
     private void onLockChange() {
-        for (Listener listener : listeners.values()) {
-            listener.onLockChange(_PointLocked);
+//        for (Listener listener : listeners.values()) {
+//            listener.onLockChange(_PointLocked);
+//        }
+
+        if (listeners.containsKey(_CurrentPoint.getCN())) {
+            listeners.get(_CurrentPoint.getCN()).onLockChange(_PointLocked);
         }
     }
 
