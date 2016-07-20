@@ -250,9 +250,7 @@ public class TraversePointFragment extends BasePointFragment {
     }
 
     @Override
-    public void onLockChange(boolean locked) {
-        super.onLockChange(locked);
-
+    protected void onBaseLockChanged(boolean locked) {
         txtFwd.setEnabled(!locked);
         txtBk.setEnabled(!locked);
         txtSlopeDist.setEnabled(!locked);

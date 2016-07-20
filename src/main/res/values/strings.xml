@@ -121,6 +121,7 @@
     <string name="str_index">Index</string>
     <string name="str_cn">CN</string>
     <string name="str_test">Test</string>
+    <string name="str_mag_dec">Mag Dec</string>
 
     <string name="zero">0</string>
     <string name="str_x">X</string>
@@ -389,7 +390,6 @@
     <string name="points_gps_manacc">Mannual Accuracy</string>
     <string name="point_trav_az_fwd">Fwd</string>
     <string name="points_trav_az_bk">Back</string>
-    <string name="points_trav_mag">Mag Dec</string>
     <string name="points_reset_diag">This will reset this point back to all its original values.</string>
     <string name="points_camera_diag">This device can use the built in TwoTrails camera that can capture the direction of the camera when a photo is taken. Would you like to use it or another camera app?</string>
 

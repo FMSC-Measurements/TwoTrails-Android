@@ -3,6 +3,7 @@ package com.usda.fmsc.twotrails.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -21,6 +22,7 @@ import com.usda.fmsc.twotrails.objects.TtMetadata;
 import java.util.ArrayList;
 
 import com.usda.fmsc.twotrails.units.MapTracking;
+import com.usda.fmsc.twotrails.utilities.TtUtils;
 import com.usda.fmsc.utilities.StringEx;
 
 public class AcquireGpsActivity extends AcquireGpsMapActivity {
@@ -217,7 +219,10 @@ public class AcquireGpsActivity extends AcquireGpsMapActivity {
 
             startActivityForResult(intent, Consts.Codes.Activites.CALCULATE);
         } catch (Exception e) {
-            e.printStackTrace();
+            TtUtils.TtReport.writeError(e.getMessage(), "AcquireGpsActivity:btnCalcClick", e.getStackTrace());
+            new AlertDialog.Builder(AcquireGpsActivity.this)
+                    .setMessage("Unable to start Calculation")
+                    .show();
         }
 
     }

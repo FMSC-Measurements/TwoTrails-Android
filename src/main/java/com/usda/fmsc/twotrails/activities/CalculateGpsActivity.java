@@ -262,95 +262,56 @@ public class CalculateGpsActivity extends CustomToolbarActivity {
     }
 
     private void calculate() {
-        int groupSize;
+        try {
+            int groupSize;
 
-        _FilteredBursts.clear();
+            _FilteredBursts.clear();
 
-        TtNmeaBurst tmpBurst;
-        for (int i = 0; i < _Bursts.size(); i++) {
-            tmpBurst = _Bursts.get(i);
-            tmpBurst.setUsed(false);
+            TtNmeaBurst tmpBurst;
+            for (int i = 0; i < _Bursts.size(); i++) {
+                tmpBurst = _Bursts.get(i);
+                tmpBurst.setUsed(false);
 
-            if (i > rangeStart && i < rangeEnd && TtUtils.isUsableNmeaBurst(tmpBurst, options)) {
-                _FilteredBursts.add(tmpBurst);
-            }
-        }
-
-        if (manualGroupSize == null) {
-            double d = _FilteredBursts.size() / 3.0;
-            int i = (int)d;
-
-            if ((d-i) > 0.666) {
-                groupSize = i + 1;
-            } else {
-                groupSize = i;
-            }
-
-            if (groupSize < 5) {
-                groupSize = 5;
-            }
-        } else {
-            groupSize = manualGroupSize;
-        }
-
-
-        ArrayList<TtNmeaBurst> usedBursts = new ArrayList<>();
-
-        double x = 0, y = 0, xF = 0, yF = 0, zF = 0;
-        double dRMSEx = 0, dRMSEy = 0, dRMSEr, dRMSExf = 0, dRMSEyf = 0, dRMSErf;
-
-        int count = 0, countF;
-
-        String nVal = "*";
-        if (_FilteredBursts.size() > 0) {
-            //region Group 1
-            for (int i = 0; i < _FilteredBursts.size() && i < groupSize; i++) {
-                tmpBurst = _FilteredBursts.get(i);
-                x += tmpBurst.getX(_Zone);
-                y += tmpBurst.getY(_Zone);
-                count++;
-
-                if (chkG1.isChecked()) {
-                    xF += tmpBurst.getX(_Zone);
-                    yF += tmpBurst.getY(_Zone);
-                    zF += tmpBurst.getElevation();
-                    usedBursts.add(tmpBurst);
+                if (i > rangeStart && i < rangeEnd && TtUtils.isUsableNmeaBurst(tmpBurst, options)) {
+                    _FilteredBursts.add(tmpBurst);
                 }
             }
 
-            x /= count;
-            y /= count;
+            if (manualGroupSize == null) {
+                double d = _FilteredBursts.size() / 3.0;
+                int i = (int)d;
 
-            for (int i = 0; i < _FilteredBursts.size() && i < groupSize; i++) {
-                tmpBurst = _FilteredBursts.get(i);
-                dRMSEx += Math.pow(tmpBurst.getX(_Zone) - x, 2);
-                dRMSEy += Math.pow(tmpBurst.getY(_Zone) - y, 2);
+                if ((d-i) > 0.666) {
+                    groupSize = i + 1;
+                } else {
+                    groupSize = i;
+                }
+
+                if (groupSize < 5) {
+                    groupSize = 5;
+                }
+            } else {
+                groupSize = manualGroupSize;
             }
 
-            dRMSEx = Math.sqrt(dRMSEx / count);
-            dRMSEy = Math.sqrt(dRMSEy / count);
-            dRMSEr = Math.sqrt(Math.pow(dRMSEx, 2) + Math.pow(dRMSEy, 2)) * Consts.RMSEr95_Coeff;
 
+            ArrayList<TtNmeaBurst> usedBursts = new ArrayList<>();
 
-            tvUtmX1.setText(StringEx.toString(x, 2));
-            tvUtmY1.setText(StringEx.toString(y, 2));
-            tvNssda1.setText(StringEx.toString(dRMSEr, 2));
-            chkG1.setEnabled(true);
-            chkG1.setText(String.format("(%d)", count));
-            //endregion
+            double x = 0, y = 0, xF = 0, yF = 0, zF = 0;
+            double dRMSEx = 0, dRMSEy = 0, dRMSEr, dRMSExf = 0, dRMSEyf = 0, dRMSErf;
 
-            //region Group 2
-            if (_FilteredBursts.size() > groupSize) {
-                x = y = count = 0;
-                dRMSEx = dRMSEy = 0;
+            int count = 0, countF;
 
-                for (int i = groupSize; i < _FilteredBursts.size() && i < groupSize * 2; i++) {
+            String nVal = "*";
+            if (_FilteredBursts.size() > 0) {
+                //region Group 1
+                for (int i = 0; i < _FilteredBursts.size() && i < groupSize; i++) {
                     tmpBurst = _FilteredBursts.get(i);
                     x += tmpBurst.getX(_Zone);
                     y += tmpBurst.getY(_Zone);
                     count++;
 
-                    if (chkG2.isChecked()) {
+                    if (chkG1.isChecked()) {
                         xF += tmpBurst.getX(_Zone);
                         yF += tmpBurst.getY(_Zone);
                         zF += tmpBurst.getElevation();
@@ -361,7 +322,7 @@ public class CalculateGpsActivity extends CustomToolbarActivity {
                 x /= count;
                 y /= count;
 
-                for (int i = groupSize; i < _FilteredBursts.size() && i < groupSize * 2; i++) {
+                for (int i = 0; i < _FilteredBursts.size() && i < groupSize; i++) {
                     tmpBurst = _FilteredBursts.get(i);
                     dRMSEx += Math.pow(tmpBurst.getX(_Zone) - x, 2);
                     dRMSEy += Math.pow(tmpBurst.getY(_Zone) - y, 2);
@@ -371,151 +332,194 @@ public class CalculateGpsActivity extends CustomToolbarActivity {
                 dRMSEy = Math.sqrt(dRMSEy / count);
                 dRMSEr = Math.sqrt(Math.pow(dRMSEx, 2) + Math.pow(dRMSEy, 2)) * Consts.RMSEr95_Coeff;
 
-                tvUtmX2.setText(StringEx.toString(x, 2));
-                tvUtmY2.setText(StringEx.toString(y, 2));
-                tvNssda2.setText(StringEx.toString(dRMSEr, 2));
+
+                tvUtmX1.setText(StringEx.toString(x, 2));
+                tvUtmY1.setText(StringEx.toString(y, 2));
+                tvNssda1.setText(StringEx.toString(dRMSEr, 2));
+                chkG1.setEnabled(true);
+                chkG1.setText(String.format("(%d)", count));
+                //endregion
+
+                //region Group 2
+                if (_FilteredBursts.size() > groupSize) {
+                    x = y = count = 0;
+                    dRMSEx = dRMSEy = 0;
+
+                    for (int i = groupSize; i < _FilteredBursts.size() && i < groupSize * 2; i++) {
+                        tmpBurst = _FilteredBursts.get(i);
+                        x += tmpBurst.getX(_Zone);
+                        y += tmpBurst.getY(_Zone);
+                        count++;
+
+                        if (chkG2.isChecked()) {
+                            xF += tmpBurst.getX(_Zone);
+                            yF += tmpBurst.getY(_Zone);
+                            zF += tmpBurst.getElevation();
+                            usedBursts.add(tmpBurst);
+                        }
+                    }
+
+                    x /= count;
+                    y /= count;
+
+                    for (int i = groupSize; i < _FilteredBursts.size() && i < groupSize * 2; i++) {
+                        tmpBurst = _FilteredBursts.get(i);
+                        dRMSEx += Math.pow(tmpBurst.getX(_Zone) - x, 2);
+                        dRMSEy += Math.pow(tmpBurst.getY(_Zone) - y, 2);
+                    }
+
+                    dRMSEx = Math.sqrt(dRMSEx / count);
+                    dRMSEy = Math.sqrt(dRMSEy / count);
+                    dRMSEr = Math.sqrt(Math.pow(dRMSEx, 2) + Math.pow(dRMSEy, 2)) * Consts.RMSEr95_Coeff;
+
+                    tvUtmX2.setText(StringEx.toString(x, 2));
+                    tvUtmY2.setText(StringEx.toString(y, 2));
+                    tvNssda2.setText(StringEx.toString(dRMSEr, 2));
 
 
-                if (!chkG2.isEnabled()) {
-                    chkG2.setChecked(true);
+                    if (!chkG2.isEnabled()) {
+                        chkG2.setChecked(true);
+                    }
+
+                    chkG2.setEnabled(true);
+                    chkG2.setText(String.format("(%d)", count));
+                } else {
+                    tvUtmX2.setText(nVal);
+                    tvUtmY2.setText(nVal);
+                    tvNssda2.setText(nVal);
+                    chkG2.setChecked(false);
+                    chkG2.setEnabled(false);
+                    chkG2.setText("(0)");
                 }
+                //endregion
 
-                chkG2.setEnabled(true);
-                chkG2.setText(String.format("(%d)", count));
+                //region Group 3
+                if (_FilteredBursts.size() > groupSize * 2) {
+                    x = y = count = 0;
+                    dRMSEx = dRMSEy = 0;
+
+                    for (int i = groupSize * 2; i < _FilteredBursts.size(); i++) {
+                        tmpBurst = _FilteredBursts.get(i);
+                        x += tmpBurst.getX(_Zone);
+                        y += tmpBurst.getY(_Zone);
+                        count++;
+
+                        if (chkG3.isChecked()) {
+                            xF += tmpBurst.getX(_Zone);
+                            yF += tmpBurst.getY(_Zone);
+                            zF += tmpBurst.getElevation();
+                            usedBursts.add(tmpBurst);
+                        }
+                    }
+
+                    x /= count;
+                    y /= count;
+
+                    for (int i = groupSize * 2; i < _FilteredBursts.size() && i < groupSize * 3; i++) {
+                        tmpBurst = _FilteredBursts.get(i);
+                        dRMSEx += Math.pow(tmpBurst.getX(_Zone) - x, 2);
+                        dRMSEy += Math.pow(tmpBurst.getY(_Zone) - y, 2);
+                    }
+
+                    dRMSEx = Math.sqrt(dRMSEx / count);
+                    dRMSEy = Math.sqrt(dRMSEy / count);
+                    dRMSEr = Math.sqrt(Math.pow(dRMSEx, 2) + Math.pow(dRMSEy, 2)) * Consts.RMSEr95_Coeff;
+
+                    tvUtmX3.setText(StringEx.toString(x, 2));
+                    tvUtmY3.setText(StringEx.toString(y, 2));
+                    tvNssda3.setText(StringEx.toString(dRMSEr, 2));
+
+                    if (!chkG3.isEnabled()) {
+                        chkG3.setChecked(true);
+                    }
+
+                    chkG3.setEnabled(true);
+                    chkG3.setText(String.format("(%d)", count));
+                } else {
+                    tvUtmX3.setText(nVal);
+                    tvUtmY3.setText(nVal);
+                    tvNssda3.setText(nVal);
+                    chkG3.setChecked(false);
+                    chkG3.setEnabled(false);
+                    chkG3.setText("(0)");
+                }
+                //endregion
+
+                //region Real Point
+                countF = usedBursts.size();
+
+                if (countF > 0) {
+                    xF /= countF;
+                    yF /= countF;
+                    zF /= countF;
+
+                    ArrayList<GeoPosition> positions = new ArrayList<>(countF);
+
+                    for (int i = 0; i < countF; i++) {
+                        tmpBurst = usedBursts.get(i);
+                        tmpBurst.setUsed(true);
+
+                        dRMSExf += Math.pow(tmpBurst.getX(_Zone) - xF, 2);
+                        dRMSEyf += Math.pow(tmpBurst.getY(_Zone) - yF, 2);
+
+                        positions.add(tmpBurst.getPosition());
+                    }
+
+                    dRMSExf = Math.sqrt(dRMSExf / countF);
+                    dRMSEyf = Math.sqrt(dRMSEyf / countF);
+                    dRMSErf = Math.sqrt(Math.pow(dRMSExf, 2) + Math.pow(dRMSEyf, 2)) * Consts.RMSEr95_Coeff;
+
+                    GeoPosition position = GeoTools.getMidPioint(positions);
+
+                    _Point.setLatitude(position.getLatitudeSignedDecimal());
+                    _Point.setLongitude(position.getLongitudeSignedDecimal());
+                    _Point.setElevation(TtUtils.Convert.distance(zF, UomElevation.Meters, _Metadata.getElevation()));
+                    _Point.setUnAdjX(xF);
+                    _Point.setUnAdjY(yF);
+                    _Point.setUnAdjZ(_Point.getElevation());
+                    _Point.setRMSEr(dRMSErf);
+
+                    tvUtmXF.setText(StringEx.toString(xF, 3));
+                    tvUtmYF.setText(StringEx.toString(yF, 3));
+                    tvNssdaF.setText(StringEx.toString(dRMSErf, 2));
+
+                    setCalculated(true);
+                } else {
+                    tvUtmXF.setText(nVal);
+                    tvUtmYF.setText(nVal);
+                    tvNssdaF.setText(nVal);
+                    setCalculated(false);
+                }
+                //endregion
             } else {
+                //region reset
+                tvUtmX1.setText(nVal);
+                tvUtmY1.setText(nVal);
+                tvNssda1.setText(nVal);
+                chkG1.setEnabled(false);
+                chkG2.setText("(0)");
+
                 tvUtmX2.setText(nVal);
                 tvUtmY2.setText(nVal);
                 tvNssda2.setText(nVal);
-                chkG2.setChecked(false);
                 chkG2.setEnabled(false);
-                chkG2.setText("(0)");
-            }
-            //endregion
+                chkG1.setText("(0)");
 
-            //region Group 3
-            if (_FilteredBursts.size() > groupSize * 2) {
-                x = y = count = 0;
-                dRMSEx = dRMSEy = 0;
-
-                for (int i = groupSize * 2; i < _FilteredBursts.size(); i++) {
-                    tmpBurst = _FilteredBursts.get(i);
-                    x += tmpBurst.getX(_Zone);
-                    y += tmpBurst.getY(_Zone);
-                    count++;
-
-                    if (chkG3.isChecked()) {
-                        xF += tmpBurst.getX(_Zone);
-                        yF += tmpBurst.getY(_Zone);
-                        zF += tmpBurst.getElevation();
-                        usedBursts.add(tmpBurst);
-                    }
-                }
-
-                x /= count;
-                y /= count;
-
-                for (int i = groupSize * 2; i < _FilteredBursts.size() && i < groupSize * 3; i++) {
-                    tmpBurst = _FilteredBursts.get(i);
-                    dRMSEx += Math.pow(tmpBurst.getX(_Zone) - x, 2);
-                    dRMSEy += Math.pow(tmpBurst.getY(_Zone) - y, 2);
-                }
-
-                dRMSEx = Math.sqrt(dRMSEx / count);
-                dRMSEy = Math.sqrt(dRMSEy / count);
-                dRMSEr = Math.sqrt(Math.pow(dRMSEx, 2) + Math.pow(dRMSEy, 2)) * Consts.RMSEr95_Coeff;
-
-                tvUtmX3.setText(StringEx.toString(x, 2));
-                tvUtmY3.setText(StringEx.toString(y, 2));
-                tvNssda3.setText(StringEx.toString(dRMSEr, 2));
-
-                if (!chkG3.isEnabled()) {
-                    chkG3.setChecked(true);
-                }
-
-                chkG3.setEnabled(true);
-                chkG3.setText(String.format("(%d)", count));
-            } else {
                 tvUtmX3.setText(nVal);
                 tvUtmY3.setText(nVal);
                 tvNssda3.setText(nVal);
-                chkG3.setChecked(false);
                 chkG3.setEnabled(false);
                 chkG3.setText("(0)");
-            }
-            //endregion
 
-            //region Real Point
-            countF = usedBursts.size();
-
-            if (countF > 0) {
-                xF /= countF;
-                yF /= countF;
-                zF /= countF;
-
-                ArrayList<GeoPosition> positions = new ArrayList<>(countF);
-
-                for (int i = 0; i < countF; i++) {
-                    tmpBurst = usedBursts.get(i);
-                    tmpBurst.setUsed(true);
-
-                    dRMSExf += Math.pow(tmpBurst.getX(_Zone) - xF, 2);
-                    dRMSEyf += Math.pow(tmpBurst.getY(_Zone) - yF, 2);
-
-                    positions.add(tmpBurst.getPosition());
-                }
-
-                dRMSExf = Math.sqrt(dRMSExf / countF);
-                dRMSEyf = Math.sqrt(dRMSEyf / countF);
-                dRMSErf = Math.sqrt(Math.pow(dRMSExf, 2) + Math.pow(dRMSEyf, 2)) * Consts.RMSEr95_Coeff;
-
-                GeoPosition position = GeoTools.getMidPioint(positions);
-
-                _Point.setLatitude(position.getLatitudeSignedDecimal());
-                _Point.setLongitude(position.getLongitudeSignedDecimal());
-                _Point.setElevation(TtUtils.Convert.distance(zF, UomElevation.Meters, _Metadata.getElevation()));
-                _Point.setUnAdjX(xF);
-                _Point.setUnAdjY(yF);
-                _Point.setUnAdjZ(_Point.getElevation());
-                _Point.setRMSEr(dRMSErf);
-
-                tvUtmXF.setText(StringEx.toString(xF, 3));
-                tvUtmYF.setText(StringEx.toString(yF, 3));
-                tvNssdaF.setText(StringEx.toString(dRMSErf, 2));
-
-                setCalculated(true);
-            } else {
                 tvUtmXF.setText(nVal);
                 tvUtmYF.setText(nVal);
                 tvNssdaF.setText(nVal);
+
                 setCalculated(false);
+                //endregion
             }
-            //endregion
-        } else {
-            //region reset
-            tvUtmX1.setText(nVal);
-            tvUtmY1.setText(nVal);
-            tvNssda1.setText(nVal);
-            chkG1.setEnabled(false);
-            chkG2.setText("(0)");
-
-            tvUtmX2.setText(nVal);
-            tvUtmY2.setText(nVal);
-            tvNssda2.setText(nVal);
-            chkG2.setEnabled(false);
-            chkG1.setText("(0)");
-
-            tvUtmX3.setText(nVal);
-            tvUtmY3.setText(nVal);
-            tvNssda3.setText(nVal);
-            chkG3.setEnabled(false);
-            chkG3.setText("(0)");
-
-            tvUtmXF.setText(nVal);
-            tvUtmYF.setText(nVal);
-            tvNssdaF.setText(nVal);
-
-            setCalculated(false);
-            //endregion
+        } catch (Exception e) {
+            TtUtils.TtReport.writeError(e.getMessage(), "CalculateGpsActivity:calculate", e.getStackTrace());
         }
     }
 

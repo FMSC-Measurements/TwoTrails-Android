@@ -8,6 +8,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -76,6 +77,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_walk);
 
+        setUseExitWarning(true);
         setUseLostConnectionWarning(true);
 
         if (!isCanceling()) {
@@ -114,6 +116,12 @@ public class WalkActivity extends AcquireGpsMapActivity {
                 setResult(cancelResult);
                 finish();
                 return;
+            }
+
+            ActionBar actionBar = getSupportActionBar();
+            if (actionBar != null) {
+                actionBar.setTitle(_Polygon.getName());
+                actionBar.setDisplayShowTitleEnabled(true);
             }
 
             _Group = new TtGroup(TtGroup.GroupType.Walk);
@@ -558,10 +566,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
         }
     }
 
-    public void btnPointInfo(View view) {
-
-    }
-
+    public void btnPointInfo(View view) { }
 
     @Override
     protected MapTracking getMapTracking() {

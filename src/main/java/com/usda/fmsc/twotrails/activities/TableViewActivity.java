@@ -173,42 +173,6 @@ public class TableViewActivity extends CustomToolbarActivity {
                     ViewAnimator.expandView(filterView);
                 }
 
-                /*
-                ssp = Bitmap.createBitmap(ssvPoints.getDrawingCache());
-
-                imPointsImage.setImageBitmap(ssp);
-
-                imPointsImage.setVisibility(View.VISIBLE);
-                ssvPoints.setVisibility(View.GONE);
-
-                if (filterDisplayed) {
-                    ViewAnimator.collapseView(filterView, new ViewAnimator.SimpleAnimatorListener() {
-                        @Override
-                        public void onAnimationEnd(Animator animator) {
-                            super.onAnimationEnd(animator);
-                            imPointsImage.setVisibility(View.GONE);
-                            ssvPoints.setVisibility(View.VISIBLE);
-                        }
-                    });
-                } else {
-                    ViewAnimator.expandView(filterView, new ViewAnimator.SimpleAnimatorListener() {
-                        @Override
-                        public void onAnimationEnd(Animator animator) {
-                            super.onAnimationEnd(animator);
-                            imPointsImage.setVisibility(View.GONE);
-                            ssvPoints.setVisibility(View.VISIBLE);
-                        }
-                    });
-                }
-
-                if (filterDisplayed) {
-                    filterView.setVisibility(View.GONE);
-                } else {
-                    filterView.setVisibility(View.VISIBLE);
-                }
-                */
-
-
                 filterDisplayed = !filterDisplayed;
                 break;
             }
@@ -669,13 +633,13 @@ public class TableViewActivity extends CustomToolbarActivity {
                 case 0:
                     return point.getOp().toString();
                 case 1:
-                    return Long.toString(point.getIndex());
+                    return StringEx.toString(point.getIndex());
                 case 2:
                     return point.getPolyName();
                 case 3:
                     return DateTimeFormatter.print(point.getTime());
                 case 4:
-                    return Boolean.toString(point.isOnBnd());
+                    return StringEx.toString(point.isOnBnd());
                 case 5:
                     return _MetaNames.get(point.getMetadataCN());
                 case 6:
@@ -721,8 +685,7 @@ public class TableViewActivity extends CustomToolbarActivity {
                             TtUtils.Convert.angle(((TravPoint)point).getSlopeAngle(), _Metadata.get(point.getMetadataCN()).getSlope(), Slope.Percent),
                             3) : StringEx.Empty;
                 case 22:
-                    if (point instanceof QuondamPoint)
-                    {
+                    if (point instanceof QuondamPoint) {
                         QuondamPoint qp = ((QuondamPoint)point);
                         if (qp.hasParent())
                             return Integer.toString(qp.getParentPID());
@@ -745,13 +708,13 @@ public class TableViewActivity extends CustomToolbarActivity {
                 case 0:
                     return point.getOp().toString();
                 case 1:
-                    return Long.toString(point.getIndex());
+                    return StringEx.toString(point.getIndex());
                 case 2:
                     return point.getPolyName();
                 case 3:
                     return DateTimeFormatter.print(point.getTime());
                 case 4:
-                    return Boolean.toString(point.isOnBnd());
+                    return StringEx.toString(point.isOnBnd());
                 case 5:
                     return _MetaNames.get(point.getMetadataCN());
                 case 6:
@@ -792,11 +755,10 @@ public class TableViewActivity extends CustomToolbarActivity {
                     return (point instanceof TravPoint) ? StringEx.toString(
                             TtUtils.Convert.angle(((TravPoint)point).getSlopeAngle(), _Metadata.get(point.getMetadataCN()).getSlope(), Slope.Percent)) : StringEx.Empty;
                 case 22:
-                    if (point instanceof QuondamPoint)
-                    {
+                    if (point instanceof QuondamPoint) {
                         QuondamPoint qp = ((QuondamPoint)point);
                         if (qp.hasParent())
-                            return Integer.toString(qp.getParentPID());
+                            return StringEx.toString(qp.getParentPID());
                     }
                     return StringEx.Empty;
                 case 23:

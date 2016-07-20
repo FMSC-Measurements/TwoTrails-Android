@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.view.KeyEvent;
@@ -186,6 +187,7 @@ public class Take5Activity extends AcquireGpsMapActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_take5);
 
+        setUseExitWarning(true);
         setUseLostConnectionWarning(true);
 
         if (!isCanceling()) {
@@ -219,8 +221,6 @@ public class Take5Activity extends AcquireGpsMapActivity {
                             cancelResult = Consts.Codes.Results.NO_POLYGON_DATA;
                         }
                     }
-
-
                 } catch (Exception e) {
                     cancelResult = Consts.Codes.Results.ERROR;
                     e.printStackTrace();
@@ -233,6 +233,12 @@ public class Take5Activity extends AcquireGpsMapActivity {
                 setResult(cancelResult);
                 finish();
                 return;
+            }
+
+            ActionBar actionBar = getSupportActionBar();
+            if (actionBar != null) {
+                actionBar.setTitle(_Polygon.getName());
+                actionBar.setDisplayShowTitleEnabled(true);
             }
 
             _Group = new TtGroup(TtGroup.GroupType.Take5);
