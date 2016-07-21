@@ -433,12 +433,12 @@ public class Export {
                 values.add(StringEx.toString(burst.getTrackAngle()));
                 values.add(StringEx.toString(burst.getMagVar()));
                 values.add(burst.getMagVarDir() == null ? StringEx.Empty : burst.getMagVarDir().toString());
-                values.add(StringEx.toString(burst.getMode().getValue()));
-                values.add(StringEx.toString(burst.getFix().getValue()));
+                values.add(burst.getMode().toStringF());
+                values.add(burst.getFix().toStringF());
                 values.add(StringEx.toString(burst.getPDOP()));
                 values.add(StringEx.toString(burst.getHDOP()));
                 values.add(StringEx.toString(burst.getVDOP()));
-                values.add(burst.getFixQuality() == null ? StringEx.Empty : burst.getFixQuality().toString());
+                values.add(burst.getFixQuality() == null ? StringEx.Empty : burst.getFixQuality().toStringF());
                 values.add(StringEx.toString(burst.getHorizDilution()));
                 values.add(StringEx.toString(burst.getGeoidHeight()));
                 values.add(StringEx.toString(burst.getTrackedSatellitesCount()));
