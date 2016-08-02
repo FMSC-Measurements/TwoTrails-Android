@@ -852,6 +852,7 @@ public class PointsActivity extends CustomToolbarActivity {
                         @Override
                         public void onEdited(String cn, Double lat, Double lon) {
                             if (_CurrentPoint.getCN().equals(cn)) {
+                                //TODO Check conversions
                                 UTMCoords coords = UTMTools.convertLatLonSignedDecToUTM(lat, lon, _CurrentMetadata.getZone());
 
                                 GpsPoint point = (GpsPoint)_CurrentPoint;

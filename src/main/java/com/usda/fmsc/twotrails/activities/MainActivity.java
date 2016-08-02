@@ -504,13 +504,21 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
             public void onClick(DialogInterface dialog, int whichButton) {
                 String value = inputDialog.getText().trim();
 
-                //filePath = TtUtils.getTtFilePath(inputDialog.getContext(), value);
-                String filePath = Global.getTtFilePath(value);
+                if (value.length() > 0) {
+                    String filePath = Global.getTtFilePath(value);
 
-                if (FileUtils.fileExists(filePath)) {
-                    OverwriteFileDialog(filePath);
+                    if (FileUtils.fileExists(filePath)) {
+                        OverwriteFileDialog(filePath);
+                    } else {
+                        createFile(filePath);
+                    }
                 } else {
-                    createFile(filePath);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(MainActivity.this, "Invalid Filename", Toast.LENGTH_LONG).show();
+                        }
+                    });
                 }
             }
         });

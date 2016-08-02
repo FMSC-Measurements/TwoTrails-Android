@@ -170,7 +170,7 @@ public class LatLonDialog extends DialogFragment {
 
         dialog.setTitle(String.format("Point %d", pid));
 
-        dialog.setPositiveButton(R.string.str_edit , new DialogInterface.OnClickListener() {
+        dialog.setPositiveButton(R.string.str_ok , new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 if (listener != null) {
