@@ -11,6 +11,8 @@ import com.usda.fmsc.geospatial.UomElevation;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
+import com.usda.fmsc.twotrails.objects.DataActivityType;
+import com.usda.fmsc.twotrails.objects.TtUserActivity;
 import com.usda.fmsc.twotrails.objects.media.TtMedia;
 import com.usda.fmsc.twotrails.objects.media.TtImage;
 import com.usda.fmsc.twotrails.objects.points.GpsPoint;
@@ -138,6 +140,7 @@ public class DataAccessLayer {
             CreatePolygonAttrTable();
             CreateMediaTable();
             CreatePictureTable();
+            CreateActivityTable();
 
             SetupProjInfo();
             insertMetadata(Global.getDefaultMeta());
@@ -287,6 +290,18 @@ public class DataAccessLayer {
         catch (Exception ex)
         {
             TtUtils.TtReport.writeError(ex.getMessage(), "DataAccessLayer:CreatePictureTable");
+            throw ex;
+        }
+    }
+
+    private void CreateActivityTable() {
+        try
+        {
+            _db.execSQL(TwoTrailsSchema.ActivitySchema.CreateTable);
+        }
+        catch (Exception ex)
+        {
+            TtUtils.TtReport.writeError(ex.getMessage(), "DataAccessLayer:CreateActivityTable");
             throw ex;
         }
     }
@@ -2748,6 +2763,63 @@ public class DataAccessLayer {
     //endregion
     //endregion
 
+
+    //region Activity
+    //region Get
+    private ArrayList<TtUserActivity> getUserActivity() {
+        ArrayList<TtUserActivity> activities = new ArrayList<>();
+
+        try {
+
+            String query = String.format("select %s from %s",
+                    TwoTrailsSchema.ActivitySchema.SelectItems,
+                    TwoTrailsSchema.ActivitySchema.TableName);
+
+            Cursor c = _db.rawQuery(query, null);
+
+            if (c.moveToFirst()) {
+                do {
+                    activities.add(new TtUserActivity(c.getString(0), c.getString(1), dtf.parseDateTime(c.getString(2)), new DataActivityType(c.getInt(3))));
+                } while (c.moveToNext());
+            }
+
+            c.close();
+        } catch (Exception ex) {
+            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:getUserActivity");
+            return null;
+        }
+
+        return activities;
+    }
+    //endregion
+
+    //region Insert
+    public boolean insertUserActivity(TtUserActivity activity) {
+        boolean success = false;
+
+        try {
+            _db.beginTransaction();
+
+            ContentValues cvs = new ContentValues();
+            cvs.put(TwoTrailsSchema.ActivitySchema.UserName, activity.getUserName());
+            cvs.put(TwoTrailsSchema.ActivitySchema.DeviceName, activity.getDeviceName());
+            cvs.put(TwoTrailsSchema.ActivitySchema.ActivityDate, dtf.print(activity.getDate()));
+            cvs.put(TwoTrailsSchema.ActivitySchema.DataActivity, activity.getActvity().getValue());
+
+            _db.insert(TwoTrailsSchema.ActivitySchema.TableName, null, cvs);
+
+            _db.setTransactionSuccessful();
+            success = true;
+        } catch (Exception ex) {
+            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:insertUserActivity");
+        } finally {
+            _db.endTransaction();
+        }
+
+        return success;
+    }
+    //endregion
+    //endregion
 
     //region DbTools
     private String createSelectQuery(String table, String items, String where) {

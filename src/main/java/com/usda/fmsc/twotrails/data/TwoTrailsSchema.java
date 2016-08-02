@@ -519,4 +519,32 @@ public class TwoTrailsSchema {
     //endregion
 
     //endregion
+
+
+    //region Activity
+    public static class ActivitySchema
+    {
+        public static final String TableName = "Activity";
+
+        public static final String UserName = "UserName";
+        public static final String DeviceName = "DeviceName";
+        public static final String ActivityDate = "ActivityDate";
+        public static final String DataActivity = "ActivityType";
+
+        public static final String CreateTable =
+            "CREATE TABLE " + TableName + " (" +
+            UserName + " TEXT, " +
+            DeviceName + " TEXT, " +
+            ActivityDate + " TEXT, " +
+            DataActivity + " INTEGER" +
+            ");";
+
+
+        public static final String SelectItems =
+            UserName + ", " +
+            DeviceName + ", " +
+            ActivityDate + ", " +
+            DataActivity;
+    }
+    //endregion
 }
