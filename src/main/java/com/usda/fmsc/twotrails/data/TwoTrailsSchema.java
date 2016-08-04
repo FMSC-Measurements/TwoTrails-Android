@@ -336,7 +336,7 @@ public class TwoTrailsSchema {
 
     //region MetaData Table
     public static class MetadataSchema {
-        public static final String TableName = "MetaData";
+        public static final String TableName = "Metadata";
 
         public static final String Name = "Name";
         public static final String Distance = "Distance";
