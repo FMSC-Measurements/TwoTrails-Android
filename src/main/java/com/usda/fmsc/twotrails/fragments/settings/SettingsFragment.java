@@ -506,7 +506,7 @@ public class SettingsFragment extends PreferenceFragment {
         public void onClick(DialogInterface dialogInterface, int i, Object value) {
             String receiver = Global.Settings.DeviceSettings.getGpsDeviceName();
 
-            if (value == 1) {
+            if ((int)value == 1) {
                 TtMetadata metadata = Global.getDAL().getDefaultMetadata();
 
                 if (metadata != null) {
@@ -514,7 +514,7 @@ public class SettingsFragment extends PreferenceFragment {
                     Global.getDAL().updateMetadata(metadata);
                     Global.Settings.MetaDataSetting.setReceiver(receiver);
                 }
-            } else if (value == 2) {
+            } else if ((int)value == 2) {
                 List<TtMetadata> metas = Global.getDAL().getMetadata();
 
                 if (metas.size() > 0) {
