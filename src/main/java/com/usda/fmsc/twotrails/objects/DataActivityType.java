@@ -1,7 +1,5 @@
 package com.usda.fmsc.twotrails.objects;
 
-import com.usda.fmsc.twotrails.data.DataAccessLayer;
-
 public class DataActivityType {
     public static final int Opened = 0;
     public static final int ModifiedProject = 1;

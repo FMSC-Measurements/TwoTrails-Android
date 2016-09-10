@@ -46,7 +46,7 @@ public class TtMetadata extends TtObject implements Parcelable {
         this.Name = "Metadata";
         this.Zone = 13;
         this._Datum = Datum.NAD83;
-        this._Distance = Dist.FeetInches;
+        this._Distance = Dist.FeetTenths;
         this._Elevation = UomElevation.Meters;
         this._Slope = Slope.Percent;
         this._DecType = DeclinationType.MagDec;

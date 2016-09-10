@@ -8,7 +8,7 @@ public class TtUserActivity {
     private String UserName;
     private String DeviceName;
     private DateTime Date;
-    private DataActivityType Actvity;
+    private DataActivityType Activity;
 
     public TtUserActivity(String userName, String deviceName) {
         this(userName, deviceName, DateTime.now(), new DataActivityType());
@@ -24,7 +24,7 @@ public class TtUserActivity {
         UserName = userName;
         DeviceName = deviceName;
         Date = date;
-        Actvity = activity;
+        Activity = activity;
     }
 
     public String getUserName() {
@@ -51,11 +51,15 @@ public class TtUserActivity {
         Date = date;
     }
 
-    public DataActivityType getActvity() {
-        return Actvity;
+    public DataActivityType getActivity() {
+        return Activity;
     }
 
-    public void setActvity(DataActivityType actvity) {
-        Actvity = actvity;
+    public void setActivity(DataActivityType activity) {
+        Activity = activity;
+    }
+
+    public void updateActivity(int activity) {
+        Activity.setFlag(activity);
     }
 }
