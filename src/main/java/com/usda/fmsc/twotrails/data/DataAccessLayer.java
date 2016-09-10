@@ -74,24 +74,26 @@ public class DataAccessLayer {
     private String _FilePath;
     private File _dbFile;
 
+    private TtUserActivity _Activity = null;
 
     //region Constructors / Open / Close
     public DataAccessLayer(String filePath) {
         _FilePath = filePath;
 
-        if(FileUtils.fileExists(_FilePath))
+        if (FileUtils.fileExists(_FilePath))
             open();
         else
             CreateDB();
     }
 
     public boolean open() {
-        if(FileUtils.fileExists(_FilePath)) {
+        if (!isOpen() && FileUtils.fileExists(_FilePath)) {
             _db = SQLiteDatabase.openDatabase(_FilePath, null, 0);
 
             try {
                 _dbFile = new File(_FilePath);
                 _DalVersion = new TtDalVersion(getTtDbVersion());
+                _Activity = new TtUserActivity("Android User", TtUtils.getDeviceName());
             } catch (Exception ex) {
                 return false;
             }
@@ -102,7 +104,10 @@ public class DataAccessLayer {
     }
 
     public void close() {
-        if(isOpen()) {
+        if (isOpen()) {
+            if (_Activity != null)
+                insertUserActivity(_Activity);
+
             _db.close();
 
             File f = new File(_FilePath + "-journal");
@@ -404,6 +409,8 @@ public class DataAccessLayer {
 
             _db.setTransactionSuccessful();
             success = true;
+
+            _Activity.updateActivity(DataActivityType.InsertedPolygons);
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:insertPolygon");
         } finally {
@@ -434,6 +441,8 @@ public class DataAccessLayer {
                 String.format("%s = '%s'", TwoTrailsSchema.SharedSchema.CN, poly.getCN()), null);
 
             _db.setTransactionSuccessful();
+
+            _Activity.updateActivity(DataActivityType.ModifiedPolygons);
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:updatePolygon");
         } finally {
@@ -455,6 +464,8 @@ public class DataAccessLayer {
 
             if (success) {
                 deletePolygonGraphicOption(cn);
+
+                _Activity.updateActivity(DataActivityType.DeletedPolygons);
             }
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:deletePolygon");
@@ -782,8 +793,11 @@ public class DataAccessLayer {
 
             success = insertBasePoint(point);
 
-            if(success)
+            if(success) {
                 _db.setTransactionSuccessful();
+
+                _Activity.updateActivity(DataActivityType.InsertedPoints);
+            }
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:insertPoint");
             success = false;
@@ -810,8 +824,11 @@ public class DataAccessLayer {
                 }
             }
 
-            if(success)
+            if(success) {
                 _db.setTransactionSuccessful();
+
+                _Activity.updateActivity(DataActivityType.ModifiedPoints);
+            }
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:insertPoints");
             success = false;
@@ -955,8 +972,11 @@ public class DataAccessLayer {
 
             success = updateBasePoint(updatedPoint, updatedPoint);
 
-            if(success)
+            if(success) {
                 _db.setTransactionSuccessful();
+
+                _Activity.updateActivity(DataActivityType.ModifiedPoints);
+            }
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:updatePoint");
         } finally {
@@ -973,8 +993,11 @@ public class DataAccessLayer {
 
             success = updateBasePoint(updatedPoint, oldPoint);
 
-            if(success)
+            if(success) {
                 _db.setTransactionSuccessful();
+
+                _Activity.updateActivity(DataActivityType.ModifiedPoints);
+            }
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:updatePoint");
         } finally {
@@ -996,8 +1019,11 @@ public class DataAccessLayer {
                     break;
             }
 
-            if(success)
+            if(success) {
                 _db.setTransactionSuccessful();
+
+                _Activity.updateActivity(DataActivityType.ModifiedPoints);
+            }
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:updatePoint");
         } finally {
@@ -1024,8 +1050,11 @@ public class DataAccessLayer {
                     break;
             }
 
-            if(success)
+            if(success) {
                 _db.setTransactionSuccessful();
+
+                _Activity.updateActivity(DataActivityType.ModifiedPoints);
+            }
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:updatePoint");
         } finally {
@@ -1224,7 +1253,7 @@ public class DataAccessLayer {
                     TwoTrailsSchema.SharedSchema.CN + "=?",
                     new String[] { pointCN }) > 0;
 
-            if(success) {
+            if (success) {
                 switch (point.getOp()) {
                     case GPS:
                     case Take5:
@@ -1240,6 +1269,8 @@ public class DataAccessLayer {
                         removeQuondamData((QuondamPoint)point);
                         break;
                 }
+
+                _Activity.updateActivity(DataActivityType.DeletedPoints);
             }
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:deletePoint");
@@ -1267,6 +1298,9 @@ public class DataAccessLayer {
             }
 
             success = deletePoint(point);
+
+            if (success)
+                _Activity.updateActivity(DataActivityType.DeletedPoints);
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:deletePointSafe");
         }
@@ -1292,7 +1326,9 @@ public class DataAccessLayer {
                 success = deletePointSafe(point);
 
                 if (!success)
-                    break;
+                    return false;
+
+                _Activity.updateActivity(DataActivityType.DeletedPoints);
             }
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:deletePoints");
@@ -1457,6 +1493,8 @@ public class DataAccessLayer {
 
             _db.setTransactionSuccessful();
             success = true;
+
+            _Activity.updateActivity(DataActivityType.InsertedMetadata);
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:insertMetadata");
         } finally {
@@ -1494,6 +1532,8 @@ public class DataAccessLayer {
                     String.format("%s = '%s'", TwoTrailsSchema.SharedSchema.CN, meta.getCN()), null);
 
             _db.setTransactionSuccessful();
+
+            _Activity.updateActivity(DataActivityType.ModifiedMetadata);
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:updateMetadata");
         } finally {
@@ -1519,7 +1559,11 @@ public class DataAccessLayer {
 
             success = deleteMetadata(cn);
 
-            _db.setTransactionSuccessful();
+
+            if (success) {
+                _db.setTransactionSuccessful();
+                _Activity.updateActivity(DataActivityType.DeletedMetadata);
+            }
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:deleteMetadataSafe");
             success = false;
@@ -1535,6 +1579,9 @@ public class DataAccessLayer {
             success = _db.delete(TwoTrailsSchema.MetadataSchema.TableName,
                     TwoTrailsSchema.SharedSchema.CN + "=?",
                     new String[] { cn }) > 0;
+
+            if (success)
+                _Activity.updateActivity(DataActivityType.DeletedMetadata);
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:deleteMetadata");
         }
@@ -1636,6 +1683,8 @@ public class DataAccessLayer {
 
             _db.setTransactionSuccessful();
             success = true;
+
+            _Activity.updateActivity(DataActivityType.InsertedGroups);
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:insertGroup");
         } finally {
@@ -1661,6 +1710,11 @@ public class DataAccessLayer {
             success = _db.update(TwoTrailsSchema.GroupSchema.TableName, cvs,
                     String.format("%s = '%s'", TwoTrailsSchema.SharedSchema.CN, group.getCN()), null);
 
+
+            if (success > 0) {
+                _Activity.updateActivity(DataActivityType.ModifiedGroups);
+            }
+
             _db.setTransactionSuccessful();
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:updateGroup");
@@ -1680,6 +1734,9 @@ public class DataAccessLayer {
             success = _db.delete(TwoTrailsSchema.GroupSchema.TableName,
                     TwoTrailsSchema.SharedSchema.CN + "=?",
                     new String[] { cn }) > 0;
+
+            if (success)
+                _Activity.updateActivity(DataActivityType.DeletedGroups);
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:deleteGroup");
         }
@@ -2278,6 +2335,8 @@ public class DataAccessLayer {
         try
         {
             _db.execSQL(updateQuery);
+
+            _Activity.updateActivity(DataActivityType.ModifiedProject);
         }
         catch (Exception ex)
         {
@@ -2804,7 +2863,7 @@ public class DataAccessLayer {
             cvs.put(TwoTrailsSchema.ActivitySchema.UserName, activity.getUserName());
             cvs.put(TwoTrailsSchema.ActivitySchema.DeviceName, activity.getDeviceName());
             cvs.put(TwoTrailsSchema.ActivitySchema.ActivityDate, dtf.print(activity.getDate()));
-            cvs.put(TwoTrailsSchema.ActivitySchema.DataActivity, activity.getActvity().getValue());
+            cvs.put(TwoTrailsSchema.ActivitySchema.DataActivity, activity.getActivity().getValue());
 
             _db.insert(TwoTrailsSchema.ActivitySchema.TableName, null, cvs);
 

@@ -110,8 +110,6 @@ public class TtUtils {
                 return distance;
 
             switch (to) {
-                case FeetInches:
-                    return toFeetInches(distance, from);
                 case FeetTenths:
                     return toFeetTenths(distance, from);
                 case Chains:
@@ -158,26 +156,6 @@ public class TtUtils {
             switch (distance) {
                 case Meters: return UomElevation.Meters;
                 case FeetTenths:
-                case FeetInches: return UomElevation.Feet;
-            }
-
-            throw new RuntimeException("Invalid Option");
-        }
-
-
-
-        public static double toFeetInches(double distance, Dist dist) throws RuntimeException {
-            switch (dist) {
-                case FeetInches:
-                    return distance;
-                case FeetTenths:
-                    return feetTenthsToFeetInches(distance);
-                case Meters:
-                    return feetTenthsToFeetInches(distance * MetersToFeet_Coeff);
-                case Yards:
-                    return feetTenthsToFeetInches(distance * YardsToFeet_Coeff);
-                case Chains:
-                    return feetTenthsToFeetInches(distance * ChainsToFeet_Coeff);
             }
 
             throw new RuntimeException("Invalid Option");
@@ -185,8 +163,6 @@ public class TtUtils {
 
         public static double toFeetTenths(double distance, Dist dist) throws RuntimeException {
             switch (dist) {
-                case FeetInches:
-                    return feetInchesToFeetTenths(distance);
                 case FeetTenths:
                     return distance;
                 case Meters:
@@ -202,8 +178,6 @@ public class TtUtils {
 
         public static double toYards(double distance, Dist dist) throws RuntimeException {
             switch (dist) {
-                case FeetInches:
-                    return feetInchesToFeetTenths(distance) * FeetToYards_Coeff;
                 case FeetTenths:
                     return distance * FeetToYards_Coeff;
                 case Meters:
@@ -219,8 +193,6 @@ public class TtUtils {
 
         public static double toMeters(double distance, Dist dist) throws RuntimeException {
             switch (dist) {
-                case FeetInches:
-                    return feetInchesToFeetTenths(distance) * FeetToMeters_Coeff;
                 case FeetTenths:
                     return distance * FeetToMeters_Coeff;
                 case Meters:
@@ -236,8 +208,6 @@ public class TtUtils {
 
         public static double toChains(double distance, Dist dist) throws RuntimeException {
             switch (dist) {
-                case FeetInches:
-                    return feetInchesToFeetTenths(distance) * FeetToChains_Coeff;
                 case FeetTenths:
                     return distance * FeetToChains_Coeff;
                 case Meters:

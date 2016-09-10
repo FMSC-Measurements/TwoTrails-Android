@@ -747,7 +747,7 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
     public void btnDistClick(View view) {
         if (!_MetaLocked) {
             final EnumSelectionDialog<Dist> edialog =
-                    new EnumSelectionDialog<>(this, Dist.getUsedValues());
+                    new EnumSelectionDialog<>(this, Dist.values());
 
             edialog.setTitle(R.string.str_dist);
 

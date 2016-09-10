@@ -2,10 +2,9 @@ package com.usda.fmsc.twotrails.units;
 
 public enum Dist {
     FeetTenths(0),
-    FeetInches(1),
-    Meters(2),
-    Chains(3),
-    Yards(4);
+    Meters(1),
+    Chains(2),
+    Yards(3);
 
     private final int value;
 
@@ -30,21 +29,17 @@ public enum Dist {
             case "0":
             case "ftt":
                 return FeetTenths;
-            case "feetinches":
-            case "1":
-            case "fti":
-                return FeetInches;
             case "meters":
-            case "2":
+            case "1":
             case "m":
                 return Meters;
             case "chains":
-            case "3":
+            case "2":
             case "c":
             case "chn":
                 return Chains;
             case "yards":
-            case "4":
+            case "3":
             case "y":
             case "yd":
             case "yard":
@@ -59,7 +54,6 @@ public enum Dist {
     public String toString() {
         switch(this) {
             case FeetTenths: return "FeetTenths";
-            case FeetInches: return "FeetInches";
             case Meters: return "Meters";
             case Chains: return "Chains";
             case Yards: return "Yards";
@@ -70,20 +64,10 @@ public enum Dist {
     public String toStringAbv() {
         switch(this) {
             case FeetTenths: return "FtT";
-            case FeetInches: return "FtI";
             case Meters: return "Mt";
             case Chains: return "Chn";
             case Yards: return "Yd";
             default: throw new IllegalArgumentException();
         }
-    }
-
-    public static Dist[] getUsedValues() {
-        return new Dist[] {
-                FeetTenths,
-                Meters,
-                Yards,
-                Chains
-        };
     }
 }

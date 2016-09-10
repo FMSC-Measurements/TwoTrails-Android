@@ -522,8 +522,7 @@ public class TwoTrailsSchema {
 
 
     //region Activity
-    public static class ActivitySchema
-    {
+    public static class ActivitySchema {
         public static final String TableName = "Activity";
 
         public static final String UserName = "UserName";
