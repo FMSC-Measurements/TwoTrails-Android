@@ -6,11 +6,6 @@ import android.os.Parcelable;
 
 import org.joda.time.DateTime;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,7 +55,7 @@ public class TtNmeaBurst extends TtObject implements Parcelable {
     private GSASentence.Mode mode;
     private GSASentence.Fix fix;
     private ArrayList<Integer> satsUsed;
-    double pdop, hdop, vdop;
+    private double pdop, hdop, vdop;
 
     //gga
     private GGASentence.GpsFixType fixQuality;
@@ -74,7 +69,7 @@ public class TtNmeaBurst extends TtObject implements Parcelable {
     //endregion
 
     @SuppressWarnings("unchecked")
-    public TtNmeaBurst(Parcel source) {
+    private TtNmeaBurst(Parcel source) {
         super(source);
 
         this.timeCreated = (DateTime) source.readSerializable();
