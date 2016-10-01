@@ -110,7 +110,7 @@ dependencies {
     compile project(':AndroidEx')
     compile project(':GeoSpatial')
     compile project(':Utilities')
-    compile 'com.google.android.gms:play-services:9.6.0'
+    compile 'com.google.android.gms:play-services:9.6.1'
     compile 'com.google.code.gson:gson:2.4'
     compile 'com.android.support:recyclerview-v7:24.2.1'
     compile 'com.android.support:appcompat-v7:24.2.1'
