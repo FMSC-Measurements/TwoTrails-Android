@@ -91,7 +91,7 @@ public class CalculateGpsActivity extends CustomToolbarActivity {
 
         options.DopType = Global.Settings.DeviceSettings.getGpsFilterDopType();
         options.DopValue = Global.Settings.DeviceSettings.getGpsFilterDopValue();
-        options.Fix = Global.Settings.DeviceSettings.getGpsFilterFixType();
+        options.FixType = Global.Settings.DeviceSettings.getGpsFilterFixType();
 
         //region Control Assign
         btnCreate = (Button)findViewById(R.id.calcBtnCreate);
@@ -141,7 +141,7 @@ public class CalculateGpsActivity extends CustomToolbarActivity {
             spDop.setSelection(options.DopType.getValue());
 
             spFix.setAdapter(fixAdapter);
-            spFix.setSelection(options.Fix.getValue());
+            spFix.setSelection(options.FixType.getValue());
         }
 
         spDop.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -161,8 +161,8 @@ public class CalculateGpsActivity extends CustomToolbarActivity {
         spFix.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                options.Fix = GGASentence.GpsFixType.parse(i);
-                Global.Settings.DeviceSettings.setGpsFilterFixType(options.Fix);
+                options.FixType = GGASentence.GpsFixType.parse(i);
+                Global.Settings.DeviceSettings.setGpsFilterFixType(options.FixType);
                 calculate();
             }
 

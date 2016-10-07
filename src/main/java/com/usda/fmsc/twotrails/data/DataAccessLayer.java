@@ -128,6 +128,7 @@ public class DataAccessLayer {
     private void CreateDB() {
         try {
             _dbFile = new File(_FilePath);
+            _Activity = new TtUserActivity("Android User", TtUtils.getDeviceName());
 
             _db = SQLiteDatabase.openOrCreateDatabase(_dbFile, null);
             //_db.rawQuery("PRAGMA journal_mode = MEMORY", null);
@@ -1788,7 +1789,7 @@ public class DataAccessLayer {
                     String pointCN;
                     boolean used;
                     DateTime fixTime;
-                    double groundSpeed, trackAngle, magVar, pdop, hdop, vdop, horizDilution, geoidHeight;
+                    Double groundSpeed, trackAngle, magVar, pdop, hdop, vdop, horizDilution, geoidHeight;
                     EastWest magVarDir;
                     GSASentence.Mode mode;
                     GSASentence.Fix fix;
