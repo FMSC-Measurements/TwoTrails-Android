@@ -1191,7 +1191,7 @@ public class TtUtils {
                 valid = true;
             }
         } else {
-            int value = options.Fix.getValue();
+            int value = options.FixType.getValue();
 
             //reverse RTK and FRTK
             if (value == 4)
@@ -1199,7 +1199,7 @@ public class TtUtils {
             else if (value == 5)
                 value = 4;
 
-            if (value >= options.Fix.getValue() &&
+            if (value >= options.FixType.getValue() && nmeaBurst.getFix().getValue() >= options.Fix.getValue() &&
                     (options.DopType == DopType.HDOP && nmeaBurst.getHDOP() <= options.DopValue) ||
                     (options.DopType == DopType.PDOP && nmeaBurst.getPDOP() <= options.DopValue)) {
                 valid = true;
@@ -1213,19 +1213,20 @@ public class TtUtils {
         boolean valid = false;
 
         if (options == null) {
-            if (nmeaBurst.getFixQuality().getValue() > 0) {
+            if (nmeaBurst.getFixQuality().getValue() > 0 && nmeaBurst.getFix().getValue() > 1) {
                 valid = true;
             }
         } else {
-            int value = options.Fix.getValue();
+
+            int fixType = options.FixType.getValue();
 
             //reverse RTK and FRTK
-            if (value == 4)
-                value = 5;
-            else if (value == 5)
-                value = 4;
+            if (fixType == 4)
+                fixType = 5;
+            else if (fixType == 5)
+                fixType = 4;
 
-            if (value >= options.Fix.getValue() &&
+            if (fixType >= options.FixType.getValue() && nmeaBurst.getFix().getValue() >= options.Fix.getValue() &&
                     (options.DopType == DopType.HDOP && nmeaBurst.getHDOP() <= options.DopValue) ||
                     (options.DopType == DopType.PDOP && nmeaBurst.getPDOP() <= options.DopValue)) {
                 valid = true;
