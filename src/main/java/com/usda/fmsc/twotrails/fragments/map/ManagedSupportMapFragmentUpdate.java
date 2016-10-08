@@ -38,8 +38,9 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Queue;
 
-public class ManagedSupportMapFragment extends SupportMapFragment implements IMultiMapFragment,
-        OnMapReadyCallback, GoogleMap.OnMapLoadedCallback, GoogleMap.OnCameraChangeListener, GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener {
+public class ManagedSupportMapFragmentUpdate extends SupportMapFragment implements IMultiMapFragment,
+        OnMapReadyCallback, GoogleMap.OnMapLoadedCallback, GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener,
+        GoogleMap.OnCameraMoveStartedListener, GoogleMap.OnCameraMoveListener, GoogleMap.OnCameraIdleListener{
 
     private MultiMapListener mmlistener;
 
@@ -58,12 +59,12 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
     private boolean isMoving, cameraQueueEnabled = false;
 
 
-    public static ManagedSupportMapFragment newInstance() {
-        return new ManagedSupportMapFragment();
+    public static ManagedSupportMapFragmentUpdate newInstance() {
+        return new ManagedSupportMapFragmentUpdate();
     }
 
-    public static ManagedSupportMapFragment newInstance(MapOptions options) {
-        ManagedSupportMapFragment mapFragment = new ManagedSupportMapFragment();
+    public static ManagedSupportMapFragmentUpdate newInstance(MapOptions options) {
+        ManagedSupportMapFragmentUpdate mapFragment = new ManagedSupportMapFragmentUpdate();
 
         Bundle bundle = new Bundle();
         bundle.putParcelable("MapOptions", new GoogleMapOptions().mapType(options.getMapId()));
@@ -74,7 +75,7 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
     }
 
 
-    public ManagedSupportMapFragment() { }
+    public ManagedSupportMapFragmentUpdate() { }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -129,7 +130,9 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
         }
 
         map.setOnMapLoadedCallback(this);
-        map.setOnCameraChangeListener(this);
+        map.setOnCameraIdleListener(this);
+        map.setOnCameraMoveListener(this);
+        map.setOnCameraMoveStartedListener(this);
 
         map.setInfoWindowAdapter(new MultiLineInfoWindowAdapter(getContext()));
         map.setOnMapClickListener(this);
@@ -181,11 +184,6 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
         if (mmlistener != null) {
             mmlistener.onMapLoaded();
         }
-    }
-
-    @Override
-    public void onCameraChange(CameraPosition cameraPosition) {
-        onMapLocationChanged();
     }
 
     @Override
@@ -281,6 +279,34 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
                 map.moveCamera(cu);
             }
         }
+    }
+
+
+
+    @Override
+    public void onCameraIdle() {
+        if (cameraQueueEnabled) {
+            if (cameraQueue.peek() != null) {
+                CameraUpdate cu = cameraQueue.poll();
+
+                while (cameraQueue.peek() != null) {
+                    cu = cameraQueue.poll();
+                }
+
+                map.animateCamera(cu);
+            }
+        }
+    }
+
+    @Override
+    public void onCameraMove() {
+        onMapLocationChanged();
+        isMoving = false;
+    }
+
+    @Override
+    public void onCameraMoveStarted(int i) {
+        isMoving = true;
     }
 
     GoogleMap.CancelableCallback cancelableCallback = new GoogleMap.CancelableCallback() {
