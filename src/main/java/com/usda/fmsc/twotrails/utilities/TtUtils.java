@@ -869,8 +869,13 @@ public class TtUtils {
             lat = gps.getLatitude();
             lon = gps.getLongitude();
         } else {
-            double x = adjusted ? point.getAdjX() : point.getUnAdjX();
-            double y = adjusted ? point.getAdjY() : point.getUnAdjY();
+            Double x = adjusted ? point.getAdjX() : point.getUnAdjX();
+            Double y = adjusted ? point.getAdjY() : point.getUnAdjY();
+
+            if (x == null)
+                x = 0d;
+            if (y == null)
+                y = 0d;
 
             GeoPosition position = UTMTools.convertUTMtoLatLonSignedDec(x, y, meta.getZone());
             lat = position.getLatitudeSignedDecimal();
