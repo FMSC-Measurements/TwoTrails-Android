@@ -15,6 +15,7 @@ import android.widget.TextView;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.listeners.SimpleTextWatcher;
 import com.usda.fmsc.geospatial.UomElevation;
+import com.usda.fmsc.geospatial.nmea.sentences.GSASentence;
 import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.Global;
@@ -38,6 +39,7 @@ import com.usda.fmsc.utilities.EnumEx;
 import com.usda.fmsc.utilities.ParseEx;
 import com.usda.fmsc.utilities.StringEx;
 
+//TODO add NMEA data view like table view
 public class CalculateGpsActivity extends CustomToolbarActivity {
     private static final Pattern pattern = Pattern.compile("[a-zA-Z]");
 
@@ -89,6 +91,7 @@ public class CalculateGpsActivity extends CustomToolbarActivity {
             return;
         }
 
+        options.Fix = Global.Settings.DeviceSettings.getGpsFilterFix();
         options.DopType = Global.Settings.DeviceSettings.getGpsFilterDopType();
         options.DopValue = Global.Settings.DeviceSettings.getGpsFilterDopValue();
         options.FixType = Global.Settings.DeviceSettings.getGpsFilterFixType();
@@ -131,7 +134,7 @@ public class CalculateGpsActivity extends CustomToolbarActivity {
 
         //region Control Init
         ArrayAdapter<CharSequence> dopAdapter = ArrayAdapter.createFromResource(this, R.array.arr_dops, android.R.layout.simple_spinner_item);
-        ArrayAdapter<CharSequence> fixAdapter = new ArrayAdapter<CharSequence>(this, android.R.layout.simple_spinner_item, EnumEx.getNames(GGASentence.GpsFixType.class));
+        ArrayAdapter<CharSequence> fixAdapter = new ArrayAdapter<CharSequence>(this, android.R.layout.simple_spinner_item, EnumEx.getNames(GSASentence.Fix.class));
 
         dopAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         fixAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -141,7 +144,7 @@ public class CalculateGpsActivity extends CustomToolbarActivity {
             spDop.setSelection(options.DopType.getValue());
 
             spFix.setAdapter(fixAdapter);
-            spFix.setSelection(options.FixType.getValue());
+            spFix.setSelection(options.Fix.getValue());
         }
 
         spDop.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -161,8 +164,8 @@ public class CalculateGpsActivity extends CustomToolbarActivity {
         spFix.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                options.FixType = GGASentence.GpsFixType.parse(i);
-                Global.Settings.DeviceSettings.setGpsFilterFixType(options.FixType);
+                options.Fix = GSASentence.Fix.parse(i);
+                Global.Settings.DeviceSettings.setGpsFilterFix(options.Fix);
                 calculate();
             }
 

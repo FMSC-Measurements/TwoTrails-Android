@@ -274,6 +274,7 @@ public class Take5Activity extends AcquireGpsMapActivity {
     protected void getSettings() {
         super.getSettings();
 
+        options.Fix = Global.Settings.DeviceSettings.getTake5FilterFix();
         options.FixType = Global.Settings.DeviceSettings.getTake5FilterFixType();
         options.DopType = Global.Settings.DeviceSettings.getTake5FilterDopType();
         options.DopValue = Global.Settings.DeviceSettings.getTake5FilterDopValue();

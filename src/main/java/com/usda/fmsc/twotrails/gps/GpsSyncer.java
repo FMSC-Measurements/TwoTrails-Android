@@ -5,8 +5,8 @@ public class GpsSyncer {
     private long timeStart;
     private byte collectCount;
 
-    String startString;
-    Long longestInterval = 0L;
+    private String startString;
+    private Long longestInterval = 0L;
 
 
     public GpsSyncer() {

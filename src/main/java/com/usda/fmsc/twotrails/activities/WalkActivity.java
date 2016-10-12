@@ -175,6 +175,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
     protected void getSettings() {
         super.getSettings();
 
+        options.Fix = Global.Settings.DeviceSettings.getWalkFilterFix();
         options.FixType = Global.Settings.DeviceSettings.getWalkFilterFixType();
         options.DopType = Global.Settings.DeviceSettings.getWalkFilterDopType();
         options.DopValue = Global.Settings.DeviceSettings.getWalkFilterDopValue();

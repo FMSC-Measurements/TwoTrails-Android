@@ -85,6 +85,10 @@
                 android:title="Filters">
 
                 <com.usda.fmsc.twotrails.preferences.GpsFixPreference
+                    android:title="GPS Fix"
+                    android:key="@string/set_GPS_FILTER_FIX"/>
+
+                <com.usda.fmsc.twotrails.preferences.GpsFixTypePreference
                     android:title="Fix Type"
                     android:key="@string/set_GPS_FILTER_FIX_TYPE"/>
 
@@ -113,6 +117,10 @@
                 android:title="Filters">
 
                 <com.usda.fmsc.twotrails.preferences.GpsFixPreference
+                    android:title="GPS Fix"
+                    android:key="@string/set_TAKE5_FILTER_FIX"/>
+
+                <com.usda.fmsc.twotrails.preferences.GpsFixTypePreference
                     android:title="Fix Type"
                     android:key="@string/set_TAKE5_FILTER_FIX_TYPE"/>
 
@@ -184,6 +192,10 @@
                 android:title="Filters">
 
                 <com.usda.fmsc.twotrails.preferences.GpsFixPreference
+                    android:title="GPS Fix"
+                    android:key="@string/set_WALK_FILTER_FIX"/>
+
+                <com.usda.fmsc.twotrails.preferences.GpsFixTypePreference
                     android:title="Fix Type"
                     android:key="@string/set_WALK_FILTER_FIX_TYPE"/>
 

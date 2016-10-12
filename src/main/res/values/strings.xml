@@ -242,10 +242,12 @@
 
     <string name="set_GPS_FILTER_DOP_TYPE">GpsFilterDopType</string>
     <string name="set_GPS_FILTER_DOP_VALUE">GpsFilterDopValue</string>
+    <string name="set_GPS_FILTER_FIX">GpsFilterFix</string>
     <string name="set_GPS_FILTER_FIX_TYPE">GpsFilterFixType</string>
 
     <string name="set_TAKE5_FILTER_DOP_TYPE">Take5FilterDopType</string>
     <string name="set_TAKE5_FILTER_DOP_VALUE">Take5FilterDopValue</string>
+    <string name="set_TAKE5_FILTER_FIX">Take5FilterFix</string>
     <string name="set_TAKE5_FILTER_FIX_TYPE">Take5FilterFixType</string>
     <string name="set_TAKE5_NMEA_AMOUNT">Take5NmeaAmount</string>
     <string name="set_TAKE5_IGNORE_NMEA">Take5IgnoreNmea</string>
@@ -257,6 +259,7 @@
 
     <string name="set_WALK_FILTER_DOP_TYPE">WalkFilterDopType</string>
     <string name="set_WALK_FILTER_DOP_VALUE">WalkFilterDopValue</string>
+    <string name="set_WALK_FILTER_FIX">WalkFilterFix</string>
     <string name="set_WALK_FILTER_FIX_TYPE">WalkFilterFixType</string>
     <string name="set_WALK_FILTER_ACCURACY">WalkFilterAccuracy</string>
     <string name="set_WALK_FILTER_FREQUENCY">WalkFilterFrequency</string>

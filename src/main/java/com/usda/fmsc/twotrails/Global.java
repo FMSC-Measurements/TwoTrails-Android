@@ -22,6 +22,7 @@ import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.geospatial.UomElevation;
 import com.usda.fmsc.geospatial.nmea.sentences.GGASentence;
+import com.usda.fmsc.geospatial.nmea.sentences.GSASentence;
 import com.usda.fmsc.twotrails.activities.MainActivity;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
 import com.usda.fmsc.twotrails.devices.TtBluetoothManager;
@@ -538,10 +539,12 @@ public class Global {
             public static final String GPS_FILTER_DOP_TYPE = "GpsFilterDopType";
             public static final String GPS_FILTER_DOP_VALUE = "GpsFilterDopValue";
             public static final String GPS_FILTER_FIX_TYPE = "GpsFilterFixType";
+            public static final String GPS_FILTER_FIX = "GpsFilterFix";
 
             public static final String TAKE5_FILTER_DOP_TYPE = "Take5FilterDopType";
             public static final String TAKE5_FILTER_DOP_VALUE = "Take5FilterDopValue";
-            public static final String TAKE5_FILTER_FIX_TYPE = "Take5FilterFixType";
+            public static final String TAKE5_FILTER_FIX = "Take5FilterFixType";
+            public static final String TAKE5_FILTER_FIX_TYPE = "Take5FilterFix";
             public static final String TAKE5_NMEA_AMOUNT = "Take5NmeaAmount";
             public static final String TAKE5_IGNORE_FIRST_NMEA = "Take5IgnoreNmea";
             public static final String TAKE5_IGNORE_FIRST_NMEA_AMOUNT = "Take5IgnoreNmeaAmount";
@@ -553,6 +556,7 @@ public class Global {
             public static final String WALK_FILTER_DOP_TYPE = "WalkFilterDopType";
             public static final String WALK_FILTER_DOP_VALUE = "WalkFilterDopValue";
             public static final String WALK_FILTER_FIX_TYPE = "WalkFilterFixType";
+            public static final String WALK_FILTER_FIX = "WalkFilterFix";
             public static final String WALK_FILTER_ACCURACY = "WalkFilterAccuracy";
             public static final String WALK_FILTER_FREQUENCY = "WalkFilterFrequency";
             public static final String WALK_INCREMENT = "WalkIncrement";
@@ -600,10 +604,12 @@ public class Global {
 
             public static final DopType DEFAULT_GPS_DOP_TYPE = DopType.HDOP;
             public static final GGASentence.GpsFixType DEFAULT_GPS_FIX_TYPE = GGASentence.GpsFixType.GPS;
+            public static final GSASentence.Fix DEFAULT_GPS_FIX = GSASentence.Fix._3D;
             public static final int DEFAULT_GPS_DOP_VALUE = 20;
 
             public static final DopType DEFAULT_TAKE5_DOP_TYPE = DopType.HDOP;
             public static final GGASentence.GpsFixType DEFAULT_TAKE5_FIX_TYPE = GGASentence.GpsFixType.GPS;
+            public static final GSASentence.Fix DEFAULT_TAKE5_FIX = GSASentence.Fix._3D;
             public static final int DEFAULT_TAKE5_DOP_VALUE = 20;
             public static final int DEFAULT_TAKE5_INCREMENT = 5;
             public static final int DEFAULT_TAKE5_NMEA_AMOUNT = 5;
@@ -615,6 +621,7 @@ public class Global {
 
             public static final DopType DEFAULT_WALK_DOP_TYPE = DopType.HDOP;
             public static final GGASentence.GpsFixType DEFAULT_WALK_FIX_TYPE = GGASentence.GpsFixType.GPS;
+            public static final GSASentence.Fix DEFAULT_WALK_FIX = GSASentence.Fix._3D;
             public static final int DEFAULT_WALK_DOP_VALUE = 20;
             public static final int DEFAULT_WALK_INCREMENT = 2;
             public static final int DEFAULT_WALK_ACCURACY = 0;
@@ -675,10 +682,12 @@ public class Global {
                 editor.putInt(GPS_FILTER_DOP_TYPE, DEFAULT_GPS_DOP_TYPE.getValue());
                 editor.putInt(GPS_FILTER_DOP_VALUE, DEFAULT_GPS_DOP_VALUE);
                 editor.putInt(GPS_FILTER_FIX_TYPE, DEFAULT_GPS_FIX_TYPE.getValue());
+                editor.putInt(GPS_FILTER_FIX, DEFAULT_GPS_FIX.getValue());
 
                 editor.putInt(TAKE5_FILTER_DOP_TYPE, DEFAULT_TAKE5_DOP_TYPE.getValue());
                 editor.putInt(TAKE5_FILTER_DOP_VALUE, DEFAULT_TAKE5_DOP_VALUE);
                 editor.putInt(TAKE5_FILTER_FIX_TYPE, DEFAULT_TAKE5_FIX_TYPE.getValue());
+                editor.putInt(TAKE5_FILTER_FIX, DEFAULT_TAKE5_FIX.getValue());
                 editor.putInt(TAKE5_NMEA_AMOUNT, DEFAULT_TAKE5_NMEA_AMOUNT);
                 editor.putBoolean(TAKE5_IGNORE_FIRST_NMEA, DEFAULT_TAKE5_IGNORE);
                 editor.putInt(TAKE5_IGNORE_FIRST_NMEA_AMOUNT, DEFAULT_TAKE5_IGNORE_AMOUNT);
@@ -690,6 +699,7 @@ public class Global {
                 editor.putInt(WALK_FILTER_DOP_TYPE, DEFAULT_WALK_DOP_TYPE.getValue());
                 editor.putInt(WALK_FILTER_DOP_VALUE, DEFAULT_WALK_DOP_VALUE);
                 editor.putInt(WALK_FILTER_FIX_TYPE, DEFAULT_WALK_FIX_TYPE.getValue());
+                editor.putInt(WALK_FILTER_FIX, DEFAULT_WALK_FIX.getValue());
                 editor.putInt(WALK_FILTER_ACCURACY, DEFAULT_WALK_ACCURACY);
                 editor.putInt(WALK_FILTER_FREQUENCY, DEFAULT_WALK_FREQUENCY);
                 editor.putInt(WALK_INCREMENT, DEFAULT_WALK_INCREMENT);
@@ -847,6 +857,14 @@ public class Global {
                 setInt(GPS_FILTER_FIX_TYPE, value.getValue());
             }
 
+            public static GSASentence.Fix getGpsFilterFix() {
+                return GSASentence.Fix.parse(getInt(GPS_FILTER_FIX, DEFAULT_GPS_FIX.getValue()));
+            }
+
+            public static void setGpsFilterFix(GSASentence.Fix value) {
+                setInt(GPS_FILTER_FIX, value.getValue());
+            }
+
 
             public static DopType getTake5FilterDopType() {
                 return DopType.parse(getInt(TAKE5_FILTER_DOP_TYPE, DEFAULT_TAKE5_DOP_TYPE.getValue()));
@@ -870,6 +888,14 @@ public class Global {
 
             public static void setTake5FilterFixType(GGASentence.GpsFixType value) {
                 setInt(TAKE5_FILTER_FIX_TYPE, value.getValue());
+            }
+
+            public static GSASentence.Fix getTake5FilterFix() {
+                return GSASentence.Fix.parse(getInt(TAKE5_FILTER_FIX, DEFAULT_TAKE5_FIX.getValue()));
+            }
+
+            public static void setTake5FilterFix(GSASentence.Fix value) {
+                setInt(TAKE5_FILTER_FIX, value.getValue());
             }
             
             
@@ -895,6 +921,14 @@ public class Global {
 
             public static void setWalkFilterFixType(GGASentence.GpsFixType value) {
                 setInt(WALK_FILTER_FIX_TYPE, value.getValue());
+            }
+
+            public static GSASentence.Fix getWalkFilterFix() {
+                return GSASentence.Fix.parse(getInt(WALK_FILTER_FIX, DEFAULT_WALK_FIX.getValue()));
+            }
+
+            public static void setWalkFilterFix(GSASentence.Fix value) {
+                setInt(WALK_FILTER_FIX, value.getValue());
             }
 
 
