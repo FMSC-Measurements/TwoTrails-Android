@@ -2029,9 +2029,9 @@ public class DataAccessLayer {
 
             cvs.put(TwoTrailsSchema.TtNmeaSchema.MagVar, burst.getMagVar());
             if (burst.getMagVarDir() != null) { cvs.put(TwoTrailsSchema.TtNmeaSchema.MagDir,burst.getMagVarDir().getValue()); }
-            cvs.put(TwoTrailsSchema.TtNmeaSchema.Fix, burst.getFix().getValue());
-            cvs.put(TwoTrailsSchema.TtNmeaSchema.FixQuality, burst.getFixQuality().getValue());
-            cvs.put(TwoTrailsSchema.TtNmeaSchema.Mode, burst.getMode().getValue());
+            if (burst.getFix() != null) { cvs.put(TwoTrailsSchema.TtNmeaSchema.Fix,burst.getFix().getValue()); }
+            if (burst.getFixQuality() != null) { cvs.put(TwoTrailsSchema.TtNmeaSchema.FixQuality,burst.getFixQuality().getValue()); }
+            if (burst.getMode() != null) { cvs.put(TwoTrailsSchema.TtNmeaSchema.Mode,burst.getMode().getValue()); }
 
             cvs.put(TwoTrailsSchema.TtNmeaSchema.PDOP, burst.getPDOP());
             cvs.put(TwoTrailsSchema.TtNmeaSchema.HDOP, burst.getHDOP());
