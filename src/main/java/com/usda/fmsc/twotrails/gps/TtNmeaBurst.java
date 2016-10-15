@@ -9,6 +9,7 @@ import org.joda.time.DateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.usda.fmsc.android.utilities.ParcelTools;
 import com.usda.fmsc.geospatial.EastWest;
 import com.usda.fmsc.geospatial.GeoPosition;
 import com.usda.fmsc.geospatial.NorthSouth;
@@ -82,10 +83,10 @@ public class TtNmeaBurst extends TtObject implements Parcelable {
         this.groundSpeed = source.readDouble();
         this.trackAngle = source.readDouble();
         this.magVar = source.readDouble();
-        this.magVarDir = EastWest.parse(source.readInt());
+        this.magVarDir = EastWest.parse(ParcelTools.readNInt(source));
 
-        this.mode = GSASentence.Mode.parse(source.readInt());
-        this.fix = GSASentence.Fix.parse(source.readInt());
+        this.mode = GSASentence.Mode.parse(ParcelTools.readNInt(source));
+        this.fix = GSASentence.Fix.parse(ParcelTools.readNInt(source));
         this.satsUsed = source.readArrayList(Integer.class.getClassLoader());
         this.pdop = source.readDouble();
         this.hdop = source.readDouble();
@@ -95,7 +96,7 @@ public class TtNmeaBurst extends TtObject implements Parcelable {
         this.trackedSatellites = source.readInt();
         this.horizDilution = source.readDouble();
         this.geoidHeight = source.readDouble();
-        this.geoUom = UomElevation.parse(source.readInt());
+        this.geoUom = UomElevation.parse(ParcelTools.readNInt(source));
 
         this.numberOfSatellitesInView = source.readInt();
     }
@@ -182,10 +183,10 @@ public class TtNmeaBurst extends TtObject implements Parcelable {
         dest.writeDouble(groundSpeed);
         dest.writeDouble(trackAngle);
         dest.writeDouble(magVar);
-        dest.writeInt(magVarDir.getValue());
+        ParcelTools.writeNInt(dest, magVarDir != null ? magVarDir.getValue() : null);
 
-        dest.writeInt(mode.getValue());
-        dest.writeInt(fix.getValue());
+        ParcelTools.writeNInt(dest, mode != null ? mode.getValue() : null);
+        ParcelTools.writeNInt(dest, fix != null ? fix.getValue() : null);
         dest.writeList(satsUsed);
         dest.writeDouble(pdop);
         dest.writeDouble(hdop);
@@ -195,7 +196,7 @@ public class TtNmeaBurst extends TtObject implements Parcelable {
         dest.writeInt(trackedSatellites);
         dest.writeDouble(horizDilution);
         dest.writeDouble(geoidHeight);
-        dest.writeInt(geoUom.getValue());
+        ParcelTools.writeNInt(dest, geoUom != null ? geoUom.getValue() : null);
 
         dest.writeInt(numberOfSatellitesInView);
     }
