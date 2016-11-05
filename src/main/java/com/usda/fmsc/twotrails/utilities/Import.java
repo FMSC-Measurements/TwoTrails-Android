@@ -364,9 +364,6 @@ public class Import {
                         point.setComment(record.get(fCmt));
                     }
 
-
-                    TtUtils.pointHasValue(point);
-
                     points.put(point.getCN(), point);
 
                     prevPoint = point;
