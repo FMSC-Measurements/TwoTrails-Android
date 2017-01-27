@@ -2365,7 +2365,8 @@ public class PointsActivity extends CustomToolbarActivity {
     public void btnAcquireClick(View view) {
         if(!_PointLocked && _CurrentPoint != null) {
             switch (_CurrentPoint.getOp()) {
-                case GPS: {
+                case GPS:
+                case WayPoint: {
                     //region GPS
                     if (Global.Settings.DeviceSettings.isGpsConfigured()) {
                         if (TtUtils.pointHasValue(_CurrentPoint)) {

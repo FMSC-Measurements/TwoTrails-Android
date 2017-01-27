@@ -253,14 +253,19 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
 
     public void btnMmAddOnlineClick(View view) {
         fabSheet.hideSheet();
-        createMap(null, null, NewArcMapDialog.CreateMode.NEW_ONLINE);
+        if (checkCredentials()) {
+            createMap(null, null, NewArcMapDialog.CreateMode.NEW_ONLINE);
+        }
     }
 
     public void btnMmAddOfflineClick(View view) {
         fabSheet.hideSheet();
+        addOfflineMap();
+    }
 
+    private boolean checkCredentials() {
         if (ArcGISTools.hasValidCredentials(MapManagerActivity.this)) {
-            addOfflineMap();
+            return true;
         } else {
             String message;
             boolean updateCredentials = false;
@@ -296,7 +301,10 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
                     .setNegativeButton(R.string.str_no, null)
                     .show();
         }
+
+        return false;
     }
+
 
     private void addOfflineMap() {
         new AlertDialog.Builder(this)
@@ -304,30 +312,31 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
                 .setPositiveButton("Existing Map", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        if (checkCredentials()) {
+                            SelectMapTypeDialog.newInstance(maps, SelectMapTypeDialog.SelectMapMode.ALL_ARC)
+                                    .setOnMapSelectedListener(new SelectMapTypeDialog.OnMapSelectedListener() {
+                                        @Override
+                                        public void mapSelected(MapType mapType, int mapId) {
+                                            ArcGisMapLayer layer = ArcGISTools.getMapLayer(mapId);
 
-                        SelectMapTypeDialog.newInstance(maps, SelectMapTypeDialog.SelectMapMode.ALL_ARC)
-                                .setOnMapSelectedListener(new SelectMapTypeDialog.OnMapSelectedListener() {
-                                    @Override
-                                    public void mapSelected(MapType mapType, int mapId) {
-                                        ArcGisMapLayer layer = ArcGISTools.getMapLayer(mapId);
-
-                                        if (!layer.isOnline() && StringEx.isEmpty(layer.getUrl())) {
-                                            new AlertDialog.Builder(getBaseContext())
-                                                    .setMessage("This offline map was not created from an online resource. " +
-                                                            "You can only create offline maps from online maps or offline" +
-                                                            "maps which were created from online resources.")
-                                                    .setPositiveButton(R.string.str_ok, null)
-                                                    .show();
-                                        } else {
-                                            createMap(String.format("%s (Offline)", layer.getName()), layer.getUrl(),
-                                                    layer.isOnline() ?
-                                                            NewArcMapDialog.CreateMode.OFFLINE_FROM_ONLINE_URL :
-                                                            NewArcMapDialog.CreateMode.OFFLINE_FROM_OFFLINE_URL
-                                            );
+                                            if (!layer.isOnline() && StringEx.isEmpty(layer.getUrl())) {
+                                                new AlertDialog.Builder(getBaseContext())
+                                                        .setMessage("This offline map was not created from an online resource. " +
+                                                                "You can only create offline maps from online maps or offline" +
+                                                                "maps which were created from online resources.")
+                                                        .setPositiveButton(R.string.str_ok, null)
+                                                        .show();
+                                            } else {
+                                                createMap(String.format("%s (Offline)", layer.getName()), layer.getUrl(),
+                                                        layer.isOnline() ?
+                                                                NewArcMapDialog.CreateMode.OFFLINE_FROM_ONLINE_URL :
+                                                                NewArcMapDialog.CreateMode.OFFLINE_FROM_OFFLINE_URL
+                                                );
+                                            }
                                         }
-                                    }
-                                })
-                                .show(getSupportFragmentManager(), SELECT_MAP);
+                                    })
+                                    .show(getSupportFragmentManager(), SELECT_MAP);
+                        }
                     }
                 })
                 .setNegativeButton("File", new DialogInterface.OnClickListener() {

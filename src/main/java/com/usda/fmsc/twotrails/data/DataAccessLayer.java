@@ -369,11 +369,13 @@ public class DataAccessLayer {
                     if (!c.isNull(5))
                         poly.setPerimeter(c.getDouble(5));
                     if (!c.isNull(6))
-                        poly.setIncrementBy(c.getInt(6));
+                        poly.setPerimeterLine(c.getDouble(6));
                     if (!c.isNull(7))
-                        poly.setPointStartIndex(c.getInt(7));
+                        poly.setIncrementBy(c.getInt(7));
                     if (!c.isNull(8))
-                        poly.setTime(dtf.parseDateTime(c.getString(8)));
+                        poly.setPointStartIndex(c.getInt(8));
+                    if (!c.isNull(9))
+                        poly.setTime(dtf.parseDateTime(c.getString(9)));
 
                     polys.add(poly);
                 } while (c.moveToNext());
