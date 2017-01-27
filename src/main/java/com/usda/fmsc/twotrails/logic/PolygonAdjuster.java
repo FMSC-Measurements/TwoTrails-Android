@@ -199,15 +199,13 @@ public class PolygonAdjuster {
         if (polys != null && polys.size() > 0) {
             for (TtPolygon poly : polys) {
                 try {
-                    TtPolygon newPoly = new TtPolygon(poly);
                     ArrayList<TtPoint> points = dal.getBoundaryPointsInPoly(poly.getCN());
 
                     if (points.size() > 2) {
                         double perim = 0, area = 0;
 
-                        points.add(points.get(0));
                         TtPoint p1, p2;
-                        for (int i = 0; i < points.size() - 1; i++) {
+                        for (int i = 0; i < points.size() - 2; i++) {
                             p1 = points.get(i);
                             p2 = points.get(i + 1);
 
@@ -215,14 +213,21 @@ public class PolygonAdjuster {
                             area += ((p2.getAdjX() - p1.getAdjX()) * (p2.getAdjY() + p1.getAdjY()) / 2);
                         }
 
-                        newPoly.setPerimeter(perim);
-                        newPoly.setArea(Math.abs(area));
+                        poly.setPerimeterLine(perim);
+
+                        p1 = points.get(points.size() - 1);
+                        p2 = points.get(0);
+                        perim += TtUtils.Math.distance(p1, p2);
+                        area += ((p2.getAdjX() - p1.getAdjX()) * (p2.getAdjY() + p1.getAdjY()) / 2);
+
+                        poly.setPerimeter(perim);
+                        poly.setArea(Math.abs(area));
                     } else {
-                        newPoly.setPerimeter(0);
-                        newPoly.setArea(0);
+                        poly.setPerimeter(0);
+                        poly.setArea(0);
                     }
 
-                    dal.updatePolygon(newPoly);
+                    dal.updatePolygon(poly);
                 } catch (Exception ex) {
                     TtUtils.TtReport.writeError(ex.getMessage(), "SegmentFactory:CalculateAreaAndPerimeter");
                 }

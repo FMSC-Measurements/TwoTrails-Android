@@ -36,6 +36,7 @@ public class TtPolygon extends TtObject implements Comparable<TtPolygon>, Compar
 
     private double Area;
     private double Perimeter;
+    private double PerimeterLine;
 
 
     //region Constructors
@@ -55,6 +56,7 @@ public class TtPolygon extends TtObject implements Comparable<TtPolygon>, Compar
         Accuracy = source.readDouble();
         Area = source.readDouble();
         Perimeter = source.readDouble();
+        PerimeterLine = source.readDouble();
     }
 
     public TtPolygon(TtPolygon p) {
@@ -64,6 +66,7 @@ public class TtPolygon extends TtObject implements Comparable<TtPolygon>, Compar
         Accuracy = p.getAccuracy();
         Area = p.getArea();
         Perimeter = p.getPerimeter();
+        PerimeterLine = p.getPerimeterLine();
         IncrementBy = p.getIncrementBy();
         PointStartIndex = p.getPointStartIndex();
         Time = p.getTime();
@@ -96,6 +99,7 @@ public class TtPolygon extends TtObject implements Comparable<TtPolygon>, Compar
         dest.writeDouble(Accuracy);
         dest.writeDouble(Area);
         dest.writeDouble(Perimeter);
+        dest.writeDouble(PerimeterLine);
     }
 
     //region Get/Set
@@ -162,6 +166,14 @@ public class TtPolygon extends TtObject implements Comparable<TtPolygon>, Compar
 
     public void setPerimeter(double Perimeter) {
         this.Perimeter = Perimeter;
+    }
+
+    public void setPerimeterLine(double PerimeterLine) {
+        this.PerimeterLine = PerimeterLine;
+    }
+
+    public double getPerimeterLine() {
+        return PerimeterLine;
     }
 
     public DateTime getTime() {

@@ -37,7 +37,7 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
 
     private View viewPreFocus;
     private ScrollView scrollView;
-    private TextView tvName, tvPerimFt, tvPerimMt, tvAreaAc, tvAreaHa;
+    private TextView tvName, tvPerimFt, tvPerimMt, tvPerimLineFt, tvPerimLineMt, tvAreaAc, tvAreaHa;
     private EditText txtName, txtDesc, txtInc, txtPsi, txtAcc;
     private StaticPolygonView spv;
 
@@ -93,6 +93,8 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
 
         tvPerimFt = (TextView)view.findViewById(R.id.polyFragTvPerimFt);
         tvPerimMt = (TextView)view.findViewById(R.id.polyFragTvPerimMt);
+        tvPerimLineFt = (TextView)view.findViewById(R.id.polyFragTvPerimLineFt);
+        tvPerimLineMt = (TextView)view.findViewById(R.id.polyFragTvPerimLineMt);
         tvAreaAc = (TextView)view.findViewById(R.id.polyFragTvAreaAc);
         tvAreaHa = (TextView)view.findViewById(R.id.polyFragTvAreaHa);
 
@@ -349,6 +351,8 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
         txtPsi.setText(StringEx.toString(_Polygon.getPointStartIndex()));
         txtAcc.setText(StringEx.toStringRound(_Polygon.getAccuracy(), 2));
 
+        tvPerimFt.setText(StringEx.toStringRound(TtUtils.Convert.toFeetTenths(_Polygon.getPerimeter(), Dist.Meters), 2));
+        tvPerimMt.setText(StringEx.toStringRound(_Polygon.getPerimeter(), 2));
         tvPerimFt.setText(StringEx.toStringRound(TtUtils.Convert.toFeetTenths(_Polygon.getPerimeter(), Dist.Meters), 2));
         tvPerimMt.setText(StringEx.toStringRound(_Polygon.getPerimeter(), 2));
         tvAreaAc.setText(StringEx.toStringRound(TtUtils.Convert.metersSquaredToAcres(_Polygon.getArea()), 2));

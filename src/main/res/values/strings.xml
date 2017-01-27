@@ -110,6 +110,7 @@
     <string name="str_ac">Ac</string>
     <string name="str_ha">Ha</string>
     <string name="str_perim">Perimeter</string>
+    <string name="str_perim_line">Perimeter Line</string>
     <string name="str_area">Area</string>
     <string name="str_calc">Calculate</string>
     <string name="str_bnd">Boundary</string>

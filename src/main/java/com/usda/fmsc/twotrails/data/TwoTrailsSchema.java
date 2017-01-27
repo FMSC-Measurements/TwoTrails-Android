@@ -182,6 +182,7 @@ public class TwoTrailsSchema {
         public static final String Description = "Description";
         public static final String Area = "Area";
         public static final String Perimeter = "Perimeter";
+        public static final String PerimeterLine = "PerimeterLine";
         public static final String IncrementBy = "Increment";
         public static final String PointStartIndex = "PointStartIndex";
         public static final String TimeCreated = "TimeCreated";
@@ -194,6 +195,7 @@ public class TwoTrailsSchema {
             Description     + " TEXT, " +
             Area            + " REAL, " +
             Perimeter       + " REAL, " +
+            PerimeterLine   + " REAL, " +
             IncrementBy     + " INTEGER, " +
             PointStartIndex + " INTEGER, " +
             TimeCreated     + " TEXT, " +
@@ -207,6 +209,7 @@ public class TwoTrailsSchema {
             Description + ", " +
             Area + ", " +
             Perimeter + ", " +
+            PerimeterLine + ", " +
             IncrementBy + ", " +
             PointStartIndex + ", " +
             TimeCreated;

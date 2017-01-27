@@ -214,6 +214,28 @@
 
                                 <TableRow>
                                     <TextView
+                                        android:text="@string/str_perim_line"
+                                        android:textSize="20sp"/>
+
+                                    <TextView
+                                        android:id="@+id/polyFragTvPerimLineFt"
+                                        style="@style/polyDetailTextValueStyle"/>
+
+                                    <TextView
+                                        android:text="@string/str_ft"
+                                        style="@style/polyDetailTextStyle"/>
+
+                                    <TextView
+                                        android:id="@+id/polyFragTvPerimLineMt"
+                                        style="@style/polyDetailTextValueStyle"/>
+
+                                    <TextView
+                                        android:text="@string/str_mt"
+                                        style="@style/polyDetailTextStyle"/>
+                                </TableRow>
+
+                                <TableRow>
+                                    <TextView
                                         android:text="@string/str_area"
                                         android:textSize="20sp"/>
 

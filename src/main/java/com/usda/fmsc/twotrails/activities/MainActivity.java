@@ -574,6 +574,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     }
 
     public void btnOpenClick(View view) {
+        //todo fix open file method
         AndroidUtils.App.openFileIntent(this, Consts.FileExtensions.TWO_TRAILS, Consts.Codes.Dialogs.REQUEST_FILE);
     }
 
