@@ -5,7 +5,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.Nullable;
 
-import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.geospatial.EastWest;
 import com.usda.fmsc.geospatial.NorthSouth;
 import com.usda.fmsc.geospatial.UomElevation;
@@ -52,6 +51,7 @@ import com.usda.fmsc.utilities.StringEx;
 
 public class DataAccessLayer {
     private static DateTimeFormatter dtf = DateTimeFormat.forPattern("M/d/yyyy h:mm:ss.SSS");
+    private static DateTimeFormatter dtfAlt = DateTimeFormat.forPattern("yyyy-dd-M h:mm:ss"); //Alt Format, PC might be using it
 
     public String getFilePath() {
         return _FilePath;
@@ -375,7 +375,7 @@ public class DataAccessLayer {
                     if (!c.isNull(8))
                         poly.setPointStartIndex(c.getInt(8));
                     if (!c.isNull(9))
-                        poly.setTime(dtf.parseDateTime(c.getString(9)));
+                        poly.setTime(parseDateTime(c.getString(9)));
 
                     polys.add(poly);
                 } while (c.moveToNext());
@@ -628,7 +628,7 @@ public class DataAccessLayer {
                         point.setMetadataCN(c.getString(8));
 
                     if (!c.isNull(9))
-                        point.setTime(dtf.parseDateTime(c.getString(9)));
+                        point.setTime(parseDateTime(c.getString(9)));
 
                     if (!c.isNull(10))
                         point.setAdjX(c.getDouble(10));
@@ -1823,12 +1823,12 @@ public class DataAccessLayer {
                         continue;
 
                     if (!c.isNull(3))
-                        timeCreated = dtf.parseDateTime(c.getString(3));
+                        timeCreated = parseDateTime(c.getString(3));
                     else
                         continue;
 
                     if (!c.isNull(4))
-                        fixTime = dtf.parseDateTime(c.getString(4));
+                        fixTime = parseDateTime(c.getString(4));
                     else
                         continue;
 
@@ -2616,7 +2616,7 @@ public class DataAccessLayer {
                         pic.setFilePath(c.getString(4));
 
                     if (!c.isNull(5))
-                        pic.setTimeCreated(dtf.parseDateTime(c.getString(5)));
+                        pic.setTimeCreated(parseDateTime(c.getString(5)));
 
                     if (!c.isNull(6))
                         pic.setComment(c.getString(6));
@@ -2842,7 +2842,7 @@ public class DataAccessLayer {
 
             if (c.moveToFirst()) {
                 do {
-                    activities.add(new TtUserActivity(c.getString(0), c.getString(1), dtf.parseDateTime(c.getString(2)), new DataActivityType(c.getInt(3))));
+                    activities.add(new TtUserActivity(c.getString(0), c.getString(1), parseDateTime(c.getString(2)), new DataActivityType(c.getInt(3))));
                 } while (c.moveToNext());
             }
 
@@ -2890,12 +2890,12 @@ public class DataAccessLayer {
                 items, table, StringEx.isEmpty(where) ? StringEx.Empty : String.format(" where %s", where));
     }
 
-
     private String createSelectAllQuery(String table, String where) {
         return String.format("select * from %s%s",
                 table, StringEx.isEmpty(where) ?
                         StringEx.Empty : String.format(" where %s", where));
     }
+
 
     public int getItemCount(String tableName) {
         String countQuery = "SELECT COUNT (*) FROM " + tableName;
@@ -2954,9 +2954,20 @@ public class DataAccessLayer {
         return count;
     }
 
+
+    public DateTime parseDateTime(String date) {
+        try {
+            return dtf.parseDateTime(date);
+        } catch (IllegalArgumentException e) {
+            return dtfAlt.parseDateTime(date);
+        }
+    }
+
+
     public boolean hasPolygons() {
         return getItemCount(TwoTrailsSchema.PolygonSchema.TableName) > 0;
     }
+
 
     public boolean duplicate(String duplicateFileName) {
         try {
@@ -3004,6 +3015,7 @@ public class DataAccessLayer {
         return true;
     }
 
+
     public ArrayList<String> getCNs(String tableName, String where) {
         ArrayList<String> cns = new ArrayList<>();
 
@@ -3030,8 +3042,8 @@ public class DataAccessLayer {
         return cns;
     }
 
-    public boolean needsAdjusting()
-    {
+
+    public boolean needsAdjusting() {
         String countQuery = String.format("SELECT COUNT (*) FROM %s where %s = NULL",
                 TwoTrailsSchema.PointSchema.TableName,
                 TwoTrailsSchema.PointSchema.AdjX);
@@ -3050,6 +3062,7 @@ public class DataAccessLayer {
 
         return count > 0;
     }
+
 
     public void clean() {
         StringBuilder sbPoly = new StringBuilder();
