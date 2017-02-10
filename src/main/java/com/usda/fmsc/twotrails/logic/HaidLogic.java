@@ -177,8 +177,8 @@ public class HaidLogic {
                     if (traversing) {
                        closeTraverse(point, sb);
                     } else {
-                        if (_LastTtPoint != null) {
-                            _Legs.add(new Leg(_LastTtPoint, point));
+                        if (_LastTtBndPt != null) {
+                            _Legs.add(new Leg(_LastTtBndPt, point));
                         }
                     }
 
