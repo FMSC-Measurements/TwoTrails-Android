@@ -40,16 +40,16 @@ public class TtImage extends TtMedia implements TtOrientation {
         _Roll = ParcelTools.readNFloat(source);
     }
 
-    public TtImage(String name, String filePath, DateTime timeCreated, String pointCN) {
-        this(name, filePath, StringEx.Empty, timeCreated, pointCN, null, null, null);
+    public TtImage(String name, String filePath, DateTime timeCreated, String pointCN, boolean isExternal) {
+        this(name, filePath, StringEx.Empty, timeCreated, pointCN, isExternal, null, null, null);
     }
 
-    public TtImage(String name, String filePath, String comment, DateTime timeCreated, String pointCN) {
-        this(name, filePath, comment, timeCreated, pointCN, null, null, null);
+    public TtImage(String name, String filePath, String comment, DateTime timeCreated, String pointCN, boolean isExternal) {
+        this(name, filePath, comment, timeCreated, pointCN, isExternal, null, null, null);
     }
 
-    public TtImage(String name, String filePath, String comment, DateTime timeCreated, String pointCN, Float azimuth, Float pitch, Float roll) {
-        super(name, filePath, comment, timeCreated, pointCN);
+    public TtImage(String name, String filePath, String comment, DateTime timeCreated, String pointCN, boolean isExternal, Float azimuth, Float pitch, Float roll) {
+        super(name, filePath, comment, timeCreated, pointCN, isExternal);
 
         _Azimuth = azimuth;
         _Pitch = pitch;

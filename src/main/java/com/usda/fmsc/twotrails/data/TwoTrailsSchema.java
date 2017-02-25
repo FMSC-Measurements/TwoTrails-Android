@@ -1,5 +1,7 @@
 package com.usda.fmsc.twotrails.data;
 
+import com.usda.fmsc.utilities.StringEx;
+
 public class TwoTrailsSchema {
     //Old Schema Versions
     public static final TtDalVersion OSV_2_0_0 = new TtDalVersion(2, 0, 0);
@@ -457,72 +459,6 @@ public class TwoTrailsSchema {
             WayPtsColor;
     }
     //endregion
-
-    //region Media
-
-    //region Media Table
-    public static class MediaSchema {
-        public static final String TableName = "Media";
-
-        public static final String PointCN = "PointCN";
-        public static final String MediaType = "MediaType";
-        public static final String Name = "Name";
-        public static final String FilePath = "FilePath";
-        public static final String CreationTime = "CreationTime";
-        public static final String Comment = "Comment";
-
-        public static final String CreateTable =
-            "CREATE TABLE " + TableName + " (" +
-            SharedSchema.CN + " TEXT NOT NULL, " +
-            PointCN         + " TEXT, " +
-            MediaType       + " INTEGER, " +
-            Name            + " TEXT, " +
-            FilePath        + " TEXT, " +
-            CreationTime    + " TEXT, " +
-            Comment         + " TEXT, " +
-            "PRIMARY KEY (" + SharedSchema.CN + "));";
-
-        public static final String SelectItems =
-                SharedSchema.CN + ", " +
-                PointCN + ", " +
-                MediaType + ", " +
-                Name + ", " +
-                FilePath + ", " +
-                CreationTime + ", " +
-                Comment;
-    }
-    //endregion
-
-
-    //region PictureTable
-    public static class PictureSchema {
-        public static final String TableName = "PictureData";
-
-        public static final String PicType = "Type";
-        public static final String Azimuth = "Azimuth";
-        public static final String Pitch = "Pitch";
-        public static final String Roll = "Roll";
-
-        public static final String CreateTable =
-            "CREATE TABLE " + TableName + " (" +
-            SharedSchema.CN + " TEXT REFERENCES " +
-            MediaSchema.TableName + ", " +
-            PicType     + " INTEGER, " +
-            Azimuth     + " REAL, " +
-            Pitch       + " REAL, " +
-            Roll        + " REAL, " +
-            "PRIMARY KEY (" + SharedSchema.CN + "));";
-
-        public static final String SelectItemsNoCN =
-            PicType + ", " +
-            Azimuth + ", " +
-            Pitch + ", " +
-            Roll;
-    }
-    //endregion
-
-    //endregion
-
 
     //region Activity
     public static class ActivitySchema {

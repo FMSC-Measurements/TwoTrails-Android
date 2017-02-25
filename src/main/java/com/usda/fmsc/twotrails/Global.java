@@ -25,6 +25,7 @@ import com.usda.fmsc.geospatial.nmea.sentences.GGASentence;
 import com.usda.fmsc.geospatial.nmea.sentences.GSASentence;
 import com.usda.fmsc.twotrails.activities.MainActivity;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
+import com.usda.fmsc.twotrails.data.MediaAccessLayer;
 import com.usda.fmsc.twotrails.devices.TtBluetoothManager;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.objects.RecentProject;
@@ -55,6 +56,7 @@ import java.util.List;
 
 public class Global {
     private static DataAccessLayer _DAL;
+    private static MediaAccessLayer _MAL;
 
     private static Context _ApplicationContext;
     private static MainActivity _MainActivity;
@@ -156,6 +158,23 @@ public class Global {
         }
     }
 
+    public static MediaAccessLayer getMAL() {
+        if (_MAL == null && _DAL != null)
+        {
+            String filename = _DAL.getFilePath();
+
+            filename = filename.substring(0, filename.length() - 3) + "ttmpx";
+
+            _MAL = new MediaAccessLayer(filename);
+        }
+
+        return _MAL;
+    }
+
+    public static void setMAL(MediaAccessLayer mal) {
+        _MAL = mal;
+    }
+
     public static TtMetadata getDefaultMeta() {
         return _DefaultMeta;
     }
@@ -209,8 +228,8 @@ public class Global {
 
     //region Files
     public static String getTtFilePath(String fileName) {
-        if(!fileName.endsWith(".tt"))
-            fileName += ".tt";
+        if(!fileName.endsWith(Consts.FILE_EXTENSION))
+            fileName += Consts.FILE_EXTENSION;
 
         return getTtFileDir() + File.separator + fileName;
     }

@@ -30,16 +30,16 @@ public class TtPanorama extends TtImage {
         super(source);
     }
 
-    public TtPanorama(String name, String filePath, DateTime timeCreated, String pointCN) {
-        this(name, filePath, StringEx.Empty, timeCreated, pointCN, null, null, null);
+    public TtPanorama(String name, String filePath, DateTime timeCreated, String pointCN, boolean isExternal) {
+        this(name, filePath, StringEx.Empty, timeCreated, pointCN, isExternal, null, null, null);
     }
 
-    public TtPanorama(String name, String filePath, String comment, DateTime timeCreated, String pointCN) {
-        this(name, filePath, comment, timeCreated, pointCN, null, null, null);
+    public TtPanorama(String name, String filePath, String comment, DateTime timeCreated, String pointCN, boolean isExternal) {
+        this(name, filePath, comment, timeCreated, pointCN, isExternal, null, null, null);
     }
 
-    public TtPanorama(String name, String filePath, String comment, DateTime timeCreated, String pointCN, Float azimuth, Float pitch, Float roll) {
-        super(name, filePath, comment, timeCreated, pointCN, azimuth, pitch, roll);
+    public TtPanorama(String name, String filePath, String comment, DateTime timeCreated, String pointCN, boolean isExternal, Float azimuth, Float pitch, Float roll) {
+        super(name, filePath, comment, timeCreated, pointCN, isExternal, azimuth, pitch, roll);
     }
 
     public TtPanorama(TtPanorama panorama) {
