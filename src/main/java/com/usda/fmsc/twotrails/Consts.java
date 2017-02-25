@@ -14,6 +14,9 @@ public class Consts {
 
     public static final String LOG_TAG = "TT";
 
+    public static final String FILE_EXTENSION = ".ttx";
+    public static final String MEDIA_PACKAGE_EXTENSION = ".ttmpx";
+
     public static final String EmptyGuid = "00000000-0000-0000-0000-000000000000";
 
     public static final double RMSEr95_Coeff = 1.7308;
@@ -64,7 +67,7 @@ public class Consts {
     }
 
     public static class FileExtensions {
-        public static final String TWO_TRAILS = "file/*.tt";
+        public static final String TWO_TRAILS = "file/*" + FILE_EXTENSION;
         public static final String TPK = "file/*.tpk";
     }
 

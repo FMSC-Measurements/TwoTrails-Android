@@ -89,7 +89,7 @@
                     android:host="*"
                     android:scheme="file"/>
                 <data android:mimeType="*/*"/>
-                <data android:pathPattern="/.*\\.tt"/>
+                <data android:pathPattern="/.*\\.ttx"/>
             </intent-filter>
 
             <!-- mimetypes, where the suffix is irrelevant -->
@@ -113,7 +113,7 @@
 
                 <data android:scheme="file"/>
                 <data android:host="*"/>
-                <data android:pathPattern="/.*\\.tt"/>
+                <data android:pathPattern="/.*\\.ttx"/>
             </intent-filter>
         </activity>
         <activity

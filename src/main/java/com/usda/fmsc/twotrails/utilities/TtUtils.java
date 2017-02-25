@@ -1173,9 +1173,9 @@ public class TtUtils {
                     time = new DateTime(new File(filePath).lastModified());
 
                 if (type == PictureType.Panorama) {
-                    return new TtPanorama(name, filePath, time, pointCN);
+                    return new TtPanorama(name, filePath, time, pointCN, true);
                 } else {
-                    return new TtImage(name, filePath, time, pointCN);
+                    return new TtImage(name, filePath, time, pointCN, true);
                 }
 
             } catch (IOException e) {

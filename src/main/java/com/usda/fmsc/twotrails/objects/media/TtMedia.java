@@ -2,6 +2,7 @@ package com.usda.fmsc.twotrails.objects.media;
 
 import android.os.Parcel;
 
+import com.usda.fmsc.android.utilities.ParcelTools;
 import com.usda.fmsc.twotrails.objects.TtObject;
 import com.usda.fmsc.twotrails.units.MediaType;
 import com.usda.fmsc.utilities.FileUtils;
@@ -15,6 +16,7 @@ public abstract class TtMedia extends TtObject {
     private String _Comment;
     private DateTime _TimeCreated;
     private String _PointCN;
+    private boolean _IsExternal;
 
 
     public TtMedia() {}
@@ -27,14 +29,16 @@ public abstract class TtMedia extends TtObject {
         _Comment = source.readString();
         _TimeCreated = (DateTime)source.readSerializable();
         _PointCN = source.readString();
+        _IsExternal = ParcelTools.readBool(source);
     }
 
-    public TtMedia(String Name, String FilePath, String Comment, DateTime TimeCreated, String PointCN) {
+    public TtMedia(String Name, String FilePath, String Comment, DateTime TimeCreated, String PointCN, boolean IsExternal) {
         this._Name = Name;
         this._FilePath = FilePath;
         this._Comment = Comment;
         this._TimeCreated = TimeCreated;
         this._PointCN = PointCN;
+        this._IsExternal = IsExternal;
     }
 
     public TtMedia(TtMedia media) {
@@ -96,6 +100,13 @@ public abstract class TtMedia extends TtObject {
     }
 
 
+    public boolean getIsExternal() { return _IsExternal;}
+
+    public  void setIsExternal(boolean isExternal) {
+        _IsExternal = isExternal;
+    }
+
+
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
@@ -105,5 +116,6 @@ public abstract class TtMedia extends TtObject {
         dest.writeString(StringEx.getValueOrEmpty(_Comment));
         dest.writeSerializable(_TimeCreated);
         dest.writeString(StringEx.getValueOrEmpty(_PointCN));
+        ParcelTools.writeBool(dest, _IsExternal);
     }
 }

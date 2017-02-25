@@ -56,7 +56,7 @@ import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.adapters.MediaRvAdapter;
 import com.usda.fmsc.twotrails.adapters.PointDetailsAdapter;
 import com.usda.fmsc.twotrails.Consts;
-import com.usda.fmsc.twotrails.data.TwoTrailsSchema;
+import com.usda.fmsc.twotrails.data.TwoTrailsMediaSchema;
 import com.usda.fmsc.twotrails.dialogs.LatLonDialog;
 import com.usda.fmsc.twotrails.dialogs.MoveToPointDialog;
 import com.usda.fmsc.twotrails.dialogs.PointEditorDialog;
@@ -97,7 +97,6 @@ import java.util.concurrent.Semaphore;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.geospatial.utm.UTMTools;
 import com.usda.fmsc.utilities.StringEx;
-import com.usda.fmsc.utilities.kml.Point;
 
 import org.joda.time.DateTime;
 
@@ -1376,7 +1375,7 @@ public class PointsActivity extends CustomToolbarActivity {
 
     private void saveMedia() {
         if (_MediaUpdated && _CurrentMedia != null) {
-            if (!Global.getDAL().updateMedia(_CurrentMedia)) {
+            if (!Global.getMAL().updateMedia(_CurrentMedia)) {
                 Toast.makeText(PointsActivity.this,
                         String.format("Unable to save %s", _CurrentMedia.getMediaType().toString()),
                         Toast.LENGTH_LONG
@@ -1391,7 +1390,7 @@ public class PointsActivity extends CustomToolbarActivity {
         List<TtMedia> mediaList = rvMediaAdapter.getItems();
         int index = mediaList.indexOf(media);
 
-        Global.getDAL().deleteMedia(media);
+        Global.getMAL().deleteMedia(media);
 
         if (delete) {
             File file = new File(media.getFilePath());
@@ -1422,7 +1421,7 @@ public class PointsActivity extends CustomToolbarActivity {
 
     private void addImage(final TtImage picture) {
         if (picture != null) {
-            if (Global.getDAL().insertMedia(picture)) {
+            if (Global.getMAL().insertMedia(picture)) {
                 mediaSelectionIndex = TtUtils.getMediaIndex(picture, rvMediaAdapter.getItems());
                 loadImageToList(picture);
             } else {
@@ -1438,7 +1437,7 @@ public class PointsActivity extends CustomToolbarActivity {
             Collections.sort(pictures, TtUtils.PictureTimeComparator);
 
             for (int i = 0; i <pictures.size(); i++) {
-                if (!Global.getDAL().insertMedia(pictures.get(i))) {
+                if (!Global.getMAL().insertMedia(pictures.get(i))) {
                     pictures.remove(i--);
                     error++;
                 }
@@ -1850,7 +1849,7 @@ public class PointsActivity extends CustomToolbarActivity {
                     mediaCount = 0;
                     mediaSelectionIndex = INVALID_INDEX;
 
-                    ArrayList<TtImage> pictures = Global.getDAL().getPicturesInPoint(point.getCN());
+                    ArrayList<TtImage> pictures = Global.getMAL().getPicturesInPoint(point.getCN());
 
                     Collections.sort(pictures, TtUtils.PictureTimeComparator);
                     for (final TtImage p : pictures) {
@@ -1861,8 +1860,8 @@ public class PointsActivity extends CustomToolbarActivity {
                         mediaSelectionIndex = 0;
                 } else {
                     mediaCount = Global.getDAL().getItemsCount(
-                            TwoTrailsSchema.MediaSchema.TableName,
-                            TwoTrailsSchema.MediaSchema.PointCN,
+                            TwoTrailsMediaSchema.Media.TableName,
+                            TwoTrailsMediaSchema.Media.PointCN,
                             point.getCN());
                 }
             }

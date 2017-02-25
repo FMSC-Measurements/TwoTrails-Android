@@ -32,8 +32,8 @@ public class TtVideo extends TtMedia {
         _PositionTimelineFile = source.readString();
     }
 
-    public TtVideo(String Name, String FilePath, String Comment, DateTime TimeCreated, String PointCN, PositionTimeline _Timeline, String _PositionTimelineFile) {
-        super(Name, FilePath, Comment, TimeCreated, PointCN);
+    public TtVideo(String Name, String FilePath, String Comment, DateTime TimeCreated, String PointCN, boolean isExternal, PositionTimeline _Timeline, String _PositionTimelineFile) {
+        super(Name, FilePath, Comment, TimeCreated, PointCN, isExternal);
         this._Timeline = _Timeline;
         this._PositionTimelineFile = _PositionTimelineFile;
     }

@@ -574,7 +574,6 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     }
 
     public void btnOpenClick(View view) {
-        //todo fix open file method
         AndroidUtils.App.openFileIntent(this, Consts.FileExtensions.TWO_TRAILS, Consts.Codes.Dialogs.REQUEST_FILE);
     }
 
@@ -630,12 +629,12 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
             String filepath = Global.getDAL().getFilePath();
 
-            String dupFile = String.format("%s_bk.tt", filepath.substring(0, filepath.length() - 3));
+            String dupFile = String.format("%s_bk%s", filepath.substring(0, filepath.length() - 3), Consts.FILE_EXTENSION);
             int inc = 2;
 
             while (true) {
                 if (FileUtils.fileExists(dupFile)) {
-                    dupFile = String.format("%s_bk%d.tt", filepath.substring(0, filepath.length() - 3), inc);
+                    dupFile = String.format("%s_bk%d%s", filepath.substring(0, filepath.length() - 3), inc, Consts.FILE_EXTENSION);
                     inc++;
                     continue;
                 }

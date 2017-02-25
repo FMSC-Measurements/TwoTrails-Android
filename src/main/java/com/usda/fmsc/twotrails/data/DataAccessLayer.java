@@ -49,10 +49,7 @@ import com.usda.fmsc.utilities.FileUtils;
 import com.usda.fmsc.utilities.ParseEx;
 import com.usda.fmsc.utilities.StringEx;
 
-public class DataAccessLayer {
-    private static DateTimeFormatter dtf = DateTimeFormat.forPattern("M/d/yyyy h:mm:ss.SSS");
-    private static DateTimeFormatter dtfAlt = DateTimeFormat.forPattern("yyyy-dd-M h:mm:ss"); //Alt Format, PC might be using it
-
+public class DataAccessLayer extends IDataLayer {
     public String getFilePath() {
         return _FilePath;
     }
@@ -71,7 +68,6 @@ public class DataAccessLayer {
 
 
     private TtDalVersion _DalVersion;
-    private SQLiteDatabase _db;
     private String _FilePath;
     private File _dbFile;
 
@@ -145,10 +141,7 @@ public class DataAccessLayer {
             CreateTtNmeaTable();
             CreateGroupTable();
             CreatePolygonAttrTable();
-            CreateMediaTable();
-            CreatePictureTable();
             CreateActivityTable();
-
             SetupProjInfo();
             insertMetadata(Global.getDefaultMeta());
             insertGroup(Global.getMainGroup());
@@ -273,30 +266,6 @@ public class DataAccessLayer {
         catch (Exception ex)
         {
             TtUtils.TtReport.writeError(ex.getMessage(), "DataAccessLayer:CreatePolygonAttrTable");
-            throw ex;
-        }
-    }
-
-    private void CreateMediaTable() {
-        try
-        {
-            _db.execSQL(TwoTrailsSchema.MediaSchema.CreateTable);
-        }
-        catch (Exception ex)
-        {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DataAccessLayer:CreateMediaTable");
-            throw ex;
-        }
-    }
-
-    private void CreatePictureTable() {
-        try
-        {
-            _db.execSQL(TwoTrailsSchema.PictureSchema.CreateTable);
-        }
-        catch (Exception ex)
-        {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DataAccessLayer:CreatePictureTable");
             throw ex;
         }
     }
@@ -2530,303 +2499,6 @@ public class DataAccessLayer {
     //endregion
 
 
-    //region Media
-    //region Get
-    public ArrayList<TtImage> getPictureByCN(String cn) {
-        return getPictures(
-                String.format("%s.%s = '%s'",
-                    TwoTrailsSchema.MediaSchema.TableName,
-                    TwoTrailsSchema.SharedSchema.CN,
-                    cn),
-                0);
-    }
-
-    public ArrayList<TtImage> getPicturesInPoint(String pointCN) {
-        return getPictures(
-                String.format("%s = '%s'",
-                        TwoTrailsSchema.MediaSchema.PointCN,
-                        pointCN),
-                0);
-    }
-
-    public ArrayList<TtImage> getPicturesInPolygon(String polygonCN) {
-        StringBuilder sb = new StringBuilder();
-
-        for (String cn : getCNs(TwoTrailsSchema.PointSchema.TableName,
-                String.format("%s = '%s'", TwoTrailsSchema.PointSchema.PolyCN, polygonCN))) {
-            sb.append(String.format("%s = '%s' or ", TwoTrailsSchema.MediaSchema.PointCN, cn));
-        }
-
-        if (sb.length() < 1)
-            return new ArrayList<>();
-
-        return getPictures(sb.substring(0, sb.length() - 5), 0);
-    }
-
-    public ArrayList<TtImage> getPicturesInGroup(String groupCN) {
-        StringBuilder sb = new StringBuilder();
-
-        for (String cn : getCNs(TwoTrailsSchema.PointSchema.TableName,
-                String.format("%s = '%s'", TwoTrailsSchema.PointSchema.GroupCN, groupCN))) {
-            sb.append(String.format("%s = '%s' or ", TwoTrailsSchema.MediaSchema.PointCN, cn));
-        }
-
-        if (sb.length() < 1)
-            return new ArrayList<>();
-
-        return getPictures(sb.substring(0, sb.length() - 5), 0);
-    }
-
-    private ArrayList<TtImage> getPictures(String where, int limit) {
-        ArrayList<TtImage> pictures = new ArrayList<>();
-
-        try {
-            String query = String.format("%s where %s = %d%s order by datetime(%s) asc %s",
-                    SelectPictures,
-                    TwoTrailsSchema.MediaSchema.MediaType,
-                    MediaType.Picture.getValue(),
-                    StringEx.isEmpty(where) ? StringEx.Empty : String.format(" and %s", where),
-                    TwoTrailsSchema.MediaSchema.CreationTime,
-                    limit > 0 ? " limit " + limit : StringEx.Empty);
-
-            Cursor c = _db.rawQuery(query, null);
-
-            TtImage pic;
-
-            if (c.moveToFirst()) {
-                do {
-                    if(!c.isNull(7)) {
-                        pic = TtUtils.getPictureByType(PictureType.parse(c.getInt(7)));
-                    } else {
-                        throw new Exception("Picture has no PictureType");
-                    }
-
-                    if (!c.isNull(0))
-                        pic.setCN(c.getString(0));
-                    else
-                        throw new Exception("Picture has no CN");
-
-                    if (!c.isNull(1))
-                        pic.setPointCN(c.getString(1));
-
-                    if (!c.isNull(3))
-                        pic.setName(c.getString(3));
-
-                    if (!c.isNull(4))
-                        pic.setFilePath(c.getString(4));
-
-                    if (!c.isNull(5))
-                        pic.setTimeCreated(parseDateTime(c.getString(5)));
-
-                    if (!c.isNull(6))
-                        pic.setComment(c.getString(6));
-
-                    if (!c.isNull(8))
-                        pic.setAzimuth(c.getFloat(8));
-
-                    if (!c.isNull(9))
-                        pic.setPitch(c.getFloat(9));
-
-                    if (!c.isNull(10))
-                        pic.setRoll(c.getFloat(10));
-
-                    pictures.add(pic);
-                } while (c.moveToNext());
-            }
-
-            c.close();
-        } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:getPictures");
-            return null;
-        }
-
-        return pictures;
-    }
-    //endregion
-
-    //region Insert
-    public boolean insertMedia(TtMedia media) {
-        boolean success = false;
-
-        if (media == null)
-            return false;
-
-        try {
-            _db.beginTransaction();
-
-            success = insertBaseMedia(media);
-
-            if(success)
-                _db.setTransactionSuccessful();
-        } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:insertMedia");
-            success = false;
-        } finally {
-            _db.endTransaction();
-        }
-
-        return success;
-    }
-
-    private boolean insertBaseMedia(TtMedia media) {
-        boolean result = true;
-
-        try {
-            ContentValues cvs = new ContentValues();
-
-            cvs.put(TwoTrailsSchema.SharedSchema.CN, media.getCN());
-            cvs.put(TwoTrailsSchema.MediaSchema.PointCN, media.getPointCN());
-            cvs.put(TwoTrailsSchema.MediaSchema.MediaType, media.getMediaType().getValue());
-            cvs.put(TwoTrailsSchema.MediaSchema.Name, media.getName());
-            cvs.put(TwoTrailsSchema.MediaSchema.FilePath, media.getFilePath());
-            cvs.put(TwoTrailsSchema.MediaSchema.Comment, media.getComment());
-            cvs.put(TwoTrailsSchema.MediaSchema.CreationTime, dtf.print(media.getTimeCreated()));
-
-            _db.insert(TwoTrailsSchema.MediaSchema.TableName, null, cvs);
-
-            switch (media.getMediaType()) {
-                case Picture:
-                    result = insertPictureData((TtImage)media);
-                    break;
-                case Video:
-                    break;
-            }
-        } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:insertBaseMedia");
-            result = false;
-        }
-
-        return result;
-    }
-
-    private boolean insertPictureData(TtImage picture) {
-        try {
-            ContentValues cvs = new ContentValues();
-
-            cvs.put(TwoTrailsSchema.SharedSchema.CN, picture.getCN());
-            cvs.put(TwoTrailsSchema.PictureSchema.PicType, picture.getPictureType().getValue());
-            cvs.put(TwoTrailsSchema.PictureSchema.Azimuth, picture.getAzimuth());
-            cvs.put(TwoTrailsSchema.PictureSchema.Pitch, picture.getPitch());
-            cvs.put(TwoTrailsSchema.PictureSchema.Roll, picture.getRoll());
-
-            _db.insert(TwoTrailsSchema.PictureSchema.TableName, null, cvs);
-
-        } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:insertPictureData");
-            return false;
-        }
-
-        return true;
-    }
-    //endregion
-
-    //region Update
-    public boolean updateMedia(TtMedia media) {
-        boolean success = false;
-
-        if (media == null)
-            return false;
-
-        try {
-            _db.beginTransaction();
-
-            success = updateBaseMedia(media);
-
-            if(success)
-                _db.setTransactionSuccessful();
-        } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:updateMedia");
-            success = false;
-        } finally {
-            _db.endTransaction();
-        }
-
-        return success;
-    }
-
-    private boolean updateBaseMedia(TtMedia media) {
-        try {
-            ContentValues cvs = new ContentValues();
-
-            cvs.put(TwoTrailsSchema.MediaSchema.PointCN, media.getPointCN());
-            cvs.put(TwoTrailsSchema.MediaSchema.Name, media.getName());
-            cvs.put(TwoTrailsSchema.MediaSchema.FilePath, media.getFilePath());
-            cvs.put(TwoTrailsSchema.MediaSchema.Comment, media.getComment());
-
-            _db.update(TwoTrailsSchema.MediaSchema.TableName, cvs,
-                    TwoTrailsSchema.SharedSchema.CN + "=?", new String[] { media.getCN() });
-
-            switch (media.getMediaType()) {
-                case Picture:
-                    updatePictureData((TtImage)media);
-                    break;
-                case Video:
-                    break;
-            }
-        } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:updateBaseMedia");
-            return false;
-        }
-
-        return true;
-    }
-
-    private void updatePictureData(TtImage picture) {
-        try {
-            ContentValues cvs = new ContentValues();
-
-            cvs.put(TwoTrailsSchema.PictureSchema.Azimuth, picture.getAzimuth());
-            cvs.put(TwoTrailsSchema.PictureSchema.Pitch, picture.getPitch());
-            cvs.put(TwoTrailsSchema.PictureSchema.Roll, picture.getRoll());
-
-            _db.update(TwoTrailsSchema.PictureSchema.TableName, cvs,
-                    TwoTrailsSchema.SharedSchema.CN + "=?", new String[]{ picture.getCN() });
-
-        } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:insertPictureData");
-        }
-    }
-    //endregion
-
-    //region Delete
-    public boolean deleteMedia(TtMedia media) {
-        boolean success = false;
-        String cn = media.getCN();
-
-        try {
-            success = _db.delete(TwoTrailsSchema.MediaSchema.TableName,
-                    TwoTrailsSchema.SharedSchema.CN + "=?",
-                    new String[] { cn }) > 0;
-
-            if (success) {
-                switch (media.getMediaType()) {
-                    case Picture:
-                        removePictureData((TtImage)media);
-                        break;
-                    case Video:
-                        break;
-                }
-            }
-        } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:deleteMedia");
-        }
-
-        return success;
-    }
-    
-    private void removePictureData(TtImage picture) {
-        try {
-            _db.delete(TwoTrailsSchema.PictureSchema.TableName,
-                    TwoTrailsSchema.SharedSchema.CN + "=?",
-                    new String[] { picture.getCN() });
-        } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:removePictureData");
-        }
-    }
-    //endregion
-    //endregion
-
-
     //region Activity
     //region Get
     private ArrayList<TtUserActivity> getUserActivity() {
@@ -2885,89 +2557,9 @@ public class DataAccessLayer {
     //endregion
 
     //region DbTools
-    private String createSelectQuery(String table, String items, String where) {
-        return String.format("select %s from %s%s",
-                items, table, StringEx.isEmpty(where) ? StringEx.Empty : String.format(" where %s", where));
-    }
-
-    private String createSelectAllQuery(String table, String where) {
-        return String.format("select * from %s%s",
-                table, StringEx.isEmpty(where) ?
-                        StringEx.Empty : String.format(" where %s", where));
-    }
-
-
-    public int getItemCount(String tableName) {
-        String countQuery = "SELECT COUNT (*) FROM " + tableName;
-
-        Cursor cursor = _db.rawQuery(countQuery, null);
-
-        int count = 0;
-        if (null != cursor) {
-            if (cursor.getCount() > 0) {
-                cursor.moveToFirst();
-                count = cursor.getInt(0);
-            }
-
-            cursor.close();
-        }
-        return count;
-    }
-
-    public int getItemsCount(String tableName, String column, int value) {
-        String countQuery = String.format("SELECT COUNT (*) FROM %s where %s = %d",
-                tableName,
-                column,
-                value);
-
-        Cursor cursor = _db.rawQuery(countQuery, null);
-
-        int count = 0;
-        if (null != cursor) {
-            if (cursor.getCount() > 0) {
-                cursor.moveToFirst();
-                count = cursor.getInt(0);
-            }
-
-            cursor.close();
-        }
-        return count;
-    }
-
-    public int getItemsCount(String tableName, String column, String value) {
-        String countQuery = String.format("SELECT COUNT (*) FROM %s where %s = '%s'",
-                tableName,
-                column,
-                value);
-
-        Cursor cursor = _db.rawQuery(countQuery, null);
-
-        int count = 0;
-        if (null != cursor) {
-            if (cursor.getCount() > 0) {
-                cursor.moveToFirst();
-                count = cursor.getInt(0);
-            }
-
-            cursor.close();
-        }
-        return count;
-    }
-
-
-    public DateTime parseDateTime(String date) {
-        try {
-            return dtf.parseDateTime(date);
-        } catch (IllegalArgumentException e) {
-            return dtfAlt.parseDateTime(date);
-        }
-    }
-
-
     public boolean hasPolygons() {
         return getItemCount(TwoTrailsSchema.PolygonSchema.TableName) > 0;
     }
-
 
     public boolean duplicate(String duplicateFileName) {
         try {
@@ -3014,34 +2606,6 @@ public class DataAccessLayer {
 
         return true;
     }
-
-
-    public ArrayList<String> getCNs(String tableName, String where) {
-        ArrayList<String> cns = new ArrayList<>();
-
-        try {
-            String query = String.format("select %s from %s%s",
-                    TwoTrailsSchema.SharedSchema.CN,
-                    tableName,
-                    StringEx.isEmpty(where) ? StringEx.Empty : String.format(" where %s", where));
-
-            Cursor c = _db.rawQuery(query, null);
-
-            if (c.moveToFirst()) {
-                do {
-                    if (!c.isNull(0))
-                        cns.add(c.getString(0));
-                } while (c.moveToNext());
-            }
-
-            c.close();
-        } catch (Exception ex) {
-            //
-        }
-
-        return cns;
-    }
-
 
     public boolean needsAdjusting() {
         String countQuery = String.format("SELECT COUNT (*) FROM %s where %s = NULL",
@@ -3125,20 +2689,5 @@ public class DataAccessLayer {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:clean");
         }
     }
-    //endregion
-
-    //region Select Statements
-    private static final String SelectPictures = String.format("select %s.%s, %s from %s left join %s on %s.%s = %s.%s",
-            TwoTrailsSchema.MediaSchema.TableName,
-            TwoTrailsSchema.MediaSchema.SelectItems,
-            TwoTrailsSchema.PictureSchema.SelectItemsNoCN,
-            TwoTrailsSchema.MediaSchema.TableName,
-            TwoTrailsSchema.PictureSchema.TableName,
-            TwoTrailsSchema.MediaSchema.TableName,
-            TwoTrailsSchema.SharedSchema.CN,
-            TwoTrailsSchema.PictureSchema.TableName,
-            TwoTrailsSchema.SharedSchema.CN);
-
-    //private static final String SelectPoints = String.format("");
     //endregion
 }
