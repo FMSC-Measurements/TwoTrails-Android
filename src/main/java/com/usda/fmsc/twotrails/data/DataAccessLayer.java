@@ -13,8 +13,6 @@ import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
 import com.usda.fmsc.twotrails.objects.DataActivityType;
 import com.usda.fmsc.twotrails.objects.TtUserActivity;
-import com.usda.fmsc.twotrails.objects.media.TtMedia;
-import com.usda.fmsc.twotrails.objects.media.TtImage;
 import com.usda.fmsc.twotrails.objects.points.GpsPoint;
 import com.usda.fmsc.twotrails.objects.points.QuondamPoint;
 import com.usda.fmsc.twotrails.objects.points.TravPoint;
@@ -26,15 +24,11 @@ import com.usda.fmsc.twotrails.objects.map.PolygonGraphicOptions;
 import com.usda.fmsc.twotrails.units.Datum;
 import com.usda.fmsc.twotrails.units.DeclinationType;
 import com.usda.fmsc.twotrails.units.Dist;
-import com.usda.fmsc.twotrails.units.MediaType;
 import com.usda.fmsc.twotrails.units.OpType;
-import com.usda.fmsc.twotrails.units.PictureType;
 import com.usda.fmsc.twotrails.units.Slope;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -64,10 +58,10 @@ public class DataAccessLayer extends IDataLayer {
 
     public File getDBFile() { return _dbFile; }
 
-    public TtDalVersion getDalVersion() { return _DalVersion; }
+    public TtVersion getDalVersion() { return _DalVersion; }
 
 
-    private TtDalVersion _DalVersion;
+    private TtVersion _DalVersion;
     private String _FilePath;
     private File _dbFile;
 
@@ -89,7 +83,7 @@ public class DataAccessLayer extends IDataLayer {
 
             try {
                 _dbFile = new File(_FilePath);
-                _DalVersion = new TtDalVersion(getTtDbVersion());
+                _DalVersion = new TtVersion(getTtDbVersion());
                 _Activity = new TtUserActivity("Android User", TtUtils.getDeviceName());
             } catch (Exception ex) {
                 return false;

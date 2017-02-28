@@ -8,6 +8,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
@@ -21,10 +22,13 @@ import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
+import com.usda.fmsc.twotrails.data.MediaAccessLayer;
+import com.usda.fmsc.twotrails.objects.media.TtImage;
 import com.usda.fmsc.twotrails.utilities.Export;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.io.File;
+import java.util.List;
 
 public class ExportActivity extends CustomToolbarActivity {
     private MultiStateTouchCheckBox chkAll, chkPoints, chkPolys, chkMeta, chkProj, chkNmea, chkKmz, chkGpx, chkSum;
@@ -94,7 +98,7 @@ public class ExportActivity extends CustomToolbarActivity {
             String directory = data.getData().getPath();
 
             if(directory != null) {
-                startExport(directory);
+                startExport(directory, true);
             }
         }
 
@@ -150,13 +154,87 @@ public class ExportActivity extends CustomToolbarActivity {
                 if (selectdir) {
                     selectDirectory(Global.getTtFileDir());
                 } else {
-                    startExport(Global.getTtFileDir());
+                    startExport(Global.getTtFileDir(), true);
                 }
             }
         }
     }
 
-    private void startExport(String directory) {
+    private void startExport(final String directory, boolean checkExternalMedia) {
+        if (checkExternalMedia && (chkPoints.isChecked() || chkProj.isChecked())) {
+            final MediaAccessLayer mal = Global.getMAL();
+            if (mal != null && mal.hasExternalImages()) {
+                //TODO convert to DontAskAgainDialog
+                new AlertDialog.Builder(getBaseContext())
+                        .setMessage("There are Images that are saved outside of the media database. Would you like to include them to simplify image transfer?")
+                        .setPositiveButton("Include", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                progCircle.show();
+                                new Thread(){
+                                    @Override
+                                    public void run() {
+                                        mal.internalizeImages(new MediaAccessLayer.SimpleMalListener(){
+                                            @Override
+                                            public void internalizeImagesCompleted(List<TtImage> imagesInternalized, final List<TtImage> externalImagesNotFound) {
+                                                runOnUiThread(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        progCircle.hide();
+
+                                                        if (externalImagesNotFound.size() > 0) {
+                                                            new AlertDialog.Builder(getBaseContext())
+                                                                    .setMessage("Some image files were not found. Would you still like to export the database?")
+                                                                    .setPositiveButton("Export", new DialogInterface.OnClickListener() {
+                                                                        @Override
+                                                                        public void onClick(DialogInterface dialog, int which) {
+                                                                            startExport(directory, false);
+                                                                        }
+                                                                    })
+                                                                    .setNeutralButton(R.string.str_cancel, null);
+                                                        }
+                                                        else {
+                                                            startExport(directory, false);
+                                                        }
+                                                    }
+                                                });
+                                            }
+
+                                            @Override
+                                            public void internalizeImagesFailed(List<TtImage> imagesInternalized, List<TtImage> externalImagesNotFound, String failedReason) {
+                                                runOnUiThread(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        progCircle.hide();
+
+                                                        new AlertDialog.Builder(getBaseContext())
+                                                                .setMessage("There was an issue internalizing images to the media database. Would you still like to export the database?")
+                                                                .setPositiveButton("Export", new DialogInterface.OnClickListener() {
+                                                                    @Override
+                                                                    public void onClick(DialogInterface dialog, int which) {
+                                                                        startExport(directory, false);
+                                                                    }
+                                                                })
+                                                                .setNeutralButton(R.string.str_cancel, null);
+                                                    }
+                                                });
+                                            }
+                                        });
+                                    }
+                                }.start();
+                            }
+                        })
+                        .setNegativeButton("Exclude", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                startExport(directory, false);
+                            }
+                        })
+                        .show();
+                return;
+            }
+        }
+
         final File dir = new File(String.format("%s/%s/", directory, Global.getDAL().getProjectID()));
 
         if (dir.exists()) {

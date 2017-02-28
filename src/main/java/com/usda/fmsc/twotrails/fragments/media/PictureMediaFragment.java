@@ -153,7 +153,7 @@ public class PictureMediaFragment extends BaseMediaFragment {
     private void setViews() {
         settingView = true;
 
-        if (_Picture.isFileValid()) {
+        if (_Picture.externalFileExists()) {
             ivBackground.setImageBitmap(bitmapManager.get(_Picture.getFilePath()));
         }
 

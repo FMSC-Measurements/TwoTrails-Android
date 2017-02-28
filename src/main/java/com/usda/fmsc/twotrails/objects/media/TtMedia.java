@@ -68,8 +68,8 @@ public abstract class TtMedia extends TtObject {
         _FilePath = filePath;
     }
 
-    public boolean isFileValid() {
-        return FileUtils.fileExists(_FilePath);
+    public boolean externalFileExists() {
+        return _IsExternal && FileUtils.fileExists(_FilePath);
     }
 
 
@@ -100,7 +100,7 @@ public abstract class TtMedia extends TtObject {
     }
 
 
-    public boolean getIsExternal() { return _IsExternal;}
+    public boolean isExternal() { return _IsExternal;}
 
     public  void setIsExternal(boolean isExternal) {
         _IsExternal = isExternal;
