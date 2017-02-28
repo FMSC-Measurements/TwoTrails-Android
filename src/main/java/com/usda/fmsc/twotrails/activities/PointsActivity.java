@@ -36,9 +36,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.assist.FailReason;
-import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import com.usda.fmsc.android.adapters.FragmentStatePagerAdapterEx;
 import com.usda.fmsc.android.AndroidUtils;
@@ -56,6 +53,7 @@ import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.adapters.MediaRvAdapter;
 import com.usda.fmsc.twotrails.adapters.PointDetailsAdapter;
 import com.usda.fmsc.twotrails.Consts;
+import com.usda.fmsc.twotrails.data.MediaAccessLayer;
 import com.usda.fmsc.twotrails.data.TwoTrailsMediaSchema;
 import com.usda.fmsc.twotrails.dialogs.LatLonDialog;
 import com.usda.fmsc.twotrails.dialogs.MoveToPointDialog;
@@ -1849,7 +1847,7 @@ public class PointsActivity extends CustomToolbarActivity {
                     mediaCount = 0;
                     mediaSelectionIndex = INVALID_INDEX;
 
-                    ArrayList<TtImage> pictures = Global.getMAL().getPicturesInPoint(point.getCN());
+                    ArrayList<TtImage> pictures = Global.getMAL().getImagesInPoint(point.getCN());
 
                     Collections.sort(pictures, TtUtils.PictureTimeComparator);
                     for (final TtImage p : pictures) {
@@ -1876,26 +1874,17 @@ public class PointsActivity extends CustomToolbarActivity {
     private void loadImageToList(final TtImage picture) {
         mediaCount++;
 
-        if (picture.isFileValid()) {
-            ImageLoader.getInstance().loadImage("file://" + picture.getFilePath(), new SimpleImageLoadingListener() {
-                @Override
-                public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
-                    addImageToList(picture, true, loadedImage);
-                }
+        Global.getMAL().loadImage(picture, new MediaAccessLayer.SimpleMalListener() {
+            @Override
+            public void imageLoaded(TtImage image, View view, Bitmap bitmap) {
+                addImageToList(picture, true, bitmap);
+            }
 
-                @Override
-                public void onLoadingFailed(String imageUri, View view, final FailReason failReason) {
-                    addInvalidImagesToList(picture);
-                }
-            });
-        } else {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    addInvalidImagesToList(picture);
-                }
-            }).start();
-        }
+            @Override
+            public void loadingFailed(TtImage image, View view, String reason) {
+                addInvalidImagesToList(picture);
+            }
+        });
     }
 
     private void addInvalidImagesToList(final TtImage picture) {

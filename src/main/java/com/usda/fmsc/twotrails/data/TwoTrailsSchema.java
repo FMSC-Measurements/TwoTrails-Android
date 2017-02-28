@@ -1,13 +1,11 @@
 package com.usda.fmsc.twotrails.data;
 
-import com.usda.fmsc.utilities.StringEx;
-
 public class TwoTrailsSchema {
     //Old Schema Versions
-    public static final TtDalVersion OSV_2_0_0 = new TtDalVersion(2, 0, 0);
+    public static final TtVersion OSV_2_0_0 = new TtVersion(2, 0, 0);
 
     //Schema Version
-    public static final TtDalVersion SchemaVersion = OSV_2_0_0;
+    public static final TtVersion SchemaVersion = OSV_2_0_0;
 
 
     public static class SharedSchema {

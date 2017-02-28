@@ -1,17 +1,17 @@
 package com.usda.fmsc.twotrails.data;
 
-public class TtDalVersion {
+public class TtVersion {
     public int Major;
     public int Minor;
     public int Update;
 
-    public TtDalVersion(int maj, int min, int up) {
+    public TtVersion(int maj, int min, int up) {
         Major = maj;
         Minor = min;
         Update = up;
     }
 
-    public TtDalVersion(String versionString) {
+    public TtVersion(String versionString) {
         Major = Minor = Update = 0;
 
         if (versionString == null)

@@ -2,10 +2,10 @@ package com.usda.fmsc.twotrails.data;
 
 public class TwoTrailsMediaSchema {
     //Old Schema Versions
-    public static final TtDalVersion OSV_2_0_0 = new TtDalVersion(2, 0, 0);
+    public static final TtVersion OSV_2_0_0 = new TtVersion(2, 0, 0);
 
     //Schema Version
-    public static final TtDalVersion SchemaVersion = OSV_2_0_0;
+    public static final TtVersion SchemaVersion = OSV_2_0_0;
 
 
     public static class SharedSchema {
@@ -50,8 +50,7 @@ public class TwoTrailsMediaSchema {
 
 
     //region Media Data Table
-    public static class Data
-    {
+    public static class Data {
         public static final String TableName = "Data";
 
         public static final String DataType = "DataType";
@@ -73,7 +72,7 @@ public class TwoTrailsMediaSchema {
 
 
     //region PictureTable
-    public static class PictureSchema {
+    public static class Images {
         public static final String TableName = "Images";
 
         public static final String PicType = "Type";

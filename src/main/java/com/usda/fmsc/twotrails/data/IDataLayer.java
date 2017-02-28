@@ -46,30 +46,23 @@ public abstract class IDataLayer {
     }
 
     public int getItemsCount(String tableName, String column, int value) {
-        String countQuery = String.format("SELECT COUNT (*) FROM %s where %s = %d",
-                tableName,
-                column,
-                value);
-
-        Cursor cursor = _db.rawQuery(countQuery, null);
-
-        int count = 0;
-        if (null != cursor) {
-            if (cursor.getCount() > 0) {
-                cursor.moveToFirst();
-                count = cursor.getInt(0);
-            }
-
-            cursor.close();
-        }
-        return count;
+        return getItemsCount(tableName,
+                String.format("%s = %d",
+                        column,
+                        value)
+        );
     }
 
     public int getItemsCount(String tableName, String column, String value) {
-        String countQuery = String.format("SELECT COUNT (*) FROM %s where %s = '%s'",
-                tableName,
-                column,
-                value);
+        return getItemsCount(tableName,
+                String.format("%s = '%s'",
+                    column,
+                    value)
+        );
+    }
+
+    public int getItemsCount(String tableName, String where) {
+        String countQuery = String.format("SELECT COUNT (*) FROM %s where %s", tableName, where);
 
         Cursor cursor = _db.rawQuery(countQuery, null);
 
