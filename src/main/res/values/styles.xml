@@ -218,6 +218,10 @@
 
         <item name="arcColor">@color/green_700</item>
         <item name="arcWidth">3dp</item>
+
+        <item name="layout_anchorGravity">bottom|end|right</item>
+        <item name="elevation">6dp</item>
+        <item name="pressedTranslationZ">12dp</item>
     </style>
 
     <style name="fabProgressStyle">

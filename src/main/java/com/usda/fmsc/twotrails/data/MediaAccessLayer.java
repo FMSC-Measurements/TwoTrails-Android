@@ -10,6 +10,7 @@ import android.view.View;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
+import com.nostra13.universalimageloader.utils.IoUtils;
 import com.usda.fmsc.twotrails.objects.media.TtImage;
 import com.usda.fmsc.twotrails.objects.media.TtMedia;
 import com.usda.fmsc.twotrails.units.MediaType;
@@ -19,7 +20,9 @@ import com.usda.fmsc.utilities.FileUtils;
 import com.usda.fmsc.utilities.ParseEx;
 import com.usda.fmsc.utilities.StringEx;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -106,6 +109,7 @@ public class MediaAccessLayer extends IDataLayer {
 
             CreateMediaTable();
             CreateImageTable();
+            CreateDataTable();
 
         } catch (Exception ex) {
             //say that db creation failed, specific tables have already been logged
@@ -146,7 +150,7 @@ public class MediaAccessLayer extends IDataLayer {
         }
         catch (Exception ex)
         {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DataAccessLayer:CreateImageTable");
+            TtUtils.TtReport.writeError(ex.getMessage(), "DataAccessLayer:CreateDataTable");
             throw ex;
         }
     }
@@ -277,15 +281,18 @@ public class MediaAccessLayer extends IDataLayer {
             cvs.put(TwoTrailsMediaSchema.Media.FilePath, media.getFilePath());
             cvs.put(TwoTrailsMediaSchema.Media.Comment, media.getComment());
             cvs.put(TwoTrailsMediaSchema.Media.CreationTime, dtf.print(media.getTimeCreated()));
+            cvs.put(TwoTrailsMediaSchema.Media.IsExternal, media.isExternal());
 
-            _db.insert(TwoTrailsMediaSchema.Media.TableName, null, cvs);
-
-            switch (media.getMediaType()) {
-                case Picture:
-                    result = insertImage((TtImage)media);
-                    break;
-                case Video:
-                    break;
+            if (_db.insert(TwoTrailsMediaSchema.Media.TableName, null, cvs) > 0) {
+                switch (media.getMediaType()) {
+                    case Picture:
+                        result = insertImage((TtImage) media);
+                        break;
+                    case Video:
+                        break;
+                }
+            } else {
+                result = false;
             }
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:insertBaseMedia");
@@ -315,7 +322,7 @@ public class MediaAccessLayer extends IDataLayer {
         return true;
     }
 
-    public boolean insertImageData(TtImage image, Bitmap bitmap) {
+    public boolean insertImageData(TtImage image, byte[] data) {
         try {
             ContentValues cvs = new ContentValues();
             Bitmap.CompressFormat format;
@@ -332,11 +339,11 @@ public class MediaAccessLayer extends IDataLayer {
                     throw new RuntimeException("Invalid File Type");
             }
 
-            ByteBuffer buffer = ByteBuffer.allocate(bitmap.getByteCount());
-            bitmap.copyPixelsToBuffer(buffer);
+//            ByteBuffer buffer = ByteBuffer.allocate(bitmap.getByteCount());
+//            bitmap.copyPixelsToBuffer(buffer);
 
             cvs.put(TwoTrailsMediaSchema.SharedSchema.CN, image.getCN());
-            cvs.put(TwoTrailsMediaSchema.Data.BinaryData, buffer.array());
+            cvs.put(TwoTrailsMediaSchema.Data.BinaryData, data);
             cvs.put(TwoTrailsMediaSchema.Data.DataType, format.toString());
 
             _db.insert(TwoTrailsMediaSchema.Images.TableName, null, cvs);
@@ -469,11 +476,10 @@ public class MediaAccessLayer extends IDataLayer {
 
     public boolean hasExternalImages() {
         return getItemsCount(TwoTrailsMediaSchema.Media.TableName,
-                String.format("%s = %d and %s = %s",
+                String.format("%s = %d and %s = 1",
                     TwoTrailsMediaSchema.Media.MediaType,
                     MediaType.Picture.getValue(),
-                    TwoTrailsMediaSchema.Media.IsExternal,
-                    "true"
+                    TwoTrailsMediaSchema.Media.IsExternal
                 )
             ) > 0;
     }
@@ -484,28 +490,39 @@ public class MediaAccessLayer extends IDataLayer {
         List<TtImage> failedImages = new ArrayList<>();
 
         images = getImages(
-                String.format("%s where %s = %d and %s = %s",
+                String.format("%s where %s = %d and %s = 1",
                         SelectImages,
                         TwoTrailsMediaSchema.Media.MediaType,
                         MediaType.Picture.getValue(),
-                        TwoTrailsMediaSchema.Media.IsExternal,
-                        "true"
+                        TwoTrailsMediaSchema.Media.IsExternal
                 ), 0);
 
         try {
             for (TtImage img : images) {
                 if (img.externalFileExists()) {
                     File file = new File(img.getFilePath());
+//
+//                    BitmapFactory.Options options = new BitmapFactory.Options();
+//                    options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+//                    Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath(), options);
 
-                    BitmapFactory.Options options = new BitmapFactory.Options();
-                    options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-                    Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath(), options);
+                    FileInputStream is = new FileInputStream(file);
+                    ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+
+                    int nRead;
+                    byte[] data = new byte[(int)file.length()];
+
+                    while ((nRead = is.read(data, 0, data.length)) != -1) {
+                        buffer.write(data, 0, nRead);
+                    }
+
+                    buffer.flush();
 
 
                     img.setIsExternal(false);
                     img.setFilePath(file.getName());
 
-                    insertImageData(img, bitmap);
+                    insertImageData(img, buffer.toByteArray());
                     updateMedia(img);
 
                     internalizedImages.add(img);
