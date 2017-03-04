@@ -1843,24 +1843,28 @@ public class PointsActivity extends CustomToolbarActivity {
             mediaLoaded = false;
 
             if (point != null) {
-                if (loadPoints) {
-                    mediaCount = 0;
-                    mediaSelectionIndex = INVALID_INDEX;
+                if (Global.hasMAL()) {
+                    if (loadPoints) {
+                        mediaCount = 0;
+                        mediaSelectionIndex = INVALID_INDEX;
 
-                    ArrayList<TtImage> pictures = Global.getMAL().getImagesInPoint(point.getCN());
+                        ArrayList<TtImage> pictures = Global.getMAL().getImagesInPoint(point.getCN());
 
-                    Collections.sort(pictures, TtUtils.PictureTimeComparator);
-                    for (final TtImage p : pictures) {
-                        loadImageToList(p);
+                        Collections.sort(pictures, TtUtils.PictureTimeComparator);
+                        for (final TtImage p : pictures) {
+                            loadImageToList(p);
+                        }
+
+                        if (mediaCount > 0)
+                            mediaSelectionIndex = 0;
+                    } else {
+                        mediaCount = Global.getMAL().getItemsCount(
+                                TwoTrailsMediaSchema.Media.TableName,
+                                TwoTrailsMediaSchema.Media.PointCN,
+                                point.getCN());
                     }
-
-                    if (mediaCount > 0)
-                        mediaSelectionIndex = 0;
                 } else {
-                    mediaCount = Global.getDAL().getItemsCount(
-                            TwoTrailsMediaSchema.Media.TableName,
-                            TwoTrailsMediaSchema.Media.PointCN,
-                            point.getCN());
+                    mediaCount = 0;
                 }
             }
 

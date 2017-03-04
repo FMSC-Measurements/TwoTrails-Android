@@ -171,6 +171,10 @@ public class Global {
         return _MAL;
     }
 
+    public static boolean hasMAL() {
+        return _MAL != null;
+    }
+
     public static void setMAL(MediaAccessLayer mal) {
         _MAL = mal;
     }

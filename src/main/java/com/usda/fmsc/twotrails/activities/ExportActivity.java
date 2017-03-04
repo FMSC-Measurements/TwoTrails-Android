@@ -165,14 +165,14 @@ public class ExportActivity extends CustomToolbarActivity {
             final MediaAccessLayer mal = Global.getMAL();
             if (mal != null && mal.hasExternalImages()) {
                 //TODO convert to DontAskAgainDialog
-                new AlertDialog.Builder(getBaseContext())
+                new AlertDialog.Builder(this)
                         .setMessage("There are Images that are saved outside of the media database. Would you like to include them to simplify image transfer?")
                         .setPositiveButton("Include", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 progCircle.show();
-                                new Thread(){
-                                    @Override
+                                new Thread(new Runnable() {
+                                @Override
                                     public void run() {
                                         mal.internalizeImages(new MediaAccessLayer.SimpleMalListener(){
                                             @Override
@@ -183,7 +183,7 @@ public class ExportActivity extends CustomToolbarActivity {
                                                         progCircle.hide();
 
                                                         if (externalImagesNotFound.size() > 0) {
-                                                            new AlertDialog.Builder(getBaseContext())
+                                                            new AlertDialog.Builder(ExportActivity.this)
                                                                     .setMessage("Some image files were not found. Would you still like to export the database?")
                                                                     .setPositiveButton("Export", new DialogInterface.OnClickListener() {
                                                                         @Override
@@ -207,7 +207,7 @@ public class ExportActivity extends CustomToolbarActivity {
                                                     public void run() {
                                                         progCircle.hide();
 
-                                                        new AlertDialog.Builder(getBaseContext())
+                                                        new AlertDialog.Builder(ExportActivity.this)
                                                                 .setMessage("There was an issue internalizing images to the media database. Would you still like to export the database?")
                                                                 .setPositiveButton("Export", new DialogInterface.OnClickListener() {
                                                                     @Override
@@ -221,7 +221,7 @@ public class ExportActivity extends CustomToolbarActivity {
                                             }
                                         });
                                     }
-                                }.start();
+                                }).start();
                             }
                         })
                         .setNegativeButton("Exclude", new DialogInterface.OnClickListener() {
