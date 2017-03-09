@@ -62,7 +62,7 @@ public abstract class IDataLayer {
     }
 
     public int getItemsCount(String tableName, String where) {
-        String countQuery = String.format("SELECT COUNT (*) FROM %s where %s", tableName, where);
+        String countQuery = String.format("select count(*) from %s where %s", tableName, where);
 
         Cursor cursor = _db.rawQuery(countQuery, null);
 
