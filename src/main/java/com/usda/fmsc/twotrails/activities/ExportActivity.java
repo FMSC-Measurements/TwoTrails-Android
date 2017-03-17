@@ -176,19 +176,24 @@ public class ExportActivity extends CustomToolbarActivity {
                                     public void run() {
                                         mal.internalizeImages(new MediaAccessLayer.SimpleMalListener(){
                                             @Override
-                                            public void internalizeImagesCompleted(List<TtImage> imagesInternalized, final List<TtImage> externalImagesNotFound) {
+                                            public void internalizeImagesCompleted(List<TtImage> imagesInternalized, final List<TtImage> failedImages) {
                                                 runOnUiThread(new Runnable() {
                                                     @Override
                                                     public void run() {
                                                         progCircle.hide();
 
-                                                        if (externalImagesNotFound.size() > 0) {
+                                                        if (failedImages.size() > 0) {
                                                             new AlertDialog.Builder(ExportActivity.this)
                                                                     .setMessage("Some image files were not found. Would you still like to export the database?")
                                                                     .setPositiveButton("Export", new DialogInterface.OnClickListener() {
                                                                         @Override
                                                                         public void onClick(DialogInterface dialog, int which) {
-                                                                            startExport(directory, false);
+                                                                            runOnUiThread(new Runnable() {
+                                                                                @Override
+                                                                                public void run() {
+                                                                                    startExport(directory, false);
+                                                                                }
+                                                                            });
                                                                         }
                                                                     })
                                                                     .setNeutralButton(R.string.str_cancel, null);
@@ -201,7 +206,7 @@ public class ExportActivity extends CustomToolbarActivity {
                                             }
 
                                             @Override
-                                            public void internalizeImagesFailed(List<TtImage> imagesInternalized, List<TtImage> externalImagesNotFound, String failedReason) {
+                                            public void internalizeImagesFailed(List<TtImage> imagesInternalized, List<TtImage> failedImages, String failedReason) {
                                                 runOnUiThread(new Runnable() {
                                                     @Override
                                                     public void run() {

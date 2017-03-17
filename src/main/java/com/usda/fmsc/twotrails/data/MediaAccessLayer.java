@@ -327,33 +327,31 @@ public class MediaAccessLayer extends IDataLayer {
             ContentValues cvs = new ContentValues();
             Bitmap.CompressFormat format;
 
-            switch (image.getFilePath().substring(image.getFilePath().lastIndexOf('.'))) {
-                case "jpg":
-                case "jpeg":
-                    format = Bitmap.CompressFormat.JPEG;
-                    break;
-                case "png":
-                    format = Bitmap.CompressFormat.PNG;
-                    break;
-                default:
-                    throw new RuntimeException("Invalid File Type");
-            }
+            String ext = image.getFilePath().substring(image.getFilePath().lastIndexOf('.') + 1);
+//            switch (ext) {
+//                case "jpg":
+//                case "jpeg":
+//                    format = Bitmap.CompressFormat.JPEG;
+//                    break;
+//                case "png":
+//                    format = Bitmap.CompressFormat.PNG;
+//                    break;
+//                default:
+//                    throw new RuntimeException("Invalid File Type");
+//            }
 
 //            ByteBuffer buffer = ByteBuffer.allocate(bitmap.getByteCount());
 //            bitmap.copyPixelsToBuffer(buffer);
 
             cvs.put(TwoTrailsMediaSchema.SharedSchema.CN, image.getCN());
             cvs.put(TwoTrailsMediaSchema.Data.BinaryData, data);
-            cvs.put(TwoTrailsMediaSchema.Data.DataType, format.toString());
+            cvs.put(TwoTrailsMediaSchema.Data.DataType, ext);//format.toString());
 
-            _db.insert(TwoTrailsMediaSchema.Images.TableName, null, cvs);
-
+            return _db.insert(TwoTrailsMediaSchema.Data.TableName, null, cvs) > 0;
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:insertImage");
             return false;
         }
-
-        return true;
     }
     //endregion
 
@@ -489,13 +487,7 @@ public class MediaAccessLayer extends IDataLayer {
         List<TtImage> internalizedImages = new ArrayList<>();
         List<TtImage> failedImages = new ArrayList<>();
 
-        images = getImages(
-                String.format("%s where %s = %d and %s = 1",
-                        SelectImages,
-                        TwoTrailsMediaSchema.Media.MediaType,
-                        MediaType.Picture.getValue(),
-                        TwoTrailsMediaSchema.Media.IsExternal
-                ), 0);
+        images = getImages(String.format("%s = 1", TwoTrailsMediaSchema.Media.IsExternal), 0);
 
         try {
             for (TtImage img : images) {
@@ -522,10 +514,12 @@ public class MediaAccessLayer extends IDataLayer {
                     img.setIsExternal(false);
                     img.setFilePath(file.getName());
 
-                    insertImageData(img, buffer.toByteArray());
-                    updateMedia(img);
-
-                    internalizedImages.add(img);
+                    if (insertImageData(img, buffer.toByteArray())) {
+                        updateMedia(img);
+                        internalizedImages.add(img);
+                    } else {
+                        failedImages.add(img);
+                    }
                 } else {
                     failedImages.add(img);
                 }
@@ -622,8 +616,8 @@ public class MediaAccessLayer extends IDataLayer {
         void imageLoaded(TtImage image, View view, Bitmap bitmap);
         void loadingFailed(TtImage image, View view, String reason);
 
-        void internalizeImagesCompleted(List<TtImage> imagesInternalized, List<TtImage> externalImagesNotFound);
-        void internalizeImagesFailed(List<TtImage> imagesInternalized, List<TtImage> externalImagesNotFound, String failedReason);
+        void internalizeImagesCompleted(List<TtImage> imagesInternalized, List<TtImage> failedImages);
+        void internalizeImagesFailed(List<TtImage> imagesInternalized, List<TtImage> failedImages, String failedReason);
     }
 
     public static class SimpleMalListener implements IMalListener {
@@ -638,12 +632,12 @@ public class MediaAccessLayer extends IDataLayer {
         }
 
         @Override
-        public void internalizeImagesCompleted(List<TtImage> imagesInternalized, List<TtImage> externalImagesNotFound) {
+        public void internalizeImagesCompleted(List<TtImage> imagesInternalized, List<TtImage> failedImages) {
 
         }
 
         @Override
-        public void internalizeImagesFailed(List<TtImage> imagesInternalized, List<TtImage> externalImagesNotFound, String failedReason) {
+        public void internalizeImagesFailed(List<TtImage> imagesInternalized, List<TtImage> failedImages, String failedReason) {
 
         }
     }
