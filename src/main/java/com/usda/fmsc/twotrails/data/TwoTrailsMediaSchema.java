@@ -12,6 +12,22 @@ public class TwoTrailsMediaSchema {
         public static final String CN = "CN";
     }
 
+
+    //region Info Table
+    public static class Info {
+        public static final String TableName = "Info";
+
+        public static final String TtMediaDbSchemaVersion = "TtMediaDbSchemaVersion";
+
+        public static final String CreateTable =
+                "CREATE TABLE " + TableName + " (" + TableName + " TEXT);";
+
+        public static final String SelectItems = TtMediaDbSchemaVersion;
+    }
+    //endregion
+
+
+
     //region Media Table
     public static class Media {
         public static final String TableName = "Media";
