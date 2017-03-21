@@ -11,8 +11,8 @@ import org.joda.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 public abstract class IDataLayer {
-    protected static DateTimeFormatter dtf = DateTimeFormat.forPattern("M/d/yyyy h:mm:ss.SSS");
-    protected static DateTimeFormatter dtfAlt = DateTimeFormat.forPattern("yyyy-dd-M h:mm:ss"); //Alt Format, PC might be using it
+    protected static DateTimeFormatter dtf = DateTimeFormat.forPattern("M/d/yyyy H:mm:ss.SSS");
+    protected static DateTimeFormatter dtfAlt = DateTimeFormat.forPattern("yyyy-dd-M H:mm:ss"); //Alt Format, PC might be using it
 
     protected SQLiteDatabase _db;
 
