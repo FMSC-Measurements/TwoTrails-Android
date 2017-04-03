@@ -152,7 +152,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
             dOffBnd = AndroidUtils.UI.getDrawable(this, R.drawable.ic_offbnd_dark);
 
             dWalk = AndroidUtils.UI.getDrawable(this, R.drawable.ic_ttpoint_walk_white);
-            dPause = AndroidUtils.UI.getDrawable(this, R.drawable.ic_media_pause);
+            dPause = AndroidUtils.UI.getDrawable(this, R.drawable.ic_media_pause_dark);
 
             ibBnd.setOnClickListener(new View.OnClickListener() {
                 @Override
