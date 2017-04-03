@@ -573,12 +573,10 @@ public class Export {
         //region Create Document
         KmlDocument doc = new KmlDocument(projName, dal.getProjectDescription());
 
-        Properties properties = new Properties();
-        properties.setSnippit(String.format("Generated in TwoTrails: %s", TtUtils.getDeviceName()));
+        doc.setSnippit(String.format("Generated in TwoTrails: %s", TtUtils.getDeviceName()));
 
         doc.setOpen(true);
-        doc.setProperties(properties);
-        doc.setVisible(true);
+        doc.setVisibility(true);
         //endregion
 
         //region Create Styles / StyleMaps
@@ -716,16 +714,13 @@ public class Export {
             folder.setOpen(false);
             folder.setVisibility(true);
 
-            Properties prop = new Properties();
-            prop.setSnippit(poly.getDescription());
+            folder.setSnippit(poly.getDescription());
             
             ExtendedData ed = new ExtendedData();
             ed.add(new ExtendedData.Data(" ", "In Meters"));
             ed.add(new ExtendedData.Data("Accuracy", StringEx.toString(poly.getAccuracy())));
             ed.add(new ExtendedData.Data("Perimeter", StringEx.toString(poly.getPerimeter())));
             ed.add(new ExtendedData.Data("Area", StringEx.toString(poly.getArea())));
-            
-            folder.setProperties(prop);
             //endregion
 
             //region Create SubFolders under Polygon root
@@ -839,9 +834,7 @@ public class Export {
                     view.setAltMode(AltitudeMode.clampToGround);
                     view.setRange(150d);
 
-                    Properties pointProp = new Properties();
-                    pointProp.setSnippit(snippit);
-                    adjPm.setProperties(pointProp);
+                    adjPm.setSnippit(snippit);
 
                     adjPm.setStyleUrl(sAdjBoundMap.getStyleUrl());
                     adjPm.setOpen(false);
@@ -861,7 +854,7 @@ public class Export {
                     view.setAltMode(AltitudeMode.clampToGround);
                     view.setRange(150d);
 
-                    unAdjPm.setProperties(pointProp);
+                    unAdjPm.setSnippit(snippit);
 
                     unAdjPm.setStyleUrl(sUnAdjBoundMap.getStyleUrl());
                     unAdjPm.setOpen(false);
@@ -966,11 +959,9 @@ public class Export {
             
             view.setRange(adjRange);
             view.setTilt(5d);
-            
-            prop = new Properties();
-            prop.setSnippit(poly.getDescription());
 
-            AdjBoundPlacemark.setProperties(prop);
+            AdjBoundPlacemark.setSnippit(poly.getDescription());
+
             AdjBoundPlacemark.setOpen(false);
             AdjBoundPlacemark.setVisibility(true);
             AdjBoundPlacemark.addPolygon(AdjBoundPoly);
@@ -990,7 +981,7 @@ public class Export {
             view.setRange(unAdjRange);
             view.setTilt(5d);
             
-            UnAdjBoundPlacemark.setProperties(prop);
+            UnAdjBoundPlacemark.setSnippit(poly.getDescription());
             UnAdjBoundPlacemark.setOpen(false);
             UnAdjBoundPlacemark.setVisibility(false);
             UnAdjBoundPlacemark.addPolygon(UnAdjBoundPoly);
@@ -1009,7 +1000,7 @@ public class Export {
             view.setRange(adjRange);
             view.setTilt(5d);
 
-            AdjNavPlacemark.setProperties(prop);
+            AdjNavPlacemark.setSnippit(poly.getDescription());
             AdjNavPlacemark.setOpen(false);
             AdjNavPlacemark.setVisibility(false);
             AdjNavPlacemark.addPolygon(AdjNavPoly);
@@ -1028,7 +1019,7 @@ public class Export {
             view.setRange(unAdjRange);
             view.setTilt(5d);
 
-            UnAdjNavPlacemark.setProperties(prop);
+            UnAdjNavPlacemark.setSnippit(poly.getDescription());
             UnAdjNavPlacemark.setOpen(false);
             UnAdjNavPlacemark.setVisibility(false);
             UnAdjNavPlacemark.addPolygon(UnAdjNavPoly);
