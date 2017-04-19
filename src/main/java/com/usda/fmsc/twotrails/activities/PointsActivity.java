@@ -1017,8 +1017,8 @@ public class PointsActivity extends CustomToolbarActivity {
 
 
     private void captureImage(int setting) {
-        if (setting == 2) {
-            if (AndroidUtils.App.requestCameraPermission(PointsActivity.this, Consts.Codes.Requests.CAMERA)) {
+        if (AndroidUtils.App.requestCameraPermission(PointsActivity.this, Consts.Codes.Requests.CAMERA)) {
+            if (setting == 2) {
                 Intent intent = new Intent(PointsActivity.this, TtCameraActivity.class);
 
                 if (_CurrentPoint != null) {
@@ -1026,21 +1026,21 @@ public class PointsActivity extends CustomToolbarActivity {
                 }
 
                 startActivityForResult(intent, Consts.Codes.Activites.TTCAMERA);
-            }
-        } else {
-            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-
-            DateTime dateTime = DateTime.now();
-            String imageName = String.format("IMG_%d%d%d_%d", dateTime.getYear(), dateTime.getMonthOfYear(), dateTime.getDayOfMonth(), dateTime.getMillisOfDay());
-
-            File photo = new File(String.format("%s%s%s.jpg", Global.getTtMediaDir(), File.separator, imageName));
-            captureImageUri = Uri.fromFile(photo);
-            intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photo));
-
-            if (intent.resolveActivity(getPackageManager()) != null) {
-                startActivityForResult(intent, Consts.Codes.Requests.CAPTURE_IMAGE);
             } else {
-                Toast.makeText(PointsActivity.this, "Unable to find a Camera application", Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+                DateTime dateTime = DateTime.now();
+                String imageName = String.format("IMG_%d%d%d_%d", dateTime.getYear(), dateTime.getMonthOfYear(), dateTime.getDayOfMonth(), dateTime.getMillisOfDay());
+
+                File photo = new File(String.format("%s%s%s.jpg", Global.getTtMediaDir(), File.separator, imageName));
+                captureImageUri = Uri.fromFile(photo);
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photo));
+
+                if (intent.resolveActivity(getPackageManager()) != null) {
+                    startActivityForResult(intent, Consts.Codes.Requests.CAPTURE_IMAGE);
+                } else {
+                    Toast.makeText(PointsActivity.this, "Unable to find a Camera application", Toast.LENGTH_LONG).show();
+                }
             }
         }
     }

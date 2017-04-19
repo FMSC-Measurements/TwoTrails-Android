@@ -20,7 +20,7 @@ public class TwoTrailsMediaSchema {
         public static final String TtMediaDbSchemaVersion = "TtMediaDbSchemaVersion";
 
         public static final String CreateTable =
-                "CREATE TABLE " + TableName + " (" + TableName + " TEXT);";
+                "CREATE TABLE " + TableName + " (" + TtMediaDbSchemaVersion + " TEXT);";
 
         public static final String SelectItems = TtMediaDbSchemaVersion;
     }

@@ -110,10 +110,12 @@ public class MediaAccessLayer extends IDataLayer {
             CreateMediaTable();
             CreateImageTable();
             CreateDataTable();
+            CreateInfoTable();
 
+            ContentValues cvs = new ContentValues();
+            cvs.put(TwoTrailsMediaSchema.Info.TtMediaDbSchemaVersion, _Version.toString());
+            _db.insert(TwoTrailsMediaSchema.Info.TableName, null, cvs);
         } catch (Exception ex) {
-            //say that db creation failed, specific tables have already been logged
-
             TtUtils.TtReport.writeError(ex.getMessage(), "MediaAccessLayer:CreateDB");
         }
     }
@@ -151,6 +153,18 @@ public class MediaAccessLayer extends IDataLayer {
         catch (Exception ex)
         {
             TtUtils.TtReport.writeError(ex.getMessage(), "DataAccessLayer:CreateDataTable");
+            throw ex;
+        }
+    }
+
+    private void CreateInfoTable() {
+        try
+        {
+            _db.execSQL(TwoTrailsMediaSchema.Info.CreateTable);
+        }
+        catch (Exception ex)
+        {
+            TtUtils.TtReport.writeError(ex.getMessage(), "DataAccessLayer:CreateInfoTable");
             throw ex;
         }
     }
@@ -387,6 +401,7 @@ public class MediaAccessLayer extends IDataLayer {
             cvs.put(TwoTrailsMediaSchema.Media.Name, media.getName());
             cvs.put(TwoTrailsMediaSchema.Media.FilePath, media.getFilePath());
             cvs.put(TwoTrailsMediaSchema.Media.Comment, media.getComment());
+            cvs.put(TwoTrailsMediaSchema.Media.IsExternal, media.isExternal());
 
             _db.update(TwoTrailsMediaSchema.Media.TableName, cvs,
                     TwoTrailsMediaSchema.SharedSchema.CN + "=?", new String[] { media.getCN() });

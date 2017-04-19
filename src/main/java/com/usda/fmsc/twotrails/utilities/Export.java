@@ -1,10 +1,13 @@
 package com.usda.fmsc.twotrails.utilities;
 
 import android.os.AsyncTask;
+import android.provider.MediaStore;
 
 import com.usda.fmsc.geospatial.utm.UTMTools;
+import com.usda.fmsc.twotrails.data.MediaAccessLayer;
 import com.usda.fmsc.twotrails.units.Dist;
 import com.usda.fmsc.twotrails.units.Slope;
+import com.usda.fmsc.utilities.FileUtils;
 import com.usda.fmsc.utilities.gpx.GpxDocument;
 import com.usda.fmsc.utilities.gpx.GpxMetadata;
 import com.usda.fmsc.utilities.gpx.GpxPoint;
@@ -31,6 +34,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -1178,6 +1183,11 @@ public class Export {
                 if (!isCancelled() && ep.isPoints()) {
                     if (points(ep.getDal(), dirPath) == null) {
                         return new ExportResult(ExportResultCode.ExportFailure, "Points");
+                    } else {
+                        if (ep.getMal() != null) {
+                            FileUtils.copyFile(ep.getMal().getFilePath(),
+                                    String.format("%s/%s", dirPath, FileUtils.getFileName(ep.getMal().getFilePath())));
+                        }
                     }
                 }
 
@@ -1245,13 +1255,15 @@ public class Export {
 
         public static class ExportParams {
             private DataAccessLayer dal;
+            private MediaAccessLayer mal;
             private File directory;
             private boolean points, polys, meta, proj, nmea, kmz, gpx, summary;
 
-            public ExportParams(DataAccessLayer dal, File directory, boolean points, boolean polys, boolean meta,
+            public ExportParams(DataAccessLayer dal, MediaAccessLayer mal, File directory, boolean points, boolean polys, boolean meta,
                 boolean proj, boolean nmea, boolean kmz, boolean gpx, boolean summary) {
 
                 this.dal = dal;
+                this.mal = mal;
 
                 this.directory = directory;
 
@@ -1267,6 +1279,10 @@ public class Export {
 
             public DataAccessLayer getDal() {
                 return dal;
+            }
+
+            public MediaAccessLayer getMal() {
+                return mal;
             }
 
             public File getDirectory() {
