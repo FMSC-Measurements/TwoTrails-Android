@@ -21,7 +21,7 @@ public class Consts {
 
     public static final double RMSEr95_Coeff = 1.7308;
 
-    public static final double Default_Point_Accuracy = 6.0;
+    public static final double Default_Point_Accuracy = 6.01;
     public static final double Minimum_Point_Accuracy = 0.000001;
     public static final int Minimum_Point_Display_Digits = 5;
 
