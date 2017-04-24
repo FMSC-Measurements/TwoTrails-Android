@@ -189,6 +189,7 @@ public class HaidActivity extends CustomToolbarActivity {
                 builder.create().show();
                 break;
             }
+            //todo change font size
             /*
             case R.id.haid_action_increase_font:
             case R.id.haid_action_decrease_font:

@@ -84,6 +84,9 @@ public class CalculateGpsActivity extends CustomToolbarActivity {
                 _FilteredBursts = new ArrayList<>();
             } catch (Exception e) {
                 e.printStackTrace();
+                setResult(Consts.Codes.Results.ERROR);
+                finish();
+                return;
             }
         } else {
             setResult(Consts.Codes.Results.NO_POINT_DATA);
