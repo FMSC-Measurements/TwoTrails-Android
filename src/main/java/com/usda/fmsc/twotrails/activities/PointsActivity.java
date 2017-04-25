@@ -1030,11 +1030,13 @@ public class PointsActivity extends CustomToolbarActivity {
                 Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
                 DateTime dateTime = DateTime.now();
-                String imageName = String.format("IMG_%d%d%d_%d", dateTime.getYear(), dateTime.getMonthOfYear(), dateTime.getDayOfMonth(), dateTime.getMillisOfDay());
 
-                File photo = new File(String.format("%s%s%s.jpg", Global.getTtMediaDir(), File.separator, imageName));
+                File photo = new File(String.format("%s%sIMG_%d%d%d_%d.jpg",
+                        Global.getTtMediaDir(), File.separator, dateTime.getYear(),
+                        dateTime.getMonthOfYear(), dateTime.getDayOfMonth(), dateTime.getMillisOfDay()));
+
                 captureImageUri = Uri.fromFile(photo);
-                intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photo));
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, captureImageUri);
 
                 if (intent.resolveActivity(getPackageManager()) != null) {
                     startActivityForResult(intent, Consts.Codes.Requests.CAPTURE_IMAGE);
