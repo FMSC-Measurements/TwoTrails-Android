@@ -5,14 +5,23 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.usda.fmsc.utilities.StringEx;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeFieldType;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.DateTimeFormatterBuilder;
 
 import java.util.ArrayList;
 
 public abstract class IDataLayer {
-    protected static DateTimeFormatter dtf = DateTimeFormat.forPattern("M/d/yyyy H:mm:ss.SSS");
-    protected static DateTimeFormatter dtfAlt = DateTimeFormat.forPattern("yyyy-dd-M H:mm:ss"); //Alt Format, PC might be using it
+    protected static DateTimeFormatter dtf = DateTimeFormat.forPattern("M/d/yyyy H:mm:ss");
+    protected static DateTimeFormatter dtfAlt3 = DateTimeFormat.forPattern("M/d/yyyy H:mm:ss.SSS");
+    protected static DateTimeFormatter dtfAlt = DateTimeFormat.forPattern("yyyy-M-dd H:mm:ss"); //Alt Format, PC might be using it
+    protected static DateTimeFormatter dtfAlt2 = new DateTimeFormatterBuilder()
+            .appendPattern("yyyy-M-dd H:mm:ss")
+            .appendFraction(DateTimeFieldType.millisOfSecond(), 0, 9) // Nanoseconds = 0-9 digits of fractional second.
+            .toFormatter();
+
+    protected static DateTimeFormatter[] formatters = new DateTimeFormatter[] { dtf, dtfAlt, dtfAlt2, dtfAlt3 };
 
     protected SQLiteDatabase _db;
 
@@ -80,11 +89,25 @@ public abstract class IDataLayer {
 
 
     public DateTime parseDateTime(String date) {
-        try {
-            return dtf.parseDateTime(date);
-        } catch (IllegalArgumentException e) {
-            return dtfAlt.parseDateTime(date);
+        for (int i = 0; i < formatters.length; i++) {
+            try {
+                return formatters[i].parseDateTime(date);
+            } catch (IllegalArgumentException e) {
+                //
+            }
         }
+
+//        try {
+//            return dtf.parseDateTime(date);
+//        } catch (IllegalArgumentException e) {
+//            try {
+//                return dtfAlt.parseDateTime(date);
+//            } catch (IllegalArgumentException e2) {
+//                return dtfAlt2.parseDateTime(date);
+//            }
+//        }
+
+        return DateTime.now();
     }
 
 
