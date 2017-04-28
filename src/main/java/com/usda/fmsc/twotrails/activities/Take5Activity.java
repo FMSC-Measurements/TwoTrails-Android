@@ -58,7 +58,7 @@ public class Take5Activity extends AcquireGpsMapActivity {
     private RecyclerViewEx rvPoints;
     private Take5PointsEditRvAdapter t5pAdapter;
     private LinearLayoutManagerWithSmoothScroller linearLayoutManager;
-    private FloatingActionButton fabT5, fabSS, fabCancel;
+    private FloatingActionButton fabT5, fabSS, fabCancel, fabSSCommit;
     private LinearLayout layCardInfo;
 
     private RelativeLayout progLay;
@@ -74,7 +74,7 @@ public class Take5Activity extends AcquireGpsMapActivity {
     private TtGroup _Group;
 
     private int increment, takeAmount, nmeaCount = 0;
-    private boolean saved = true, updated, onBnd = true, cancelVisible, ignoreScroll, useRing, useVib, mapViewMode, killAcquire;
+    private boolean saved = true, updated, onBnd = true, cancelVisible, commitSSVisible, ignoreScroll, useRing, useVib, mapViewMode, killAcquire;
 
     private PostDelayHandler pdhHideProgress = new PostDelayHandler(500);
 
@@ -248,7 +248,7 @@ public class Take5Activity extends AcquireGpsMapActivity {
             fabT5 = (FloatingActionButton)findViewById(R.id.take5FabT5);
             fabSS = (FloatingActionButton)findViewById(R.id.take5FabSideShot);
             fabCancel = (FloatingActionButton)findViewById(R.id.take5FabCancel);
-
+            fabSSCommit = (FloatingActionButton)findViewById(R.id.take5FabSideShotCommit);
 
             layCardInfo = (LinearLayout)findViewById(R.id.take5LayInfo);
 
@@ -384,17 +384,23 @@ public class Take5Activity extends AcquireGpsMapActivity {
 
     @Override
     public void finish() {
-        if (_Points != null && _Points.size() > 0) {
-            setResult(Consts.Codes.Results.POINT_CREATED, new Intent().putExtra(Consts.Codes.Data.NUMBER_OF_CREATED_POINTS, _Points.size()));
-        } else {
-            if (_Group != null) {
-                Global.getDAL().deleteGroup(_Group.getCN());
+        if (validateSideShot()) {
+            if (_Points != null && _Points.size() > 0) {
+                if (!saved || updated) {
+                    savePoint(_CurrentPoint);
+                }
+
+                setResult(Consts.Codes.Results.POINT_CREATED, new Intent().putExtra(Consts.Codes.Data.NUMBER_OF_CREATED_POINTS, _Points.size()));
+            } else {
+                if (_Group != null) {
+                    Global.getDAL().deleteGroup(_Group.getCN());
+                }
+
+                setResult(RESULT_CANCELED);
             }
 
-            setResult(RESULT_CANCELED);
+            super.finish();
         }
-
-        super.finish();
     }
 
     @Override
@@ -459,11 +465,15 @@ public class Take5Activity extends AcquireGpsMapActivity {
         _Bursts = new ArrayList<>();
         _UsedBursts = new ArrayList<>();
 
+        AndroidUtils.UI.hideKeyboard(this);
+
         startLogging();
 
         fabT5.setEnabled(false);
         fabSS.setEnabled(false);
+
         showCancel();
+        hideCommitSS();
     }
 
     private void setupSideShot() {
@@ -487,6 +497,7 @@ public class Take5Activity extends AcquireGpsMapActivity {
         AndroidUtils.UI.hideKeyboard(this);
 
         showCancel();
+        showCommitSS();
     }
 
     private void setupPoint(TtPoint point) {
@@ -551,6 +562,7 @@ public class Take5Activity extends AcquireGpsMapActivity {
             point.adjustPoint(); //temp for map
 
             hideCancel();
+            hideCommitSS();
 
             lockLastPoint(true);
 
@@ -677,6 +689,32 @@ public class Take5Activity extends AcquireGpsMapActivity {
         }
     }
 
+    private void showCommitSS() {
+        if (!commitSSVisible) {
+            Animation ac = AnimationUtils.loadAnimation(this, R.anim.push_left_in);
+
+            ac.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+                    fabSSCommit.setVisibility(View.VISIBLE);
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+
+                }
+            });
+
+            fabSSCommit.startAnimation(ac);
+            commitSSVisible = true;
+        }
+    }
+
     private void hideCancel() {
         if (cancelVisible) {
             final Animation a = AnimationUtils.loadAnimation(this, R.anim.push_down_out_fast);
@@ -697,8 +735,52 @@ public class Take5Activity extends AcquireGpsMapActivity {
                 }
             });
 
+            final Animation ac = AnimationUtils.loadAnimation(this, R.anim.push_right_out);
+
+            ac.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    fabSSCommit.setVisibility(View.GONE);
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+
+                }
+            });
+
             fabCancel.startAnimation(a);
+            fabSSCommit.startAnimation(ac);
             cancelVisible = false;
+        }
+    }
+
+    private void hideCommitSS() {
+        if (commitSSVisible) {
+            final Animation ac = AnimationUtils.loadAnimation(this, R.anim.push_right_out);
+
+            ac.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    fabSSCommit.setVisibility(View.GONE);
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+
+                }
+            });
+
+            fabSSCommit.startAnimation(ac);
+            commitSSVisible = false;
         }
     }
 
@@ -800,9 +882,16 @@ public class Take5Activity extends AcquireGpsMapActivity {
         }
     }
 
+    public void btnCommitSideShotClick(View view) {
+        if (validateSideShot()) {
+            hideCancel();
+            hideCommitSS();
+        }
+    }
+
     public void btnCancelClick(View view) {
-        fabCancel.setVisibility(View.GONE);
-        cancelVisible = false;
+        hideCancel();
+        hideCommitSS();
 
         if (isLogging()) {
             killAcquire = true;
