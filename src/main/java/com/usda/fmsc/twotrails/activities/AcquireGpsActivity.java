@@ -25,6 +25,7 @@ import com.usda.fmsc.twotrails.units.MapTracking;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 import com.usda.fmsc.utilities.StringEx;
 
+//todo add ability to move map around
 public class AcquireGpsActivity extends AcquireGpsMapActivity {
     private TextView tvLogged, tvRecv;
 
