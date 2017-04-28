@@ -87,6 +87,7 @@ import java.util.HashMap;
 
 import jp.wasabeef.recyclerview.animators.SlideInUpAnimator;
 
+//todo Manage exessive amount of points in project as to not slow down load
 public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapFragment.MultiMapListener, GpsService.Listener,
         SensorEventListener, PolyMarkerMapRvAdapter.Listener {
 

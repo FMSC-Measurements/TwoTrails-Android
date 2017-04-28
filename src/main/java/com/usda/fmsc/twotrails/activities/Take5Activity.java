@@ -53,6 +53,7 @@ import com.usda.fmsc.geospatial.GeoTools;
 
 import jp.wasabeef.recyclerview.animators.SlideInUpAnimator;
 
+//todo add ability to add media
 public class Take5Activity extends AcquireGpsMapActivity {
     private RecyclerViewEx rvPoints;
     private Take5PointsEditRvAdapter t5pAdapter;

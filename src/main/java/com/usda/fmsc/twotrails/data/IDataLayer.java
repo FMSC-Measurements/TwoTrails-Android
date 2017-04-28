@@ -13,13 +13,13 @@ import org.joda.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
 
 public abstract class IDataLayer {
-    protected static DateTimeFormatter dtf = DateTimeFormat.forPattern("M/d/yyyy H:mm:ss");
-    protected static DateTimeFormatter dtfAlt3 = DateTimeFormat.forPattern("M/d/yyyy H:mm:ss.SSS");
-    protected static DateTimeFormatter dtfAlt = DateTimeFormat.forPattern("yyyy-M-dd H:mm:ss"); //Alt Format, PC might be using it
+    protected static DateTimeFormatter dtf= DateTimeFormat.forPattern("yyyy-M-dd H:mm:ss");
+    protected static DateTimeFormatter dtfAlt = DateTimeFormat.forPattern("M/d/yyyy H:mm:ss.SSS"); //Alt Format, PC might be using it
     protected static DateTimeFormatter dtfAlt2 = new DateTimeFormatterBuilder()
             .appendPattern("yyyy-M-dd H:mm:ss")
             .appendFraction(DateTimeFieldType.millisOfSecond(), 0, 9) // Nanoseconds = 0-9 digits of fractional second.
             .toFormatter();
+    protected static DateTimeFormatter dtfAlt3 = DateTimeFormat.forPattern("M/d/yyyy H:mm:ss");
 
     protected static DateTimeFormatter[] formatters = new DateTimeFormatter[] { dtf, dtfAlt, dtfAlt2, dtfAlt3 };
 
