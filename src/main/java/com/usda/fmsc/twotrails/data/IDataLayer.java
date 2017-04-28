@@ -14,14 +14,7 @@ import java.util.ArrayList;
 
 public abstract class IDataLayer {
     protected static DateTimeFormatter dtf= DateTimeFormat.forPattern("yyyy-M-dd H:mm:ss");
-    protected static DateTimeFormatter dtfAlt = DateTimeFormat.forPattern("M/d/yyyy H:mm:ss.SSS"); //Alt Format, PC might be using it
-    protected static DateTimeFormatter dtfAlt2 = new DateTimeFormatterBuilder()
-            .appendPattern("yyyy-M-dd H:mm:ss")
-            .appendFraction(DateTimeFieldType.millisOfSecond(), 0, 9) // Nanoseconds = 0-9 digits of fractional second.
-            .toFormatter();
-    protected static DateTimeFormatter dtfAlt3 = DateTimeFormat.forPattern("M/d/yyyy H:mm:ss");
-
-    protected static DateTimeFormatter[] formatters = new DateTimeFormatter[] { dtf, dtfAlt, dtfAlt2, dtfAlt3 };
+    protected static DateTimeFormatter dtfAlt = DateTimeFormat.forPattern("yyyy-M-dd H:mm:ss.SSS"); //Alt Format, PC might be using it
 
     protected SQLiteDatabase _db;
 
@@ -89,25 +82,19 @@ public abstract class IDataLayer {
 
 
     public DateTime parseDateTime(String date) {
-        for (int i = 0; i < formatters.length; i++) {
+        try {
+            return dtf.parseDateTime(date);
+        } catch (IllegalArgumentException e) {
             try {
-                return formatters[i].parseDateTime(date);
-            } catch (IllegalArgumentException e) {
-                //
+                return dtfAlt.parseDateTime(date);
+            } catch (IllegalArgumentException e2) {
+                try {
+                    return DateTime.parse(date);
+                } catch (IllegalArgumentException e3) {
+                    return DateTime.now();
+                }
             }
         }
-
-//        try {
-//            return dtf.parseDateTime(date);
-//        } catch (IllegalArgumentException e) {
-//            try {
-//                return dtfAlt.parseDateTime(date);
-//            } catch (IllegalArgumentException e2) {
-//                return dtfAlt2.parseDateTime(date);
-//            }
-//        }
-
-        return DateTime.now();
     }
 
 

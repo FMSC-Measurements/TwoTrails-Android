@@ -75,6 +75,19 @@
         android:onClick="btnSideShotClick"/>
 
     <android.support.design.widget.FloatingActionButton
+        android:id="@+id/take5FabSideShotCommit"
+        style="@style/fabStyle"
+        android:src="@drawable/ic_done_white_36dp"
+        android:layout_margin="@null"
+        android:layout_marginEnd="@dimen/fab_margin"
+        android:layout_marginRight="@dimen/fab_margin"
+        android:layout_marginBottom="156dp"
+        app:layout_anchor="@id/lay1"
+        app:layout_anchorGravity="bottom|right|end"
+        android:onClick="btnCommitSideShotClick"
+        android:visibility="gone"/>
+
+    <android.support.design.widget.FloatingActionButton
         android:id="@+id/take5FabCancel"
         style="@style/fabStyle"
         android:src="@drawable/ic_clear_white_36dp"
