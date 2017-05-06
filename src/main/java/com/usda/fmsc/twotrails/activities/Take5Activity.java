@@ -408,8 +408,8 @@ public class Take5Activity extends AcquireGpsMapActivity {
         if ((keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)){
             if (validateSideShot()) {
                 setupTake5();
+                return false;
             }
-
         }
 
         return super.onKeyDown(keyCode, event);

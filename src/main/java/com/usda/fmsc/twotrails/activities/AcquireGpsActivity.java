@@ -66,7 +66,8 @@ public class AcquireGpsActivity extends AcquireGpsMapActivity {
                     }
 
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    TtUtils.TtReport.writeError(e.getMessage(), "AcquireGpsActivity:onCreate", e.getStackTrace());
+                    setResult(Consts.Codes.Results.ERROR);
                 }
             } else {
                 setResult(Consts.Codes.Results.NO_POINT_DATA);
@@ -213,6 +214,7 @@ public class AcquireGpsActivity extends AcquireGpsMapActivity {
 
         try {
             Intent intent = new Intent(this, CalculateGpsActivity.class);
+
             intent.putExtra(Consts.Codes.Data.POINT_DATA, _Point);
             intent.putExtra(Consts.Codes.Data.METADATA_DATA, _Metadata);
 

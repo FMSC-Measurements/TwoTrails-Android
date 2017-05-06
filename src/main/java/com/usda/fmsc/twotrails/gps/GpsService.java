@@ -551,7 +551,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
     }
 
     private void postGpsStart() {
-        for(final Listener listener : listeners) {
+        for (final Listener listener : listeners) {
             try {
                 Handler handler = new Handler(Looper.getMainLooper());
                 handler.post(new Runnable() {
@@ -567,7 +567,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
     }
 
     private void postGpsStop() {
-        for(final Listener listener : listeners) {
+        for (final Listener listener : listeners) {
             try {
                 Handler handler = new Handler(Looper.getMainLooper());
                 handler.post(new Runnable() {
@@ -583,7 +583,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
     }
 
     private void postServiceStart() {
-        for(final Listener listener : listeners) {
+        for (final Listener listener : listeners) {
             try {
                 Handler handler = new Handler(Looper.getMainLooper());
                 handler.post(new Runnable() {
@@ -599,7 +599,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
     }
 
     private void postServiceStop() {
-        for(final Listener listener : listeners) {
+        for (final Listener listener : listeners) {
             try {
                 Handler handler = new Handler(Looper.getMainLooper());
                 handler.post(new Runnable() {
@@ -615,18 +615,21 @@ public class GpsService extends Service implements LocationListener, LocationSou
     }
 
     private void postError(final GpsError error) {
-        for(final Listener listener : listeners) {
+        for (final Listener listener : listeners) {
             try {
                 Handler handler = new Handler(Looper.getMainLooper());
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        listener.gpsError(error);
+                        try {
+                            listener.gpsError(error);
+                        } catch (Exception e) {
+                            TtUtils.TtReport.writeError(e.getMessage(), "GpsService:postError");
+                        }
                     }
                 });
-
             } catch (Exception ex) {
-                //
+                TtUtils.TtReport.writeError(ex.getMessage(), "GpsService:postError-handler.post");
             }
         }
     }

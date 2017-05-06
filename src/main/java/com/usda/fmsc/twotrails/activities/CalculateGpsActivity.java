@@ -2,6 +2,7 @@ package com.usda.fmsc.twotrails.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.text.Editable;
 import android.view.View;
 import android.widget.AdapterView;
@@ -76,14 +77,15 @@ public class CalculateGpsActivity extends CustomToolbarActivity {
             _Bursts = new ArrayList<>();
 
             try {
-                _Point = intent.getParcelableExtra(Consts.Codes.Data.POINT_DATA);
                 _Metadata = intent.getParcelableExtra(Consts.Codes.Data.METADATA_DATA);
+                _Point = intent.getParcelableExtra(Consts.Codes.Data.POINT_DATA);
+
                 _Zone = _Metadata.getZone();
 
                 _Bursts = intent.getParcelableArrayListExtra(Consts.Codes.Data.ADDITIVE_NMEA_DATA);
                 _FilteredBursts = new ArrayList<>();
             } catch (Exception e) {
-                e.printStackTrace();
+                TtUtils.TtReport.writeError(e.getMessage(), "CalculateGpsActivity:onCreate", e.getStackTrace());
                 setResult(Consts.Codes.Results.ERROR);
                 finish();
                 return;
