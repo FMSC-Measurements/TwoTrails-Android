@@ -289,7 +289,7 @@ public class SettingsFragment extends PreferenceFragment {
                                         activity.runOnUiThread(new Runnable() {
                                             @Override
                                             public void run() {
-                                                pd.setMessage(getString(R.string.ds_gps_connected));
+                                                pd.setMessage(activity.getString(R.string.ds_gps_connected));
 
                                                 if (Global.Settings.DeviceSettings.isGpsAlwaysOn()) {
                                                     prefGpsCheck.setSummary(R.string.ds_gps_connected);

@@ -20,6 +20,7 @@ import com.usda.fmsc.geospatial.nmea.sentences.GSASentence;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.geospatial.utm.UTMTools;
 import com.usda.fmsc.twotrails.objects.TtObject;
+import com.usda.fmsc.twotrails.utilities.TtUtils;
 import com.usda.fmsc.utilities.StringEx;
 
 public class TtNmeaBurst extends TtObject implements Parcelable {
@@ -173,32 +174,37 @@ public class TtNmeaBurst extends TtObject implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
 
-        dest.writeSerializable(timeCreated);
-        dest.writeString(pointCN);
-        dest.writeInt(used ? 1 : 0);
+        try {
+            dest.writeSerializable(timeCreated);
+            dest.writeString(pointCN);
+            dest.writeInt(used ? 1 : 0);
 
-        dest.writeSerializable(position);
+            dest.writeSerializable(position);
 
-        dest.writeSerializable(fixTime);
-        dest.writeDouble(groundSpeed);
-        dest.writeDouble(trackAngle);
-        dest.writeDouble(magVar);
-        ParcelTools.writeNInt(dest, magVarDir != null ? magVarDir.getValue() : null);
+            dest.writeSerializable(fixTime);
+            dest.writeDouble(groundSpeed);
+            dest.writeDouble(trackAngle);
+            dest.writeDouble(magVar);
+            ParcelTools.writeNInt(dest, magVarDir != null ? magVarDir.getValue() : null);
 
-        ParcelTools.writeNInt(dest, mode != null ? mode.getValue() : null);
-        ParcelTools.writeNInt(dest, fix != null ? fix.getValue() : null);
-        dest.writeList(satsUsed);
-        dest.writeDouble(pdop);
-        dest.writeDouble(hdop);
-        dest.writeDouble(vdop);
+            ParcelTools.writeNInt(dest, mode != null ? mode.getValue() : null);
+            ParcelTools.writeNInt(dest, fix != null ? fix.getValue() : null);
+            dest.writeList(satsUsed);
+            dest.writeDouble(pdop);
+            dest.writeDouble(hdop);
+            dest.writeDouble(vdop);
 
-        dest.writeInt(fixQuality.getValue());
-        dest.writeInt(trackedSatellites);
-        dest.writeDouble(horizDilution);
-        dest.writeDouble(geoidHeight);
-        ParcelTools.writeNInt(dest, geoUom != null ? geoUom.getValue() : null);
+            dest.writeInt(fixQuality.getValue());
+            dest.writeInt(trackedSatellites);
+            dest.writeDouble(horizDilution);
+            dest.writeDouble(geoidHeight);
+            ParcelTools.writeNInt(dest, geoUom != null ? geoUom.getValue() : null);
 
-        dest.writeInt(numberOfSatellitesInView);
+            dest.writeInt(numberOfSatellitesInView);
+        } catch (Exception e) {
+            TtUtils.TtReport.writeError(e.getMessage(), "TtNmeaBurst:writeToParcel");
+            throw e;
+        }
     }
 
     public String getPointCN() {

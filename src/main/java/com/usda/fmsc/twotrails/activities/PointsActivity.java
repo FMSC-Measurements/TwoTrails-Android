@@ -2108,7 +2108,7 @@ public class PointsActivity extends CustomToolbarActivity {
                         @Override
                         public void run() {
                             if (result == PolygonAdjuster.AdjustResult.SUCCESSFUL) {
-                                startAquireGpsActivity(point, bursts);
+                                startAcquireGpsActivity(point, bursts);
                             } else if (result != PolygonAdjuster.AdjustResult.ADJUSTING) {
                                 Toast.makeText(PointsActivity.this, "Adjusting Failed. See error log for details", Toast.LENGTH_LONG).show();
                             }
@@ -2137,11 +2137,11 @@ public class PointsActivity extends CustomToolbarActivity {
                 }
             });
         } else {
-            startAquireGpsActivity(point, bursts);
+            startAcquireGpsActivity(point, bursts);
         }
     }
 
-    private void startAquireGpsActivity(TtPoint point, ArrayList<TtNmeaBurst> bursts) {
+    private void startAcquireGpsActivity(TtPoint point, ArrayList<TtNmeaBurst> bursts) {
         Intent intent = new Intent(this, AcquireGpsActivity.class);
         intent.putExtra(Consts.Codes.Data.POINT_DATA, TtUtils.clonePoint(point));
         intent.putExtra(Consts.Codes.Data.POLYGON_DATA, _CurrentPolygon);
@@ -2180,7 +2180,7 @@ public class PointsActivity extends CustomToolbarActivity {
                         @Override
                         public void run() {
                             if (result == PolygonAdjuster.AdjustResult.SUCCESSFUL) {
-                                startTakeActivity(point);
+                                startTake5Activity(point);
                             } else if (result != PolygonAdjuster.AdjustResult.ADJUSTING) {
                                 Toast.makeText(PointsActivity.this, "Adjusting Failed. See error log for details", Toast.LENGTH_LONG).show();
                             }
@@ -2209,11 +2209,11 @@ public class PointsActivity extends CustomToolbarActivity {
                 }
             });
         } else {
-            startTakeActivity(point);
+            startTake5Activity(point);
         }
     }
 
-    private void startTakeActivity(TtPoint currentPoint) {
+    private void startTake5Activity(TtPoint currentPoint) {
         if (!Global.Settings.DeviceSettings.isGpsConfigured()) {
             configGps();
         } else {
@@ -2502,7 +2502,7 @@ public class PointsActivity extends CustomToolbarActivity {
     }
 
 
-    public class PointsPagerAdapter extends FragmentStatePagerAdapterEx {
+    private class PointsPagerAdapter extends FragmentStatePagerAdapterEx {
 
         public PointsPagerAdapter(FragmentManager fm) {
             super(fm);
@@ -2562,7 +2562,7 @@ public class PointsActivity extends CustomToolbarActivity {
     }
 
 
-    public class MediaPagerAdapter extends FragmentStatePagerAdapterEx {
+    private class MediaPagerAdapter extends FragmentStatePagerAdapterEx {
         public MediaPagerAdapter(FragmentManager fm) {
             super(fm);
             saveFragmentStates(false);
