@@ -1231,7 +1231,7 @@ public class TtUtils {
             else if (fixType == 5)
                 fixType = 4;
 
-            if (fixType >= options.FixType.getValue() && nmeaBurst.getFix().getValue() >= options.Fix.getValue() &&
+            if (nmeaBurst.getFix().getValue() >= options.Fix.getValue() && nmeaBurst.getFixQuality().getValue() >= fixType &&
                     (options.DopType == DopType.HDOP && nmeaBurst.getHDOP() <= options.DopValue) ||
                     (options.DopType == DopType.PDOP && nmeaBurst.getPDOP() <= options.DopValue)) {
                 valid = true;

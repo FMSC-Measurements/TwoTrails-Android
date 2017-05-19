@@ -5,6 +5,16 @@
         <item>PDOP</item>
     </string-array>
 
+    <string-array name="arr_fix_types">
+        <item>None</item>
+        <item>2D</item>
+        <item>3D</item>
+        <item>3D+DIFF</item>
+        <item>PPS</item>
+        <item>Float RTK</item>
+        <item>RTK</item>
+    </string-array>
+
     <string-array name="arr_plot_point_loc">
         <item>Inside</item>
         <item>Extents</item>

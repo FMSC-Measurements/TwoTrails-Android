@@ -347,14 +347,17 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
         tvName.setText(_Polygon.getName());
         txtName.setText(_Polygon.getName());
         txtDesc.setText(_Polygon.getDescription());
+
         txtInc.setText(StringEx.toString(_Polygon.getIncrementBy()));
         txtPsi.setText(StringEx.toString(_Polygon.getPointStartIndex()));
         txtAcc.setText(StringEx.toStringRound(_Polygon.getAccuracy(), 2));
 
         tvPerimFt.setText(StringEx.toStringRound(TtUtils.Convert.toFeetTenths(_Polygon.getPerimeter(), Dist.Meters), 2));
         tvPerimMt.setText(StringEx.toStringRound(_Polygon.getPerimeter(), 2));
-        tvPerimFt.setText(StringEx.toStringRound(TtUtils.Convert.toFeetTenths(_Polygon.getPerimeter(), Dist.Meters), 2));
-        tvPerimMt.setText(StringEx.toStringRound(_Polygon.getPerimeter(), 2));
+
+        tvPerimLineFt.setText(StringEx.toStringRound(TtUtils.Convert.toFeetTenths(_Polygon.getPerimeterLine(), Dist.Meters), 2));
+        tvPerimLineMt.setText(StringEx.toStringRound(_Polygon.getPerimeterLine(), 2));
+
         tvAreaAc.setText(StringEx.toStringRound(TtUtils.Convert.metersSquaredToAcres(_Polygon.getArea()), 2));
         tvAreaHa.setText(StringEx.toStringRound(TtUtils.Convert.metersSquaredToHa(_Polygon.getArea()), 2));
 

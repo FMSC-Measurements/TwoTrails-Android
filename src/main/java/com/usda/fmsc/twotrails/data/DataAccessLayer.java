@@ -346,7 +346,7 @@ public class DataAccessLayer extends IDataLayer {
 
             c.close();
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:getPolygonNames");
+            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:getPolygons");
             return null;
         }
 
@@ -368,6 +368,7 @@ public class DataAccessLayer extends IDataLayer {
             cvs.put(TwoTrailsSchema.PolygonSchema.Accuracy, poly.getAccuracy());
             cvs.put(TwoTrailsSchema.PolygonSchema.Area, poly.getArea());
             cvs.put(TwoTrailsSchema.PolygonSchema.Perimeter, poly.getPerimeter());
+            cvs.put(TwoTrailsSchema.PolygonSchema.PerimeterLine, poly.getPerimeterLine());
             cvs.put(TwoTrailsSchema.PolygonSchema.PointStartIndex, poly.getPointStartIndex());
             cvs.put(TwoTrailsSchema.PolygonSchema.IncrementBy, poly.getIncrementBy());
             cvs.put(TwoTrailsSchema.PolygonSchema.TimeCreated, dtf.print(poly.getTime()));
@@ -401,6 +402,7 @@ public class DataAccessLayer extends IDataLayer {
             cvs.put(TwoTrailsSchema.PolygonSchema.Accuracy, poly.getAccuracy());
             cvs.put(TwoTrailsSchema.PolygonSchema.Area, poly.getArea());
             cvs.put(TwoTrailsSchema.PolygonSchema.Perimeter, poly.getPerimeter());
+            cvs.put(TwoTrailsSchema.PolygonSchema.PerimeterLine, poly.getPerimeterLine());
             cvs.put(TwoTrailsSchema.PolygonSchema.PointStartIndex, poly.getPointStartIndex());
             cvs.put(TwoTrailsSchema.PolygonSchema.IncrementBy, poly.getIncrementBy());
 

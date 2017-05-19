@@ -1,0 +1,435 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.usda.fmsc.twotrails.activities.AcquireAndCalculateGpsActivity">
+
+    <android.support.v4.widget.DrawerLayout
+        android:id="@+id/acqAndCalcNavDrawer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <!-- View -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <android.support.v7.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/toolbar_height"
+                android:background="@color/primary"
+                android:theme="@style/ToolbarTheme"
+                app:popupTheme="@style/PopupTheme">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/acquireGpsToolbarLblLogged"
+                        android:text="@string/aqr_logged"
+                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentStart="true"
+                        android:textSize="20sp"
+                        android:textColor="@android:color/white" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/acquireGpsToolbarLblLoggedValue"
+                        android:text="@string/zero"
+                        android:layout_toRightOf="@+id/acquireGpsToolbarLblLogged"
+                        android:layout_toEndOf="@+id/acquireGpsToolbarLblLogged"
+                        android:paddingStart="10dp"
+                        android:paddingLeft="10dp"
+                        android:paddingEnd="0dp"
+                        android:paddingRight="0dp"
+                        android:textSize="20sp"
+                        android:textColor="@android:color/white" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/acquireGpsToolbarLblReceived"
+                        android:text="@string/aqr_recv"
+                        android:layout_alignParentRight="true"
+                        android:layout_alignParentEnd="true"
+                        android:textSize="20sp"
+                        android:textColor="@android:color/white"
+                        android:paddingEnd="15dp"
+                        android:paddingRight="15dp"
+                        android:paddingStart="0dp"
+                        android:paddingLeft="0dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/acquireGpsToolbarLblReceivedValue"
+                        android:text="@string/zero"
+                        android:layout_toLeftOf="@id/acquireGpsToolbarLblReceived"
+                        android:layout_toStartOf="@id/acquireGpsToolbarLblReceived"
+                        android:layout_toRightOf="@id/acquireGpsToolbarLblLoggedValue"
+                        android:layout_toEndOf="@id/acquireGpsToolbarLblLoggedValue"
+                        android:paddingEnd="10dp"
+                        android:paddingRight="10dp"
+                        android:paddingStart="0dp"
+                        android:paddingLeft="0dp"
+                        android:textSize="20sp"
+                        android:textColor="@android:color/white"
+                        android:gravity="end" />
+                </RelativeLayout>
+            </android.support.v7.widget.Toolbar>
+
+            <View
+                style="@style/ToolbarShadowViewElevation"
+                android:layout_below="@id/toolbar" />
+
+            <LinearLayout
+                android:id="@+id/buttonBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:layout_alignParentBottom="true">
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/aqr_log"
+                    android:id="@+id/aqrBtnLog"
+                    android:layout_weight="1"
+                    android:onClick="btnLogClick"
+                    style="@style/buttonMaterial" />
+
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/str_calc"
+                    android:id="@+id/aqrBtnCalc"
+                    android:layout_weight="1"
+                    android:onClick="btnStartCalcClick"
+                    android:enabled="false"
+                    style="@style/buttonMaterial" />
+            </LinearLayout>
+
+            <RelativeLayout
+                android:layout_below="@id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_above="@id/buttonBar">
+
+                <android.support.v7.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@android:color/white"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginRight="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginTop="8dp"
+                    style="@style/ToolbarElevation2">
+
+                    <include
+                        layout="@layout/control_gps_info"
+                        android:layout_height="wrap_content"
+                        android:layout_width="match_parent" />
+                </android.support.v7.widget.CardView>
+            </RelativeLayout>
+        </RelativeLayout>
+
+        <!-- Drawer -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/white_1000"
+            android:layout_gravity="end"
+            android:layout_marginEnd="-64dp"
+            android:layout_marginRight="-64dp">
+
+            <include android:id="@+id/toolbarCalc" layout="@layout/toolbar_default"/>
+
+            <View style="@style/ToolbarShadowViewElevation" android:layout_below="@id/toolbarCalc"/>
+
+            <include layout="@layout/pre_focus" />
+
+            <LinearLayout
+                android:id="@+id/calcLayFilter"
+                android:layout_below="@id/toolbarCalc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:text="@string/calc_filters"
+                    android:gravity="center"
+                    android:textSize="25sp"
+                    android:paddingTop="4dp"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <Spinner android:id="@+id/calcSpinnerDopType"
+                        android:layout_width="0dp"
+                        android:layout_weight=".25"
+                        android:layout_height="wrap_content"/>
+
+                    <EditText android:id="@+id/calcTxtDopValue"
+                        android:layout_width="0dp"
+                        android:layout_weight=".25"
+                        android:layout_height="wrap_content"
+                        android:inputType="number|numberDecimal"/>
+
+                    <TextView
+                        android:text="@string/calc_fix"
+                        android:textSize="20sp"
+                        android:layout_width="0dp"
+                        android:layout_weight=".2"
+                        android:layout_height="wrap_content"
+                        android:gravity="end"/>
+
+                    <Spinner android:id="@+id/calcSpinnerFix"
+                        android:layout_width="0dp"
+                        android:layout_weight=".3"
+                        android:layout_height="wrap_content"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingStart="15dp"
+                    android:paddingLeft="15dp"
+                    android:paddingEnd="0dp"
+                    android:paddingRight="0dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight=".3"
+                        android:layout_height="wrap_content"
+                        android:textSize="20sp"
+                        android:text="@string/calc_gs"
+                        android:layout_gravity="center"
+                        android:gravity="start"/>
+
+                    <EditText
+                        android:id="@+id/calcTxtGroup"
+                        android:layout_width="0dp"
+                        android:layout_weight=".2"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:gravity="start"
+                        android:inputType="number"/>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_weight=".25"
+                        android:layout_height="wrap_content"
+                        android:text="@string/calc_range"
+                        android:textSize="20sp"
+                        android:layout_gravity="center"
+                        android:gravity="end"/>
+
+                    <EditText
+                        android:id="@+id/calcTxtRange"
+                        android:layout_width="0dp"
+                        android:layout_weight=".3"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:gravity="start"
+                        android:digits="0123456789-"
+                        android:inputType="numberSigned"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <View android:id="@+id/calcLayDiv" style="@style/Dividers" android:layout_below="@id/calcLayFilter"/>
+
+            <TableLayout
+                android:id="@+id/calcLayStats"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/calcLayDiv"
+                android:stretchColumns="*"
+                android:paddingTop="10dp"
+                android:paddingStart="5dp"
+                android:paddingLeft="5dp"
+                android:paddingRight="0dp"
+                android:paddingEnd="0dp">
+
+                <TableRow>
+                    <TextView
+                        android:text="@string/str_group"
+                        style="@style/calcStyleTvHeader"/>
+                    <TextView
+                        android:text="@string/str_utmx"
+                        style="@style/calcStyleTvHeader"/>
+                    <TextView
+                        android:text="@string/str_utmy"
+                        style="@style/calcStyleTvHeader"/>
+                    <TextView
+                        android:text="@string/calc_nssda"
+                        style="@style/calcStyleTvHeader"
+                        android:gravity="center"/>
+                </TableRow>
+
+                <TableRow>
+                    <CheckBox
+                        android:id="@+id/calcChkGroup1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="true"
+                        android:enabled="false"
+                        android:onClick="chkGroupClick"/>
+                    <TextView
+                        android:id="@+id/calcTvUtmXG1"
+                        android:text="@string/calc_uvx"
+                        style="@style/calcStyleTvValues"/>
+                    <TextView
+                        android:id="@+id/calcTvUtmYG1"
+                        android:text="@string/calc_uvy"
+                        style="@style/calcStyleTvValues"/>
+                    <TextView
+                        android:id="@+id/calcTvNssdaG1"
+                        android:text="@string/calc_uvn"
+                        style="@style/calcStyleTvValues"
+                        android:gravity="center"/>
+                </TableRow>
+
+                <TableRow>
+                    <CheckBox
+                        android:id="@+id/calcChkGroup2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="true"
+                        android:enabled="false"
+                        android:onClick="chkGroupClick"/>
+                    <TextView
+                        android:id="@+id/calcTvUtmXG2"
+                        android:text="@string/calc_uvx"
+                        style="@style/calcStyleTvValues"/>
+                    <TextView
+                        android:id="@+id/calcTvUtmYG2"
+                        android:text="@string/calc_uvy"
+                        style="@style/calcStyleTvValues"/>
+                    <TextView
+                        android:id="@+id/calcTvNssdaG2"
+                        android:text="@string/calc_uvn"
+                        style="@style/calcStyleTvValues"
+                        android:gravity="center"/>
+                </TableRow>
+
+                <TableRow>
+                    <CheckBox
+                        android:id="@+id/calcChkGroup3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="true"
+                        android:enabled="false"
+                        android:onClick="chkGroupClick"/>
+                    <TextView
+                        android:id="@+id/calcTvUtmXG3"
+                        android:text="@string/calc_uvx"
+                        style="@style/calcStyleTvValues"/>
+                    <TextView
+                        android:id="@+id/calcTvUtmYG3"
+                        android:text="@string/calc_uvy"
+                        style="@style/calcStyleTvValues"/>
+                    <TextView
+                        android:id="@+id/calcTvNssdaG3"
+                        android:text="@string/calc_uvn"
+                        style="@style/calcStyleTvValues"
+                        android:gravity="center"/>
+                </TableRow>
+            </TableLayout>
+
+            <View android:id="@+id/calcLayDiv2" style="@style/Dividers" android:layout_below="@id/calcLayStats"/>
+
+            <TableLayout
+                android:id="@+id/calcLayFinal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/calcLayDiv2"
+                android:stretchColumns="*"
+                android:paddingTop="5dp">
+
+                <TableRow>
+                    <TextView
+                        android:text="@string/str_utmx"
+                        style="@style/calcStyleTvHeaderFinal"/>
+                    <TextView
+                        android:text="@string/str_utmy"
+                        style="@style/calcStyleTvHeaderFinal"/>
+                    <TextView
+                        android:text="@string/calc_nssda"
+                        style="@style/calcStyleTvHeaderFinal"/>
+                </TableRow>
+
+                <TableRow>
+                    <TextView
+                        android:id="@+id/calcTvUtmXF"
+                        android:text="@string/calc_uvx"
+                        style="@style/calcStyleTvValuesFinalValue"/>
+                    <TextView
+                        android:id="@+id/calcTvUtmYF"
+                        android:text="@string/calc_uvy"
+                        style="@style/calcStyleTvValuesFinalValue"/>
+                    <TextView
+                        android:id="@+id/calcTvNssdaF"
+                        android:text="@string/calc_uvn"
+                        style="@style/calcStyleTvValuesFinalValue"/>
+                </TableRow>
+            </TableLayout>
+
+            <View android:id="@+id/calcLayDiv3" style="@style/Dividers" android:layout_below="@id/calcLayFinal"/>
+
+            <!-- Visual of data (center calculated position with points of nmea around it) -->
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_margin="4dp">
+
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/str_calc"
+                    android:id="@+id/calcBtnCalc"
+                    android:layout_weight="1"
+                    android:onClick="btnCalculateClick"
+                    style="@style/buttonMaterial"/>
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"/>
+
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/str_create"
+                    android:id="@+id/calcBtnCreate"
+                    android:layout_weight="1"
+                    android:onClick="btnCreateClick"
+                    style="@style/buttonMaterial"
+                    android:enabled="false"/>
+            </LinearLayout>
+        </RelativeLayout>
+
+    </android.support.v4.widget.DrawerLayout>
+
+</LinearLayout>
+

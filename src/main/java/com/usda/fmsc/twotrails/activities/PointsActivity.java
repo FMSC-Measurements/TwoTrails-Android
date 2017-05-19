@@ -553,10 +553,19 @@ public class PointsActivity extends CustomToolbarActivity {
             slexCreate.setFabAnimationEndListener(new SheetLayoutEx.OnFabAnimationEndListener() {
                 @Override
                 public void onFabAnimationEnd() {
+
+                    TtPoint point = null;
+
+                    if (TtUtils.pointHasValue(_CurrentPoint)) {
+                        point = _CurrentPoint;
+                    } else if (_CurrentIndex > 0) {
+                        point = _Points.get(_CurrentIndex - 1);
+                    }
+
                     if (createOpType == OpType.Take5) {
-                        acquireT5Points(_CurrentPoint);
+                        acquireT5Points(point);
                     } else if (createOpType == OpType.Walk) {
-                        acquireWalkPoints(_CurrentPoint);
+                        acquireWalkPoints(point);
                     }
 
                     createOpType = null;
@@ -2142,7 +2151,7 @@ public class PointsActivity extends CustomToolbarActivity {
     }
 
     private void startAcquireGpsActivity(TtPoint point, ArrayList<TtNmeaBurst> bursts) {
-        Intent intent = new Intent(this, AcquireGpsActivity.class);
+        Intent intent = new Intent(this, AcquireAndCalculateGpsActivity.class);
         intent.putExtra(Consts.Codes.Data.POINT_DATA, TtUtils.clonePoint(point));
         intent.putExtra(Consts.Codes.Data.POLYGON_DATA, _CurrentPolygon);
         intent.putExtra(Consts.Codes.Data.METADATA_DATA, _MetaData.get(point.getMetadataCN()));

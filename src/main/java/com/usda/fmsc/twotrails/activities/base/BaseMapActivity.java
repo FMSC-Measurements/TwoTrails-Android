@@ -109,7 +109,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
     private GeoPosition lastPosition;
     private android.location.Location currentLocation, targetLocation;
 
-    private DrawerLayout polyDrawer;
+    protected DrawerLayout dlPolyDrawer;
 
     private SensorManager mSensorManager;
     private Sensor accelerometer, magnetometer;
@@ -268,7 +268,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
         tvNavAzTrue = (TextView)findViewById(R.id.mapNavTvAzTrue);
         tvNavAzMag = (TextView)findViewById(R.id.mapNavTvAzMag);
 
-        polyDrawer = (DrawerLayout)findViewById(R.id.mapNavDrawer);
+        dlPolyDrawer = (DrawerLayout)findViewById(R.id.mapNavDrawer);
     }
 
 
@@ -344,10 +344,10 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
                     actionBar.setDisplayShowTitleEnabled(false);
                 }
 
-                if (polyDrawer != null) {
-                    drawerToggle = new ActionBarDrawerToggle(this, polyDrawer, toolbar, R.string.str_open, R.string.str_close);
+                if (dlPolyDrawer != null) {
+                    drawerToggle = new ActionBarDrawerToggle(this, dlPolyDrawer, toolbar, R.string.str_open, R.string.str_close);
 
-                    polyDrawer.addDrawerListener(drawerToggle);
+                    dlPolyDrawer.addDrawerListener(drawerToggle);
                 }
             }
         }
@@ -537,8 +537,8 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
 
     @Override
     public void onBackPressed() {
-        if (polyDrawer.isDrawerOpen(GravityCompat.START)) {
-            polyDrawer.closeDrawer(GravityCompat.START);
+        if (dlPolyDrawer.isDrawerOpen(GravityCompat.START)) {
+            dlPolyDrawer.closeDrawer(GravityCompat.START);
         } else {
             switch (slidingLayout.getPanelState()) {
                 case EXPANDED:
