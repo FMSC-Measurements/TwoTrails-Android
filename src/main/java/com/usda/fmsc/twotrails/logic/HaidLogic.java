@@ -297,9 +297,9 @@ public class HaidLogic {
         }
 
         if (totalGpsError > Consts.Minimum_Point_Accuracy) {
-            sb.append(String.format("GPS Contribution: %s%.5f Ha (%.2f ac)%s",
+            sb.append(String.format("GPS Contribution: %s%.4f Ha (%.0f ac)%s",
                 save ? "              " : "",
-                TtUtils.Math.round(TtUtils.Convert.metersSquaredToHa(totalGpsError), 2),
+                TtUtils.Math.round(TtUtils.Convert.metersSquaredToHa(totalGpsError), 4),
                 TtUtils.Math.round(TtUtils.Convert.metersSquaredToAcres(totalGpsError), 2),
                 Consts.NewLine));
 
@@ -309,7 +309,7 @@ public class HaidLogic {
         }
 
         if (totalTravError > Consts.Minimum_Point_Accuracy) {
-            sb.append(String.format("Traverse Contribution: %s%.2f Ha (%.2f ac)%s",
+            sb.append(String.format("Traverse Contribution: %s%.2f Ha (%.0f ac)%s",
                 save ? "        " : "",
                 TtUtils.Math.round(TtUtils.Convert.metersSquaredToHa(totalTravError), 2),
                 TtUtils.Math.round(TtUtils.Convert.metersSquaredToAcres(totalTravError), 2),

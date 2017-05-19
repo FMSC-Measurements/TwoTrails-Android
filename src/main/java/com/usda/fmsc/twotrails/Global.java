@@ -566,8 +566,8 @@ public class Global {
 
             public static final String TAKE5_FILTER_DOP_TYPE = "Take5FilterDopType";
             public static final String TAKE5_FILTER_DOP_VALUE = "Take5FilterDopValue";
-            public static final String TAKE5_FILTER_FIX = "Take5FilterFixType";
-            public static final String TAKE5_FILTER_FIX_TYPE = "Take5FilterFix";
+            public static final String TAKE5_FILTER_FIX_TYPE = "Take5FilterFixType";
+            public static final String TAKE5_FILTER_FIX = "Take5FilterFix";
             public static final String TAKE5_NMEA_AMOUNT = "Take5NmeaAmount";
             public static final String TAKE5_IGNORE_FIRST_NMEA = "Take5IgnoreNmea";
             public static final String TAKE5_IGNORE_FIRST_NMEA_AMOUNT = "Take5IgnoreNmeaAmount";
@@ -865,7 +865,7 @@ public class Global {
             }
 
             public static double getGpsFilterDopValue() {
-                return getInt(GPS_FILTER_DOP_VALUE, DEFAULT_GPS_DOP_VALUE);
+                return getDouble(GPS_FILTER_DOP_VALUE, DEFAULT_GPS_DOP_VALUE);
             }
 
             public static void setGpsFilterDopValue(double value) {
