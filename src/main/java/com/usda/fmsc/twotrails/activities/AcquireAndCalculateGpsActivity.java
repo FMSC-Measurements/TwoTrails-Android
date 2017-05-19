@@ -174,10 +174,56 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
             EditText txtRange = (EditText)findViewById(R.id.calcTxtRange);
             //endregion
 
+            if (txtRange != null) {
+                if (_Bursts.size() > 0) {
+                    txtRange.setText(String.format("1-%d", _Bursts.size()));
+                }
 
+                txtRange.addTextChangedListener(new SimpleTextWatcher() {
+                    @Override
+                    public void afterTextChanged(Editable editable) {
+                        String text = editable.toString();
+                        boolean valid = false;
 
-            if (txtRange != null && _Bursts.size() > 0) {
-                txtRange.setText(String.format("1-%d", _Bursts.size()));
+                        rangeStart = -1;
+                        rangeEnd = Integer.MAX_VALUE;
+
+                        Matcher m = pattern.matcher(text);
+                        if (!m.find()) {
+                            String[] tokens = text.split("-");
+
+                            if (tokens.length > 0) {
+                                Integer value = ParseEx.parseInteger(tokens[0]);
+
+                                if (value != null) {
+                                    rangeStart = value;
+                                    valid = true;
+
+                                    if (tokens.length > 1) {
+                                        value = ParseEx.parseInteger(tokens[1]);
+
+                                        if (value != null && value > rangeStart) {
+                                            rangeEnd = value;
+                                        } else {
+                                            valid = false;
+                                            rangeStart = -1;
+                                        }
+                                    }
+
+                                    rangeStart -= 2;
+                                }
+                            }
+                        }
+
+                        if (valid) {
+                            txtDop.setTextColor(AndroidUtils.UI.getColor(getBaseContext(), R.color.abc_primary_text_material_light));
+                            calculate();
+                        } else {
+                            txtDop.setTextColor(AndroidUtils.UI.getColor(getBaseContext(), android.R.color.holo_red_dark));
+                        }
+
+                    }
+                });
             }
 
             //region Control Init
@@ -194,35 +240,34 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
 
                 spFix.setAdapter(fixAdapter);
                 setSpinnerFixOption(options);
+
+                spDop.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                        options.DopType = DopType.parse(i);
+                        Global.Settings.DeviceSettings.setGpsFilterDopType(options.DopType);
+                        calculate();
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> adapterView) {
+
+                    }
+                });
+
+                spFix.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                        setSettingsFixOptions(i);
+                        calculate();
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> adapterView) {
+
+                    }
+                });
             }
-
-            spDop.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                    options.DopType = DopType.parse(i);
-                    Global.Settings.DeviceSettings.setGpsFilterDopType(options.DopType);
-                    calculate();
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> adapterView) {
-
-                }
-            });
-
-            spFix.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                    setSettingsFixOptions(i);
-                    calculate();
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> adapterView) {
-
-                }
-            });
-
 
             txtDop.setText(StringEx.toString(options.DopValue));
             txtDop.addTextChangedListener(new SimpleTextWatcher() {
@@ -247,52 +292,6 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
                 public void afterTextChanged(Editable editable) {
                     manualGroupSize = ParseEx.parseInteger(editable.toString());
                     calculate();
-                }
-            });
-
-            txtRange.addTextChangedListener(new SimpleTextWatcher() {
-                @Override
-                public void afterTextChanged(Editable editable) {
-                    String text = editable.toString();
-                    boolean valid = false;
-
-                    rangeStart = -1;
-                    rangeEnd = Integer.MAX_VALUE;
-
-                    Matcher m = pattern.matcher(text);
-                    if (!m.find()) {
-                        String[] tokens = text.split("-");
-
-                        if (tokens.length > 0) {
-                            Integer value = ParseEx.parseInteger(tokens[0]);
-
-                            if (value != null) {
-                                rangeStart = value;
-                                valid = true;
-
-                                if (tokens.length > 1) {
-                                    value = ParseEx.parseInteger(tokens[1]);
-
-                                    if (value != null && value > rangeStart) {
-                                        rangeEnd = value;
-                                    } else {
-                                        valid = false;
-                                        rangeStart = -1;
-                                    }
-                                }
-
-                                rangeStart -= 2;
-                            }
-                        }
-                    }
-
-                    if (valid) {
-                        txtDop.setTextColor(AndroidUtils.UI.getColor(getBaseContext(), R.color.abc_primary_text_material_light));
-                        calculate();
-                    } else {
-                        txtDop.setTextColor(AndroidUtils.UI.getColor(getBaseContext(), android.R.color.holo_red_dark));
-                    }
-
                 }
             });
             //endregion
@@ -619,16 +618,25 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
         }
     }
 
+    @Override
+    public void onMapReady() {
+        super.onMapReady();
+        setMapGesturesEnabled(true);
+    }
 
     @Override
     protected void startLogging() {
         super.startLogging();
         btnLog.setText(R.string.aqr_log_pause);
+
+        setMapGesturesEnabled(false);
     }
 
     protected void stopLogging() {
         super.stopLogging();
         btnLog.setText(R.string.aqr_log);
+
+        setMapGesturesEnabled(true);
     }
 
     protected void setLoggedCount(int count) {
