@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.content.DialogInterface;
@@ -24,6 +25,7 @@ import android.widget.Toast;
 
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.dialogs.InputDialog;
+import com.usda.fmsc.twotrails.BuildConfig;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.activities.base.TtAjusterCustomToolbarActivity;
 import com.usda.fmsc.twotrails.adapters.RecentProjectAdapter;
@@ -736,7 +738,12 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
                 if (!StringEx.isEmpty(kmlPath)) {
                     File KML = new File(kmlPath);
                     Intent i = getPackageManager().getLaunchIntentForPackage(gEarth);
-                    i.setDataAndType(Uri.fromFile(KML), "application/vnd.google-earth.kml+xml");
+
+                    i.setDataAndType(FileProvider.getUriForFile(
+                                MainActivity.this,
+                                BuildConfig.APPLICATION_ID + ".provider",
+                                KML),
+                            "application/vnd.google-earth.kml+xml");
                     startActivity(i);
                 }
             }

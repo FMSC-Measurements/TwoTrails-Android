@@ -629,14 +629,14 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
         super.startLogging();
         btnLog.setText(R.string.aqr_log_pause);
 
-        setMapGesturesEnabled(false);
+        //setMapGesturesEnabled(false);
     }
 
     protected void stopLogging() {
         super.stopLogging();
         btnLog.setText(R.string.aqr_log);
 
-        setMapGesturesEnabled(true);
+        //setMapGesturesEnabled(true);
     }
 
     protected void setLoggedCount(int count) {
@@ -781,6 +781,6 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
 
     @Override
     protected MapTracking getMapTracking() {
-        return MapTracking.FOLLOW;
+        return isLogging() ? MapTracking.NONE : MapTracking.FOLLOW;
     }
 }

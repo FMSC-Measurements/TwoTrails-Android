@@ -205,7 +205,7 @@ public class PolygonAdjuster {
                         double perim = 0, area = 0;
 
                         TtPoint p1, p2;
-                        for (int i = 0; i < points.size() - 2; i++) {
+                        for (int i = 0; i < points.size() - 1; i++) {
                             p1 = points.get(i);
                             p2 = points.get(i + 1);
 

@@ -864,12 +864,12 @@ public class Global {
                 setInt(GPS_FILTER_DOP_TYPE, value.getValue());
             }
 
-            public static double getGpsFilterDopValue() {
-                return getDouble(GPS_FILTER_DOP_VALUE, DEFAULT_GPS_DOP_VALUE);
+            public static int getGpsFilterDopValue() {
+                return getInt(GPS_FILTER_DOP_VALUE, DEFAULT_GPS_DOP_VALUE);
             }
 
-            public static void setGpsFilterDopValue(double value) {
-                setDouble(GPS_FILTER_DOP_VALUE, value);
+            public static void setGpsFilterDopValue(int value) {
+                setInt(GPS_FILTER_DOP_VALUE, value);
             }
 
             public static GGASentence.GpsFixType getGpsFilterFixType() {
@@ -897,12 +897,12 @@ public class Global {
                 setInt(TAKE5_FILTER_DOP_TYPE, value.getValue());
             }
 
-            public static double getTake5FilterDopValue() {
+            public static int getTake5FilterDopValue() {
                 return getInt(TAKE5_FILTER_DOP_VALUE, DEFAULT_TAKE5_DOP_VALUE);
             }
 
-            public static void setTake5FilterDopValue(double value) {
-                setDouble(TAKE5_FILTER_DOP_VALUE, value);
+            public static void setTake5FilterDopValue(int value) {
+                setInt(TAKE5_FILTER_DOP_VALUE, value);
             }
 
             public static GGASentence.GpsFixType getTake5FilterFixType() {
@@ -930,12 +930,12 @@ public class Global {
                 setInt(WALK_FILTER_DOP_TYPE, value.getValue());
             }
 
-            public static double getWalkFilterDopValue() {
+            public static int getWalkFilterDopValue() {
                 return getInt(WALK_FILTER_DOP_VALUE, DEFAULT_WALK_DOP_VALUE);
             }
 
-            public static void setWalkFilterDopValue(double value) {
-                setDouble(WALK_FILTER_DOP_VALUE, value);
+            public static void setWalkFilterDopValue(int value) {
+                setInt(WALK_FILTER_DOP_VALUE, value);
             }
 
             public static GGASentence.GpsFixType getWalkFilterFixType() {

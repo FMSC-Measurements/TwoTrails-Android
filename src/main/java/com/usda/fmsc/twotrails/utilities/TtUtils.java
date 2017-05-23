@@ -1157,12 +1157,12 @@ public class TtUtils {
                 if (info != null) {
                     width = ParseEx.parseInteger(info);
 
-                    if (width != null) {
+                    if (width != null && width != 0) {
                         info = exifInterface.getAttribute(ExifInterface.TAG_IMAGE_LENGTH);
                         if (info != null) {
                             height = ParseEx.parseInteger(info);
 
-                            if (height != null && (width / height > 1 || height / width > 1)) {
+                            if (height != null && height != 0 && (width / height > 1 || height / width > 1)) {
                                 type = PictureType.Panorama;
                             }
                         }

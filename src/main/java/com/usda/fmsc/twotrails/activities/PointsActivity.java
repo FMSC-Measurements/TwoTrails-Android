@@ -17,6 +17,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.FileProvider;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
@@ -49,6 +50,7 @@ import com.usda.fmsc.android.widget.RecyclerViewEx;
 import com.usda.fmsc.android.widget.SheetFab;
 import com.usda.fmsc.android.widget.SheetLayoutEx;
 import com.usda.fmsc.android.widget.layoutmanagers.LinearLayoutManagerWithSmoothScroller;
+import com.usda.fmsc.twotrails.BuildConfig;
 import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.adapters.MediaRvAdapter;
 import com.usda.fmsc.twotrails.adapters.PointDetailsAdapter;
@@ -1044,7 +1046,11 @@ public class PointsActivity extends CustomToolbarActivity {
                         Global.getTtMediaDir(), File.separator, dateTime.getYear(),
                         dateTime.getMonthOfYear(), dateTime.getDayOfMonth(), dateTime.getMillisOfDay()));
 
-                captureImageUri = Uri.fromFile(photo);
+                captureImageUri = FileProvider.getUriForFile(
+                        PointsActivity.this,
+                        BuildConfig.APPLICATION_ID + ".provider",
+                        photo);
+
                 intent.putExtra(MediaStore.EXTRA_OUTPUT, captureImageUri);
 
                 if (intent.resolveActivity(getPackageManager()) != null) {
