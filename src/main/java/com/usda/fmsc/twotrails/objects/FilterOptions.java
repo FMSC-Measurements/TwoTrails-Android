@@ -5,7 +5,7 @@ import com.usda.fmsc.geospatial.nmea.sentences.GSASentence;
 
 public class FilterOptions {
     public com.usda.fmsc.twotrails.units.DopType DopType;
-    public double DopValue;
+    public int DopValue;
     public GGASentence.GpsFixType FixType;
     public GSASentence.Fix Fix;
 

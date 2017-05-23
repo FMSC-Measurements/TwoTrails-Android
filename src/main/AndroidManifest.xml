@@ -38,6 +38,16 @@
         android:theme="@style/AppTheme"
         tools:replace="theme">
 
+        <provider
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="${applicationId}.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_paths"/>
+        </provider>
+
         <!-- Goolge API Key -->
         <meta-data
             android:name="com.google.android.gms.version"
@@ -225,6 +235,7 @@
         <activity
             android:name=".activities.TtCameraActivity"
             android:screenOrientation="portrait" />
+
         <activity android:name=".activities.AcquireAndCalculateGpsActivity"></activity>
     </application>
 

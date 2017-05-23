@@ -128,7 +128,7 @@ public class GpsPoint extends TtPoint implements TtPoint.IManualAccuracy {
 
     //endregion
 
-    protected void gpsCopy(GpsPoint p) {
+    private void gpsCopy(GpsPoint p) {
         this._ManualAccuracy = p.getManualAccuracy();
         this._RMSEr = p.getRMSEr();
         this._Latitude = p.getLatitude();
