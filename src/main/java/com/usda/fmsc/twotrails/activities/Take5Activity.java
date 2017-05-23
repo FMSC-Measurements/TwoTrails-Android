@@ -74,7 +74,8 @@ public class Take5Activity extends AcquireGpsMapActivity {
     private TtGroup _Group;
 
     private int increment, takeAmount, nmeaCount = 0;
-    private boolean saved = true, updated, onBnd = true, cancelVisible, commitSSVisible, ignoreScroll, useRing, useVib, mapViewMode, killAcquire;
+    private boolean saved = true, updated, onBnd = true, createSSVisible = true, cancelVisible, commitSSVisible,
+            ignoreScroll, useRing, useVib, mapViewMode, killAcquire;
 
     private PostDelayHandler pdhHideProgress = new PostDelayHandler(500);
 
@@ -352,7 +353,14 @@ public class Take5Activity extends AcquireGpsMapActivity {
                 setMapGesturesEnabled(mapViewMode);
                 layCardInfo.setEnabled(!mapViewMode);
                 layCardInfo.setVisibility(mapViewMode ? View.GONE : View.VISIBLE);
-                fabSS.setVisibility(mapViewMode ? View.GONE : View.VISIBLE);
+
+                if (mapViewMode) {
+                    hideCreateSS();
+                } else {
+                    showCreateSS();
+                }
+                //fabSS.setVisibility(mapViewMode ? View.GONE : View.VISIBLE);
+
                 miMode.setIcon(mapViewMode ? R.drawable.ic_add_location_white_36dp : R.drawable.ic_map_white_36dp);
                 break;
             }
@@ -663,9 +671,10 @@ public class Take5Activity extends AcquireGpsMapActivity {
         }
     }
 
+
     private void showCancel() {
         if (!cancelVisible) {
-            Animation a = AnimationUtils.loadAnimation(this, R.anim.push_up_in_fast);
+            Animation a = AnimationUtils.loadAnimation(this, R.anim.push_right_in);
 
             a.setAnimationListener(new Animation.AnimationListener() {
                 @Override
@@ -689,35 +698,9 @@ public class Take5Activity extends AcquireGpsMapActivity {
         }
     }
 
-    private void showCommitSS() {
-        if (!commitSSVisible) {
-            Animation ac = AnimationUtils.loadAnimation(this, R.anim.push_left_in);
-
-            ac.setAnimationListener(new Animation.AnimationListener() {
-                @Override
-                public void onAnimationStart(Animation animation) {
-                    fabSSCommit.setVisibility(View.VISIBLE);
-                }
-
-                @Override
-                public void onAnimationEnd(Animation animation) {
-
-                }
-
-                @Override
-                public void onAnimationRepeat(Animation animation) {
-
-                }
-            });
-
-            fabSSCommit.startAnimation(ac);
-            commitSSVisible = true;
-        }
-    }
-
     private void hideCancel() {
         if (cancelVisible) {
-            final Animation a = AnimationUtils.loadAnimation(this, R.anim.push_down_out_fast);
+            final Animation a = AnimationUtils.loadAnimation(this, R.anim.push_left_out);
 
             a.setAnimationListener(new Animation.AnimationListener() {
                 @Override
@@ -759,6 +742,33 @@ public class Take5Activity extends AcquireGpsMapActivity {
         }
     }
 
+
+    private void showCommitSS() {
+        if (!commitSSVisible) {
+            Animation ac = AnimationUtils.loadAnimation(this, R.anim.push_left_in);
+
+            ac.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+                    fabSSCommit.setVisibility(View.VISIBLE);
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+
+                }
+            });
+
+            fabSSCommit.startAnimation(ac);
+            commitSSVisible = true;
+        }
+    }
+
     private void hideCommitSS() {
         if (commitSSVisible) {
             final Animation ac = AnimationUtils.loadAnimation(this, R.anim.push_right_out);
@@ -784,6 +794,57 @@ public class Take5Activity extends AcquireGpsMapActivity {
         }
     }
 
+
+    private void showCreateSS() {
+        if (!createSSVisible) {
+            Animation ac = AnimationUtils.loadAnimation(this, R.anim.push_left_in);
+
+            ac.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+                    fabSS.setVisibility(View.VISIBLE);
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+
+                }
+            });
+
+            fabSS.startAnimation(ac);
+            createSSVisible = true;
+        }
+    }
+
+    private void hideCreateSS() {
+        if (createSSVisible) {
+            final Animation ac = AnimationUtils.loadAnimation(this, R.anim.push_right_out);
+
+            ac.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    fabSS.setVisibility(View.GONE);
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+
+                }
+            });
+
+            fabSS.startAnimation(ac);
+            createSSVisible = false;
+        }
+    }
 
     //region GPS
     @Override
