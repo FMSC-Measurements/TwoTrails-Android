@@ -13,6 +13,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.annotation.ColorInt;
+import android.support.annotation.IntDef;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -22,6 +23,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -80,6 +82,8 @@ import com.usda.fmsc.twotrails.utilities.ArcGISTools;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 import com.usda.fmsc.utilities.StringEx;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -87,9 +91,25 @@ import java.util.HashMap;
 
 import jp.wasabeef.recyclerview.animators.SlideInUpAnimator;
 
+import static android.support.v4.widget.DrawerLayout.LOCK_MODE_LOCKED_CLOSED;
+import static android.support.v4.widget.DrawerLayout.LOCK_MODE_LOCKED_OPEN;
+import static android.support.v4.widget.DrawerLayout.LOCK_MODE_UNDEFINED;
+import static android.support.v4.widget.DrawerLayout.LOCK_MODE_UNLOCKED;
+
 //todo Manage exessive amount of points in project as to not slow down load
 public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapFragment.MultiMapListener, GpsService.Listener,
         SensorEventListener, PolyMarkerMapRvAdapter.Listener {
+
+    //region Lock and Gravity Defs
+    @IntDef({LOCK_MODE_UNLOCKED, LOCK_MODE_LOCKED_CLOSED, LOCK_MODE_LOCKED_OPEN,
+            LOCK_MODE_UNDEFINED})
+    @Retention(RetentionPolicy.SOURCE)
+    private @interface LockMode {}
+
+    @IntDef({Gravity.LEFT, Gravity.RIGHT, GravityCompat.START, GravityCompat.END})
+    @Retention(RetentionPolicy.SOURCE)
+    private @interface EdgeGravity {}
+    //endregion
 
     private static final String FRAGMENT = "fragmet";
     private static final String MAP_TYPE = "mapType";
@@ -109,7 +129,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
     private GeoPosition lastPosition;
     private android.location.Location currentLocation, targetLocation;
 
-    protected DrawerLayout dlPolyDrawer;
+    private DrawerLayout baseMapDrawer;
 
     private SensorManager mSensorManager;
     private Sensor accelerometer, magnetometer;
@@ -262,14 +282,14 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
         btnToPoly = (Button)findViewById(R.id.mapNavBtnToPoly);
         btnToPoint = (Button)findViewById(R.id.mapNavBtnToPoint);
 
-
         tvNavDistFt = (TextView)findViewById(R.id.mapNavTvDistFeet);
         tvNavDistMt = (TextView)findViewById(R.id.mapNavTvDistMeters);
         tvNavAzTrue = (TextView)findViewById(R.id.mapNavTvAzTrue);
         tvNavAzMag = (TextView)findViewById(R.id.mapNavTvAzMag);
 
-        dlPolyDrawer = (DrawerLayout)findViewById(R.id.mapNavDrawer);
+        baseMapDrawer = (DrawerLayout)findViewById(R.id.mapDrawer);
     }
+
 
 
     private void startGMap() {
@@ -344,13 +364,37 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
                     actionBar.setDisplayShowTitleEnabled(false);
                 }
 
-                if (dlPolyDrawer != null) {
-                    drawerToggle = new ActionBarDrawerToggle(this, dlPolyDrawer, toolbar, R.string.str_open, R.string.str_close);
+                if (baseMapDrawer != null) {
+                    drawerToggle = new ActionBarDrawerToggle(this, baseMapDrawer, toolbar, R.string.str_open, R.string.str_close);
 
-                    dlPolyDrawer.addDrawerListener(drawerToggle);
+                    baseMapDrawer.addDrawerListener(drawerToggle);
                 }
             }
         }
+
+        if (getMapRightDrawerLayoutId() != 0) {
+            FrameLayout rightDrawer = (FrameLayout)findViewById(R.id.mapRightDrawer);
+            view = inflater.inflate(getMapRightDrawerLayoutId(), null);
+            if (view != null) {
+                rightDrawer.addView(view);
+            } else {
+                setMapDrawerLockMode(LOCK_MODE_LOCKED_CLOSED, GravityCompat.END);
+            }
+        } else {
+            setMapDrawerLockMode(LOCK_MODE_LOCKED_CLOSED, GravityCompat.END);
+        }
+    }
+
+    protected int getMapRightDrawerLayoutId() {
+        return 0;
+    }
+
+    protected void setMapDrawerLockMode(@LockMode int lockMode, @EdgeGravity int edgeGravity) {
+        baseMapDrawer.setDrawerLockMode(lockMode, edgeGravity);
+    }
+
+    protected boolean isMapDrawerOpen(@EdgeGravity int edgeGravity) {
+        return baseMapDrawer.isDrawerOpen(edgeGravity);
     }
 
     @Override
@@ -537,8 +581,8 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
 
     @Override
     public void onBackPressed() {
-        if (dlPolyDrawer.isDrawerOpen(GravityCompat.START)) {
-            dlPolyDrawer.closeDrawer(GravityCompat.START);
+        if (baseMapDrawer.isDrawerOpen(GravityCompat.START)) {
+            baseMapDrawer.closeDrawer(GravityCompat.START);
         } else {
             switch (slidingLayout.getPanelState()) {
                 case EXPANDED:

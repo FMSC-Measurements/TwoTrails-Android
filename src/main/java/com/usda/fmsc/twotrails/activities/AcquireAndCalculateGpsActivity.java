@@ -58,8 +58,6 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
 
     private EditText txtDop;
 
-    private DrawerLayout dlCalc;
-
     private GpsPoint _Point;
     private TtMetadata _Metadata;
     private ArrayList<TtNmeaBurst> _Bursts, _FilteredBursts;
@@ -121,8 +119,9 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
                 actionBar.setDisplayShowTitleEnabled(false);
             }
 
-            dlCalc = (DrawerLayout)findViewById(R.id.acqAndCalcNavDrawer);
-            dlCalc.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+            //dlCalc = (DrawerLayout)findViewById(R.id.acqAndCalcNavDrawer);
+            //dlCalc.setMapDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+            setMapDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, GravityCompat.END);
 
             Toolbar tbCalc = (Toolbar)findViewById(R.id.toolbarCalc);
             if (tbCalc != null)
@@ -298,6 +297,10 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
         }
     }
 
+    @Override
+    protected int getMapRightDrawerLayoutId() {
+        return R.layout.content_calc_drawer;
+    }
 
     @Override
     protected void onResume() {
@@ -595,9 +598,12 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
 
     @Override
     public void onBackPressed() {
-        if (dlCalc.isDrawerOpen(GravityCompat.END)) {
-            dlCalc.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-            dlPolyDrawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+        if (isMapDrawerOpen(GravityCompat.END)) {
+            //dlCalc.setMapDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+
+            setMapDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, GravityCompat.END);
+            setMapDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, GravityCompat.START);
+            //baseMapDrawer.setMapDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
         } else {
             super.onBackPressed();
         }
@@ -629,14 +635,14 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
         super.startLogging();
         btnLog.setText(R.string.aqr_log_pause);
 
-        //setMapGesturesEnabled(false);
+        setMapGesturesEnabled(false);
     }
 
     protected void stopLogging() {
         super.stopLogging();
         btnLog.setText(R.string.aqr_log);
 
-        //setMapGesturesEnabled(true);
+        setMapGesturesEnabled(true);
     }
 
     protected void setLoggedCount(int count) {
@@ -753,8 +759,8 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
             stopLogging();
         }
 
-        dlCalc.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_OPEN);
-        dlPolyDrawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        setMapDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_OPEN, GravityCompat.END);
+        setMapDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, GravityCompat.START);
 
         calculate();
     }
@@ -781,6 +787,6 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
 
     @Override
     protected MapTracking getMapTracking() {
-        return isLogging() ? MapTracking.NONE : MapTracking.FOLLOW;
+        return isLogging() ? MapTracking.FOLLOW : MapTracking.NONE;
     }
 }

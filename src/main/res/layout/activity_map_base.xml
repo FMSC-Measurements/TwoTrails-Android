@@ -5,7 +5,7 @@
               tools:context="com.usda.fmsc.twotrails.activities.base.BaseMapActivity">
 
     <android.support.v4.widget.DrawerLayout
-        android:id="@+id/mapNavDrawer"
+        android:id="@+id/mapDrawer"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -45,7 +45,7 @@
         </com.sothree.slidinguppanel.SlidingUpPanelLayout>
 
 
-        <!-- Drawer -->
+        <!-- Left Drawer -->
         <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
@@ -65,5 +65,14 @@
                 android:layout_alignParentBottom="true"
                 android:layout_below="@id/controlOpts"/>
         </RelativeLayout>
+
+        <!-- Right Drawer -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/mapRightDrawer"
+            android:layout_gravity="end"
+            android:layout_marginEnd="-64dp"
+            android:layout_marginRight="-64dp"/>
     </android.support.v4.widget.DrawerLayout>
 </LinearLayout>

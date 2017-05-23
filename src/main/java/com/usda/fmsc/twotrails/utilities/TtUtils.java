@@ -1128,21 +1128,14 @@ public class TtUtils {
     }
 
     private static TtImage getImageFromFile(String filePath, String pointCN) {
-        String name = FileUtils.getFileNameWoType(filePath);
-        ExifInterface exifInterface;
-        String info;
-
-        PictureType type;
 
         if (FileUtils.fileExists(filePath)) {
-
-
             DateTime time = null;
             Integer width, height;
             try {
-                exifInterface = new ExifInterface(filePath);
+                ExifInterface exifInterface = new ExifInterface(filePath);
 
-                info = exifInterface.getAttribute(ExifInterface.TAG_DATETIME);
+                String info = exifInterface.getAttribute(ExifInterface.TAG_DATETIME);
 
                 if (info != null) {
                     try {
@@ -1152,7 +1145,7 @@ public class TtUtils {
                     }
                 }
 
-                type = PictureType.Regular;
+                PictureType type = PictureType.Regular;
                 info = exifInterface.getAttribute(ExifInterface.TAG_IMAGE_WIDTH);
                 if (info != null) {
                     width = ParseEx.parseInteger(info);
@@ -1172,12 +1165,13 @@ public class TtUtils {
                 if (time == null)
                     time = new DateTime(new File(filePath).lastModified());
 
+                String name = FileUtils.getFileNameWoType(filePath);
+
                 if (type == PictureType.Panorama) {
                     return new TtPanorama(name, filePath, time, pointCN, true);
                 } else {
                     return new TtImage(name, filePath, time, pointCN, true);
                 }
-
             } catch (IOException e) {
                 //
             }
@@ -1266,6 +1260,7 @@ public class TtUtils {
         return exported ? filename : null;
     }
     //endregion
+
 
     public static class UI {
 
