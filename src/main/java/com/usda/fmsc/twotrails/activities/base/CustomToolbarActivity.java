@@ -69,7 +69,7 @@ public class CustomToolbarActivity extends AppCompatActivity {
         if (toolbar != null) {
             setSupportActionBar(toolbar);
 
-            if (Build.VERSION.SDK_INT  < Build.VERSION_CODES.LOLLIPOP) {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
                 AndroidUtils.UI.setHomeIndicatorIcon(this, R.drawable.ic_arrow_back_white_24dp);
             }
 

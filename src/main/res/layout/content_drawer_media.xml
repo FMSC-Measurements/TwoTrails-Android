@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white_1000">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbarMedia"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/toolbar_height"
+            android:background="@color/primary"
+            android:theme="@style/ToolbarTheme"
+            app:popupTheme="@style/PopupTheme">
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:orientation="horizontal"
+                android:paddingEnd="8dp"
+                android:paddingRight="8dp"
+                android:paddingLeft="0dp"
+                android:paddingStart="0dp">
+
+                <com.usda.fmsc.android.widget.PopupMenuButton
+                    android:id="@+id/pmdMenu"
+                    android:layout_height="50dp"
+                    android:layout_width="56dp"
+                    android:src="@drawable/ic_action_overflow_white"
+                    android:background="@android:color/transparent"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="10dp"
+                    android:paddingStart="8dp"
+                    android:paddingLeft="8dp"
+                    android:paddingEnd="10dp"
+                    android:paddingRight="10dp"
+                    app:menuRes="@menu/ctx_menu_pmd"/>
+
+                <ImageView
+                    android:id="@+id/pmdIvFullscreen"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:padding="8dp"
+                    android:src="@drawable/ic_fullscreen_white_36dp"
+                    android:clickable="true"
+                    android:contentDescription="@string/str_fullscreen"
+                    android:layout_toLeftOf="@id/pmdMenu"
+                    android:layout_toStartOf="@id/pmdMenu"
+                    android:layout_centerVertical="true"/>
+            </RelativeLayout>
+        </android.support.v7.widget.Toolbar>
+
+        <android.support.v4.view.ViewPager
+            android:id="@+id/pmdViewPager"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_alignParentBottom="true"
+            android:layout_below="@id/toolbarMedia">
+
+        </android.support.v4.view.ViewPager>
+    </RelativeLayout>
+
+    <RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/pmdScroller"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:background="@color/background_card">
+
+        <View
+            android:id="@+id/pmdHeaderShadow"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_alignParentTop="true"
+            android:background="@color/grey_400"
+            style="@style/ToolbarElevation1"/>
+
+        <com.usda.fmsc.android.widget.RecyclerViewEx
+            android:id="@+id/pmdRvMedia"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentTop="true"/>
+    </RelativeLayout>
+</LinearLayout>

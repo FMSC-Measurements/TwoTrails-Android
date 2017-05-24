@@ -85,22 +85,5 @@
             android:layout_above="@id/lay1">
 
         </android.support.v4.view.ViewPager>
-
-        <!--<ImageView-->
-            <!--android:id="@+id/pmdIvFullscreen"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:src="@drawable/ic_fullscreen_black_36dp"-->
-            <!--android:paddingTop="8dp"-->
-            <!--android:paddingBottom="8dp"-->
-            <!--android:paddingStart="8dp"-->
-            <!--android:paddingLeft="8dp"-->
-            <!--android:paddingEnd="11dp"-->
-            <!--android:paddingRight="11dp"-->
-            <!--android:clickable="true"-->
-            <!--android:layout_alignParentTop="true"-->
-            <!--android:layout_alignParentEnd="true"-->
-            <!--android:layout_alignParentRight="true"-->
-            <!--android:contentDescription="@string/str_fullscreen"/>-->
     </RelativeLayout>
 </RelativeLayout>

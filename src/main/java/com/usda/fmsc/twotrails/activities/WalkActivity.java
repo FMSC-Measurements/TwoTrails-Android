@@ -47,6 +47,7 @@ import java.util.List;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.utilities.StringEx;
 
+//TODO add right drawer info for: graph- distance traveled, elevation gain, time, acc, dropped instances (due to distance); maybe battery drain info
 public class WalkActivity extends AcquireGpsMapActivity {
     private MenuItem miRenameGroup, miWalking;
     private FloatingActionButton fabWalk;

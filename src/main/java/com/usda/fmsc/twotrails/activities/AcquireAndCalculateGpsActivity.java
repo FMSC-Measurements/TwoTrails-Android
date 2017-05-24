@@ -49,7 +49,7 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
 
     private Button btnCreate;
 
-    private TextView tvLogged, tvRecv, tvUtmX1, tvUtmX2,tvUtmX3,tvUtmXF, tvUtmY1, tvUtmY2,tvUtmY3,tvUtmYF,
+    private TextView tvLogged, tvRecv, tvUtmX1, tvUtmX2,tvUtmX3,tvUtmXF, tvUtmY1, tvUtmY2, tvUtmY3, tvUtmYF,
             tvNssda1, tvNssda2, tvNssda3, tvNssdaF;
 
     private CheckBox chkG1, chkG2, chkG3;
@@ -119,8 +119,6 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
                 actionBar.setDisplayShowTitleEnabled(false);
             }
 
-            //dlCalc = (DrawerLayout)findViewById(R.id.acqAndCalcNavDrawer);
-            //dlCalc.setMapDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
             setMapDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, GravityCompat.END);
 
             Toolbar tbCalc = (Toolbar)findViewById(R.id.toolbarCalc);
@@ -299,7 +297,7 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
 
     @Override
     protected int getMapRightDrawerLayoutId() {
-        return R.layout.content_calc_drawer;
+        return R.layout.content_drawer_calc;
     }
 
     @Override
@@ -599,11 +597,8 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
     @Override
     public void onBackPressed() {
         if (isMapDrawerOpen(GravityCompat.END)) {
-            //dlCalc.setMapDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-
             setMapDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, GravityCompat.END);
             setMapDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, GravityCompat.START);
-            //baseMapDrawer.setMapDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
         } else {
             super.onBackPressed();
         }
