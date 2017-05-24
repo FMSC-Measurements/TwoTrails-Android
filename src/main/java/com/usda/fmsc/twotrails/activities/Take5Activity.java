@@ -273,6 +273,11 @@ public class Take5Activity extends AcquireGpsMapActivity {
     }
 
     @Override
+    protected int getMapRightDrawerLayoutId() {
+        return R.layout.content_drawer_media;
+    }
+
+    @Override
     protected void getSettings() {
         super.getSettings();
 

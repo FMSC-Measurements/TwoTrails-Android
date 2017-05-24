@@ -59,13 +59,14 @@ public class Global {
     private static MediaAccessLayer _MAL;
 
     private static Context _ApplicationContext;
+    //TODO refactor the need for static current and main activities. maybe make poly adjuster and mapdownloader as a service
     private static MainActivity _MainActivity;
     private static Activity _CurrentActivity;
 
     private static TtMetadata _DefaultMeta;
     private static TtGroup _MainGroup;
 
-    protected static TtBluetoothManager bluetoothManager;
+    private static TtBluetoothManager bluetoothManager;
 
 
     private static GpsService.GpsBinder gpsBinder;
@@ -241,7 +242,7 @@ public class Global {
     public static String getDocumentsDir() {
         File dir;
 
-        if (Build.VERSION.SDK_INT < 19) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
             dir = Environment.getExternalStorageDirectory();
         } else {
             dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
