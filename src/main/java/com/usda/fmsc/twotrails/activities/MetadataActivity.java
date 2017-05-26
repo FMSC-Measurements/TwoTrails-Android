@@ -514,7 +514,7 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
 
                                 if (points.size() > 0) {
                                     for (int i = 0; i < points.size(); i++) {
-                                        points.set(i, TtUtils.reCalculateGps(points.get(i), zone, Global.getDAL(), null));
+                                        points.set(i, TtUtils.Points.reCalculateGps(points.get(i), zone, Global.getDAL(), null));
 
                                         progressDialog.setProgress(i);
                                     }

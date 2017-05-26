@@ -414,7 +414,7 @@ public class ArcGISTools {
 
     public static void getLayerFromUrl(final String url, Context context, final IGetArcMapLayerListener listener) {
         if (listener == null)
-            throw new RuntimeException("Listener is null");
+            throw new RuntimeException("PointMediaListener is null");
 
         String jUrl = url;
 

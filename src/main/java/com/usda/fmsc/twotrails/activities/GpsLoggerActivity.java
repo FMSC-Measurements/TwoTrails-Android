@@ -248,7 +248,7 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
 
 
 
-    //region GpsService Listener
+    //region GpsService PointMediaListener
     @Override
     public void gpsError(GpsService.GpsError error) {
 

@@ -16,14 +16,15 @@ import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.listeners.SimpleTextWatcher;
 import com.usda.fmsc.android.utilities.Clipboard;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.activities.PointsActivity;
+import com.usda.fmsc.twotrails.activities.base.PointMediaController;
+import com.usda.fmsc.twotrails.activities.base.PointMediaListener;
 import com.usda.fmsc.twotrails.objects.media.TtMedia;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
 
-public abstract class BaseMediaFragment extends Fragment implements PointsActivity.Listener {
+public abstract class BaseMediaFragment extends Fragment implements PointMediaListener {
     protected static final String MEDIA = "Media";
 
-    private PointsActivity activity;
+    private PointMediaController controller;
     private TtMedia _Media;
 
     private EditText txtName, txtCmt;
@@ -39,8 +40,8 @@ public abstract class BaseMediaFragment extends Fragment implements PointsActivi
         if (bundle != null && bundle.containsKey(MEDIA)) {
             _Media = bundle.getParcelable(MEDIA);
 
-            if (activity != null && _Media != null) {
-                activity.register(_Media.getCN(), this);
+            if (controller != null && _Media != null) {
+                controller.register(_Media.getCN(), this);
             }
         }
     }
@@ -61,7 +62,7 @@ public abstract class BaseMediaFragment extends Fragment implements PointsActivi
             public void afterTextChanged(Editable s) {
                 if (!settingView) {
                     _Media.setName(s.toString());
-                    getPointsActivity().updateMedia(_Media);
+                    getPointMediaController().updateMedia(_Media);
                 }
             }
         });
@@ -71,7 +72,7 @@ public abstract class BaseMediaFragment extends Fragment implements PointsActivi
             public void afterTextChanged(Editable s) {
                 if (!settingView) {
                     _Media.setComment(s.toString());
-                    getPointsActivity().updateMedia(_Media);
+                    getPointMediaController().updateMedia(_Media);
                 }
             }
         });
@@ -97,31 +98,31 @@ public abstract class BaseMediaFragment extends Fragment implements PointsActivi
     public abstract View onCreateViewEx(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState);
 
     @Override
-    public void onAttach(Context activity) {
-        super.onAttach(activity);
+    public void onAttach(Context context) {
+        super.onAttach(context);
         try {
-            this.activity = (PointsActivity) activity;
+            this.controller = (PointMediaController) context;
         } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement Points Listener");
+            throw new ClassCastException(context.toString()
+                    + " must implement MediaController");
         }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        if (activity != null && _Media != null) {
-            activity.unregister(_Media.getCN());
-            activity = null;
+        if (controller != null && _Media != null) {
+            controller.unregister(_Media.getCN());
+            controller = null;
         }
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (activity != null && _Media != null) {
-            activity.unregister(_Media.getCN());
-            activity = null;
+        if (controller != null && _Media != null) {
+            controller.unregister(_Media.getCN());
+            controller = null;
         }
     }
 
@@ -156,7 +157,7 @@ public abstract class BaseMediaFragment extends Fragment implements PointsActivi
         return _Media;
     }
 
-    protected PointsActivity getPointsActivity() {
-        return activity;
+    public PointMediaController getPointMediaController() {
+        return controller;
     }
 }

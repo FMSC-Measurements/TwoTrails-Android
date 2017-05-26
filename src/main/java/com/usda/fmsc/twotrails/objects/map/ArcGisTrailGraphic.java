@@ -87,7 +87,7 @@ public class ArcGisTrailGraphic implements ITrailGraphic, IMarkerDataGraphic {
     private GeoPosition addPoint(TtPoint point, HashMap<String, TtMetadata> meta) {
         TtMetadata metadata = meta.get(point.getMetadataCN());
 
-        GeoPosition pos = TtUtils.getLatLonFromPoint(point, false, metadata);
+        GeoPosition pos = TtUtils.Points.getLatLonFromPoint(point, false, metadata);
         Point posLL = ArcGISTools.latLngToMapSpatial(pos.getLatitudeSignedDecimal(), pos.getLongitudeSignedDecimal(), map);
         Graphic mk = new Graphic(posLL, markerOpts);
 

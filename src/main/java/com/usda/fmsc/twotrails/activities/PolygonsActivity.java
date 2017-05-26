@@ -517,7 +517,7 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
                                     public void run() {
                                         int zone = metadata.get(Consts.EmptyGuid).getZone();
 
-                                        drawPoints.put(poly.getCN(), TtUtils.generateStaticPolyPoints(points, metadata, zone, (int)(width * 0.9)));
+                                        drawPoints.put(poly.getCN(), TtUtils.UI.generateStaticPolyPoints(points, metadata, zone, (int)(width * 0.9)));
                                         hasDrawPoints.put(poly.getCN(), true);
 
                                         onPolygonUpdate(poly);

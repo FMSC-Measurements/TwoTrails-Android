@@ -2,12 +2,24 @@ package com.usda.fmsc.twotrails.activities;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.view.ViewPager;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,19 +27,34 @@ import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.usda.fmsc.android.AndroidUtils;
+import com.usda.fmsc.android.adapters.SelectableAdapterEx;
+import com.usda.fmsc.android.dialogs.DontAskAgainDialog;
+import com.usda.fmsc.android.listeners.ComplexOnPageChangeListener;
+import com.usda.fmsc.android.utilities.BitmapManager;
 import com.usda.fmsc.android.utilities.PostDelayHandler;
+import com.usda.fmsc.android.widget.PopupMenuButton;
 import com.usda.fmsc.android.widget.SheetLayoutEx;
 import com.usda.fmsc.android.widget.layoutmanagers.LinearLayoutManagerWithSmoothScroller;
 import com.usda.fmsc.android.widget.RecyclerViewEx;
 import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.twotrails.activities.base.AcquireGpsMapActivity;
+import com.usda.fmsc.twotrails.activities.base.PointMediaController;
+import com.usda.fmsc.twotrails.activities.base.PointMediaListener;
+import com.usda.fmsc.twotrails.adapters.MediaPagerAdapter;
+import com.usda.fmsc.twotrails.adapters.MediaRvAdapter;
+import com.usda.fmsc.twotrails.data.MediaAccessLayer;
+import com.usda.fmsc.twotrails.data.TwoTrailsMediaSchema;
+import com.usda.fmsc.twotrails.objects.media.TtImage;
+import com.usda.fmsc.twotrails.objects.media.TtMedia;
 import com.usda.fmsc.twotrails.units.MapTracking;
+import com.usda.fmsc.twotrails.units.MediaType;
 import com.usda.fmsc.twotrails.units.OpType;
 import com.usda.fmsc.utilities.StringEx;
 import com.usda.fmsc.twotrails.adapters.Take5PointsEditRvAdapter;
@@ -46,15 +73,22 @@ import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.Semaphore;
 
 import com.usda.fmsc.geospatial.GeoPosition;
 import com.usda.fmsc.geospatial.GeoTools;
 
+import jp.wasabeef.recyclerview.animators.FadeInAnimator;
 import jp.wasabeef.recyclerview.animators.SlideInUpAnimator;
 
-//todo add ability to add media
-public class Take5Activity extends AcquireGpsMapActivity {
+public class Take5Activity extends AcquireGpsMapActivity implements PointMediaController {
+    private HashMap<String, PointMediaListener> listeners = new HashMap<>();
+
     private RecyclerViewEx rvPoints;
     private Take5PointsEditRvAdapter t5pAdapter;
     private LinearLayoutManagerWithSmoothScroller linearLayoutManager;
@@ -75,7 +109,152 @@ public class Take5Activity extends AcquireGpsMapActivity {
 
     private int increment, takeAmount, nmeaCount = 0;
     private boolean saved = true, updated, onBnd = true, createSSVisible = true, cancelVisible, commitSSVisible,
-            ignoreScroll, useRing, useVib, mapViewMode, killAcquire;
+            ignoreScroll, useRing, useVib, mapViewMode, killAcquire, _Locked;
+
+    //region Media
+    private TtMedia _CurrentMedia, _BackupMedia;
+
+    private int bitmapHeight;
+    private boolean mediaLoaded, ignoreMediaChange, _MediaUpdated;
+    private int mediaCount, mediaSelectionIndex;
+
+    private Uri captureImageUri;
+
+    private Semaphore semaphore = new Semaphore(1);
+    private PostDelayHandler mediaLoaderDelayedHandler = new PostDelayHandler(500);
+
+    private ViewPager mediaViewPager;
+    private MediaPagerAdapter mediaPagerAdapter;
+    private RecyclerViewEx rvMedia;
+    private MediaRvAdapter rvMediaAdapter;
+
+    private Toolbar toolbarMedia;
+    private PopupMenuButton pmbMedia;
+
+    private BitmapManager bitmapManager;
+    private BitmapManager.ScaleOptions scaleOptions = new BitmapManager.ScaleOptions();
+
+    private ComplexOnPageChangeListener onMediaPageChangeListener = new ComplexOnPageChangeListener() {
+        @Override
+        public void onPageSelected(int position) {
+            super.onPageSelected(position);
+
+            if (!ignoreMediaChange && rvMediaAdapter.getItemCountEx() > 0) {
+                saveMedia();
+
+                setCurrentMedia(rvMediaAdapter.getItem(position));
+                rvMediaAdapter.selectItem(position);
+                rvMedia.smoothScrollToPosition(position);
+                //onLockChange();
+            }
+            ignoreMediaChange = false;
+        }
+    };
+    
+    private SelectableAdapterEx.Listener<TtMedia> mediaListener = new SelectableAdapterEx.Listener<TtMedia>() {
+        @Override
+        public void onItemSelected(TtMedia media, int adapterPosition, int layoutPosition) {
+            if (mediaLoaded) {
+                if (!_CurrentMedia.getCN().equals(media.getCN())) {
+                    ignoreMediaChange = true;
+                }
+
+                saveMedia();
+
+                setCurrentMedia(media);
+                
+                mediaViewPager.setCurrentItem(adapterPosition, true);
+            }
+        }
+    };
+    
+    //todo edit
+    private PopupMenu.OnMenuItemClickListener menuPopupListener = new PopupMenu.OnMenuItemClickListener() {
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+            switch (item.getItemId()) {
+                case R.id.ctx_menu_add: {
+                    Intent intent = new Intent(Intent.ACTION_PICK);
+
+                    if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+                    }
+
+                    intent.setType("image/*");
+                    startActivityForResult(intent, Consts.Codes.Requests.ADD_IMAGES);
+                    break;
+                }
+                case R.id.ctx_menu_capture: {
+                    if (Global.Settings.DeviceSettings.getUseTtCameraAsk()) {
+                        DontAskAgainDialog dialog = new DontAskAgainDialog(Take5Activity.this,
+                                Global.Settings.DeviceSettings.USE_TTCAMERA_ASK,
+                                Global.Settings.DeviceSettings.USE_TTCAMERA,
+                                Global.Settings.PreferenceHelper.getPrefs());
+
+                        dialog.setMessage(Take5Activity.this.getString(R.string.points_camera_diag))
+                                .setPositiveButton("TwoTrails", new DontAskAgainDialog.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i, Object value) {
+                                        captureImageUri = TtUtils.Media.captureImage(Take5Activity.this, (int)value, _CurrentPoint);
+                                    }
+                                }, 2)
+                                .setNegativeButton("Android", new DontAskAgainDialog.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i, Object value) {
+                                        captureImageUri = TtUtils.Media.captureImage(Take5Activity.this, (int)value, _CurrentPoint);
+                                    }
+                                }, 1)
+                                .setNeutralButton(getString(R.string.str_cancel), null, 0)
+                                .show();
+                    } else {
+                        captureImageUri = TtUtils.Media.captureImage(Take5Activity.this, Global.Settings.DeviceSettings.getUseTtCamera(), _CurrentPoint);
+                    }
+                    break;
+                }
+                case R.id.ctx_menu_reset: {
+                    resetMedia();
+                    break;
+                }
+                case R.id.ctx_menu_delete: {
+                    if (_CurrentMedia != null) {
+                        new AlertDialog.Builder(Take5Activity.this)
+                                .setMessage(String.format(
+                                        "Would you like to delete %s '%s' from storage or only remove its association with the point?",
+                                        _CurrentMedia.getMediaType().toString().toLowerCase(),
+                                        _CurrentMedia.getName()))
+                                .setPositiveButton(R.string.str_remove, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        removeMedia(_CurrentMedia, false);
+                                    }
+                                })
+                                .setNegativeButton(R.string.str_delete, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        new AlertDialog.Builder(Take5Activity.this)
+                                                .setMessage(String.format("You are about to delete file '%s'.", _CurrentMedia.getFilePath()))
+                                                .setPositiveButton(R.string.str_delete, new DialogInterface.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(DialogInterface dialog, int which) {
+                                                        removeMedia(_CurrentMedia, true);
+                                                    }
+                                                })
+                                                .setNeutralButton(R.string.str_cancel, null)
+                                                .show();
+                                    }
+                                })
+                                .setNeutralButton(R.string.str_cancel, null)
+                                .show();
+                    }
+                    break;
+                }
+            }
+
+            return false;
+        }
+    };
+    //endregion
+
 
     private PostDelayHandler pdhHideProgress = new PostDelayHandler(500);
 
@@ -184,7 +363,7 @@ public class Take5Activity extends AcquireGpsMapActivity {
     };
 
 
-
+    //region Activity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_take5);
@@ -237,6 +416,17 @@ public class Take5Activity extends AcquireGpsMapActivity {
                 return;
             }
 
+            addMapDrawerListener(new DrawerLayout.SimpleDrawerListener() {
+                @Override
+                public void onDrawerOpened(View drawerView) {
+                    if (isMapDrawerOpen(GravityCompat.END)) {
+                        setMapDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_OPEN, GravityCompat.END);
+                    }
+                }
+            });
+
+            bitmapManager = new BitmapManager(getResources());
+
             ActionBar actionBar = getSupportActionBar();
             if (actionBar != null) {
                 actionBar.setTitle(_Polygon.getName());
@@ -269,7 +459,83 @@ public class Take5Activity extends AcquireGpsMapActivity {
 
             progLay = (RelativeLayout)findViewById(R.id.progressLayout);
             tvProg = (TextView)findViewById(R.id.take5ProgressText);
+
+
+            //region Media Layout
+            toolbarMedia = (Toolbar)findViewById(R.id.toolbarMedia);
+            toolbarMedia.setNavigationIcon(AndroidUtils.UI.getDrawable(Take5Activity.this, R.drawable.ic_arrow_back_white_24dp));
+            toolbarMedia.setNavigationOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    setMapDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, GravityCompat.END);
+                    closeMapDrawer(GravityCompat.END);
+                }
+            });
+
+            pmbMedia = (PopupMenuButton)findViewById(R.id.pmdMenu);
+            if (pmbMedia != null) {
+                pmbMedia.setListener(menuPopupListener);
+
+                pmbMedia.setItemEnabled(R.id.ctx_menu_reset, false);
+                pmbMedia.setItemEnabled(R.id.ctx_menu_delete, false);
+                pmbMedia.setItemEnabled(R.id.ctx_menu_capture, false);
+                pmbMedia.setItemEnabled(R.id.ctx_menu_add, false);
+            }
+            
+            rvMedia = (RecyclerViewEx) findViewById(R.id.pmdRvMedia);
+            if (rvMedia != null) {
+                rvMedia.setViewHasFooter(true);
+                rvMedia.setLayoutManager(new LinearLayoutManagerWithSmoothScroller(this, LinearLayoutManager.HORIZONTAL, false));
+                rvMedia.setHasFixedSize(true);
+                rvMedia.setItemAnimator(new FadeInAnimator());
+            }
+
+            mediaViewPager = (ViewPager)findViewById(R.id.pmdViewPager);
+            if (mediaViewPager != null) {
+                rvMediaAdapter = new MediaRvAdapter(Take5Activity.this, Collections.synchronizedList(new ArrayList<TtMedia>()), mediaListener,
+                        AndroidUtils.Convert.dpToPx(Take5Activity.this, 90), bitmapManager);
+
+                rvMedia.setAdapter(rvMediaAdapter);
+
+                mediaPagerAdapter = new MediaPagerAdapter(getSupportFragmentManager(), rvMediaAdapter);
+                mediaViewPager.setAdapter(mediaPagerAdapter);
+                mediaViewPager.addOnPageChangeListener(onMediaPageChangeListener);
+
+                rvMediaAdapter.setListener(new MediaRvAdapter.MediaChangedListener() {
+                    @Override
+                    public void onNotifyDataSetChanged() {
+                        mediaPagerAdapter.notifyDataSetChanged();
+                    }
+                });
+
+                loadMedia(_CurrentPoint, false);
+            }
+
+            ImageView ivFullscreen = (ImageView)findViewById(R.id.pmdIvFullscreen);
+            if (ivFullscreen != null) {
+                ivFullscreen.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (_CurrentMedia != null && _CurrentMedia.getMediaType() == MediaType.Picture) {
+                            TtUtils.Media.openInImageViewer(Take5Activity.this, _CurrentMedia.getFilePath());
+                        }
+                    }
+                });
+
+                AndroidUtils.UI.setContentDescToast(ivFullscreen, "View in Fullscreen");
+            }
+            //endregion
         }
+    }
+
+    private int getBitmapHeight() {
+        if (bitmapHeight == 0) {
+            bitmapHeight = mediaViewPager.getHeight();
+            bitmapManager.setImageLimitSize(bitmapHeight);
+            scaleOptions.setScaleMode(BitmapManager.ScaleMode.Max);
+            scaleOptions.setSize(bitmapHeight);
+        }
+        return bitmapHeight;
     }
 
     @Override
@@ -384,9 +650,64 @@ public class Take5Activity extends AcquireGpsMapActivity {
                 getSettings();
                 break;
             }
+            case Consts.Codes.Requests.ADD_IMAGES: {
+                if (data != null) {
+                    addImages(TtUtils.Media.getPicturesFromImageIntent(Take5Activity.this, data, _CurrentPoint.getCN()));
+                }
+                break;
+            }
+            case Consts.Codes.Activites.TTCAMERA: {
+                if (data != null) {
+                    TtImage image = TtUtils.Media.getPictureFromTtCameraIntent(data);
+
+                    if (image == null) {
+                        Toast.makeText(Take5Activity.this, "Unable to add Image", Toast.LENGTH_LONG).show();
+                    } else {
+                        addImage(image);
+                    }
+                }
+                break;
+            }
+            case Consts.Codes.Requests.CAPTURE_IMAGE: {
+                if (resultCode != RESULT_CANCELED) {
+                    TtImage image = TtUtils.Media.getPictureFromUri(captureImageUri.getPath(), _CurrentPoint.getCN());
+
+                    if (image == null) {
+                        Toast.makeText(Take5Activity.this, "Unable to add Image", Toast.LENGTH_LONG).show();
+                    } else {
+                        addImage(image);
+                    }
+                }
+                break;
+            }
         }
 
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == Consts.Codes.Requests.CAMERA && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            Intent intent = new Intent(Take5Activity.this, TtCameraActivity.class);
+
+            if (_CurrentPoint != null) {
+                intent.putExtra(Consts.Codes.Data.POINT_CN, _CurrentPoint.getCN());
+            }
+
+            startActivityForResult(intent, Consts.Codes.Activites.TTCAMERA);
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (isMapDrawerOpen(GravityCompat.END)) {
+            setMapDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, GravityCompat.END);
+            closeMapDrawer(GravityCompat.END);
+        } else {
+            super.onBackPressed();
+        }
     }
 
     @Override
@@ -434,7 +755,9 @@ public class Take5Activity extends AcquireGpsMapActivity {
 
         setMapGesturesEnabled(mapViewMode);
     }
+    //endregion
 
+    //region Update/Save/Validate/Setup Points
     public void updatePoint(TtPoint point) {
         if (_CurrentPoint == point) {
             updated = true;
@@ -461,6 +784,8 @@ public class Take5Activity extends AcquireGpsMapActivity {
                 Global.getDAL().updatePoint(point, point);
             }
         }
+
+        updateMediaContextMenuLocked();
 
         return true;
     }
@@ -607,7 +932,7 @@ public class Take5Activity extends AcquireGpsMapActivity {
             Toast.makeText(this, "Point failed to save", Toast.LENGTH_SHORT).show();
         }
     }
-
+    //endregion
 
     @Override
     protected void startLogging() {
@@ -676,7 +1001,7 @@ public class Take5Activity extends AcquireGpsMapActivity {
         }
     }
 
-
+    //region Hide/Show FABs
     private void showCancel() {
         if (!cancelVisible) {
             Animation a = AnimationUtils.loadAnimation(this, R.anim.push_right_in);
@@ -850,6 +1175,7 @@ public class Take5Activity extends AcquireGpsMapActivity {
             createSSVisible = false;
         }
     }
+    //endregion
 
     //region GPS
     @Override
@@ -861,7 +1187,7 @@ public class Take5Activity extends AcquireGpsMapActivity {
 
             _Bursts.add(burst);
 
-            if (TtUtils.isUsableNmeaBurst(burst, options)) {
+            if (TtUtils.NMEA.isBurstUsable(burst, options)) {
                 burst.setUsed(true);
                 _UsedBursts.add(burst);
 
@@ -932,7 +1258,292 @@ public class Take5Activity extends AcquireGpsMapActivity {
     }
     //endregion
 
+    //region Media
+    private void saveMedia() {
+        if (_MediaUpdated && _CurrentMedia != null) {
+            if (!Global.getMAL().updateMedia(_CurrentMedia)) {
+                Toast.makeText(Take5Activity.this,
+                        String.format("Unable to save %s", _CurrentMedia.getMediaType().toString()),
+                        Toast.LENGTH_LONG
+                ).show();
+            } else {
+                setMediaUpdated(false);
+            }
+        }
+    }
 
+    private void removeMedia(TtMedia media, boolean delete) {
+        List<TtMedia> mediaList = rvMediaAdapter.getItems();
+        int index = mediaList.indexOf(media);
+
+        Global.getMAL().deleteMedia(media);
+
+        if (delete) {
+            File file = new File(media.getFilePath());
+            file.deleteOnExit();
+        }
+
+        mediaCount--;
+        TtMedia changeTo = null;
+
+        if (index > INVALID_INDEX) {
+            if (index > 0) {
+                if (index < mediaList.size() - 1) {
+                    changeTo = mediaList.get(index + 1);
+                } else {
+                    changeTo = mediaList.get(--index);
+                }
+            } else if (mediaList.size() > 1) {
+                changeTo = mediaList.get(1);
+            } else {
+                setMediaTitle(null);
+            }
+        }
+
+        rvMediaAdapter.remove(media);
+        mediaViewPager.setCurrentItem(index);
+        setCurrentMedia(changeTo);
+    }
+
+    private void addImage(final TtImage picture) {
+        if (picture != null) {
+            if (Global.getMAL().insertMedia(picture)) {
+                mediaSelectionIndex = TtUtils.Media.getMediaIndex(picture, rvMediaAdapter.getItems());
+                loadImageToList(picture);
+            } else {
+                Toast.makeText(Take5Activity.this, "Error saving picture", Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+    private void addImages(final List<TtImage> pictures) {
+        if (pictures.size() > 0) {
+            int error = 0;
+
+            Collections.sort(pictures, TtUtils.Media.PictureTimeComparator);
+
+            for (int i = 0; i <pictures.size(); i++) {
+                if (!Global.getMAL().insertMedia(pictures.get(i))) {
+                    pictures.remove(i--);
+                    error++;
+                }
+            }
+
+            mediaSelectionIndex = TtUtils.Media.getMediaIndex(pictures.get(0), rvMediaAdapter.getItems());
+
+            for (TtImage p : pictures) {
+                loadImageToList(p);
+            }
+
+            if (error > 0) {
+                Toast.makeText(Take5Activity.this, String.format("Error saving %d pictures", pictures.size()), Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+
+    private void resetMedia() {
+        if (_MediaUpdated) {
+            new AlertDialog.Builder(this)
+                    .setTitle(String.format("Reset Media %s", _CurrentMedia.getName()))
+                    .setMessage(String.format("This will reset this %s back to its original values.",
+                            _CurrentMedia.getMediaType().toString().toLowerCase()))
+                    .setPositiveButton("Reset", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            _CurrentMedia = TtUtils.Media.cloneMedia(_BackupMedia);
+                            setMediaUpdated(false);
+                        }
+                    })
+                    .setNeutralButton(getString(R.string.str_cancel), null)
+                    .show();
+        }
+    }
+
+    private void loadMedia(final TtPoint point, final boolean loadPoints) {
+        if (rvMediaAdapter != null) {
+            mediaViewPager.removeOnPageChangeListener(onMediaPageChangeListener);
+
+            rvMediaAdapter.clear();
+
+            mediaLoaded = false;
+
+            if (point != null) {
+                if (Global.hasMAL()) {
+                    if (loadPoints) {
+                        mediaCount = 0;
+                        mediaSelectionIndex = INVALID_INDEX;
+
+                        ArrayList<TtImage> pictures = Global.getMAL().getImagesInPoint(point.getCN());
+
+                        Collections.sort(pictures, TtUtils.Media.PictureTimeComparator);
+                        for (final TtImage p : pictures) {
+                            loadImageToList(p);
+                        }
+
+                        if (mediaCount > 0)
+                            mediaSelectionIndex = 0;
+                    } else {
+                        mediaCount = Global.getMAL().getItemsCount(
+                                TwoTrailsMediaSchema.Media.TableName,
+                                TwoTrailsMediaSchema.Media.PointCN,
+                                point.getCN());
+                    }
+                } else {
+                    mediaCount = 0;
+                }
+            }
+
+            setCurrentMedia(null);
+
+            mediaViewPager.addOnPageChangeListener(onMediaPageChangeListener);
+        }
+    }
+
+    private void loadImageToList(final TtImage picture) {
+        mediaCount++;
+
+        Global.getMAL().loadImage(picture, new MediaAccessLayer.SimpleMalListener() {
+            @Override
+            public void imageLoaded(TtImage image, View view, Bitmap bitmap) {
+                addImageToList(picture, true, bitmap);
+            }
+
+            @Override
+            public void loadingFailed(TtImage image, View view, String reason) {
+                addInvalidImagesToList(picture);
+            }
+        });
+    }
+
+    private void addInvalidImagesToList(final TtImage picture) {
+        Bitmap bitmap = BitmapFactory.decodeResource(Take5Activity.this.getResources(), R.drawable.ic_error_outline_black_48dp);
+        if (bitmap != null) {
+            addImageToList(picture, false, bitmap);
+        }
+    }
+
+    private void addImageToList(final TtImage picture, boolean isValid, final Bitmap loadedImage) {
+        if (picture.getPointCN().equals(_CurrentPoint.getCN())) {
+            if (isValid) {
+                bitmapManager.put(picture.getFilePath(), picture.getFilePath(), AndroidUtils.UI.scaleMinBitmap(loadedImage, getBitmapHeight(), false), scaleOptions);
+            } else {
+                bitmapManager.put(picture.getFilePath(), Integer.toString(R.drawable.ic_error_outline_black_48dp), AndroidUtils.UI.scaleMinBitmap(loadedImage, getBitmapHeight(), false), scaleOptions, true);
+            }
+
+            try {
+                semaphore.acquire();
+
+                final int order = TtUtils.Media.getMediaIndex(picture, rvMediaAdapter.getItems());
+
+                Take5Activity.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        rvMediaAdapter.add(order, picture);
+
+                        //don't bombard the adapter with lots of changes
+                        mediaLoaderDelayedHandler.post(onMediaChanged);
+
+                        semaphore.release();
+                    }
+                });
+            } catch (InterruptedException e) {
+                //
+            }
+        }
+    }
+
+    private void updateMediaContextMenuLocked() {
+        boolean locked = _CurrentMedia != null;
+        pmbMedia.setItemEnabled(R.id.ctx_menu_reset, locked);
+        pmbMedia.setItemEnabled(R.id.ctx_menu_delete, locked);
+
+        locked = _CurrentPoint != null;
+        pmbMedia.setItemEnabled(R.id.ctx_menu_capture, locked);
+        pmbMedia.setItemEnabled(R.id.ctx_menu_add, locked);
+    }
+
+
+    private Runnable onMediaChanged = new Runnable() {
+        @Override
+        public void run() {
+            Take5Activity.this.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (mediaSelectionIndex > INVALID_INDEX && mediaSelectionIndex < rvMediaAdapter.getItemCountEx()) {
+                        setCurrentMedia(rvMediaAdapter.getItem(mediaSelectionIndex));
+                        rvMediaAdapter.selectItem(mediaSelectionIndex);
+                        mediaViewPager.setCurrentItem(mediaSelectionIndex);
+                        mediaSelectionIndex = INVALID_INDEX;
+                    }
+
+                    mediaLoaded = true;
+
+                    setMediaTitle(isMapDrawerOpen(GravityCompat.END) ? _CurrentMedia.getName() : null);
+                }
+            });
+        }
+    };
+
+
+    private void setCurrentMedia(TtMedia media) {
+        if (media != null) {
+            if (isMapDrawerOpen(GravityCompat.END)) {
+                setMediaTitle(media.getName());
+            } else {
+                setMediaTitle(null);
+            }
+
+            if (_CurrentMedia == null || !media.getCN().equals(_CurrentMedia.getCN())) {
+                _BackupMedia = TtUtils.Media.cloneMedia(media);
+
+                setMediaUpdated(false);
+            }
+        } else {
+            setMediaTitle(null);
+        }
+
+        _CurrentMedia = media;
+
+        if (_CurrentMedia == null)
+            _BackupMedia = null;
+    }
+
+    private void setMediaTitle(String title) {
+        if (title != null) {
+            toolbarMedia.setTitle(title);
+        } else {
+            toolbarMedia.setTitle(String.format("Media (%d)", mediaCount));
+        }
+    }
+
+    private void setMediaUpdated(boolean updated) {
+        _MediaUpdated = updated;
+
+        pmbMedia.setItemEnabled(R.id.ctx_menu_reset, _MediaUpdated);
+    }
+
+
+    public void updateMedia(TtMedia media) {
+        //only update if current media
+        if (_CurrentMedia.getCN().equals(media.getCN())) {
+            setCurrentMedia(media);
+            setMediaUpdated(true);
+        }
+    }
+
+    @Override
+    public TtMetadata getMetadata(String cn) {
+        return _Metadata;
+    }
+
+    @Override
+    public BitmapManager getBitmapManager() {
+        return bitmapManager;
+    }
+    //endregion
+
+    //region Controls
     public void btnTake5Click(View view) {
         if (validateSideShot()) {
             setupTake5();
@@ -989,14 +1600,62 @@ public class Take5Activity extends AcquireGpsMapActivity {
         updated = false;
     }
 
-
     public void btnPointInfo(View view) {
 
     }
-
+    //endregion
 
     @Override
     protected MapTracking getMapTracking() {
         return mapViewMode ? MapTracking.NONE : MapTracking.FOLLOW;
     }
+
+
+    //region Fragment Interaction
+    private void onLockChange() {
+        if (_CurrentPoint != null && listeners.containsKey(_CurrentPoint.getCN())) {
+            listeners.get(_CurrentPoint.getCN()).onLockChange(_Locked);
+        }
+    }
+
+    private void onPointUpdate() {
+        if (_CurrentPoint != null && listeners.containsKey(_CurrentPoint.getCN())) {
+            listeners.get(_CurrentPoint.getCN()).onPointUpdated(_CurrentPoint);
+        }
+    }
+
+    private void onPointUpdate(TtPoint point) {
+        if (listeners.containsKey(point.getCN())) {
+            listeners.get(point.getCN()).onPointUpdated(point);
+        }
+    }
+
+
+    private void onMediaUpdate() {
+        setMediaUpdated(true);
+
+        if (listeners.containsKey(_CurrentMedia.getCN())) {
+            listeners.get(_CurrentMedia.getCN()).onMediaUpdated(_CurrentMedia);
+        }
+    }
+
+    private void onMediaUpdate(TtMedia media) {
+        if (listeners.containsKey(media.getCN())) {
+            listeners.get(media.getCN()).onMediaUpdated(media);
+        }
+    }
+
+
+    public void register(String pointCN, PointMediaListener listener) {
+        if (listener != null && !listeners.containsKey(pointCN)) {
+            listeners.put(pointCN, listener);
+        }
+    }
+
+    public void unregister(String pointCN) {
+        if (listeners.containsKey(pointCN)) {
+            listeners.remove(pointCN);
+        }
+    }
+    //endregion
 }

@@ -289,7 +289,7 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
             this.activity = (PolygonsActivity) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
-                    + " must implement Polygon Listener");
+                    + " must implement Polygon PointMediaListener");
         }
     }
 

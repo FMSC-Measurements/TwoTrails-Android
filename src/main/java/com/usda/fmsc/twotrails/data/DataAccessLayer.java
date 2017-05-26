@@ -13,6 +13,7 @@ import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
 import com.usda.fmsc.twotrails.objects.DataActivityType;
 import com.usda.fmsc.twotrails.objects.TtUserActivity;
+import com.usda.fmsc.twotrails.objects.media.TtMedia;
 import com.usda.fmsc.twotrails.objects.points.GpsPoint;
 import com.usda.fmsc.twotrails.objects.points.QuondamPoint;
 import com.usda.fmsc.twotrails.objects.points.TravPoint;
@@ -122,7 +123,6 @@ public class DataAccessLayer extends IDataLayer {
             _Activity = new TtUserActivity("Android User", TtUtils.getDeviceName());
 
             _db = SQLiteDatabase.openOrCreateDatabase(_dbFile, null);
-            //_db.rawQuery("PRAGMA journal_mode = MEMORY", null);
             _DalVersion = TwoTrailsSchema.SchemaVersion;
 
             CreatePolygonTable();
@@ -286,9 +286,14 @@ public class DataAccessLayer extends IDataLayer {
 
     public HashMap<String, TtPolygon> getPolygonsMap() {
         HashMap<String, TtPolygon> polys = new HashMap<>();
-        for(TtPolygon polygon : getPolygons()) {
-            polys.put(polygon.getCN(), polygon);
+        ArrayList<TtPolygon> pl = getPolygons();
+
+        if (pl != null) {
+            for(TtPolygon polygon : pl) {
+                polys.put(polygon.getCN(), polygon);
+            }
         }
+
         return  polys;
     }
 
@@ -563,7 +568,7 @@ public class DataAccessLayer extends IDataLayer {
                 do {
 
                     if(!c.isNull(7)) {
-                        point = TtUtils.getPointByOpType(OpType.parse(c.getInt(7)));
+                        point = TtUtils.Points.createNewPointByOpType(OpType.parse(c.getInt(7)));
                     } else {
                         throw new Exception("Point has no OpType");
                     }
@@ -652,9 +657,14 @@ public class DataAccessLayer extends IDataLayer {
 
     public HashMap<String, TtPoint> getPointsMap() {
         HashMap<String, TtPoint> points = new HashMap<>();
-        for(TtPoint point : getPoints()) {
-            points.put(point.getCN(), point);
+        ArrayList<TtPoint> pl = getPoints();
+
+        if (pl != null) {
+            for(TtPoint point : pl) {
+                points.put(point.getCN(), point);
+            }
         }
+
         return  points;
     }
 
@@ -1258,7 +1268,7 @@ public class DataAccessLayer extends IDataLayer {
                     TtPoint qndmPoint = getPointByCN(qndmCN);
 
                     if (qndmPoint != null) {
-                        TtPoint newPoint = TtUtils.clonePoint(point);
+                        TtPoint newPoint = TtUtils.Points.clonePoint(point);
                         newPoint.copyInfo(qndmPoint);
 
                         updatePoint(newPoint, qndmPoint);
@@ -1426,11 +1436,16 @@ public class DataAccessLayer extends IDataLayer {
 
 
     public HashMap<String, TtMetadata> getMetadataMap() {
-        HashMap<String, TtMetadata> metadatas = new HashMap<>();
-        for(TtMetadata metaData : getMetadata()) {
-            metadatas.put(metaData.getCN(), metaData);
+        HashMap<String, TtMetadata> metadata = new HashMap<>();
+        ArrayList<TtMetadata> ml = getMetadata();
+
+        if (ml != null) {
+            for(TtMetadata metaData : ml) {
+                metadata.put(metaData.getCN(), metaData);
+            }
         }
-        return  metadatas;
+
+        return  metadata;
     }
     //endregion
 
@@ -1628,9 +1643,14 @@ public class DataAccessLayer extends IDataLayer {
 
     public HashMap<String, TtGroup> getGroupsMap() {
         HashMap<String, TtGroup> groups = new HashMap<>();
-        for(TtGroup group : getGroups()) {
-            groups.put(group.getCN(), group);
+        ArrayList<TtGroup> gl = getGroups();
+
+        if (gl != null) {
+            for (TtGroup group : getGroups()) {
+                groups.put(group.getCN(), group);
+            }
         }
+
         return  groups;
     }
     //endregion
@@ -2409,9 +2429,14 @@ public class DataAccessLayer extends IDataLayer {
 
     public HashMap<String, PolygonGraphicOptions> getPolygonGraphicOptionsMap() {
         HashMap<String, PolygonGraphicOptions> pgos = new HashMap<>();
-        for (PolygonGraphicOptions pgo : getPolygonGraphicOptions()) {
-            pgos.put(pgo.getCN(), pgo);
+        ArrayList<PolygonGraphicOptions> opts = getPolygonGraphicOptions();
+
+        if (opts != null) {
+            for (PolygonGraphicOptions pgo : opts) {
+                pgos.put(pgo.getCN(), pgo);
+            }
         }
+
         return  pgos;
     }
     //endregion

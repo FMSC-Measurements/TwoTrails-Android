@@ -547,7 +547,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
             if (System.currentTimeMillis() - lastPointCreationTime >= frequency && nmeaBurst.isValid()) {
 
                 //if point is up good enough to use
-                if (TtUtils.isUsableNmeaBurst(nmeaBurst, options)) {
+                if (TtUtils.NMEA.isBurstUsable(nmeaBurst, options)) {
                     UTMCoords utmCoords = nmeaBurst.getUTM(_Metadata.getZone());
 
                     //if more than minimum distance

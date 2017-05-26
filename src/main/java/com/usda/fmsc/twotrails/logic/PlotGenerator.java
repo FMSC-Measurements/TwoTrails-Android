@@ -84,7 +84,7 @@ public class PlotGenerator extends AsyncTask<PlotGenerator.PlotParams, Void, TtP
 
             List<PointD> points = new ArrayList<>();
 
-            boolean allMatchMeta = TtUtils.allPointsHaveSameMetadata(pp.Points);
+            boolean allMatchMeta = TtUtils.Points.allPointsHaveSameMetadata(pp.Points);
 
             if (isCancelled())
                 return null;
@@ -94,7 +94,7 @@ public class PlotGenerator extends AsyncTask<PlotGenerator.PlotParams, Void, TtP
                     if (allMatchMeta)
                         points.add(new PointD(point.getAdjX(), point.getAdjY()));
                     else {
-                        UTMCoords coords = TtUtils.forcePointZone(point, pp.Metadata.getZone(), metadata.get(point.getMetadataCN()).getZone(), true);
+                        UTMCoords coords = TtUtils.Points.forcePointZone(point, pp.Metadata.getZone(), metadata.get(point.getMetadataCN()).getZone(), true);
                         points.add(new PointD(coords.getX(), coords.getY()));
                     }
                 }
@@ -109,7 +109,7 @@ public class PlotGenerator extends AsyncTask<PlotGenerator.PlotParams, Void, TtP
                 startX = pp.StartPoint.getAdjX();
                 startY = pp.StartPoint.getAdjY();
             } else {
-                UTMCoords coords = TtUtils.forcePointZone(pp.StartPoint, pp.Metadata.getZone(), metadata.get(pp.StartPoint.getMetadataCN()).getZone(), true);
+                UTMCoords coords = TtUtils.Points.forcePointZone(pp.StartPoint, pp.Metadata.getZone(), metadata.get(pp.StartPoint.getMetadataCN()).getZone(), true);
                 startX = coords.getX();
                 startY = coords.getY();
             }
@@ -125,7 +125,7 @@ public class PlotGenerator extends AsyncTask<PlotGenerator.PlotParams, Void, TtP
                 return null;
 
             if (boundaries != null) {
-                PointD farCorner = TtUtils.getFarthestCorner(startX, startY, boundaries.TopLeft.Y, boundaries.BottomRight.Y, boundaries.TopLeft.X, boundaries.BottomRight.X);
+                PointD farCorner = TtUtils.Math.getFarthestCorner(startX, startY, boundaries.TopLeft.Y, boundaries.BottomRight.Y, boundaries.TopLeft.X, boundaries.BottomRight.X);
 
                 double dist = TtUtils.Math.distance(startX, startY, farCorner.X, farCorner.Y);
 
@@ -161,7 +161,7 @@ public class PlotGenerator extends AsyncTask<PlotGenerator.PlotParams, Void, TtP
                     while (j >= farBottom) {
                         //add the rotated point
 
-                        _point = TtUtils.RotatePoint(i, j, angle, startX, startY);
+                        _point = TtUtils.Math.RotatePoint(i, j, angle, startX, startY);
 
                         if (pp.Inside) {
                             //add if point inside the polygon

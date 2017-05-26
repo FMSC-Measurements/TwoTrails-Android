@@ -13,7 +13,7 @@ import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.listeners.SimpleTextWatcher;
 import com.usda.fmsc.android.utilities.BitmapManager;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.activities.PointsActivity;
+import com.usda.fmsc.twotrails.activities.base.PointMediaController;
 import com.usda.fmsc.twotrails.objects.media.TtMedia;
 import com.usda.fmsc.twotrails.objects.media.TtImage;
 import com.usda.fmsc.utilities.ParseEx;
@@ -53,7 +53,7 @@ public class PictureMediaFragment extends BaseMediaFragment {
 
         ivBackground = (ImageView) view.findViewById(R.id.pmdIvBackground);
 
-        bitmapManager = ((PointsActivity)getActivity()).getBitmapManager();
+        bitmapManager = ((PointMediaController)getActivity()).getBitmapManager();
 
         txtAz = (EditText)view.findViewById(R.id.pmdFragPicTxtAzimuth);
         txtPitch = (EditText)view.findViewById(R.id.pmdFragPicTxtPitch);
@@ -74,7 +74,7 @@ public class PictureMediaFragment extends BaseMediaFragment {
                     }
 
                     _Picture.setAzimuth(value);
-                    getPointsActivity().updateMedia(_Picture);
+                    getPointMediaController().updateMedia(_Picture);
                 }
             }
         });
@@ -90,7 +90,7 @@ public class PictureMediaFragment extends BaseMediaFragment {
                     }
 
                     _Picture.setPitch(value);
-                    getPointsActivity().updateMedia(_Picture);
+                    getPointMediaController().updateMedia(_Picture);
                 }
             }
         });
@@ -106,7 +106,7 @@ public class PictureMediaFragment extends BaseMediaFragment {
                     }
 
                     _Picture.setRoll(value);
-                    getPointsActivity().updateMedia(_Picture);
+                    getPointMediaController().updateMedia(_Picture);
                 }
             }
         });

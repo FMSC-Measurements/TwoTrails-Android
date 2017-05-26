@@ -397,6 +397,22 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
         return baseMapDrawer.isDrawerOpen(edgeGravity);
     }
 
+    protected void openMapDrawer(@EdgeGravity int edgeGravity) {
+        baseMapDrawer.openDrawer(edgeGravity);
+    }
+
+    protected void closeMapDrawer(@EdgeGravity int edgeGravity) {
+        baseMapDrawer.closeDrawer(edgeGravity);
+    }
+
+    protected void addMapDrawerListener(DrawerLayout.DrawerListener listener) {
+        baseMapDrawer.addDrawerListener(listener);
+    }
+
+    protected void removeMapDrawerListener(DrawerLayout.DrawerListener listener) {
+        baseMapDrawer.removeDrawerListener(listener);
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -767,7 +783,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
     public void onMarkerClick(IMultiMapFragment.MarkerData markerData) {
         TtPoint currentPoint = markerData.Point;
 
-        targetLocation = TtUtils.getPointLocation(currentPoint, markerData.Adjusted, _Metadata);
+        targetLocation = TtUtils.Points.getPointLocation(currentPoint, markerData.Adjusted, _Metadata);
 
         tvNavPid.setText(StringEx.toString(currentPoint.getPID()));
         tvNavPoly.setText(currentPoint.getPolyName());
@@ -1578,7 +1594,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
 
                     hideSelectedMarkerInfo();
 
-                    targetLocation = TtUtils.getPointLocation(toPoint, false, _Metadata);
+                    targetLocation = TtUtils.Points.getPointLocation(toPoint, false, _Metadata);
 
                     dialog.dismiss();
                 }

@@ -67,7 +67,7 @@ public class HaidLogic {
 
             if (points.size() > 0) {
                 if (points.size() > 2) {
-                    points = TtUtils.filterOut(points, OpType.WayPoint);
+                    points = TtUtils.Points.filterOut(points, OpType.WayPoint);
 
                     if (points.size() > 0) {
                         if (points.size() > 2) {

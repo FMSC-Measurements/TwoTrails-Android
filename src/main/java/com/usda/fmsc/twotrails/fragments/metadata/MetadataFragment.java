@@ -95,7 +95,7 @@ public class MetadataFragment extends AnimationCardFragment implements MetadataA
             this.activity = (MetadataActivity) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
-                    + " must implement Metadata Listener");
+                    + " must implement Metadata PointMediaListener");
         }
     }
 

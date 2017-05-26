@@ -326,7 +326,7 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
                 tmpBurst = _Bursts.get(i);
                 tmpBurst.setUsed(false);
 
-                if (i > rangeStart && i < rangeEnd && TtUtils.isUsableNmeaBurst(tmpBurst, options)) {
+                if (i > rangeStart && i < rangeEnd && TtUtils.NMEA.isBurstUsable(tmpBurst, options)) {
                     _FilteredBursts.add(tmpBurst);
                 }
             }

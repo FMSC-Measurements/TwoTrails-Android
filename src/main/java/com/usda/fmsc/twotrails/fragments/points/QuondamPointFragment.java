@@ -131,7 +131,7 @@ public class QuondamPointFragment extends BasePointFragment {
                         if (!_Quondam.hasParent() || _Quondam.getParentPID() != parent.getPID()) {
                             selectedPoint = parent;
                             _Quondam.setParentPoint(parent);
-                            getPointsActivity().updatePoint(_Quondam);
+                            getPointController().updatePoint(_Quondam);
                         }
 
                         pointsAdapter.setSelected(index);
@@ -160,7 +160,7 @@ public class QuondamPointFragment extends BasePointFragment {
                     }
 
                     _Quondam.setManualAccuracy(value);
-                    getPointsActivity().updatePoint(_Quondam);
+                    getPointController().updatePoint(_Quondam);
                 }
             }
         });
