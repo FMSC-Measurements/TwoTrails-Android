@@ -39,7 +39,7 @@ public class GpsInfoControl implements GpsService.Listener {
     }
 
 
-    //region Listener
+    //region PointMediaListener
     @Override
     public void gpsError(GpsService.GpsError error) {
     }

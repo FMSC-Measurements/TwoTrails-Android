@@ -26,17 +26,11 @@ public class MediaRvAdapter extends SelectableAdapterEx<TtMedia, SelectableAdapt
     private int maxHeight;
 
     private LayoutInflater inflater;
-
     private BitmapManager bitmapManager;
-
-    private Activity activity;
-
     private MediaChangedListener listener;
 
     public MediaRvAdapter(Activity activity, List<TtMedia> mediaList, Listener<TtMedia> listener, int maxHeight, BitmapManager bitmapManager) {
         super(activity, mediaList);
-
-        this.activity = activity;
 
         inflater = LayoutInflater.from(activity);
 
@@ -91,7 +85,7 @@ public class MediaRvAdapter extends SelectableAdapterEx<TtMedia, SelectableAdapt
         super.add(item, notify);
 
         if (notify && listener != null) {
-            listener.onNotifyDatasetChanged();
+            listener.onNotifyDataSetChanged();
         }
     }
 
@@ -100,7 +94,7 @@ public class MediaRvAdapter extends SelectableAdapterEx<TtMedia, SelectableAdapt
         super.add(index, item, notify);
 
         if (notify && listener != null) {
-            listener.onNotifyDatasetChanged();
+            listener.onNotifyDataSetChanged();
         }
     }
 
@@ -109,7 +103,7 @@ public class MediaRvAdapter extends SelectableAdapterEx<TtMedia, SelectableAdapt
         super.remove(item, notify);
 
         if (notify && listener != null) {
-            listener.onNotifyDatasetChanged();
+            listener.onNotifyDataSetChanged();
         }
     }
 
@@ -118,7 +112,7 @@ public class MediaRvAdapter extends SelectableAdapterEx<TtMedia, SelectableAdapt
         TtMedia media = super.remove(index, notify);
 
         if (notify && listener != null) {
-            listener.onNotifyDatasetChanged();
+            listener.onNotifyDataSetChanged();
         }
 
         return media;
@@ -129,7 +123,7 @@ public class MediaRvAdapter extends SelectableAdapterEx<TtMedia, SelectableAdapt
         super.clear(notify);
 
         if (notify && listener != null) {
-            listener.onNotifyDatasetChanged();
+            listener.onNotifyDataSetChanged();
         }
     }
 
@@ -139,16 +133,16 @@ public class MediaRvAdapter extends SelectableAdapterEx<TtMedia, SelectableAdapt
     }
 
     public interface MediaChangedListener {
-        void onNotifyDatasetChanged();
+        void onNotifyDataSetChanged();
     }
 
-    public abstract class MediaViewHolder extends SelectableViewHolderEx {
+    private abstract class MediaViewHolder extends SelectableViewHolderEx {
         public MediaViewHolder(View itemView) {
             super(itemView);
         }
     }
 
-    public class ImageViewHolder extends MediaViewHolder {
+    private class ImageViewHolder extends MediaViewHolder {
         private ImageView ivImage;
 
         public ImageViewHolder(View itemView) {

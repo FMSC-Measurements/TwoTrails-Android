@@ -1,7 +1,6 @@
 package com.usda.fmsc.twotrails.utilities;
 
 import android.os.AsyncTask;
-import android.provider.MediaStore;
 
 import com.usda.fmsc.geospatial.utm.UTMTools;
 import com.usda.fmsc.twotrails.data.MediaAccessLayer;
@@ -34,8 +33,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -815,11 +812,11 @@ public class Export {
                     throw new RuntimeException("Meta Data is null. Cant obtain UTM Zone");
 
                 for (TtPoint point : points) {
-                    GeoPosition coords = TtUtils.getLatLonFromPoint(point, true, md.get(point.getMetadataCN()));
+                    GeoPosition coords = TtUtils.Points.getLatLonFromPoint(point, true, md.get(point.getMetadataCN()));
 
                     Coordinates adjCoord = new Coordinates(coords.getLatitudeSignedDecimal(), coords.getLongitudeSignedDecimal(), coords.getElevation());
 
-                    coords = TtUtils.getLatLonFromPoint(point, false, md.get(point.getMetadataCN()));
+                    coords = TtUtils.Points.getLatLonFromPoint(point, false, md.get(point.getMetadataCN()));
                     Coordinates unAdjCoord = new Coordinates(coords.getLatitudeSignedDecimal(), coords.getLongitudeSignedDecimal(), coords.getElevation());
 
                     String snippit = "Point Operation: " + point.getOp().toString();

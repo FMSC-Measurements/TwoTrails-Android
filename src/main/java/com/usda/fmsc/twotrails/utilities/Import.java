@@ -158,7 +158,7 @@ public class Import {
 
                     if (ip.isAdvImport()) {
                         OpType op = OpType.parse(record.get(fOp));
-                        point = TtUtils.getPointByOpType(op);
+                        point = TtUtils.Points.createNewPointByOpType(op);
 
                         switch (op) {
                             case GPS:

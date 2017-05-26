@@ -10,7 +10,6 @@ import android.view.View;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
-import com.nostra13.universalimageloader.utils.IoUtils;
 import com.usda.fmsc.twotrails.objects.media.TtImage;
 import com.usda.fmsc.twotrails.objects.media.TtMedia;
 import com.usda.fmsc.twotrails.units.MediaType;
@@ -23,7 +22,6 @@ import com.usda.fmsc.utilities.StringEx;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -83,7 +81,7 @@ public class MediaAccessLayer extends IDataLayer {
             File f = new File(_FilePath + "-journal");
             if (f.exists()) {
                 if (!f.delete()) {
-                    TtUtils.TtReport.writeError("sql journal not deleted", "DataAccessLayer:close");
+                    TtUtils.TtReport.writeError("sql journal not deleted", "MediaAccessLayer:close");
                 }
             }
         }
@@ -128,7 +126,7 @@ public class MediaAccessLayer extends IDataLayer {
         }
         catch (Exception ex)
         {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DataAccessLayer:CreateMediaTable");
+            TtUtils.TtReport.writeError(ex.getMessage(), "MediaAccessLayer:CreateMediaTable");
             throw ex;
         }
     }
@@ -140,7 +138,7 @@ public class MediaAccessLayer extends IDataLayer {
         }
         catch (Exception ex)
         {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DataAccessLayer:CreateImageTable");
+            TtUtils.TtReport.writeError(ex.getMessage(), "MediaAccessLayer:CreateImageTable");
             throw ex;
         }
     }
@@ -152,7 +150,7 @@ public class MediaAccessLayer extends IDataLayer {
         }
         catch (Exception ex)
         {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DataAccessLayer:CreateDataTable");
+            TtUtils.TtReport.writeError(ex.getMessage(), "MediaAccessLayer:CreateDataTable");
             throw ex;
         }
     }
@@ -164,7 +162,7 @@ public class MediaAccessLayer extends IDataLayer {
         }
         catch (Exception ex)
         {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DataAccessLayer:CreateInfoTable");
+            TtUtils.TtReport.writeError(ex.getMessage(), "MediaAccessLayer:CreateInfoTable");
             throw ex;
         }
     }
@@ -207,7 +205,7 @@ public class MediaAccessLayer extends IDataLayer {
             if (c.moveToFirst()) {
                 do {
                     if(!c.isNull(8)) {
-                        pic = TtUtils.getPictureByType(PictureType.parse(c.getInt(8)));
+                        pic = TtUtils.Media.getPictureByType(PictureType.parse(c.getInt(8)));
                     } else {
                         throw new Exception("Picture has no PictureType");
                     }
@@ -339,27 +337,12 @@ public class MediaAccessLayer extends IDataLayer {
     public boolean insertImageData(TtImage image, byte[] data) {
         try {
             ContentValues cvs = new ContentValues();
-            Bitmap.CompressFormat format;
 
             String ext = image.getFilePath().substring(image.getFilePath().lastIndexOf('.') + 1);
-//            switch (ext) {
-//                case "jpg":
-//                case "jpeg":
-//                    format = Bitmap.CompressFormat.JPEG;
-//                    break;
-//                case "png":
-//                    format = Bitmap.CompressFormat.PNG;
-//                    break;
-//                default:
-//                    throw new RuntimeException("Invalid File Type");
-//            }
-
-//            ByteBuffer buffer = ByteBuffer.allocate(bitmap.getByteCount());
-//            bitmap.copyPixelsToBuffer(buffer);
 
             cvs.put(TwoTrailsMediaSchema.SharedSchema.CN, image.getCN());
             cvs.put(TwoTrailsMediaSchema.Data.BinaryData, data);
-            cvs.put(TwoTrailsMediaSchema.Data.DataType, ext);//format.toString());
+            cvs.put(TwoTrailsMediaSchema.Data.DataType, ext);
 
             return _db.insert(TwoTrailsMediaSchema.Data.TableName, null, cvs) > 0;
         } catch (Exception ex) {
@@ -508,10 +491,6 @@ public class MediaAccessLayer extends IDataLayer {
             for (TtImage img : images) {
                 if (img.externalFileExists()) {
                     File file = new File(img.getFilePath());
-//
-//                    BitmapFactory.Options options = new BitmapFactory.Options();
-//                    options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-//                    Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath(), options);
 
                     FileInputStream is = new FileInputStream(file);
                     ByteArrayOutputStream buffer = new ByteArrayOutputStream();

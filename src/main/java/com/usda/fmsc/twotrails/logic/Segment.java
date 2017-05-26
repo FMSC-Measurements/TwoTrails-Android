@@ -292,7 +292,7 @@ public class Segment {
 
             return 3;
         } else {
-            if (TtUtils.allPointsAreQndmType(points)) {
+            if (TtUtils.Points.allPointsAreQndmType(points)) {
                 return 2;
             } else {
                 TtPoint lPoint = points.get(points.size() - 1);

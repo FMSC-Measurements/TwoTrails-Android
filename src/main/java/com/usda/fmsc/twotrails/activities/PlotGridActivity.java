@@ -114,7 +114,7 @@ public class PlotGridActivity extends CustomToolbarActivity {
             if (Global.getDAL().getPointCountInPolygon(poly.getCN()) > 2) {
 
                 tmpPoints = Global.getDAL().getPointsInPolygon(poly.getCN());
-                if (TtUtils.isValidPolygon(tmpPoints)) {
+                if (TtUtils.Points.isValidPolygon(tmpPoints)) {
                     polyPoints.put(poly.getCN(), tmpPoints);
                     polygons.add(poly);
                     polyNames.add(poly.getName());

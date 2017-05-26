@@ -157,23 +157,31 @@ public class Global {
         if (dal != null) {
             MapSettings.reset();
         }
+
+
     }
 
     public static MediaAccessLayer getMAL() {
         if (_MAL == null && _DAL != null)
         {
-            String filename = _DAL.getFilePath();
-
-            filename = filename.substring(0, filename.length() - 3) + "ttmpx";
-
-            _MAL = new MediaAccessLayer(filename);
+            _MAL = new MediaAccessLayer(getMALFilename());
         }
 
         return _MAL;
     }
 
+    private static String getMALFilename() {
+        if (_DAL != null) {
+            String filename = _DAL.getFilePath();
+
+            return filename.substring(0, filename.length() - 3) + "ttmpx";
+        }
+
+        throw new RuntimeException("DAL does not exist.");
+    }
+
     public static boolean hasMAL() {
-        return _MAL != null;
+        return _MAL != null || FileUtils.fileExists(getMALFilename());
     }
 
     public static void setMAL(MediaAccessLayer mal) {

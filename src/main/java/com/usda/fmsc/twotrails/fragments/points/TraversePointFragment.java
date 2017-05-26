@@ -93,7 +93,7 @@ public class TraversePointFragment extends BasePointFragment {
                             //value != null && !TtUtils.Math.cmpa(value, az)) {
                         _TravPoint.setFwdAz(value);
                         calcAzError();
-                        getPointsActivity().updatePoint(_TravPoint);
+                        getPointController().updatePoint(_TravPoint);
                     //}
                 }
             }
@@ -121,7 +121,7 @@ public class TraversePointFragment extends BasePointFragment {
                             //value != null && !TtUtils.Math.cmpa(value, az)) {
                         _TravPoint.setBkAz(value);
                         calcAzError();
-                        getPointsActivity().updatePoint(_TravPoint);
+                        getPointController().updatePoint(_TravPoint);
                     //}
                 }
             }
@@ -148,7 +148,7 @@ public class TraversePointFragment extends BasePointFragment {
 
                         //if (!TtUtils.Math.cmpa(value, _TravPoint.getSlopeDistance())) {
                             _TravPoint.setSlopeDistance(value);
-                            getPointsActivity().updatePoint(_TravPoint);
+                            getPointController().updatePoint(_TravPoint);
                         //}
                     //}
                 }
@@ -176,7 +176,7 @@ public class TraversePointFragment extends BasePointFragment {
 
                         //if (!TtUtils.Math.cmpa(value, _TravPoint.getSlopeAngle())) {
                             _TravPoint.setSlopeAngle(value);
-                            getPointsActivity().updatePoint(_TravPoint);
+                            getPointController().updatePoint(_TravPoint);
                         //}
                     //}
                 }

@@ -2,7 +2,6 @@ package com.usda.fmsc.twotrails.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.text.Editable;
 import android.view.View;
 import android.widget.AdapterView;
@@ -35,7 +34,6 @@ import java.util.regex.Pattern;
 
 import com.usda.fmsc.geospatial.GeoPosition;
 import com.usda.fmsc.geospatial.GeoTools;
-import com.usda.fmsc.geospatial.nmea.sentences.GGASentence;
 import com.usda.fmsc.utilities.EnumEx;
 import com.usda.fmsc.utilities.ParseEx;
 import com.usda.fmsc.utilities.StringEx;
@@ -280,7 +278,7 @@ public class CalculateGpsActivity extends CustomToolbarActivity {
                 tmpBurst = _Bursts.get(i);
                 tmpBurst.setUsed(false);
 
-                if (i > rangeStart && i < rangeEnd && TtUtils.isUsableNmeaBurst(tmpBurst, options)) {
+                if (i > rangeStart && i < rangeEnd && TtUtils.NMEA.isBurstUsable(tmpBurst, options)) {
                     _FilteredBursts.add(tmpBurst);
                 }
             }

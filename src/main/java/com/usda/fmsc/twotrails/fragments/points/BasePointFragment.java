@@ -20,7 +20,8 @@ import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.listeners.SimpleTextWatcher;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.activities.PointsActivity;
+import com.usda.fmsc.twotrails.activities.base.PointMediaController;
+import com.usda.fmsc.twotrails.activities.base.PointMediaListener;
 import com.usda.fmsc.twotrails.fragments.AnimationCardFragment;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.media.TtMedia;
@@ -30,7 +31,7 @@ import com.usda.fmsc.twotrails.utilities.AppUnits;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 import com.usda.fmsc.utilities.StringEx;
 
-public abstract class BasePointFragment extends AnimationCardFragment implements PointsActivity.Listener {
+public abstract class BasePointFragment extends AnimationCardFragment implements PointMediaListener {
     public static final String POINT = "Point";
 
     private static String sOnBnd = "On Boundary", sOffBnd = "Off Boundary";
@@ -43,7 +44,7 @@ public abstract class BasePointFragment extends AnimationCardFragment implements
 
     private boolean locked, updating;
     private View header, preFocus;
-    private PointsActivity activity;
+    private PointMediaController controller;
     private TtPoint _Point;
     private TtMetadata _Metadata;
 
@@ -58,9 +59,9 @@ public abstract class BasePointFragment extends AnimationCardFragment implements
         if (bundle != null && bundle.containsKey(POINT)) {
             _Point = bundle.getParcelable(POINT);
 
-            if (activity != null && _Point != null) {
-                _Metadata = activity.getMetadata(_Point.getMetadataCN());
-                activity.register(_Point.getCN(), this);
+            if (controller != null && _Point != null) {
+                _Metadata = controller.getMetadata(_Point.getMetadataCN());
+                controller.register(_Point.getCN(), this);
             }
         }
     }
@@ -99,7 +100,7 @@ public abstract class BasePointFragment extends AnimationCardFragment implements
                     ibBnd.setContentDescription(strBnd);
 
                     _Point.setOnBnd(onbnd);
-                    activity.updatePoint(_Point);
+                    controller.updatePoint(_Point);
 
                     Toast.makeText(getContext(), strBnd, Toast.LENGTH_SHORT).show();
                 }
@@ -129,7 +130,7 @@ public abstract class BasePointFragment extends AnimationCardFragment implements
             public void afterTextChanged(Editable s) {
                 if (!updating) {
                     _Point.setComment(s.toString());
-                    activity.updatePoint(_Point);
+                    controller.updatePoint(_Point);
                 }
             }
         });
@@ -141,31 +142,31 @@ public abstract class BasePointFragment extends AnimationCardFragment implements
     public abstract View onCreateViewEx(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState);
 
     @Override
-    public void onAttach(Context activity) {
-        super.onAttach(activity);
+    public void onAttach(Context context) {
+        super.onAttach(context);
         try {
-            this.activity = (PointsActivity) activity;
+            this.controller = (PointMediaController) context;
         } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement Points Listener");
+            throw new ClassCastException(context.toString()
+                    + " must implement MediaController");
         }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        if (activity != null && _Point != null) {
-            activity.unregister(_Point.getCN());
-            activity = null;
+        if (controller != null && _Point != null) {
+            controller.unregister(_Point.getCN());
+            controller = null;
         }
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (activity != null && _Point != null) {
-            activity.unregister(_Point.getCN());
-            activity = null;
+        if (controller != null && _Point != null) {
+            controller.unregister(_Point.getCN());
+            controller = null;
         }
     }
 
@@ -196,7 +197,7 @@ public abstract class BasePointFragment extends AnimationCardFragment implements
     @Override
     public final void onPointUpdated(TtPoint point) {
         _Point = point;
-        _Metadata = activity.getMetadata(_Point.getMetadataCN());
+        _Metadata = controller.getMetadata(_Point.getMetadataCN());
 
         onBasePointUpdated();
 
@@ -236,8 +237,8 @@ public abstract class BasePointFragment extends AnimationCardFragment implements
         return _Point;
     }
 
-    protected PointsActivity getPointsActivity() {
-        return activity;
+    protected PointMediaController getPointController() {
+        return controller;
     }
 
     protected TtMetadata getMetadata() {

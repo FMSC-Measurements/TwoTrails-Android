@@ -97,10 +97,10 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
         for (TtPoint point : points) {
             metadata = meta.get(point.getMetadataCN());
 
-            adjPos = TtUtils.getLatLonFromPoint(point, true, metadata);
+            adjPos = TtUtils.Points.getLatLonFromPoint(point, true, metadata);
             adjLL = ArcGISTools.latLngToMapSpatial(adjPos.getLatitudeSignedDecimal(), adjPos.getLongitudeSignedDecimal(), map);
 
-            unAdjPos = TtUtils.getLatLonFromPoint(point, false, metadata);
+            unAdjPos = TtUtils.Points.getLatLonFromPoint(point, false, metadata);
             unadjLL = ArcGISTools.latLngToMapSpatial(unAdjPos.getLatitudeSignedDecimal(), unAdjPos.getLongitudeSignedDecimal(), map);
 
             adjmk = new Graphic(adjLL, adjMkOpts);

@@ -15,7 +15,6 @@ import com.usda.fmsc.geospatial.UomElevation;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.objects.points.GpsPoint;
-import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import com.usda.fmsc.utilities.ParseEx;
@@ -85,7 +84,7 @@ public class GPSPointFragment extends BasePointFragment {
 
                     _GpsPoint.setUnAdjX(value);
                     _GpsPoint.clearLatLon();
-                    getPointsActivity().updatePoint(_GpsPoint);
+                    getPointController().updatePoint(_GpsPoint);
                 }
             }
         });
@@ -102,7 +101,7 @@ public class GPSPointFragment extends BasePointFragment {
 
                     _GpsPoint.setUnAdjY(value);
                     _GpsPoint.clearLatLon();
-                    getPointsActivity().updatePoint(_GpsPoint);
+                    getPointController().updatePoint(_GpsPoint);
                 }
             }
         });
@@ -121,7 +120,7 @@ public class GPSPointFragment extends BasePointFragment {
 
                     _GpsPoint.setUnAdjZ(value);
                     _GpsPoint.clearLatLon();
-                    getPointsActivity().updatePoint(_GpsPoint);
+                    getPointController().updatePoint(_GpsPoint);
                 }
             }
         });
@@ -137,7 +136,7 @@ public class GPSPointFragment extends BasePointFragment {
                     }
 
                     _GpsPoint.setManualAccuracy(value);
-                    getPointsActivity().updatePoint(_GpsPoint);
+                    getPointController().updatePoint(_GpsPoint);
                 }
             }
         });
