@@ -1616,6 +1616,10 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
         if (_CurrentPoint != null && listeners.containsKey(_CurrentPoint.getCN())) {
             listeners.get(_CurrentPoint.getCN()).onLockChange(_Locked);
         }
+
+        if (_CurrentMedia != null && listeners.containsKey(_CurrentMedia.getCN())) {
+            listeners.get(_CurrentMedia.getCN()).onLockChange(_Locked);
+        }
     }
 
     private void onPointUpdate() {

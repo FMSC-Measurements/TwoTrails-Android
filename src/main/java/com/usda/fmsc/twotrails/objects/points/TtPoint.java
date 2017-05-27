@@ -17,33 +17,21 @@ import com.usda.fmsc.utilities.StringEx;
 
 
 public abstract class TtPoint extends TtObject implements Comparable<TtPoint>, Comparator<TtPoint> {
-    protected int _Index;
-    protected int _PID;
+    protected int _Index, _PID;
     protected DateTime _Time;
 
-    protected boolean _calculated;
-    protected boolean _adjusted;
+    protected boolean _calculated, _adjusted;
 
-    protected String _PolyCN;
-    protected String _PolyName;
-
-    protected String _GroupCN;
-    protected String _GroupName;
-
-    protected String _Comment;
-
+    protected String _PolyCN, _PolyName;
+    protected String _GroupCN, _GroupName;
     protected String _MetadataCN;
 
     protected boolean _OnBnd;
 
-    protected Double _AdjX;
-    protected Double _AdjY;
-    protected Double _AdjZ;
+    protected String _Comment;
 
-    protected double _UnAdjX;
-    protected double _UnAdjY;
-    protected double _UnAdjZ;
-
+    protected Double _AdjX, _AdjY, _AdjZ;
+    protected double _UnAdjX, _UnAdjY, _UnAdjZ;
     protected Double _Accuracy;
 
     protected List<String> _LinkedPoints = new ArrayList<>();
@@ -84,8 +72,27 @@ public abstract class TtPoint extends TtObject implements Comparable<TtPoint>, C
         source.readStringList(_LinkedPoints);
     }
 
-    public TtPoint(TtPoint toCopy) {
-        copy(toCopy);
+    public TtPoint(TtPoint point) {
+        super(point);
+
+        this._Comment = point.getComment();
+        this._Index = point.getIndex();
+        this._PolyCN = point.getPolyCN();
+        this._PolyName = point.getPolyName();
+        this._PID = point.getPID();
+        this._Time = point.getTime();
+        this._AdjX = point.getAdjX();
+        this._AdjY = point.getAdjY();
+        this._AdjZ = point.getAdjZ();
+        this._UnAdjX = point.getUnAdjX();
+        this._UnAdjY = point.getUnAdjY();
+        this._UnAdjZ = point.getUnAdjZ();
+        this._Accuracy = point.getAccuracy();
+        this._LinkedPoints = point.getLinkedPoints();
+        this._MetadataCN = point.getMetadataCN();
+        this._OnBnd = point.isOnBnd();
+        this._GroupName = point.getGroupName();
+        this._GroupCN = point.getGroupCN();
     }
 
     //endregion
@@ -299,28 +306,6 @@ public abstract class TtPoint extends TtObject implements Comparable<TtPoint>, C
 
 
     //region copy Point
-    public void copy(TtPoint toCopy) {
-        setCN(toCopy.getCN());
-        this._Comment = toCopy.getComment();
-        this._Index = toCopy.getIndex();
-        this._PolyCN = toCopy.getPolyCN();
-        this._PolyName = toCopy.getPolyName();
-        this._PID = toCopy.getPID();
-        this._Time = toCopy.getTime();
-        this._AdjX = toCopy.getAdjX();
-        this._AdjY = toCopy.getAdjY();
-        this._AdjZ = toCopy.getAdjZ();
-        this._UnAdjX = toCopy.getUnAdjX();
-        this._UnAdjY = toCopy.getUnAdjY();
-        this._UnAdjZ = toCopy.getUnAdjZ();
-        this._Accuracy = toCopy.getAccuracy();
-        this._LinkedPoints = toCopy.getLinkedPoints();
-        this._MetadataCN = toCopy.getMetadataCN();
-        this._OnBnd = toCopy.isOnBnd();
-        this._GroupName = toCopy.getGroupName();
-        this._GroupCN = toCopy.getGroupCN();
-    }
-
     public void copyInfo(TtPoint toCopy) {
         setCN(toCopy.getCN());
 

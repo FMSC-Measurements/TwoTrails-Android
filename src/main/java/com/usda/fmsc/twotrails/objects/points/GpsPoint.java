@@ -46,15 +46,23 @@ public class GpsPoint extends TtPoint implements TtPoint.IManualAccuracy {
 
     public GpsPoint(GpsPoint p) {
         super(p);
-        gpsCopy(p);
+        copy(p);
     }
 
     public GpsPoint(TtPoint p) {
         super(p);
 
-        if(p.isGpsType()) {
-            gpsCopy((GpsPoint)p);
+        if (p.isGpsType()) {
+            copy((GpsPoint)p);
         }
+    }
+
+    private void copy(GpsPoint p) {
+        this._ManualAccuracy = p.getManualAccuracy();
+        this._RMSEr = p.getRMSEr();
+        this._Latitude = p.getLatitude();
+        this._Longitude = p.getLongitude();
+        this._Elevation = p.getElevation();
     }
     //endregion
 
@@ -127,14 +135,6 @@ public class GpsPoint extends TtPoint implements TtPoint.IManualAccuracy {
     }
 
     //endregion
-
-    private void gpsCopy(GpsPoint p) {
-        this._ManualAccuracy = p.getManualAccuracy();
-        this._RMSEr = p.getRMSEr();
-        this._Latitude = p.getLatitude();
-        this._Longitude = p.getLongitude();
-        this._Elevation = p.getElevation();
-    }
 
     public boolean hasLatLon() {
         return _Latitude != null && _Longitude != null;

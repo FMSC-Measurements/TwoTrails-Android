@@ -42,6 +42,7 @@ public abstract class TtMedia extends TtObject {
     }
 
     public TtMedia(TtMedia media) {
+        super(media);
         this._Name = media._Name;
         this._FilePath = media._FilePath;
         this._Comment = media._Comment;
