@@ -46,19 +46,24 @@ public class TravPoint extends TtPoint {
     }
 
     public TravPoint(TravPoint p) {
+        super(p);
         copy(p);
     }
 
     public TravPoint(TtPoint p) {
         super(p);
-        if (p.isTravType())
-        {
+        if (p.isTravType()) {
             copy((TravPoint)p);
-        }
-        else
-        {
+        } else {
             defaultTraverseValues();
         }
+    }
+
+    private void copy(TravPoint p) {
+        this._BkAz = p.getBkAz();
+        this._FwdAz = p.getFwdAz();
+        this._SlopeDistance = p.getSlopeDistance();
+        this._SlopeAngle = p.getSlopeAngle();
     }
 
     //endregion
@@ -165,15 +170,6 @@ public class TravPoint extends TtPoint {
         _SlopeDistance = 0;
         _SlopeAngle = 0;
     }
-
-    protected void copy(TravPoint p) {
-        super.copy(p);
-        this._BkAz = p.getBkAz();
-        this._FwdAz = p.getFwdAz();
-        this._SlopeDistance = p.getSlopeDistance();
-        this._SlopeAngle = p.getSlopeAngle();
-    }
-
 
     @Override
     public boolean adjustPoint() {

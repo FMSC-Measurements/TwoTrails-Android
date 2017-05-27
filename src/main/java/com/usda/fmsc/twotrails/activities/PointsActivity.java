@@ -1438,6 +1438,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
                             _CurrentMedia = TtUtils.Media.cloneMedia(_BackupMedia);
+                            onMediaUpdate();
                             setMediaUpdated(false);
                         }
                     })
@@ -1830,20 +1831,22 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                             loadImageToList(p);
                         }
 
-                        if (mediaCount > 0)
+                        if (mediaCount > 0) {
                             mediaSelectionIndex = 0;
+                            setCurrentMedia(pictures.get(0));
+                        }
                     } else {
                         mediaCount = Global.getMAL().getItemsCount(
                                 TwoTrailsMediaSchema.Media.TableName,
                                 TwoTrailsMediaSchema.Media.PointCN,
                                 point.getCN());
+                        setCurrentMedia(null);
                     }
                 } else {
                     mediaCount = 0;
+                    setCurrentMedia(null);
                 }
             }
-
-            setCurrentMedia(null);
 
             mediaViewPager.addOnPageChangeListener(onMediaPageChangeListener);
         }
@@ -1971,6 +1974,10 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         if (_CurrentPoint != null && listeners.containsKey(_CurrentPoint.getCN())) {
             listeners.get(_CurrentPoint.getCN()).onLockChange(_PointLocked);
         }
+
+        if (_CurrentMedia != null && listeners.containsKey(_CurrentMedia.getCN())) {
+            listeners.get(_CurrentMedia.getCN()).onLockChange(_PointLocked);
+        }
     }
 
     private void onPointUpdate() {
@@ -2014,7 +2021,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
     public void updateMedia(TtMedia media) {
         //only update if current media
-        if (_CurrentMedia.getCN().equals(media.getCN())) {
+        if (_CurrentMedia != null && _CurrentMedia.getCN().equals(media.getCN())) {
             setCurrentMedia(media);
             setMediaUpdated(true);
         }

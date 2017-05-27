@@ -2,7 +2,6 @@ package com.usda.fmsc.twotrails.fragments.media;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.text.Editable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,13 +9,11 @@ import android.widget.EditText;
 import android.widget.ImageView;
 
 import com.usda.fmsc.android.AndroidUtils;
-import com.usda.fmsc.android.listeners.SimpleTextWatcher;
 import com.usda.fmsc.android.utilities.BitmapManager;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.activities.base.PointMediaController;
 import com.usda.fmsc.twotrails.objects.media.TtMedia;
 import com.usda.fmsc.twotrails.objects.media.TtImage;
-import com.usda.fmsc.utilities.ParseEx;
 import com.usda.fmsc.utilities.StringEx;
 
 public class PictureMediaFragment extends BaseMediaFragment {
@@ -24,7 +21,7 @@ public class PictureMediaFragment extends BaseMediaFragment {
 
     private TtImage _Picture;
     private BitmapManager bitmapManager;
-    private boolean settingView;
+    //private boolean settingView;
 
     private EditText txtAz, txtPitch, txtRoll;
 
@@ -63,53 +60,53 @@ public class PictureMediaFragment extends BaseMediaFragment {
             setViews();
         }
 
-        txtAz.addTextChangedListener(new SimpleTextWatcher() {
-            @Override
-            public void afterTextChanged(Editable s) {
-                if (!settingView) {
-                    Float value = null;
-
-                    if (s.length() > 0) {
-                        value = ParseEx.parseFloat(s.toString());
-                    }
-
-                    _Picture.setAzimuth(value);
-                    getPointMediaController().updateMedia(_Picture);
-                }
-            }
-        });
-
-        txtPitch.addTextChangedListener(new SimpleTextWatcher() {
-            @Override
-            public void afterTextChanged(Editable s) {
-                if (!settingView) {
-                    Float value = null;
-
-                    if (s.length() > 0) {
-                        value = ParseEx.parseFloat(s.toString());
-                    }
-
-                    _Picture.setPitch(value);
-                    getPointMediaController().updateMedia(_Picture);
-                }
-            }
-        });
-
-        txtRoll.addTextChangedListener(new SimpleTextWatcher() {
-            @Override
-            public void afterTextChanged(Editable s) {
-                if (!settingView) {
-                    Float value = null;
-
-                    if (s.length() > 0) {
-                        value = ParseEx.parseFloat(s.toString());
-                    }
-
-                    _Picture.setRoll(value);
-                    getPointMediaController().updateMedia(_Picture);
-                }
-            }
-        });
+//        txtAz.addTextChangedListener(new SimpleTextWatcher() {
+//            @Override
+//            public void afterTextChanged(Editable s) {
+//                if (!settingView) {
+//                    Float value = null;
+//
+//                    if (s.length() > 0) {
+//                        value = ParseEx.parseFloat(s.toString());
+//                    }
+//
+//                    _Picture.setAzimuth(value);
+//                    getPointMediaController().updateMedia(_Picture);
+//                }
+//            }
+//        });
+//
+//        txtPitch.addTextChangedListener(new SimpleTextWatcher() {
+//            @Override
+//            public void afterTextChanged(Editable s) {
+//                if (!settingView) {
+//                    Float value = null;
+//
+//                    if (s.length() > 0) {
+//                        value = ParseEx.parseFloat(s.toString());
+//                    }
+//
+//                    _Picture.setPitch(value);
+//                    getPointMediaController().updateMedia(_Picture);
+//                }
+//            }
+//        });
+//
+//        txtRoll.addTextChangedListener(new SimpleTextWatcher() {
+//            @Override
+//            public void afterTextChanged(Editable s) {
+//                if (!settingView) {
+//                    Float value = null;
+//
+//                    if (s.length() > 0) {
+//                        value = ParseEx.parseFloat(s.toString());
+//                    }
+//
+//                    _Picture.setRoll(value);
+//                    getPointMediaController().updateMedia(_Picture);
+//                }
+//            }
+//        });
 
         final View parent = view.findViewById(R.id.parentLayout);
 
@@ -117,15 +114,10 @@ public class PictureMediaFragment extends BaseMediaFragment {
         AndroidUtils.UI.removeSelectionOnUnfocus(txtRoll);
         AndroidUtils.UI.removeSelectionOnUnfocus(txtPitch);
 
-        EditText txtName = (EditText)view.findViewById(R.id.pmdFragTxtName);
-        EditText txtCmt = (EditText)view.findViewById(R.id.pmdFragTxtCmt);
-
         EditText[] ets = new EditText[] {
                 txtAz,
                 txtRoll,
-                txtPitch,
-                txtName,
-                txtCmt
+                txtPitch
         };
 
         AndroidUtils.UI.hideKeyboardOnTouch(parent, ets);
@@ -133,14 +125,15 @@ public class PictureMediaFragment extends BaseMediaFragment {
         return view;
     }
 
-    @Override
-    public void onLockChange(boolean locked) {
-        super.onLockChange(locked);
-
-        txtAz.setEnabled(!locked);
-        txtRoll.setEnabled(!locked);
-        txtPitch.setEnabled(!locked);
-    }
+//Do not enable ability to change Picture direction from text directly
+//    @Override
+//    public void onLockChange(boolean locked) {
+//        super.onLockChange(locked);
+//
+//        txtAz.setEnabled(!locked);
+//        txtRoll.setEnabled(!locked);
+//        txtPitch.setEnabled(!locked);
+//    }
 
     @Override
     public void onMediaUpdated(TtMedia media) {
@@ -151,7 +144,7 @@ public class PictureMediaFragment extends BaseMediaFragment {
     }
 
     private void setViews() {
-        settingView = true;
+        //settingView = true;
 
         if (_Picture.externalFileExists()) {
             ivBackground.setImageBitmap(bitmapManager.get(_Picture.getFilePath()));
@@ -161,6 +154,6 @@ public class PictureMediaFragment extends BaseMediaFragment {
         txtPitch.setText(StringEx.toStringRound(_Picture.getPitch(), 3));
         txtRoll.setText(StringEx.toStringRound(_Picture.getRoll(), 3));
 
-        settingView = false;
+        //settingView = false;
     }
 }

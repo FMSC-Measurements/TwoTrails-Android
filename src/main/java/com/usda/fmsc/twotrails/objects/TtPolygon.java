@@ -60,7 +60,8 @@ public class TtPolygon extends TtObject implements Comparable<TtPolygon>, Compar
     }
 
     public TtPolygon(TtPolygon p) {
-        setCN(p.getCN());
+        super(p);
+
         Name = p.getName();
         Description = p.getDescription();
         Accuracy = p.getAccuracy();
