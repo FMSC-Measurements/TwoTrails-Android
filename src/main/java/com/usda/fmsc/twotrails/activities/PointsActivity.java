@@ -364,36 +364,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                     break;
                 }
                 case R.id.ctx_menu_delete: {
-                    if (!_PointLocked && _CurrentMedia != null) {
-                        new AlertDialog.Builder(PointsActivity.this)
-                                .setMessage(String.format(
-                                        "Would you like to delete %s '%s' from storage or only remove its association with the point?",
-                                        _CurrentMedia.getMediaType().toString().toLowerCase(),
-                                        _CurrentMedia.getName()))
-                                .setPositiveButton(R.string.str_remove, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        removeMedia(_CurrentMedia, false);
-                                    }
-                                })
-                                .setNegativeButton(R.string.str_delete, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        new AlertDialog.Builder(PointsActivity.this)
-                                                .setMessage(String.format("You are about to delete file '%s'.", _CurrentMedia.getFilePath()))
-                                                .setPositiveButton(R.string.str_delete, new DialogInterface.OnClickListener() {
-                                                    @Override
-                                                    public void onClick(DialogInterface dialog, int which) {
-                                                        removeMedia(_CurrentMedia, true);
-                                                    }
-                                                })
-                                                .setNeutralButton(R.string.str_cancel, null)
-                                                .show();
-                                    }
-                                })
-                                .setNeutralButton(R.string.str_cancel, null)
-                                .show();
-                    }
+                    deleteMedia();
                     break;
                 }
             }
@@ -933,7 +904,12 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
             }
             case Consts.Codes.Requests.ADD_IMAGES: {
                 if (data != null) {
-                    addImages(TtUtils.Media.getPicturesFromImageIntent(PointsActivity.this, data, _CurrentPoint.getCN()));
+
+                    List<TtImage> images = TtUtils.Media.getPicturesFromImageIntent(PointsActivity.this, data, _CurrentPoint.getCN());
+
+
+
+                    addImages(images);
                 }
                 break;
             }
@@ -1443,6 +1419,39 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                         }
                     })
                     .setNeutralButton(getString(R.string.str_cancel), null)
+                    .show();
+        }
+    }
+
+    private void deleteMedia() {
+        if (!_PointLocked && _CurrentMedia != null) {
+            new AlertDialog.Builder(PointsActivity.this)
+                    .setMessage(String.format(
+                            "Would you like to delete %s '%s' from storage or only remove its association with the point?",
+                            _CurrentMedia.getMediaType().toString().toLowerCase(),
+                            _CurrentMedia.getName()))
+                    .setPositiveButton(R.string.str_remove, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            removeMedia(_CurrentMedia, false);
+                        }
+                    })
+                    .setNegativeButton(R.string.str_delete, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            new AlertDialog.Builder(PointsActivity.this)
+                                    .setMessage(String.format("You are about to delete file '%s'.", _CurrentMedia.getFilePath()))
+                                    .setPositiveButton(R.string.str_delete, new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            removeMedia(_CurrentMedia, true);
+                                        }
+                                    })
+                                    .setNeutralButton(R.string.str_cancel, null)
+                                    .show();
+                        }
+                    })
+                    .setNeutralButton(R.string.str_cancel, null)
                     .show();
         }
     }

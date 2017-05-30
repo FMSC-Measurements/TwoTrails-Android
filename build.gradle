@@ -129,4 +129,5 @@ dependencies {
     compile 'com.larswerkman:HoloColorPicker:1.5'
     compile 'org.apache.commons:commons-csv:1.2'
     compile 'com.mcxiaoke.volley:library:1.0.19'
+    compile 'com.android.support.constraint:constraint-layout:+'
 }
