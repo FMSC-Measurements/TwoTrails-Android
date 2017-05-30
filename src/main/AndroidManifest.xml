@@ -37,7 +37,6 @@
         android:largeHeap="true"
         android:theme="@style/AppTheme"
         tools:replace="theme">
-
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="${applicationId}.provider"
@@ -45,7 +44,7 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/provider_paths"/>
+                android:resource="@xml/provider_paths" />
         </provider>
 
         <!-- Goolge API Key -->
@@ -235,8 +234,11 @@
         <activity
             android:name=".activities.TtCameraActivity"
             android:screenOrientation="portrait" />
-
-        <activity android:name=".activities.AcquireAndCalculateGpsActivity"></activity>
+        <activity android:name=".activities.AcquireAndCalculateGpsActivity" />
+        <activity
+            android:name=".activities.GetDirectionActivity"
+            android:label="@string/title_activity_get_direction"
+            android:theme="@style/AppTheme"></activity>
     </application>
 
 </manifest>

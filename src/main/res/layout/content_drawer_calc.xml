@@ -112,8 +112,8 @@
         android:paddingTop="10dp"
         android:paddingStart="5dp"
         android:paddingLeft="5dp"
-        android:paddingRight="0dp"
-        android:paddingEnd="0dp">
+        android:paddingRight="5dp"
+        android:paddingEnd="5dp">
 
         <TableRow>
             <TextView

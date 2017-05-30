@@ -320,6 +320,7 @@
     <string name="title_activity_offline_map_manager">Map Manager</string>
     <string name="title_activity_get_map_extents">Get Map Boundaries</string>
     <string name="title_activity_edit_arc_map">Map Details</string>
+    <string name="title_activity_get_direction">Get Direction</string>
 
     <!-- Main -->
     <string name="main_tab_file">FILE</string>

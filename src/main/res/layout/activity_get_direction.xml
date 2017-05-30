@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.usda.fmsc.twotrails.activities.GetDirectionActivity">
+
+    <include layout="@layout/toolbar_default" android:id="@id/toolbar" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="4dp">
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/str_cancel"
+            android:id="@+id/gdBtnCancel"
+            android:layout_weight="1"
+            android:onClick="btnCancelClick"
+            style="@style/buttonMaterial"/>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/str_acquire"
+            android:id="@+id/gdBtnAcquire"
+            android:layout_weight="1"
+            android:onClick="btnAcquireClick"
+            style="@style/buttonMaterial"/>
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/str_ok"
+            android:id="@+id/gdBtnSave"
+            android:layout_weight="1"
+            android:onClick="btnSaveClick"
+            style="@style/buttonMaterial"/>
+    </LinearLayout>
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/toolbar"
+        android:layout_alignParentBottom="true"
+        android:stretchColumns="*"
+        android:paddingTop="10dp"
+        android:paddingStart="5dp"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:paddingEnd="5dp">
+
+        <TableRow>
+            <TextView android:text="@string/pmd_azimuth" style="@style/BasicTvStyle"/>
+
+            <EditText android:id="@+id/gdTxtAzimuth" style="@style/NumDecValueTextStyle" />
+        </TableRow>
+
+        <TableRow>
+            <TextView android:text="@string/pmd_pitch" style="@style/BasicTvStyle"/>
+
+            <EditText android:id="@+id/gdTxtPitch" style="@style/NumDecValueTextStyle" />
+        </TableRow>
+
+        <TableRow>
+            <TextView android:text="@string/pmd_roll" style="@style/BasicTvStyle"/>
+
+            <EditText android:id="@+id/gdTxtRoll" style="@style/NumDecValueTextStyle" />
+        </TableRow>
+    </TableLayout>
+
+    <RelativeLayout android:id="@+id/lay1"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:layout_below="@id/toolbar"
+        android:layout_alignParentBottom="true"
+        android:background="@color/white_1000"
+        android:visibility="visible">
+
+        <View
+            android:id="@+id/frag_camera"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_add_white"
+            android:background="@color/black_500"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:contentDescription="@null"/>
+    </RelativeLayout>
+</RelativeLayout>

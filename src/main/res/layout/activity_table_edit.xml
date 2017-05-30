@@ -56,49 +56,49 @@
 
                 <ImageButton
                     android:id="@+id/teIbOpGps"
-                    style="@style/teFilterbuttonStyle"
+                    style="@style/teFilterButtonStyle"
                     android:src="@drawable/ic_ttpoint_gps_white"
                     android:contentDescription="@string/op_gps"
                     android:onClick="btnTeGps"/>
 
                 <ImageButton
                     android:id="@+id/teIbOpTake5"
-                    style="@style/teFilterbuttonStyle"
+                    style="@style/teFilterButtonStyle"
                     android:src="@drawable/ic_ttpoint_take5_white"
                     android:contentDescription="@string/op_take5"
                     android:onClick="btnTeTake5"/>
 
                 <ImageButton
                     android:id="@+id/teIbOpTrav"
-                    style="@style/teFilterbuttonStyle"
+                    style="@style/teFilterButtonStyle"
                     android:src="@drawable/ic_ttpoint_traverse_white"
                     android:contentDescription="@string/op_trav"
                     android:onClick="btnTeTrav"/>
 
                 <ImageButton
                     android:id="@+id/teIbOpSS"
-                    style="@style/teFilterbuttonStyle"
+                    style="@style/teFilterButtonStyle"
                     android:src="@drawable/ic_ttpoint_sideshot_white"
                     android:contentDescription="@string/op_ss"
                     android:onClick="btnTeSS"/>
 
                 <ImageButton
                     android:id="@+id/teIbOpQndm"
-                    style="@style/teFilterbuttonStyle"
+                    style="@style/teFilterButtonStyle"
                     android:src="@drawable/ic_ttpoint_quondam_white"
                     android:contentDescription="@string/op_qndm"
                     android:onClick="btnTeQndm"/>
 
                 <ImageButton
                     android:id="@+id/teIbOpWalk"
-                    style="@style/teFilterbuttonStyle"
+                    style="@style/teFilterButtonStyle"
                     android:src="@drawable/ic_ttpoint_walk_white"
                     android:contentDescription="@string/op_walk"
                     android:onClick="btnTeWalk"/>
 
                 <ImageButton
                     android:id="@+id/teIbOpWay"
-                    style="@style/teFilterbuttonStyle"
+                    style="@style/teFilterButtonStyle"
                     android:src="@drawable/ic_ttpoint_way_white"
                     android:contentDescription="@string/op_way"
                     android:onClick="btnTeWay"/>

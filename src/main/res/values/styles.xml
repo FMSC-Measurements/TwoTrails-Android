@@ -114,6 +114,9 @@
         <item name="android:colorAccent" tools:targetApi="21">@color/accent</item>
     </style>
 
+    <style name="BasicTvStyle">
+        <item name="android:textSize">20sp</item>
+    </style>
 
     <style name="calcStyleTvValues">
         <item name="android:textSize">18sp</item>
@@ -244,7 +247,7 @@
     </style>
 
 
-    <style name="teFilterbuttonStyle">
+    <style name="teFilterButtonStyle">
         <item name="android:background">@color/primaryLighter</item>
         <item name="android:adjustViewBounds">true</item>
         <item name="android:layout_width">@dimen/toolbar_height</item>
@@ -295,23 +298,23 @@
     </style>
 
 
-    <style name="ToolbarElevation"/>
+    <style name="ToolbarElevation" />
 
-    <style name="ToolbarElevation0"/>
+    <style name="ToolbarElevation0" />
 
-    <style name="ToolbarElevation1"/>
+    <style name="ToolbarElevation1" />
 
-    <style name="ToolbarElevation2"/>
+    <style name="ToolbarElevation2" />
 
-    <style name="ToolbarElevation3"/>
+    <style name="ToolbarElevation3" />
 
-    <style name="ToolbarElevation4"/>
+    <style name="ToolbarElevation4" />
 
-    <style name="ToolbarElevation7"/>
+    <style name="ToolbarElevation7" />
 
-    <style name="ToolbarElevation8"/>
+    <style name="ToolbarElevation8" />
 
-    <style name="ToolbarElevation9"/>
+    <style name="ToolbarElevation9" />
 
 
     <!-- Common -->
@@ -364,9 +367,9 @@
         <item name="android:paddingBottom">8dp</item>
     </style>
 
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light"/>
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
 
     <style name="ArcMapDetailsStyle">

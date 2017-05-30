@@ -13,12 +13,14 @@ import com.usda.fmsc.twotrails.objects.media.TtImage;
 import com.usda.fmsc.twotrails.objects.media.TtPanorama;
 import com.usda.fmsc.twotrails.units.PictureType;
 import com.usda.fmsc.utilities.FileUtils;
+import com.usda.fmsc.utilities.StringEx;
 
 import org.joda.time.DateTime;
 
 @TargetApi(21)
 public class TtCameraFragment extends CameraFragment {
     private static final String POINT_CN = "PointCN";
+    private static final String SAVE_IMAGE = "SaveImage";
 
     private TtCameraListener listener;
     private DeviceOrientationEx deviceOrientationEx;
@@ -29,12 +31,23 @@ public class TtCameraFragment extends CameraFragment {
     private String pointCN;
     private DateTime captureTime;
     private int width, height;
+    private boolean saveImage;
 
 
     public static TtCameraFragment newInstance(String pointCN) {
         TtCameraFragment fragment = new TtCameraFragment();
         Bundle args = new Bundle();
         args.putString(POINT_CN, pointCN);
+        args.putBoolean(SAVE_IMAGE, true);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    public static TtCameraFragment newInstanceWithOutSave() {
+        TtCameraFragment fragment = new TtCameraFragment();
+        Bundle args = new Bundle();
+        args.putString(POINT_CN, StringEx.Empty);
+        args.putBoolean(SAVE_IMAGE, false);
         fragment.setArguments(args);
         return fragment;
     }
@@ -49,6 +62,7 @@ public class TtCameraFragment extends CameraFragment {
 
         if (bundle != null && bundle.containsKey(POINT_CN)) {
             pointCN = bundle.getString(POINT_CN);
+            saveImage = bundle.getBoolean(SAVE_IMAGE);
         } else {
             throw new IllegalArgumentException("Requires Point CN");
         }
@@ -66,6 +80,13 @@ public class TtCameraFragment extends CameraFragment {
         super.onPause();
 
         deviceOrientationEx.pause();
+    }
+
+    @Override
+    protected void takePicture() {
+        if (saveImage) {
+            super.takePicture();
+        }
     }
 
     @Override
@@ -99,6 +120,10 @@ public class TtCameraFragment extends CameraFragment {
         height = image.getHeight();
         orientation = deviceOrientationEx.getOrientation();
         captureTime = DateTime.now();
+    }
+
+    public DeviceOrientationEx.Orientation getOrientation() {
+        return deviceOrientationEx.getOrientation();
     }
 
     @Override
