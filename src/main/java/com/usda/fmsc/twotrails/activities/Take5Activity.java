@@ -642,7 +642,6 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
         switch (requestCode) {
             case Consts.Codes.Activites.SETTINGS: {
                 Global.getGpsBinder().startGps();
@@ -670,7 +669,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
             }
             case Consts.Codes.Requests.CAPTURE_IMAGE: {
                 if (resultCode != RESULT_CANCELED) {
-                    TtImage image = TtUtils.Media.getPictureFromUri(captureImageUri.getPath(), _CurrentPoint.getCN());
+                    TtImage image = TtUtils.Media.createPictureFromUri(captureImageUri, _CurrentPoint.getCN());
 
                     if (image == null) {
                         Toast.makeText(Take5Activity.this, "Unable to add Image", Toast.LENGTH_LONG).show();
