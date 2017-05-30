@@ -951,7 +951,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
             }
             case Consts.Codes.Requests.CAPTURE_IMAGE: {
                 if (resultCode != RESULT_CANCELED) {
-                    TtImage image = TtUtils.Media.getPictureFromUri(captureImageUri.getPath(), _CurrentPoint.getCN());
+                    TtImage image = TtUtils.Media.createPictureFromUri(captureImageUri, _CurrentPoint.getCN());
 
                     if (image == null) {
                         Toast.makeText(PointsActivity.this, "Unable to add Image", Toast.LENGTH_LONG).show();

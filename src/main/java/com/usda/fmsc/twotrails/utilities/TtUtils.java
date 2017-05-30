@@ -994,10 +994,6 @@ public class TtUtils {
             return null;
         }
 
-        public static TtImage getPictureFromUri(String path, String pointCN) {
-            return getImageFromFile(path, pointCN);
-        }
-
         public static ArrayList<TtImage> getPicturesFromImageIntent(Context context, Intent intent, String pointCN) {
             String[] filePathColumn = { MediaStore.Images.Media.DATA };
             ArrayList<TtImage> pictures = new ArrayList<>();
@@ -1043,7 +1039,7 @@ public class TtUtils {
                             }
                         }
 
-                        TtImage image = getImageFromFile(filePath, pointCN);
+                        TtImage image = createImageFromFile(filePath, pointCN);
                         if (image != null) {
                             pictures.add(image);
                         }
@@ -1068,7 +1064,7 @@ public class TtUtils {
                         }
                     }
 
-                    TtImage image = getImageFromFile(uri, pointCN);
+                    TtImage image = createImageFromFile(uri, pointCN);
                     if (image != null) {
                         pictures.add(image);
                     }
@@ -1078,8 +1074,11 @@ public class TtUtils {
             return pictures;
         }
 
-        private static TtImage getImageFromFile(String filePath, String pointCN) {
+        public static TtImage createPictureFromUri(Uri uri, String pointCN) {
+            return createImageFromFile(uri.getPath(), pointCN);
+        }
 
+        private static TtImage createImageFromFile(String filePath, String pointCN) {
             if (FileUtils.fileExists(filePath)) {
                 DateTime time = null;
                 Integer width, height;
@@ -1132,8 +1131,6 @@ public class TtUtils {
         }
 
         public static Uri captureImage(Activity activity, int setting, TtPoint currentPoint) {
-            Uri captureImageUri = null;
-
             if (AndroidUtils.App.requestCameraPermission(activity, Consts.Codes.Requests.CAMERA)) {
                 if (setting == 2) {
                     Intent intent = new Intent(activity, TtCameraActivity.class);
@@ -1152,22 +1149,23 @@ public class TtUtils {
                             Global.getTtMediaDir(), File.separator, dateTime.getYear(),
                             dateTime.getMonthOfYear(), dateTime.getDayOfMonth(), dateTime.getMillisOfDay()));
 
-                    captureImageUri = FileProvider.getUriForFile(
-                            activity,
-                            BuildConfig.APPLICATION_ID + ".provider",
-                            photo);
-
-                    intent.putExtra(MediaStore.EXTRA_OUTPUT, captureImageUri);
+                    intent.putExtra(MediaStore.EXTRA_OUTPUT,
+                            FileProvider.getUriForFile(
+                                activity,
+                                BuildConfig.APPLICATION_ID + ".provider",
+                                photo)
+                    );
 
                     if (intent.resolveActivity(activity.getPackageManager()) != null) {
                         activity.startActivityForResult(intent, Consts.Codes.Requests.CAPTURE_IMAGE);
+                        return Uri.fromFile(photo);
                     } else {
                         Toast.makeText(activity, "Unable to find a Camera application", Toast.LENGTH_LONG).show();
                     }
                 }
             }
 
-            return captureImageUri;
+            return null;
         }
 
         public static void openInImageViewer(Activity activity, String filePath) {
