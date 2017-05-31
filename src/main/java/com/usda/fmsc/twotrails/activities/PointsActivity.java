@@ -103,7 +103,7 @@ import jp.wasabeef.recyclerview.animators.FadeInAnimator;
 public class PointsActivity extends CustomToolbarActivity implements PointMediaController {
     private HashMap<String, PointMediaListener> listeners;
 
-    private MenuItem miLock, miLink, miMovePoint, miReset, miEnterLatLon, miNmeaRecalc, miDelete, miGoto;
+    private MenuItem miLock, miLink, miReset, miEnterLatLon, miNmeaRecalc, miDelete, miGoto;//, miMovePoint;
     private SheetLayoutEx slexAqr, slexCreate;
     private android.support.design.widget.FloatingActionButton fabAqr;
     private MSFloatingActionButton fabMenu;
@@ -676,7 +676,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
         miLock = menu.findItem(R.id.pointsMenuLock);
         miLink = menu.findItem(R.id.pointsMenuLink);
-        miMovePoint = menu.findItem(R.id.pointsMenuMovePoint);
+        //miMovePoint = menu.findItem(R.id.pointsMenuMovePoint);
         miReset = menu.findItem(R.id.pointsMenuReset);
         miEnterLatLon = menu.findItem(R.id.pointsMenuEnterLatLon);
         miNmeaRecalc = menu.findItem(R.id.pointsMenuRecalcNmea);
@@ -1679,7 +1679,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         //menu items that dont rely on a valid point
         if (menuCreated) {
             miLink.setVisible(setLinkVisible);
-            miMovePoint.setVisible(setPolyChangeVisible);
+            //miMovePoint.setVisible(setPolyChangeVisible);
             miNmeaRecalc.setVisible(setGpsTypeVisible);
             miEnterLatLon.setVisible(setGpsTypeVisible);
         }
@@ -1691,7 +1691,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                 miLock.setTitle(R.string.str_unlock);
                 miLock.setIcon(R.drawable.ic_action_lock_closed_white_36dp);
 
-                AndroidUtils.UI.disableMenuItem(miMovePoint);
+                //AndroidUtils.UI.disableMenuItem(miMovePoint);
                 AndroidUtils.UI.disableMenuItem(miReset);
                 AndroidUtils.UI.disableMenuItem(miDelete);
                 AndroidUtils.UI.disableMenuItem(miNmeaRecalc);
