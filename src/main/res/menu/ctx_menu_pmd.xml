@@ -11,6 +11,11 @@
         android:icon="@drawable/ic_add_a_photo_black_36dp"/>
 
     <item
+        android:id="@+id/ctx_menu_update_orientation"
+        android:title="@string/menu_pmd_update_orientation"
+        android:icon="@drawable/ic_edit_black_36dp"/>
+
+    <item
         android:id="@+id/ctx_menu_reset"
         android:title="@string/str_reset"
         android:icon="@drawable/ic_refresh_black_36dp"

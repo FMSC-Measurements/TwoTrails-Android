@@ -171,6 +171,7 @@
     <string name="menu_take5_bnc">On Bnd</string>
     <string name="menu_take5_settings">Take 5 Settings</string>
     <string name="menu_take5_map_mode">Map Mode</string>
+    <string name="menu_take5_add_media">Add Media</string>
     <string name="menu_take5_goto_bottom">Go To Last Point</string>
     <string name="menu_walk_settings">Walk Settings</string>
     <string name="menu_walk_walking">Walking</string>
@@ -189,6 +190,7 @@
     <string name="menu_table_edit_reset">Reset</string>
     <string name="menu_map_manager_login">Login To ArcGIS</string>
     <string name="menu_pmd_add">Add Media</string>
+    <string name="menu_pmd_update_orientation">Update Orientation</string>
     <string name="menu_pmd_capture">Capture Media</string>
     <string name="menu_pmd_delete">Delete Media</string>
 

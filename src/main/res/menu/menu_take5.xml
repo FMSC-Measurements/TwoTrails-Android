@@ -18,6 +18,13 @@
         android:visible="true"/>
 
     <item
+        android:id="@+id/take5MenuAddMedia"
+        android:title="@string/menu_take5_add_media"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_camera_alt_white_36dp"
+        android:visible="true"/>
+
+    <item
         android:id="@+id/mmMenuSelectMap"
         android:title="@string/menu_map_select_type"
         app:showAsAction="never"/>

@@ -10,7 +10,6 @@ import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.text.Editable;
 import android.text.InputType;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -19,6 +18,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 
 import com.usda.fmsc.android.AndroidUtils;
+import com.usda.fmsc.android.listeners.SimpleTextWatcher;
 import com.usda.fmsc.twotrails.adapters.MetadataDetailsAdapter;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
@@ -102,17 +102,7 @@ public class PointEditorDialog extends DialogFragment {
         txtPID.setInputType(InputType.TYPE_CLASS_NUMBER);
         txtPID.setSelection(pid.length());
 
-        txtPID.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
+        txtPID.addTextChangedListener(new SimpleTextWatcher() {
             @Override
             public void afterTextChanged(Editable s) {
                 posButton.setEnabled(true);

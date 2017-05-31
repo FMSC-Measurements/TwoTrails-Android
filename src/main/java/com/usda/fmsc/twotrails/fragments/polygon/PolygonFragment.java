@@ -4,7 +4,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.Looper;
 import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +13,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.usda.fmsc.android.AndroidUtils;
+import com.usda.fmsc.android.listeners.SimpleTextWatcher;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.activities.PolygonsActivity;
 import com.usda.fmsc.twotrails.Consts;
@@ -132,13 +132,7 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
         }
 
         //region TextChange
-        txtName.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) { }
-
+        txtName.addTextChangedListener(new SimpleTextWatcher() {
             @Override
             public void afterTextChanged(Editable s) {
                 if (!settingView) {
@@ -154,13 +148,7 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
             }
         });
 
-        txtDesc.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) { }
-
+        txtDesc.addTextChangedListener(new SimpleTextWatcher() {
             @Override
             public void afterTextChanged(Editable s) {if (!settingView) {
                 String value = s.toString();
@@ -173,13 +161,7 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
             } }
         });
 
-        txtInc.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) { }
-
+        txtInc.addTextChangedListener(new SimpleTextWatcher() {
             @Override
             public void afterTextChanged(Editable s) {
                 if (!settingView) {
@@ -200,14 +182,7 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
             }
         });
 
-        txtPsi.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) { }
-
+        txtPsi.addTextChangedListener(new SimpleTextWatcher() {
             @Override
             public void afterTextChanged(Editable s) {
                 if (!settingView) {
@@ -228,14 +203,7 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
             }
         });
 
-        txtAcc.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) { }
-
+        txtAcc.addTextChangedListener(new SimpleTextWatcher() {
             @Override
             public void afterTextChanged(Editable s) {
                 if (!settingView) {

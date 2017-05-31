@@ -20,6 +20,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -38,6 +39,7 @@ import com.usda.fmsc.android.adapters.SelectableAdapterEx;
 import com.usda.fmsc.android.dialogs.DontAskAgainDialog;
 import com.usda.fmsc.android.listeners.ComplexOnPageChangeListener;
 import com.usda.fmsc.android.utilities.BitmapManager;
+import com.usda.fmsc.android.utilities.DeviceOrientationEx;
 import com.usda.fmsc.android.utilities.PostDelayHandler;
 import com.usda.fmsc.android.widget.PopupMenuButton;
 import com.usda.fmsc.android.widget.SheetLayoutEx;
@@ -74,6 +76,7 @@ import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -167,8 +170,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
             }
         }
     };
-    
-    //todo edit
+
     private PopupMenu.OnMenuItemClickListener menuPopupListener = new PopupMenu.OnMenuItemClickListener() {
         @Override
         public boolean onMenuItemClick(MenuItem item) {
@@ -208,6 +210,12 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                                 .show();
                     } else {
                         captureImageUri = TtUtils.Media.captureImage(Take5Activity.this, Global.Settings.DeviceSettings.getUseTtCamera(), _CurrentPoint);
+                    }
+                    break;
+                }
+                case R.id.ctx_menu_update_orientation: {
+                    if (_CurrentMedia != null && _CurrentMedia.getMediaType() == MediaType.Picture) {
+                        TtUtils.Media.updateImageOrientation(Take5Activity.this, (TtImage)_CurrentMedia);
                     }
                     break;
                 }
@@ -431,6 +439,8 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
             if (actionBar != null) {
                 actionBar.setTitle(_Polygon.getName());
                 actionBar.setDisplayShowTitleEnabled(true);
+
+                AndroidUtils.UI.createToastForToolbarTitle(Take5Activity.this, getToolbar());
             }
 
             _Group = new TtGroup(TtGroup.GroupType.Take5);
@@ -602,6 +612,10 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                 }
                 break;
             }
+            case R.id.take5MenuAddMedia: {
+                openMapDrawer(GravityCompat.END);
+                break;
+            }
             case R.id.take5MenuGps: {
                 startActivityForResult(new Intent(this, SettingsActivity.class)
                                 .putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.GPS_SETTINGS_PAGE),
@@ -651,7 +665,13 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
             }
             case Consts.Codes.Requests.ADD_IMAGES: {
                 if (data != null) {
-                    addImages(TtUtils.Media.getPicturesFromImageIntent(Take5Activity.this, data, _CurrentPoint.getCN()));
+                    List<TtImage> images = TtUtils.Media.getPicturesFromImageIntent(Take5Activity.this, data, _CurrentPoint.getCN());
+
+                    if (images.size() == 1) {
+                        TtUtils.Media.askAndUpdateImageOrientation(Take5Activity.this, null);
+                    }
+
+                    addImages(images);
                 }
                 break;
             }
@@ -674,8 +694,26 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                     if (image == null) {
                         Toast.makeText(Take5Activity.this, "Unable to add Image", Toast.LENGTH_LONG).show();
                     } else {
+                        TtUtils.Media.askAndUpdateImageOrientation(Take5Activity.this, null);
                         addImage(image);
                     }
+                }
+                break;
+            }
+            case Consts.Codes.Requests.UPDATE_ORIENTATION: {
+                if (resultCode != RESULT_CANCELED) {
+                    if (data != null && data.hasExtra(Consts.Codes.Data.ORIENTATION)) {
+                        DeviceOrientationEx.Orientation orientation = data.getParcelableExtra(Consts.Codes.Data.ORIENTATION);
+
+                        if (_CurrentMedia != null && _CurrentMedia.getMediaType() == MediaType.Picture) {
+                            TtImage image = (TtImage)_CurrentMedia;
+                            image.setAzimuth(orientation.getAzimuth());
+                            image.setPitch(orientation.getPitch());
+                            image.setRoll(orientation.getRoll());
+                            onMediaUpdate();
+                        }
+                    }
+
                 }
                 break;
             }

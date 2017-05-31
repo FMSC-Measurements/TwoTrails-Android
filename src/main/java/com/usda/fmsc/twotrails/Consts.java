@@ -105,16 +105,20 @@ public class Consts {
         public static class Results {
             public static final int ERROR = 2000;
             public static final int POINT_CREATED = 2001;
-            public static final int NO_POINT_DATA = 2002;
-            public static final int NO_POLYGON_DATA = 2003;
-            public static final int NO_METDATA_DATA = 2004;
-            public static final int MAP_CREATED = 2005;
-            public static final int MAP_UPDATED = 2006;
-            public static final int MAP_DELETED = 2007;
-            public static final int DOWNLOADING_MAP = 2008;
-            public static final int IMAGE_CAPTURED = 2009;
-            public static final int GPS_NOT_FOUND = 2010;
-            public static final int GPS_NOT_CONFIGURED = 2011;
+            public static final int POINT_UPDATED = 2002;
+            public static final int MEDIA_CREATED = 2003;
+            public static final int MEDIA_UPDATED = 2004;
+            public static final int NO_POINT_DATA = 2005;
+            public static final int NO_POLYGON_DATA = 2006;
+            public static final int NO_METDATA_DATA = 2007;
+            public static final int MAP_CREATED = 2008;
+            public static final int MAP_UPDATED = 2009;
+            public static final int MAP_DELETED = 2010;
+            public static final int DOWNLOADING_MAP = 2011;
+            public static final int IMAGE_CAPTURED = 2012;
+            public static final int GPS_NOT_FOUND = 2013;
+            public static final int GPS_NOT_CONFIGURED = 2014;
+            public static final int ORIENTATION_UPDATED = 2015;
 
         }
 
@@ -132,6 +136,7 @@ public class Consts {
             public static final String NUMBER_OF_CREATED_POINTS = "NumOfCreatedPoints";
             public static final String MAP_DATA = "MapData";
             public static final String TTIMAGE = "TtImage";
+            public static final String ORIENTATION = "Orientation";
         }
 
         public static class Requests {
@@ -147,6 +152,7 @@ public class Consts {
             public static final int CREATE_FILE = 5009;
             public static final int FOLDER = 5010;
             public static final int CAMERA = 5011;
+            public static final int UPDATE_ORIENTATION = 5012;
         }
     }
 

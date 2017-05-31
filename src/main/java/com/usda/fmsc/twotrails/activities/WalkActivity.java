@@ -123,6 +123,8 @@ public class WalkActivity extends AcquireGpsMapActivity {
             if (actionBar != null) {
                 actionBar.setTitle(_Polygon.getName());
                 actionBar.setDisplayShowTitleEnabled(true);
+
+                AndroidUtils.UI.createToastForToolbarTitle(WalkActivity.this, getToolbar());
             }
 
             _Group = new TtGroup(TtGroup.GroupType.Walk);

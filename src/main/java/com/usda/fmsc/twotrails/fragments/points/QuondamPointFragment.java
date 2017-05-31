@@ -3,7 +3,6 @@ package com.usda.fmsc.twotrails.fragments.points;
 
 import android.os.Bundle;
 import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +12,7 @@ import android.widget.ListView;
 
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.adapters.SelectableStringArrayAdapter;
+import com.usda.fmsc.android.listeners.SimpleTextWatcher;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
@@ -141,15 +141,7 @@ public class QuondamPointFragment extends BasePointFragment {
             }
         });
 
-        txtManAcc.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-
+        txtManAcc.addTextChangedListener(new SimpleTextWatcher() {
             @Override
             public void afterTextChanged(Editable s) {
                 if (!settingView) {

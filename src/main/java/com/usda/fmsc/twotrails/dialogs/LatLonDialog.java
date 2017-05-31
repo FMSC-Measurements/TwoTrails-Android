@@ -18,6 +18,7 @@ import android.widget.EditText;
 
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.animation.ViewAnimator;
+import com.usda.fmsc.android.listeners.SimpleTextWatcher;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.objects.points.GpsPoint;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
@@ -220,17 +221,8 @@ public class LatLonDialog extends DialogFragment {
     public void setOnEditedListener(OnEditedListener listener) {
         this.listener = listener;
     }
-    
-    TextWatcher textWatcher = new TextWatcher() {
-        @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            
-        }
 
-        @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
-        }
-
+    SimpleTextWatcher textWatcher = new SimpleTextWatcher() {
         @Override
         public void afterTextChanged(Editable s) {
             calc();
