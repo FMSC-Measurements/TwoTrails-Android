@@ -84,9 +84,9 @@
         android:layout_below="@id/toolbar"
         android:layout_alignParentBottom="true"
         android:background="@color/white_1000"
-        android:visibility="visible">
+        android:visibility="gone">
 
-        <View
+        <FrameLayout
             android:id="@+id/frag_camera"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>

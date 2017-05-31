@@ -42,6 +42,7 @@ import com.usda.fmsc.android.adapters.SelectableAdapterEx;
 import com.usda.fmsc.android.dialogs.DontAskAgainDialog;
 import com.usda.fmsc.android.listeners.ComplexOnPageChangeListener;
 import com.usda.fmsc.android.utilities.BitmapManager;
+import com.usda.fmsc.android.utilities.DeviceOrientationEx;
 import com.usda.fmsc.android.utilities.PostDelayHandler;
 import com.usda.fmsc.android.widget.PopupMenuButton;
 import com.usda.fmsc.android.widget.RecyclerViewEx;
@@ -356,6 +357,12 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                                 .show();
                     } else {
                         captureImageUri = TtUtils.Media.captureImage(PointsActivity.this, Global.Settings.DeviceSettings.getUseTtCamera(), _CurrentPoint);
+                    }
+                    break;
+                }
+                case R.id.ctx_menu_update_orientation: {
+                    if (_CurrentMedia != null && _CurrentMedia.getMediaType() == MediaType.Picture) {
+                        TtUtils.Media.updateImageOrientation(PointsActivity.this, (TtImage)_CurrentMedia);
                     }
                     break;
                 }
@@ -904,10 +911,11 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
             }
             case Consts.Codes.Requests.ADD_IMAGES: {
                 if (data != null) {
-
                     List<TtImage> images = TtUtils.Media.getPicturesFromImageIntent(PointsActivity.this, data, _CurrentPoint.getCN());
 
-
+                    if (images.size() == 1) {
+                        TtUtils.Media.askAndUpdateImageOrientation(PointsActivity.this, null);
+                    }
 
                     addImages(images);
                 }
@@ -932,8 +940,26 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                     if (image == null) {
                         Toast.makeText(PointsActivity.this, "Unable to add Image", Toast.LENGTH_LONG).show();
                     } else {
+                        TtUtils.Media.askAndUpdateImageOrientation(PointsActivity.this, null);
                         addImage(image);
                     }
+                }
+                break;
+            }
+            case Consts.Codes.Requests.UPDATE_ORIENTATION: {
+                if (resultCode != RESULT_CANCELED) {
+                    if (data != null && data.hasExtra(Consts.Codes.Data.ORIENTATION)) {
+                        DeviceOrientationEx.Orientation orientation = data.getParcelableExtra(Consts.Codes.Data.ORIENTATION);
+
+                        if (_CurrentMedia != null && _CurrentMedia.getMediaType() == MediaType.Picture) {
+                            TtImage image = (TtImage)_CurrentMedia;
+                            image.setAzimuth(orientation.getAzimuth());
+                            image.setPitch(orientation.getPitch());
+                            image.setRoll(orientation.getRoll());
+                            onMediaUpdate();
+                        }
+                    }
+
                 }
                 break;
             }
@@ -1673,6 +1699,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
                 pmbMedia.setItemEnabled(R.id.ctx_menu_delete, false);
                 pmbMedia.setItemEnabled(R.id.ctx_menu_reset, false);
+                pmbMedia.setItemEnabled(R.id.ctx_menu_update_orientation, false);
             }
 
             fabAqr.setEnabled(false);
@@ -1696,6 +1723,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                 if (_CurrentMedia != null) {
                     pmbMedia.setItemEnabled(R.id.ctx_menu_delete, true);
                     pmbMedia.setItemEnabled(R.id.ctx_menu_reset, _MediaUpdated);
+                    pmbMedia.setItemEnabled(R.id.ctx_menu_update_orientation, _CurrentMedia.getMediaType() == MediaType.Picture);
                 }
 
                 if (_CurrentPoint != null) {

@@ -3,6 +3,7 @@ package com.usda.fmsc.twotrails.utilities;
 import android.app.Activity;
 import android.content.ClipData;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Point;
@@ -14,6 +15,7 @@ import android.os.Build;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.content.FileProvider;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
@@ -25,10 +27,13 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.usda.fmsc.android.utilities.DeviceOrientationEx;
 import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.twotrails.BuildConfig;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.Global;
+import com.usda.fmsc.twotrails.activities.GetDirectionActivity;
+import com.usda.fmsc.twotrails.activities.PointsActivity;
 import com.usda.fmsc.twotrails.activities.TtCameraActivity;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
 import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment;
@@ -1175,6 +1180,29 @@ public class TtUtils {
             intent.setDataAndType(uri, "image/*");
             intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             activity.startActivity(intent);
+        }
+
+        public static void askAndUpdateImageOrientation(final Activity activity, final TtImage image) {
+            new AlertDialog.Builder(activity)
+                    .setMessage("Would you like to update the orientation to this image?")
+                    .setPositiveButton(R.string.str_yes, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            updateImageOrientation(activity, image);
+                        }
+                    })
+                    .setNegativeButton(R.string.str_no, null)
+                    .show();
+        }
+
+        public static void updateImageOrientation(Activity activity, TtImage image) {
+            Intent intent = new Intent(activity, GetDirectionActivity.class);
+
+            if (image != null) {
+                intent.putExtra(Consts.Codes.Data.ORIENTATION, new DeviceOrientationEx.Orientation(image.getAzimuth(), image.getPitch(), image.getRoll()));
+            }
+
+            activity.startActivityForResult(intent, Consts.Codes.Requests.UPDATE_ORIENTATION);
         }
     }
 
