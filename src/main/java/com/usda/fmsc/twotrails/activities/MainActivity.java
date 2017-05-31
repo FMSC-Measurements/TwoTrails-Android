@@ -723,9 +723,8 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
     public void btnGoogleEarthClick(View view) {
         final String gEarth = "com.google.earth";
-        final Activity activity = this;
 
-        if (AndroidUtils.App.isPackageInstalled(this, gEarth)) {
+        if (AndroidUtils.App.isPackageInstalled(MainActivity.this, gEarth)) {
             if (Global.getDAL().needsAdjusting()) {
                 askToAdjust();
             } else {
@@ -754,7 +753,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
             .setPositiveButton("Install", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    AndroidUtils.App.navigateAppStore(activity, gEarth);
+                    AndroidUtils.App.navigateAppStore(MainActivity.this, gEarth);
                 }
             })
             .setNeutralButton(R.string.str_cancel, null)
