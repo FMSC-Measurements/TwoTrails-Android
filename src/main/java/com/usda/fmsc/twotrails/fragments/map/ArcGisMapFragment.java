@@ -547,6 +547,14 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
         _MarkerDataGraphics.add(polygonGraphic);
     }
 
+    //todo removePolygon(PolygonGraphicManager graphicManager)
+    @Override
+    public void removePolygon(PolygonGraphicManager graphicManager) {
+
+
+
+    }
+
     @Override
     public void addTrail(TrailGraphicManager graphicManager) {
         ArcGisTrailGraphic trailGraphic = new ArcGisTrailGraphic(mMapView);
@@ -555,6 +563,12 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
         graphicManager.setGraphic(trailGraphic);
 
         _MarkerDataGraphics.add(trailGraphic);
+    }
+
+    //todo removeTrail(TrailGraphicManager graphicManager)
+    @Override
+    public void removeTrail(TrailGraphicManager graphicManager) {
+
     }
 
     @Override

@@ -17,7 +17,6 @@ import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.animation.ViewAnimator;
 import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.geospatial.GeoPosition;
-import com.usda.fmsc.geospatial.Longitude;
 import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.geospatial.nmea.NmeaIDs;
 import com.usda.fmsc.geospatial.nmea.sentences.GGASentence;
@@ -48,7 +47,7 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
     private GpsStatusSatView statusView;
 
     private Integer zone = null;
-    private boolean canceling = false, useLostConnectionWarning = false;
+    private boolean canceling = false, useLostConnectionWarning = false, trailModeEnabled = true;
     private boolean logging, gpsExtraVisable = true, animating, gpsExtraLayoutSet;
 
     private ArrayList<TtPolygon> polygonsToMap;
@@ -56,7 +55,7 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
 
     private int currentMapIndex = -1, mapOffsetY;
 
-    private TtPolygon polygon;
+    private TtPolygon _Polygon;
 
     private TrailGraphicManager trailGraphicManager;
 
@@ -65,7 +64,6 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         if (!Global.Settings.DeviceSettings.isGpsConfigured()) {
             canceling = true;
             setResult(Consts.Codes.Results.GPS_NOT_CONFIGURED);
@@ -73,33 +71,27 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
             return;
         }
 
-        Intent intent = getIntent();
+        if (trailModeEnabled) {
+            Intent intent = getIntent();
 
-        if (intent != null) {
-            if (intent.getExtras().containsKey(Consts.Codes.Data.POLYGON_DATA))
-                polygon = intent.getParcelableExtra(Consts.Codes.Data.POLYGON_DATA);
+            if (intent != null) {
+                if (intent.getExtras().containsKey(Consts.Codes.Data.POLYGON_DATA))
+                    _Polygon = intent.getParcelableExtra(Consts.Codes.Data.POLYGON_DATA);
 
-            if (polygon == null) {
-                setResult(Consts.Codes.Results.NO_POLYGON_DATA);
+                    if (_Polygon == null) {
+                        trailModeEnabled = false;
+                    }
+
+                    super.onCreate(savedInstanceState);
+
+                    if (trailModeEnabled) {
+                        setupTrailMode(_Polygon);
+                    }
+            } else {
                 canceling = true;
-                return;
             }
-
-            super.onCreate(savedInstanceState);
-
-            ArrayList<TtPoint> points = Global.getDAL().getPointsInPolygon(polygon.getCN());
-
-            PolygonGraphicOptions pgo = Global.MapSettings.getPolyGraphicOptions(polygon.getCN());
-
-            trailGraphicManager = new TrailGraphicManager(polygon, points, getMetadata(),
-                    new TrailGraphicOptions(
-                            pgo.getUnAdjNavColor(),
-                            pgo.getAdjPtsColor(),
-                            Global.Settings.DeviceSettings.getMapUnAdjLineWidth()
-                    )
-            );
         } else {
-            canceling = true;
+            super.onCreate(savedInstanceState);
         }
     }
 
@@ -153,7 +145,9 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
             setMapPadding(0, mapOffsetY, 0, 0);
         }
 
-        addTrailGraphic(trailGraphicManager);
+        if (trailModeEnabled) {
+            addTrailGraphic(trailGraphicManager);
+        }
     }
 
     public void moveToMapPoint(int positionIndex) {
@@ -164,20 +158,39 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
         }
     }
 
+    private void setupTrailMode(TtPolygon poly) {
+        _Polygon = poly;
+
+        ArrayList<TtPoint> points = Global.getDAL().getPointsInPolygon(poly.getCN());
+
+        PolygonGraphicOptions pgo = Global.MapSettings.getPolyGraphicOptions(poly.getCN());
+
+        trailGraphicManager = new TrailGraphicManager(poly, points, getMetadata(),
+                new TrailGraphicOptions(
+                        pgo.getUnAdjNavColor(),
+                        pgo.getAdjPtsColor(),
+                        Global.Settings.DeviceSettings.getMapUnAdjLineWidth()
+                )
+        );
+    }
 
     public void addPosition(TtPoint point) {
         addPosition(point, false);
     }
 
     public void addPosition(TtPoint point, boolean moveToPointAfterAdd) {
-        final GeoPosition position = trailGraphicManager.addPoint(point);
+        if (trailModeEnabled) {
+            final GeoPosition position = trailGraphicManager.addPoint(point);
 
-        if (position != null) {
-            if (moveToPointAfterAdd) {
-                currentMapIndex++;
+            if (position != null) {
+                if (moveToPointAfterAdd) {
+                    currentMapIndex++;
 
-                moveToLocation(position, true);
+                    moveToLocation(position, true);
+                }
             }
+        } else {
+            throw new RuntimeException("TrailMode is disabled");
         }
     }
 
@@ -187,10 +200,14 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
         if (polygonsToMap == null) {
             polygonsToMap = new ArrayList<>();
 
-            for (TtPolygon p : getPolygons().values()) {
-                if (!p.getCN().equals(getTrackedPolyCN())) {
-                    polygonsToMap.add(p);
+            if (trailModeEnabled) {
+                for (TtPolygon p : getPolygons().values()) {
+                    if (!p.getCN().equals(getTrackedPolyCN())) {
+                        polygonsToMap.add(p);
+                    }
                 }
+            } else {
+                polygonsToMap.addAll(getPolygons().values());
             }
         }
 
@@ -199,12 +216,16 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
 
     @Override
     protected String getTrackedPolyCN() {
-        return polygon.getCN();
+        return _Polygon != null ? _Polygon.getCN() : null;
     }
 
     @Override
     protected Extent getTrackedPoly() {
-        return trailGraphicManager.getExtents();
+        if (trailModeEnabled) {
+            return trailGraphicManager.getExtents();
+        } else {
+            throw new RuntimeException("TrailMode is disabled");
+        }
     }
 
     @Override
@@ -237,6 +258,30 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
         if (skyView != null) {
             skyView.resume();
         }
+    }
+
+    protected final void enabledTrailMode(TtPolygon polygon) {
+        trailModeEnabled = true;
+        polygonsToMap = null;
+
+        if (trailGraphicManager != null) {
+            removeTrailGraphic(trailGraphicManager);
+        }
+
+        setupTrailMode(polygon);
+        addTrailGraphic(trailGraphicManager);
+    }
+
+    protected final void disableTrailMode() {
+        trailModeEnabled = false;
+        if (trailGraphicManager != null) {
+            removeTrailGraphic(trailGraphicManager);
+            trailGraphicManager = null;
+        }
+    }
+
+    protected final boolean isTrailModeEnabled() {
+        return trailModeEnabled;
     }
 
     protected void setNmeaData(final INmeaBurst burst) {
@@ -502,12 +547,14 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
 
     @Override
     protected void onCreateGraphicManagers() {
-        addTrailGraphic(trailGraphicManager);
+        if (trailModeEnabled) {
+            addTrailGraphic(trailGraphicManager);
+        }
 
         super.onCreateGraphicManagers();
     }
 
     protected TtPolygon getPolygon() {
-        return polygon;
+        return _Polygon;
     }
 }

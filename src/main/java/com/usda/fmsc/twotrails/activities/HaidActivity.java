@@ -18,6 +18,7 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
@@ -34,8 +35,9 @@ public class HaidActivity extends CustomToolbarActivity {
     private String onWait;
     private ProgressBar progress;
     private boolean showPoints;
-    private MenuItem miShowPoints;
+    private MenuItem miShowPoints, miTSInc, miTSDec;
     private TextView tvInfo;
+    private int textSize = 18;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -143,10 +145,13 @@ public class HaidActivity extends CustomToolbarActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_haid, menu);
+        super.onCreateOptionsMenu(menu);
+
+        inflateMenu(R.menu.menu_haid, menu);
 
         miShowPoints = menu.findItem(R.id.haidMenuShowPoints);
+        miTSInc = menu.findItem(R.id.haidMenuIncreaseTextSize);
+        miTSDec = menu.findItem(R.id.haidMenuDecreaseTextSize);
 
         return true;
     }
@@ -157,20 +162,19 @@ public class HaidActivity extends CustomToolbarActivity {
 
         switch (id) {
             case R.id.haidMenuShowPoints: {
+                miShowPoints.setTitle(showPoints ? R.string.haid_menu_show_points : R.string.haid_menu_hide_points);
+                miShowPoints.setIcon(showPoints ? R.drawable.ic_action_location_on_black : R.drawable.ic_action_location_off_black);
+
                 showPoints = !showPoints;
 
-                if (miShowPoints != null) {
-                    miShowPoints.setChecked(showPoints);
+                PolyInfo pi;
+                for (int i = 0; i < polyinfo.length; i++) {
+                    pi = new PolyInfo(polyinfo[i].getPolygon(), showPoints);
+                    polyinfo[i] = pi;
 
-                    PolyInfo pi;
-                    for (int i = 0; i < polyinfo.length; i++) {
-                        pi = new PolyInfo(polyinfo[i].getPolygon(), showPoints);
-                        polyinfo[i] = pi;
-
-                        if (pi.getCN().equals(currentPoly.getCN())) {
-                            currentPoly = pi;
-                            updateContent();
-                        }
+                    if (pi.getCN().equals(currentPoly.getCN())) {
+                        currentPoly = pi;
+                        updateContent();
                     }
                 }
                 break;
@@ -189,12 +193,38 @@ public class HaidActivity extends CustomToolbarActivity {
                 builder.create().show();
                 break;
             }
-            //todo change font size
-            /*
-            case R.id.haid_action_increase_font:
-            case R.id.haid_action_decrease_font:
-                return true;
-            */
+            case R.id.haidMenuIncreaseTextSize: {
+                if (textSize < 48) {
+                    textSize *= 1.2;
+
+                    if (textSize >= 48) {
+                        AndroidUtils.UI.disableMenuItem(miTSInc);
+                    }
+
+                    if (!miTSDec.isEnabled()) {
+                        AndroidUtils.UI.enableMenuItem(miTSDec);
+                    }
+
+                    tvInfo.setTextSize(textSize);
+                }
+                break;
+            }
+            case R.id.haidMenuDecreaseTextSize: {
+                if (textSize > 8) {
+                    textSize /= 1.2;
+
+                    if (textSize <= 8) {
+                        AndroidUtils.UI.disableMenuItem(miTSDec);
+                    }
+
+                    if (!miTSInc.isEnabled()) {
+                        AndroidUtils.UI.enableMenuItem(miTSInc);
+                    }
+
+                    tvInfo.setTextSize(textSize);
+                }
+                break;
+            }
         }
 
         return super.onOptionsItemSelected(item);

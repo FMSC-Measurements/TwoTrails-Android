@@ -7,7 +7,15 @@
         android:id="@+id/haidMenuShowPoints"
         android:title="@string/haid_menu_show_points"
         app:showAsAction="never"
-        android:checkable="true"/>
+        android:icon="@drawable/ic_action_location_on_black"/>
+
+    <item android:id="@+id/haidMenuIncreaseTextSize" android:title="@string/haid_menu_item_increase_text_size"
+        android:orderInCategory="100" app:showAsAction="never"
+        android:icon="@drawable/ic_action_zoom_in_black"/>
+
+    <item android:id="@+id/haidMenuDecreaseTextSize" android:title="@string/haid_menu_item_decrease_text_size"
+        android:orderInCategory="100" app:showAsAction="never"
+        android:icon="@drawable/ic_action_zoom_out_black"/>
 
     <item android:id="@+id/haidMenuHelp" android:title="@string/str_help"
           android:orderInCategory="100" app:showAsAction="never"

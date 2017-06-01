@@ -130,7 +130,8 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
 
     @Override
     public boolean onCreateOptionsMenuEx(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_polygons, menu);
+        inflateMenu(R.menu.menu_polygons, menu);
+
         miLock = menu.findItem(R.id.polyMenuLock);
         miReset = menu.findItem(R.id.polyMenuReset);
         miDelete = menu.findItem(R.id.polyMenuDelete);
@@ -140,13 +141,6 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
         updateButtons();
 
         return true;
-    }
-
-    @Override
-    protected boolean onPrepareOptionsPanel(View view, Menu menu) {
-        AndroidUtils.UI.addIconsToMenu(menu);
-
-        return super.onPrepareOptionsPanel(view, menu);
     }
 
     @Override

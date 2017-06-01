@@ -45,6 +45,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
+    public static final String CALCULATE_ONLY_MODE = "CalculateOnlyMode";
+
     private static final Pattern pattern = Pattern.compile("[a-zA-Z]");
 
     private Button btnCreate;
@@ -66,7 +68,7 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
 
     private int loggedCount = 0, receivedCount = 0;
 
-    private boolean calculated;
+    private boolean calculated, calcOnlyMode;
 
     private int rangeStart = -1, rangeEnd = Integer.MAX_VALUE;
 
@@ -77,222 +79,236 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_acquire_and_calculate_gps);
+        Intent intent = getIntent();
+        if (intent != null && intent.getExtras() != null) {
+            try {
+                if (intent.getExtras().containsKey(CALCULATE_ONLY_MODE)) {
+                    calcOnlyMode = intent.getBooleanExtra(CALCULATE_ONLY_MODE, false);
 
-        setUseExitWarning(true);
-        setUseLostConnectionWarning(true);
-
-        setResult(RESULT_CANCELED);
-
-        if (!isCanceling()) {
-            SheetLayoutEx.enterFromBottomAnimation(this);
-            Intent intent = getIntent();
-            if (intent != null && intent.getExtras() != null) {
-                _Bursts = new ArrayList<>();
-
-                try {
-                    _Point = intent.getParcelableExtra(Consts.Codes.Data.POINT_DATA);
-                    _Metadata = intent.getParcelableExtra(Consts.Codes.Data.METADATA_DATA);
-
-                    setZone(_Metadata.getZone());
-
-                    if (intent.getExtras().containsKey(Consts.Codes.Data.ADDITIVE_NMEA_DATA)) {
-                        _Bursts = intent.getParcelableArrayListExtra(Consts.Codes.Data.ADDITIVE_NMEA_DATA);
-                        setLoggedCount(_Bursts.size());
+                    if (calcOnlyMode) {
+                        disableTrailMode();
                     }
-
-                    _FilteredBursts = new ArrayList<>();
-                } catch (Exception e) {
-                    TtUtils.TtReport.writeError(e.getMessage(), "AcquireAndCalculateGpsActivity:onCreate", e.getStackTrace());
-                    setResult(Consts.Codes.Results.ERROR);
                 }
-            } else {
-                setResult(Consts.Codes.Results.NO_POINT_DATA);
-                finish();
-                return;
+
+                super.onCreate(savedInstanceState);
+
+                setResult(RESULT_CANCELED);
+
+                if (isCanceling()) {
+                    finish();
+                    return;
+                }
+
+                setContentView(R.layout.activity_acquire_and_calculate_gps);
+
+                SheetLayoutEx.enterFromBottomAnimation(this);
+
+                setUseExitWarning(true);
+                setUseLostConnectionWarning(true);
+
+                _Point = intent.getParcelableExtra(Consts.Codes.Data.POINT_DATA);
+                _Metadata = intent.getParcelableExtra(Consts.Codes.Data.METADATA_DATA);
+
+                setZone(_Metadata.getZone());
+
+                if (intent.getExtras().containsKey(Consts.Codes.Data.ADDITIVE_NMEA_DATA)) {
+                    _Bursts = intent.getParcelableArrayListExtra(Consts.Codes.Data.ADDITIVE_NMEA_DATA);
+                    setLoggedCount(_Bursts.size());
+                } else {
+                    _Bursts = new ArrayList<>();
+                }
+
+                _FilteredBursts = new ArrayList<>();
+            } catch (Exception e) {
+                TtUtils.TtReport.writeError(e.getMessage(), "AcquireAndCalculateGpsActivity:onCreate", e.getStackTrace());
+                setResult(Consts.Codes.Results.ERROR);
             }
+        } else {
+            setResult(Consts.Codes.Results.NO_POINT_DATA);
+            finish();
+            return;
+        }
 
-            //region Control Assign
-            ActionBar actionBar = getSupportActionBar();
-            if (actionBar != null){
-                actionBar.setDisplayShowTitleEnabled(false);
-            }
+        //region Control Assign
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null){
+            actionBar.setDisplayShowTitleEnabled(false);
+        }
 
-            setMapDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, GravityCompat.END);
+        setMapDrawerLockMode(calcOnlyMode ?
+                    DrawerLayout.LOCK_MODE_LOCKED_OPEN : DrawerLayout.LOCK_MODE_LOCKED_CLOSED,
+                GravityCompat.END);
 
-            Toolbar tbCalc = (Toolbar)findViewById(R.id.toolbarCalc);
-            if (tbCalc != null)
-                tbCalc.setTitle("Average NMEA");
+        Toolbar tbCalc = (Toolbar)findViewById(R.id.toolbarCalc);
+        if (tbCalc != null)
+            tbCalc.setTitle("Average NMEA");
 
-            tvLogged = (TextView)findViewById(R.id.acquireGpsToolbarLblLoggedValue);
-            tvRecv = (TextView)findViewById(R.id.acquireGpsToolbarLblReceivedValue);
+        tvLogged = (TextView)findViewById(R.id.acquireGpsToolbarLblLoggedValue);
+        tvRecv = (TextView)findViewById(R.id.acquireGpsToolbarLblReceivedValue);
 
-            btnLog = (Button)findViewById(R.id.aqrBtnLog);
-            btnCalc = (Button)findViewById(R.id.aqrBtnCalc);
+        btnLog = (Button)findViewById(R.id.aqrBtnLog);
+        btnCalc = (Button)findViewById(R.id.aqrBtnCalc);
 
+        if (_Bursts.size() > 0) {
+            btnCalc.setEnabled(true);
+        } else {
+            btnCalc.setBackgroundColor(AndroidUtils.UI.getColor(this, R.color.primaryLighter));
+        }
+
+        options.Fix = Global.Settings.DeviceSettings.getGpsFilterFix();
+        options.DopType = Global.Settings.DeviceSettings.getGpsFilterDopType();
+        options.DopValue = Global.Settings.DeviceSettings.getGpsFilterDopValue();
+        options.FixType = Global.Settings.DeviceSettings.getGpsFilterFixType();
+
+        btnCreate = (Button)findViewById(R.id.calcBtnCreate);
+
+        chkG1 = (CheckBox)findViewById(R.id.calcChkGroup1);
+        chkG2 = (CheckBox)findViewById(R.id.calcChkGroup2);
+        chkG3 = (CheckBox)findViewById(R.id.calcChkGroup3);
+
+        tvUtmX1 = (TextView)findViewById(R.id.calcTvUtmXG1);
+        tvUtmX2 = (TextView)findViewById(R.id.calcTvUtmXG2);
+        tvUtmX3 = (TextView)findViewById(R.id.calcTvUtmXG3);
+        tvUtmXF = (TextView)findViewById(R.id.calcTvUtmXF);
+
+        tvUtmY1 = (TextView)findViewById(R.id.calcTvUtmYG1);
+        tvUtmY2 = (TextView)findViewById(R.id.calcTvUtmYG2);
+        tvUtmY3 = (TextView)findViewById(R.id.calcTvUtmYG3);
+        tvUtmYF = (TextView)findViewById(R.id.calcTvUtmYF);
+
+        tvNssda1 = (TextView)findViewById(R.id.calcTvNssdaG1);
+        tvNssda2 = (TextView)findViewById(R.id.calcTvNssdaG2);
+        tvNssda3 = (TextView)findViewById(R.id.calcTvNssdaG3);
+        tvNssdaF = (TextView)findViewById(R.id.calcTvNssdaF);
+
+        Spinner spDop = (Spinner)findViewById(R.id.calcSpinnerDopType);
+        spFix = (Spinner)findViewById(R.id.calcSpinnerFix);
+
+        txtDop = (EditText)findViewById(R.id.calcTxtDopValue);
+        EditText txtGroup = (EditText)findViewById(R.id.calcTxtGroup);
+        EditText txtRange = (EditText)findViewById(R.id.calcTxtRange);
+        //endregion
+
+        if (txtRange != null) {
             if (_Bursts.size() > 0) {
-                btnCalc.setEnabled(true);
-            } else {
-                btnCalc.setBackgroundColor(AndroidUtils.UI.getColor(this, R.color.primaryLighter));
+                txtRange.setText(String.format("1-%d", _Bursts.size()));
             }
 
-            options.Fix = Global.Settings.DeviceSettings.getGpsFilterFix();
-            options.DopType = Global.Settings.DeviceSettings.getGpsFilterDopType();
-            options.DopValue = Global.Settings.DeviceSettings.getGpsFilterDopValue();
-            options.FixType = Global.Settings.DeviceSettings.getGpsFilterFixType();
-
-            btnCreate = (Button)findViewById(R.id.calcBtnCreate);
-
-            chkG1 = (CheckBox)findViewById(R.id.calcChkGroup1);
-            chkG2 = (CheckBox)findViewById(R.id.calcChkGroup2);
-            chkG3 = (CheckBox)findViewById(R.id.calcChkGroup3);
-
-            tvUtmX1 = (TextView)findViewById(R.id.calcTvUtmXG1);
-            tvUtmX2 = (TextView)findViewById(R.id.calcTvUtmXG2);
-            tvUtmX3 = (TextView)findViewById(R.id.calcTvUtmXG3);
-            tvUtmXF = (TextView)findViewById(R.id.calcTvUtmXF);
-
-            tvUtmY1 = (TextView)findViewById(R.id.calcTvUtmYG1);
-            tvUtmY2 = (TextView)findViewById(R.id.calcTvUtmYG2);
-            tvUtmY3 = (TextView)findViewById(R.id.calcTvUtmYG3);
-            tvUtmYF = (TextView)findViewById(R.id.calcTvUtmYF);
-
-            tvNssda1 = (TextView)findViewById(R.id.calcTvNssdaG1);
-            tvNssda2 = (TextView)findViewById(R.id.calcTvNssdaG2);
-            tvNssda3 = (TextView)findViewById(R.id.calcTvNssdaG3);
-            tvNssdaF = (TextView)findViewById(R.id.calcTvNssdaF);
-
-            Spinner spDop = (Spinner)findViewById(R.id.calcSpinnerDopType);
-            spFix = (Spinner)findViewById(R.id.calcSpinnerFix);
-
-            txtDop = (EditText)findViewById(R.id.calcTxtDopValue);
-            EditText txtGroup = (EditText)findViewById(R.id.calcTxtGroup);
-            EditText txtRange = (EditText)findViewById(R.id.calcTxtRange);
-            //endregion
-
-            if (txtRange != null) {
-                if (_Bursts.size() > 0) {
-                    txtRange.setText(String.format("1-%d", _Bursts.size()));
-                }
-
-                txtRange.addTextChangedListener(new SimpleTextWatcher() {
-                    @Override
-                    public void afterTextChanged(Editable editable) {
-                        String text = editable.toString();
-                        boolean valid = false;
-
-                        rangeStart = -1;
-                        rangeEnd = Integer.MAX_VALUE;
-
-                        Matcher m = pattern.matcher(text);
-                        if (!m.find()) {
-                            String[] tokens = text.split("-");
-
-                            if (tokens.length > 0) {
-                                Integer value = ParseEx.parseInteger(tokens[0]);
-
-                                if (value != null) {
-                                    rangeStart = value;
-                                    valid = true;
-
-                                    if (tokens.length > 1) {
-                                        value = ParseEx.parseInteger(tokens[1]);
-
-                                        if (value != null && value > rangeStart) {
-                                            rangeEnd = value;
-                                        } else {
-                                            valid = false;
-                                            rangeStart = -1;
-                                        }
-                                    }
-
-                                    rangeStart -= 2;
-                                }
-                            }
-                        }
-
-                        if (valid) {
-                            txtDop.setTextColor(AndroidUtils.UI.getColor(getBaseContext(), R.color.abc_primary_text_material_light));
-                            calculate();
-                        } else {
-                            txtDop.setTextColor(AndroidUtils.UI.getColor(getBaseContext(), android.R.color.holo_red_dark));
-                        }
-
-                    }
-                });
-            }
-
-            //region Control Init
-            ArrayAdapter<CharSequence> dopAdapter = ArrayAdapter.createFromResource(this, R.array.arr_dops, android.R.layout.simple_spinner_item);
-            ArrayAdapter<CharSequence> fixAdapter =  ArrayAdapter.createFromResource(this, R.array.arr_fix_types, android.R.layout.simple_spinner_item);
-            //ArrayAdapter<CharSequence> fixAdapter = new ArrayAdapter<CharSequence>(this, android.R.layout.simple_spinner_item, EnumEx.getNames(GSASentence.Fix.class));
-
-            dopAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            fixAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-            if (spDop != null && spFix != null) {
-                spDop.setAdapter(dopAdapter);
-                spDop.setSelection(options.DopType.getValue());
-
-                spFix.setAdapter(fixAdapter);
-                setSpinnerFixOption(options);
-
-                spDop.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                    @Override
-                    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                        options.DopType = DopType.parse(i);
-                        Global.Settings.DeviceSettings.setGpsFilterDopType(options.DopType);
-                        calculate();
-                    }
-
-                    @Override
-                    public void onNothingSelected(AdapterView<?> adapterView) {
-
-                    }
-                });
-
-                spFix.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                    @Override
-                    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                        setSettingsFixOptions(i);
-                        calculate();
-                    }
-
-                    @Override
-                    public void onNothingSelected(AdapterView<?> adapterView) {
-
-                    }
-                });
-            }
-
-            txtDop.setText(StringEx.toString(options.DopValue));
-            txtDop.addTextChangedListener(new SimpleTextWatcher() {
+            txtRange.addTextChangedListener(new SimpleTextWatcher() {
                 @Override
                 public void afterTextChanged(Editable editable) {
                     String text = editable.toString();
-                    Integer value = ParseEx.parseInteger(text);
+                    boolean valid = false;
 
-                    if (value != null) {
-                        options.DopValue = value;
-                        Global.Settings.DeviceSettings.setGpsFilterDopValue(value);
-                        txtDop.setTextColor(AndroidUtils.UI.getColor(getBaseContext(), R.color.black_1000));
+                    rangeStart = -1;
+                    rangeEnd = Integer.MAX_VALUE;
+
+                    Matcher m = pattern.matcher(text);
+                    if (!m.find()) {
+                        String[] tokens = text.split("-");
+
+                        if (tokens.length > 0) {
+                            Integer value = ParseEx.parseInteger(tokens[0]);
+
+                            if (value != null) {
+                                rangeStart = value;
+                                valid = true;
+
+                                if (tokens.length > 1) {
+                                    value = ParseEx.parseInteger(tokens[1]);
+
+                                    if (value != null && value > rangeStart) {
+                                        rangeEnd = value;
+                                    } else {
+                                        valid = false;
+                                        rangeStart = -1;
+                                    }
+                                }
+
+                                rangeStart -= 2;
+                            }
+                        }
+                    }
+
+                    if (valid) {
+                        txtDop.setTextColor(AndroidUtils.UI.getColor(getBaseContext(), R.color.abc_primary_text_material_light));
                         calculate();
                     } else {
                         txtDop.setTextColor(AndroidUtils.UI.getColor(getBaseContext(), android.R.color.holo_red_dark));
                     }
+
+                }
+            });
+        }
+
+        //region Control Init
+        ArrayAdapter<CharSequence> dopAdapter = ArrayAdapter.createFromResource(this, R.array.arr_dops, android.R.layout.simple_spinner_item);
+        ArrayAdapter<CharSequence> fixAdapter =  ArrayAdapter.createFromResource(this, R.array.arr_fix_types, android.R.layout.simple_spinner_item);
+
+        dopAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        fixAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        if (spDop != null && spFix != null) {
+            spDop.setAdapter(dopAdapter);
+            spDop.setSelection(options.DopType.getValue());
+
+            spFix.setAdapter(fixAdapter);
+            setSpinnerFixOption(options);
+
+            spDop.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                    options.DopType = DopType.parse(i);
+                    Global.Settings.DeviceSettings.setGpsFilterDopType(options.DopType);
+                    calculate();
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> adapterView) {
+
                 }
             });
 
-            txtGroup.addTextChangedListener(new SimpleTextWatcher() {
+            spFix.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
-                public void afterTextChanged(Editable editable) {
-                    manualGroupSize = ParseEx.parseInteger(editable.toString());
+                public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                    setSettingsFixOptions(i);
                     calculate();
                 }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> adapterView) {
+
+                }
             });
-            //endregion
         }
+
+        txtDop.setText(StringEx.toString(options.DopValue));
+        txtDop.addTextChangedListener(new SimpleTextWatcher() {
+            @Override
+            public void afterTextChanged(Editable editable) {
+                String text = editable.toString();
+                Integer value = ParseEx.parseInteger(text);
+
+                if (value != null) {
+                    options.DopValue = value;
+                    Global.Settings.DeviceSettings.setGpsFilterDopValue(value);
+                    txtDop.setTextColor(AndroidUtils.UI.getColor(getBaseContext(), R.color.black_1000));
+                    calculate();
+                } else {
+                    txtDop.setTextColor(AndroidUtils.UI.getColor(getBaseContext(), android.R.color.holo_red_dark));
+                }
+            }
+        });
+
+        txtGroup.addTextChangedListener(new SimpleTextWatcher() {
+            @Override
+            public void afterTextChanged(Editable editable) {
+                manualGroupSize = ParseEx.parseInteger(editable.toString());
+                calculate();
+            }
+        });
+        //endregion
     }
 
     @Override
@@ -596,7 +612,7 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
 
     @Override
     public void onBackPressed() {
-        if (isMapDrawerOpen(GravityCompat.END)) {
+        if (!calcOnlyMode && isMapDrawerOpen(GravityCompat.END)) {
             setMapDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, GravityCompat.END);
             setMapDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, GravityCompat.START);
         } else {
@@ -779,6 +795,11 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
     }
     //endregion
 
+
+    @Override
+    public boolean shouldStartGps() {
+        return !calcOnlyMode && super.shouldStartGps();
+    }
 
     @Override
     protected MapTracking getMapTracking() {

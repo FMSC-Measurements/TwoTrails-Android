@@ -153,14 +153,6 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
     }
 
     @Override
-    protected boolean onPrepareOptionsPanel(View view, Menu menu) {
-        AndroidUtils.UI.addIconsToMenu(menu);
-
-        return super.onPrepareOptionsPanel(view, menu);
-    }
-
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.metaMenuLock: {

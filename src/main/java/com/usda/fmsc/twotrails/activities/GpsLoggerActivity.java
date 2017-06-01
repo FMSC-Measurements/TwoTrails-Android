@@ -117,7 +117,9 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_gps_logger, menu);
+        super.onCreateOptionsMenu(menu);
+
+        inflateMenu(R.menu.menu_gps_logger, menu);
 
         miCheckLtf = menu.findItem(R.id.loggerMenuLtf);
         miCheckLtf.setCheckable(true);

@@ -40,7 +40,11 @@ public interface IMultiMapFragment {
 
     void addPolygon(PolygonGraphicManager graphicManager, PolygonDrawOptions drawOptions);
 
+    void removePolygon(PolygonGraphicManager graphicManager);
+
     void addTrail(TrailGraphicManager graphicManager);
+
+    void removeTrail(TrailGraphicManager graphicManager);
 
     void hideSelectedMarkerInfo();
 

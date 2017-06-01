@@ -202,9 +202,11 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_map_manager, menu);
+        super.onCreateOptionsMenu(menu);
 
-        return super.onCreateOptionsMenu(menu);
+        inflateMenu(R.menu.menu_map_manager, menu);
+
+        return true;
     }
 
     @Override

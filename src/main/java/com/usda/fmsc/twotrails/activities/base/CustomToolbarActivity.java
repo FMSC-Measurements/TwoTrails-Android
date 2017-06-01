@@ -2,10 +2,12 @@ package com.usda.fmsc.twotrails.activities.base;
 
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.MenuRes;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
+import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,6 +51,20 @@ public class CustomToolbarActivity extends AppCompatActivity {
         setupToolbar(view);
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        boolean result = super.onCreateOptionsMenu(menu);
+
+        if (result) {
+            AndroidUtils.UI.addIconsToMenu(menu);
+        }
+
+        return result;
+    }
+
+    protected final void inflateMenu(@MenuRes int menuRes, Menu menu) {
+        getMenuInflater().inflate(menuRes, menu);
+    }
 
     @Override
     protected void onResume() {

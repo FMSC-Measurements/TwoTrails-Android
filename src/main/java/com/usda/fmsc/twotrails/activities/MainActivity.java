@@ -143,9 +143,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
     @Override
     public boolean onCreateOptionsMenuEx(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-
-        AndroidUtils.UI.addIconsToMenu(menu);
+        inflateMenu(R.menu.menu_main, menu);
         return true;
     }
 

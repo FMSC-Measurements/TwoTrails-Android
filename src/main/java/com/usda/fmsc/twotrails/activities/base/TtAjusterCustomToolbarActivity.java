@@ -39,9 +39,9 @@ public abstract class TtAjusterCustomToolbarActivity extends CustomToolbarActivi
 
     @Override
     public final boolean onCreateOptionsMenu(Menu menu) {
-        boolean result = onCreateOptionsMenuEx(menu);
+        boolean result = super.onCreateOptionsMenu(menu) && onCreateOptionsMenuEx(menu);
 
-        if (menu != null) {
+        if (result && menu != null) {
             miAdjust = menu.findItem(R.id.miAdjPoly);
             setupMenu();
         }

@@ -66,6 +66,7 @@ import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment;
 import com.usda.fmsc.twotrails.fragments.map.ManagedSupportMapFragment;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
+import com.usda.fmsc.twotrails.objects.map.IPolygonGraphic;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
@@ -813,6 +814,26 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
         trailGraphicManagers.add(graphicManager);
     }
 
+    protected void removePolygonGraphic(PolygonGraphicManager graphicManager) {
+        if (graphicManager != null && polyGraphicManagers.contains(graphicManager)) {
+            if (mmFrag != null) {
+                mmFrag.removePolygon(graphicManager);
+            }
+
+            polyGraphicManagers.remove(graphicManager);
+        }
+    }
+
+    protected void removeTrailGraphic(TrailGraphicManager graphicManager) {
+        if (graphicManager != null && trailGraphicManagers.contains(graphicManager)) {
+            if (mmFrag != null) {
+                mmFrag.removeTrail(graphicManager);
+            }
+
+            trailGraphicManagers.remove(graphicManager);
+        }
+    }
+
     @Override
     public void onMapTypeChanged(MapType mapType, int mapId, boolean isOnline) {
         this.mapType = mapType;
@@ -1084,7 +1105,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
 
             addPolygonGraphic(polygonGraphicManager, Global.MapSettings.getPolyDrawOptions(polygon.getCN()));
 
-            if (polygon.getCN().equals(trackedPolyCN)) {
+            if (trackedPolyCN != null && polygon.getCN().equals(trackedPolyCN)) {
                 trackedPoly = polygonGraphicManager.getExtents();
             }
         }

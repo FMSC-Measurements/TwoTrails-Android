@@ -49,6 +49,7 @@ import com.usda.fmsc.android.widget.RecyclerViewEx;
 import com.usda.fmsc.android.widget.SheetFab;
 import com.usda.fmsc.android.widget.SheetLayoutEx;
 import com.usda.fmsc.android.widget.layoutmanagers.LinearLayoutManagerWithSmoothScroller;
+import com.usda.fmsc.twotrails.activities.base.AcquireGpsMapActivity;
 import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.activities.base.PointMediaController;
 import com.usda.fmsc.twotrails.activities.base.PointMediaListener;
@@ -672,7 +673,9 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_points, menu);
+        super.onCreateOptionsMenu(menu);
+
+        inflateMenu(R.menu.menu_points, menu);
 
         miLock = menu.findItem(R.id.pointsMenuLock);
         miLink = menu.findItem(R.id.pointsMenuLink);
@@ -692,13 +695,6 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         updateButtons();
 
         return true;
-    }
-
-    @Override
-    protected boolean onPrepareOptionsPanel(View view, Menu menu) {
-        AndroidUtils.UI.addIconsToMenu(menu);
-
-        return super.onPrepareOptionsPanel(view, menu);
     }
 
     @Override
@@ -1652,7 +1648,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         lockPoint(true);
 
         boolean setLinkVisible = false;
-        boolean setPolyChangeVisible = _Polygons.size() > 1;
+        //boolean setPolyChangeVisible = _Polygons.size() > 1;
         boolean setGpsTypeVisible = false;
 
         if (_CurrentPoint != null) {
@@ -1715,7 +1711,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                 miLock.setTitle(R.string.str_lock);
                 miLock.setIcon(R.drawable.ic_action_lock_open_white_36dp);
 
-                AndroidUtils.UI.enableMenuItem(miMovePoint);
+                //AndroidUtils.UI.enableMenuItem(miMovePoint);
                 AndroidUtils.UI.enableMenuItem(miDelete);
                 AndroidUtils.UI.enableMenuItem(miNmeaRecalc);
                 AndroidUtils.UI.enableMenuItem(miEnterLatLon);
@@ -2331,9 +2327,10 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
             ArrayList<TtNmeaBurst> bursts = Global.getDAL().getNmeaBurstsByPointCN(_CurrentPoint.getCN());
 
             if (bursts.size() > 0) {
-                Intent intent = new Intent(this, CalculateGpsActivity.class);
+                Intent intent = new Intent(this, AcquireAndCalculateGpsActivity.class);
                 intent.putExtra(Consts.Codes.Data.POINT_DATA, TtUtils.Points.clonePoint(_CurrentPoint));
                 intent.putExtra(Consts.Codes.Data.METADATA_DATA, _MetaData.get(_CurrentPoint.getMetadataCN()));
+                intent.putExtra(AcquireAndCalculateGpsActivity.CALCULATE_ONLY_MODE, true);
 
                 try {
                     intent.putParcelableArrayListExtra(Consts.Codes.Data.ADDITIVE_NMEA_DATA, bursts);
