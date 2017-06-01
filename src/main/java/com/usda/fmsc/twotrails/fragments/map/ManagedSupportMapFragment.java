@@ -418,10 +418,22 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
         _MarkerDataGraphics.add(gmpg);
     }
 
+    //todo removePolygon(PolygonGraphicManager graphicManager)
+    @Override
+    public void removePolygon(PolygonGraphicManager graphicManager) {
+
+    }
+
     @Override
     public void addTrail(TrailGraphicManager graphicManager) {
         GoogleMapsTrailGraphic gmtg = new GoogleMapsTrailGraphic(map);
         graphicManager.setGraphic(gmtg);
         _MarkerDataGraphics.add(gmtg);
+    }
+
+    //todo removeTrail(TrailGraphicManager graphicManager)
+    @Override
+    public void removeTrail(TrailGraphicManager graphicManager) {
+
     }
 }

@@ -155,7 +155,10 @@ public class TableViewActivity extends CustomToolbarActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_table_edit, menu);
+        super.onCreateOptionsMenu(menu);
+
+        inflateMenu(R.menu.menu_table_edit, menu);
+
         return true;
     }
 

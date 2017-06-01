@@ -25,7 +25,8 @@
                 android:id="@+id/haidTxtInfo"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:padding="8dp"/>
+                android:padding="8dp"
+                android:textSize="18sp"/>
 
             <ProgressBar
                 android:id="@+id/progress"

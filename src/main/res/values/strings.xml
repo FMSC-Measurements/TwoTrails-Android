@@ -432,6 +432,7 @@
 
     <!-- HAID -->
     <string name="haid_menu_show_points">Show Points</string>
+    <string name="haid_menu_hide_points">Hide Points</string>
     <string name="haid_help_text">-GPS Error can be divided by 2 if an appropriate
         ANGLE POINT METHOD is used instead of the WALK METHOD.\n\n-Appropriate means that
         the boundary legs are reasonably long between vertices where the boundary
@@ -439,8 +440,8 @@
         more than 30 degrees most of the time.\n\n-If the unit is totally a direction
         distance traverse. Use only the traverse contribution for area-error.
         -Points with asterisks are OFF boundary points.</string>
-    <string name="haid_menu_item_increase_font">Font +</string>
-    <string name="haid_menu_item_decrease_font">Font -</string>
+    <string name="haid_menu_item_increase_text_size">Increase Text Size</string>
+    <string name="haid_menu_item_decrease_text_size">Decrease Text Size</string>
 
 
     <!-- GPS Logger -->
