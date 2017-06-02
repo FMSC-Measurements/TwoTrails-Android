@@ -31,7 +31,7 @@ import java.io.File;
 import java.util.List;
 
 public class ExportActivity extends CustomToolbarActivity {
-    private MultiStateTouchCheckBox chkAll, chkPoints, chkPolys, chkMeta, chkProj, chkNmea, chkKmz, chkGpx, chkSum;
+    private MultiStateTouchCheckBox chkAll, chkPoints, chkPolys, chkMeta, chkProj, chkNmea, chkKmz, chkGpx, chkSum, chkImgInfo;
     private FABProgressCircleEx progCircle;
     private Export.ExportTask exportTask;
 
@@ -47,6 +47,7 @@ public class ExportActivity extends CustomToolbarActivity {
         chkPoints = (MultiStateTouchCheckBox)findViewById(R.id.exportChkPoints);
         chkPolys = (MultiStateTouchCheckBox)findViewById(R.id.exportChkPolys);
         chkMeta = (MultiStateTouchCheckBox)findViewById(R.id.exportChkMeta);
+        chkImgInfo = (MultiStateTouchCheckBox)findViewById(R.id.exportChkImgInfo);
         chkProj = (MultiStateTouchCheckBox)findViewById(R.id.exportChkProject);
         chkNmea = (MultiStateTouchCheckBox)findViewById(R.id.exportChkNMEA);
         chkKmz = (MultiStateTouchCheckBox)findViewById(R.id.exportChkKMZ);
@@ -62,6 +63,7 @@ public class ExportActivity extends CustomToolbarActivity {
                 chkPoints.setCheckedStateNoEvent(chkeckedState);
                 chkPolys.setCheckedStateNoEvent(chkeckedState);
                 chkMeta.setCheckedStateNoEvent(chkeckedState);
+                chkImgInfo.setCheckedStateNoEvent(chkeckedState);
                 chkProj.setCheckedStateNoEvent(chkeckedState);
                 chkNmea.setCheckedStateNoEvent(chkeckedState);
                 chkKmz.setCheckedStateNoEvent(chkeckedState);
@@ -133,9 +135,12 @@ public class ExportActivity extends CustomToolbarActivity {
         if (chkSum.isChecked())
             checkedCount++;
 
+        if (chkImgInfo.isChecked())
+            checkedCount++;
+
         if(checkedCount == 0)
             chkAll.setCheckedStateNoEvent(MultiStateTouchCheckBox.CheckedState.NotChecked);
-        else if (checkedCount > 7)
+        else if (checkedCount > 8)
             chkAll.setCheckedStateNoEvent(MultiStateTouchCheckBox.CheckedState.Checked);
         else
             chkAll.setCheckedStateNoEvent(MultiStateTouchCheckBox.CheckedState.PartialChecked);
@@ -368,6 +373,7 @@ public class ExportActivity extends CustomToolbarActivity {
                             chkPoints.isChecked(),
                             chkPolys.isChecked(),
                             chkMeta.isChecked(),
+                            chkImgInfo.isChecked(),
                             chkProj.isChecked(),
                             chkNmea.isChecked(),
                             chkKmz.isChecked(),

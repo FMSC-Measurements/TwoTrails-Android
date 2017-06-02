@@ -4,6 +4,7 @@ import android.os.AsyncTask;
 
 import com.usda.fmsc.geospatial.utm.UTMTools;
 import com.usda.fmsc.twotrails.data.MediaAccessLayer;
+import com.usda.fmsc.twotrails.objects.media.TtImage;
 import com.usda.fmsc.twotrails.units.Dist;
 import com.usda.fmsc.twotrails.units.Slope;
 import com.usda.fmsc.utilities.FileUtils;
@@ -1149,6 +1150,52 @@ public class Export {
         return summaryName;
     }
 
+    public static String imageInfo(MediaAccessLayer mal, String dir) {
+        String imagesFileName = String.format("%s/ImageInfo.csv", dir);
+
+        try {
+            CSVPrinter printer = new CSVPrinter(new FileWriter(imagesFileName), CSVFormat.DEFAULT);
+
+            printer.printRecord(
+                    "Name",
+                    "Creation Time",
+                    "IsExternal",
+                    "Comment",
+                    "Type",
+                    "Azimuth",
+                    "Pitch",
+                    "Roll",
+                    "CN",
+                    "PointCN"
+            );
+
+            ArrayList<String> values = new ArrayList<>(5);
+
+            for (TtImage img : mal.getImages()) {
+                values.add(img.getName());
+                values.add(Consts.DateTimeFormatter.print(img.getTimeCreated()));
+                values.add(StringEx.toString(img.isExternal()));
+                values.add(img.getComment());
+                values.add(img.getPictureType().toString());
+                values.add(StringEx.toString(img.getAzimuth()));
+                values.add(StringEx.toString(img.getPitch()));
+                values.add(StringEx.toString(img.getRoll()));
+                values.add(img.getCN());
+                values.add(img.getPointCN());
+
+                printer.printRecord(values);
+                values.clear();
+            }
+
+            printer.close();
+        } catch (Exception ex) {
+            imagesFileName = null;
+            TtUtils.TtReport.writeError(ex.getMessage(), "Export:imageInfo", ex.getStackTrace());
+        }
+
+        return imagesFileName;
+    }
+
 
     private static String scrubProjectName(String file) {
         return  file.replaceAll("[^a-zA-Z0-9.-]", "_");
@@ -1229,6 +1276,12 @@ public class Export {
                         return new ExportResult(ExportResultCode.ExportFailure, "Summary");
                     }
                 }
+
+                if (!isCancelled() && ep.isImgInfo() && ep.getMal() != null) {
+                    if (imageInfo(ep.getMal(), dirPath) == null) {
+                        return new ExportResult(ExportResultCode.ExportFailure, "ImageInfo");
+                    }
+                }
             } catch (Exception ex) {
                 TtUtils.TtReport.writeError(ex.getMessage(), "Export:ExportTask", ex.getStackTrace());
                 return new ExportResult(ExportResultCode.ExportFailure, "Unknown failure");
@@ -1254,10 +1307,10 @@ public class Export {
             private DataAccessLayer dal;
             private MediaAccessLayer mal;
             private File directory;
-            private boolean points, polys, meta, proj, nmea, kmz, gpx, summary;
+            private boolean points, polys, meta, proj, nmea, kmz, gpx, summary, imgInfo;
 
             public ExportParams(DataAccessLayer dal, MediaAccessLayer mal, File directory, boolean points, boolean polys, boolean meta,
-                boolean proj, boolean nmea, boolean kmz, boolean gpx, boolean summary) {
+                boolean imgInfo, boolean proj, boolean nmea, boolean kmz, boolean gpx, boolean summary) {
 
                 this.dal = dal;
                 this.mal = mal;
@@ -1267,6 +1320,7 @@ public class Export {
                 this.points = points;
                 this.polys = polys;
                 this.meta = meta;
+                this.imgInfo = imgInfo;
                 this.proj = proj;
                 this.nmea = nmea;
                 this.kmz = kmz;
@@ -1297,6 +1351,8 @@ public class Export {
             public boolean isMeta() {
                 return meta;
             }
+
+            public boolean isImgInfo() { return imgInfo; }
 
             public boolean isProj() {
                 return proj;
