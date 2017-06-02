@@ -162,6 +162,35 @@
                     android:layout_height="wrap_content">
 
                     <com.usda.fmsc.android.widget.MultiStateTouchCheckBox
+                        android:id="@+id/exportChkImgInfo"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        app:checkedColor="@color/primary"
+                        android:layout_gravity="center"
+                        android:layout_margin="5dp"
+                        android:layout_alignParentRight="true"
+                        android:layout_alignParentEnd="true"
+                        app:onCheckStateChange="chkOnChange"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/str_img_info"
+                        android:layout_centerVertical="true"
+                        android:textSize="22sp"
+                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentStart="true"
+                        android:layout_toLeftOf="@id/exportChkImgInfo"
+                        android:layout_toStartOf="@id/exportChkImgInfo"/>
+                </RelativeLayout>
+
+                <View style="@style/Dividers" />
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.usda.fmsc.android.widget.MultiStateTouchCheckBox
                         android:id="@+id/exportChkProject"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
@@ -306,8 +335,6 @@
     </RelativeLayout>
 
 
-    <!--app:layout_anchor="@id/lay1"-->
-    <!--app:layout_anchorGravity="bottom|right|end"-->
     <com.usda.fmsc.android.widget.FABProgressCircleEx
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

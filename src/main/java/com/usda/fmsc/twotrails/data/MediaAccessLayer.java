@@ -186,6 +186,10 @@ public class MediaAccessLayer extends IDataLayer {
                 0);
     }
 
+    public ArrayList<TtImage> getImages() {
+        return getImages(null, 0);
+    }
+
     private ArrayList<TtImage> getImages(String where, int limit) {
         ArrayList<TtImage> pictures = new ArrayList<>();
 

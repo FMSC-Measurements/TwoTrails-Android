@@ -123,6 +123,7 @@
     <string name="str_cn">CN</string>
     <string name="str_test">Test</string>
     <string name="str_mag_dec">Mag Dec</string>
+    <string name="str_img_info">Media Info</string>
 
     <string name="zero">0</string>
     <string name="str_x">X</string>
