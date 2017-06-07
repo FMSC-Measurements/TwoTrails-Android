@@ -1003,18 +1003,13 @@ public class TtUtils {
             String[] filePathColumn = { MediaStore.Images.Media.DATA };
             ArrayList<TtImage> pictures = new ArrayList<>();
 
-            String mediaDirStr = Global.getTtMediaDir();
-            boolean copyToProject = false;
-            if (Global.Settings.DeviceSettings.getMediaCopyToProject()) {
-                copyToProject = true;
+            String mediaDirStr = null;
+            boolean copyToProject = Global.Settings.DeviceSettings.getMediaCopyToProject();
+            if (copyToProject) {
+                mediaDirStr = Global.getTtMediaDir();
 
-                File mediaDir = new File(mediaDirStr);
-                File noMedia = new File(String.format("%s%s%s", mediaDirStr, File.separator, ".nomedia"));
+                File noMedia = new File(mediaDirStr, ".nomedia");
                 try {
-                    if (!mediaDir.exists() || !mediaDir.isDirectory()) {
-                        mediaDir.mkdirs();
-                    }
-
                     if (!noMedia.exists()) {
                         noMedia.createNewFile();
                     }
@@ -1150,9 +1145,8 @@ public class TtUtils {
 
                     DateTime dateTime = DateTime.now();
 
-                    File photo = new File(String.format("%s%sIMG_%d%d%d_%d.jpg",
-                            Global.getTtMediaDir(), File.separator, dateTime.getYear(),
-                            dateTime.getMonthOfYear(), dateTime.getDayOfMonth(), dateTime.getMillisOfDay()));
+                    File photo = new File(Global.getTtMediaDir(), String.format("IMG_%d%d%d_%d.jpg",
+                            dateTime.getYear(), dateTime.getMonthOfYear(), dateTime.getDayOfMonth(), dateTime.getMillisOfDay()));
 
                     intent.putExtra(MediaStore.EXTRA_OUTPUT,
                             FileProvider.getUriForFile(

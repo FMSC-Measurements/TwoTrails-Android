@@ -86,14 +86,16 @@ public class GpsStatusSkyView extends GpsStatusView implements SensorEventListen
         southPaint.setStyle(Paint.Style.FILL);
         southPaint.setAntiAlias(true);
 
-        mSensorManager = (SensorManager)context.getSystemService(Context.SENSOR_SERVICE);
-        accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        magnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+        if (AndroidUtils.Device.isFullOrientationAvailable(getContext())) {
+            mSensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
+            accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+            magnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+        }
     }
 
 
     public void resume() {
-        if (!compassLock) {
+        if (!compassLock && mSensorManager != null) {
             startCompass();
         }
     }

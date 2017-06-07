@@ -4,7 +4,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.widget.Toast;
 
+import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.fragments.media.TtCameraFragment;
 import com.usda.fmsc.twotrails.objects.media.TtImage;
@@ -27,6 +29,10 @@ public class TtCameraActivity extends AppCompatActivity implements TtCameraFragm
                         .beginTransaction()
                         .replace(android.R.id.content, TtCameraFragment.newInstance(bundle.getString(Consts.Codes.Data.POINT_CN)))
                         .commit();
+
+                if (!AndroidUtils.Device.isFullOrientationAvailable(TtCameraActivity.this)) {
+                    Toast.makeText(TtCameraActivity.this, "Orientation Not Supported", Toast.LENGTH_SHORT).show();
+                }
                 return;
             }
         }

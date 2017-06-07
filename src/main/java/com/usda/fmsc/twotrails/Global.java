@@ -49,6 +49,7 @@ import com.usda.fmsc.utilities.StringEx;
 import org.joda.time.DateTime;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -286,7 +287,16 @@ public class Global {
             _TtMediaDir = String.format("%s%s%s", getTtFileDir(), File.separator, "Media");
 
         if (_DAL != null) {
-            return String.format("%s%s%s", _TtMediaDir, File.separator, _DAL.getFileName());
+            String mdir = String.format("%s%s%s", _TtMediaDir, File.separator, _DAL.getFileName());
+
+            File dir = new File(mdir);
+            if (!dir.exists()) {
+                if (!dir.mkdirs()) {
+                    throw new RuntimeException("Unable to create Media Folder");
+                }
+            }
+
+            return mdir;
         }
 
         return _TtMediaDir;

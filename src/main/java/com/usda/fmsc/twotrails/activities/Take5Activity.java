@@ -112,7 +112,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
 
     private int increment, takeAmount, nmeaCount = 0;
     private boolean saved = true, updated, onBnd = true, createSSVisible = true, cancelVisible, commitSSVisible,
-            ignoreScroll, useRing, useVib, mapViewMode, killAcquire, _Locked;
+            ignoreScroll, useRing, useVib, mapViewMode, killAcquire, _Locked, cameraSupported;
 
     //region Media
     private TtMedia _CurrentMedia, _BackupMedia;
@@ -484,6 +484,8 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
 
             pmbMedia = (PopupMenuButton)findViewById(R.id.pmdMenu);
             if (pmbMedia != null) {
+                cameraSupported = AndroidUtils.Device.isCameraAvailable(Take5Activity.this);
+
                 pmbMedia.setListener(menuPopupListener);
 
                 pmbMedia.setItemEnabled(R.id.ctx_menu_reset, false);
@@ -1491,13 +1493,13 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
     }
 
     private void updateMediaContextMenuLocked() {
-        boolean locked = _CurrentMedia != null;
-        pmbMedia.setItemEnabled(R.id.ctx_menu_reset, locked);
-        pmbMedia.setItemEnabled(R.id.ctx_menu_delete, locked);
+        boolean unlocked = _CurrentMedia != null;
+        pmbMedia.setItemEnabled(R.id.ctx_menu_reset, unlocked);
+        pmbMedia.setItemEnabled(R.id.ctx_menu_delete, unlocked);
 
-        locked = _CurrentPoint != null;
-        pmbMedia.setItemEnabled(R.id.ctx_menu_capture, locked);
-        pmbMedia.setItemEnabled(R.id.ctx_menu_add, locked);
+        unlocked = _CurrentPoint != null;
+        pmbMedia.setItemEnabled(R.id.ctx_menu_capture, unlocked && cameraSupported);
+        pmbMedia.setItemEnabled(R.id.ctx_menu_add, unlocked);
     }
 
 

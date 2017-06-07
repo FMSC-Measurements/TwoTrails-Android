@@ -227,9 +227,11 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
         binder = Global.getGpsBinder();
         binder.addListener(this);
 
-        mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
-        accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        magnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+        if (AndroidUtils.Device.isFullOrientationAvailable(this)) {
+            mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+            accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+            magnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+        }
 
         getMapSettings();
 
@@ -567,19 +569,24 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
     @Override
     protected void onPause() {
         super.onPause();
-        // to stop the listener and save battery
-        mSensorManager.unregisterListener(this);
+
+        if (mSensorManager != null) {
+            // to stop the listener and save battery
+            mSensorManager.unregisterListener(this);
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        try {
-            mSensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI);
-            mSensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_UI);
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (mSensorManager != null) {
+            try {
+                mSensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI);
+                mSensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_UI);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 

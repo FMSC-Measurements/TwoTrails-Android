@@ -555,6 +555,10 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         //region Media Layouts
         pmbMedia = (PopupMenuButton)findViewById(R.id.pmdMenu);
         if (pmbMedia != null) {
+            if (!AndroidUtils.Device.isCameraAvailable(PointsActivity.this)) {
+                pmbMedia.setItemEnabled(R.id.ctx_menu_capture, false);
+            }
+
             pmbMedia.setListener(menuPopupListener);
         }
 
