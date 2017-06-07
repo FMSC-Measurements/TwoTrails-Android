@@ -6,6 +6,7 @@ import android.media.Image;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 
+import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.fragments.CameraFragment;
 import com.usda.fmsc.android.utilities.DeviceOrientationEx;
 import com.usda.fmsc.twotrails.Global;
@@ -56,7 +57,9 @@ public class TtCameraFragment extends CameraFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        deviceOrientationEx = new DeviceOrientationEx(getContext(), 3);
+        if (AndroidUtils.Device.isFullOrientationAvailable(getContext())) {
+            deviceOrientationEx = new DeviceOrientationEx(getContext(), 3);
+        }
 
         Bundle bundle = getArguments();
 
@@ -72,14 +75,18 @@ public class TtCameraFragment extends CameraFragment {
     public void onResume() {
         super.onResume();
 
-        deviceOrientationEx.resume();
+        if (deviceOrientationEx != null) {
+            deviceOrientationEx.resume();
+        }
     }
 
     @Override
     public void onPause() {
         super.onPause();
 
-        deviceOrientationEx.pause();
+        if (deviceOrientationEx != null) {
+            deviceOrientationEx.pause();
+        }
     }
 
     @Override
@@ -118,12 +125,17 @@ public class TtCameraFragment extends CameraFragment {
 
         width = image.getWidth();
         height = image.getHeight();
-        orientation = deviceOrientationEx.getOrientation();
+        if (deviceOrientationEx != null) {
+            orientation = deviceOrientationEx.getOrientation();
+        } else {
+            orientation = new DeviceOrientationEx.Orientation(0f, 0f, 0f);
+        }
+
         captureTime = DateTime.now();
     }
 
     public DeviceOrientationEx.Orientation getOrientation() {
-        return deviceOrientationEx.getOrientation();
+        return deviceOrientationEx != null ? deviceOrientationEx.getOrientation() : new DeviceOrientationEx.Orientation(0f, 0f, 0f);
     }
 
     @Override

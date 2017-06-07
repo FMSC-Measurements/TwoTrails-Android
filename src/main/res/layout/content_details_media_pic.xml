@@ -120,10 +120,11 @@
                     android:paddingStart="0dp"
                     android:paddingLeft="0dp"/>
 
-                <!--style="@style/EditTextStyle"-->
                 <TextView
                     android:id="@+id/pmdFragTvFile"
                     style="@style/TvEditTextStyleNoFocus"
+                    android:maxLines="1"
+                    android:singleLine="true"
                     android:ellipsize="start"/>
             </TableRow>
         </TableLayout>

@@ -11,8 +11,10 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 
+import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.fragments.CameraFragment;
 import com.usda.fmsc.android.listeners.SimpleTextWatcher;
 import com.usda.fmsc.android.utilities.DeviceOrientationEx;
@@ -27,6 +29,7 @@ import com.usda.fmsc.utilities.StringEx;
 public class GetDirectionActivity extends CustomToolbarActivity implements CameraFragment.CameraListener {
     private TtCameraFragment cameraFragment;
 
+    private Button btnAqr;
     private View cameraView;
     private EditText txtAzimuth, txtRoll, txtPitch;
     private boolean _canceled = true, updating;
@@ -53,6 +56,12 @@ public class GetDirectionActivity extends CustomToolbarActivity implements Camer
         txtAzimuth = (EditText)findViewById(R.id.gdTxtAzimuth);
         txtRoll = (EditText)findViewById(R.id.gdTxtRoll);
         txtPitch = (EditText)findViewById(R.id.gdTxtPitch);
+
+        btnAqr = (Button)findViewById(R.id.gdBtnAcquire);
+        if (!AndroidUtils.Device.isFullOrientationAvailable(this)) {
+            btnAqr.setEnabled(false);
+            btnAqr.setAlpha(Consts.DISABLED_ALPHA);
+        }
 
         updateOrientation();
 
