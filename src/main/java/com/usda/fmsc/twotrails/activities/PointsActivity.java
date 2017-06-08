@@ -49,7 +49,6 @@ import com.usda.fmsc.android.widget.RecyclerViewEx;
 import com.usda.fmsc.android.widget.SheetFab;
 import com.usda.fmsc.android.widget.SheetLayoutEx;
 import com.usda.fmsc.android.widget.layoutmanagers.LinearLayoutManagerWithSmoothScroller;
-import com.usda.fmsc.twotrails.activities.base.AcquireGpsMapActivity;
 import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.activities.base.PointMediaController;
 import com.usda.fmsc.twotrails.activities.base.PointMediaListener;
@@ -953,7 +952,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
                         if (_CurrentMedia != null && _CurrentMedia.getMediaType() == MediaType.Picture) {
                             TtImage image = (TtImage)_CurrentMedia;
-                            image.setAzimuth(orientation.getAzimuth());
+                            image.setAzimuth(orientation.getRationalAzimuth());
                             image.setPitch(orientation.getPitch());
                             image.setRoll(orientation.getRoll());
                             onMediaUpdate();

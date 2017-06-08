@@ -20,7 +20,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -76,7 +75,6 @@ import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.io.File;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -709,7 +707,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
 
                         if (_CurrentMedia != null && _CurrentMedia.getMediaType() == MediaType.Picture) {
                             TtImage image = (TtImage)_CurrentMedia;
-                            image.setAzimuth(orientation.getAzimuth());
+                            image.setAzimuth(orientation.getRationalAzimuth());
                             image.setPitch(orientation.getPitch());
                             image.setRoll(orientation.getRoll());
                             onMediaUpdate();
