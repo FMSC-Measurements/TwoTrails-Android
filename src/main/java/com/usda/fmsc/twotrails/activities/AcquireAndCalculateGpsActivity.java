@@ -793,6 +793,18 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
     public void chkGroupClick(View view) {
         calculate();
     }
+
+    public void btnMyLocClick(View view) {
+        GeoPosition lastPosition = getLastPosition();
+
+        if (lastPosition == null) {
+            lastPosition = Global.getGpsBinder().getLastPosition();
+        }
+
+        if (lastPosition != null) {
+            moveToLocation(lastPosition, Consts.Location.ZOOM_CLOSE, true);
+        }
+    }
     //endregion
 
 

@@ -109,9 +109,9 @@ public class TtCameraFragment extends CameraFragment {
         }
 
         if (type == PictureType.Panorama) {
-            ttImage = new TtPanorama(name, filePath, null, captureTime, pointCN, true, orientation.getAzimuth(), orientation.getPitch(), orientation.getRoll());
+            ttImage = new TtPanorama(name, filePath, null, captureTime, pointCN, true, orientation.getRationalAzimuth(), orientation.getPitch(), orientation.getRoll());
         } else {
-            ttImage = new TtImage(name, filePath, null, captureTime, pointCN, true, orientation.getAzimuth(), orientation.getPitch(), orientation.getRoll());
+            ttImage = new TtImage(name, filePath, null, captureTime, pointCN, true, orientation.getRationalAzimuth(), orientation.getPitch(), orientation.getRoll());
         }
 
         if (listener != null) {

@@ -3,13 +3,7 @@ package com.usda.fmsc.twotrails.activities;
 import android.content.Intent;
 import android.media.Image;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.text.Editable;
-import android.text.TextWatcher;
-import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -142,7 +136,7 @@ public class GetDirectionActivity extends CustomToolbarActivity implements Camer
     private void updateOrientation() {
         updating = true;
 
-        txtAzimuth.setText(StringEx.toString(_Orientation.getAzimuth(), 4));
+        txtAzimuth.setText(StringEx.toString(_Orientation.getRationalAzimuth(), 4));
         txtRoll.setText(StringEx.toString(_Orientation.getRoll(), 4));
         txtPitch.setText(StringEx.toString(_Orientation.getPitch(), 4));
 
