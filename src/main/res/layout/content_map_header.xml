@@ -29,15 +29,16 @@
         app:menuRes="@menu/ctx_menu_map_manager"/>
 
     <TextView
+        android:id="@+id/mhName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_toEndOf="@id/mhIcon"
         android:layout_toRightOf="@id/mhIcon"
         android:layout_toLeftOf="@id/mhMenu"
         android:layout_toStartOf="@id/mhMenu"
-        android:id="@+id/mhName"
-        android:maxLines="1"
         android:ellipsize="end"
+        android:singleLine="true"
+        android:maxLines="1"
         android:textSize="28sp"
         android:textColor="@android:color/black"
         android:layout_centerVertical="true"
