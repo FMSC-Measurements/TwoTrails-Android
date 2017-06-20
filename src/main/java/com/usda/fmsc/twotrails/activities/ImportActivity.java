@@ -25,8 +25,14 @@ import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.logic.PolygonAdjuster;
 import com.usda.fmsc.twotrails.utilities.Import;
+import com.usda.fmsc.utilities.kml.KmlDocument;
 
+import org.xml.sax.SAXException;
+
+import java.io.IOException;
 import java.util.regex.Pattern;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 public class ImportActivity extends TtAjusterCustomToolbarActivity {
     private FloatingActionButton fabImport;
@@ -161,9 +167,10 @@ public class ImportActivity extends TtAjusterCustomToolbarActivity {
         boolean fragUpdated = false;
 
         String[] parts = filename.split(Pattern.quote("."));
+        String ext = parts[parts.length - 1].toLowerCase();
 
         if (parts.length > 1) {
-            switch (parts[parts.length - 1].toLowerCase()) {
+            switch (ext) {
                 case "txt":
                 case "csv": {
                     if (fragment == null || !(fragment instanceof ImportTextFragment)) {
@@ -181,6 +188,27 @@ public class ImportActivity extends TtAjusterCustomToolbarActivity {
                     } else {
                         fragment.updateFileName(filename);
                     }
+                    break;
+                }
+                case "kmz":
+                case "kml": {
+                    try {
+                        String file = filename;
+
+                        KmlDocument kdoc = KmlDocument.load(filename);
+
+
+                        if (kdoc != null) {
+                            kdoc.setRegion("");
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (ParserConfigurationException e) {
+                        e.printStackTrace();
+                    } catch (SAXException e) {
+                        e.printStackTrace();
+                    }
+
                     break;
                 }
                 default: {

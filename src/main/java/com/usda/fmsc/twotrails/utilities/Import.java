@@ -832,7 +832,32 @@ public class Import {
         }
     }
     //endregion
-    
+
+
+    //region KML / KMZ
+    public static class KMLImportTask extends ImportTask<KMLImportTask.KMLImportParams, Void> {
+
+        @Override
+        protected ImportResult doInBackground(KMLImportParams... params) {
+            return null;
+        }
+
+        public static class KMLImportParams extends ImportParams {
+
+            private Collection<Integer> featureIndices;
+
+            public KMLImportParams(String filePath, DataAccessLayer dal, Collection<Integer> featureIndices) {
+                super(filePath, dal);
+
+                this.featureIndices = featureIndices;
+            }
+
+            public Collection<Integer> getFeatureIndices() {
+                return featureIndices;
+            }
+        }
+    }
+    //endregion
 
     public static abstract class ImportTask<IP extends ImportParams, Progress> extends AsyncTask<IP, Progress, ImportResult> {
         ImportTaskListener listener;
