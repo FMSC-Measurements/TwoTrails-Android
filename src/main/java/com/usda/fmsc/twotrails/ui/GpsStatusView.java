@@ -48,6 +48,8 @@ public class GpsStatusView extends View {
     }
 
     public void update(INmeaBurst burst) {
+        final long now = System.currentTimeMillis();
+
         if (burst.isValid(NmeaIDs.SentenceID.GSV)) {
             satsVisCount = burst.getSatellitesInViewCount();
             satsTrackedCount = burst.isValid(NmeaIDs.SentenceID.GGA) ? burst.getTrackedSatellitesCount() : 0;
@@ -72,7 +74,7 @@ public class GpsStatusView extends View {
                 nid = sat.getNmeaID();
                 if (nid != 0) {
                     satellites.put(nid, sat);
-                    satellitesLastSeen.put(nid, System.currentTimeMillis());
+                    satellitesLastSeen.put(nid, now);
                     satellitesVisibility.put(nid, true);
                     satellitesUsed.put(nid, usedSats.contains(nid));
 
@@ -81,7 +83,7 @@ public class GpsStatusView extends View {
 
                     if (!wasValid && valid) {
                         satValidCount++;
-                    }else if (wasValid && !valid) {
+                    } else if (wasValid && !valid) {
                         satValidCount--;
                     }
 
@@ -90,9 +92,7 @@ public class GpsStatusView extends View {
             }
         }
 
-        long now = System.currentTimeMillis();
-        Set<Integer> nids = satellites.keySet();
-        for (Integer id : nids) {
+        for (Integer id : satellites.keySet()) {
             if (now - satellitesLastSeen.get(id) > SATELLITE_VISIBILITY_TIMEOUT) {
                 satellites.remove(id);
                 satellitesLastSeen.remove(id);

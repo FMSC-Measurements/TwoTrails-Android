@@ -1669,10 +1669,8 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
             } else if (aqrVisible) {
                 hideAqr();
             }
-        } else {
-            if (aqrVisible) {
-                hideAqr();
-            }
+        } else if (aqrVisible) {
+            hideAqr();
         }
 
         //menu items that dont rely on a valid point
@@ -1870,6 +1868,8 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                         if (mediaCount > 0) {
                             mediaSelectionIndex = 0;
                             setCurrentMedia(pictures.get(0));
+                        } else {
+                            setCurrentMedia(null);
                         }
                     } else {
                         mediaCount = Global.getMAL().getItemsCount(
@@ -1981,12 +1981,10 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
             }
         } else {
             setMediaTitle(null);
+            _BackupMedia = null;
         }
 
         _CurrentMedia = media;
-
-        if (_CurrentMedia == null)
-            _BackupMedia = null;
     }
 
     private void setMediaTitle(String title) {
