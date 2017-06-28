@@ -23,7 +23,7 @@ public class GpsStatusSkyView extends GpsStatusView implements SensorEventListen
     private PointF center;
     private Paint paintCompass, paintVisSatellite, paintInvisSatellite, paintText, northPaint, southPaint;
     private RectF outerCircle, innerCircle;
-    private int outerCircleRadius, innerrCircleRadius, satRad;
+    private int outerCircleRadius, innerCircleRadius, satRad;
     private float orientation = 0;
 
     private long lastUpdate = System.currentTimeMillis();
@@ -136,7 +136,7 @@ public class GpsStatusSkyView extends GpsStatusView implements SensorEventListen
         canvas.drawLine(getX(a1, outerCircleRadius), getY(a1, outerCircleRadius),
                 getX(a2, outerCircleRadius), getY(a2, outerCircleRadius), paintCompass);
 
-        float a3 = (float)Math.toRadians(0 - orientation);
+        float a3 = (float)Math.toRadians(-orientation);
 
         northPath.reset();
         northPath.moveTo(getX(a3, outerCircleRadius), getY(a3, outerCircleRadius));
@@ -156,7 +156,7 @@ public class GpsStatusSkyView extends GpsStatusView implements SensorEventListen
         canvas.drawPath(southPath, southPaint);
 
         canvas.drawCircle(center.x, center.y, outerCircleRadius, paintCompass);
-        canvas.drawCircle(center.x, center.y, innerrCircleRadius, paintCompass);
+        canvas.drawCircle(center.x, center.y, innerCircleRadius, paintCompass);
 
         if (getValidSatelliteCount() > 0) {
             for (Satellite sat : getSatellites().values()) {
@@ -197,13 +197,13 @@ public class GpsStatusSkyView extends GpsStatusView implements SensorEventListen
         center = new PointF(w / 2, h / 2);
 
         outerCircleRadius = (int)(shortSide * .45);
-        innerrCircleRadius = (int)(shortSide * .25);
+        innerCircleRadius = (int)(shortSide * .25);
 
         outerCircle.set(center.x - outerCircleRadius, center.y - outerCircleRadius,
                 center.x + outerCircleRadius, center.y + outerCircleRadius);
 
-        innerCircle.set(center.x - innerrCircleRadius, center.y - innerrCircleRadius,
-                center.x + innerrCircleRadius, center.y + innerrCircleRadius);
+        innerCircle.set(center.x - innerCircleRadius, center.y - innerCircleRadius,
+                center.x + innerCircleRadius, center.y + innerCircleRadius);
     }
 
     public void lockCompass(boolean lock) {
