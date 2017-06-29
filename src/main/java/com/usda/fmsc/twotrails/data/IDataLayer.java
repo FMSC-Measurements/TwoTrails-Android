@@ -123,4 +123,13 @@ public abstract class IDataLayer {
 
         return cns;
     }
+
+
+    public abstract boolean open();
+
+    public abstract boolean isOpen();
+
+    public abstract void close();
+
+    public abstract TtVersion getVersion();
 }

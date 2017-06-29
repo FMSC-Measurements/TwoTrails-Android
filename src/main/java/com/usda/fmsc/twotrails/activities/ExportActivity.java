@@ -31,7 +31,7 @@ import java.io.File;
 import java.util.List;
 
 public class ExportActivity extends CustomToolbarActivity {
-    private MultiStateTouchCheckBox chkAll, chkPoints, chkPolys, chkMeta, chkProj, chkNmea, chkKmz, chkGpx, chkSum, chkImgInfo;
+    private MultiStateTouchCheckBox chkAll, chkPoints, chkPolys, chkMeta, chkProj, chkNmea, chkKmz, chkGpx, chkSum, chkImgInfo, chkPc;
     private FABProgressCircleEx progCircle;
     private Export.ExportTask exportTask;
 
@@ -44,6 +44,7 @@ public class ExportActivity extends CustomToolbarActivity {
         progCircle = (FABProgressCircleEx)findViewById(R.id.exportFabExportProgressCircle);
 
         chkAll = (MultiStateTouchCheckBox)findViewById(R.id.exportChkAll);
+        chkPc = (MultiStateTouchCheckBox)findViewById(R.id.exportChkPC);
         chkPoints = (MultiStateTouchCheckBox)findViewById(R.id.exportChkPoints);
         chkPolys = (MultiStateTouchCheckBox)findViewById(R.id.exportChkPolys);
         chkMeta = (MultiStateTouchCheckBox)findViewById(R.id.exportChkMeta);
@@ -60,6 +61,7 @@ public class ExportActivity extends CustomToolbarActivity {
                 MultiStateTouchCheckBox.CheckedState chkeckedState = isChecked ?
                         MultiStateTouchCheckBox.CheckedState.Checked : MultiStateTouchCheckBox.CheckedState.NotChecked;
 
+                chkPc.setCheckedStateNoEvent(chkeckedState);
                 chkPoints.setCheckedStateNoEvent(chkeckedState);
                 chkPolys.setCheckedStateNoEvent(chkeckedState);
                 chkMeta.setCheckedStateNoEvent(chkeckedState);
@@ -111,6 +113,9 @@ public class ExportActivity extends CustomToolbarActivity {
     public void chkOnChange(View view, boolean isChecked, MultiStateTouchCheckBox.CheckedState state) {
         int checkedCount = 0;
 
+        if (chkPc.isChecked())
+            checkedCount++;
+
         if (chkPoints.isChecked())
             checkedCount++;
 
@@ -140,7 +145,7 @@ public class ExportActivity extends CustomToolbarActivity {
 
         if(checkedCount == 0)
             chkAll.setCheckedStateNoEvent(MultiStateTouchCheckBox.CheckedState.NotChecked);
-        else if (checkedCount > 8)
+        else if (checkedCount > 9)
             chkAll.setCheckedStateNoEvent(MultiStateTouchCheckBox.CheckedState.Checked);
         else
             chkAll.setCheckedStateNoEvent(MultiStateTouchCheckBox.CheckedState.PartialChecked);
@@ -165,9 +170,10 @@ public class ExportActivity extends CustomToolbarActivity {
         }
     }
 
+    //todo edit to make pc package option instead of points selected
     private void startExport(final String directory, boolean checkExternalMedia) {
         if (checkExternalMedia && (chkPoints.isChecked() || chkProj.isChecked())) {
-            final MediaAccessLayer mal = Global.getMAL();
+            final MediaAccessLayer mal = Global.getOrCreateMAL();
             if (mal != null && mal.hasExternalImages()) {
                 //TODO convert to DontAskAgainDialog
                 new AlertDialog.Builder(this)
@@ -368,7 +374,7 @@ public class ExportActivity extends CustomToolbarActivity {
             exportTask.execute(
                     new Export.ExportTask.ExportParams(
                             Global.getDAL(),
-                            Global.hasMAL() ? Global.getMAL() : null,
+                            Global.hasMAL() ? Global.getOrCreateMAL() : null,
                             directory,
                             chkPoints.isChecked(),
                             chkPolys.isChecked(),
