@@ -163,6 +163,10 @@ public class Global {
     }
 
     public static MediaAccessLayer getMAL() {
+        return _MAL;
+    }
+
+    public static MediaAccessLayer getOrCreateMAL() {
         if (_MAL == null && _DAL != null)
         {
             _MAL = new MediaAccessLayer(getMALFilename());

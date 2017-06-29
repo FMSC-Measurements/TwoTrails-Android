@@ -1,6 +1,5 @@
 package com.usda.fmsc.twotrails.activities;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -364,7 +363,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
                 } else {
                     Global.setDAL(new DataAccessLayer(filePath));
 
-                    if (Global.getDAL().getDalVersion().toIntVersion() < TwoTrailsSchema.SchemaVersion.toIntVersion()) {
+                    if (Global.getDAL().getVersion().toIntVersion() < TwoTrailsSchema.SchemaVersion.toIntVersion()) {
                         //upgrade?
 
                         //if upgrade
@@ -443,6 +442,11 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
         if (Global.getDAL() != null) {
             Global.getDAL().close();
             Global.setDAL(null);
+        }
+
+        if (Global.getMAL() != null) {
+            Global.getMAL().close();
+            Global.setMAL(null);
         }
     }
 

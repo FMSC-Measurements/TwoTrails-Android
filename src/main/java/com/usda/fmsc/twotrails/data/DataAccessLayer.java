@@ -59,7 +59,7 @@ public class DataAccessLayer extends IDataLayer {
 
     public File getDBFile() { return _dbFile; }
 
-    public TtVersion getDalVersion() { return _DalVersion; }
+    public TtVersion getVersion() { return _DalVersion; }
 
 
     private TtVersion _DalVersion;

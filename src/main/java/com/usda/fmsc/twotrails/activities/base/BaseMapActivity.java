@@ -927,29 +927,27 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
         }
     }
 
-    protected void onFirstPositionReceived(GeoPosition position) {
+    protected void onPositionReceived(GeoPosition position) {
         updateMapView(position);
     }
 
-    protected void onPositionReceived(GeoPosition position) {
-        updateMapView(position);
+    protected void onFirstPositionReceived(GeoPosition position) {
+        moveToLocation(position, Consts.Location.ZOOM_CLOSE, true);
+        mapMoved = false;
     }
 
     private void updateMapView(GeoPosition position) {
         if (getMapTracking() == MapTracking.FOLLOW) {
             moveToLocation(position, true);
-            mapMoved = true;
-        }
-
-        if (mapMoved) {
+        } else if (mapMoved) {
             if (getMapTracking() == MapTracking.POLY_BOUNDS && getTrackedPoly() != null) {
                 moveToLocation(getTrackedPoly(), Consts.Location.PADDING, true);
-                mapMoved = false;
             } else if (getMapTracking() == MapTracking.COMPLETE_BOUNDS && getCompleteBounds() != null) {
                 moveToLocation(getCompleteBounds(), Consts.Location.PADDING, true);
-                mapMoved = false;
             }
         }
+
+        mapMoved = false;
     }
 
 

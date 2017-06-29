@@ -776,11 +776,15 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if ((keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)){
+        if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN){
             if (validateSideShot()) {
                 setupTake5();
-                return false;
             }
+
+            return true;
+        } else if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
+            moveToLocation(getLastPosition(), Consts.Location.ZOOM_CLOSE, true);
+            return true;
         }
 
         return super.onKeyDown(keyCode, event);
@@ -1066,6 +1070,8 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
     }
 
     private void hideCancel() {
+        AndroidUtils.UI.hideKeyboard(this);
+
         if (cancelVisible) {
             final Animation a = AnimationUtils.loadAnimation(this, R.anim.push_left_out);
 
@@ -1298,7 +1304,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
     //region Media
     private void saveMedia() {
         if (_MediaUpdated && _CurrentMedia != null) {
-            if (!Global.getMAL().updateMedia(_CurrentMedia)) {
+            if (!Global.getOrCreateMAL().updateMedia(_CurrentMedia)) {
                 Toast.makeText(Take5Activity.this,
                         String.format("Unable to save %s", _CurrentMedia.getMediaType().toString()),
                         Toast.LENGTH_LONG
@@ -1313,7 +1319,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
         List<TtMedia> mediaList = rvMediaAdapter.getItems();
         int index = mediaList.indexOf(media);
 
-        Global.getMAL().deleteMedia(media);
+        Global.getOrCreateMAL().deleteMedia(media);
 
         if (delete) {
             File file = new File(media.getFilePath());
@@ -1344,7 +1350,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
 
     private void addImage(final TtImage picture) {
         if (picture != null) {
-            if (Global.getMAL().insertMedia(picture)) {
+            if (Global.getOrCreateMAL().insertMedia(picture)) {
                 mediaSelectionIndex = TtUtils.Media.getMediaIndex(picture, rvMediaAdapter.getItems());
                 loadImageToList(picture);
             } else {
@@ -1360,7 +1366,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
             Collections.sort(pictures, TtUtils.Media.PictureTimeComparator);
 
             for (int i = 0; i <pictures.size(); i++) {
-                if (!Global.getMAL().insertMedia(pictures.get(i))) {
+                if (!Global.getOrCreateMAL().insertMedia(pictures.get(i))) {
                     pictures.remove(i--);
                     error++;
                 }
@@ -1411,7 +1417,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                         mediaCount = 0;
                         mediaSelectionIndex = INVALID_INDEX;
 
-                        ArrayList<TtImage> pictures = Global.getMAL().getImagesInPoint(point.getCN());
+                        ArrayList<TtImage> pictures = Global.getOrCreateMAL().getImagesInPoint(point.getCN());
 
                         Collections.sort(pictures, TtUtils.Media.PictureTimeComparator);
                         for (final TtImage p : pictures) {
@@ -1421,7 +1427,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                         if (mediaCount > 0)
                             mediaSelectionIndex = 0;
                     } else {
-                        mediaCount = Global.getMAL().getItemsCount(
+                        mediaCount = Global.getOrCreateMAL().getItemsCount(
                                 TwoTrailsMediaSchema.Media.TableName,
                                 TwoTrailsMediaSchema.Media.PointCN,
                                 point.getCN());
@@ -1440,7 +1446,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
     private void loadImageToList(final TtImage picture) {
         mediaCount++;
 
-        Global.getMAL().loadImage(picture, new MediaAccessLayer.SimpleMalListener() {
+        Global.getOrCreateMAL().loadImage(picture, new MediaAccessLayer.SimpleMalListener() {
             @Override
             public void imageLoaded(TtImage image, View view, Bitmap bitmap) {
                 addImageToList(picture, true, bitmap);

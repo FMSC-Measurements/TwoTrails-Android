@@ -996,26 +996,18 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                 Global.getDAL().updatePoints(updatePoints);
             }
 
-            int goToPoint = _CurrentIndex + created;
-
             _Points = Global.getDAL().getPointsInPolygon(_CurrentPolygon.getCN());
 
             pointSectionsPagerAdapter.notifyDataSetChanged();
 
-            int pointSize = _Points.size();
+            int numberOfPoints = _Points.size();
 
-            if (pointSize > 0) {
-                if (menuCreated) {
-                    AndroidUtils.UI.enableMenuItem(miGoto);
-                    AndroidUtils.UI.enableMenuItem(miLock);
-                }
+            if (numberOfPoints > 0 && menuCreated) {
+                AndroidUtils.UI.enableMenuItem(miGoto);
+                AndroidUtils.UI.enableMenuItem(miLock);
             }
 
-            if (goToPoint < pointSize) {
-                moveToPoint(goToPoint);
-            } else {
-                moveToPoint(pointSize - 1);
-            }
+            moveToPoint(numberOfPoints - 1);
 
             adjust = true;
         }
@@ -1349,7 +1341,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
     private void saveMedia() {
         if (_MediaUpdated && _CurrentMedia != null) {
-            if (!Global.getMAL().updateMedia(_CurrentMedia)) {
+            if (!Global.getOrCreateMAL().updateMedia(_CurrentMedia)) {
                 Toast.makeText(PointsActivity.this,
                         String.format("Unable to save %s", _CurrentMedia.getMediaType().toString()),
                         Toast.LENGTH_LONG
@@ -1364,7 +1356,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         List<TtMedia> mediaList = rvMediaAdapter.getItems();
         int index = mediaList.indexOf(media);
 
-        Global.getMAL().deleteMedia(media);
+        Global.getOrCreateMAL().deleteMedia(media);
 
         if (delete) {
             File file = new File(media.getFilePath());
@@ -1395,7 +1387,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
     private void addImage(final TtImage picture) {
         if (picture != null) {
-            if (Global.getMAL().insertMedia(picture)) {
+            if (Global.getOrCreateMAL().insertMedia(picture)) {
                 mediaSelectionIndex = TtUtils.Media.getMediaIndex(picture, rvMediaAdapter.getItems());
                 loadImageToList(picture);
             } else {
@@ -1411,7 +1403,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
             Collections.sort(pictures, TtUtils.Media.PictureTimeComparator);
 
             for (int i = 0; i <pictures.size(); i++) {
-                if (!Global.getMAL().insertMedia(pictures.get(i))) {
+                if (!Global.getOrCreateMAL().insertMedia(pictures.get(i))) {
                     pictures.remove(i--);
                     error++;
                 }
@@ -1858,7 +1850,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                         mediaCount = 0;
                         mediaSelectionIndex = INVALID_INDEX;
 
-                        ArrayList<TtImage> pictures = Global.getMAL().getImagesInPoint(point.getCN());
+                        ArrayList<TtImage> pictures = Global.getOrCreateMAL().getImagesInPoint(point.getCN());
 
                         Collections.sort(pictures, TtUtils.Media.PictureTimeComparator);
                         for (final TtImage p : pictures) {
@@ -1872,7 +1864,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                             setCurrentMedia(null);
                         }
                     } else {
-                        mediaCount = Global.getMAL().getItemsCount(
+                        mediaCount = Global.getOrCreateMAL().getItemsCount(
                                 TwoTrailsMediaSchema.Media.TableName,
                                 TwoTrailsMediaSchema.Media.PointCN,
                                 point.getCN());
@@ -1892,7 +1884,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
     private void loadImageToList(final TtImage picture) {
         mediaCount++;
 
-        Global.getMAL().loadImage(picture, new MediaAccessLayer.SimpleMalListener() {
+        Global.getOrCreateMAL().loadImage(picture, new MediaAccessLayer.SimpleMalListener() {
             @Override
             public void imageLoaded(TtImage image, View view, Bitmap bitmap) {
                 addImageToList(picture, true, bitmap);
