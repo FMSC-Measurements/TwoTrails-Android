@@ -1469,9 +1469,9 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
     private void addImageToList(final TtImage picture, boolean isValid, final Bitmap loadedImage) {
         if (picture.getPointCN().equals(_CurrentPoint.getCN())) {
             if (isValid) {
-                bitmapManager.put(picture.getFilePath(), picture.getFilePath(), AndroidUtils.UI.scaleMinBitmap(loadedImage, getBitmapHeight(), false), scaleOptions);
+                bitmapManager.put(picture.getCN(), picture.getFilePath(), AndroidUtils.UI.scaleMinBitmap(loadedImage, getBitmapHeight(), false), scaleOptions);
             } else {
-                bitmapManager.put(picture.getFilePath(), Integer.toString(R.drawable.ic_error_outline_black_48dp), AndroidUtils.UI.scaleMinBitmap(loadedImage, getBitmapHeight(), false), scaleOptions, true);
+                bitmapManager.put(picture.getCN(), Integer.toString(R.drawable.ic_error_outline_black_48dp), AndroidUtils.UI.scaleMinBitmap(loadedImage, getBitmapHeight(), false), scaleOptions, true);
             }
 
             try {

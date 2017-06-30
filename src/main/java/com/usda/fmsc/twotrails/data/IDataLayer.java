@@ -10,6 +10,9 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.DateTimeFormatterBuilder;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public abstract class IDataLayer {
@@ -122,6 +125,70 @@ public abstract class IDataLayer {
         }
 
         return cns;
+    }
+
+
+    public byte[] getLargeBlob(String tableName, String column, String where) {
+        final int MAX_BLOB_SIZE = 1000000;
+        byte[] data = null;
+
+        String query = String.format("select length(%s) from %s%s",
+                column, tableName,
+                where != null ? String.format(" where %s", where) : null);
+
+        Cursor cursor = _db.rawQuery(query, null);
+        if (cursor.moveToFirst()){
+            int size = cursor.getInt(0);
+
+            cursor.close();
+
+            if (size > MAX_BLOB_SIZE) {
+                int start = 1, length = MAX_BLOB_SIZE;
+
+                ByteArrayOutputStream baos = new ByteArrayOutputStream(size);
+                while (size > 0) {
+                    query = String.format("select substr(%s,       %d, %d) from %s%s",
+                            column, start, length, tableName,
+                            where != null ? String.format(" where %s", where) : null);
+
+                    size -= MAX_BLOB_SIZE;
+                    start += MAX_BLOB_SIZE;
+                    length = size > MAX_BLOB_SIZE ? MAX_BLOB_SIZE : size;
+
+                    cursor = _db.rawQuery(query, null);
+
+                    if (cursor.moveToFirst() && !cursor.isNull(0)) {
+                        try {
+                            baos.write(cursor.getBlob(0));
+                            cursor.close();
+                        } catch (IOException e) {
+                            throw new RuntimeException("Unable to retrieve blob");
+                        }
+                    } else {
+                        throw new RuntimeException("Unable to retrieve blob");
+                    }
+                }
+
+                data = baos.toByteArray();
+            } else {
+                query = String.format("select %s from %s%s",
+                        column, tableName,
+                        where != null ? String.format(" where %s", where) : null);
+
+                cursor = _db.rawQuery(query, null);
+
+                if (cursor.moveToFirst() && !cursor.isNull(0)) {
+                    data = cursor.getBlob(0);
+                } else {
+                    throw new RuntimeException("Unable to retrieve blob");
+                }
+            }
+
+        } else {
+            throw new RuntimeException("Blob doesn't exists");
+        }
+
+        return data;
     }
 
 

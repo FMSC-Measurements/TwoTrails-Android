@@ -10,69 +10,44 @@
         android:orientation="vertical">
 
         <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:text="@string/str_new"
             android:id="@+id/mainFragFileBtnNew"
-            android:layout_gravity="center_horizontal"
             android:onClick="btnNewClick"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"
             android:layout_marginTop="5dp"
             style="@style/MainActivityButtons"/>
 
         <View style="@style/Dividers"/>
 
         <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:text="@string/str_open"
             android:id="@+id/mainFragFileBtnOpen"
-            android:layout_gravity="center_horizontal"
             android:onClick="btnOpenClick"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"
             style="@style/MainActivityButtons"/>
 
         <View style="@style/Dividers"/>
 
         <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:text="@string/main_btn_open_rec"
             android:id="@+id/mainFragFileBtnOpenRecent"
-            android:layout_gravity="center_horizontal"
             android:onClick="btnOpenRecClick"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"
             style="@style/MainActivityButtons"/>
 
 
         <View style="@style/Dividers"/>
 
         <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:text="@string/main_btn_import"
             android:id="@+id/mainFragFileBtnImport"
-            android:layout_gravity="center_horizontal"
             android:onClick="btnImportClick"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"
             android:enabled="false"
             style="@style/MainActivityButtons"/>
 
         <View style="@style/Dividers"/>
 
         <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:text="@string/main_btn_duplicate"
             android:id="@+id/mainFragFileBtnDup"
-            android:layout_gravity="center_horizontal"
             android:onClick="btnDupClick"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"
             android:enabled="false"
             style="@style/MainActivityButtons"/>
 
@@ -86,14 +61,9 @@
             android:visibility="gone">
 
             <Button
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
                 android:text="@string/main_btn_clean"
                 android:id="@+id/mainFragFileBtnCleanDb"
-                android:layout_gravity="center_horizontal"
                 android:onClick="btnCleanDb"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"
                 android:enabled="false"
                 style="@style/MainActivityButtons"/>
 

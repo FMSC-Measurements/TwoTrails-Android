@@ -21,7 +21,6 @@ public class PictureMediaFragment extends BaseMediaFragment {
 
     private TtImage _Picture;
     private BitmapManager bitmapManager;
-    //private boolean settingView;
 
     private EditText txtAz, txtPitch, txtRoll;
 
@@ -60,54 +59,6 @@ public class PictureMediaFragment extends BaseMediaFragment {
             setViews();
         }
 
-//        txtAz.addTextChangedListener(new SimpleTextWatcher() {
-//            @Override
-//            public void afterTextChanged(Editable s) {
-//                if (!settingView) {
-//                    Float value = null;
-//
-//                    if (s.length() > 0) {
-//                        value = ParseEx.parseFloat(s.toString());
-//                    }
-//
-//                    _Picture.setAzimuth(value);
-//                    getPointMediaController().updateMedia(_Picture);
-//                }
-//            }
-//        });
-//
-//        txtPitch.addTextChangedListener(new SimpleTextWatcher() {
-//            @Override
-//            public void afterTextChanged(Editable s) {
-//                if (!settingView) {
-//                    Float value = null;
-//
-//                    if (s.length() > 0) {
-//                        value = ParseEx.parseFloat(s.toString());
-//                    }
-//
-//                    _Picture.setPitch(value);
-//                    getPointMediaController().updateMedia(_Picture);
-//                }
-//            }
-//        });
-//
-//        txtRoll.addTextChangedListener(new SimpleTextWatcher() {
-//            @Override
-//            public void afterTextChanged(Editable s) {
-//                if (!settingView) {
-//                    Float value = null;
-//
-//                    if (s.length() > 0) {
-//                        value = ParseEx.parseFloat(s.toString());
-//                    }
-//
-//                    _Picture.setRoll(value);
-//                    getPointMediaController().updateMedia(_Picture);
-//                }
-//            }
-//        });
-
         final View parent = view.findViewById(R.id.parentLayout);
 
         AndroidUtils.UI.removeSelectionOnUnfocus(txtAz);
@@ -125,16 +76,6 @@ public class PictureMediaFragment extends BaseMediaFragment {
         return view;
     }
 
-//Do not enable ability to change Picture direction from text directly
-//    @Override
-//    public void onLockChange(boolean locked) {
-//        super.onLockChange(locked);
-//
-//        txtAz.setEnabled(!locked);
-//        txtRoll.setEnabled(!locked);
-//        txtPitch.setEnabled(!locked);
-//    }
-
     @Override
     public void onMediaUpdated(TtMedia media) {
         super.onMediaUpdated(media);
@@ -144,16 +85,10 @@ public class PictureMediaFragment extends BaseMediaFragment {
     }
 
     private void setViews() {
-        //settingView = true;
-
-        if (_Picture.externalFileExists()) {
-            ivBackground.setImageBitmap(bitmapManager.get(_Picture.getFilePath()));
-        }
+        ivBackground.setImageBitmap(bitmapManager.get(_Picture.getCN()));
 
         txtAz.setText(StringEx.toStringRound(_Picture.getAzimuth(), 3));
         txtPitch.setText(StringEx.toStringRound(_Picture.getPitch(), 3));
         txtRoll.setText(StringEx.toStringRound(_Picture.getRoll(), 3));
-
-        //settingView = false;
     }
 }

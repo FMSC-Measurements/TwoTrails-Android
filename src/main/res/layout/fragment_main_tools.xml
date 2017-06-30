@@ -10,14 +10,9 @@
         android:orientation="vertical">
 
         <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:text="@string/str_map"
             android:id="@+id/mainFragToolsBtnMap"
-            android:layout_gravity="center_horizontal"
             android:onClick="btnMapClick"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"
             android:layout_marginTop="5dp"
             android:enabled="false"
             style="@style/MainActivityButtons"/>
@@ -25,28 +20,18 @@
         <View style="@style/Dividers"/>
 
         <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:text="@string/main_btn_gearth"
             android:id="@+id/mainFragToolsBtnGoogleEarth"
-            android:layout_gravity="center_horizontal"
             android:onClick="btnGoogleEarthClick"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"
             android:enabled="false"
             style="@style/MainActivityButtons"/>
 
         <View style="@style/Dividers"/>
 
         <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:text="@string/main_btn_haid"
             android:id="@+id/mainFragToolsBtnHAID"
-            android:layout_gravity="center_horizontal"
             android:onClick="btnHAIDClick"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"
             android:enabled="false"
             style="@style/MainActivityButtons"/>
 
@@ -54,42 +39,27 @@
 
 
         <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:text="@string/main_btn_export"
             android:id="@+id/mainFragToolsBtnExport"
-            android:layout_gravity="center_horizontal"
             android:onClick="btnExportClick"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"
             android:enabled="false"
             style="@style/MainActivityButtons"/>
 
         <View style="@style/Dividers"/>
 
         <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:text="@string/main_btn_plot_grid"
             android:id="@+id/mainFragToolsBtnPlotGrid"
-            android:layout_gravity="center_horizontal"
             android:onClick="btnPlotGridClick"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"
             android:enabled="false"
             style="@style/MainActivityButtons"/>
 
         <View style="@style/Dividers"/>
 
         <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:text="@string/main_btn_multi_edit"
             android:id="@+id/mainFragToolsBtnMultiEdit"
-            android:layout_gravity="center_horizontal"
             android:onClick="btnMultiEdit"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"
             android:enabled="false"
             style="@style/MainActivityButtons"
             android:visibility="gone"/>
@@ -99,30 +69,18 @@
             android:visibility="gone"/>
 
         <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:text="@string/main_btn_map_manager"
             android:id="@+id/mainFragToolsBtnMapManager"
-            android:layout_gravity="center_horizontal"
             android:onClick="btnMapManagerClick"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"
-            android:layout_marginBottom="5dp"
             android:enabled="true"
             style="@style/MainActivityButtons"/>
 
         <View style="@style/Dividers"/>
 
         <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:text="@string/main_btn_gps_log"
             android:id="@+id/mainFragToolsBtnGpsLogger"
-            android:layout_gravity="center_horizontal"
             android:onClick="btnGpsLoggerClick"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"
-            android:layout_marginBottom="5dp"
             android:enabled="true"
             style="@style/MainActivityButtons"/>
 
@@ -136,14 +94,9 @@
             android:visibility="gone">
 
             <Button
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
                 android:text="@string/str_test"
                 android:id="@+id/mainFragToolsBtnTest"
-                android:layout_gravity="center_horizontal"
                 android:onClick="btnTest"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"
                 android:enabled="true"
                 style="@style/MainActivityButtons"/>
 

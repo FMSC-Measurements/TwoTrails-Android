@@ -558,7 +558,8 @@ public class MediaAccessLayer extends IDataLayer {
                 @Override
                 public void run() {
                     try {
-                        String query = String.format("select from %s where %s = '%'",
+                        String query = String.format("select %s from %s where %s = '%s'",
+                                TwoTrailsMediaSchema.Data.BinaryData,
                                 TwoTrailsMediaSchema.Data.TableName,
                                 TwoTrailsMediaSchema.SharedSchema.CN,
                                 image.getCN());
@@ -567,8 +568,12 @@ public class MediaAccessLayer extends IDataLayer {
 
                         if (c.moveToFirst()) {
                             do {
-                                if (!c.isNull(0)) {
-                                    byte[] data = c.getBlob(0);
+                                byte[] data = getLargeBlob(
+                                        TwoTrailsMediaSchema.Data.TableName,
+                                        TwoTrailsMediaSchema.Data.BinaryData,
+                                        String.format("%s = '%s'",TwoTrailsMediaSchema.SharedSchema.CN, image.getCN()));
+
+                                if (data != null) {
                                     Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
 
                                     if (listener != null) {
@@ -579,9 +584,6 @@ public class MediaAccessLayer extends IDataLayer {
                                         }
                                     }
                                 }
-                                else
-                                    throw new Exception("Image Binary Data is null");
-
                             } while (c.moveToNext());
                         }
 
