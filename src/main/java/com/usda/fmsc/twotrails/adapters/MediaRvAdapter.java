@@ -166,12 +166,12 @@ public class MediaRvAdapter extends SelectableAdapterEx<TtMedia, SelectableAdapt
         public void onBindView(TtMedia item) {
             TtImage pic = (TtImage)getItem();
 
-            String key = pic.getFilePath() + "_tumb";
+            String key = pic.getCN() + "_thumb";
 
             Bitmap thumbnail;
 
             if (!bitmapManager.containKey(key)) {
-                Bitmap img = bitmapManager.get(pic.getFilePath());
+                Bitmap img = bitmapManager.get(pic.getCN());
 
                 int width = img.getWidth() * maxHeight / img.getHeight();
                 thumbnail = AndroidUtils.UI.resizeBitmap(img, width, maxHeight);

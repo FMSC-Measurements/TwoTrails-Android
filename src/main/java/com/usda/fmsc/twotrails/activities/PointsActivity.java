@@ -108,6 +108,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
     private android.support.design.widget.FloatingActionButton fabAqr;
     private MSFloatingActionButton fabMenu;
     private SheetFab fabSheet;
+    private ImageView ivFullscreen;
 
     private SlidingUpPanelLayout slidingLayout;
     private View pmdScroller;
@@ -638,12 +639,12 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         }
 
 
-        ImageView ivFullscreen = (ImageView)findViewById(R.id.pmdIvFullscreen);
+        ivFullscreen = (ImageView)findViewById(R.id.pmdIvFullscreen);
         if (ivFullscreen != null) {
             ivFullscreen.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (_CurrentMedia != null && _CurrentMedia.getMediaType() == MediaType.Picture &&
+                    if (_CurrentMedia != null && _CurrentMedia.getMediaType() == MediaType.Picture && _CurrentMedia.isExternal() &&
                             (slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED ||
                                     slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.ANCHORED)) {
                         TtUtils.Media.openInImageViewer(PointsActivity.this, _CurrentMedia.getFilePath());
@@ -1852,14 +1853,18 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
                         ArrayList<TtImage> pictures = Global.getOrCreateMAL().getImagesInPoint(point.getCN());
 
-                        Collections.sort(pictures, TtUtils.Media.PictureTimeComparator);
-                        for (final TtImage p : pictures) {
-                            loadImageToList(p);
-                        }
+                        if (pictures != null) {
+                            Collections.sort(pictures, TtUtils.Media.PictureTimeComparator);
+                            for (final TtImage p : pictures) {
+                                loadImageToList(p);
+                            }
 
-                        if (mediaCount > 0) {
-                            mediaSelectionIndex = 0;
-                            setCurrentMedia(pictures.get(0));
+                            if (mediaCount > 0) {
+                                mediaSelectionIndex = 0;
+                                setCurrentMedia(pictures.get(0));
+                            } else {
+                                setCurrentMedia(null);
+                            }
                         } else {
                             setCurrentMedia(null);
                         }
@@ -1907,9 +1912,9 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
     private void addImageToList(final TtImage picture, boolean isValid, final Bitmap loadedImage) {
         if (picture.getPointCN().equals(_CurrentPoint.getCN())) {
             if (isValid) {
-                bitmapManager.put(picture.getFilePath(), picture.getFilePath(), AndroidUtils.UI.scaleMinBitmap(loadedImage, bitmapHeight, false), scaleOptions);
+                bitmapManager.put(picture.getCN(), picture.getFilePath(), AndroidUtils.UI.scaleMinBitmap(loadedImage, bitmapHeight, false), scaleOptions);
             } else {
-                bitmapManager.put(picture.getFilePath(), Integer.toString(R.drawable.ic_error_outline_black_48dp), AndroidUtils.UI.scaleMinBitmap(loadedImage, bitmapHeight, false), scaleOptions, true);
+                bitmapManager.put(picture.getCN(), Integer.toString(R.drawable.ic_error_outline_black_48dp), AndroidUtils.UI.scaleMinBitmap(loadedImage, bitmapHeight, false), scaleOptions, true);
             }
 
             try {
@@ -1971,9 +1976,20 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
                 setMediaUpdated(false);
             }
+
+            if (media.isExternal()) {
+                ivFullscreen.setEnabled(true);
+                ivFullscreen.setAlpha(Consts.ENABLED_ALPHA);
+            } else {
+                ivFullscreen.setEnabled(false);
+                ivFullscreen.setAlpha(Consts.DISABLED_ALPHA);
+            }
         } else {
             setMediaTitle(null);
             _BackupMedia = null;
+
+            ivFullscreen.setEnabled(false);
+            ivFullscreen.setAlpha(Consts.DISABLED_ALPHA);
         }
 
         _CurrentMedia = media;
