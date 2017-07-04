@@ -6,5 +6,6 @@
     android:layout_height="?attr/dropdownListPreferredItemHeight"
     android:ellipsize="marquee"
     android:textColor="@android:color/black"
-    android:textSize="20sp"/>
+    android:textSize="20sp"
+    android:background="@color/background_card"/>
     <!--android:textColor="@color/abc_primary_text_material_dark"/>-->
