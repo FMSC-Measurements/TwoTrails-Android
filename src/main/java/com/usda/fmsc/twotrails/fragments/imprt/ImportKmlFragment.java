@@ -8,43 +8,45 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.usda.fmsc.android.widget.RecyclerViewEx;
 import com.usda.fmsc.android.widget.multiselection.MultiSelector;
 import com.usda.fmsc.android.widget.multiselection.SelectableHolder;
-import com.usda.fmsc.android.widget.RecyclerViewEx;
-import com.usda.fmsc.utilities.gpx.GpxBaseTrack;
-import com.usda.fmsc.utilities.gpx.GpxDocument;
-import com.usda.fmsc.utilities.StringEx;
-import com.usda.fmsc.twotrails.adapters.GpxTracksAdapter;
-import com.usda.fmsc.twotrails.data.DataAccessLayer;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
+import com.usda.fmsc.twotrails.adapters.GpxTracksAdapter;
+import com.usda.fmsc.twotrails.adapters.KmlPolygonsAdapter;
+import com.usda.fmsc.twotrails.data.DataAccessLayer;
 import com.usda.fmsc.twotrails.utilities.Import;
-import com.usda.fmsc.twotrails.utilities.Import.GPXImportTask;
+import com.usda.fmsc.utilities.StringEx;
+import com.usda.fmsc.utilities.kml.Folder;
+import com.usda.fmsc.utilities.kml.KmlDocument;
+import com.usda.fmsc.utilities.kml.Placemark;
+import com.usda.fmsc.utilities.kml.Polygon;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import jp.wasabeef.recyclerview.animators.SlideInUpAnimator;
 
-public class ImportGpxFragment extends BaseImportFragment {
+public class ImportKmlFragment extends BaseImportFragment {
     private static final String FILENAME = "filename";
 
     private RecyclerViewEx rvImport;
-    private MultiSelector selector = new MultiSelector( new MultiSelector.Listener() {
+    private MultiSelector selector = new MultiSelector(new MultiSelector.Listener() {
         @Override
         public void onItemSelectionChange(SelectableHolder holder, boolean isSelected) {
-            if (holder instanceof GpxTracksAdapter.GpxBaseTrackHolder) {
-                GpxTracksAdapter.GpxBaseTrackHolder gh = (GpxTracksAdapter.GpxBaseTrackHolder)holder;
+            if (holder instanceof KmlPolygonsAdapter.KmlPolygonHolder) {
+                KmlPolygonsAdapter.KmlPolygonHolder kmlHolder = (KmlPolygonsAdapter.KmlPolygonHolder)holder;
 
 
-                if (isSelected && !polyParams.contains(gh)) {
-                    polyParams.add(gh);
+                if (isSelected && !polyParams.contains(kmlHolder)) {
+                    polyParams.add(kmlHolder);
                 } else {
-                    polyParams.remove(gh);
+                    polyParams.remove(kmlHolder);
                 }
-
-                readyToImport(validate());
             }
+
+            readyToImport(validate());
         }
 
         @Override
@@ -54,18 +56,19 @@ public class ImportGpxFragment extends BaseImportFragment {
         }
     });
 
-    private Import.GPXImportTask task;
+    private Import.KMLImportTask task;
 
     private String _FileName;
 
-    private GpxDocument gpxDocument;
+    private KmlDocument kmlDocument;
 
-    private List<GpxTracksAdapter.GpxBaseTrackHolder> polyParams;
-    private List<GpxBaseTrack> tracks;
+    private List<KmlPolygonsAdapter.KmlPolygonHolder> polyParams;
+    private List<Polygon> polygons;
 
 
-    public static ImportGpxFragment newInstance(String fileName) {
-        ImportGpxFragment fragment = new ImportGpxFragment();
+
+    public static ImportKmlFragment newInstance(String fileName) {
+        ImportKmlFragment fragment = new ImportKmlFragment();
         Bundle args = new Bundle();
 
         args.putString(FILENAME, fileName);
@@ -109,22 +112,32 @@ public class ImportGpxFragment extends BaseImportFragment {
 
 
     private void setupTracks() {
-        if (rvImport != null && gpxDocument != null) {
-            tracks = new ArrayList<>();
-            tracks.addAll(gpxDocument.getTracks());
-            tracks.addAll(gpxDocument.getRoutes());
+        if (rvImport != null && kmlDocument != null) {
+            polygons = new ArrayList<>();
+
+            parseFolder(kmlDocument);
 
             selector.clearSelections();
 
-            GpxTracksAdapter adapter = new GpxTracksAdapter(getContext(), tracks, selector);
+            KmlPolygonsAdapter adapter = new KmlPolygonsAdapter(getContext(), polygons, selector);
             rvImport.setAdapter(adapter);
+        }
+    }
+
+    private void parseFolder(Folder folder) {
+        for (Placemark placemark : folder.getPlacemarks()) {
+            polygons.addAll(placemark.getPolygons());
+        }
+
+        for (Folder subFolder : folder.getSubFolders()) {
+            parseFolder(subFolder);
         }
     }
 
 
     @Override
     protected void runImportTask(DataAccessLayer dal) {
-        task = new GPXImportTask();
+        task = new Import.KMLImportTask();
 
         task.setListener(new Import.ImportTaskListener() {
             @Override
@@ -135,7 +148,7 @@ public class ImportGpxFragment extends BaseImportFragment {
 
         selector.getSelectedPositions();
 
-        GPXImportTask.GPXImportParams params = new GPXImportTask.GPXImportParams(
+        Import.KMLImportTask.KMLImportParams params = new Import.KMLImportTask.KMLImportParams(
                 _FileName, dal, getParams()
         );
 
@@ -162,12 +175,12 @@ public class ImportGpxFragment extends BaseImportFragment {
         return true;
     }
 
-    private List<GPXImportTask.GPXPolyParams> getParams() {
-        ArrayList<GPXImportTask.GPXPolyParams> params = new ArrayList<>();
+    private List<Import.KMLImportTask.KMLPolyParams> getParams() {
+        ArrayList<Import.KMLImportTask.KMLPolyParams> params = new ArrayList<>();
 
-        for (GpxTracksAdapter.GpxBaseTrackHolder holder : polyParams) {
-            params.add(new GPXImportTask.GPXPolyParams(
-                    holder.getName(), null, null, null, null, tracks.get(holder.getAdapterPosition()), Global.getDefaultMeta()));
+        for (KmlPolygonsAdapter.KmlPolygonHolder holder : polyParams) {
+            params.add(new Import.KMLImportTask.KMLPolyParams(
+                    holder.getName(), null, null, null, null, polygons.get(holder.getAdapterPosition()), Global.getDefaultMeta()));
         }
 
         return params;
@@ -184,7 +197,7 @@ public class ImportGpxFragment extends BaseImportFragment {
             _FileName = filename;
 
             try {
-                gpxDocument = GpxDocument.parseFile(_FileName);
+                kmlDocument = KmlDocument.load(_FileName);
 
                 setupTracks();
 

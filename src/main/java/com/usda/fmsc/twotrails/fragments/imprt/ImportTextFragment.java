@@ -7,6 +7,7 @@ import android.support.v7.widget.SwitchCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 import android.widget.EditText;
@@ -162,6 +163,45 @@ public class ImportTextFragment extends BaseImportFragment {
         spnSlpAng = (Spinner)view.findViewById(R.id.importFragSpnSlpAng);
         spnSlpAngType = (Spinner)view.findViewById(R.id.importFragSpnSlpAngType);
         spnParentCN = (Spinner)view.findViewById(R.id.importFragSpnParentCN);
+
+        AdapterView.OnItemSelectedListener sl = new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                readyToImport(validate());
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                readyToImport(validate());
+            }
+        };
+
+        spnCN.setOnItemSelectedListener(sl);
+        spnOp.setOnItemSelectedListener(sl);
+        spnIndex.setOnItemSelectedListener(sl);
+        spnPID.setOnItemSelectedListener(sl);
+        spnTime.setOnItemSelectedListener(sl);
+        spnPoly.setOnItemSelectedListener(sl);
+        spnGroup.setOnItemSelectedListener(sl);
+        spnCmt.setOnItemSelectedListener(sl);
+        //spnMeta.setOnItemSelectedListener(sl);
+        spnBnd.setOnItemSelectedListener(sl);
+        spnX.setOnItemSelectedListener(sl);
+        spnY.setOnItemSelectedListener(sl);
+        spnZ.setOnItemSelectedListener(sl);
+        //spnAcc.setOnItemSelectedListener(sl);
+        spnManAcc.setOnItemSelectedListener(sl);
+        spnLat.setOnItemSelectedListener(sl);
+        spnLon.setOnItemSelectedListener(sl);
+        spnElev.setOnItemSelectedListener(sl);
+        spnRMSEr.setOnItemSelectedListener(sl);
+        spnFwdAz.setOnItemSelectedListener(sl);
+        spnBkAz.setOnItemSelectedListener(sl);
+        spnSlpDist.setOnItemSelectedListener(sl);
+        spnSlpDistType.setOnItemSelectedListener(sl);
+        spnSlpAng.setOnItemSelectedListener(sl);
+        spnSlpAngType.setOnItemSelectedListener(sl);
+        spnParentCN.setOnItemSelectedListener(sl);
         //endregion
 
         if (_Columns != null && _Columns.length > 2) {
@@ -229,6 +269,8 @@ public class ImportTextFragment extends BaseImportFragment {
                 divSlpAng.setVisibility(visibility);
                 divSlpAngType.setVisibility(visibility);
                 divParentCN.setVisibility(visibility);
+
+                readyToImport(validate());
             }
         });
 
@@ -524,55 +566,57 @@ public class ImportTextFragment extends BaseImportFragment {
     }
 
     @Override
-    public boolean validate() {
+    public boolean validate(boolean useMessage) {
         if (!validFile) {
-            Toast.makeText(getContext(), "Invalid File", Toast.LENGTH_SHORT).show();
+            if (useMessage) {
+                Toast.makeText(getContext(), "Invalid File", Toast.LENGTH_SHORT).show();
+            }
             return false;
         }
 
         if (spnX.getSelectedItemPosition() < 1) {
-            toastError("X", spnX, false);
+            onError("X", spnX, false, useMessage);
             return false;
         }
 
         if (spnY.getSelectedItemPosition() < 1) {
-            toastError("Y", spnY, false);
+            onError("Y", spnY, false, useMessage);
             return false;
         }
 
         if (advImport) {
             if (spnOp.getSelectedItemPosition() < 1) {
-                toastError("Op Type", spnOp, true);
+                onError("Op Type", spnOp, true, useMessage);
                 return false;
             }
 
             if (spnFwdAz.getSelectedItemPosition() < 1 && spnBkAz.getSelectedItemPosition() < 1) {
-                toastError("The Forward or Backward Azimuth", spnFwdAz, true);
+                onError("The Forward or Backward Azimuth", spnFwdAz, true, useMessage);
                 return false;
             }
 
             if (spnSlpDist.getSelectedItemPosition() < 1) {
-                toastError("Slope Distance", spnSlpDist, true);
+                onError("Slope Distance", spnSlpDist, true, useMessage);
                 return false;
             }
 
             if (spnSlpDistType.getSelectedItemPosition() < 1) {
-                toastError("Slope Distance Type", spnSlpDistType, true);
+                onError("Slope Distance Type", spnSlpDistType, true, useMessage);
                 return false;
             }
 
             if (spnSlpAng.getSelectedItemPosition() < 1) {
-                toastError("Slope Angle", spnSlpAng, true);
+                onError("Slope Angle", spnSlpAng, true, useMessage);
                 return false;
             }
 
             if (spnSlpAngType.getSelectedItemPosition() < 1) {
-                toastError("Slope Angle Type", spnSlpAngType, true);
+                onError("Slope Angle Type", spnSlpAngType, true, useMessage);
                 return false;
             }
 
             if (spnParentCN.getSelectedItemPosition() < 1) {
-                toastError("Parent CN", spnParentCN, true);
+                onError("Parent CN", spnParentCN, true, useMessage);
                 return false;
             }
         }
@@ -614,12 +658,15 @@ public class ImportTextFragment extends BaseImportFragment {
         }
     }
 
-    private void toastError(String field, View view, boolean isAdv) {
+    private void onError(String field, View view, boolean isAdv, boolean showToast) {
         view.requestFocus();
-        Toast.makeText(getContext(),
-                String.format("%s Field is required%s", field,
-                        isAdv ? " for advanced import" : StringEx.Empty),
-                Toast.LENGTH_SHORT).show();
+
+        if (showToast) {
+            Toast.makeText(getContext(),
+                    String.format("%s Field is required%s", field,
+                            isAdv ? " for advanced import" : StringEx.Empty),
+                    Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override

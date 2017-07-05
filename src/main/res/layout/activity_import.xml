@@ -80,8 +80,7 @@
         android:id="@+id/importFabImportProgressCircle"
         style="@style/fabProgressHolderStyle"
         app:finalIcon="@drawable/ic_file_download_white_36dp"
-        app:layout_anchor="@id/lay1"
-        app:layout_anchorGravity="bottom|right|end">
+        android:layout_gravity="bottom|end">
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/importFabImport"
@@ -89,7 +88,7 @@
             android:src="@drawable/ic_file_download_white_36dp"
             android:onClick="btnImport"
             android:layout_margin="@dimen/fab_margin"
-            android:visibility="invisible"/>
+            android:visibility="gone"/>
 
     </com.usda.fmsc.android.widget.FABProgressCircleEx>
 </android.support.design.widget.CoordinatorLayout>

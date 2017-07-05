@@ -27,6 +27,8 @@ import com.usda.fmsc.utilities.gpx.GpxPoint;
 import com.usda.fmsc.utilities.gpx.GpxRoute;
 import com.usda.fmsc.utilities.gpx.GpxTrack;
 import com.usda.fmsc.utilities.gpx.GpxTrackSeg;
+import com.usda.fmsc.utilities.kml.Coordinates;
+import com.usda.fmsc.utilities.kml.Polygon;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -839,21 +841,169 @@ public class Import {
 
         @Override
         protected ImportResult doInBackground(KMLImportParams... params) {
-            return null;
+            KMLImportParams gip;
+
+            if (params.length < 1 || !validatePolyParams((gip = params[0]).getPolyParms())) {
+                return new ImportResult(ImportResultCode.InvalidParams);
+            }
+
+            if (gip.getFilePath() == null) {
+                return new ImportResult(ImportResultCode.InvalidParams, "No File selected");
+            }
+
+            DataAccessLayer dal = gip.getDal();
+
+            try {
+                ArrayList<TtPolygon> polygons = new ArrayList<>();
+                ArrayList<TtPoint> points = new ArrayList<>();
+
+                TtPolygon poly;
+                int polyCount = dal.getItemCount(TwoTrailsSchema.PolygonSchema.TableName);
+
+                for (KMLPolyParams gpp: gip.getPolyParms()) {
+                    poly = new TtPolygon();
+                    poly.setName(gpp.PolyName);
+
+                    if (gpp.Accuracy != null) {
+                        poly.setAccuracy(gpp.Accuracy);
+                    }
+
+                    if (gpp.IncrementAmount != null) {
+                        poly.setIncrementBy(gpp.IncrementAmount);
+                    }
+
+                    if (gpp.PointStartIndex != null) {
+                        poly.setPointStartIndex(gpp.PointStartIndex);
+                    } else {
+                        poly.setPointStartIndex(polyCount * 1000 + 1010);
+                    }
+
+                    if (gpp.Description != null) {
+                        poly.setDescription(gpp.Description);
+                    }
+
+                    polygons.add(poly);
+
+                    int index = 0;
+                    GpsPoint point, prevPoint = null;
+
+                    for (Coordinates coord : gpp.Polygon.getInnerBoundary() != null ?
+                            gpp.Polygon.getInnerBoundary() : gpp.Polygon.getOuterBoundary()) {
+                        point = new GpsPoint();
+
+                        point.setIndex(index);
+                        index++;
+
+                        point.setPID(PointNamer.namePoint(prevPoint, poly));
+
+                        point.setPolyCN(poly.getCN());
+                        point.setPolyName(poly.getName());
+
+                        point.setGroupCN(Global.getMainGroup().getCN());
+                        point.setGroupName(Global.getMainGroup().getName());
+
+                        point.setMetadataCN(gpp.Metadata.getCN());
+
+                        point.setOnBnd(true);
+
+                        UTMCoords utmcoords = UTMTools.convertLatLonSignedDecToUTM(coord.getLatitude(), coord.getLongitude(), gpp.Metadata.getZone());
+
+                        point.setUnAdjX(utmcoords.getX());
+                        point.setUnAdjY(utmcoords.getY());
+
+                        point.setLatitude(coord.getLatitude());
+                        point.setLongitude(coord.getLongitude());
+
+                        if (coord.getAltitude() != null) {
+                            point.setElevation(coord.getAltitude());
+                            point.setUnAdjZ(TtUtils.Convert.distance(coord.getAltitude(), UomElevation.Meters, gpp.Metadata.getElevation()));
+                        }
+
+
+                        points.add(point);
+                        prevPoint = point;
+                    }
+
+                    polyCount++;
+                }
+
+
+                if (!isCancelled()) {
+                    if (polygons.size() > 0) {
+                        for (TtPolygon p : polygons) {
+                            if (!dal.insertPolygon(p)) {
+                                throw new RuntimeException("Failed to insert Polygons");
+                            }
+                        }
+                    }
+
+                    if (points.size() > 0) {
+                        if (!dal.insertPoints(points)) {
+                            throw new RuntimeException("Failed to insert Points");
+                        }
+                    }
+
+                    return new ImportResult(ImportResultCode.Success);
+                } else {
+                    return new ImportResult(ImportResultCode.Cancelled);
+                }
+            } catch (Exception ex) {
+                TtUtils.TtReport.writeError(ex.getMessage(), "Import:GPXImportTask", ex.getStackTrace());
+                return new ImportResult(ImportResultCode.ImportFailure, "Data error");
+            }
+        }
+
+        private boolean validatePolyParams(Collection<KMLPolyParams>  params) {
+            if (params == null || params.size() < 1) {
+                return false;
+            }
+
+            for (KMLPolyParams gpp : params) {
+                if ((gpp.PointStartIndex != null && gpp.PointStartIndex < 0) ||
+                        (StringEx.isEmpty(gpp.PolyName)) ||
+                        (gpp.IncrementAmount != null && gpp.IncrementAmount < 1) ||
+                        (gpp.Polygon == null) ||
+                        (gpp.Accuracy != null && gpp.Accuracy < 0) ||
+                        (gpp.Metadata == null)) {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         public static class KMLImportParams extends ImportParams {
+            private Collection<KMLPolyParams> polyParms;
 
-            private Collection<Integer> featureIndices;
-
-            public KMLImportParams(String filePath, DataAccessLayer dal, Collection<Integer> featureIndices) {
+            public KMLImportParams(String filePath, DataAccessLayer dal, Collection<KMLPolyParams> polyParms) {
                 super(filePath, dal);
-
-                this.featureIndices = featureIndices;
+                this.polyParms = polyParms;
             }
 
-            public Collection<Integer> getFeatureIndices() {
-                return featureIndices;
+            public Collection<KMLPolyParams> getPolyParms() {
+                return polyParms;
+            }
+        }
+
+        public static class KMLPolyParams {
+            public String PolyName;
+            public String Description;
+            public Integer PointStartIndex;
+            public Integer IncrementAmount;
+            public Double Accuracy;
+            public com.usda.fmsc.utilities.kml.Polygon Polygon;
+            public TtMetadata Metadata;
+
+            public KMLPolyParams(String polyName, String description, Integer pointStartIndex,
+                                 Integer incrementAmount, Double accuracy, com.usda.fmsc.utilities.kml.Polygon polygon,
+                                 TtMetadata metadata) {
+                this.PolyName = polyName;
+                this.Description = description;
+                this.PointStartIndex = pointStartIndex;
+                this.IncrementAmount = incrementAmount;
+                this.Accuracy = accuracy;
+                this.Polygon = polygon;
+                this.Metadata = metadata;
             }
         }
     }
