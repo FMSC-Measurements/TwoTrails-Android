@@ -20,11 +20,14 @@ import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.activities.base.TtAjusterCustomToolbarActivity;
 import com.usda.fmsc.twotrails.fragments.imprt.BaseImportFragment;
 import com.usda.fmsc.twotrails.fragments.imprt.ImportGpxFragment;
+import com.usda.fmsc.twotrails.fragments.imprt.ImportKmlFragment;
 import com.usda.fmsc.twotrails.fragments.imprt.ImportTextFragment;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.logic.PolygonAdjuster;
 import com.usda.fmsc.twotrails.utilities.Import;
+import com.usda.fmsc.twotrails.utilities.TtUtils;
+import com.usda.fmsc.utilities.kml.ExtendedData;
 import com.usda.fmsc.utilities.kml.KmlDocument;
 
 import org.xml.sax.SAXException;
@@ -42,7 +45,7 @@ public class ImportActivity extends TtAjusterCustomToolbarActivity {
 
     private PolygonAdjuster.Listener polyAdjustListener;
     private EditText txtFile;
-    private PostDelayHandler handler = new PostDelayHandler(1000);
+    private PostDelayHandler handler = new PostDelayHandler(1000), pdhShowFab = new PostDelayHandler(250);
 
     private boolean ignoreChange, adjust;
 
@@ -91,6 +94,24 @@ public class ImportActivity extends TtAjusterCustomToolbarActivity {
         @Override
         public void onTaskStart() {
             fabProgCircle.show();
+        }
+
+        @Override
+        public void onReadyToImport(final boolean ready) {
+            pdhShowFab.post(new Runnable() {
+                @Override
+                public void run() {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (ready)
+                                fabImport.show();
+                            else
+                                fabImport.hide();
+                        }
+                    });
+                }
+            });
         }
     };
 
@@ -192,23 +213,13 @@ public class ImportActivity extends TtAjusterCustomToolbarActivity {
                 }
                 case "kmz":
                 case "kml": {
-                    try {
-                        String file = filename;
 
-                        KmlDocument kdoc = KmlDocument.load(filename);
-
-
-                        if (kdoc != null) {
-                            kdoc.setRegion("");
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (ParserConfigurationException e) {
-                        e.printStackTrace();
-                    } catch (SAXException e) {
-                        e.printStackTrace();
+                    if (fragment == null || !(fragment instanceof ImportKmlFragment)) {
+                        fragment = ImportKmlFragment.newInstance(filename);
+                        fragUpdated = true;
+                    } else {
+                        fragment.updateFileName(filename);
                     }
-
                     break;
                 }
                 default: {

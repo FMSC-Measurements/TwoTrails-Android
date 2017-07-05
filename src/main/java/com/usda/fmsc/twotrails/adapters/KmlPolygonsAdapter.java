@@ -5,30 +5,27 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.usda.fmsc.android.widget.multiselection.SimpleMultiSelectorBindingHolder;
-import com.usda.fmsc.android.widget.multiselection.MultiSelector;
 import com.usda.fmsc.android.widget.MultiStateTouchCheckBox;
 import com.usda.fmsc.android.widget.RecyclerViewEx;
-import com.usda.fmsc.utilities.gpx.GpxBaseTrack;
-import com.usda.fmsc.utilities.gpx.GpxRoute;
-import com.usda.fmsc.utilities.gpx.GpxTrack;
-import com.usda.fmsc.utilities.gpx.GpxTrackSeg;
-import com.usda.fmsc.utilities.StringEx;
+import com.usda.fmsc.android.widget.multiselection.MultiSelector;
+import com.usda.fmsc.android.widget.multiselection.SimpleMultiSelectorBindingHolder;
 import com.usda.fmsc.twotrails.R;
+import com.usda.fmsc.utilities.StringEx;
+import com.usda.fmsc.utilities.kml.Polygon;
 
 import java.util.List;
 
-public class GpxTracksAdapter extends RecyclerViewEx.AdapterEx<SimpleMultiSelectorBindingHolder> {
-    private static final int TRACK = 1, ROUTE = 2;
+public class KmlPolygonsAdapter extends RecyclerViewEx.AdapterEx<SimpleMultiSelectorBindingHolder> {
+    private static final int POLYGON = 1;
 
-    private List<GpxBaseTrack> tracks;
+    private List<Polygon> polygons;
 
     private MultiSelector mSelector;
 
 
-    public GpxTracksAdapter(Context context, List<GpxBaseTrack> tracks, MultiSelector selector) {
+    public KmlPolygonsAdapter(Context context, List<Polygon> polygons, MultiSelector selector) {
         super(context);
-        this.tracks = tracks;
+        this.polygons = polygons;
 
         mSelector = selector;
     }
@@ -36,30 +33,18 @@ public class GpxTracksAdapter extends RecyclerViewEx.AdapterEx<SimpleMultiSelect
 
     @Override
     public int getItemViewTypeEx(int position) {
-        GpxBaseTrack track = tracks.get(position);
-        if (track instanceof GpxTrack) {
-            return TRACK;
-        } else if (track instanceof GpxRoute) {
-            return ROUTE;
-        }
-
-        return INVALID_TYPE;
+        return POLYGON;
     }
 
     @Override
     public SimpleMultiSelectorBindingHolder onCreateViewHolderEx(ViewGroup parent, int viewType) {
-        if (viewType == TRACK)
-            return new GpxTrackHolder(inflater.inflate(R.layout.content_import_item, parent, false));
-        else if (viewType == ROUTE)
-            return new GpxRouteHolder(inflater.inflate(R.layout.content_import_item, parent, false));
-        else
-            return null;
+        return new KmlPolygonHolder(inflater.inflate(R.layout.content_import_item, parent, false));
     }
 
     @Override
     public void onBindViewHolderEx(SimpleMultiSelectorBindingHolder holder, int position) {
-        GpxBaseTrack track = tracks.get(position);
-        ((GpxBaseTrackHolder)holder).bindTrack(track);
+        Polygon poly = polygons.get(position);
+        ((KmlPolygonHolder)holder).bindPolygon(poly);
     }
 
     @Override
@@ -74,20 +59,20 @@ public class GpxTracksAdapter extends RecyclerViewEx.AdapterEx<SimpleMultiSelect
 
     @Override
     public int getItemCountEx() {
-        return tracks.size();
+        return polygons.size();
     }
 
 
-    public abstract class GpxBaseTrackHolder extends SimpleMultiSelectorBindingHolder implements MultiStateTouchCheckBox.OnCheckedStateChangeListener {
+    public class KmlPolygonHolder extends SimpleMultiSelectorBindingHolder implements MultiStateTouchCheckBox.OnCheckedStateChangeListener {
         protected MultiStateTouchCheckBox mcb;
         protected TextView tvName, tvPointCount;
 
-        protected GpxBaseTrack track;
+        protected Polygon polygon;
 
         protected boolean selected;
 
 
-        public GpxBaseTrackHolder(View itemView) {
+        public KmlPolygonHolder(View itemView) {
             super(itemView, mSelector);
 
             mcb = (MultiStateTouchCheckBox)itemView.findViewById(R.id.importContMcbImport);
@@ -119,11 +104,15 @@ public class GpxTracksAdapter extends RecyclerViewEx.AdapterEx<SimpleMultiSelect
         }
 
 
-        public void bindTrack(GpxBaseTrack track) {
-            this.track = track;
+        public void bindPolygon(Polygon poly) {
+            this.polygon = poly;
 
-            tvName.setText(track.getName());
-            tvPointCount.setText(StringEx.toString(getPointCount(track)));
+            tvName.setText(polygon.getName());
+
+            tvPointCount.setText(StringEx.toString(
+                    poly.getInnerBoundary() != null ?
+                            poly.getInnerBoundary().size() : poly.getOuterBoundary().size()
+            ));
         }
 
         @Override
@@ -131,41 +120,9 @@ public class GpxTracksAdapter extends RecyclerViewEx.AdapterEx<SimpleMultiSelect
             mSelector.setSelected(this, isChecked);
         }
 
-        abstract int getPointCount(GpxBaseTrack track);
-
         public String getName() {
             return tvName.getText().toString();
         }
 
-    }
-
-    public class GpxTrackHolder extends GpxBaseTrackHolder {
-        public GpxTrackHolder(View itemView) {
-            super(itemView);
-        }
-
-        @Override
-        int getPointCount(GpxBaseTrack track) {
-            GpxTrack trk = (GpxTrack)track;
-
-            int pc = 0;
-
-            for (GpxTrackSeg seg : trk.getSegments()) {
-                pc += seg.getPoints().size();
-            }
-
-            return pc;
-        }
-    }
-
-    public class GpxRouteHolder extends GpxBaseTrackHolder {
-        public GpxRouteHolder(View itemView) {
-            super(itemView);
-        }
-
-        @Override
-        int getPointCount(GpxBaseTrack track) {
-            return ((GpxRoute)track).getPoints().size();
-        }
     }
 }
