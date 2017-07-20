@@ -2259,7 +2259,7 @@ public class DataAccessLayer extends IDataLayer {
             cvs.put(TwoTrailsSchema.ProjectInfoSchema.Region,
                     Global.Settings.ProjectSettings.getRegion());
 
-            cvs.put(TwoTrailsSchema.ProjectInfoSchema.ID, "Unnamed");
+            cvs.put(TwoTrailsSchema.ProjectInfoSchema.ID, getFileName());
 
             cvs.put(TwoTrailsSchema.ProjectInfoSchema.DeviceID, TtUtils.getDeviceName());
 

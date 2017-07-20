@@ -3,11 +3,13 @@ package com.usda.fmsc.twotrails.activities;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,6 +20,7 @@ import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.dialogs.DontAskAgainDialog;
 import com.usda.fmsc.android.widget.FABProgressCircleEx;
 import com.usda.fmsc.android.widget.MultiStateTouchCheckBox;
+import com.usda.fmsc.twotrails.BuildConfig;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.Global;
@@ -34,6 +37,8 @@ public class ExportActivity extends CustomToolbarActivity {
     private MultiStateTouchCheckBox chkAll, chkPoints, chkPolys, chkMeta, chkProj, chkNmea, chkKmz, chkGpx, chkSum, chkImgInfo, chkPc;
     private FABProgressCircleEx progCircle;
     private Export.ExportTask exportTask;
+
+    private Snackbar snackbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -170,9 +175,8 @@ public class ExportActivity extends CustomToolbarActivity {
         }
     }
 
-    //todo edit to make pc package option instead of points selected
     private void startExport(final String directory, boolean checkExternalMedia) {
-        if (checkExternalMedia && (chkPoints.isChecked() || chkProj.isChecked())) {
+        if (checkExternalMedia && chkPc.isChecked()) {
             final MediaAccessLayer mal = Global.getOrCreateMAL();
             if (mal != null && mal.hasExternalImages()) {
                 //TODO convert to DontAskAgainDialog
@@ -310,8 +314,6 @@ public class ExportActivity extends CustomToolbarActivity {
         }
     }
 
-    Snackbar snackbar;
-
     private void export(final File directory) {
         if (exportTask == null || exportTask.getStatus() == AsyncTask.Status.FINISHED) {
             progCircle.show();
@@ -323,6 +325,8 @@ public class ExportActivity extends CustomToolbarActivity {
                 public void onTaskFinish(Export.ExportResult result) {
                 switch (result.getCode()) {
                     case Success:
+                        MediaScannerConnection.scanFile(ExportActivity.this, new String[] { directory.getAbsolutePath() }, null, null);
+
                         progCircle.beginFinalAnimation();
                         View view = findViewById(R.id.parent);
                         if (view != null) {
@@ -330,12 +334,17 @@ public class ExportActivity extends CustomToolbarActivity {
                                 @Override
                                 public void onClick(View v) {
                                     Intent intent = new Intent(Intent.ACTION_VIEW);
-                                    intent.setDataAndType(Uri.parse(directory.getAbsolutePath()), "resource/folder");
+                                    intent.setDataAndType(
+                                            FileProvider.getUriForFile(
+                                                    ExportActivity.this,
+                                                    BuildConfig.APPLICATION_ID + ".provider",
+                                                    directory),
+                                            "resource/folder");
 
                                     if (snackbar != null)
                                         snackbar.dismiss();
 
-                                    startActivity(Intent.createChooser(intent, "Open folder"));
+                                    startActivity(Intent.createChooser(intent, "Open Folder"));
                                 }
                             })
                             .setActionTextColor(AndroidUtils.UI.getColor(getBaseContext(), R.color.primaryLighter));
@@ -384,7 +393,8 @@ public class ExportActivity extends CustomToolbarActivity {
                             chkNmea.isChecked(),
                             chkKmz.isChecked(),
                             chkGpx.isChecked(),
-                            chkSum.isChecked()
+                            chkSum.isChecked(),
+                            chkPc.isChecked()
                     )
             );
         } else {

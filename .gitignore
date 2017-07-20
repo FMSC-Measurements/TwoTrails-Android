@@ -15,5 +15,4 @@ $RECYCLE.BIN/
 *.lnk
 
 /build
-version.properties
-version.properties
+gradle.properties
