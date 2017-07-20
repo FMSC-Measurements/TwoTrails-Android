@@ -1,5 +1,6 @@
 package com.usda.fmsc.twotrails.utilities;
 
+import android.media.MediaScannerConnection;
 import android.os.AsyncTask;
 
 import com.usda.fmsc.geospatial.utm.UTMTools;
@@ -1105,7 +1106,6 @@ public class Export {
 
             String kmlPath = kml(dal, dir);
 
-
             if (!StringEx.isEmpty(kmlPath)) {
                 ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(kmzPath));
 
@@ -1130,7 +1130,7 @@ public class Export {
             TtUtils.TtReport.writeError(e.getMessage(), "Export:kmz");
         }
 
-        return null;
+        return kmzPath;
     }
 
     public static String summary(DataAccessLayer dal, String dir) {
@@ -1196,6 +1196,49 @@ public class Export {
         return imagesFileName;
     }
 
+    public static String exportPC(DataAccessLayer dal, MediaAccessLayer mal, String dir) {
+        String filename = scrubProjectName(dal.getProjectID());
+        String expPath = String.format("%s/%s_Export.zip", dir, filename);
+
+        try {
+            byte[] buffer = new byte[1024];
+            ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(expPath));
+
+            zos.putNextEntry(new ZipEntry(FileUtils.getFileName(dal.getFilePath())));
+            FileInputStream fis = new FileInputStream(dal.getFilePath());
+
+            int len;
+            while ((len = fis.read(buffer)) > 0) {
+                zos.write(buffer, 0, len);
+            }
+
+            fis.close();
+
+            zos.closeEntry();
+
+            if (mal != null) {
+                zos.putNextEntry(new ZipEntry(FileUtils.getFileName(mal.getFilePath())));
+                fis = new FileInputStream(mal.getFilePath());
+
+                while ((len = fis.read(buffer)) > 0) {
+                    zos.write(buffer, 0, len);
+                }
+
+                fis.close();
+
+                zos.closeEntry();
+            }
+
+            zos.close();
+
+                return expPath;
+        } catch (Exception e) {
+            TtUtils.TtReport.writeError(e.getMessage(), "Export:kmz");
+        }
+
+        return null;
+    }
+
 
     private static String scrubProjectName(String file) {
         return  file.replaceAll("[^a-zA-Z0-9.-]", "_");
@@ -1227,11 +1270,6 @@ public class Export {
                 if (!isCancelled() && ep.isPoints()) {
                     if (points(ep.getDal(), dirPath) == null) {
                         return new ExportResult(ExportResultCode.ExportFailure, "Points");
-                    } else {
-                        if (ep.getMal() != null) {
-                            FileUtils.copyFile(ep.getMal().getFilePath(),
-                                    String.format("%s/%s", dirPath, FileUtils.getFileName(ep.getMal().getFilePath())));
-                        }
                     }
                 }
 
@@ -1282,6 +1320,12 @@ public class Export {
                         return new ExportResult(ExportResultCode.ExportFailure, "ImageInfo");
                     }
                 }
+
+                if (!isCancelled() && ep.isExportPC()) {
+                    if (exportPC(ep.getDal(), ep.getMal(), dirPath) == null) {
+                        return new ExportResult(ExportResultCode.ExportFailure, "ExportPC");
+                    }
+                }
             } catch (Exception ex) {
                 TtUtils.TtReport.writeError(ex.getMessage(), "Export:ExportTask", ex.getStackTrace());
                 return new ExportResult(ExportResultCode.ExportFailure, "Unknown failure");
@@ -1307,10 +1351,10 @@ public class Export {
             private DataAccessLayer dal;
             private MediaAccessLayer mal;
             private File directory;
-            private boolean points, polys, meta, proj, nmea, kmz, gpx, summary, imgInfo;
+            private boolean points, polys, meta, proj, nmea, kmz, gpx, summary, imgInfo, pcExp;
 
             public ExportParams(DataAccessLayer dal, MediaAccessLayer mal, File directory, boolean points, boolean polys, boolean meta,
-                boolean imgInfo, boolean proj, boolean nmea, boolean kmz, boolean gpx, boolean summary) {
+                boolean imgInfo, boolean proj, boolean nmea, boolean kmz, boolean gpx, boolean summary, boolean pcExp) {
 
                 this.dal = dal;
                 this.mal = mal;
@@ -1326,6 +1370,7 @@ public class Export {
                 this.kmz = kmz;
                 this.gpx = gpx;
                 this.summary = summary;
+                this.pcExp = pcExp;
             }
 
             public DataAccessLayer getDal() {
@@ -1372,6 +1417,10 @@ public class Export {
 
             public boolean isSummary() {
                 return summary;
+            }
+
+            public boolean isExportPC() {
+                return pcExp;
             }
         }
 
