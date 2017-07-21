@@ -84,17 +84,19 @@ public class GpsService extends Service implements LocationListener, LocationSou
 
         if (prefs != null) {
             prefs.registerOnSharedPreferenceChangeListener(this);
-        }
 
-        if (Global.Settings.DeviceSettings.getGpsExternal()) {
-            _deviceUUID = Global.Settings.DeviceSettings.getGpsDeviceID();
-        }
+            if (Global.Settings.DeviceSettings.getGpsExternal()) {
+                _deviceUUID = Global.Settings.DeviceSettings.getGpsDeviceID();
+            }
 
-        if (Global.Settings.DeviceSettings.isGpsConfigured() && Global.Settings.DeviceSettings.isGpsAlwaysOn()) {
-            startGps();
-        }
+            if (Global.Settings.DeviceSettings.isGpsConfigured() && Global.Settings.DeviceSettings.isGpsAlwaysOn()) {
+                startGps();
+            }
 
-        logBurstDetails = Global.Settings.DeviceSettings.getGpsLogBurstDetails();
+            logBurstDetails = Global.Settings.DeviceSettings.getGpsLogBurstDetails();
+        } else {
+            TtUtils.TtReport.writeError("Unable to get preferences", "GpsService:onCreate");
+        }
     }
 
     @Override
