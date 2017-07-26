@@ -11,9 +11,8 @@ import com.usda.fmsc.geospatial.UomElevation;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
-import com.usda.fmsc.twotrails.objects.DataActivityType;
-import com.usda.fmsc.twotrails.objects.TtUserActivity;
-import com.usda.fmsc.twotrails.objects.media.TtMedia;
+import com.usda.fmsc.twotrails.objects.DataActionType;
+import com.usda.fmsc.twotrails.objects.TtUserAction;
 import com.usda.fmsc.twotrails.objects.points.GpsPoint;
 import com.usda.fmsc.twotrails.objects.points.QuondamPoint;
 import com.usda.fmsc.twotrails.objects.points.TravPoint;
@@ -66,7 +65,7 @@ public class DataAccessLayer extends IDataLayer {
     private String _FilePath;
     private File _dbFile;
 
-    private TtUserActivity _Activity = null;
+    private TtUserAction _Activity = null;
 
     //region Constructors / Open / Close
     public DataAccessLayer(String filePath) {
@@ -383,7 +382,7 @@ public class DataAccessLayer extends IDataLayer {
             _db.setTransactionSuccessful();
             success = true;
 
-            _Activity.updateActivity(DataActivityType.InsertedPolygons);
+            _Activity.updateAction(DataActionType.InsertedPolygons);
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:insertPolygon");
         } finally {
@@ -416,7 +415,7 @@ public class DataAccessLayer extends IDataLayer {
 
             _db.setTransactionSuccessful();
 
-            _Activity.updateActivity(DataActivityType.ModifiedPolygons);
+            _Activity.updateAction(DataActionType.ModifiedPolygons);
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:updatePolygon");
         } finally {
@@ -439,7 +438,7 @@ public class DataAccessLayer extends IDataLayer {
             if (success) {
                 deletePolygonGraphicOption(cn);
 
-                _Activity.updateActivity(DataActivityType.DeletedPolygons);
+                _Activity.updateAction(DataActionType.DeletedPolygons);
             }
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:deletePolygon");
@@ -775,7 +774,7 @@ public class DataAccessLayer extends IDataLayer {
             if(success) {
                 _db.setTransactionSuccessful();
 
-                _Activity.updateActivity(DataActivityType.InsertedPoints);
+                _Activity.updateAction(DataActionType.InsertedPoints);
             }
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:insertPoint");
@@ -806,7 +805,7 @@ public class DataAccessLayer extends IDataLayer {
             if(success) {
                 _db.setTransactionSuccessful();
 
-                _Activity.updateActivity(DataActivityType.ModifiedPoints);
+                _Activity.updateAction(DataActionType.ModifiedPoints);
             }
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:insertPoints");
@@ -954,7 +953,7 @@ public class DataAccessLayer extends IDataLayer {
             if(success) {
                 _db.setTransactionSuccessful();
 
-                _Activity.updateActivity(DataActivityType.ModifiedPoints);
+                _Activity.updateAction(DataActionType.ModifiedPoints);
             }
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:updatePoint");
@@ -975,7 +974,7 @@ public class DataAccessLayer extends IDataLayer {
             if(success) {
                 _db.setTransactionSuccessful();
 
-                _Activity.updateActivity(DataActivityType.ModifiedPoints);
+                _Activity.updateAction(DataActionType.ModifiedPoints);
             }
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:updatePoint");
@@ -1001,7 +1000,7 @@ public class DataAccessLayer extends IDataLayer {
             if(success) {
                 _db.setTransactionSuccessful();
 
-                _Activity.updateActivity(DataActivityType.ModifiedPoints);
+                _Activity.updateAction(DataActionType.ModifiedPoints);
             }
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:updatePoint");
@@ -1032,7 +1031,7 @@ public class DataAccessLayer extends IDataLayer {
             if(success) {
                 _db.setTransactionSuccessful();
 
-                _Activity.updateActivity(DataActivityType.ModifiedPoints);
+                _Activity.updateAction(DataActionType.ModifiedPoints);
             }
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:updatePoint");
@@ -1249,7 +1248,7 @@ public class DataAccessLayer extends IDataLayer {
                         break;
                 }
 
-                _Activity.updateActivity(DataActivityType.DeletedPoints);
+                _Activity.updateAction(DataActionType.DeletedPoints);
             }
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:deletePoint");
@@ -1279,7 +1278,7 @@ public class DataAccessLayer extends IDataLayer {
             success = deletePoint(point);
 
             if (success)
-                _Activity.updateActivity(DataActivityType.DeletedPoints);
+                _Activity.updateAction(DataActionType.DeletedPoints);
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:deletePointSafe");
         }
@@ -1307,7 +1306,7 @@ public class DataAccessLayer extends IDataLayer {
                 if (!success)
                     return false;
 
-                _Activity.updateActivity(DataActivityType.DeletedPoints);
+                _Activity.updateAction(DataActionType.DeletedPoints);
             }
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:deletePoints");
@@ -1478,7 +1477,7 @@ public class DataAccessLayer extends IDataLayer {
             _db.setTransactionSuccessful();
             success = true;
 
-            _Activity.updateActivity(DataActivityType.InsertedMetadata);
+            _Activity.updateAction(DataActionType.InsertedMetadata);
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:insertMetadata");
         } finally {
@@ -1517,7 +1516,7 @@ public class DataAccessLayer extends IDataLayer {
 
             _db.setTransactionSuccessful();
 
-            _Activity.updateActivity(DataActivityType.ModifiedMetadata);
+            _Activity.updateAction(DataActionType.ModifiedMetadata);
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:updateMetadata");
         } finally {
@@ -1546,7 +1545,7 @@ public class DataAccessLayer extends IDataLayer {
 
             if (success) {
                 _db.setTransactionSuccessful();
-                _Activity.updateActivity(DataActivityType.DeletedMetadata);
+                _Activity.updateAction(DataActionType.DeletedMetadata);
             }
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:deleteMetadataSafe");
@@ -1565,7 +1564,7 @@ public class DataAccessLayer extends IDataLayer {
                     new String[] { cn }) > 0;
 
             if (success)
-                _Activity.updateActivity(DataActivityType.DeletedMetadata);
+                _Activity.updateAction(DataActionType.DeletedMetadata);
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:deleteMetadata");
         }
@@ -1673,7 +1672,7 @@ public class DataAccessLayer extends IDataLayer {
             _db.setTransactionSuccessful();
             success = true;
 
-            _Activity.updateActivity(DataActivityType.InsertedGroups);
+            _Activity.updateAction(DataActionType.InsertedGroups);
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:insertGroup");
         } finally {
@@ -1701,7 +1700,7 @@ public class DataAccessLayer extends IDataLayer {
 
 
             if (success > 0) {
-                _Activity.updateActivity(DataActivityType.ModifiedGroups);
+                _Activity.updateAction(DataActionType.ModifiedGroups);
             }
 
             _db.setTransactionSuccessful();
@@ -1725,7 +1724,7 @@ public class DataAccessLayer extends IDataLayer {
                     new String[] { cn }) > 0;
 
             if (success)
-                _Activity.updateActivity(DataActivityType.DeletedGroups);
+                _Activity.updateAction(DataActionType.DeletedGroups);
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:deleteGroup");
         }
@@ -2325,7 +2324,7 @@ public class DataAccessLayer extends IDataLayer {
         {
             _db.execSQL(updateQuery);
 
-            _Activity.updateActivity(DataActivityType.ModifiedProject);
+            _Activity.updateAction(DataActionType.ModifiedProject);
         }
         catch (Exception ex)
         {
@@ -2521,13 +2520,13 @@ public class DataAccessLayer extends IDataLayer {
 
 
     //region Activity
-    private TtUserActivity createUserActivty() {
-        return new TtUserActivity("Android User", TtUtils.getDeviceName());
+    private TtUserAction createUserActivty() {
+        return new TtUserAction("Android User", TtUtils.getDeviceName());
     }
 
     //region Get
-    private ArrayList<TtUserActivity> getUserActivity() {
-        ArrayList<TtUserActivity> activities = new ArrayList<>();
+    private ArrayList<TtUserAction> getUserActivity() {
+        ArrayList<TtUserAction> activities = new ArrayList<>();
 
         try {
 
@@ -2539,7 +2538,7 @@ public class DataAccessLayer extends IDataLayer {
 
             if (c.moveToFirst()) {
                 do {
-                    activities.add(new TtUserActivity(c.getString(0), c.getString(1), parseDateTime(c.getString(2)), new DataActivityType(c.getInt(3))));
+                    activities.add(new TtUserAction(c.getString(0), c.getString(1), parseDateTime(c.getString(2)), new DataActionType(c.getInt(3))));
                 } while (c.moveToNext());
             }
 
@@ -2555,7 +2554,7 @@ public class DataAccessLayer extends IDataLayer {
 
     //region Insert
     public boolean updateUserSession() {
-        if (_Activity != null && _Activity.getActivity().getValue() != 0) {
+        if (_Activity != null && _Activity.getAction().getValue() != 0) {
             insertUserActivity(_Activity);
             _Activity = createUserActivty();
             return true;
@@ -2564,7 +2563,7 @@ public class DataAccessLayer extends IDataLayer {
         return false;
     }
 
-    public boolean insertUserActivity(TtUserActivity activity) {
+    public boolean insertUserActivity(TtUserAction activity) {
         boolean success = false;
 
         try {
@@ -2574,7 +2573,7 @@ public class DataAccessLayer extends IDataLayer {
             cvs.put(TwoTrailsSchema.ActivitySchema.UserName, activity.getUserName());
             cvs.put(TwoTrailsSchema.ActivitySchema.DeviceName, activity.getDeviceName());
             cvs.put(TwoTrailsSchema.ActivitySchema.ActivityDate, dtf.print(activity.getDate()));
-            cvs.put(TwoTrailsSchema.ActivitySchema.DataActivity, activity.getActivity().getValue());
+            cvs.put(TwoTrailsSchema.ActivitySchema.DataActivity, activity.getAction().getValue());
 
             _db.insert(TwoTrailsSchema.ActivitySchema.TableName, null, cvs);
 
