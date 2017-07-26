@@ -85,7 +85,7 @@ public class DataAccessLayer extends IDataLayer {
             try {
                 _dbFile = new File(_FilePath);
                 _DalVersion = new TtVersion(getTtDbVersion());
-                _Activity = new TtUserActivity("Android User", TtUtils.getDeviceName());
+                _Activity = createUserActivty();
             } catch (Exception ex) {
                 return false;
             }
@@ -120,7 +120,7 @@ public class DataAccessLayer extends IDataLayer {
     private void CreateDB() {
         try {
             _dbFile = new File(_FilePath);
-            _Activity = new TtUserActivity("Android User", TtUtils.getDeviceName());
+            _Activity = createUserActivty();
 
             _db = SQLiteDatabase.openOrCreateDatabase(_dbFile, null);
             _DalVersion = TwoTrailsSchema.SchemaVersion;
@@ -2521,6 +2521,10 @@ public class DataAccessLayer extends IDataLayer {
 
 
     //region Activity
+    private TtUserActivity createUserActivty() {
+        return new TtUserActivity("Android User", TtUtils.getDeviceName());
+    }
+
     //region Get
     private ArrayList<TtUserActivity> getUserActivity() {
         ArrayList<TtUserActivity> activities = new ArrayList<>();
@@ -2550,6 +2554,16 @@ public class DataAccessLayer extends IDataLayer {
     //endregion
 
     //region Insert
+    public boolean updateUserSession() {
+        if (_Activity != null && _Activity.getActivity().getValue() != 0) {
+            insertUserActivity(_Activity);
+            _Activity = createUserActivty();
+            return true;
+        }
+
+        return false;
+    }
+
     public boolean insertUserActivity(TtUserActivity activity) {
         boolean success = false;
 
