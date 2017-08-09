@@ -27,6 +27,7 @@ import com.usda.fmsc.twotrails.utilities.TtUtils;
 import org.joda.time.DateTime;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
@@ -262,6 +263,8 @@ public class GpsService extends Service implements LocationListener, LocationSou
             } else {
                 return GpsDeviceStatus.ExternalGpsNotFound;
             }
+        } catch (IOException ioe) {
+            postError(GpsError.NoExternalGpsSocket);
         } catch (Exception e) {
             TtUtils.TtReport.writeError(e.getMessage(), "GpsService:startExternalGps");
             return GpsDeviceStatus.ExternalGpsError;
@@ -271,7 +274,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
     }
 
     private GpsDeviceStatus stopExternalGps() {
-        if(btConn != null) {
+        if (btConn != null) {
             btConn.unregister(this);
             btConn.disconnect();
             btConn = null;

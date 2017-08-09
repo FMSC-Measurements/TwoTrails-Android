@@ -10,8 +10,6 @@ import java.util.ArrayList;
 
 import com.usda.fmsc.utilities.StringEx;
 
-//https://android.googlesource.com/platform/development/+/25b6aed7b2e01ce7bdc0dfa1a79eaf009ad178fe/samples/BluetoothChat/src/com/example/android/BluetoothChat
-
 public class GpsBluetoothConnection extends Thread {
     private BluetoothSocket btSocket;
     private BufferedReader bufferedReader;
@@ -20,18 +18,12 @@ public class GpsBluetoothConnection extends Thread {
 
     private ArrayList<Listener> listeners;
 
-    public GpsBluetoothConnection(BluetoothSocket socket) {
+    public GpsBluetoothConnection(BluetoothSocket socket) throws IOException {
         listeners = new ArrayList<>();
 
         btSocket = socket;
 
-        try {
-            InputStream btInStream = btSocket.getInputStream();
-
-            bufferedReader = new BufferedReader(new InputStreamReader(btInStream));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        bufferedReader = new BufferedReader(new InputStreamReader(btSocket.getInputStream()));
     }
 
 
