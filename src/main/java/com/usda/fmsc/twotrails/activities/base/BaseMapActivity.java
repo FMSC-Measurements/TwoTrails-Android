@@ -766,6 +766,14 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
         if (!polysCreated) {
             setupPolygons();
             polysCreated = true;
+
+            if (getMapTracking() == MapTracking.POLY_BOUNDS && getTrackedPoly() != null) {
+                moveToLocation(getTrackedPoly(), Consts.Location.PADDING, true);
+            } else if (getMapTracking() == MapTracking.COMPLETE_BOUNDS && getCompleteBounds() != null) {
+                moveToLocation(getCompleteBounds(), Consts.Location.PADDING, true);
+            } else {
+                moveToLocation(Consts.Location.USA_BOUNDS, Consts.Location.PADDING, true);
+            }
         }
 
         setupUI();
