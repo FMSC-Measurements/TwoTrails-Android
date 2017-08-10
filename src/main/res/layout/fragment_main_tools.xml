@@ -86,6 +86,15 @@
 
         <View style="@style/Dividers"/>
 
+        <Button
+            android:text="@string/main_btn_gps_status"
+            android:id="@+id/mainFragToolsBtnGpsStatus"
+            android:onClick="btnGpsStatusClick"
+            android:enabled="true"
+            style="@style/MainActivityButtons"/>
+
+        <View style="@style/Dividers"/>
+
         <LinearLayout
             android:id="@+id/mainFragToolsTest"
             android:layout_width="match_parent"

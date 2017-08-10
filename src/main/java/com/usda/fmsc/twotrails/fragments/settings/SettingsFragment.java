@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Looper;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceCategory;
@@ -23,6 +24,7 @@ import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.dialogs.DontAskAgainDialog;
 import com.usda.fmsc.android.preferences.ListCompatPreference;
 import com.usda.fmsc.android.preferences.SwitchCompatPreference;
+import com.usda.fmsc.android.utilities.PostDelayHandler;
 import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.activities.SettingsActivity;
@@ -245,7 +247,6 @@ public class SettingsFragment extends PreferenceFragment {
 
                 final ProgressDialog pd = new ProgressDialog(getActivity());
 
-
                 prefGpsCheck.setSummary(R.string.ds_gps_not_connected);
 
                 stringRecvCount = 0;
@@ -258,6 +259,13 @@ public class SettingsFragment extends PreferenceFragment {
                     public void run() {
                         pd.setMessage(getString(R.string.ds_gps_connecting));
 
+                        pd.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                            @Override
+                            public void onDismiss(DialogInterface dialog) {
+                                binder.stopGps();
+                            }
+                        });
+
                         activity.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -267,118 +275,130 @@ public class SettingsFragment extends PreferenceFragment {
 
                         final GpsService.GpsBinder binder = Global.getGpsBinder();
 
-                        binder.stopGps();
-
-                        binder.setGpsProvider(Global.Settings.DeviceSettings.getGpsDeviceID());
-
-
-                        GpsService.Listener listener = new GpsService.Listener() {
+                        Runnable runGPS = new Runnable() {
                             @Override
-                            public void nmeaBurstReceived(INmeaBurst nmeaBurst) {
+                            public void run() {
+                                binder.setGpsProvider(Global.Settings.DeviceSettings.getGpsDeviceID());
 
-                            }
 
-                            @Override
-                            public void nmeaStringReceived(String nmeaString) {
-                                try {
-                                    binder.removeListener(this);
+                                GpsService.Listener listener = new GpsService.Listener() {
+                                    @Override
+                                    public void nmeaBurstReceived(INmeaBurst nmeaBurst) {
 
-                                    Global.Settings.DeviceSettings.setGpsConfigured(true);
+                                    }
 
-                                    if (1 > stringRecvCount++) {
-                                        activity.runOnUiThread(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                pd.setMessage(activity.getString(R.string.ds_gps_connected));
+                                    @Override
+                                    public void nmeaStringReceived(String nmeaString) {
+                                        try {
+                                            binder.removeListener(this);
 
-                                                if (Global.Settings.DeviceSettings.isGpsAlwaysOn()) {
-                                                    prefGpsCheck.setSummary(R.string.ds_gps_connected);
-                                                } else {
-                                                    prefGpsCheck.setSummary(R.string.ds_dev_configured);
-                                                    binder.stopGps();
-                                                }
+                                            Global.Settings.DeviceSettings.setGpsConfigured(true);
 
-                                                if (Global.Settings.DeviceSettings.getAutoSetGpsNameToMetaAsk()) {
-                                                    DontAskAgainDialog dialog = new DontAskAgainDialog(getActivity(),
-                                                            Global.Settings.DeviceSettings.AUTO_SET_GPS_NAME_TO_META_ASK,
-                                                            Global.Settings.DeviceSettings.AUTO_SET_GPS_NAME_TO_META,
-                                                            Global.Settings.PreferenceHelper.getPrefs());
+                                            if (1 > stringRecvCount++) {
+                                                activity.runOnUiThread(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        pd.setMessage(activity.getString(R.string.ds_gps_connected));
 
-                                                    dialog.setMessage("Do you want to update metadata with the current GPS receiver?");
+                                                        if (Global.Settings.DeviceSettings.isGpsAlwaysOn()) {
+                                                            prefGpsCheck.setSummary(R.string.ds_gps_connected);
+                                                        } else {
+                                                            prefGpsCheck.setSummary(R.string.ds_dev_configured);
+                                                            binder.stopGps();
+                                                        }
 
-                                                    dialog.setPositiveButton("Default", setMetaListener, 1);
+                                                        if (Global.Settings.DeviceSettings.getAutoSetGpsNameToMetaAsk()) {
+                                                            DontAskAgainDialog dialog = new DontAskAgainDialog(getActivity(),
+                                                                    Global.Settings.DeviceSettings.AUTO_SET_GPS_NAME_TO_META_ASK,
+                                                                    Global.Settings.DeviceSettings.AUTO_SET_GPS_NAME_TO_META,
+                                                                    Global.Settings.PreferenceHelper.getPrefs());
 
-                                                    if (Global.getDAL() != null)
-                                                        dialog.setNegativeButton("All", setMetaListener, 2);
+                                                            dialog.setMessage("Do you want to update metadata with the current GPS receiver?");
 
-                                                    dialog.setNeutralButton("None", null, 0);
+                                                            dialog.setPositiveButton("Default", setMetaListener, 1);
 
-                                                    dialog.show();
-                                                } else {
-                                                    setMetaListener.onClick(null, 0, Global.Settings.DeviceSettings.getAutoSetGpsNameToMeta());
-                                                }
+                                                            if (Global.getDAL() != null)
+                                                                dialog.setNegativeButton("All", setMetaListener, 2);
+
+                                                            dialog.setNeutralButton("None", null, 0);
+
+                                                            dialog.show();
+                                                        } else {
+                                                            setMetaListener.onClick(null, 0, Global.Settings.DeviceSettings.getAutoSetGpsNameToMeta());
+                                                        }
+                                                    }
+                                                });
+
+
+                                                Thread.sleep(1000);
+
+                                                activity.runOnUiThread(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        pd.hide();
+                                                    }
+                                                });
                                             }
-                                        });
+                                        } catch (InterruptedException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
 
+                                    @Override
+                                    public void nmeaSentenceReceived(NmeaSentence nmeaSentence) {
+                                        //
+                                    }
 
-                                        Thread.sleep(1000);
+                                    @Override
+                                    public void gpsStarted() {
+
+                                    }
+
+                                    @Override
+                                    public void gpsStopped() {
+
+                                    }
+
+                                    @Override
+                                    public void gpsServiceStarted() {
+
+                                    }
+
+                                    @Override
+                                    public void gpsServiceStopped() {
+
+                                    }
+
+                                    @Override
+                                    public void gpsError(GpsService.GpsError error) {
+                                        Global.Settings.DeviceSettings.setGpsConfigured(false);
+
+                                        Toast.makeText(activity, error.toString(), Toast.LENGTH_SHORT).show();
 
                                         activity.runOnUiThread(new Runnable() {
                                             @Override
                                             public void run() {
+                                                pd.setMessage(getString(R.string.ds_gps_not_connected));
                                                 pd.hide();
                                             }
                                         });
                                     }
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                }
-                            }
+                                };
 
-                            @Override
-                            public void nmeaSentenceReceived(NmeaSentence nmeaSentence) {
-                                //
-                            }
+                                binder.addListener(listener);
 
-                            @Override
-                            public void gpsStarted() {
-
-                            }
-
-                            @Override
-                            public void gpsStopped() {
-
-                            }
-
-                            @Override
-                            public void gpsServiceStarted() {
-
-                            }
-
-                            @Override
-                            public void gpsServiceStopped() {
-
-                            }
-
-                            @Override
-                            public void gpsError(GpsService.GpsError error) {
-                                Global.Settings.DeviceSettings.setGpsConfigured(false);
-
-                                Toast.makeText(activity, error.toString(), Toast.LENGTH_SHORT).show();
-
-                                activity.runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            pd.setMessage(getString(R.string.ds_gps_not_connected));
-                                            pd.hide();
-                                        }
-                                    });
+                                binder.startGps();
                             }
                         };
 
-                        binder.addListener(listener);
+                        Looper.prepare();
 
-                        binder.startGps();
+                        if (binder.isGpsRunning()) {
+                            binder.stopGps();
+                            new PostDelayHandler(1000, runGPS).post();
+                        } else {
+                            runGPS.run();
+                        }
                     }
                 }).start();
 

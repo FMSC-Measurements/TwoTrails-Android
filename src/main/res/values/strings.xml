@@ -315,6 +315,7 @@
     <string name="title_activity_map">Map</string>
     <string name="title_activity_haid">How Am I Doing</string>
     <string name="title_activity_gps_logger">GPS Logger</string>
+    <string name="title_activity_gps_status">GPS Status</string>
     <string name="title_activity_settings">Settings</string>
     <string name="title_activity_main_gps_settings">GPS Settings</string>
     <string name="title_activity_plot_grid">Generate Plots</string>
@@ -350,6 +351,7 @@
     <string name="main_btn_plot_grid">Plot Grid</string>
     <string name="main_btn_multi_edit">Multi Point Edit</string>
     <string name="main_btn_gps_log">GPS Logger</string>
+    <string name="main_btn_gps_status">GPS Status</string>
     <string name="main_btn_map_manager">Map Manager</string>
 
     <string name="main_tv_edited">Last Edited</string>

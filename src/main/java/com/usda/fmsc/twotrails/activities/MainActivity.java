@@ -809,6 +809,10 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
         startActivity(new Intent(this, GpsLoggerActivity.class));
     }
 
+    public void btnGpsStatusClick(View view) {
+        startActivity(new Intent(this, GpsStatusActivity.class));
+    }
+
     public void btnMapManagerClick(View view) {
         startActivity(new Intent(this, MapManagerActivity.class));
     }

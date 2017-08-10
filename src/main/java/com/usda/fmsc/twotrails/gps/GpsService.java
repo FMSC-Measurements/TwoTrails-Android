@@ -264,6 +264,9 @@ public class GpsService extends Service implements LocationListener, LocationSou
                 return GpsDeviceStatus.ExternalGpsNotFound;
             }
         } catch (IOException ioe) {
+            if (btConn != null) {
+                btConn.disconnect();
+            }
             postError(GpsError.NoExternalGpsSocket);
         } catch (Exception e) {
             TtUtils.TtReport.writeError(e.getMessage(), "GpsService:startExternalGps");
@@ -377,14 +380,19 @@ public class GpsService extends Service implements LocationListener, LocationSou
 
     @Override
     public void connectionLost() {
-
         postError(GpsError.LostDeviceConnection);
     }
 
     @Override
     public void connectionEnded() {
         Global.TtNotifyManager.setGpsOff();
-        postError(GpsError.DeviceConnectionEnded);
+        //postError(GpsError.DeviceConnectionEnded);
+    }
+
+    @Override
+    public void failedToConnect() {
+        Global.TtNotifyManager.setGpsOff();
+        postError(GpsError.FailedToConnect);
     }
 
     //endregion
@@ -662,6 +670,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
         LostDeviceConnection,
         DeviceConnectionEnded,
         NoExternalGpsSocket,
+        FailedToConnect,
         Unkown
     }
 

@@ -121,6 +121,13 @@ public class TtBluetoothManager {
                                     listener.error(BluetoothDeviceError.ConnectionClosed);
                                 }
                             }
+
+                            @Override
+                            public void failedToConnect() {
+                                if (!gpsConnected && listener != null) {
+                                    listener.error(BluetoothDeviceError.FailedToConnect);
+                                }
+                            }
                         };
 
                         conn.register(btListener);
@@ -188,6 +195,7 @@ public class TtBluetoothManager {
         ConnectionClosed,
         NoDevice,
         BadSocket,
+        FailedToConnect,
         Unknown
     }
 }

@@ -38,39 +38,45 @@ public class GpsBluetoothConnection extends Thread {
             }
         }
 
-        try {
+        if (btSocket.isConnected()) {
+            try {
+                String str = StringEx.Empty;
 
-            String str = StringEx.Empty;
+                while (!disconnect) {
+                    try {
+                        str += bufferedReader.readLine();
 
-            while (!disconnect) {
-                try {
-                    str += bufferedReader.readLine();
+                        if (!StringEx.isEmpty(str) && str.contains("*") && !disconnect) {
+                            for (Listener l : listeners) {
+                                l.receivedString(str);
+                            }
 
-                    if (!StringEx.isEmpty(str) && str.contains("*") && !disconnect) {
-                        for (Listener l : listeners) {
-                            l.receivedString(str);
+                            str = StringEx.Empty;
                         }
+                      } catch (Exception e) {
+                        if (!disconnect) {
+                            for (Listener l : listeners) {
+                                l.connectionLost();
+                            }
 
-                        str = StringEx.Empty;
-                    }
-                  } catch (Exception e) {
-                    if (!disconnect) {
-                        for (Listener l : listeners) {
-                            l.connectionLost();
+                            btSocket.connect();
                         }
-
-                        btSocket.connect();
+                        break;
                     }
-                    break;
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
+                running = false;
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            running = false;
-        }
 
-        for (Listener l : listeners) {
-            l.connectionEnded();
+            for (Listener l : listeners) {
+                l.connectionEnded();
+            }
+        } else {
+
+            for (Listener l : listeners) {
+                l.failedToConnect();
+            }
         }
     }
 
@@ -112,5 +118,6 @@ public class GpsBluetoothConnection extends Thread {
         void receivedString(String data);
         void connectionLost();
         void connectionEnded();
+        void failedToConnect();
     }
 }
