@@ -52,9 +52,9 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
             lvNmea.setFadingEdgeLength(0);
 
             binder = Global.getGpsBinder();
+            binder.addListener(this);
 
             if (Global.Settings.DeviceSettings.isGpsConfigured()) {
-                binder.addListener(this);
                 binder.startGps();
             }
 
@@ -160,6 +160,17 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == Consts.Codes.Activites.SETTINGS) {
+            if (Global.Settings.DeviceSettings.isGpsConfigured()) {
+                binder.startGps();
+            }
+        }
+    }
+
 
     private void restoreState(Bundle savedInstanceState) {
         if (savedInstanceState.containsKey(STRINGS_KEY)) {
@@ -209,7 +220,7 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
         dialog.setPositiveButton("Configure", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                startActivity(new Intent(getBaseContext(), SettingsActivity.class).putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.GPS_SETTINGS_PAGE));
+                startActivityForResult(new Intent(getBaseContext(), SettingsActivity.class).putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.GPS_SETTINGS_PAGE), Consts.Codes.Activites.SETTINGS);
             }
         });
 
@@ -250,7 +261,7 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
 
 
 
-    //region GpsService PointMediaListener
+    //region GpsService
     @Override
     public void gpsError(GpsService.GpsError error) {
 

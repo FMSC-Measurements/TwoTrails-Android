@@ -13,7 +13,7 @@ import com.usda.fmsc.twotrails.R;
 
 public class MainToolsFragment extends Fragment {
     private Button btnMap, btnGEarth, btnHAID, btnExport,
-            btnPlotGrid, btnGpsLogger;
+            btnPlotGrid, btnGpsLogger, btnGpsStatus;
     private View viewTest;
 
     private boolean enabled = false, viewExists = false;
@@ -40,6 +40,7 @@ public class MainToolsFragment extends Fragment {
         btnExport = (Button)view.findViewById(R.id.mainFragToolsBtnExport);
         btnPlotGrid = (Button)view.findViewById(R.id.mainFragToolsBtnPlotGrid);
         btnGpsLogger = (Button)view.findViewById(R.id.mainFragToolsBtnGpsLogger);
+        btnGpsStatus = (Button)view.findViewById(R.id.mainFragToolsBtnGpsStatus);
         viewTest = view.findViewById(R.id.mainFragToolsTest);
 
         enableButtons(enabled);
@@ -64,6 +65,7 @@ public class MainToolsFragment extends Fragment {
             btnExport.setEnabled(enable);
             btnPlotGrid.setEnabled(enable);
             btnGpsLogger.setEnabled(enable);
+            btnGpsStatus.setEnabled(enable);
 
             if (Global.Settings.DeviceSettings.isDeveloperOptionsEnabled()) {
                 viewTest.setVisibility(View.VISIBLE);
