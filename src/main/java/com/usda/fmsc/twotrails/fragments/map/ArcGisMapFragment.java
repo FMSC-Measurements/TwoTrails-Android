@@ -534,7 +534,9 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
 
     @Override
     public void setGesturesEnabled(boolean enabled) {
-        mMapView.setEnabled(enabled);
+        if (mMapView != null) {
+            mMapView.setEnabled(enabled);
+        }
     }
 
     @Override
