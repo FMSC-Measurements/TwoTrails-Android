@@ -243,7 +243,15 @@
 
     <!-- todo Visual of data (center calculated position with points of nmea around it) -->
 
+    <com.usda.fmsc.twotrails.ui.NmeaPointsView
+        android:id="@+id/calcNPV"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_below="@id/calcLayDiv3"
+        android:layout_above="@+id/calcLayBtns"/>
+
     <LinearLayout
+        android:id="@+id/calcLayBtns"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"

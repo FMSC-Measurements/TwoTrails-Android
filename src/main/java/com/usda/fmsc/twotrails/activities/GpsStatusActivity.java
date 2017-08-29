@@ -35,7 +35,6 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
     private TextView tvGpsStatus, tvGpsMode, tvLat, tvLon, tvUtmX, tvUtmY,
             tvZone, tvDec, tvSat, tvElev, tvPdop, tvHdop;
 
-    private View viewGpsInfoLaySatInfo;
     private GpsStatusSkyView skyView;
     private GpsStatusSatView statusView;
 
@@ -88,8 +87,6 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
         tvHdop = (TextView)findViewById(R.id.gpsInfoTvHdop);
 
         tvGpsMode.setText(GGASentence.GpsFixType.NoFix.toString());
-
-        viewGpsInfoLaySatInfo = findViewById(R.id.gpsInfoLaySatInfo);
 
         skyView = (GpsStatusSkyView)findViewById(R.id.gpsInfoSatSky);
         statusView = (GpsStatusSatView)findViewById(R.id.gpsInfoSatStatus);

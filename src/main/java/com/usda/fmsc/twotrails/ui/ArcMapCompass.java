@@ -95,7 +95,7 @@ public class ArcMapCompass extends View implements View.OnClickListener {
         // Save the new rotation angle.
         mAngle = (float) angle;
 
-        // Force the compass to re-paint itself.
+        // Force the compass to re-paintNmea itself.
         if (mAngle != 0 && !visible) {
             visible = true;
         }

@@ -34,6 +34,7 @@ import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
 import com.usda.fmsc.twotrails.objects.FilterOptions;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.points.GpsPoint;
+import com.usda.fmsc.twotrails.ui.NmeaPointsView;
 import com.usda.fmsc.twotrails.units.DopType;
 import com.usda.fmsc.twotrails.units.MapTracking;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
@@ -49,16 +50,15 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
 
     private static final Pattern pattern = Pattern.compile("[a-zA-Z]");
 
-    private Button btnCreate;
-
     private TextView tvLogged, tvRecv, tvUtmX1, tvUtmX2,tvUtmX3,tvUtmXF, tvUtmY1, tvUtmY2, tvUtmY3, tvUtmYF,
             tvNssda1, tvNssda2, tvNssda3, tvNssdaF;
 
+    private Button btnCreate;
     private CheckBox chkG1, chkG2, chkG3;
-
     private Spinner spFix;
-
     private EditText txtDop;
+
+    private NmeaPointsView nmeaPointsView;
 
     private GpsPoint _Point;
     private TtMetadata _Metadata;
@@ -308,6 +308,8 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
                 calculate();
             }
         });
+
+        nmeaPointsView = (NmeaPointsView)findViewById(R.id.calcNPV);
         //endregion
     }
 
@@ -561,6 +563,8 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
                     tvNssdaF.setText(nVal);
                     setCalculated(false);
                 }
+
+                nmeaPointsView.update(_Bursts, zone, xF, yF);
                 //endregion
             } else {
                 //region reset
@@ -587,6 +591,8 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
                 tvNssdaF.setText(nVal);
 
                 setCalculated(false);
+
+                nmeaPointsView.update(null, 0, 0, 0);
                 //endregion
             }
         } catch (Exception e) {
