@@ -92,19 +92,19 @@ public class SegmentFactory {
                 continue;
             }
 
-            OpType tmpOp = current.getOp();
+            OpType tmpOpType = current.getOp();
             TtPoint tmpQp = null;
 
-            while (tmpOp == OpType.Quondam) {
+            while (tmpOpType == OpType.Quondam) {
                 if (tmpQp == null)
                     tmpQp = ((QuondamPoint)current).getParentPoint();
                 else
                     tmpQp = ((QuondamPoint)tmpQp).getParentPoint();
 
-                tmpOp = tmpQp.getOp();
+                tmpOpType = tmpQp.getOp();
             }
 
-            switch (tmpOp)
+            switch (tmpOpType)
             {
                 case GPS:
                 case WayPoint:
