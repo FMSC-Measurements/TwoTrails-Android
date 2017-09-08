@@ -10,6 +10,7 @@ import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
 
+import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
 
 import java.text.DecimalFormat;
@@ -23,9 +24,9 @@ public class NmeaPointsView extends View {
     private final ArrayList<PointF> nmeaPoints = new ArrayList<>(), nmeaPointsUsed = new ArrayList<>();
 
     private int xpad = 0, ypad = 0;
-    private double shortSideAdjust, xaxis = 1, yaxis = 1;
+    private double shortSideAdjust, axis = 1;
 
-    private float mlX = 0, mlY = 0, bpady, bpadx;
+    private float ml = 0, bpad, pointRadius = 15;
 
     private final Paint paintNmea = new Paint(), paintNmeaUsed = new Paint(), paintCenter = new Paint(), paintDist = new Paint();
 
@@ -41,6 +42,8 @@ public class NmeaPointsView extends View {
     public NmeaPointsView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
+        pointRadius = AndroidUtils.Convert.dpToPx(getContext(), 5);
+
         paintNmea.setColor(Color.GRAY);
 
         paintNmeaUsed.setColor(Color.BLACK);
@@ -48,7 +51,7 @@ public class NmeaPointsView extends View {
         paintCenter.setColor(Color.RED);
 
         paintDist.setColor(Color.BLACK);
-        paintDist.setStrokeWidth(10);
+        paintDist.setStrokeWidth(AndroidUtils.Convert.dpToPx(getContext(), 3));
         paintDist.setTextSize(30);
     }
 
@@ -80,55 +83,44 @@ public class NmeaPointsView extends View {
                     ymax = y;
             }
 
-            xaxis = xmax - xmin;
-            yaxis = ymax - ymin;
+            double xaxis = xmax - xmin, yaxis = ymax - ymin, xoffset = 0, yoffset = 0;
 
-            if (xaxis > 1) {
-                mlX = (float)(int)xaxis;
-            } else if (xaxis > 0.75) {
-                mlX = 0.75f;
-            } else if (xaxis > 0.5) {
-                mlX = 0.5f;
-            } else if (xaxis > 0.25) {
-                mlX = 0.25f;
-            } else if (xaxis > 0.1) {
-                mlX = 0.1f;
-            } else if (xaxis > 0.05) {
-                mlX = 0.05f;
-            } else if (xaxis > 0.025) {
-                mlX = 0.025f;
-            } else if (xaxis > 0.01) {
-                mlX = 0.01f;
+            if (xaxis > yaxis) {
+                axis = xaxis;
+                yoffset = (xaxis - yaxis) / 2;
             } else {
-                mlX = (float) xaxis;
+                axis = yaxis;
+                xoffset = (yaxis - xaxis) / 2;
             }
 
-            if (yaxis > 1) {
-                mlY = (float)(int)yaxis;
-            } else if (yaxis > 0.75) {
-                mlY = 0.75f;
-            } else if (yaxis > 0.5) {
-                mlY = 0.5f;
-            } else if (yaxis > 0.25) {
-                mlY = 0.25f;
-            } else if (yaxis > 0.1) {
-                mlY = 0.1f;
-            } else if (yaxis > 0.05) {
-                mlY = 0.05f;
-            } else if (yaxis > 0.025) {
-                mlY = 0.025f;
-            } else if (yaxis > 0.01) {
-                mlY = 0.01f;
+            //axis = xaxis > yaxis ? xaxis : yaxis;
+
+            if (axis > 1) {
+                ml = (float)(int)axis;
+            } else if (axis > 0.75) {
+                ml = 0.75f;
+            } else if (axis > 0.5) {
+                ml = 0.5f;
+            } else if (axis > 0.25) {
+                ml = 0.25f;
+            } else if (axis > 0.1) {
+                ml = 0.1f;
+            } else if (axis > 0.05) {
+                ml = 0.05f;
+            } else if (axis > 0.025) {
+                ml = 0.025f;
+            } else if (axis > 0.01) {
+                ml = 0.01f;
             } else {
-                mlY = (float) yaxis;
+                ml = (float) axis;
             }
 
             PointF point;
 
             for (TtNmeaBurst burst : bursts ) {
                 point = new PointF(
-                        (float)((burst.getX(zone) - xmin) / xaxis * shortSideAdjust + xpad),
-                        (float)((burst.getY(zone) - ymin) / yaxis * shortSideAdjust + ypad)
+                        (float)((burst.getX(zone) - xmin + xoffset) / axis * shortSideAdjust + xpad),
+                        (float)((burst.getY(zone) - ymin + yoffset) / axis * shortSideAdjust + ypad)
                 );
 
                 if (burst.isUsed()) {
@@ -139,8 +131,8 @@ public class NmeaPointsView extends View {
             }
 
             center = new PointF(
-                    (float)((xc - xmin) / xaxis * shortSideAdjust + xpad),
-                    (float)((yc - ymin) / yaxis * shortSideAdjust + ypad)
+                    (float)((xc - xmin) / axis * shortSideAdjust + xpad + xoffset),
+                    (float)((yc - ymin) / axis * shortSideAdjust + ypad + yoffset)
             );
         }
 
@@ -152,35 +144,25 @@ public class NmeaPointsView extends View {
         super.onDraw(canvas);
 
         for (PointF point : nmeaPoints) {
-            canvas.drawCircle(point.x, point.y, 15, paintNmea);
+            canvas.drawCircle(point.x, point.y, pointRadius, paintNmea);
         }
 
         for (PointF point : nmeaPointsUsed) {
-            canvas.drawCircle(point.x, point.y, 15, paintNmeaUsed);
+            canvas.drawCircle(point.x, point.y, pointRadius, paintNmeaUsed);
         }
 
         if (center != null) {
-            canvas.drawCircle(center.x, center.y, 15, paintCenter);
+            canvas.drawCircle(center.x, center.y, pointRadius, paintCenter);
 
             canvas.drawLine(
-                    bpadx,
-                    bpady,
-                    (float)(mlX / xaxis * shortSideAdjust) - bpadx,
-                    bpady,
+                    bpad,
+                    bpad,
+                    (float)(ml / axis * shortSideAdjust) - bpad,
+                    bpad,
                     paintDist
             );
 
-            canvas.drawLine(
-                    bpadx,
-                    bpady * 2,
-                    (float)(mlY / yaxis * shortSideAdjust) - bpadx,
-                    bpady * 2,
-                    paintDist
-            );
-
-            canvas.drawText(String.format("X-Axis: %s (meters)", df.format(mlX)), bpadx, bpady - 10, paintDist);
-
-            canvas.drawText(String.format("Y-Axis: %s (meters)", df.format(mlY)), bpadx, bpady * 2 - 10, paintDist);
+            canvas.drawText(String.format("%s (meters)", df.format(ml)), bpad, bpad - 10, paintDist);
         }
     }
 
@@ -203,7 +185,6 @@ public class NmeaPointsView extends View {
         }
 
         shortSideAdjust = shortSide * 0.9;
-        bpady = (float) (shortSide * 0.05);
-        bpadx = bpady / 2;
+        bpad = (float) (shortSide * 0.1);
     }
 }

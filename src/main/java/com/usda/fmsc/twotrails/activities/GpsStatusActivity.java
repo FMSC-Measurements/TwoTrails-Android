@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -90,6 +91,15 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
 
         skyView = (GpsStatusSkyView)findViewById(R.id.gpsInfoSatSky);
         statusView = (GpsStatusSatView)findViewById(R.id.gpsInfoSatStatus);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            finish();
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
