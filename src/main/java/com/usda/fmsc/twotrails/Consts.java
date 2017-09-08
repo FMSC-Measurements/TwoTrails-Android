@@ -171,7 +171,7 @@ public class Consts {
         public static final int PADDING = 30;
 
         public static final float ZOOM_GENERAL = 10f;
-        public static final float ZOOM_CLOSE = 20f;
+        public static final float ZOOM_CLOSE = 23;
 
         public static class GoogleMaps {
             public static final LatLng USA_CENTER = new LatLng(center_lat, center_lon);

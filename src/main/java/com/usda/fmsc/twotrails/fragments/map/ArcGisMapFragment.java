@@ -362,14 +362,15 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
     public void moveToLocation(float lat, float lon, float zoomLevel, boolean animate) {
         if (mMapView != null) {
             if (animate) {
-                float zLevel = -1;
+                int zLevels = currentGisMapLayer.getNumberOfLevels();
 
-                if (currentGisMapLayer != null && zoomLevel > -1 && currentGisMapLayer.getNumberOfLevels() > zoomLevel) {
-                    zLevel = (float)currentGisMapLayer.getLevelsOfDetail()[(int)zoomLevel].getResolution();
+                if (currentGisMapLayer != null && zoomLevel > 0 && zLevels > 0 && zoomLevel > zLevels) {
+                    zoomLevel = currentGisMapLayer.getNumberOfLevels();
+                    //zoomLevel = (float)currentGisMapLayer.getLevelsOfDetail()[(int)zoomLevel].getResolution();
                 }
 
-                if (zLevel > -1) {
-                    mMapView.zoomToResolution(ArcGISTools.latLngToMapSpatial(lat, lon, mMapView), zLevel);
+                if (zoomLevel > -1) {
+                    mMapView.zoomToScale(ArcGISTools.latLngToMapSpatial(lat, lon, mMapView), zoomLevel);
                 } else {
                     mMapView.centerAt(lat, lon, true);
                 }
