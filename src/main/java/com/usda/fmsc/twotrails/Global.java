@@ -1,6 +1,5 @@
 package com.usda.fmsc.twotrails;
 
-import android.app.Activity;
 import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -60,9 +59,6 @@ public class Global {
     private static MediaAccessLayer _MAL;
 
     private static Context _ApplicationContext;
-    //TODO refactor the need for static current and main activities. maybe make poly adjuster and mapdownloader as a service
-    private static MainActivity _MainActivity;
-    private static Activity _CurrentActivity;
 
     private static TtMetadata _DefaultMeta;
     private static TtGroup _MainGroup;
@@ -86,9 +82,9 @@ public class Global {
 
 
 
-    public static void init(Context applicationContext, MainActivity mainActivity) {
+    public static void init(Context applicationContext) {
         _ApplicationContext = applicationContext;
-        _MainActivity = mainActivity;
+        //_MainActivity = mainActivity;
 
         Settings.DeviceSettings.init();
 
@@ -226,21 +222,8 @@ public class Global {
     }
 
 
-    public static MainActivity getMainActivity() {
-        return _MainActivity;
-    }
-
     public static Context getApplicationContext() {
         return _ApplicationContext;
-    }
-
-
-    public static void setCurrentActivity(Activity activity) {
-        _CurrentActivity = activity;
-    }
-
-    public static Activity getCurrentActivity() {
-        return _CurrentActivity;
     }
 
 
@@ -321,15 +304,15 @@ public class Global {
 
 
     public static class TtNotifyManager {
-        public static int GPS_NOTIFICATION_ID = 123;
+        private static int GPS_NOTIFICATION_ID = 123;
 
-        protected static NotificationManager _NotificationManager;
+        private static NotificationManager _NotificationManager;
         private static NotificationCompat.Builder _GpsBuilder;
         private static int _UsedDrawable;
         private static String _UsedText;
         private static HashMap<Integer, NotificationCompat.Builder> _DownloadingNotifs;
 
-        public static void init(Context ctx) {
+        private static void init(Context ctx) {
             _NotificationManager = (NotificationManager)ctx.getSystemService(Context.NOTIFICATION_SERVICE);
             _GpsBuilder = new NotificationCompat.Builder(ctx);
             _GpsBuilder.setOngoing(true);

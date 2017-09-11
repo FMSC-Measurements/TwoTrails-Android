@@ -270,7 +270,7 @@ public class PlotGridActivity extends CustomToolbarActivity {
         super.onDestroy();
 
         if (adjust) {
-            PolygonAdjuster.adjust(Global.getDAL(), Global.getMainActivity(), true);
+            PolygonAdjuster.adjust(Global.getDAL(), true);
         }
     }
 

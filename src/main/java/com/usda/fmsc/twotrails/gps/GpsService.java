@@ -13,13 +13,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import android.support.v4.app.ActivityCompat;
 
 import com.google.android.gms.maps.LocationSource;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.geospatial.nmea.NmeaIDs;
 import com.usda.fmsc.geospatial.nmea.NmeaBurstEx;
-import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.devices.TtBluetoothManager;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
@@ -216,11 +214,6 @@ public class GpsService extends Service implements LocationListener, LocationSou
                     locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_UPDATE_INTERVAL, GPS_MINIMUM_DISTANCE, this);
                     return GpsDeviceStatus.InternalGpsStarted;
                 } else {
-                    ActivityCompat.requestPermissions(Global.getMainActivity(), new String[] {
-                                    android.Manifest.permission.ACCESS_FINE_LOCATION,
-                                    android.Manifest.permission.ACCESS_COARSE_LOCATION
-                            },
-                            Consts.Codes.Services.REQUEST_GPS_SERVICE);
                     return GpsDeviceStatus.InternalGpsNeedsPermissions;
                 }
             } else {

@@ -38,7 +38,6 @@ import com.usda.fmsc.utilities.EnumEx;
 import com.usda.fmsc.utilities.ParseEx;
 import com.usda.fmsc.utilities.StringEx;
 
-//TODO add NMEA data view like table view
 public class CalculateGpsActivity extends CustomToolbarActivity {
     private static final Pattern pattern = Pattern.compile("[a-zA-Z]");
 

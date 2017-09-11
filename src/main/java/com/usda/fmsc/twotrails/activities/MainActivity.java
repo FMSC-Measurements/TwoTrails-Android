@@ -99,7 +99,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                Global.init(getApplicationContext(), MainActivity.this);
+                Global.init(getApplicationContext());
 
                 final Intent intent = getIntent();
                 final String action = intent.getAction();
@@ -558,7 +558,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
             .setPositiveButton(R.string.str_yes, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    PolygonAdjuster.adjust(Global.getDAL(), MainActivity.this, true);
+                    PolygonAdjuster.adjust(Global.getDAL(), true, MainActivity.this);
                 }
             })
             .setNeutralButton(R.string.str_no, null)

@@ -1,6 +1,5 @@
 package com.usda.fmsc.twotrails.fragments.settings;
 
-import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
@@ -15,6 +14,8 @@ import android.preference.Preference;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -230,7 +231,7 @@ public class SettingsFragment extends PreferenceFragment {
 
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         if (requestCode == Consts.Codes.Requests.BLUETOOH && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -462,12 +463,22 @@ public class SettingsFragment extends PreferenceFragment {
     }
 
     private boolean switchToInternal() {
-        binder.stopGps();
-        binder.setGpsProvider(null);
+        if (!binder.isInternalGpsEnabled()) {
+            ActivityCompat.requestPermissions(getActivity(), new String[]{
+                            android.Manifest.permission.ACCESS_FINE_LOCATION,
+                            android.Manifest.permission.ACCESS_COARSE_LOCATION
+                    },
+                    Consts.Codes.Services.REQUEST_GPS_SERVICE);
+        } else {
+            binder.stopGps();
+            binder.setGpsProvider(null);
 
-        Global.Settings.DeviceSettings.setGpsConfigured(true);
-        exGpsCat.setEnabled(false);
-        return true;
+            Global.Settings.DeviceSettings.setGpsConfigured(true);
+            exGpsCat.setEnabled(false);
+            return true;
+        }
+
+        return false;
     }
     //endregion
 

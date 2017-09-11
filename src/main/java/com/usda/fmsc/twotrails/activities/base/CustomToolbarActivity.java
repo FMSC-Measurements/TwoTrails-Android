@@ -69,13 +69,11 @@ public class CustomToolbarActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        Global.setCurrentActivity(this);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        Global.setCurrentActivity(null);
     }
 
 

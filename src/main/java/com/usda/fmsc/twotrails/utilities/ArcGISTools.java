@@ -517,22 +517,24 @@ public class ArcGISTools {
             public void onMapDownloaded(final ArcGisMapLayer layer) {
                 addMapLayer(layer);
 
-                Global.getMainActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Global.TtNotifyManager.endMapDownload(layer.getId());
-                    }
-                });
+//                Global.getMainActivity().runOnUiThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        Global.TtNotifyManager.endMapDownload(layer.getId());
+//                    }
+//                });
+                Global.TtNotifyManager.endMapDownload(layer.getId());
 
-                final Activity activity = Global.getCurrentActivity();
-                if (activity != null) {
-                    activity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(Global.getApplicationContext(), String.format("%s Downloaded", layer.getName()), Toast.LENGTH_LONG).show();
-                        }
-                    });
-                }
+//                final Activity activity = Global.getCurrentActivity();
+//                if (activity != null) {
+//                    activity.runOnUiThread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            Toast.makeText(Global.getApplicationContext(), String.format("%s Downloaded", layer.getName()), Toast.LENGTH_LONG).show();
+//                        }
+//                    });
+//                }
+                Toast.makeText(Global.getApplicationContext(), String.format("%s Downloaded", layer.getName()), Toast.LENGTH_LONG).show();
             }
 
             @Override
@@ -543,33 +545,36 @@ public class ArcGISTools {
                     if (now > lastUpdate + 250) {
                         final int progress = status.getDownloadSize() > 0 ? (int) (100 * status.getTotalBytesDownloaded() / status.getDownloadSize()) : 0;
 
-                        Global.getMainActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Global.TtNotifyManager.updateMapDownload(layer.getId(), progress);
-                            }
-                        });
+//                        Global.getMainActivity().runOnUiThread(new Runnable() {
+//                            @Override
+//                            public void run() {
+//                                Global.TtNotifyManager.updateMapDownload(layer.getId(), progress);
+//                            }
+//                        });
+                        Global.TtNotifyManager.updateMapDownload(layer.getId(), progress);
 
                         lastUpdate = now;
                     }
                 } else if (status.getStatus() == GPJobResource.JobStatus.FAILED) {
-                    Global.getMainActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Global.TtNotifyManager.endMapDownload(layer.getId());
-                        }
-                    });
+//                    Global.getMainActivity().runOnUiThread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            Global.TtNotifyManager.endMapDownload(layer.getId());
+//                        }
+//                    });
+                    Global.TtNotifyManager.endMapDownload(layer.getId());
 
-                    final Activity activity = Global.getCurrentActivity();
+//                    final Activity activity = Global.getCurrentActivity();
 
-                    if (activity != null) {
-                        activity.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Toast.makeText(activity, "Failed to download offline map", Toast.LENGTH_LONG).show();
-                            }
-                        });
-                    }
+//                    if (activity != null) {
+//                        activity.runOnUiThread(new Runnable() {
+//                            @Override
+//                            public void run() {
+//                                Toast.makeText(activity, "Failed to download offline map", Toast.LENGTH_LONG).show();
+//                            }
+//                        });
+//                    }
+                    Toast.makeText(Global.getApplicationContext(), "Failed to download offline map", Toast.LENGTH_LONG).show();
                 } //else {
 //                    final Activity activity = Global.getCurrentActivity();
 //
@@ -588,45 +593,49 @@ public class ArcGISTools {
             public void onStatusError(String message) {
                 tasks.remove(layer.getId());
 
-                Global.getMainActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Global.TtNotifyManager.endMapDownload(layer.getId());
-                    }
-                });
+//                Global.getMainActivity().runOnUiThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        Global.TtNotifyManager.endMapDownload(layer.getId());
+//                    }
+//                });
+                Global.TtNotifyManager.endMapDownload(layer.getId());
 
-                final Activity activity = Global.getCurrentActivity();
-
-                if (activity != null) {
-                    activity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(activity, "Error creating offline map", Toast.LENGTH_LONG).show();
-                        }
-                    });
-                }
+//                final Activity activity = Global.getCurrentActivity();
+//
+//                if (activity != null) {
+//                    activity.runOnUiThread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            Toast.makeText(activity, "Error creating offline map", Toast.LENGTH_LONG).show();
+//                        }
+//                    });
+//                }
+                Toast.makeText(Global.getApplicationContext(), "Error creating offline map", Toast.LENGTH_LONG).show();
             }
 
             @Override
             public void onDownloadError(String message) {
                 tasks.remove(layer.getId());
-                Global.getMainActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Global.TtNotifyManager.endMapDownload(layer.getId());
-                    }
-                });
+//                Global.getMainActivity().runOnUiThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        Global.TtNotifyManager.endMapDownload(layer.getId());
+//                    }
+//                });
+                Global.TtNotifyManager.endMapDownload(layer.getId());
 
-                final Activity activity = Global.getCurrentActivity();
-
-                if (activity != null) {
-                    activity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(Global.getApplicationContext(), "Error downloading offline map", Toast.LENGTH_LONG).show();
-                        }
-                    });
-                }
+//                final Activity activity = Global.getCurrentActivity();
+//
+//                if (activity != null) {
+//                    activity.runOnUiThread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            Toast.makeText(activity, "Error downloading offline map", Toast.LENGTH_LONG).show();
+//                        }
+//                    });
+//                }
+                Toast.makeText(Global.getApplicationContext(), "Error downloading offline map", Toast.LENGTH_LONG).show();
             }
         });
     }

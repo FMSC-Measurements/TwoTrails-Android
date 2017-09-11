@@ -25,7 +25,7 @@ import com.usda.fmsc.android.dialogs.NumericInputDialog;
 import com.usda.fmsc.android.listeners.ComplexOnPageChangeListener;
 import com.usda.fmsc.geospatial.UomElevation;
 import com.usda.fmsc.geospatial.nmea.INmeaBurst;
-import com.usda.fmsc.twotrails.activities.base.TtAjusterCustomToolbarActivity;
+import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.data.TwoTrailsSchema;
 import com.usda.fmsc.twotrails.dialogs.EditableListDialog;
@@ -50,7 +50,7 @@ import java.util.List;
 import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
 import com.usda.fmsc.utilities.StringEx;
 
-public class MetadataActivity extends TtAjusterCustomToolbarActivity {
+public class MetadataActivity extends CustomToolbarActivity {
     private HashMap<String, Listener> listeners;
 
     private GpsService.Listener listener;
@@ -134,13 +134,13 @@ public class MetadataActivity extends TtAjusterCustomToolbarActivity {
         saveMetadata();
 
         if (adjust) {
-            PolygonAdjuster.adjust(Global.getDAL(), Global.getMainActivity(), true);
+            PolygonAdjuster.adjust(Global.getDAL(), true);
         }
     }
 
 
     @Override
-    public boolean onCreateOptionsMenuEx(Menu menu) {
+    public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_metadata, menu);
         miLock = menu.findItem(R.id.metaMenuLock);
         miReset = menu.findItem(R.id.metaMenuReset);

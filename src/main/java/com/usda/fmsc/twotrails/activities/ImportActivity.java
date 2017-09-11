@@ -7,7 +7,6 @@ import android.support.design.widget.Snackbar;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -17,7 +16,7 @@ import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.utilities.PostDelayHandler;
 import com.usda.fmsc.android.widget.FABProgressCircleEx;
 import com.usda.fmsc.twotrails.Consts;
-import com.usda.fmsc.twotrails.activities.base.TtAjusterCustomToolbarActivity;
+import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.fragments.imprt.BaseImportFragment;
 import com.usda.fmsc.twotrails.fragments.imprt.ImportGpxFragment;
 import com.usda.fmsc.twotrails.fragments.imprt.ImportKmlFragment;
@@ -26,24 +25,15 @@ import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.logic.PolygonAdjuster;
 import com.usda.fmsc.twotrails.utilities.Import;
-import com.usda.fmsc.twotrails.utilities.TtUtils;
-import com.usda.fmsc.utilities.kml.ExtendedData;
-import com.usda.fmsc.utilities.kml.KmlDocument;
 
-import org.xml.sax.SAXException;
-
-import java.io.IOException;
 import java.util.regex.Pattern;
 
-import javax.xml.parsers.ParserConfigurationException;
-
-public class ImportActivity extends TtAjusterCustomToolbarActivity {
+public class ImportActivity extends CustomToolbarActivity {
     private FloatingActionButton fabImport;
     private FABProgressCircleEx fabProgCircle;
 
     private BaseImportFragment fragment;
 
-    private PolygonAdjuster.Listener polyAdjustListener;
     private EditText txtFile;
     private PostDelayHandler handler = new PostDelayHandler(1000), pdhShowFab = new PostDelayHandler(250);
 
@@ -64,7 +54,27 @@ public class ImportActivity extends TtAjusterCustomToolbarActivity {
                                 .setAction("View Map", new View.OnClickListener() {
                                     @Override
                                     public void onClick(View v) {
-                                        PolygonAdjuster.adjust(Global.getDAL(), polyAdjustListener);
+                                        PolygonAdjuster.adjust(Global.getDAL(), false, new PolygonAdjuster.Listener() {
+                                            @Override
+                                            public void adjusterStarted() {
+
+                                            }
+
+                                            @Override
+                                            public void adjusterStopped(PolygonAdjuster.AdjustResult result) {
+                                                if (result == PolygonAdjuster.AdjustResult.SUCCESSFUL) {
+                                                    adjust = false;
+                                                    startActivity(new Intent(ImportActivity.this, MapActivity.class));
+                                                } else {
+                                                    Toast.makeText(ImportActivity.this, "Polygon(s) failed to adjust.", Toast.LENGTH_SHORT).show();
+                                                }
+                                            }
+
+                                            @Override
+                                            public void adjusterRunningSlow() {
+
+                                            }
+                                        });
                                     }
                                 })
                                 .setActionTextColor(AndroidUtils.UI.getColor(getBaseContext(), R.color.primaryLighter));
@@ -119,8 +129,6 @@ public class ImportActivity extends TtAjusterCustomToolbarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_import);
-
-        polyAdjustListener = this;
 
         fabImport = (FloatingActionButton)findViewById(R.id.importFabImport);
         fabProgCircle = (FABProgressCircleEx)findViewById(R.id.importFabImportProgressCircle);
@@ -259,25 +267,7 @@ public class ImportActivity extends TtAjusterCustomToolbarActivity {
         super.onDestroy();
 
         if (adjust) {
-            PolygonAdjuster.adjust(Global.getDAL(), Global.getMainActivity(), true);
-        }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenuEx(Menu menu) {
-        return true;
-    }
-
-
-    @Override
-    protected void onAdjusterStopped(PolygonAdjuster.AdjustResult result) {
-        super.onAdjusterStopped(result);
-
-        if (result == PolygonAdjuster.AdjustResult.SUCCESSFUL) {
-            adjust = false;
-            startActivity(new Intent(this, MapActivity.class));
-        } else {
-            Toast.makeText(this, "Polygon(s) failed to adjust.", Toast.LENGTH_SHORT).show();
+            PolygonAdjuster.adjust(Global.getDAL(), true);
         }
     }
 
