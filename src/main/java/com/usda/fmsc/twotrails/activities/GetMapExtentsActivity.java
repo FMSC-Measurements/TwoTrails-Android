@@ -137,13 +137,11 @@ public class GetMapExtentsActivity extends AppCompatActivity implements GpsServi
     @Override
     protected void onResume() {
         super.onResume();
-        Global.setCurrentActivity(this);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        Global.setCurrentActivity(null);
 
         if (progressDialog != null && progressDialog.isShowing()) {
             progressDialog.dismiss();

@@ -671,7 +671,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         saveMedia();
 
         if (adjust) {
-            PolygonAdjuster.adjust(Global.getDAL(), Global.getMainActivity(), true);
+            PolygonAdjuster.adjust(Global.getDAL(), true);
         }
     }
 
@@ -2108,7 +2108,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         if (!Global.Settings.DeviceSettings.isGpsConfigured()) {
             configGps();
         } else if (Global.getDAL().needsAdjusting()) {
-            PolygonAdjuster.adjust(Global.getDAL(), new PolygonAdjuster.Listener() {
+            PolygonAdjuster.adjust(Global.getDAL(), false, new PolygonAdjuster.Listener() {
                 @Override
                 public void adjusterStarted() {
                     runOnUiThread(new Runnable() {
@@ -2180,7 +2180,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         if (!Global.Settings.DeviceSettings.isGpsConfigured()) {
             configGps();
         } else if (Global.getDAL().needsAdjusting()) {
-            PolygonAdjuster.adjust(Global.getDAL(), new PolygonAdjuster.Listener() {
+            PolygonAdjuster.adjust(Global.getDAL(), false, new PolygonAdjuster.Listener() {
                 @Override
                 public void adjusterStarted() {
                     runOnUiThread(new Runnable() {
@@ -2257,7 +2257,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         if (!Global.Settings.DeviceSettings.isGpsConfigured()) {
             configGps();
         } else if (Global.getDAL().needsAdjusting()) {
-            PolygonAdjuster.adjust(Global.getDAL(), new PolygonAdjuster.Listener() {
+            PolygonAdjuster.adjust(Global.getDAL(), false, new PolygonAdjuster.Listener() {
                 @Override
                 public void adjusterStarted() {
                     runOnUiThread(new Runnable() {

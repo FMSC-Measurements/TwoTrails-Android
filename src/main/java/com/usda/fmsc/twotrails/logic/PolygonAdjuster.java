@@ -27,16 +27,24 @@ public class PolygonAdjuster {
     private static boolean _processing = false;
     private static boolean _cancelToken = false;
 
+    private static Listener _Listener = null;
+
     public static boolean isProcessing() {
         return _processing;
     }
 
 
-    public static AdjustResult adjust(DataAccessLayer dal, final Listener listener) {
-        return adjust(dal, listener, false);
+    public static AdjustResult adjust(DataAccessLayer dal) {
+        return adjust(dal, false, _Listener);
     }
 
-    public static AdjustResult adjust(final DataAccessLayer dal, final Listener listener, final boolean updateIndexes) {
+    public static AdjustResult adjust(final DataAccessLayer dal, final boolean updateIndexes) {
+        return adjust(dal, updateIndexes, _Listener);
+    }
+
+    public static AdjustResult adjust(final DataAccessLayer dal, final boolean updateIndexes, Listener listener) {
+        _Listener = listener;
+
         if (_processing)
             return AdjustResult.ADJUSTING;
 
@@ -66,14 +74,14 @@ public class PolygonAdjuster {
                 boolean success = false;
 
                 try {
-                    if(listener != null)
-                        listener.adjusterStarted();
+                    if (_Listener != null)
+                        _Listener.adjusterStarted();
 
                     if(updateIndexes)
                         updateIndexes(dal);
 
                     if(!_cancelToken) {
-                        success = adjustPoints(dal, listener);
+                        success = adjustPoints(dal);
                     }
 
                     if (success) {
@@ -87,12 +95,12 @@ public class PolygonAdjuster {
                 } finally {
                     _processing = false;
 
-                    if(listener != null) {
+                    if (_Listener != null) {
                         if (_cancelToken) {
                             result = AdjustResult.CANCELED;
                         }
 
-                        listener.adjusterStopped(result);
+                        _Listener.adjusterStopped(result);
                     }
                 }
             }
@@ -122,7 +130,7 @@ public class PolygonAdjuster {
         dal.updatePoints(savePoints, savePoints);
     }
 
-    private static boolean adjustPoints(DataAccessLayer dal, Listener listener) {
+    private static boolean adjustPoints(DataAccessLayer dal) {
         long startTime = System.currentTimeMillis();
         boolean slowTimeTriggered = false;
 
@@ -154,15 +162,15 @@ public class PolygonAdjuster {
 
                     if (!slowTimeTriggered && System.currentTimeMillis() - startTime > ADJUSTING_SLOW_TIME) {
 
-                        if (listener != null) {
-                            listener.adjusterRunningSlow();
+                        if (_Listener != null) {
+                            _Listener.adjusterRunningSlow();
                         }
 
                         slowTimeTriggered = true;
                     }
                 }
 
-                if(_cancelToken)
+                if (_cancelToken)
                     return false;
 
                 TtPoint p;
@@ -239,6 +247,20 @@ public class PolygonAdjuster {
     public static void cancel() {
         _cancelToken = true;
     }
+
+
+    public static void register(Listener listener) {
+        _Listener = listener;
+
+        if (_Listener != null && isProcessing()) {
+            _Listener.adjusterStarted();
+        }
+    }
+
+    public static void unregister() {
+        _Listener = null;
+    }
+
 
     public interface Listener {
         void adjusterStarted();

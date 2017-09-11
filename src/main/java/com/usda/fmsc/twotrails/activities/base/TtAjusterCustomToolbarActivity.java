@@ -38,6 +38,20 @@ public abstract class TtAjusterCustomToolbarActivity extends CustomToolbarActivi
 
 
     @Override
+    protected void onStart() {
+        super.onStart();
+
+        PolygonAdjuster.register(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        PolygonAdjuster.unregister();
+    }
+
+    @Override
     public final boolean onCreateOptionsMenu(Menu menu) {
         boolean result = super.onCreateOptionsMenu(menu) && onCreateOptionsMenuEx(menu);
 

@@ -124,7 +124,7 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
         savePolygon();
 
         if (adjust) {
-            PolygonAdjuster.adjust(Global.getDAL(), Global.getMainActivity(), true);
+            PolygonAdjuster.adjust(Global.getDAL(), true);
         }
     }
 
@@ -211,7 +211,7 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
                 break;
             }
             case R.id.polyMenuAdjust: {
-                PolygonAdjuster.adjust(Global.getDAL(), this);
+                PolygonAdjuster.adjust(Global.getDAL());
                 break;
             }
             case android.R.id.home: {
