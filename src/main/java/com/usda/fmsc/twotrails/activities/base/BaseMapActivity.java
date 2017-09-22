@@ -3,7 +3,6 @@ package com.usda.fmsc.twotrails.activities.base;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.hardware.GeomagneticField;
@@ -23,7 +22,6 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -66,7 +64,6 @@ import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment;
 import com.usda.fmsc.twotrails.fragments.map.ManagedSupportMapFragment;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
-import com.usda.fmsc.twotrails.objects.map.IPolygonGraphic;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
@@ -97,7 +94,7 @@ import static android.support.v4.widget.DrawerLayout.LOCK_MODE_LOCKED_OPEN;
 import static android.support.v4.widget.DrawerLayout.LOCK_MODE_UNDEFINED;
 import static android.support.v4.widget.DrawerLayout.LOCK_MODE_UNLOCKED;
 
-//todo Manage exessive amount of points in project as to not slow down load
+
 public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapFragment.MultiMapListener, GpsService.Listener,
         SensorEventListener, PolyMarkerMapRvAdapter.Listener {
 
@@ -107,12 +104,12 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
     @Retention(RetentionPolicy.SOURCE)
     private @interface LockMode {}
 
-    @IntDef({Gravity.LEFT, Gravity.RIGHT, GravityCompat.START, GravityCompat.END})
+    @IntDef({GravityCompat.START, GravityCompat.END})
     @Retention(RetentionPolicy.SOURCE)
     private @interface EdgeGravity {}
     //endregion
 
-    private static final String FRAGMENT = "fragmet";
+    private static final String FRAGMENT = "fragment";
     private static final String MAP_TYPE = "mapType";
     private static final String SELECT_MAP = "selectMap";
 
@@ -235,15 +232,37 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
 
         getMapSettings();
 
+        if (Global.getDAL() != null) {
+            _Metadata = Global.getDAL().getMetadataMap();
+            zone = _Metadata.get(Consts.EmptyGuid).getZone();
+        }
+
         _Polygons = Global.getDAL().getPolygonsMap();
 
-        for (TtPolygon poly : getPolygonsToMap()) {
-            polyPoints.put(poly.getCN(), Global.getDAL().getPointsInPolygon(poly.getCN()));
-            _Polygons.put(poly.getCN(), poly);
-        }
+//        for (TtPolygon poly : getPolygonsToMap()) {
+//            polyPoints.put(poly.getCN(), Global.getDAL().getPointsInPolygon(poly.getCN()));
+//        }
     }
 
     private void setupUI() {
+        tvNavPid = (TextView)findViewById(R.id.mapNavTvPid);
+        tvNavPoly = (TextView)findViewById(R.id.mapNavTvPoly);
+        ivArrow = (ImageView)findViewById(R.id.mapNavIbArrow);
+
+        btnFromPoly = (Button)findViewById(R.id.mapNavBtnFromPoly);
+        btnFromPoint = (Button)findViewById(R.id.mapNavBtnFromPoint);
+        btnToPoly = (Button)findViewById(R.id.mapNavBtnToPoly);
+        btnToPoint = (Button)findViewById(R.id.mapNavBtnToPoint);
+
+        tvNavDistFt = (TextView)findViewById(R.id.mapNavTvDistFeet);
+        tvNavDistMt = (TextView)findViewById(R.id.mapNavTvDistMeters);
+        tvNavAzTrue = (TextView)findViewById(R.id.mapNavTvAzTrue);
+        tvNavAzMag = (TextView)findViewById(R.id.mapNavTvAzMag);
+
+        baseMapDrawer = (DrawerLayout)findViewById(R.id.mapDrawer);
+    }
+
+    private void setupPolygonOptionsUI() {
         RecyclerView rvPolyOptions = (RecyclerView)findViewById(R.id.mapRvPolyOptions);
 
         if (rvPolyOptions != null) {
@@ -270,30 +289,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
                 }
             });
         }
-
-        if (Global.getDAL() != null) {
-            _Metadata = Global.getDAL().getMetadataMap();
-            zone = _Metadata.get(Consts.EmptyGuid).getZone();
-        }
-
-        tvNavPid = (TextView)findViewById(R.id.mapNavTvPid);
-        tvNavPoly = (TextView)findViewById(R.id.mapNavTvPoly);
-        ivArrow = (ImageView)findViewById(R.id.mapNavIbArrow);
-
-        btnFromPoly = (Button)findViewById(R.id.mapNavBtnFromPoly);
-        btnFromPoint = (Button)findViewById(R.id.mapNavBtnFromPoint);
-        btnToPoly = (Button)findViewById(R.id.mapNavBtnToPoly);
-        btnToPoint = (Button)findViewById(R.id.mapNavBtnToPoint);
-
-        tvNavDistFt = (TextView)findViewById(R.id.mapNavTvDistFeet);
-        tvNavDistMt = (TextView)findViewById(R.id.mapNavTvDistMeters);
-        tvNavAzTrue = (TextView)findViewById(R.id.mapNavTvAzTrue);
-        tvNavAzMag = (TextView)findViewById(R.id.mapNavTvAzMag);
-
-        baseMapDrawer = (DrawerLayout)findViewById(R.id.mapDrawer);
     }
-
-
 
     private void startGMap() {
         mapFragment = createMapFragment(mapType, getMapOptions(mapType, mapId));
@@ -559,12 +555,6 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
         drawerToggle.syncState();
     }
 
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        //drawerToggle.onConfigurationChanged(newConfig);
-    }
-
 
     @Override
     protected void onPause() {
@@ -764,7 +754,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
         setLocationEnabled(getShowMyPos());
 
         if (!polysCreated) {
-            setupPolygons();
+            setupGraphicManagers();
             polysCreated = true;
 
             if (getMapTracking() == MapTracking.POLY_BOUNDS && getTrackedPoly() != null) {
@@ -776,7 +766,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
             }
         }
 
-        setupUI();
+        setupPolygonOptionsUI();
     }
 
     @Override
@@ -994,7 +984,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
     }
 
     protected void onNmeaBurstReceived(INmeaBurst nmeaBurst) {
-
+        //
     }
 
     @Override
@@ -1105,28 +1095,8 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
     //endregion
 
 
-    protected void onCreateGraphicManagers() {
-        PolygonGraphicManager polygonGraphicManager;
-        String trackedPolyCN = getTrackedPolyCN();
-
-        for (TtPolygon polygon : getSortedPolys()) {
-            polygonGraphicManager =  new PolygonGraphicManager(
-                    polygon,
-                    polyPoints.get(polygon.getCN()),
-                    _Metadata,
-                    Global.MapSettings.getPolyGraphicOptions(polygon.getCN()));
-
-            addPolygonGraphic(polygonGraphicManager, Global.MapSettings.getPolyDrawOptions(polygon.getCN()));
-
-            if (trackedPolyCN != null && polygon.getCN().equals(trackedPolyCN)) {
-                trackedPoly = polygonGraphicManager.getExtents();
-            }
-        }
-    }
-
-
     //region Polygon Options
-    private void setupPolygons() {
+    private void setupGraphicManagers() {
         onCreateGraphicManagers();
 
         if (getPolyGraphicManagers().size() > 0) {
@@ -1156,12 +1126,39 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
         setupMasterPolyControl();
     }
 
-    View layHeader, layContent;
-    MultiStateTouchCheckBox tcbPoly, tcbAdjBnd, tcbAdjNav, tcbUnAdjBnd, tcbUnAdjNav,
-            tcbAdjBndPts, tcbAdjNavPts, tcbUnAdjBndPts, tcbUnAdjNavPts,
-            tcbAdjMiscPts, tcbUnadjMiscPts, tcbWayPts;
+    protected void onCreateGraphicManagers() {
+        PolygonGraphicManager polygonGraphicManager;
+        String trackedPolyCN = getTrackedPolyCN();
 
-    boolean masterCardExpanded;
+        ArrayList<TtPoint> points;
+        for (TtPolygon polygon : getSortedPolys()) {
+            if (!polyPoints.containsKey(polygon.getCN())) {
+                points = Global.getDAL().getPointsInPolygon(polygon.getCN());
+                polyPoints.put(polygon.getCN(), points);
+            } else {
+                points = polyPoints.get(polygon.getCN());
+            }
+
+            polygonGraphicManager = new PolygonGraphicManager(
+                    polygon,
+                    points,
+                    _Metadata,
+                    Global.MapSettings.getPolyGraphicOptions(polygon.getCN()));
+
+            addPolygonGraphic(polygonGraphicManager, Global.MapSettings.getPolyDrawOptions(polygon.getCN()));
+
+            if (trackedPolyCN != null && polygon.getCN().equals(trackedPolyCN)) {
+                trackedPoly = polygonGraphicManager.getExtents();
+            }
+        }
+    }
+
+    private View layContent;
+    private MultiStateTouchCheckBox tcbPoly, tcbAdjBnd, tcbAdjNav, tcbUnAdjBnd, tcbUnAdjNav,
+            tcbAdjBndPts, tcbAdjNavPts, tcbUnAdjBndPts, tcbUnAdjNavPts,
+            tcbAdjMiscPts, tcbUnAdjMiscPts, tcbWayPts;
+
+    private boolean masterCardExpanded;
 
     PostDelayHandler[] postDelayHandlers = new PostDelayHandler[12];
 
@@ -1170,7 +1167,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
             postDelayHandlers[i] = new PostDelayHandler(250);
         }
 
-        layHeader = findViewById(R.id.mpcLayHeader);
+        View layHeader = findViewById(R.id.mpcLayHeader);
         layContent = findViewById(R.id.mpcLayPolyContent);
         tcbPoly = (MultiStateTouchCheckBox)findViewById(R.id.mpcTcbPoly);
 
@@ -1183,7 +1180,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
         tcbUnAdjBndPts = (MultiStateTouchCheckBox)findViewById(R.id.mpcTcbUnadjBndPts);
         tcbUnAdjNavPts = (MultiStateTouchCheckBox)findViewById(R.id.mpcTcbUnadjNavPts);
         tcbAdjMiscPts = (MultiStateTouchCheckBox)findViewById(R.id.mpcTcbAdjMiscPts);
-        tcbUnadjMiscPts = (MultiStateTouchCheckBox)findViewById(R.id.mpcTcbUnadjMiscPts);
+        tcbUnAdjMiscPts = (MultiStateTouchCheckBox)findViewById(R.id.mpcTcbUnadjMiscPts);
         tcbWayPts = (MultiStateTouchCheckBox)findViewById(R.id.mpcTcbWayPts);
 
         tcbAdjBnd.setCheckBoxDrawable(new PolygonProgressDrawable(5, 90));
@@ -1294,7 +1291,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
             }
         });
 
-        tcbUnadjMiscPts.setOnCheckedStateChangeListener(new MultiStateTouchCheckBox.OnCheckedStateChangeListener() {
+        tcbUnAdjMiscPts.setOnCheckedStateChangeListener(new MultiStateTouchCheckBox.OnCheckedStateChangeListener() {
             @Override
             public void onCheckedStateChanged(View buttonView, boolean isChecked, MultiStateTouchCheckBox.CheckedState state) {
                 updatePolyOptions(PolygonDrawOptions.DrawCode.UNADJMISCPTS, isChecked);
@@ -1374,7 +1371,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
                     x = 9;
                     break;
                 case UNADJMISCPTS:
-                    tcb = tcbUnadjMiscPts;
+                    tcb = tcbUnAdjMiscPts;
                     x = 10;
                     break;
                 case WAYPTS:
@@ -1533,7 +1530,9 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
                     @Override
                     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                         fromPoint = pda.getItem(i);
-                        btnFromPoint.setText(StringEx.toString(fromPoint.getPID()));
+                        if (fromPoint != null) {
+                            btnFromPoint.setText(StringEx.toString(fromPoint.getPID()));
+                        }
                         calculateDir();
                         dialog.dismiss();
                     }
@@ -1616,15 +1615,13 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                     toPoint = pda.getItem(i);
-                    btnToPoint.setText(StringEx.toString(toPoint.getPID()));
-                    tvNavPid.setText(StringEx.toString(toPoint.getPID()));
-                    tvNavPoly.setText(toPoint.getPolyName());
+                    if (toPoint != null) {
+                        btnToPoint.setText(StringEx.toString(toPoint.getPID()));
+                        tvNavPid.setText(StringEx.toString(toPoint.getPID()));
+                        tvNavPoly.setText(toPoint.getPolyName());
+                    }
 
                     calculateDir();
-
-//                    if (currentMarker != null) {
-//                        currentMarker.hideInfoWindow();
-//                    }
 
                     hideSelectedMarkerInfo();
 
@@ -1664,8 +1661,8 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
 
                 tvNavDistFt.setText(StringEx.toString(distInFt, 2));
                 tvNavDistMt.setText(StringEx.toString(distInMt, 2));
-                tvNavAzTrue.setText(String.format("%.2f\u00B0", azimuth));
-                tvNavAzMag.setText(String.format("%.2f\u00B0", azMag));
+                tvNavAzTrue.setText(StringEx.format("%.2f\u00B0", azimuth));
+                tvNavAzMag.setText(StringEx.format("%.2f\u00B0", azMag));
                 return;
             }
         }
