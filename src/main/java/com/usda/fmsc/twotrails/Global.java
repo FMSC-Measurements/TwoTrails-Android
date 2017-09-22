@@ -602,6 +602,8 @@ public class Global {
             public static final String AUTO_OVERWRITE_PLOTGRID_ASK = "AutoOverwritePlotGridAsk";
             public static final String AUTO_OVERWRITE_EXPORT = "AutoOverwriteExport";
             public static final String AUTO_OVERWRITE_EXPORT_ASK = "AutoOverwriteExportAsk";
+            public static final String AUTO_INTERNALIZE_EXPORT = "AutoInternalizeExport";
+            public static final String AUTO_INTERNALIZE_EXPORT_ASK = "AutoInternalizeExportAsk";
             public static final String USE_TTCAMERA = "UseTtCamera";
             public static final String USE_TTCAMERA_ASK = "UseTtCameraAsk";
 
@@ -671,6 +673,8 @@ public class Global {
             public static final boolean DEFAULT_AUTO_OVERWRITE_PLOTGRID_ASK = true;
             public static final int DEFAULT_AUTO_OVERWRITE_EXPORT = 0;
             public static final boolean DEFAULT_AUTO_OVERWRITE_EXPORT_ASK = true;
+            public static final int DEFAULT_AUTO_INTERNALIZE_EXPORT = 0;
+            public static final boolean DEFAULT_AUTO_INTERNALIZE_EXPORT_ASK = true;
 
             public static final MapTracking DEFAULT_MAP_TRACKING_OPTION = MapTracking.POLY_BOUNDS;
             public static final boolean DEFAULT_MAP_COMPASS_ENABLED = true;
@@ -744,6 +748,8 @@ public class Global {
                 editor.putBoolean(AUTO_OVERWRITE_PLOTGRID_ASK, DEFAULT_AUTO_OVERWRITE_PLOTGRID_ASK);
                 editor.putInt(AUTO_OVERWRITE_EXPORT, DEFAULT_AUTO_OVERWRITE_EXPORT);
                 editor.putBoolean(AUTO_OVERWRITE_EXPORT_ASK, DEFAULT_AUTO_OVERWRITE_EXPORT_ASK);
+                editor.putInt(AUTO_INTERNALIZE_EXPORT, DEFAULT_AUTO_INTERNALIZE_EXPORT);
+                editor.putBoolean(AUTO_INTERNALIZE_EXPORT_ASK, DEFAULT_AUTO_INTERNALIZE_EXPORT_ASK);
 
                 if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT_WATCH) {
                     editor.putInt(USE_TTCAMERA, 2);
@@ -1325,6 +1331,22 @@ public class Global {
             }
 
 
+            public static int getAutoInternalizeExport() {
+                return getInt(AUTO_INTERNALIZE_EXPORT);
+            }
+
+            public static void setAutoInternalizeExport(int value) {
+                setInt(AUTO_INTERNALIZE_EXPORT, value);
+            }
+
+
+            public static boolean getAutoInternalizeExportAsk() {
+                return getBool(AUTO_INTERNALIZE_EXPORT_ASK);
+            }
+
+            public static void setAutoInternalizeExportAsk(boolean value) {
+                setBool(AUTO_INTERNALIZE_EXPORT_ASK, value);
+            }
 
 
 

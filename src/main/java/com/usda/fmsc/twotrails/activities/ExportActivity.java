@@ -179,78 +179,39 @@ public class ExportActivity extends CustomToolbarActivity {
         if (checkExternalMedia && chkPc.isChecked()) {
             final MediaAccessLayer mal = Global.getOrCreateMAL();
             if (mal != null && mal.hasExternalImages()) {
-                //TODO convert to DontAskAgainDialog
-                new AlertDialog.Builder(this)
-                        .setMessage("There are Images that are saved outside of the media database. Would you like to include them to simplify image transfer?")
-                        .setPositiveButton("Include", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                progCircle.show();
-                                new Thread(new Runnable() {
-                                @Override
-                                    public void run() {
-                                        mal.internalizeImages(new MediaAccessLayer.SimpleMalListener(){
-                                            @Override
-                                            public void internalizeImagesCompleted(List<TtImage> imagesInternalized, final List<TtImage> failedImages) {
-                                                runOnUiThread(new Runnable() {
-                                                    @Override
-                                                    public void run() {
-                                                        progCircle.hide();
+                if (Global.Settings.DeviceSettings.getAutoInternalizeExportAsk()) {
+                    new DontAskAgainDialog(this,
+                            Global.Settings.DeviceSettings.AUTO_INTERNALIZE_EXPORT_ASK,
+                            Global.Settings.DeviceSettings.AUTO_INTERNALIZE_EXPORT,
+                            Global.Settings.PreferenceHelper.getPrefs())
 
-                                                        if (failedImages.size() > 0) {
-                                                            new AlertDialog.Builder(ExportActivity.this)
-                                                                    .setMessage("Some image files were not found. Would you still like to export the database?")
-                                                                    .setPositiveButton("Export", new DialogInterface.OnClickListener() {
-                                                                        @Override
-                                                                        public void onClick(DialogInterface dialog, int which) {
-                                                                            runOnUiThread(new Runnable() {
-                                                                                @Override
-                                                                                public void run() {
-                                                                                    startExport(directory, false);
-                                                                                }
-                                                                            });
-                                                                        }
-                                                                    })
-                                                                    .setNeutralButton(R.string.str_cancel, null);
-                                                        }
-                                                        else {
-                                                            startExport(directory, false);
-                                                        }
-                                                    }
-                                                });
-                                            }
+                    .setMessage("There are Images that are saved outside of the media database. Would you like to include them to simplify image transfer?")
 
-                                            @Override
-                                            public void internalizeImagesFailed(List<TtImage> imagesInternalized, List<TtImage> failedImages, String failedReason) {
-                                                runOnUiThread(new Runnable() {
-                                                    @Override
-                                                    public void run() {
-                                                        progCircle.hide();
+                    .setPositiveButton("Include", new DontAskAgainDialog.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i, Object value) {
+                            progCircle.show();
+                            internalizeImages(mal, directory);
+                        }
+                    }, 2)
 
-                                                        new AlertDialog.Builder(ExportActivity.this)
-                                                                .setMessage("There was an issue internalizing images to the media database. Would you still like to export the database?")
-                                                                .setPositiveButton("Export", new DialogInterface.OnClickListener() {
-                                                                    @Override
-                                                                    public void onClick(DialogInterface dialog, int which) {
-                                                                        startExport(directory, false);
-                                                                    }
-                                                                })
-                                                                .setNeutralButton(R.string.str_cancel, null);
-                                                    }
-                                                });
-                                            }
-                                        });
-                                    }
-                                }).start();
-                            }
-                        })
-                        .setNegativeButton("Exclude", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                startExport(directory, false);
-                            }
-                        })
-                        .show();
+                    .setNegativeButton("Exclude", new DontAskAgainDialog.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i, Object value) {
+                            startExport(directory, false);
+                        }
+                    }, null)
+
+                    .show();
+                } else {
+                    if (Global.Settings.DeviceSettings.getAutoInternalizeExport() == 2) {
+                        progCircle.show();
+                        internalizeImages(mal, directory);
+                    } else {
+                        startExport(directory, false);
+                    }
+                }
+
                 return;
             }
         }
@@ -259,44 +220,102 @@ public class ExportActivity extends CustomToolbarActivity {
 
         if (dir.exists()) {
             if (Global.Settings.DeviceSettings.getAutoOverwriteExportAsk()) {
-                DontAskAgainDialog dialog = new DontAskAgainDialog(this,
+                new DontAskAgainDialog(this,
                         Global.Settings.DeviceSettings.AUTO_OVERWRITE_EXPORT_ASK,
                         Global.Settings.DeviceSettings.AUTO_OVERWRITE_EXPORT,
-                        Global.Settings.PreferenceHelper.getPrefs());
+                        Global.Settings.PreferenceHelper.getPrefs())
 
-                dialog.setMessage("There is already a folder that that contains a previous export. Would you like to change the directory or overwrite it?");
+                .setMessage("There is already a folder that that contains a previous export. Would you like to change the directory or overwrite it?")
 
-                dialog.setPositiveButton("Overwrite", new DontAskAgainDialog.OnClickListener() {
+                .setPositiveButton("Overwrite", new DontAskAgainDialog.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i, Object value) {
                         export(dir);
                     }
-                }, 2);
+                }, 2)
 
-                dialog.setNeutralButton("Change", new DontAskAgainDialog.OnClickListener() {
+                .setNeutralButton("Change", new DontAskAgainDialog.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i, Object value) {
                         selectDirectory(dir.getAbsolutePath());
                     }
-                }, 1);
+                }, 1)
 
-                dialog.setNegativeButton("Cancel", null, null);
+                .setNegativeButton("Cancel", null, null)
 
-                dialog.show();
+                .show();
             } else {
-                switch (Global.Settings.DeviceSettings.getAutoOverwriteExport()) {
-                    case 2:
-                        export(dir);
-                        break;
-                    default:
-                        selectDirectory(directory);
-                        break;
+                if (Global.Settings.DeviceSettings.getAutoOverwriteExport() == 2) {
+                    export(dir);
+                } else {
+                    selectDirectory(directory);
                 }
             }
         } else {
             export(dir);
         }
     }
+
+
+    private void internalizeImages(final MediaAccessLayer mal, final String directory) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                mal.internalizeImages(new MediaAccessLayer.SimpleMalListener(){
+                    @Override
+                    public void internalizeImagesCompleted(List<TtImage> imagesInternalized, final List<TtImage> failedImages) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                progCircle.hide();
+
+                                if (failedImages.size() > 0) {
+                                    new AlertDialog.Builder(ExportActivity.this)
+                                            .setMessage("Some image files were not found. Would you still like to export the database?")
+                                            .setPositiveButton("Export", new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialog, int which) {
+                                                    runOnUiThread(new Runnable() {
+                                                        @Override
+                                                        public void run() {
+                                                            startExport(directory, false);
+                                                        }
+                                                    });
+                                                }
+                                            })
+                                            .setNeutralButton(R.string.str_cancel, null);
+                                }
+                                else {
+                                    startExport(directory, false);
+                                }
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void internalizeImagesFailed(List<TtImage> imagesInternalized, List<TtImage> failedImages, String failedReason) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                progCircle.hide();
+
+                                new AlertDialog.Builder(ExportActivity.this)
+                                        .setMessage("There was an issue internalizing images to the media database. Would you still like to export the database?")
+                                        .setPositiveButton("Export", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                startExport(directory, false);
+                                            }
+                                        })
+                                        .setNeutralButton(R.string.str_cancel, null);
+                            }
+                        });
+                    }
+                });
+            }
+        }).start();
+    }
+
 
     private void selectDirectory(String initDir) {
         Intent i = new Intent(this, FilePickerActivity.class);
