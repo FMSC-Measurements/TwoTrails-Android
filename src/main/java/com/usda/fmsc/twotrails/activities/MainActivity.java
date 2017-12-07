@@ -3,6 +3,7 @@ package com.usda.fmsc.twotrails.activities;
 import android.app.ProgressDialog;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
@@ -65,6 +66,27 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+            @Override
+            public void uncaughtException(Thread paramThread, Throwable paramThrowable) {
+
+                new Thread() {
+                    @Override
+                    public void run() {
+                        Looper.prepare();
+                        Toast.makeText(MainActivity.this,"Fatal Error. Check Log for details.", Toast.LENGTH_LONG).show();
+                        Looper.loop();
+                    }
+                }.start();
+                try
+                {
+                    Thread.sleep(4000); // Let the Toast display before app will get shutdown
+                }
+                catch (InterruptedException e) { }
+                System.exit(2);
+            }
+        });
 
         setContentView(R.layout.activity_main);
 

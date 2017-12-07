@@ -971,7 +971,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
                 onPositionReceived(position);
             }
 
-            if (fromMyLoc && slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
+            if (fromMyLoc && slidingLayout != null && slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
                 calculateDir();
             }
 

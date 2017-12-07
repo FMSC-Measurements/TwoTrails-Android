@@ -192,7 +192,7 @@ public class TravPoint extends TtPoint {
     }
 
 
-    protected boolean calcTravLocation(double startingX, double startingY, double startingZ, boolean isAdjusted) {
+    private boolean calcTravLocation(double startingX, double startingY, double startingZ, boolean isAdjusted) {
         Double azimuth = getAzimuth();
 
         //Must have a valid azimuth to proceed
@@ -204,17 +204,15 @@ public class TravPoint extends TtPoint {
         //Adjust by the declination
         /* Apply the magnetic declination */
         /* East declination is positve, west is negative */
-        azimuth += getDeclination();
-
         /* azimuth conversion from north to mathematic postive X-axis */
-        azimuth = 90 - azimuth;
-        double x, y, z;
+        azimuth = 90 - azimuth + getDeclination();
+        double x, y, z, azAsRad = TtUtils.Convert.degreesToRadians(azimuth);
 
         double horizontalDist = getHorizontalDistance();
 
-        x = startingX + (horizontalDist * Math.cos(azimuth * (Math.PI / 180)));
-        y = startingY + (horizontalDist * Math.sin(azimuth * (Math.PI / 180)));
-        z = startingZ + (horizontalDist * Math.tan(getSlopeAngle()));
+        x = startingX + (horizontalDist * Math.cos(azAsRad));
+        y = startingY + (horizontalDist * Math.sin(azAsRad));
+        z = startingZ + (horizontalDist * Math.sin(TtUtils.Convert.degreesToRadians(getSlopeAngle())));
 
         if (isAdjusted) {
             _AdjX = x;

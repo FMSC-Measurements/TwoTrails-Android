@@ -45,8 +45,6 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
 
     private TtPolygon _Polygon;
 
-    private List<PointD> polyPoints;
-
 
     public static PolygonFragment newInstance(String polyCN, boolean hidden) {
         PolygonFragment fragment = new PolygonFragment();
@@ -104,27 +102,20 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
         viewPreFocus = view.findViewById(R.id.preFocusView);
 
         if (_Polygon != null) {
-            final View v = view;
+            if (spv.getWidth() == 0) {
+                view.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        activity.getDrawPoints(_Polygon, spv.getWidth(), false);
+                    }
+                });
+            }
 
             if (Global.getDAL().getBoundaryPointsCountInPoly(_Polygon.getCN()) < 3) {
                 View polyLayImage = view.findViewById(R.id.polyLayImage);
 
                 if (polyLayImage != null) {
                     polyLayImage.setVisibility(View.GONE);
-                }
-            } else {
-                polyPoints = activity.getDrawPoints(_Polygon, 0);
-
-                if (polyPoints == null) {
-                    v.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-                        @Override
-                        public void onGlobalLayout() {
-                            if (spv != null && activity != null) {
-                                polyPoints = activity.getDrawPoints(_Polygon, spv.getWidth());
-                                v.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                            }
-                        }
-                    });
                 }
             }
 
@@ -308,6 +299,14 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
         }
     }
 
+    @Override
+    public void onPolygonPointsUpdated(TtPolygon polygon) {
+        List<PointD> polyPoints = activity.getDrawPoints(_Polygon, spv.getWidth(), true);
+
+        if (polyPoints != null)
+            spv.render(polyPoints);
+    }
+
 
     private void setViews() {
         settingView = true;
@@ -329,12 +328,10 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
         tvAreaAc.setText(StringEx.toStringRound(TtUtils.Convert.metersSquaredToAcres(_Polygon.getArea()), 2));
         tvAreaHa.setText(StringEx.toStringRound(TtUtils.Convert.metersSquaredToHa(_Polygon.getArea()), 2));
 
+        List<PointD> polyPoints = activity.getDrawPoints(_Polygon, spv.getWidth(), false);
 
-        if (polyPoints == null && activity != null) {
-            polyPoints = activity.getDrawPoints(_Polygon, 0);
-        }
-
-        spv.render(polyPoints);
+        if (polyPoints != null)
+            spv.render(polyPoints);
 
         settingView = false;
     }

@@ -75,7 +75,7 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
             Intent intent = getIntent();
 
             if (intent != null) {
-                if (intent.getExtras().containsKey(Consts.Codes.Data.POLYGON_DATA))
+                if (intent.hasExtra(Consts.Codes.Data.POLYGON_DATA))
                     _Polygon = intent.getParcelableExtra(Consts.Codes.Data.POLYGON_DATA);
 
                     if (_Polygon == null) {

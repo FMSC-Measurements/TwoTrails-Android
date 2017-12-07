@@ -135,6 +135,7 @@ public class DataAccessLayer extends IDataLayer {
             CreateGroupTable();
             CreatePolygonAttrTable();
             CreateActivityTable();
+            CreateDataDictionaryTable();
             SetupProjInfo();
             insertMetadata(Global.getDefaultMeta());
             insertGroup(Global.getMainGroup());
@@ -271,6 +272,18 @@ public class DataAccessLayer extends IDataLayer {
         catch (Exception ex)
         {
             TtUtils.TtReport.writeError(ex.getMessage(), "DataAccessLayer:CreateActivityTable");
+            throw ex;
+        }
+    }
+
+    private  void CreateDataDictionaryTable() {
+        try
+        {
+            _db.execSQL(TwoTrailsSchema.DataDictionarySchema.CreateTable);
+        }
+        catch (Exception ex)
+        {
+            TtUtils.TtReport.writeError(ex.getMessage(), "DataAccessLayer:CreateDataDictionaryTable");
             throw ex;
         }
     }
@@ -2588,6 +2601,10 @@ public class DataAccessLayer extends IDataLayer {
         return success;
     }
     //endregion
+    //endregion
+
+    //region DataDictionary
+
     //endregion
 
     //region DbTools
