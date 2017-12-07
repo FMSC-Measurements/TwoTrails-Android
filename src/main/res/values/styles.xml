@@ -99,7 +99,7 @@
         <item name="android:textCursorDrawable">@null</item>
     </style>
 
-    <style name="AutoSelectEditTextStyle" parent="style/EditTextStyle">
+    <style name="AutoSelectEditTextStyle" parent="@style/EditTextStyle">
         <item name="android:selectAllOnFocus">true</item>
     </style>
 

@@ -35,6 +35,8 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.usda.fmsc.utilities.StringEx;
+import com.usda.fmsc.utilities.Tuple;
+import com.usda.fmsc.utilities.kml.Point;
 
 public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
     private HashMap<String, Listener> listeners;
@@ -51,7 +53,7 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private ViewPager mViewPager;
 
-    private ConcurrentHashMap<String, ArrayList<PointD>> drawPoints = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, Tuple<Integer, ArrayList<PointD>>> drawPoints = new ConcurrentHashMap<>();
     private ConcurrentHashMap<String, Boolean> hasDrawPoints = new ConcurrentHashMap<>();
     private HashMap<String, TtMetadata> metadata;
 
@@ -247,6 +249,9 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
                     moveToPolygon(index);
                 }
             });
+
+            for (TtPolygon poly : _Polygons)
+                onPolygonPointsUpdated(poly);
         }
     }
 
@@ -364,13 +369,15 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
     }
 
     private void moveToPolygon(int index, boolean smoothScroll) {
-        if (index > INVALID_INDEX && index < _Polygons.size()) {
-            mViewPager.setCurrentItem(index, smoothScroll);
-            _CurrentPolygon = getPolygonAtIndex(index);
-            _CurrentIndex = index;
-        } else {
-            _CurrentPolygon = null;
-            _CurrentIndex = INVALID_INDEX;
+        if (index != _CurrentIndex) {
+            if (index > INVALID_INDEX && index < _Polygons.size()) {
+                mViewPager.setCurrentItem(index, smoothScroll);
+                _CurrentPolygon = getPolygonAtIndex(index);
+                _CurrentIndex = index;
+            } else {
+                _CurrentPolygon = null;
+                _CurrentIndex = INVALID_INDEX;
+            }
         }
 
         updateButtons();
@@ -468,6 +475,12 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
         }
     }
 
+    private void onPolygonPointsUpdated(TtPolygon poly) {
+        if (listeners.containsKey(poly.getCN())) {
+            listeners.get(poly.getCN()).onPolygonPointsUpdated(poly);
+        }
+    }
+
     public void updatePolygon(TtPolygon polygon) {
         //only update if current poly
         if (_CurrentPolygon.getCN().equals(polygon.getCN())) {
@@ -492,12 +505,13 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
         return null;
     }
     
-    public ArrayList<PointD> getDrawPoints(final TtPolygon poly, final int width) {
+    public ArrayList<PointD> getDrawPoints(final TtPolygon poly, final int width, boolean reset) {
         boolean hdpk = hasDrawPoints.containsKey(poly.getCN());
+        Tuple<Integer, ArrayList<PointD>> dpk = hdpk ? drawPoints.get(poly.getCN()) : null;
 
-        if (hdpk && hasDrawPoints.get(poly.getCN())) {
-            return drawPoints.get(poly.getCN());
-        } else if (!hdpk) {
+        if (hdpk && dpk.Item1 == width && !reset) {
+            return dpk.Item2;
+        } else if (!hdpk || reset) {
             if (width > 0) {
                 new Thread(new Runnable() {
                     @Override
@@ -511,7 +525,7 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
                                     public void run() {
                                         int zone = metadata.get(Consts.EmptyGuid).getZone();
 
-                                        drawPoints.put(poly.getCN(), TtUtils.UI.generateStaticPolyPoints(points, metadata, zone, (int)(width * 0.9)));
+                                        drawPoints.put(poly.getCN(), new Tuple<>(width, TtUtils.UI.generateStaticPolyPoints(points, metadata, zone, (int)(width * 0.9))));
                                         hasDrawPoints.put(poly.getCN(), true);
 
                                         onPolygonUpdate(poly);
@@ -599,5 +613,6 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
     public interface Listener {
         void onLockChange(boolean locked);
         void onPolygonUpdated(TtPolygon polygon);
+        void onPolygonPointsUpdated(TtPolygon polygon);
     }
 }

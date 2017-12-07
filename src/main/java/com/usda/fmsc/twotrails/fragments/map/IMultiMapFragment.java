@@ -3,7 +3,7 @@ package com.usda.fmsc.twotrails.fragments.map;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.google.android.gms.common.internal.safeparcel.SafeParcelable;
+//import com.google.android.gms.common.internal.safeparcel.SafeParcelable;
 import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.twotrails.objects.map.PolygonDrawOptions;
@@ -69,7 +69,7 @@ public interface IMultiMapFragment {
     }
 
 
-    class MapOptions implements SafeParcelable {
+    class MapOptions implements Parcelable {
         private int MapId;
         private double North = 0, East = 0, South = 0, West = 0;
         private double Latitude = 0, Longitide = 0;

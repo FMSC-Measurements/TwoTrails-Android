@@ -2,10 +2,10 @@ package com.usda.fmsc.twotrails.data;
 
 public class TwoTrailsSchema {
     //Old Schema Versions
-    public static final TtVersion OSV_2_0_0 = new TtVersion(2, 0, 0);
+    public static final TtVersion OSV_2_0_1 = new TtVersion(2, 0, 1);
 
     //Schema Version
-    public static final TtVersion SchemaVersion = OSV_2_0_0;
+    public static final TtVersion SchemaVersion = OSV_2_0_1;
 
 
     public static class SharedSchema {
@@ -481,6 +481,50 @@ public class TwoTrailsSchema {
             DeviceName + ", " +
             ActivityDate + ", " +
             DataActivity;
+    }
+    //endregion
+
+    //region DataDictionary
+    public static class DataDictionarySchema {
+        public static final String TableName = "DataDictionary";
+
+        public static final String Name = "Name";
+        public static final String FieldOrder = "FieldOrder";
+        public static final String FieldType = "FieldType";
+        public static final String Flags = "Flags";
+        public static final String FieldValues = "FieldValues";
+        public static final String DefaultValue = "DefaultValue";
+        public static final String ValueRequired = "ValueRequired";
+        public static final String DataType = "DataType";
+
+        public static final String ExtendDataTableName = "DDData";
+        public static final String PointCN = "PointCN";
+
+
+        public static final String CreateTable =
+            "CREATE TABLE " + TableName + " (" +
+                    SharedSchema.CN + " TEXT NOT NULL, " +
+                    Name + " TEXT NOT NULL, " +
+                    FieldOrder + " INTEGER NOT NULL, " +
+                    FieldType + " INTEGER NOT NULL, " +
+                    Flags + " INTEGER, " +
+                    FieldValues + " TEXT, " +
+                    DefaultValue + " TEXT, " +
+                    ValueRequired + " INTEGER NOT NULL, " +
+                    DataType + " INTEGER NOT NULL" +
+                    ");";
+
+
+        public static final String SelectItems =
+            SharedSchema.CN + ", " +
+                    Name + ", " +
+                    FieldOrder + ", " +
+                    FieldType + ", " +
+                    Flags + ", " +
+                    FieldValues + ", " +
+                    DefaultValue + ", " +
+                    ValueRequired + ", " +
+                    DataType;
     }
     //endregion
 }
