@@ -45,66 +45,66 @@ public class PolygonAdjuster {
     public static AdjustResult adjust(final DataAccessLayer dal, final boolean updateIndexes, Listener listener) {
         _Listener = listener;
 
-        if (_processing)
-            return AdjustResult.ADJUSTING;
+        if (!_processing) {
 
-        _cancelToken = false;
+            _cancelToken = false;
 
-        //check for point issues
-        if (dal.getItemCount(TwoTrailsSchema.PolygonSchema.TableName) < 1)
-            return AdjustResult.NO_POLYS;
-        else {
-            for (TtPolygon poly : dal.getPolygons()) {
-                TtPoint p = dal.getFirstPointInPolygon(poly.getCN());
+            //check for point issues
+            if (dal.getItemCount(TwoTrailsSchema.PolygonSchema.TableName) < 1)
+                return AdjustResult.NO_POLYS;
+            else {
+                for (TtPolygon poly : dal.getPolygons()) {
+                    TtPoint p = dal.getFirstPointInPolygon(poly.getCN());
 
-                if (p != null) {
-                    if(p.isTravType() || (p.getOp() == OpType.Quondam &&
-                            ((QuondamPoint)p).getParentPoint().isTravType()))
-                        return AdjustResult.STARTS_WITH_TRAV_TYPE;
+                    if (p != null) {
+                        if (p.isTravType() || (p.getOp() == OpType.Quondam &&
+                                ((QuondamPoint) p).getParentPoint().isTravType()))
+                            return AdjustResult.STARTS_WITH_TRAV_TYPE;
+                    }
                 }
             }
-        }
 
-        _processing = true;
+            _processing = true;
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                AdjustResult result = AdjustResult.ADJUSTING;
-                boolean success = false;
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    AdjustResult result = AdjustResult.ADJUSTING;
+                    boolean success = false;
 
-                try {
-                    if (_Listener != null)
-                        _Listener.adjusterStarted();
+                    try {
+                        if (_Listener != null)
+                            _Listener.adjusterStarted();
 
-                    if(updateIndexes)
-                        updateIndexes(dal);
+                        if (updateIndexes)
+                            updateIndexes(dal);
 
-                    if(!_cancelToken) {
-                        success = adjustPoints(dal);
-                    }
-
-                    if (success) {
-                        result = AdjustResult.SUCCESSFUL;
-                    } else {
-                        result = AdjustResult.ERROR;
-                    }
-                } catch (Exception ex) {
-                    TtUtils.TtReport.writeError(ex.getMessage(), "PolygonAdjuster:adjust");
-                    result = AdjustResult.ERROR;
-                } finally {
-                    _processing = false;
-
-                    if (_Listener != null) {
-                        if (_cancelToken) {
-                            result = AdjustResult.CANCELED;
+                        if (!_cancelToken) {
+                            success = adjustPoints(dal);
                         }
 
-                        _Listener.adjusterStopped(result);
+                        if (success) {
+                            result = AdjustResult.SUCCESSFUL;
+                        } else {
+                            result = AdjustResult.ERROR;
+                        }
+                    } catch (Exception ex) {
+                        TtUtils.TtReport.writeError(ex.getMessage(), "PolygonAdjuster:adjust");
+                        result = AdjustResult.ERROR;
+                    } finally {
+                        _processing = false;
+
+                        if (_Listener != null) {
+                            if (_cancelToken) {
+                                result = AdjustResult.CANCELED;
+                            }
+
+                            _Listener.adjusterStopped(result);
+                        }
                     }
                 }
-            }
-        }).start();
+            }).start();
+        }
 
         return AdjustResult.ADJUSTING;
     }
@@ -257,8 +257,9 @@ public class PolygonAdjuster {
         }
     }
 
-    public static void unregister() {
-        _Listener = null;
+    public static void unregister(Listener listener) {
+        if (_Listener == listener)
+            _Listener = null;
     }
 
 

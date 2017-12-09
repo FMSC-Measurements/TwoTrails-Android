@@ -69,7 +69,9 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             @Override
-            public void uncaughtException(Thread paramThread, Throwable paramThrowable) {
+            public void uncaughtException(Thread errorThread, Throwable exception) {
+
+                TtUtils.TtReport.writeError(exception.getMessage(), errorThread.getName(), exception.getStackTrace());
 
                 new Thread() {
                     @Override
@@ -83,7 +85,9 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
                 {
                     Thread.sleep(4000); // Let the Toast display before app will get shutdown
                 }
-                catch (InterruptedException e) { }
+                catch (InterruptedException e) {
+                    //
+                }
                 System.exit(2);
             }
         });

@@ -48,7 +48,7 @@ public abstract class TtAjusterCustomToolbarActivity extends CustomToolbarActivi
     protected void onStop() {
         super.onStop();
 
-        PolygonAdjuster.unregister();
+        PolygonAdjuster.unregister(this);
     }
 
     @Override

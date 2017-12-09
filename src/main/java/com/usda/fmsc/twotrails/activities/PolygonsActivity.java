@@ -509,7 +509,7 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
         boolean hdpk = hasDrawPoints.containsKey(poly.getCN());
         Tuple<Integer, ArrayList<PointD>> dpk = hdpk ? drawPoints.get(poly.getCN()) : null;
 
-        if (hdpk && dpk.Item1 == width && !reset) {
+        if (!reset && hdpk && (dpk.Item1 == width || width == 0)) {
             return dpk.Item2;
         } else if (!hdpk || reset) {
             if (width > 0) {
