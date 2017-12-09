@@ -80,7 +80,7 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_polygon_card, container, false);
+        final View view = inflater.inflate(R.layout.fragment_polygon_card, container, false);
 
         tvName = (TextView)view.findViewById(R.id.polyFragTvName);
         txtName = (EditText)view.findViewById(R.id.polyFragTxtName);
@@ -106,7 +106,9 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
                 view.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                     @Override
                     public void onGlobalLayout() {
-                        activity.getDrawPoints(_Polygon, spv.getWidth(), false);
+                        if (_Polygon != null)
+                            activity.getDrawPoints(_Polygon, spv.getWidth(), false);
+                        view.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                     }
                 });
             }
