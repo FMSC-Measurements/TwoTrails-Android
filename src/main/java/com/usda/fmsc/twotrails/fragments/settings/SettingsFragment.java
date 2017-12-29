@@ -36,6 +36,8 @@ import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.logic.SettingsLogic;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
+import com.usda.fmsc.twotrails.rangefinder.RangeFinderService;
+import com.usda.fmsc.twotrails.rangefinder.TtRangeFinderData;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.util.ArrayList;
@@ -48,11 +50,10 @@ import com.usda.fmsc.utilities.StringEx;
 public class SettingsFragment extends PreferenceFragment {
     public static final String CURRENT_PAGE = "CurrentPage";
 
-    private GpsService.GpsBinder binder;
-    private Preference prefGpsCheck;
-    private SwitchCompatPreference swtUseExDev;
+    private Preference prefGpsCheck, prefRFCheck;
+    private SwitchCompatPreference swtUseExGpsDev;
     private PreferenceCategory exGpsCat;
-    private ListCompatPreference perfLstGpsDevice;
+    private ListCompatPreference prefLstGpsDevice, prefLstRFDevice;
 
     private String moveToPage;
 
@@ -120,24 +121,26 @@ public class SettingsFragment extends PreferenceFragment {
             }
         }
 
-        swtUseExDev = (SwitchCompatPreference)findPreference(Global.Settings.DeviceSettings.GPS_EXTERNAL);
+        swtUseExGpsDev = (SwitchCompatPreference)findPreference(Global.Settings.DeviceSettings.GPS_EXTERNAL);
         exGpsCat = (PreferenceCategory)findPreference(getString(R.string.set_GPS_CAT));
-        perfLstGpsDevice = (ListCompatPreference)findPreference(getString(R.string.set_GPS_LIST_DEVICE));
+        prefLstGpsDevice = (ListCompatPreference)findPreference(getString(R.string.set_GPS_LIST_DEVICE));
         prefGpsCheck = findPreference(getString(R.string.set_GPS_CHECK));
+        prefLstRFDevice = (ListCompatPreference)findPreference(getString(R.string.set_RF_LIST_DEVICE));
+        prefRFCheck = findPreference(getString(R.string.set_RF_CHECK));
         Preference prefClearLog = findPreference(getString(R.string.set_CLEAR_LOG));
         Preference prefExportReport = findPreference(getString(R.string.set_EXPORT_REPORT));
         Preference prefResetDevice = findPreference(getString(R.string.set_RESET));
         Preference prefCheckNmea = findPreference(getString(R.string.set_GPS_CHECK_NMEA));
         Preference prefCode = findPreference(getString(R.string.set_CODE));
 
-        binder = Global.getGpsBinder();
-
-        swtUseExDev.setOnPreferenceChangeListener(useExternalListener);
-        swtUseExDev.setSummary(getString(swtUseExDev.isChecked() ? R.string.ds_gps_use_external : R.string.ds_gps_use_internal));
+        swtUseExGpsDev.setOnPreferenceChangeListener(useExternalListener);
+        swtUseExGpsDev.setSummary(getString(swtUseExGpsDev.isChecked() ? R.string.ds_gps_use_external : R.string.ds_gps_use_internal));
 
         prefGpsCheck.setOnPreferenceClickListener(gpsCheckListener);
+        prefRFCheck.setOnPreferenceClickListener(rfCheckListener);
 
-        perfLstGpsDevice.setOnPreferenceChangeListener(btGPSList);
+        prefLstGpsDevice.setOnPreferenceChangeListener(btnGPSList);
+        prefLstRFDevice.setOnPreferenceChangeListener(btnRFList);
 
         prefResetDevice.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
@@ -174,15 +177,15 @@ public class SettingsFragment extends PreferenceFragment {
         });
 
         //get initial bluetooth devices
-        setBTValues(perfLstGpsDevice);
+        setBTValues(prefLstGpsDevice);
 
         exGpsCat.setEnabled(Global.Settings.DeviceSettings.getGpsExternal());
 
         String devName = Global.Settings.DeviceSettings.getGpsDeviceName();
         if(StringEx.isEmpty(devName)) {
-            perfLstGpsDevice.setSummary(R.string.ds_no_dev);
+            prefLstGpsDevice.setSummary(R.string.ds_no_dev);
         } else {
-            perfLstGpsDevice.setSummary(devName);
+            prefLstGpsDevice.setSummary(devName);
         }
 
         if (Global.Settings.DeviceSettings.isGpsConfigured()) {
@@ -239,7 +242,7 @@ public class SettingsFragment extends PreferenceFragment {
         }
     }
 
-    //region GPS Check
+
     Preference.OnPreferenceClickListener gpsCheckListener = new Preference.OnPreferenceClickListener() {
         @Override
         public boolean onPreferenceClick(Preference preference) {
@@ -253,6 +256,7 @@ public class SettingsFragment extends PreferenceFragment {
                 stringRecvCount = 0;
 
                 new Thread(new Runnable() {
+                    final GpsService.GpsBinder binder = Global.getGpsBinder();
 
                     final Activity activity = getActivity();
 
@@ -273,8 +277,6 @@ public class SettingsFragment extends PreferenceFragment {
                                 pd.show();
                             }
                         });
-
-                        final GpsService.GpsBinder binder = Global.getGpsBinder();
 
                         Runnable runGPS = new Runnable() {
                             @Override
@@ -411,7 +413,159 @@ public class SettingsFragment extends PreferenceFragment {
             return false;
         }
     };
-    //endregion
+
+    Preference.OnPreferenceClickListener rfCheckListener = new Preference.OnPreferenceClickListener() {
+        @Override
+        public boolean onPreferenceClick(Preference preference) {
+            try {
+                Global.Settings.DeviceSettings.setRangeFinderConfigured(false);
+
+                final ProgressDialog pd = new ProgressDialog(getActivity());
+
+                prefRFCheck.setSummary(R.string.ds_rf_not_connected);
+
+                stringRecvCount = 0;
+
+                new Thread(new Runnable() {
+
+                    final Activity activity = getActivity();
+
+                    @Override
+                    public void run() {
+                        final RangeFinderService.RangeFinderBinder binder = Global.getRFBinder();
+
+                        pd.setMessage(getString(R.string.ds_rf_connecting));
+
+                        pd.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                            @Override
+                            public void onDismiss(DialogInterface dialog) {
+                                binder.stopRangeFinder();
+                            }
+                        });
+
+                        activity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                pd.show();
+                            }
+                        });
+
+                        Runnable runRF = new Runnable() {
+                            @Override
+                            public void run() {
+                                binder.setRangeFinderProvider(Global.Settings.DeviceSettings.getRangeFinderDeviceID());
+
+                                RangeFinderService.Listener listener = new RangeFinderService.Listener() {
+                                    @Override
+                                    public void rfDataReceived(TtRangeFinderData rfData) {
+
+                                    }
+
+                                    @Override
+                                    public void rfStringReceived(String rfString) {
+                                        try {
+                                            binder.removeListener(this);
+
+                                            Global.Settings.DeviceSettings.setRangeFinderConfigured(true);
+
+                                            if (1 > stringRecvCount++) {
+                                                activity.runOnUiThread(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        pd.setMessage(activity.getString(R.string.ds_rf_connected));
+
+                                                        if (Global.Settings.DeviceSettings.isRangeFinderAlwaysOn()) {
+                                                            prefGpsCheck.setSummary(R.string.ds_rf_connected);
+                                                        } else {
+                                                            prefGpsCheck.setSummary(R.string.ds_dev_configured);
+                                                            binder.stopRangeFinder();
+                                                        }
+                                                    }
+                                                });
+
+
+                                                Thread.sleep(1000);
+
+                                                activity.runOnUiThread(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        pd.hide();
+                                                    }
+                                                });
+                                            }
+                                        } catch (InterruptedException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+
+                                    @Override
+                                    public void rfInvalidStringReceived(String rfString) {
+
+                                    }
+
+                                    @Override
+                                    public void rangeFinderStarted() {
+
+                                    }
+
+                                    @Override
+                                    public void rangeFinderStopped() {
+
+                                    }
+
+                                    @Override
+                                    public void rangeFinderServiceStarted() {
+
+                                    }
+
+                                    @Override
+                                    public void rangeFinderServiceStopped() {
+
+                                    }
+
+                                    @Override
+                                    public void rangeFinderError(RangeFinderService.RangeFinderError error) {
+                                        Global.Settings.DeviceSettings.setRangeFinderConfigured(false);
+
+                                        Toast.makeText(activity, error.toString(), Toast.LENGTH_SHORT).show();
+
+                                        activity.runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                pd.setMessage(getString(R.string.ds_rf_not_connected));
+                                                pd.hide();
+                                            }
+                                        });
+                                    }
+                                };
+
+
+                                binder.addListener(listener);
+
+                                binder.startRangeFinder();
+                            }
+                        };
+
+                        Looper.prepare();
+
+                        if (binder.isRangeFinderRunning()) {
+                            binder.startRangeFinder();
+                            new PostDelayHandler(1000, runRF).post();
+                        } else {
+                            runRF.run();
+                        }
+                    }
+                }).start();
+
+            } catch (Exception ex) {
+                TtUtils.TtReport.writeError(ex.getMessage(), "SettingsFragment:checkRF");
+                Toast.makeText(getActivity(), "Error", Toast.LENGTH_SHORT).show();
+            }
+
+            return false;
+        }
+    };
+
 
     //region External Switch
     Preference.OnPreferenceChangeListener useExternalListener = new Preference.OnPreferenceChangeListener() {
@@ -430,7 +584,7 @@ public class SettingsFragment extends PreferenceFragment {
             }
 
             if (sucess) {
-                swtUseExDev.setSummary(getString(useExternal ? R.string.ds_gps_use_external : R.string.ds_gps_use_internal));
+                swtUseExGpsDev.setSummary(getString(useExternal ? R.string.ds_gps_use_external : R.string.ds_gps_use_internal));
             }
 
             return sucess;
@@ -445,7 +599,7 @@ public class SettingsFragment extends PreferenceFragment {
 
         if (btm.isAvailable()) {
             if (btm.isEnabled()) {
-                setBTValues(perfLstGpsDevice);
+                setBTValues(prefLstGpsDevice);
                 exGpsCat.setEnabled(true);
                 return true;
             } else {
@@ -463,6 +617,8 @@ public class SettingsFragment extends PreferenceFragment {
     }
 
     private boolean switchToInternal() {
+        GpsService.GpsBinder binder = Global.getGpsBinder();
+
         if (!binder.isInternalGpsEnabled()) {
             ActivityCompat.requestPermissions(getActivity(), new String[]{
                             android.Manifest.permission.ACCESS_FINE_LOCATION,
@@ -482,9 +638,7 @@ public class SettingsFragment extends PreferenceFragment {
     }
     //endregion
 
-
-    //region External GPS List
-    Preference.OnPreferenceChangeListener btGPSList = new Preference.OnPreferenceChangeListener() {
+    Preference.OnPreferenceChangeListener btnGPSList = new Preference.OnPreferenceChangeListener() {
         public boolean onPreferenceChange(Preference preference, Object newValue) {
 
             try {
@@ -496,14 +650,14 @@ public class SettingsFragment extends PreferenceFragment {
                         Global.Settings.DeviceSettings.setGpsDeviceId(values[0]);
                         Global.Settings.DeviceSettings.setGpsDeviceName(values[1]);
 
-                        perfLstGpsDevice.setSummary(values[1]);
+                        prefLstGpsDevice.setSummary(values[1]);
                         Global.Settings.DeviceSettings.setGpsConfigured(false);
                     }
                 } else {
                     Global.Settings.DeviceSettings.setGpsDeviceId(StringEx.Empty);
                     Global.Settings.DeviceSettings.setGpsDeviceName(StringEx.Empty);
 
-                    perfLstGpsDevice.setSummary(getString(R.string.ds_no_dev));
+                    prefLstGpsDevice.setSummary(getString(R.string.ds_no_dev));
                     Global.Settings.DeviceSettings.setGpsConfigured(false);
                 }
             } catch (Exception e) {
@@ -513,8 +667,36 @@ public class SettingsFragment extends PreferenceFragment {
             return true;
         }
     };
-    //endregion
 
+    Preference.OnPreferenceChangeListener btnRFList = new Preference.OnPreferenceChangeListener() {
+        public boolean onPreferenceChange(Preference preference, Object newValue) {
+
+            try {
+                String[] values = newValue.toString().split(",");
+
+                if (values.length > 0) {
+
+                    if (!Global.Settings.DeviceSettings.getRangeFinderDeviceID().equals(values[0])) {
+                        Global.Settings.DeviceSettings.setRangeFinderDeviceId(values[0]);
+                        Global.Settings.DeviceSettings.setRangeFinderDeviceName(values[1]);
+
+                        prefLstRFDevice.setSummary(values[1]);
+                        Global.Settings.DeviceSettings.setRangeFinderConfigured(false);
+                    }
+                } else {
+                    Global.Settings.DeviceSettings.setRangeFinderDeviceId(StringEx.Empty);
+                    Global.Settings.DeviceSettings.setRangeFinderDeviceName(StringEx.Empty);
+
+                    prefLstRFDevice.setSummary(getString(R.string.ds_no_dev));
+                    Global.Settings.DeviceSettings.setRangeFinderConfigured(false);
+                }
+            } catch (Exception e) {
+                //
+            }
+
+            return true;
+        }
+    };
 
     Preference.OnPreferenceClickListener checkNmeaListener = new Preference.OnPreferenceClickListener() {
         @Override

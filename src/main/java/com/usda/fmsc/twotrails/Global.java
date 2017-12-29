@@ -22,7 +22,6 @@ import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.geospatial.UomElevation;
 import com.usda.fmsc.geospatial.nmea.sentences.GGASentence;
 import com.usda.fmsc.geospatial.nmea.sentences.GSASentence;
-import com.usda.fmsc.twotrails.activities.MainActivity;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
 import com.usda.fmsc.twotrails.data.MediaAccessLayer;
 import com.usda.fmsc.twotrails.devices.TtBluetoothManager;
@@ -34,6 +33,7 @@ import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
 import com.usda.fmsc.twotrails.objects.map.PolygonDrawOptions;
 import com.usda.fmsc.twotrails.objects.map.PolygonGraphicOptions;
 import com.usda.fmsc.twotrails.objects.map.PolygonGraphicOptions.GraphicCode;
+import com.usda.fmsc.twotrails.rangefinder.RangeFinderService;
 import com.usda.fmsc.twotrails.units.Datum;
 import com.usda.fmsc.twotrails.units.DeclinationType;
 import com.usda.fmsc.twotrails.units.Dist;
@@ -48,7 +48,6 @@ import com.usda.fmsc.utilities.StringEx;
 import org.joda.time.DateTime;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -67,8 +66,9 @@ public class Global {
 
 
     private static GpsService.GpsBinder gpsBinder;
+    private static RangeFinderService.RangeFinderBinder rfBinder;
 
-    private static ServiceConnection serviceConnection = new ServiceConnection() {
+    private static ServiceConnection gpsServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             gpsBinder = (GpsService.GpsBinder)service;
@@ -80,6 +80,17 @@ public class Global {
         }
     };
 
+    private static ServiceConnection rfServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            rfBinder = (RangeFinderService.RangeFinderBinder)service;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+
+        }
+    };
 
 
     public static void init(Context applicationContext) {
@@ -118,7 +129,10 @@ public class Global {
         }
 
         _ApplicationContext.startService(new Intent(_ApplicationContext, GpsService.class));
-        _ApplicationContext.bindService(new Intent(_ApplicationContext, GpsService.class), serviceConnection, Context.BIND_AUTO_CREATE);
+        _ApplicationContext.bindService(new Intent(_ApplicationContext, GpsService.class), gpsServiceConnection, Context.BIND_AUTO_CREATE);
+
+        _ApplicationContext.startService(new Intent(_ApplicationContext, RangeFinderService.class));
+        _ApplicationContext.bindService(new Intent(_ApplicationContext, RangeFinderService.class), rfServiceConnection, Context.BIND_AUTO_CREATE);
 
         TtUtils.TtReport.writeEvent("TwoTrails Started");
 
@@ -221,6 +235,9 @@ public class Global {
         return gpsBinder;
     }
 
+    public static RangeFinderService.RangeFinderBinder getRFBinder() {
+        return rfBinder;
+    }
 
     public static Context getApplicationContext() {
         return _ApplicationContext;
@@ -560,10 +577,15 @@ public class Global {
             public static final String GPS_CONFIGURED = "GPSConfigured";
             public static final String GPS_LOG_BURST_DETAILS = "GPSLogBurstDetails";
 
+            public static final String RANGE_FINDER_ALWAYS_ON = "RangeFinderAlwaysOn";
+            public static final String LOG_ALL_RANGE_FINDER = "LogAllRangeFinder";
+            public static final String RANGE_FINDER_CONFIGURED = "RangeFinderConfigured";
+            public static final String RANGE_FINDER_LOG_BURST_DETAILS = "RangeFinderLogBurstDetails";
+
             public static final String GPS_DEVICE_ID = "GpsDeviceID";
             public static final String GPS_DEVICE_NAME = "GpsDeviceName";
-            public static final String LASER_DEVICE_ID = "RangeFinderDeviceID";
-            public static final String LASER_DEVICE_NAME = "RangeFinderDeviceName";
+            public static final String RANGE_FINDER_DEVICE_ID = "RangeFinderDeviceID";
+            public static final String RANGE_FINDER_DEVICE_NAME = "RangeFinderDeviceName";
 
             public static final String GPS_FILTER_DOP_TYPE = "GpsFilterDopType";
             public static final String GPS_FILTER_DOP_VALUE = "GpsFilterDopValue";
@@ -850,20 +872,36 @@ public class Global {
 
             //region RangeFinder Settings
             public static String getRangeFinderDeviceID() {
-                return getString(LASER_DEVICE_ID);
+                return getString(RANGE_FINDER_DEVICE_ID);
             }
 
             public static void setRangeFinderDeviceId(String value) {
-                setString(LASER_DEVICE_ID, value);
+                setString(RANGE_FINDER_DEVICE_ID, value);
             }
 
 
             public static String getRangeFinderDeviceName() {
-                return getString(LASER_DEVICE_NAME);
+                return getString(RANGE_FINDER_DEVICE_NAME);
             }
 
             public static void setRangeFinderDeviceName(String value) {
-                setString(LASER_DEVICE_NAME, value);
+                setString(RANGE_FINDER_DEVICE_NAME, value);
+            }
+
+            public static boolean isRangeFinderAlwaysOn() {
+                return getBool(RANGE_FINDER_ALWAYS_ON);
+            }
+
+            public static void setRangeFinderAlwaysOn(boolean value) {
+                setBool(RANGE_FINDER_ALWAYS_ON, value);
+            }
+
+            public static boolean isRangeFinderConfigured() {
+                return getBool(RANGE_FINDER_CONFIGURED);
+            }
+
+            public static void setRangeFinderConfigured(boolean value) {
+                setBool(RANGE_FINDER_CONFIGURED, value);
             }
             //endregion
 

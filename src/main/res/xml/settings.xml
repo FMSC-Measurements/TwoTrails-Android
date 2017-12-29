@@ -53,24 +53,22 @@
         <PreferenceScreen
             android:title="Range Finder"
             android:key="@string/set_RF_SETUP"
-            android:enabled="false">
+            android:enabled="true">
 
-            <com.usda.fmsc.android.preferences.SwitchCompatPreference
-                android:id="@+id/swtLaserLocDevice"
-                android:key="@string/set_RF_LIST_DEVICE"
-                android:title="Range Finder"
-                android:summary="Device to use."
-                android:switchTextOff="@string/str_internal"
-                android:switchTextOn="@string/str_external"
-                android:textOff="@string/str_internal"
-                android:textOn="@string/str_external"/>
+            <com.usda.fmsc.android.preferences.ListCompatPreference
+                android:id="@+id/lstRfDevice"
+                android:key="@string/set_RF_DEVICE"
+                android:title="External Range Finder" />
 
-            <PreferenceCategory android:title="External Range Finder Settings">
-                <com.usda.fmsc.android.preferences.ListCompatPreference
-                    android:id="@+id/lstRfDevice"
-                    android:key="@string/set_RF_DEVICE"
-                    android:title="External Range Finder" />
-            </PreferenceCategory>
+            <Preference
+                android:key="@string/set_RF_CHECK"
+                android:title="Check Range Finder Connection"
+                android:summary="@string/ds_gps_not_connected"/>
+
+
+            <!--Create settings: use compass data-->
+            <!--Create settings (if above check): auto apply as fwd az-->
+            <!--Create settings (if 2 above check, disable 1 above and set 1 above true): auto create SS (data must include az. uses as fwd as only)-->
         </PreferenceScreen>
     </PreferenceCategory>
 

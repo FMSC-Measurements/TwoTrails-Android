@@ -27,6 +27,7 @@ public enum Dist {
         switch (value.toLowerCase()) {
             case "feettenths":
             case "0":
+            case "f":
             case "ftt":
                 return FeetTenths;
             case "meters":
