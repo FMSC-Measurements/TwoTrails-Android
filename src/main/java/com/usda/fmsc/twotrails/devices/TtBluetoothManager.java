@@ -4,7 +4,6 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 
-import com.usda.fmsc.twotrails.gps.GpsBluetoothConnection;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.io.IOException;
@@ -93,9 +92,9 @@ public class TtBluetoothManager {
 
                         socket.connect();
 
-                        final GpsBluetoothConnection conn = new GpsBluetoothConnection(socket);
+                        final BluetoothConnection conn = new BluetoothConnection(socket);
 
-                        final GpsBluetoothConnection.Listener btListener = new GpsBluetoothConnection.Listener() {
+                        final BluetoothConnection.Listener btListener = new BluetoothConnection.Listener() {
                             @Override
                             public void receivedString(String data) {
                                 if (NmeaSentence.validateChecksum(data)) {

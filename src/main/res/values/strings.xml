@@ -213,6 +213,9 @@
     <string name="ds_gps_check_nmea">See what NMEA strings are coming down from the GPS receiver</string>
     <string name="ds_gps_use_internal">Using Internal GPS</string>
     <string name="ds_gps_use_external">Using External GPS</string>
+    <string name="ds_rf_connected">Range Finder Connected</string>
+    <string name="ds_rf_not_connected">Range Finder Not Connected</string>
+    <string name="ds_rf_connecting">Connecting to Range Finder..</string>
 
 
     <!-- Device Settings Consts / Keys -->
@@ -221,6 +224,7 @@
     <string name="set_GPS_CHECK">prefGpsCheck</string>
     <string name="set_GPS_LIST_DEVICE">prefLstGpsDevice</string>
     <string name="set_GPS_CHECK_NMEA">prefGpsCheckNema</string>
+    <string name="set_RF_CHECK">prefRFCheck</string>
     <string name="set_RF_SETUP">rfSetup</string>
     <string name="set_RF_LIST_DEVICE">rfLocDevice</string>
     <string name="set_RF_DEVICE">rfDevice</string>
@@ -239,10 +243,13 @@
     <string name="set_GPS_ALWAYS_ON">GpsAlwaysOn</string>
     <string name="set_LOG_ALL_GPS">LogAllGps</string>
     <string name="set_GPS_CONFIGURED">GPSConfigured</string>
+    <string name="set_RANGE_FINDER_ALWAYS_ON">RangeFinderAlwaysOn</string>
+    <string name="set_LOG_ALL_RANGE_FINDER">LogAllRangeFinder</string>
+    <string name="set_RANGE_FINDER_CONFIGURED">RangeFinderConfigured</string>
     <string name="set_GPS_DEVICE_ID">GpsDeviceID</string>
     <string name="set_GPS_DEVICE_NAME">GpsDeviceName</string>
-    <string name="set_LASER_DEVICE_ID">RangeFinderDeviceID</string>
-    <string name="set_LASER_DEVICE_NAME">RangeFinderDeviceName</string>
+    <string name="set_RANGE_FINDER_DEVICE_ID">RangeFinderDeviceID</string>
+    <string name="set_RANGE_FINDER_DEVICE_NAME">RangeFinderDeviceName</string>
 
     <string name="set_GPS_FILTER_DOP_TYPE">GpsFilterDopType</string>
     <string name="set_GPS_FILTER_DOP_VALUE">GpsFilterDopValue</string>

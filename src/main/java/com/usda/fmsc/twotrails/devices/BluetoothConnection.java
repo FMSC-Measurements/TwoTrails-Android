@@ -1,4 +1,4 @@
-package com.usda.fmsc.twotrails.gps;
+package com.usda.fmsc.twotrails.devices;
 
 import android.bluetooth.BluetoothSocket;
 
@@ -10,7 +10,7 @@ import java.util.ArrayList;
 
 import com.usda.fmsc.utilities.StringEx;
 
-public class GpsBluetoothConnection extends Thread {
+public class BluetoothConnection extends Thread {
     private BluetoothSocket btSocket;
     private BufferedReader bufferedReader;
 
@@ -18,7 +18,7 @@ public class GpsBluetoothConnection extends Thread {
 
     private ArrayList<Listener> listeners;
 
-    public GpsBluetoothConnection(BluetoothSocket socket) throws IOException {
+    public BluetoothConnection(BluetoothSocket socket) throws IOException {
         listeners = new ArrayList<>();
 
         btSocket = socket;

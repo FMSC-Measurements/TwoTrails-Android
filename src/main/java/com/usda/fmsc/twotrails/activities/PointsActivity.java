@@ -79,6 +79,8 @@ import com.usda.fmsc.twotrails.objects.points.TravPoint;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
+import com.usda.fmsc.twotrails.rangefinder.RangeFinderService;
+import com.usda.fmsc.twotrails.rangefinder.TtRangeFinderData;
 import com.usda.fmsc.twotrails.ui.MSFloatingActionButton;
 import com.usda.fmsc.twotrails.units.MediaType;
 import com.usda.fmsc.twotrails.units.OpType;
@@ -100,7 +102,7 @@ import com.usda.fmsc.utilities.StringEx;
 
 import jp.wasabeef.recyclerview.animators.FadeInAnimator;
 
-public class PointsActivity extends CustomToolbarActivity implements PointMediaController {
+public class PointsActivity extends CustomToolbarActivity implements PointMediaController, RangeFinderService.Listener {
     private HashMap<String, PointMediaListener> listeners;
 
     private MenuItem miLock, miLink, miReset, miEnterLatLon, miNmeaRecalc, miDelete, miGoto;//, miMovePoint;
@@ -655,6 +657,10 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
             AndroidUtils.UI.setContentDescToast(ivFullscreen, "View in Fullscreen");
         }
         //endregion
+
+        if (Global.Settings.DeviceSettings.isRangeFinderConfigured()) {
+            Global.getRFBinder().startRangeFinder();
+        }
     }
 
     @Override
@@ -662,6 +668,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         super.onPause();
         savePoint();
         saveMedia();
+
     }
 
     @Override
@@ -669,6 +676,10 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         super.onDestroy();
         savePoint();
         saveMedia();
+
+        if (!Global.Settings.DeviceSettings.isRangeFinderAlwaysOn()) {
+            Global.getRFBinder().stopRangeFinder();
+        }
 
         if (adjust) {
             PolygonAdjuster.adjust(Global.getDAL(), true);
@@ -2519,10 +2530,52 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         }
     }
 
+    //region Range Finder
+    @Override
+    public void rfDataReceived(TtRangeFinderData rfData) {
+        if (_CurrentPoint.getOp().isTravType()) {
+
+        }
+    }
+
+    @Override
+    public void rfStringReceived(String rfString) {
+
+    }
+
+    @Override
+    public void rfInvalidStringReceived(String rfString) {
+        Toast.makeText(this, "Invalid Range Finder data recieved", Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void rangeFinderStarted() {
+
+    }
+
+    @Override
+    public void rangeFinderStopped() {
+
+    }
+
+    @Override
+    public void rangeFinderServiceStarted() {
+
+    }
+
+    @Override
+    public void rangeFinderServiceStopped() {
+
+    }
+
+    @Override
+    public void rangeFinderError(RangeFinderService.RangeFinderError error) {
+
+    }
+    //endregion
 
     private class PointsPagerAdapter extends FragmentStatePagerAdapterEx {
-
-        public PointsPagerAdapter(FragmentManager fm) {
+        private PointsPagerAdapter(FragmentManager fm) {
             super(fm);
         }
 

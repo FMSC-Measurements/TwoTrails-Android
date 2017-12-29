@@ -18,6 +18,7 @@ import com.google.android.gms.maps.LocationSource;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.geospatial.nmea.NmeaIDs;
 import com.usda.fmsc.geospatial.nmea.NmeaBurstEx;
+import com.usda.fmsc.twotrails.devices.BluetoothConnection;
 import com.usda.fmsc.twotrails.devices.TtBluetoothManager;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
@@ -36,7 +37,7 @@ import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
 import com.usda.fmsc.utilities.StringEx;
 
 public class GpsService extends Service implements LocationListener, LocationSource, GpsStatus.Listener,
-        GpsStatus.NmeaListener, NmeaParser.Listener, GpsBluetoothConnection.Listener, SharedPreferences.OnSharedPreferenceChangeListener {
+        GpsStatus.NmeaListener, NmeaParser.Listener, BluetoothConnection.Listener, SharedPreferences.OnSharedPreferenceChangeListener {
 
     public final int GPS_UPDATE_INTERVAL = 1000;    //in milliseconds
     public final int GPS_MINIMUM_DISTANCE = 0;      //in meters
@@ -50,7 +51,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
     private final Binder binder = new GpsBinder();
 
     private TtBluetoothManager bluetoothManager;
-    private GpsBluetoothConnection btConn;
+    private BluetoothConnection btConn;
 
     private PrintWriter logPrintWriter;
 
@@ -250,7 +251,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
             BluetoothSocket socket = bluetoothManager.getSocket(_deviceUUID);
 
             if (socket != null) {
-                btConn = new GpsBluetoothConnection(socket);
+                btConn = new BluetoothConnection(socket);
                 btConn.register(this);
                 btConn.start();
             } else {
@@ -337,7 +338,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
 
     public void setGpsProvider(String deviceUUID) throws RuntimeException {
         if(isGpsRunning())
-            throw new  RuntimeException("GPS must be stopped before setting provider.");
+            throw new RuntimeException("GPS must be stopped before setting provider.");
         else
             _deviceUUID = deviceUUID;
     }
@@ -664,7 +665,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
         DeviceConnectionEnded,
         NoExternalGpsSocket,
         FailedToConnect,
-        Unkown
+        Unknown
     }
 
     public enum GpsDeviceStatus {
