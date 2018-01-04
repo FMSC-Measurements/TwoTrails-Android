@@ -82,8 +82,10 @@ import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.rangefinder.RangeFinderService;
 import com.usda.fmsc.twotrails.rangefinder.TtRangeFinderData;
 import com.usda.fmsc.twotrails.ui.MSFloatingActionButton;
+import com.usda.fmsc.twotrails.units.Dist;
 import com.usda.fmsc.twotrails.units.MediaType;
 import com.usda.fmsc.twotrails.units.OpType;
+import com.usda.fmsc.twotrails.units.Slope;
 import com.usda.fmsc.twotrails.utilities.AppUnits;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
@@ -668,7 +670,6 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         super.onPause();
         savePoint();
         saveMedia();
-
     }
 
     @Override
@@ -2517,25 +2518,56 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
     //endregion
     //endregion
 
-
-    public void register(String pointCN, PointMediaListener listener) {
-        if (listener != null && !listeners.containsKey(pointCN)) {
-            listeners.put(pointCN, listener);
-        }
-    }
-
-    public void unregister(String pointCN) {
-        if (listeners.containsKey(pointCN)) {
-            listeners.remove(pointCN);
-        }
-    }
-
     //region Range Finder
-    @Override
-    public void rfDataReceived(TtRangeFinderData rfData) {
-        if (_CurrentPoint.getOp().isTravType()) {
+    boolean autoCreatePoint;
 
+    @Override
+    public void rfDataReceived(final TtRangeFinderData rfData) {
+        if (rfData.isValid()) {
+            if (autoCreatePoint) {
+                //create Sideshot
+            } else if (_CurrentPoint.getOp().isTravType()) {
+                if (Global.Settings.DeviceSettings.isAutoFillFromRangeFinderAsk()) {
+                    DontAskAgainDialog dialog = new DontAskAgainDialog(PointsActivity.this,
+                            Global.Settings.DeviceSettings.AUTO_FILL_FROM_RANGE_FINDER_ASK,
+                            Global.Settings.DeviceSettings.AUTO_FILL_FROM_RANGE_FINDER,
+                            Global.Settings.PreferenceHelper.getPrefs());
+
+                    dialog.setMessage(StringEx.format("Would you like to set the current point with data from the Range Finder?"))
+                            .setPositiveButton("Yes", new DontAskAgainDialog.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i, Object value) {
+                                updateTravPointFromRangeFinder(rfData, true);
+                                }
+                            }, 2)
+                            .setNegativeButton("W/O Az", new DontAskAgainDialog.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i, Object value) {
+                                updateTravPointFromRangeFinder(rfData, false);
+                                }
+                            }, 1)
+                            .setNeutralButton(getString(R.string.str_cancel), null, 0)
+                            .show();
+                } else {
+                    updateTravPointFromRangeFinder(rfData, Global.Settings.DeviceSettings.getAutoFillFromRangeFinder() > 1);
+                }
+            }
+        } else {
+            Toast.makeText(PointsActivity.this, "Range Finder did not supply Slope and/or Distance", Toast.LENGTH_LONG).show();
         }
+    }
+
+    private void updateTravPointFromRangeFinder(TtRangeFinderData rfData, boolean useCompassData) {
+        TravPoint trav = ((TravPoint)_CurrentPoint);
+
+        trav.setSlopeAngle(TtUtils.Convert.angle(rfData.getInclination(), Slope.Percent, rfData.getIncType()));
+        trav.setSlopeDistance(TtUtils.Convert.distance(rfData.getSlopeDist(), Dist.Meters, rfData.getSlopeDistType()));
+
+        if (useCompassData && rfData.hasCompassData()) {
+            trav.setFwdAz(TtUtils.Convert.angle(rfData.getAzimuth(), Slope.Degrees, rfData.getAzType()));
+        }
+
+        onPointUpdate();
     }
 
     @Override
@@ -2573,6 +2605,19 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
     }
     //endregion
+
+
+    public void register(String pointCN, PointMediaListener listener) {
+        if (listener != null && !listeners.containsKey(pointCN)) {
+            listeners.put(pointCN, listener);
+        }
+    }
+
+    public void unregister(String pointCN) {
+        if (listeners.containsKey(pointCN)) {
+            listeners.remove(pointCN);
+        }
+    }
 
     private class PointsPagerAdapter extends FragmentStatePagerAdapterEx {
         private PointsPagerAdapter(FragmentManager fm) {

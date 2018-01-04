@@ -16,6 +16,7 @@ import com.usda.fmsc.twotrails.devices.TtBluetoothManager;
 import com.usda.fmsc.twotrails.units.Dist;
 import com.usda.fmsc.twotrails.units.Slope;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
+import com.usda.fmsc.utilities.ParseEx;
 
 import org.joda.time.DateTime;
 
@@ -317,13 +318,13 @@ public class RangeFinderService extends Service implements BluetoothConnection.L
         if (tokens.length > 9 && tokens[1].length() > 0) {
             try {
                 String horizVectorMsg = tokens[1];
-                double horizDist = Double.parseDouble(tokens[2]);
+                Double horizDist = ParseEx.parseDouble(tokens[2]);
                 Dist horizDistType = Dist.parse(tokens[3]);
-                double azimuth = Double.parseDouble(tokens[4]);
+                Double azimuth = ParseEx.parseDouble(tokens[4]);
                 Slope azType = Slope.parse(tokens[5]);
-                double inclination = Double.parseDouble(tokens[6]);
+                Double inclination = ParseEx.parseDouble(tokens[6]);
                 Slope incType = Slope.parse(tokens[5]);
-                double slopeDist = Double.parseDouble(tokens[8]);
+                Double slopeDist = ParseEx.parseDouble(tokens[8]);
                 Dist slopeDistType = Dist.parse(tokens[9]);
 
                 lastRFData = TtRangeFinderData.create(horizVectorMsg, horizDist, horizDistType,

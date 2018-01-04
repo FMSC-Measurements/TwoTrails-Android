@@ -25,13 +25,13 @@ public class TtRangeFinderData implements Parcelable {
 
     private DateTime time;
     private String horizVectorMsg;
-    private double horizDist;
+    private Double horizDist;
     private Dist horizDistType;
-    private double azimuth;
+    private Double azimuth;
     private Slope azType;
-    private double inclination;
+    private Double inclination;
     private Slope incType;
-    private double slopeDist;
+    private Double slopeDist;
     private Dist slopeDistType;
 
 
@@ -83,8 +83,8 @@ public class TtRangeFinderData implements Parcelable {
     }
 
 
-    public static TtRangeFinderData create(String horizVectorMsg, double horizDist, Dist horizDistType, double azimuth,
-                                Slope azType, double inclination, Slope incType, double slopeDist, Dist slopeDistType) {
+    public static TtRangeFinderData create(String horizVectorMsg, Double horizDist, Dist horizDistType, Double azimuth,
+                                Slope azType, Double inclination, Slope incType, Double slopeDist, Dist slopeDistType) {
         return new TtRangeFinderData(DateTime.now(), horizVectorMsg, horizDist, horizDistType, azimuth, azType, inclination, incType, slopeDist, slopeDistType);
     }
 
@@ -97,7 +97,7 @@ public class TtRangeFinderData implements Parcelable {
         return horizVectorMsg;
     }
 
-    public double getHorizDist() {
+    public Double getHorizDist() {
         return horizDist;
     }
 
@@ -105,7 +105,7 @@ public class TtRangeFinderData implements Parcelable {
         return horizDistType;
     }
 
-    public double getAzimuth() {
+    public Double getAzimuth() {
         return azimuth;
     }
 
@@ -113,7 +113,7 @@ public class TtRangeFinderData implements Parcelable {
         return azType;
     }
 
-    public double getInclination() {
+    public Double getInclination() {
         return inclination;
     }
 
@@ -121,11 +121,20 @@ public class TtRangeFinderData implements Parcelable {
         return incType;
     }
 
-    public double getSlopeDist() {
+    public Double getSlopeDist() {
         return slopeDist;
     }
 
     public Dist getSlopeDistType() {
         return slopeDistType;
+    }
+
+
+    public boolean isValid() {
+        return slopeDist != null && inclination != null;
+    }
+
+    public boolean hasCompassData() {
+        return azimuth != null;
     }
 }
