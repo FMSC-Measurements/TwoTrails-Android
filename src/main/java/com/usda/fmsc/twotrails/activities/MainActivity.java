@@ -664,7 +664,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
             while (true) {
                 if (FileUtils.fileExists(dupFile)) {
-                    dupFile = String.format("%s_bk%d%s", filepath.substring(0, filepath.length() - 3), inc, Consts.FILE_EXTENSION);
+                    dupFile = StringEx.format("%s_bk%d%s", filepath.substring(0, filepath.length() - 3), inc, Consts.FILE_EXTENSION);
                     inc++;
                     continue;
                 }
@@ -766,12 +766,14 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
                     File KML = new File(kmlPath);
                     Intent i = getPackageManager().getLaunchIntentForPackage(gEarth);
 
-                    i.setDataAndType(FileProvider.getUriForFile(
-                                MainActivity.this,
-                                BuildConfig.APPLICATION_ID + ".provider",
-                                KML),
-                            "application/vnd.google-earth.kml+xml");
-                    startActivity(i);
+                    if (i != null) {
+                        i.setDataAndType(FileProvider.getUriForFile(
+                                    MainActivity.this,
+                                    BuildConfig.APPLICATION_ID + ".provider",
+                                    KML),
+                                "application/vnd.google-earth.kml+xml");
+                        startActivity(i);
+                    }
                 }
             }
         } else {

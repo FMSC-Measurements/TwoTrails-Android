@@ -151,7 +151,12 @@ public class Global {
     }
 
     public static void destroy() {
-        gpsBinder.stopService();
+        if (gpsBinder != null)
+            gpsBinder.stopService();
+
+        if (rfBinder != null)
+            rfBinder.stopService();
+
         TtUtils.TtReport.writeEvent("TwoTrails Stopped");
         TtUtils.TtReport.closeReport();
         System.exit(0);
@@ -587,6 +592,9 @@ public class Global {
             public static final String RANGE_FINDER_DEVICE_ID = "RangeFinderDeviceID";
             public static final String RANGE_FINDER_DEVICE_NAME = "RangeFinderDeviceName";
 
+            public static final String AUTO_FILL_FROM_RANGE_FINDER = "AutoFillFromRangeFinder";
+            public static final String AUTO_FILL_FROM_RANGE_FINDER_ASK = "AutoFillFromRangeFinderAsk";
+
             public static final String GPS_FILTER_DOP_TYPE = "GpsFilterDopType";
             public static final String GPS_FILTER_DOP_VALUE = "GpsFilterDopValue";
             public static final String GPS_FILTER_FIX_TYPE = "GpsFilterFixType";
@@ -687,6 +695,10 @@ public class Global {
 
             public static final boolean DEFAULT_GPS_LOG_BURST_DETAILS = false;
 
+
+            public static final int DEFAULT_AUTO_FILL_FROM_RANGE_FINDER = 1;
+            public static final boolean DEFAULT_AUTO_FILL_FROM_RANGE_FINDER_ASK = true;
+
             public static final int DEFAULT_AUTO_SET_GPS_NAME_TO_META = 0;
             public static final boolean DEFAULT_AUTO_SET_GPS_NAME_TO_META_ASK = true;
             public static final int DEFAULT_AUTO_UPDATE_WALK_ONBND = 0;
@@ -734,10 +746,15 @@ public class Global {
                 editor.putBoolean(DROP_ZERO, DEFAULT_DROP_ZERO);
                 editor.putBoolean(ROUND_POINTS, DEFAULT_ROUND_POINTS);
 
+                editor.putBoolean(GPS_ALWAYS_ON, true);
+
                 editor.putInt(GPS_FILTER_DOP_TYPE, DEFAULT_GPS_DOP_TYPE.getValue());
                 editor.putInt(GPS_FILTER_DOP_VALUE, DEFAULT_GPS_DOP_VALUE);
                 editor.putInt(GPS_FILTER_FIX_TYPE, DEFAULT_GPS_FIX_TYPE.getValue());
                 editor.putInt(GPS_FILTER_FIX, DEFAULT_GPS_FIX.getValue());
+
+                editor.putInt(AUTO_FILL_FROM_RANGE_FINDER, DEFAULT_AUTO_FILL_FROM_RANGE_FINDER);
+                editor.putBoolean(AUTO_FILL_FROM_RANGE_FINDER_ASK, DEFAULT_AUTO_FILL_FROM_RANGE_FINDER_ASK);
 
                 editor.putInt(TAKE5_FILTER_DOP_TYPE, DEFAULT_TAKE5_DOP_TYPE.getValue());
                 editor.putInt(TAKE5_FILTER_DOP_VALUE, DEFAULT_TAKE5_DOP_VALUE);
@@ -902,6 +919,14 @@ public class Global {
 
             public static void setRangeFinderConfigured(boolean value) {
                 setBool(RANGE_FINDER_CONFIGURED, value);
+            }
+
+            public static int getAutoFillFromRangeFinder() {
+                return getInt(AUTO_FILL_FROM_RANGE_FINDER);
+            }
+
+            public static boolean isAutoFillFromRangeFinderAsk() {
+                return getBool(AUTO_FILL_FROM_RANGE_FINDER_ASK);
             }
             //endregion
 
