@@ -184,7 +184,7 @@ public class AcquireGpsActivity extends AcquireGpsMapActivity {
                 break;
             case NoExternalGpsSocket:
                 break;
-            case Unkown:
+            case Unknown:
                 break;
         }
 

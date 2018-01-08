@@ -134,7 +134,7 @@ public class Global {
         _ApplicationContext.startService(new Intent(_ApplicationContext, RangeFinderService.class));
         _ApplicationContext.bindService(new Intent(_ApplicationContext, RangeFinderService.class), rfServiceConnection, Context.BIND_AUTO_CREATE);
 
-        TtUtils.TtReport.writeEvent("TwoTrails Started");
+        TtUtils.TtReport.writeEvent(StringEx.format("TwoTrails Started (%s)", AndroidUtils.App.getVersionName(_ApplicationContext)));
 
         //TODO set arc license for release
         //ArcGISRuntime.setClientId(_ApplicationContext.getString(R.string.arcgis_client_id));
