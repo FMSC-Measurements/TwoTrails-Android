@@ -1295,7 +1295,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                 break;
             case NoExternalGpsSocket:
                 break;
-            case Unkown:
+            case Unknown:
                 break;
         }
     }

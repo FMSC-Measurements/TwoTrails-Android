@@ -226,7 +226,7 @@
     <string name="set_GPS_CHECK_NMEA">prefGpsCheckNema</string>
     <string name="set_RF_CHECK">prefRFCheck</string>
     <string name="set_RF_SETUP">rfSetup</string>
-    <string name="set_RF_LIST_DEVICE">rfLocDevice</string>
+    <string name="set_RF_LIST_DEVICE">prefLstRFDevice</string>
     <string name="set_RF_DEVICE">rfDevice</string>
 
     <string name="set_DROP">prefDropZero</string>

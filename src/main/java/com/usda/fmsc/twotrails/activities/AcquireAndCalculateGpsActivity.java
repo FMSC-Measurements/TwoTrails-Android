@@ -707,7 +707,7 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
                 break;
             case NoExternalGpsSocket:
                 break;
-            case Unkown:
+            case Unknown:
                 break;
         }
 

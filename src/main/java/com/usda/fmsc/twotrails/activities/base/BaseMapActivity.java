@@ -994,7 +994,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
                 break;
             case NoExternalGpsSocket:
                 break;
-            case Unkown:
+            case Unknown:
                 break;
         }
     }

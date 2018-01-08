@@ -56,7 +56,7 @@
             android:enabled="true">
 
             <com.usda.fmsc.android.preferences.ListCompatPreference
-                android:id="@+id/lstRfDevice"
+                android:id="@+id/prefLstRFDevice"
                 android:key="@string/set_RF_DEVICE"
                 android:title="External Range Finder" />
 
