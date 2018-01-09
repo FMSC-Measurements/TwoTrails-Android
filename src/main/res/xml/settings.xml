@@ -57,13 +57,13 @@
 
             <com.usda.fmsc.android.preferences.ListCompatPreference
                 android:id="@+id/prefLstRFDevice"
-                android:key="@string/set_RF_DEVICE"
+                android:key="@string/set_RF_LIST_DEVICE"
                 android:title="External Range Finder" />
 
             <Preference
                 android:key="@string/set_RF_CHECK"
                 android:title="Check Range Finder Connection"
-                android:summary="@string/ds_gps_not_connected"/>
+                android:summary="@string/ds_rf_not_connected"/>
 
 
             <!--Create settings: use compass data-->
