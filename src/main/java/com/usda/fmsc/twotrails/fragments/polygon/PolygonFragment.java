@@ -106,7 +106,7 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
                 view.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                     @Override
                     public void onGlobalLayout() {
-                        if (_Polygon != null)
+                        if (activity != null)
                             activity.getDrawPoints(_Polygon, spv.getWidth(), false);
                         view.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                     }
@@ -249,8 +249,7 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
         try {
             this.activity = (PolygonsActivity) activity;
         } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement Polygon PointMediaListener");
+            throw new ClassCastException(activity.toString() + " must implement PolygonsActivity");
         }
     }
 
