@@ -48,7 +48,7 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
 
     private Integer zone = null;
     private boolean canceling = false, useLostConnectionWarning = false, trailModeEnabled = true;
-    private boolean logging, gpsExtraVisable = true, animating, gpsExtraLayoutSet;
+    private boolean logging, gpsExtraVisible = true, animating, gpsExtraLayoutSet;
 
     private ArrayList<TtPolygon> polygonsToMap;
 
@@ -350,7 +350,7 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
                     tvSat.setText(nVal);
                 }
 
-                if (gpsExtraVisable) {
+                if (gpsExtraVisible) {
                     skyView.update(burst);
                     statusView.update(burst);
                 }
@@ -460,7 +460,7 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
     }
 
     protected void hideExtraGpsStatus(boolean animate) {
-        if (gpsExtraVisable) {
+        if (gpsExtraVisible) {
             if (!gpsExtraLayoutSet) {
                 RelativeLayout lay = (RelativeLayout) findViewById(R.id.gpsInfoLaySatInfoSub);
 
@@ -480,7 +480,7 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
                         @Override
                         public void onAnimationEnd(Animator animator) {
                             super.onAnimationEnd(animator);
-                            gpsExtraVisable = false;
+                            gpsExtraVisible = false;
                             animating = false;
                         }
                     });
@@ -491,18 +491,18 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
                 viewGpsInfoLaySatInfo.getLayoutParams().height = 0;
                 viewGpsInfoLaySatInfo.requestLayout();
                 viewGpsInfoLaySatInfo.setVisibility(View.GONE);
-                gpsExtraVisable = false;
+                gpsExtraVisible = false;
             }
         }
     }
 
     protected void showExtraGpsStatus() {
-        if (!animating && !gpsExtraVisable) {
+        if (!animating && !gpsExtraVisible) {
             ViewAnimator.expandView(viewGpsInfoLaySatInfo, new ViewAnimator.SimpleAnimatorListener() {
                 @Override
                 public void onAnimationEnd(Animator animator) {
                     super.onAnimationEnd(animator);
-                    gpsExtraVisable = true;
+                    gpsExtraVisible = true;
                     animating = false;
                 }
             });
@@ -512,7 +512,7 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
     }
 
     protected boolean isGpsExtraInfoVisible() {
-        return gpsExtraVisable;
+        return gpsExtraVisible;
     }
 
 
@@ -522,7 +522,7 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
 
 
     public void btnGpsInfoClick(View view) {
-        if (gpsExtraVisable) {
+        if (gpsExtraVisible) {
             hideExtraGpsStatus();
         } else {
             showExtraGpsStatus();

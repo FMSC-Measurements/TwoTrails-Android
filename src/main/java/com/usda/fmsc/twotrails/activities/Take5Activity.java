@@ -16,6 +16,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
@@ -95,10 +96,11 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
     private LinearLayoutManagerWithSmoothScroller linearLayoutManager;
     private FloatingActionButton fabT5, fabSS, fabCancel, fabSSCommit;
     private LinearLayout layCardInfo;
+    private CardView cvGpsInfo;
 
     private RelativeLayout progLay;
     private TextView tvProg;
-    private MenuItem miMode, miMoveToEnd;
+    private MenuItem miMode, miMoveToEnd, miHideGpsInfo;
 
     private ArrayList<TtPoint> _Points;
     private ArrayList<TtNmeaBurst> _Bursts, _UsedBursts;
@@ -110,7 +112,8 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
 
     private int increment, takeAmount, nmeaCount = 0;
     private boolean saved = true, updated, onBnd = true, createSSVisible = true, cancelVisible, commitSSVisible,
-            ignoreScroll, useRing, useVib, mapViewMode, killAcquire, _Locked, cameraSupported;
+            ignoreScroll, useRing, useVib, mapViewMode, killAcquire, _Locked, cameraSupported, gpsInfoHidden,
+            enableCardFading = false;
 
     //region Media
     private TtMedia _CurrentMedia, _BackupMedia;
@@ -276,66 +279,72 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
         public void onScrollStateChanged(final RecyclerView recyclerView, int newState) {
             if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                 if (!ignoreScroll && !handling) {
-                    handling = true;
+                    if (enableCardFading) {
 
-                    new Handler().post(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                animFadePartial.cancel();
-                                layCardInfo.clearAnimation();
+                        handling = true;
 
-                                animFadePartial = new AlphaAnimation(.3f, 1f);
-                                animFadePartial.setDuration(250);
-                                animFadePartial.setFillEnabled(true);
-                                animFadePartial.setFillAfter(true);
+                        new Handler().post(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    animFadePartial.cancel();
+                                    layCardInfo.clearAnimation();
 
-                                animFadePartial.setAnimationListener(new Animation.AnimationListener() {
-                                    @Override
-                                    public void onAnimationStart(Animation animation) {
+                                    animFadePartial = new AlphaAnimation(.3f, 1f);
+                                    animFadePartial.setDuration(250);
+                                    animFadePartial.setFillEnabled(true);
+                                    animFadePartial.setFillAfter(true);
 
+                                    animFadePartial.setAnimationListener(new Animation.AnimationListener() {
+                                        @Override
+                                        public void onAnimationStart(Animation animation) {
+
+                                        }
+
+                                        @Override
+                                        public void onAnimationEnd(Animation animation) {
+                                            layCardInfo.setAlpha(1f);
+                                            layCardInfo.clearAnimation();
+                                        }
+
+                                        @Override
+                                        public void onAnimationRepeat(Animation animation) {
+
+                                        }
+                                    });
+
+                                    while (handling) {
+                                        Thread.sleep(350);
+
+                                        if (recyclerView.getScrollState() == RecyclerView.SCROLL_STATE_IDLE) {
+                                            layCardInfo.startAnimation(animFadePartial);
+                                            invisible = false;
+                                            handling = false;
+                                        }
                                     }
-
-                                    @Override
-                                    public void onAnimationEnd(Animation animation) {
-                                        layCardInfo.setAlpha(1f);
-                                        layCardInfo.clearAnimation();
-                                    }
-
-                                    @Override
-                                    public void onAnimationRepeat(Animation animation) {
-
-                                    }
-                                });
-
-                                while (handling) {
-                                    Thread.sleep(350);
-
-                                    if (recyclerView.getScrollState() == RecyclerView.SCROLL_STATE_IDLE) {
-                                        layCardInfo.startAnimation(animFadePartial);
-                                        invisible = false;
-                                        handling = false;
-                                    }
+                                } catch (Exception ex) {
+                                    ex.printStackTrace();
                                 }
-                            } catch (Exception ex) {
-                                ex.printStackTrace();
                             }
-                        }
-                    });
+                        });
+                    }
                 }
 
                 ignoreScroll = false;
             } else if (newState == RecyclerView.SCROLL_STATE_DRAGGING && !ignoreScroll && !invisible) {
-                animFadePartial.cancel();
+                if (enableCardFading) {
+                    animFadePartial.cancel();
 
-                animFadePartial = new AlphaAnimation(layCardInfo.getAlpha(), .3f);
-                animFadePartial.setDuration(250);
-                animFadePartial.setFillEnabled(true);
-                animFadePartial.setFillAfter(true);
+                    animFadePartial = new AlphaAnimation(layCardInfo.getAlpha(), .3f);
+                    animFadePartial.setDuration(250);
+                    animFadePartial.setFillEnabled(true);
+                    animFadePartial.setFillAfter(true);
 
-                layCardInfo.startAnimation(animFadePartial);
+                    layCardInfo.startAnimation(animFadePartial);
 
-                invisible = true;
+                    invisible = true;
+                }
+
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
@@ -453,6 +462,8 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
 
             t5pAdapter = new Take5PointsEditRvAdapter(this, _Points, _Metadata);
             linearLayoutManager = new LinearLayoutManagerWithSmoothScroller(this);
+
+            cvGpsInfo = findViewById(R.id.take5CardGpsInfo);
 
             rvPoints = (RecyclerViewEx)findViewById(R.id.take5RvPoints);
             if (rvPoints != null) {
@@ -574,6 +585,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
 
         miMoveToEnd = menu.findItem(R.id.take5MenuToBottom);
         miMode = menu.findItem(R.id.take5MenuMode);
+        miHideGpsInfo = menu.findItem(R.id.take5MenuGpsInfoToggle);
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -648,6 +660,17 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
 
                 miMode.setIcon(mapViewMode ? R.drawable.ic_add_location_white_36dp : R.drawable.ic_map_white_36dp);
                 break;
+            }
+            case R.id.take5MenuGpsInfoToggle: {
+                if (gpsInfoHidden) {
+                    gpsInfoHidden = false;
+                    cvGpsInfo.setVisibility(View.VISIBLE);
+                    miHideGpsInfo.setTitle(R.string.menu_x_hide_gps_info);
+                } else {
+                    gpsInfoHidden = true;
+                    cvGpsInfo.setVisibility(View.GONE);
+                    miHideGpsInfo.setTitle(R.string.menu_x_show_gps_info);
+                }
             }
         }
 

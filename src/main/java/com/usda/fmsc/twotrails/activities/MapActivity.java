@@ -187,8 +187,8 @@ public class MapActivity extends BaseMapActivity {
                 tvLocX.setText(StringEx.toString(coords.getX(), 3));
                 tvLocY.setText(StringEx.toString(coords.getY(), 3));
             } else {
-                tvLocX.setText(StringEx.toString(lastPosition.getLatitudeSignedDecimal(), 3));
-                tvLocY.setText(StringEx.toString(lastPosition.getLongitudeSignedDecimal(), 3));
+                tvLocX.setText(StringEx.toString(lastPosition.getLatitudeSignedDecimal(), 6));
+                tvLocY.setText(StringEx.toString(lastPosition.getLongitudeSignedDecimal(), 6));
             }
         }
     }
