@@ -200,11 +200,11 @@ public class ExportActivity extends CustomToolbarActivity {
                         public void onClick(DialogInterface dialogInterface, int i, Object value) {
                             startExport(directory, false);
                         }
-                    }, null)
+                    }, 0)
 
                     .show();
                 } else {
-                    if (Global.Settings.DeviceSettings.getAutoInternalizeExport() == 2) {
+                    if (Global.Settings.DeviceSettings.getAutoInternalizeExport() > 0) {
                         progCircle.show();
                         internalizeImages(mal, directory);
                     } else {
