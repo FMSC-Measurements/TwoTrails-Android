@@ -107,6 +107,8 @@ import jp.wasabeef.recyclerview.animators.FadeInAnimator;
 public class PointsActivity extends CustomToolbarActivity implements PointMediaController, RangeFinderService.Listener {
     private HashMap<String, PointMediaListener> listeners;
 
+    private RangeFinderService.RangeFinderBinder rfBinder;
+
     private MenuItem miLock, miLink, miReset, miEnterLatLon, miNmeaRecalc, miDelete, miGoto;//, miMovePoint;
     private SheetLayoutEx slexAqr, slexCreate;
     private android.support.design.widget.FloatingActionButton fabAqr;
@@ -138,6 +140,8 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
     private int _CurrentIndex = INVALID_INDEX, _deleteIndex = INVALID_INDEX;
     private boolean _PointUpdated, _PointLocked, _MediaUpdated;
     private String addedPoint;
+
+    private boolean autoSetTrav, autoSetAzFwd, autoSetAz;
 
     private BitmapManager bitmapManager;
     private BitmapManager.ScaleOptions scaleOptions = new BitmapManager.ScaleOptions();
@@ -660,8 +664,14 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         }
         //endregion
 
-        if (Global.Settings.DeviceSettings.isRangeFinderConfigured()) {
-            Global.getRFBinder().startRangeFinder();
+        rfBinder = Global.getRFBinder();
+
+        if (rfBinder != null) {
+            if (Global.Settings.DeviceSettings.isRangeFinderConfigured()) {
+                Global.getRFBinder().startRangeFinder();
+            }
+
+            rfBinder.addListener(this);
         }
     }
 
@@ -678,8 +688,12 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         savePoint();
         saveMedia();
 
-        if (!Global.Settings.DeviceSettings.isRangeFinderAlwaysOn()) {
-            Global.getRFBinder().stopRangeFinder();
+        if (rfBinder != null) {
+            rfBinder.removeListener(this);
+
+            if (!Global.Settings.DeviceSettings.isRangeFinderAlwaysOn()) {
+                Global.getRFBinder().stopRangeFinder();
+            }
         }
 
         if (adjust) {
@@ -1587,6 +1601,8 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                 }
 
                 Global.Settings.ProjectSettings.setLastEditedPolyCN(polygon.getCN());
+
+                autoSetTrav = false;
             }
         }
     }
@@ -2527,29 +2543,21 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
             if (autoCreatePoint) {
                 //create Sideshot
             } else if (_CurrentPoint.getOp().isTravType()) {
-                if (Global.Settings.DeviceSettings.isAutoFillFromRangeFinderAsk()) {
-                    DontAskAgainDialog dialog = new DontAskAgainDialog(PointsActivity.this,
-                            Global.Settings.DeviceSettings.AUTO_FILL_FROM_RANGE_FINDER_ASK,
-                            Global.Settings.DeviceSettings.AUTO_FILL_FROM_RANGE_FINDER,
-                            Global.Settings.PreferenceHelper.getPrefs());
+                TravPoint tp = (TravPoint)_CurrentPoint;
 
-                    dialog.setMessage(StringEx.format("Would you like to set the current point with data from the Range Finder?"))
-                            .setPositiveButton("Yes", new DontAskAgainDialog.OnClickListener() {
+                if (tp.getFwdAz() != null || tp.getBkAz() != null || tp.getSlopeDistance() > 0) {
+                    new AlertDialog.Builder(PointsActivity.this)
+                            .setMessage("This point already has data associated with it. Would you like to overwrite it?")
+                            .setPositiveButton(R.string.str_yes, new DialogInterface.OnClickListener() {
                                 @Override
-                                public void onClick(DialogInterface dialogInterface, int i, Object value) {
-                                updateTravPointFromRangeFinder(rfData, true);
+                                public void onClick(DialogInterface dialog, int which) {
+                                    promptToFillTravDataFromRF(rfData);
                                 }
-                            }, 2)
-                            .setNegativeButton("W/O Az", new DontAskAgainDialog.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i, Object value) {
-                                updateTravPointFromRangeFinder(rfData, false);
-                                }
-                            }, 1)
-                            .setNeutralButton(getString(R.string.str_cancel), null, 0)
+                            })
+                            .setNeutralButton(R.string.str_no, null)
                             .show();
                 } else {
-                    updateTravPointFromRangeFinder(rfData, Global.Settings.DeviceSettings.getAutoFillFromRangeFinder() > 1);
+                    promptToFillTravDataFromRF(rfData);
                 }
             }
         } else {
@@ -2557,15 +2565,67 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         }
     }
 
-    private void updateTravPointFromRangeFinder(TtRangeFinderData rfData, boolean useCompassData) {
+    private  void promptToFillTravDataFromRF(final TtRangeFinderData rfData) {
+        if (!autoSetTrav) {
+            final DontAskAgainDialog dialog = new DontAskAgainDialog(PointsActivity.this,
+                    Global.Settings.DeviceSettings.AUTO_FILL_FROM_RANGE_FINDER_ASK,
+                    Global.Settings.DeviceSettings.AUTO_FILL_FROM_RANGE_FINDER,
+                    Global.Settings.PreferenceHelper.getPrefs());
+
+            dialog.setMessage(StringEx.format("Would You like to set the compass value to Forward or Backwards?"))
+                    .setPositiveButton("Fwd", new DontAskAgainDialog.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i, Object value) {
+                            if (dialog.isDontAskAgainChecked()) {
+                                autoSetTrav = true;
+                                autoSetAz = true;
+                                autoSetAzFwd = true;
+                            }
+
+                            updateTravPointFromRangeFinder(rfData, true, true);
+                        }
+                    }, 2)
+                    .setNegativeButton("Back", new DontAskAgainDialog.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i, Object value) {
+                            if (dialog.isDontAskAgainChecked()) {
+                                autoSetTrav = true;
+                                autoSetAz = true;
+                                autoSetAzFwd = false;
+                            }
+                            updateTravPointFromRangeFinder(rfData, true, false);
+                        }
+                    }, 1)
+                    .setNeutralButton("No Az", new DontAskAgainDialog.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i, Object value) {
+                            if (dialog.isDontAskAgainChecked()) {
+                                autoSetTrav = false;
+                                autoSetAz = false;
+                            }
+                            updateTravPointFromRangeFinder(rfData, false, false);
+                        }
+                    })
+                    .show();
+        } else {
+            updateTravPointFromRangeFinder(rfData, autoSetAz, autoSetAzFwd);
+        }
+    }
+
+    private void updateTravPointFromRangeFinder(TtRangeFinderData rfData, boolean useCompassData, boolean useFwdDir) {
         TravPoint trav = ((TravPoint)_CurrentPoint);
 
         trav.setSlopeAngle(TtUtils.Convert.angle(rfData.getInclination(), Slope.Percent, rfData.getIncType()));
         trav.setSlopeDistance(TtUtils.Convert.distance(rfData.getSlopeDist(), Dist.Meters, rfData.getSlopeDistType()));
 
         if (useCompassData && rfData.hasCompassData()) {
-            trav.setFwdAz(TtUtils.Convert.angle(rfData.getAzimuth(), Slope.Degrees, rfData.getAzType()));
+            if (useFwdDir)
+                trav.setFwdAz(TtUtils.Convert.angle(rfData.getAzimuth(), Slope.Degrees, rfData.getAzType()));
+            else
+                trav.setBkAz(TtUtils.Convert.angle(rfData.getAzimuth(), Slope.Degrees, rfData.getAzType()));
         }
+
+        Toast.makeText(PointsActivity.this, "RF Data Applied", Toast.LENGTH_LONG).show();
 
         onPointUpdate();
     }
