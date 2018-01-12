@@ -490,31 +490,29 @@ public class SettingsFragment extends PreferenceFragment {
 
                                                 Global.Settings.DeviceSettings.setRangeFinderConfigured(true);
 
-                                                if (1 > stringRecvCount++) {
-                                                    activity.runOnUiThread(new Runnable() {
-                                                        @Override
-                                                        public void run() {
-                                                            pd.setMessage(activity.getString(R.string.ds_rf_connected));
+                                                activity.runOnUiThread(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        pd.setMessage(activity.getString(R.string.ds_rf_connected));
 
-                                                            if (Global.Settings.DeviceSettings.isRangeFinderAlwaysOn()) {
-                                                                prefGpsCheck.setSummary(R.string.ds_rf_connected);
-                                                            } else {
-                                                                prefGpsCheck.setSummary(R.string.ds_dev_configured);
-                                                                binder.stopRangeFinder();
-                                                            }
+                                                        if (Global.Settings.DeviceSettings.isRangeFinderAlwaysOn()) {
+                                                            prefRFCheck.setSummary(R.string.ds_rf_connected);
+                                                        } else {
+                                                            prefRFCheck.setSummary(R.string.ds_dev_configured);
+                                                            binder.stopRangeFinder();
                                                         }
-                                                    });
+                                                    }
+                                                });
 
 
-                                                    Thread.sleep(1000);
+                                                Thread.sleep(1000);
 
-                                                    activity.runOnUiThread(new Runnable() {
-                                                        @Override
-                                                        public void run() {
-                                                            pd.hide();
-                                                        }
-                                                    });
-                                                }
+                                                activity.runOnUiThread(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        pd.hide();
+                                                    }
+                                                });
                                             } catch (InterruptedException e) {
                                                 e.printStackTrace();
                                             }
