@@ -651,7 +651,7 @@ public class TableViewActivity extends CustomToolbarActivity {
                     return StringEx.toString(point.getAdjY(), 4);
                 case 8:
                     return (point.getAdjZ() != null) ? StringEx.toString(
-                            TtUtils.Convert.distance(point.getAdjZ(), _Metadata.get(point.getMetadataCN()).getDistance(), Dist.Meters),
+                            TtUtils.Convert.distance(point.getAdjZ(), TtUtils.Convert.elevationToDistance(_Metadata.get(point.getMetadataCN()).getElevation()), Dist.Meters),
                             4) : StringEx.Empty;
                 case 9:
                     return StringEx.toString(point.getUnAdjX(), 4);
@@ -659,7 +659,7 @@ public class TableViewActivity extends CustomToolbarActivity {
                     return StringEx.toString(point.getUnAdjY(), 4);
                 case 11:
                     return StringEx.toString(
-                            TtUtils.Convert.distance(point.getUnAdjZ(), _Metadata.get(point.getMetadataCN()).getDistance(), Dist.Meters),
+                            TtUtils.Convert.distance(point.getUnAdjZ(), TtUtils.Convert.elevationToDistance(_Metadata.get(point.getMetadataCN()).getElevation()), Dist.Meters),
                             4);
                 case 12:
                     return StringEx.toString(point.getAccuracy(), 2);

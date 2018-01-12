@@ -82,14 +82,9 @@ public class TraversePointFragment extends BasePointFragment {
                         value = ParseEx.parseDouble(s.toString());
                     }
 
-                    //Double az = _TravPoint.getFwdAz();
-
-                    //if ((value == null ^ az == null) ||
-                            //value != null && !TtUtils.Math.cmpa(value, az)) {
-                        _TravPoint.setFwdAz(value);
-                        calcAzError();
-                        getPointController().updatePoint(_TravPoint);
-                    //}
+                    _TravPoint.setFwdAz(value);
+                    calcAzError();
+                    getPointController().updatePoint(_TravPoint);
                 }
             }
         });
@@ -104,14 +99,9 @@ public class TraversePointFragment extends BasePointFragment {
                         value = ParseEx.parseDouble(s.toString());
                     }
 
-                    //Double az = _TravPoint.getBkAz();
-
-                    //if ((value == null ^ az == null) ||
-                            //value != null && !TtUtils.Math.cmpa(value, az)) {
-                        _TravPoint.setBkAz(value);
-                        calcAzError();
-                        getPointController().updatePoint(_TravPoint);
-                    //}
+                    _TravPoint.setBkAz(value);
+                    calcAzError();
+                    getPointController().updatePoint(_TravPoint);
                 }
             }
         });
@@ -126,14 +116,10 @@ public class TraversePointFragment extends BasePointFragment {
                         value = ParseEx.parseDouble(s.toString());
                     }
 
-                    //if (value != null) {
-                        value = TtUtils.Convert.distance(value, Dist.Meters, getMetadata().getDistance());
+                    value = TtUtils.Convert.distance(value, Dist.Meters, getMetadata().getDistance());
 
-                        //if (!TtUtils.Math.cmpa(value, _TravPoint.getSlopeDistance())) {
-                            _TravPoint.setSlopeDistance(value);
-                            getPointController().updatePoint(_TravPoint);
-                        //}
-                    //}
+                    _TravPoint.setSlopeDistance(value);
+                    getPointController().updatePoint(_TravPoint);
                 }
             }
         });
@@ -154,14 +140,10 @@ public class TraversePointFragment extends BasePointFragment {
                         value = ParseEx.parseDouble(s.toString(), 0d);
                     }
 
-                    //if (value != null) {
-                        value = TtUtils.Convert.angle(value, Slope.Percent, getMetadata().getSlope());
+                    value = TtUtils.Convert.angle(value, Slope.Percent, getMetadata().getSlope());
 
-                        //if (!TtUtils.Math.cmpa(value, _TravPoint.getSlopeAngle())) {
-                            _TravPoint.setSlopeAngle(value);
-                            getPointController().updatePoint(_TravPoint);
-                        //}
-                    //}
+                    _TravPoint.setSlopeAngle(value);
+                    getPointController().updatePoint(_TravPoint);
                 }
             }
         });
