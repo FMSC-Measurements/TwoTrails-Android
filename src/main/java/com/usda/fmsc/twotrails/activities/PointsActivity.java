@@ -668,7 +668,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
         if (rfBinder != null) {
             if (Global.Settings.DeviceSettings.isRangeFinderConfigured()) {
-                Global.getRFBinder().startRangeFinder();
+                rfBinder.startRangeFinder();
             }
 
             rfBinder.addListener(this);
@@ -739,7 +739,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                 break;
             }
             case R.id.pointsMenuSettings: {
-                startActivity(new Intent(this, PreferenceActivity.class));
+                startActivityForResult(new Intent(this, PreferenceActivity.class), Consts.Codes.Activites.SETTINGS);
                 break;
             }
             case R.id.pointsMenuGotoPoint: {
@@ -895,7 +895,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
     public void onBackPressed() {
         if (fabSheet.isSheetVisible()) {
             fabSheet.hideSheet();
-        } else if (slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
+        } else if (slidingLayout != null && slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
             slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
         } else {
             super.onBackPressed();
@@ -987,6 +987,21 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
                 }
                 break;
+            }
+            case Consts.Codes.Activites.SETTINGS: {
+                if (rfBinder == null) {
+                    rfBinder = Global.getRFBinder();
+                } else {
+                    rfBinder.removeListener(this);
+                }
+
+                if (rfBinder != null) {
+                    if (Global.Settings.DeviceSettings.isRangeFinderConfigured()) {
+                        rfBinder.startRangeFinder();
+                    }
+
+                    rfBinder.addListener(this);
+                }
             }
         }
     }
@@ -1754,7 +1769,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
             fabAqr.setEnabled(true);
             if (_CurrentPoint != null &&(_CurrentPoint.getOp() == OpType.GPS || _CurrentPoint.getOp() == OpType.WayPoint) &&
-                        slidingLayout.getPanelState() != SlidingUpPanelLayout.PanelState.EXPANDED) {
+                    slidingLayout != null && slidingLayout.getPanelState() != SlidingUpPanelLayout.PanelState.EXPANDED) {
                 fabAqr.show();
                 aqrVisible = true;
             }
@@ -1992,7 +2007,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
     private void setCurrentMedia(TtMedia media) {
         if (media != null) {
-            if (slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
+            if (slidingLayout != null && slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
                 setMediaTitle(media.getName());
             } else {
                 setMediaTitle(null);

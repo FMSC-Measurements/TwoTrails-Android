@@ -597,7 +597,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
     public void onBackPressed() {
         if (baseMapDrawer.isDrawerOpen(GravityCompat.START)) {
             baseMapDrawer.closeDrawer(GravityCompat.START);
-        } else {
+        } else if (slidingLayout != null) {
             switch (slidingLayout.getPanelState()) {
                 case EXPANDED:
                 case ANCHORED: {

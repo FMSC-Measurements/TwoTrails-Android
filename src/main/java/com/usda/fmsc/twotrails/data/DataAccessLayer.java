@@ -310,7 +310,7 @@ public class DataAccessLayer extends IDataLayer {
     }
 
     public TtPolygon getPolygonByCN(String cn) {
-        ArrayList<TtPolygon> polys = getPolygons(String.format("_CN = '%s'", cn));
+        ArrayList<TtPolygon> polys = getPolygons(String.format("%s = '%s'", TwoTrailsSchema.SharedSchema.CN, cn));
 
         if(polys != null && polys.size() > 0)
             return polys.get(0);
@@ -1378,7 +1378,7 @@ public class DataAccessLayer extends IDataLayer {
     }
 
     public TtMetadata getMetadataByCN(String cn) {
-        ArrayList<TtMetadata> metas = getMetadata(String.format("_CN = '%s'", cn));
+        ArrayList<TtMetadata> metas = getMetadata(String.format("%s = '%s'", TwoTrailsSchema.SharedSchema.CN, cn));
 
         if(metas != null && metas.size() > 0)
             return metas.get(0);
