@@ -2555,25 +2555,29 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
     @Override
     public void rfDataReceived(final TtRangeFinderData rfData) {
         if (rfData.isValid()) {
-            if (autoCreatePoint) {
-                //create Sideshot
-            } else if (_CurrentPoint.getOp().isTravType()) {
-                TravPoint tp = (TravPoint)_CurrentPoint;
+            if (!_PointLocked) {
+                if (autoCreatePoint) {
+                    //create Sideshot
+                } else if (_CurrentPoint.getOp().isTravType()) {
+                    TravPoint tp = (TravPoint)_CurrentPoint;
 
-                if (tp.getFwdAz() != null || tp.getBkAz() != null || tp.getSlopeDistance() > 0) {
-                    new AlertDialog.Builder(PointsActivity.this)
-                            .setMessage("This point already has data associated with it. Would you like to overwrite it?")
-                            .setPositiveButton(R.string.str_yes, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    promptToFillTravDataFromRF(rfData);
-                                }
-                            })
-                            .setNeutralButton(R.string.str_no, null)
-                            .show();
-                } else {
-                    promptToFillTravDataFromRF(rfData);
+                    if (tp.getFwdAz() != null || tp.getBkAz() != null || tp.getSlopeDistance() > 0) {
+                        new AlertDialog.Builder(PointsActivity.this)
+                                .setMessage("This point already has data associated with it. Would you like to overwrite it?")
+                                .setPositiveButton(R.string.str_yes, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        promptToFillTravDataFromRF(rfData);
+                                    }
+                                })
+                                .setNeutralButton(R.string.str_no, null)
+                                .show();
+                    } else {
+                        promptToFillTravDataFromRF(rfData);
+                    }
                 }
+            } else {
+                Toast.makeText(PointsActivity.this, "Point is Locked. Unlock to edit.", Toast.LENGTH_LONG).show();
             }
         } else {
             Toast.makeText(PointsActivity.this, "Range Finder did not supply Slope and/or Distance", Toast.LENGTH_LONG).show();

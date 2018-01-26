@@ -1193,19 +1193,20 @@ public class DataAccessLayer extends IDataLayer {
     }
 
     private void updateQuondamData(QuondamPoint updatedPoint, QuondamPoint oldPoint) {
+        ContentValues cvs = new ContentValues();
+
+        cvs.put(TwoTrailsSchema.SharedSchema.CN, updatedPoint.getCN());
+        cvs.put(TwoTrailsSchema.QuondamPointSchema.ManualAccuracy, updatedPoint.getManualAccuracy());
+
         if(!updatedPoint.getParentCN().equals(oldPoint.getParentCN())) {
-            ContentValues cvs = new ContentValues();
-
-            cvs.put(TwoTrailsSchema.SharedSchema.CN, updatedPoint.getCN());
             cvs.put(TwoTrailsSchema.QuondamPointSchema.ParentPointCN, updatedPoint.getParentCN());
-            cvs.put(TwoTrailsSchema.QuondamPointSchema.ManualAccuracy, updatedPoint.getManualAccuracy());
-
-            _db.update(TwoTrailsSchema.QuondamPointSchema.TableName, cvs,
-                    TwoTrailsSchema.SharedSchema.CN + "=?", new String[]{updatedPoint.getCN()});
 
             removeQuondamLink(oldPoint);
             updateQuondamLink(updatedPoint);
         }
+
+        _db.update(TwoTrailsSchema.QuondamPointSchema.TableName, cvs,
+                TwoTrailsSchema.SharedSchema.CN + "=?", new String[]{updatedPoint.getCN()});
     }
 
 

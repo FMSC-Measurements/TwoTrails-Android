@@ -136,8 +136,7 @@ public class QuondamPoint extends TtPoint implements TtPoint.IManualAccuracy {
 
     @Override
     public Double getAccuracy() {
-        _Accuracy = (_ManualAccuracy != null) ? _ManualAccuracy : (_ParentPoint != null ? _ParentPoint.getAccuracy() : null);
-        return _Accuracy;
+        return (_ManualAccuracy != null) ? _ManualAccuracy : (_ParentPoint != null ? _ParentPoint.getAccuracy() : null);
     }
 
     //endregion
