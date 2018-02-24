@@ -475,12 +475,14 @@ public class GoogleMapsPolygonGrahpic implements IPolygonGraphic, IMarkerDataGra
     public void setAdjBndColor(@ColorInt int color) {
         graphicOptions.setAdjBndColor(color);
         _AdjBnd.setColor(color);
+        _AdjBndCB.setStrokeColor(color);
     }
 
     @Override
     public void setUnAdjBndColor(@ColorInt int color) {
         graphicOptions.setUnAdjBndColor(color);
         _UnadjBnd.setColor(color);
+        _UnadjBndCB.setStrokeColor(color);
     }
 
 

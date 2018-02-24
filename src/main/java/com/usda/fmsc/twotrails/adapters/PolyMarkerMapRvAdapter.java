@@ -211,7 +211,14 @@ public class PolyMarkerMapRvAdapter extends RecyclerView.Adapter<PolyMarkerMapRv
                                 graphicManager.setUnAdjNavColor(colorOptions[3]);
                                 graphicManager.setAdjPtsColor(colorOptions[4]);
                                 graphicManager.setUnAdjPtsColor(colorOptions[5]);
+                                graphicManager.setWayPtsColor(colorOptions[6]);
 
+                                graphicManager.update(PolygonGraphicOptions.GraphicCode.ADJBND_COLOR, colorOptions[0]);
+                                graphicManager.update(PolygonGraphicOptions.GraphicCode.ADJNAV_COLOR, colorOptions[1]);
+                                graphicManager.update(PolygonGraphicOptions.GraphicCode.UNADJBND_COLOR, colorOptions[2]);
+                                graphicManager.update(PolygonGraphicOptions.GraphicCode.UNADJNAV_COLOR, colorOptions[3]);
+                                graphicManager.update(PolygonGraphicOptions.GraphicCode.ADJPTS_COLOR, colorOptions[4]);
+                                graphicManager.update(PolygonGraphicOptions.GraphicCode.UNADJPTS_COLOR, colorOptions[5]);
                                 graphicManager.update(PolygonGraphicOptions.GraphicCode.WAYPTS_COLOR, colorOptions[6]);
 
                                 setButtonColors(holder, graphicManager);
