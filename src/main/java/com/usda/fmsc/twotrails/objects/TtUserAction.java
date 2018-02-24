@@ -9,12 +9,13 @@ public class TtUserAction {
     private String DeviceName;
     private DateTime Date;
     private DataActionType Action;
+    private String Notes;
 
     public TtUserAction(String userName, String deviceName) {
-        this(userName, deviceName, DateTime.now(), new DataActionType());
+        this(userName, deviceName, DateTime.now(), new DataActionType(), StringEx.Empty);
     }
 
-    public TtUserAction(String userName, String deviceName, DateTime date, DataActionType action) {
+    public TtUserAction(String userName, String deviceName, DateTime date, DataActionType action, String notes) {
         if (StringEx.isEmpty(userName))
             throw new RuntimeException("Invalid UserName");
 
@@ -25,6 +26,7 @@ public class TtUserAction {
         DeviceName = deviceName;
         Date = date;
         Action = action;
+        Notes = notes;
     }
 
     public String getUserName() {
@@ -43,8 +45,21 @@ public class TtUserAction {
         return Action;
     }
 
+    public String getNotes() {
+        return Notes;
+    }
+
     public void updateAction(int action) {
         Action.setFlag(action);
         Date = DateTime.now();
+    }
+
+    public void updateAction(int action, String notes) {
+        updateAction(action);
+
+        if (Notes == null)
+            Notes = notes;
+        else
+            Notes = StringEx.format("%s|%s", Notes, notes);
     }
 }

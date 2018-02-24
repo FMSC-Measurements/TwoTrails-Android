@@ -12,15 +12,18 @@ import java.util.List;
 import com.usda.fmsc.android.utilities.ParcelTools;
 import com.usda.fmsc.geospatial.EastWest;
 import com.usda.fmsc.geospatial.GeoPosition;
+import com.usda.fmsc.geospatial.GnssType;
 import com.usda.fmsc.geospatial.NorthSouth;
 import com.usda.fmsc.geospatial.UomElevation;
 import com.usda.fmsc.geospatial.nmea.INmeaBurst;
+import com.usda.fmsc.geospatial.nmea.Satellite;
 import com.usda.fmsc.geospatial.nmea.sentences.GGASentence;
 import com.usda.fmsc.geospatial.nmea.sentences.GSASentence;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.geospatial.utm.UTMTools;
 import com.usda.fmsc.twotrails.objects.TtObject;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
+import com.usda.fmsc.utilities.ParseEx;
 import com.usda.fmsc.utilities.StringEx;
 
 public class TtNmeaBurst extends TtObject implements Parcelable {
@@ -68,11 +71,14 @@ public class TtNmeaBurst extends TtObject implements Parcelable {
 
     //gsv
     private int numberOfSatellitesInView;
+    private ArrayList<Satellite> satellitesInView;
     //endregion
 
     @SuppressWarnings("unchecked")
     private TtNmeaBurst(Parcel source) {
         super(source);
+
+        Integer val = null;
 
         this.timeCreated = (DateTime) source.readSerializable();
         this.pointCN = source.readString();
@@ -84,10 +90,10 @@ public class TtNmeaBurst extends TtObject implements Parcelable {
         this.groundSpeed = source.readDouble();
         this.trackAngle = source.readDouble();
         this.magVar = source.readDouble();
-        this.magVarDir = EastWest.parse(ParcelTools.readNInt(source));
+        this.magVarDir = (val = ParcelTools.readNInt(source)) != null ?  EastWest.parse(val) : null;
 
-        this.mode = GSASentence.Mode.parse(ParcelTools.readNInt(source));
-        this.fix = GSASentence.Fix.parse(ParcelTools.readNInt(source));
+        this.mode = (val = ParcelTools.readNInt(source)) != null ?  GSASentence.Mode.parse(val) : null;
+        this.fix = (val = ParcelTools.readNInt(source)) != null ?  GSASentence.Fix.parse(val) : null;
         this.satsUsed = source.readArrayList(Integer.class.getClassLoader());
         this.pdop = source.readDouble();
         this.hdop = source.readDouble();
@@ -97,12 +103,14 @@ public class TtNmeaBurst extends TtObject implements Parcelable {
         this.trackedSatellites = source.readInt();
         this.horizDilution = source.readDouble();
         this.geoidHeight = source.readDouble();
-        this.geoUom = UomElevation.parse(ParcelTools.readNInt(source));
+        this.geoUom = (val = ParcelTools.readNInt(source)) != null ?  UomElevation.parse(val) : null;
 
         this.numberOfSatellitesInView = source.readInt();
+
+        setSatellitesInViewFromString(source.readString());
     }
 
-    public TtNmeaBurst(String cn, DateTime timeCreated, String pointCN, boolean used,
+    private TtNmeaBurst(String cn, DateTime timeCreated, String pointCN, boolean used,
                        GeoPosition position, DateTime fixTime, double groundSpeed, double trackAngle,
                        double magVar, EastWest magVarDir, GSASentence.Mode mode, GSASentence.Fix fix,
                        ArrayList<Integer> satsUsed, double pdop, double hdop, double vdop, GGASentence.GpsFixType fixQuality,
@@ -136,7 +144,35 @@ public class TtNmeaBurst extends TtObject implements Parcelable {
 
         this.numberOfSatellitesInView = numberOfSatellitesInView;
     }
-    
+
+    public TtNmeaBurst(String cn, DateTime timeCreated, String pointCN, boolean used,
+        GeoPosition position, DateTime fixTime, double groundSpeed, double trackAngle,
+        double magVar, EastWest magVarDir, GSASentence.Mode mode, GSASentence.Fix fix,
+        ArrayList<Integer> satsUsed, double pdop, double hdop, double vdop, GGASentence.GpsFixType fixQuality,
+        int trackedSatellites, double horizDilution, double geoidHeight, UomElevation geoUom,
+        int numberOfSatellitesInView, ArrayList<Satellite> satellitesInView) {
+
+        this(cn, timeCreated, pointCN, used, position, fixTime, groundSpeed, trackAngle, magVar, magVarDir, mode,
+                fix, satsUsed, pdop, hdop, vdop, fixQuality, trackedSatellites, horizDilution, geoidHeight, geoUom,
+                numberOfSatellitesInView);
+
+        this.satellitesInView = satellitesInView;
+    }
+
+    public TtNmeaBurst(String cn, DateTime timeCreated, String pointCN, boolean used,
+                       GeoPosition position, DateTime fixTime, double groundSpeed, double trackAngle,
+                       double magVar, EastWest magVarDir, GSASentence.Mode mode, GSASentence.Fix fix,
+                       ArrayList<Integer> satsUsed, double pdop, double hdop, double vdop, GGASentence.GpsFixType fixQuality,
+                       int trackedSatellites, double horizDilution, double geoidHeight, UomElevation geoUom,
+                       int numberOfSatellitesInView, String satellitesInView) {
+
+        this(cn, timeCreated, pointCN, used, position, fixTime, groundSpeed, trackAngle, magVar, magVarDir, mode,
+                fix, satsUsed, pdop, hdop, vdop, fixQuality, trackedSatellites, horizDilution, geoidHeight, geoUom,
+                numberOfSatellitesInView);
+
+        setSatellitesInViewFromString(satellitesInView);
+    }
+
     public static TtNmeaBurst create(String pointCN, boolean used, INmeaBurst burst) {
         return new TtNmeaBurst(java.util.UUID.randomUUID().toString(),
                 DateTime.now(),
@@ -159,7 +195,8 @@ public class TtNmeaBurst extends TtObject implements Parcelable {
                 burst.getHorizDilution(),
                 burst.getGeoidHeight(),
                 burst.getGeoUom(),
-                burst.getSatellitesInViewCount());
+                burst.getSatellitesInViewCount(),
+                burst.getSatellitesInView());
     }
 
 
@@ -201,6 +238,8 @@ public class TtNmeaBurst extends TtObject implements Parcelable {
             ParcelTools.writeNInt(dest, geoUom != null ? geoUom.getValue() : null);
 
             dest.writeInt(numberOfSatellitesInView);
+
+            dest.writeString(getSatellitesInViewString());
         } catch (Exception e) {
             TtUtils.TtReport.writeError(e.getMessage(), "TtNmeaBurst:writeToParcel");
             throw e;
@@ -365,6 +404,47 @@ public class TtNmeaBurst extends TtObject implements Parcelable {
 
     public int getUsedSatellitesCount() {
         return satsUsed.size();
+    }
+
+    public ArrayList<Satellite> getSatellitesInView() { return satellitesInView; }
+
+    public String getSatellitesInViewString() {
+        if (satellitesInView.size() > 0) {
+            StringBuilder sb = new StringBuilder();
+
+            for (Satellite sat : satellitesInView) {
+                sb.append(StringEx.format("%d;%f;%f;%f;%d_", sat.getNmeaID(), sat.getElevation(), sat.getAzimuth(), sat.getSRN(), sat.getGnssType().getValue()));
+            }
+
+            return sb.toString();
+        }
+
+        return StringEx.Empty;
+    }
+
+    private void setSatellitesInViewFromString(String satsInView) {
+        if (!StringEx.isEmpty(satsInView)) {
+            String[] sats = satsInView.split("_");
+
+            satellitesInView = new ArrayList<>();
+
+            for (String sat : sats) {
+                if (!StringEx.isEmpty(sat)) {
+                    String[] tokens = sat.split(";");
+                    if (tokens.length > 4) {
+                        Integer nmeaID = ParseEx.parseInteger(tokens[0]);
+
+                        if (nmeaID != null) {
+                            satellitesInView.add(new Satellite(
+                                    nmeaID,
+                                    ParseEx.parseFloat(tokens[1]),
+                                    ParseEx.parseFloat(tokens[2]),
+                                    ParseEx.parseFloat(tokens[3])));
+                        }
+                    }
+                }
+            }
+        }
     }
 
 

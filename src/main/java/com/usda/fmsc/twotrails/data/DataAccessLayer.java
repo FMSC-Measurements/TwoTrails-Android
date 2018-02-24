@@ -67,6 +67,7 @@ public class DataAccessLayer extends IDataLayer {
 
     private TtUserAction _Activity = null;
 
+
     //region Constructors / Open / Close
     public DataAccessLayer(String filePath) {
         _FilePath = filePath;
@@ -114,6 +115,7 @@ public class DataAccessLayer extends IDataLayer {
         return (_db != null && _db.isOpen());
     }
     //endregion
+
 
     //region Create DB
     private void CreateDB() {
@@ -1787,7 +1789,7 @@ public class DataAccessLayer extends IDataLayer {
                 do {
                     String cn;
                     DateTime timeCreated;
-                    String pointCN;
+                    String pointCN, satsInView;
                     boolean used;
                     DateTime fixTime;
                     Double groundSpeed, trackAngle, magVar, pdop, hdop, vdop, horizDilution, geoidHeight;
@@ -1949,11 +1951,17 @@ public class DataAccessLayer extends IDataLayer {
                             satsUsed.add(ParseEx.parseInteger(prn));
                         }
                     }
+
+                    if (!c.isNull(28))
+                        satsInView = c.getString(28);
+                    else
+                        continue;
+
                     //endregion
 
                     nmeas.add(new TtNmeaBurst(cn, timeCreated, pointCN, used, new GeoPosition(lat, latDir, lon, lonDir, elev, uomelev), fixTime, groundSpeed,
                             trackAngle, magVar, magVarDir, mode, fix, satsUsed, pdop, hdop, vdop, fixQuality,
-                            trackedSatellites, horizDilution, geoidHeight, geoUom, numberOfSatellitesInView));
+                            trackedSatellites, horizDilution, geoidHeight, geoUom, numberOfSatellitesInView, satsInView));
                 } while (c.moveToNext());
             }
 
@@ -2048,6 +2056,8 @@ public class DataAccessLayer extends IDataLayer {
 
             cvs.put(TwoTrailsSchema.TtNmeaSchema.UsedSatPRNS, burst.getUsedSatelliteIDsString());
 
+            cvs.put(TwoTrailsSchema.TtNmeaSchema.SatellitesInView, burst.getSatellitesInViewString());
+
             _db.insert(TwoTrailsSchema.TtNmeaSchema.TableName, null, cvs);
 
             success = true;
@@ -2132,19 +2142,9 @@ public class DataAccessLayer extends IDataLayer {
             cvs.put(TwoTrailsSchema.TtNmeaSchema.SatellitesTrackedCount, burst.getTrackedSatellitesCount());
             cvs.put(TwoTrailsSchema.TtNmeaSchema.SatellitesInViewCount, burst.getSatellitesInViewCount());
 
-
             cvs.put(TwoTrailsSchema.TtNmeaSchema.UsedSatPRNS, burst.getUsedSatelliteIDsString());
 
-            /*
-            int i = 0;
-            for (Satellite sat : burst.getSatellitesInView()) {
-                cvs.put(TwoTrailsSchema.TtNmeaSchema.SatIDs[i], sat.getNmeaID());
-                cvs.put(TwoTrailsSchema.TtNmeaSchema.SatElevs[i], sat.getElevation());
-                cvs.put(TwoTrailsSchema.TtNmeaSchema.SatAzs[i], sat.getAzimuth());
-                cvs.put(TwoTrailsSchema.TtNmeaSchema.SatSRNs[i], sat.getSRN());
-                i++;
-            }
-            */
+            cvs.put(TwoTrailsSchema.TtNmeaSchema.SatellitesInView, burst.getSatellitesInViewString());
 
             success = _db.update(TwoTrailsSchema.TtNmeaSchema.TableName, cvs,
                     String.format("%s = '%s'", TwoTrailsSchema.SharedSchema.CN, burst.getCN()), null);
@@ -2552,7 +2552,12 @@ public class DataAccessLayer extends IDataLayer {
 
             if (c.moveToFirst()) {
                 do {
-                    activities.add(new TtUserAction(c.getString(0), c.getString(1), parseDateTime(c.getString(2)), new DataActionType(c.getInt(3))));
+                    activities.add(new TtUserAction(
+                            c.getString(0),
+                            c.getString(1),
+                            parseDateTime(c.getString(2)),
+                            new DataActionType(c.getInt(3)),
+                            c.getString(4)));
                 } while (c.moveToNext());
             }
 
@@ -2588,6 +2593,7 @@ public class DataAccessLayer extends IDataLayer {
             cvs.put(TwoTrailsSchema.ActivitySchema.DeviceName, activity.getDeviceName());
             cvs.put(TwoTrailsSchema.ActivitySchema.ActivityDate, dtf.print(activity.getDate()));
             cvs.put(TwoTrailsSchema.ActivitySchema.DataActivity, activity.getAction().getValue());
+            cvs.put(TwoTrailsSchema.ActivitySchema.ActivityNotes, activity.getNotes());
 
             _db.insert(TwoTrailsSchema.ActivitySchema.TableName, null, cvs);
 
@@ -2604,9 +2610,11 @@ public class DataAccessLayer extends IDataLayer {
     //endregion
     //endregion
 
+
     //region DataDictionary
 
     //endregion
+
 
     //region DbTools
     public boolean hasPolygons() {
