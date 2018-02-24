@@ -18,6 +18,7 @@ import android.widget.RelativeLayout;
 import com.larswerkman.holocolorpicker.ColorPicker;
 import com.larswerkman.holocolorpicker.ValueBar;
 import com.usda.fmsc.android.AndroidUtils;
+import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
 
 import java.util.Arrays;
@@ -147,7 +148,28 @@ public class PointColorPickerDialog extends DialogFragment {
         .setNeutralButton(R.string.str_cancel, null);
 
 
-        return dialog.create();
+        final AlertDialog ad = dialog.create();
+        ad.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialog) {
+                Button button = ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_NEGATIVE);
+                button.setOnClickListener(new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View view) {
+                        updateColor(0, Global.MapSettings.defaults.getDefaultAdjBndColor());
+                        updateColor(1, Global.MapSettings.defaults.getDefaultAdjNavColor());
+                        updateColor(2, Global.MapSettings.defaults.getDefaultUnAdjBndColor());
+                        updateColor(3, Global.MapSettings.defaults.getDefaultUnAdjNavColor());
+                        updateColor(4, Global.MapSettings.defaults.getDefaultAdjPtsColor());
+                        updateColor(5, Global.MapSettings.defaults.getDefaultUnAdjPtsColor());
+                        updateColor(6, Global.MapSettings.defaults.getDefaultWayPtsColor());
+                    }
+                });
+            }
+        });
+
+        return ad;
     }
 
     @Override
