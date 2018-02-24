@@ -2,7 +2,7 @@ package com.usda.fmsc.twotrails.objects;
 
 public class DataActionType {
     public static final int None                = 0;
-    public static final int ModifiedProject     = 1 << 0;
+    public static final int ModifiedProject     = 1;
     public static final int InsertedPoints      = 1 << 1;
     public static final int ModifiedPoints      = 1 << 2;
     public static final int DeletedPoints       = 1 << 3;
@@ -23,6 +23,8 @@ public class DataActionType {
     public static final int RetracePoints       = 1 << 18;
     public static final int ReindexPoints       = 1 << 19;
     public static final int ConvertPoints       = 1 << 20;
+    public static final int ModifiedDataDictionary  = 1 << 21;
+    public static final int DataImported        = 1 << 22;
             
 
     private int value;

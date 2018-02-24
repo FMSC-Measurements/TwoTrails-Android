@@ -3,9 +3,10 @@ package com.usda.fmsc.twotrails.data;
 public class TwoTrailsSchema {
     //Old Schema Versions
     public static final TtVersion OSV_2_0_1 = new TtVersion(2, 0, 1);
+    public static final TtVersion OSV_2_0_2 = new TtVersion(2, 0, 2);
 
     //Schema Version
-    public static final TtVersion SchemaVersion = OSV_2_0_1;
+    public static final TtVersion SchemaVersion = OSV_2_0_2;
 
 
     public static class SharedSchema {
@@ -272,6 +273,7 @@ public class TwoTrailsSchema {
         public static final String SatellitesTrackedCount = "SatTrackCount";
         public static final String SatellitesInViewCount = "SatInViewCount";
         public static final String UsedSatPRNS = "PRNS";
+        public static final String SatellitesInView = "SatInView";
 
         public static final String CreateTable =
             "CREATE TABLE " + TableName + " (" +
@@ -303,6 +305,7 @@ public class TwoTrailsSchema {
             SatellitesTrackedCount  + " INTEGER, " +
             SatellitesInViewCount   + " INTEGER, " +
             UsedSatPRNS + " TEXT, " +
+            SatellitesInView + " TEXT, " +
             "PRIMARY KEY (" + SharedSchema.CN + "));";
 
         public static final String SelectItems =
@@ -333,7 +336,8 @@ public class TwoTrailsSchema {
             SatellitesUsedCount + ", " +
             SatellitesTrackedCount + ", " +
             SatellitesInViewCount + ", " +
-            UsedSatPRNS;
+            UsedSatPRNS + ", " +
+            SatellitesInView;
     }
     //endregion
 
@@ -466,6 +470,7 @@ public class TwoTrailsSchema {
         public static final String DeviceName = "DeviceName";
         public static final String ActivityDate = "ActivityDate";
         public static final String DataActivity = "ActivityType";
+        public static final String ActivityNotes = "ActivityNotes";
 
         public static final String CreateTable =
             "CREATE TABLE " + TableName + " (" +
@@ -473,6 +478,7 @@ public class TwoTrailsSchema {
             DeviceName + " TEXT, " +
             ActivityDate + " TEXT, " +
             DataActivity + " INTEGER" +
+            ActivityNotes + " TEXT, " +
             ");";
 
 
@@ -480,7 +486,8 @@ public class TwoTrailsSchema {
             UserName + ", " +
             DeviceName + ", " +
             ActivityDate + ", " +
-            DataActivity;
+            DataActivity + ", " +
+            ActivityNotes;
     }
     //endregion
 
