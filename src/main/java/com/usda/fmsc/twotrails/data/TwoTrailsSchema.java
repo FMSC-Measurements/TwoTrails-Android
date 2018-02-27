@@ -477,8 +477,8 @@ public class TwoTrailsSchema {
             UserName + " TEXT, " +
             DeviceName + " TEXT, " +
             ActivityDate + " TEXT, " +
-            DataActivity + " INTEGER" +
-            ActivityNotes + " TEXT, " +
+            DataActivity + " INTEGER, " +
+            ActivityNotes + " TEXT" +
             ");";
 
 
