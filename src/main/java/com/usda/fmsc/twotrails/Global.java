@@ -14,6 +14,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.ColorInt;
 import android.support.v4.app.NotificationCompat;
 
+import com.esri.android.runtime.ArcGISRuntime;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -137,7 +138,7 @@ public class Global {
         TtUtils.TtReport.writeEvent(StringEx.format("TwoTrails Started (%s)", AndroidUtils.App.getVersionName(_ApplicationContext)));
 
         //TODO set arc license for release
-        //ArcGISRuntime.setClientId(_ApplicationContext.getString(R.string.arcgis_client_id));
+        ArcGISRuntime.setClientId(_ApplicationContext.getString(R.string.arcgis_client_id));
 
         initUI();
     }
