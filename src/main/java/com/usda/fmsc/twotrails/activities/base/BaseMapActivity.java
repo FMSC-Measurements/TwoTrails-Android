@@ -63,6 +63,7 @@ import com.usda.fmsc.twotrails.fragments.map.ArcGisMapFragment;
 import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment;
 import com.usda.fmsc.twotrails.fragments.map.ManagedSupportMapFragment;
 import com.usda.fmsc.twotrails.gps.GpsService;
+import com.usda.fmsc.twotrails.logic.PolygonAdjuster;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
@@ -805,7 +806,26 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
 
     protected void addPolygonGraphic(PolygonGraphicManager graphicManager, PolygonDrawOptions drawOptions) {
         if (mmFrag != null) {
-            mmFrag.addPolygon(graphicManager, drawOptions);
+            try {
+                mmFrag.addPolygon(graphicManager, drawOptions);
+            } catch (NullPointerException e) {
+                new AlertDialog.Builder(this)
+                        .setMessage("An error occurred trying to add a polygon. Please try readjusting your Polygons.")
+                        .setPositiveButton("Adjust Polygons", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                PolygonAdjuster.adjust(Global.getDAL());
+                                finish();
+                            }
+                        })
+                        .setNeutralButton(R.string.str_cancel, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                finish();
+                            }
+                        })
+                        .show();
+            }
         }
 
         polyGraphicManagers.add(graphicManager);
