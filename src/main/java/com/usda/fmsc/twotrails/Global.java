@@ -1874,7 +1874,7 @@ public class Global {
             if (_PolyDrawOptions.containsKey(cn)) {
                 return _PolyDrawOptions.get(cn);
             } else {
-                PolygonDrawOptions pdo = new PolygonDrawOptions(_MasterPolyDrawOptions);
+                PolygonDrawOptions pdo = new PolygonDrawOptions();
                 _PolyDrawOptions.put(cn, pdo);
                 return pdo;
             }

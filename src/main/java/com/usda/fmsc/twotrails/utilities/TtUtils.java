@@ -1130,9 +1130,9 @@ public class TtUtils {
             return null;
         }
 
-        public static Uri captureImage(Activity activity, int setting, TtPoint currentPoint) {
+        public static Uri captureImage(Activity activity, boolean useTtCamera, TtPoint currentPoint) {
             if (AndroidUtils.App.requestCameraPermission(activity, Consts.Codes.Requests.CAMERA)) {
-                if (setting == 2) {
+                if (useTtCamera) {
                     Intent intent = new Intent(activity, TtCameraActivity.class);
 
                     if (currentPoint != null) {
