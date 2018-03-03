@@ -343,29 +343,33 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                     break;
                 }
                 case R.id.ctx_menu_capture: {
-                    if (Global.Settings.DeviceSettings.getUseTtCameraAsk()) {
-                        DontAskAgainDialog dialog = new DontAskAgainDialog(PointsActivity.this,
-                                Global.Settings.DeviceSettings.USE_TTCAMERA_ASK,
-                                Global.Settings.DeviceSettings.USE_TTCAMERA,
-                                Global.Settings.PreferenceHelper.getPrefs());
+                    if (AndroidUtils.Device.isFullOrientationAvailable(PointsActivity.this)) {
+                        if (Global.Settings.DeviceSettings.getUseTtCameraAsk()) {
+                            DontAskAgainDialog dialog = new DontAskAgainDialog(PointsActivity.this,
+                                    Global.Settings.DeviceSettings.USE_TTCAMERA_ASK,
+                                    Global.Settings.DeviceSettings.USE_TTCAMERA,
+                                    Global.Settings.PreferenceHelper.getPrefs());
 
-                        dialog.setMessage(PointsActivity.this.getString(R.string.points_camera_diag))
-                                .setPositiveButton("TwoTrails", new DontAskAgainDialog.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialogInterface, int i, Object value) {
-                                        captureImageUri = TtUtils.Media.captureImage(PointsActivity.this, (int)value, _CurrentPoint);
-                                    }
-                                }, 2)
-                                .setNegativeButton("Android", new DontAskAgainDialog.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialogInterface, int i, Object value) {
-                                        captureImageUri = TtUtils.Media.captureImage(PointsActivity.this, (int)value, _CurrentPoint);
-                                    }
-                                }, 1)
-                                .setNeutralButton(getString(R.string.str_cancel), null, 0)
-                                .show();
+                            dialog.setMessage(PointsActivity.this.getString(R.string.points_camera_diag))
+                                    .setPositiveButton("TwoTrails", new DontAskAgainDialog.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int i, Object value) {
+                                            captureImageUri = TtUtils.Media.captureImage(PointsActivity.this, true, _CurrentPoint);
+                                        }
+                                    }, 2)
+                                    .setNegativeButton("Android", new DontAskAgainDialog.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int i, Object value) {
+                                            captureImageUri = TtUtils.Media.captureImage(PointsActivity.this, false, _CurrentPoint);
+                                        }
+                                    }, 1)
+                                    .setNeutralButton(getString(R.string.str_cancel), null, 0)
+                                    .show();
+                        } else {
+                            captureImageUri = TtUtils.Media.captureImage(PointsActivity.this, Global.Settings.DeviceSettings.getUseTtCamera() == 2, _CurrentPoint);
+                        }
                     } else {
-                        captureImageUri = TtUtils.Media.captureImage(PointsActivity.this, Global.Settings.DeviceSettings.getUseTtCamera(), _CurrentPoint);
+                        captureImageUri = TtUtils.Media.captureImage(PointsActivity.this, false, _CurrentPoint);
                     }
                     break;
                 }
@@ -1213,6 +1217,14 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
     private void createPoint(final OpType op) {
         if (_CurrentPoint != null && !TtUtils.Points.pointHasValue(_CurrentPoint)) {
             if (_CurrentPoint.getOp() == op) {
+                if (op.isTravType()) {
+                    Toast.makeText(PointsActivity.this, "Point must have at least a Forward or Backward Azimuth and a Distance", Toast.LENGTH_SHORT).show();
+                } else if (op.isGpsType()) {
+                    Toast.makeText(PointsActivity.this, "Point must have a X, Y and Z value", Toast.LENGTH_SHORT).show();
+                } else if (op == OpType.Quondam) {
+                    Toast.makeText(PointsActivity.this, "Quondam must have a Parent Point selected", Toast.LENGTH_SHORT).show();
+                }
+
                 return;
             }
 
@@ -1254,6 +1266,12 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
             saveMedia();
         }
 
+        if (op.isTravType() && _CurrentIndex < 0) {
+            Toast.makeText(PointsActivity.this,
+                    StringEx.format("A %s cannot be the first point in a polygon", op.toString()),
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         TtPoint newPoint =  TtUtils.Points.createNewPointByOpType(op);
         newPoint.setCN(java.util.UUID.randomUUID().toString());
@@ -2548,6 +2566,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
     //endregion
     //endregion
+
 
     //region Range Finder
     boolean autoCreatePoint;

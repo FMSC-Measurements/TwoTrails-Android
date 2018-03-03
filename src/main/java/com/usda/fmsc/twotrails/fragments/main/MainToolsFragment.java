@@ -64,8 +64,8 @@ public class MainToolsFragment extends Fragment {
             btnHAID.setEnabled(enable);
             btnExport.setEnabled(enable);
             btnPlotGrid.setEnabled(enable);
-            btnGpsLogger.setEnabled(enable);
-            btnGpsStatus.setEnabled(enable);
+            //btnGpsLogger.setEnabled(enable);
+            //btnGpsStatus.setEnabled(enable);
 
             if (Global.Settings.DeviceSettings.isDeveloperOptionsEnabled()) {
                 viewTest.setVisibility(View.VISIBLE);
