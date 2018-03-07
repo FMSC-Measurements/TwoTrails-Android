@@ -188,29 +188,33 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                     break;
                 }
                 case R.id.ctx_menu_capture: {
-                    if (Global.Settings.DeviceSettings.getUseTtCameraAsk()) {
-                        DontAskAgainDialog dialog = new DontAskAgainDialog(Take5Activity.this,
-                                Global.Settings.DeviceSettings.USE_TTCAMERA_ASK,
-                                Global.Settings.DeviceSettings.USE_TTCAMERA,
-                                Global.Settings.PreferenceHelper.getPrefs());
+                    if (AndroidUtils.Device.isFullOrientationAvailable(Take5Activity.this)) {
+                        if (Global.Settings.DeviceSettings.getUseTtCameraAsk()) {
+                            DontAskAgainDialog dialog = new DontAskAgainDialog(Take5Activity.this,
+                                    Global.Settings.DeviceSettings.USE_TTCAMERA_ASK,
+                                    Global.Settings.DeviceSettings.USE_TTCAMERA,
+                                    Global.Settings.PreferenceHelper.getPrefs());
 
-                        dialog.setMessage(Take5Activity.this.getString(R.string.points_camera_diag))
-                                .setPositiveButton("TwoTrails", new DontAskAgainDialog.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialogInterface, int i, Object value) {
-                                        captureImageUri = TtUtils.Media.captureImage(Take5Activity.this, (int)value, _CurrentPoint);
-                                    }
-                                }, 2)
-                                .setNegativeButton("Android", new DontAskAgainDialog.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialogInterface, int i, Object value) {
-                                        captureImageUri = TtUtils.Media.captureImage(Take5Activity.this, (int)value, _CurrentPoint);
-                                    }
-                                }, 1)
-                                .setNeutralButton(getString(R.string.str_cancel), null, 0)
-                                .show();
+                            dialog.setMessage(Take5Activity.this.getString(R.string.points_camera_diag))
+                                    .setPositiveButton("TwoTrails", new DontAskAgainDialog.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int i, Object value) {
+                                            captureImageUri = TtUtils.Media.captureImage(Take5Activity.this, true, _CurrentPoint);
+                                        }
+                                    }, 2)
+                                    .setNegativeButton("Android", new DontAskAgainDialog.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int i, Object value) {
+                                            captureImageUri = TtUtils.Media.captureImage(Take5Activity.this, false, _CurrentPoint);
+                                        }
+                                    }, 1)
+                                    .setNeutralButton(getString(R.string.str_cancel), null, 0)
+                                    .show();
+                        } else {
+                            captureImageUri = TtUtils.Media.captureImage(Take5Activity.this, Global.Settings.DeviceSettings.getUseTtCamera() == 2, _CurrentPoint);
+                        }
                     } else {
-                        captureImageUri = TtUtils.Media.captureImage(Take5Activity.this, Global.Settings.DeviceSettings.getUseTtCamera(), _CurrentPoint);
+                        captureImageUri = TtUtils.Media.captureImage(Take5Activity.this, false, _CurrentPoint);
                     }
                     break;
                 }

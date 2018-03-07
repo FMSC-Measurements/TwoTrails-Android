@@ -1268,7 +1268,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
         if (op.isTravType() && _CurrentIndex < 0) {
             Toast.makeText(PointsActivity.this,
-                    StringEx.format("A %s cannot be the first point in a polygon", op.toString()),
+                    StringEx.format("A %s cannot be the first point in a polygon. Take a GPS Type point first.", op.toString()),
                     Toast.LENGTH_SHORT).show();
             return;
         }
