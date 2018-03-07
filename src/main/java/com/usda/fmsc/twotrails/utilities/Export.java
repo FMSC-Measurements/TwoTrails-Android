@@ -1,6 +1,5 @@
 package com.usda.fmsc.twotrails.utilities;
 
-import android.media.MediaScannerConnection;
 import android.os.AsyncTask;
 
 import com.usda.fmsc.geospatial.utm.UTMTools;
@@ -397,28 +396,39 @@ public class Export {
 
             writer.printRecord(
                     "Point CN",
-                    "Used",
+                    "IsUsed",
+
                     "Time Created",
                     "Time Fix",
+
                     "Latitude",
                     "Longitude",
                     "Elevation (Mt)",
-                    "Ground Speed (knots)",
-                    "Track Angle (deg true)",
+
                     "Mag Var",
                     "Mag Var Dir",
-                    "Mode",
+
+                    "Ground Speed (knots)",
+                    "Track Angle (deg true)",
+
                     "Fix",
+                    "Fix Quality",
+                    "Mode",
+
                     "PDOP",
                     "HDOP",
                     "VDOP",
-                    "Fix Quality",
+
                     "Horiz Dilution",
                     "Geoid Height (Mt)",
-                    "Tracked Satellites",
-                    "Satellites In View",
+
+                    "Tracked Satellites Count",
+                    "Satellites In View Count",
                     "Satellites Used Count",
-                    "Satellites Used"
+                    "Satellites Used",
+                    "Satellites In View Info",
+
+                    "CN"
             );
             //endregion
 
@@ -428,27 +438,36 @@ public class Export {
             for (TtNmeaBurst burst : dal.getNmeaBursts()) {
                 values.add(burst.getPointCN());
                 values.add(Boolean.toString(burst.isUsed()));
+
                 values.add(Consts.DateTimeFormatter.print(burst.getTimeCreated()));
                 values.add(burst.getFixTime() == null ? StringEx.Empty : Consts.DateTimeFormatter.print(burst.getFixTime()));
+
                 values.add(StringEx.toString(burst.getLatitude()));
                 values.add(StringEx.toString(burst.getLongitude()));
                 values.add(StringEx.toString(burst.getElevation()));
-                values.add(StringEx.toString(burst.getGroundSpeed()));
-                values.add(StringEx.toString(burst.getTrackAngle()));
+
                 values.add(StringEx.toString(burst.getMagVar()));
                 values.add(burst.getMagVarDir() == null ? StringEx.Empty : burst.getMagVarDir().toString());
-                values.add(burst.getMode().toStringF());
+
+                values.add(StringEx.toString(burst.getGroundSpeed()));
+                values.add(StringEx.toString(burst.getTrackAngle()));
+
                 values.add(burst.getFix().toStringF());
+                values.add(burst.getFixQuality() == null ? StringEx.Empty : burst.getFixQuality().toStringF());
+                values.add(burst.getMode().toStringF());
+
                 values.add(StringEx.toString(burst.getPDOP()));
                 values.add(StringEx.toString(burst.getHDOP()));
                 values.add(StringEx.toString(burst.getVDOP()));
-                values.add(burst.getFixQuality() == null ? StringEx.Empty : burst.getFixQuality().toStringF());
+
                 values.add(StringEx.toString(burst.getHorizDilution()));
                 values.add(StringEx.toString(burst.getGeoidHeight()));
+
                 values.add(StringEx.toString(burst.getTrackedSatellitesCount()));
                 values.add(StringEx.toString(burst.getSatellitesInViewCount()));
                 values.add(StringEx.toString(burst.getUsedSatellitesCount()));
                 values.add(burst.getUsedSatelliteIDsString());
+                values.add(burst.getSatellitesInViewString());
 
                 writer.printRecord(values);
                 values.clear();

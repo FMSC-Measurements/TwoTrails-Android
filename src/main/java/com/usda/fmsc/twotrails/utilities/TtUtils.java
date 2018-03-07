@@ -33,7 +33,6 @@ import com.usda.fmsc.twotrails.BuildConfig;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.activities.GetDirectionActivity;
-import com.usda.fmsc.twotrails.activities.PointsActivity;
 import com.usda.fmsc.twotrails.activities.TtCameraActivity;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
 import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment;
