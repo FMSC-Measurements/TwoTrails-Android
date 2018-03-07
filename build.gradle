@@ -18,13 +18,14 @@ android {
 
         def major = versionProps['MAJOR'].toInteger()
         def minor = versionProps['MINOR'].toInteger()
+        def revision = versionProps['REVISION'].toInteger()
         def build = versionProps['BUILD'].toInteger() + 1
 
         versionProps['BUILD'] = build.toString()
 
         versionProps.store(versionPropsFile.newWriter(), null)
 
-        vName = String.format("%d.%d.%d", major, minor, build)
+        vName = String.format("%d.%d.%d-%d", major, minor, revision,build)
     } else {
         throw new GradleException("Could not read version.properties")
     }
