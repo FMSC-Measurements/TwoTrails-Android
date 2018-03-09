@@ -240,7 +240,7 @@
                                         android:textSize="20sp"/>
 
                                     <TextView
-                                        android:id="@+id/polyFragTvAreaHa"
+                                        android:id="@+id/polyFragTvAreaAc"
                                         style="@style/polyDetailTextValueStyle"/>
 
                                     <TextView
@@ -248,7 +248,7 @@
                                         style="@style/polyDetailTextStyle"/>
 
                                     <TextView
-                                        android:id="@+id/polyFragTvAreaAc"
+                                        android:id="@+id/polyFragTvAreaHa"
                                         style="@style/polyDetailTextValueStyle"/>
 
                                     <TextView
