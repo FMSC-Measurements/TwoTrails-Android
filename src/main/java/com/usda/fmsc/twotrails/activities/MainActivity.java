@@ -405,6 +405,9 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
                         });
 
                     } else {
+                        if (Global.getDAL().needsAdjusting())
+                            PolygonAdjuster.adjust(Global.getDAL());
+
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
