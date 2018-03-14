@@ -743,7 +743,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                 break;
             }
             case R.id.pointsMenuSettings: {
-                startActivityForResult(new Intent(this, PreferenceActivity.class), Consts.Codes.Activites.SETTINGS);
+                startActivityForResult(new Intent(this, SettingsActivity.class), Consts.Codes.Activites.SETTINGS);
                 break;
             }
             case R.id.pointsMenuGotoPoint: {

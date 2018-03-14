@@ -177,7 +177,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
         switch (item.getItemId()) {
             case R.id.mainMenuSettings:
-                startActivityForResult(new Intent(this, PreferenceActivity.class), Consts.Codes.Activites.SETTINGS);
+                startActivityForResult(new Intent(this, SettingsActivity.class), Consts.Codes.Activites.SETTINGS);
                 break;
             case R.id.mainMenuGpsSettings:
                 startActivity(new Intent(this, SettingsActivity.class).

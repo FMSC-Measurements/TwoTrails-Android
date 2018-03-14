@@ -3,33 +3,37 @@
 
     <Preference
         android:title="@string/op_gps"
-        android:key="gpsPointSetup">
+        android:key="gpsPointSetup"
+        android:persistent="false">
 
-        <intent android:action="openSettings" >
-            <extra android:name="@string/set_settings_page" android:value="gpsPointSetup" />
-        </intent>
+        <!--<intent android:action="openSettings" >-->
+            <!--<extra android:name="@string/set_settings_page" android:value="gpsPointSetup" />-->
+        <!--</intent>-->
     </Preference>
 
     <Preference
         android:title="@string/op_take5"
-        android:key="take5PointSetup">
+        android:key="take5PointSetup"
+        android:persistent="false">
 
-        <intent android:action="openSettings" >
-            <extra android:name="@string/set_settings_page" android:value="take5PointSetup" />
-        </intent>
+        <!--<intent android:action="openSettings" >-->
+            <!--<extra android:name="@string/set_settings_page" android:value="take5PointSetup" />-->
+        <!--</intent>-->
     </Preference>
 
     <Preference
         android:title="@string/op_walk"
-        android:key="walkPointSetup">
+        android:key="walkPointSetup"
+        android:persistent="false">
 
-        <intent android:action="openSettings" >
-            <extra android:name="@string/set_settings_page" android:value="walkPointSetup" />
-        </intent>
+        <!--<intent android:action="openSettings" >-->
+            <!--<extra android:name="@string/set_settings_page" android:value="walkPointSetup" />-->
+        <!--</intent>-->
     </Preference>
 
     <PreferenceCategory
-        android:title="Misc Point Settings">
+        android:title="Misc Point Settings"
+        android:persistent="false">
 
         <com.usda.fmsc.android.preferences.SwitchCompatPreference
             android:title="Overwrite PlotGrid"

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:title="@string/op_gps">
+
+    <PreferenceCategory
+        android:title="Filters">
+
+        <com.usda.fmsc.twotrails.preferences.GpsFixPreference
+            android:title="GPS Fix"
+            android:key="@string/set_GPS_FILTER_FIX"/>
+
+        <com.usda.fmsc.twotrails.preferences.GpsFixTypePreference
+            android:title="Fix Type"
+            android:key="@string/set_GPS_FILTER_FIX_TYPE"/>
+
+        <com.usda.fmsc.twotrails.preferences.DopTypePreference
+            android:title="DOP Type"
+            android:key="@string/set_GPS_FILTER_DOP_TYPE"/>
+
+        <com.usda.fmsc.android.preferences.NumberPickerPreference
+            android:title="DOP Value"
+            android:key="@string/set_GPS_FILTER_DOP_VALUE"
+            android:defaultValue="20"
+            app:valueInSummary="true"/>
+    </PreferenceCategory>
+</PreferenceScreen>

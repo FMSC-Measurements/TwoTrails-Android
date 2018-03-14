@@ -238,7 +238,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
             }
             case R.id.walkMenuWalkSettings: {
                 startActivityForResult(new Intent(this, SettingsActivity.class)
-                                .putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.FILTER_WALK_SETTINGS_PAGE),
+                                .putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.POINT_WALK_SETTINGS_PAGE),
                         Consts.Codes.Activites.SETTINGS);
                 break;
             }
