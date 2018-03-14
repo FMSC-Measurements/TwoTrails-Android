@@ -22,7 +22,7 @@
         android:title="Show My Position Button"
         android:key="@string/set_MAP_MY_POS_BUTTON" />
 
-    <!--<com.usda.fmsc.AndroidEx.Preferences.SwitchCompatPreference-->
+    <!--<CheckBoxPreference-->
     <!--android:title="Show Zoom Buttons"-->
     <!--android:key="@string/set_MAP_ZOOM_BUTTONS" />-->
 </PreferenceScreen>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceScreen
+        android:title="Device Setup"
+        android:key="devSetup">
+
+        <PreferenceScreen
+            android:title="@string/menu_x_gps_settings"
+            android:key="gpsSetup">
+
+            <com.usda.fmsc.android.preferences.SwitchCompatPreference
+                android:key="@string/set_GPS_EXTERNAL"
+                android:title="GPS Device"
+                android:summary="Device to use."
+                android:switchTextOff="@string/str_internal"
+                android:switchTextOn="@string/str_external"
+                android:textOff="@string/str_internal"
+                android:textOn="@string/str_external"/>
+
+            <com.usda.fmsc.android.preferences.SwitchCompatPreference
+                android:key="@string/set_GPS_ALWAYS_ON"
+                android:title="Keep GPS ON"
+                android:summary="Run GPS Always"/>
+
+            <Preference
+                android:key="@string/set_GPS_CHECK_NMEA"
+                android:title="Check NMEA"
+                android:summary="@string/ds_gps_check_nmea"/>
+
+            <PreferenceCategory
+                android:title="External GPS Settings"
+                android:key="@string/set_GPS_CAT">
+
+                <com.usda.fmsc.android.preferences.ListCompatPreference
+                    android:id="@+id/prefLstGpsDevice"
+                    android:key="@string/set_GPS_LIST_DEVICE"
+                    android:title="External GPS Device"
+                    android:summary="Device: "/>
+
+                <Preference
+                    android:key="@string/set_GPS_CHECK"
+                    android:title="Check GPS Connection"
+                    android:summary="@string/ds_gps_not_connected"/>
+
+                <com.usda.fmsc.android.preferences.SwitchCompatPreference
+                    android:title="Update Metadata on GPS"
+                    android:key="@string/set_AUTO_SET_GPS_NAME_TO_META_ASK"
+                    android:summary="Remember option to update metadata on GPS receiver change"/>
+            </PreferenceCategory>
+        </PreferenceScreen>
+
+        <PreferenceScreen
+            android:title="Range Finder"
+            android:key="@string/set_RF_SETUP"
+            android:enabled="true">
+
+            <com.usda.fmsc.android.preferences.ListCompatPreference
+                android:id="@+id/prefLstRFDevice"
+                android:key="@string/set_RF_LIST_DEVICE"
+                android:title="External Range Finder" />
+
+            <Preference
+                android:key="@string/set_RF_CHECK"
+                android:title="Check Range Finder Connection"
+                android:summary="@string/ds_rf_not_connected"/>
+
+
+            <!--Create settings: use compass data-->
+            <!--Create settings (if above check): auto apply as fwd az-->
+            <!--Create settings (if 2 above check, disable 1 above and set 1 above true): auto create SS (data must include az. uses as fwd as only)-->
+        </PreferenceScreen>
+    </PreferenceScreen>
+</PreferenceScreen>

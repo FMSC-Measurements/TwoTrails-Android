@@ -134,7 +134,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
     private Sensor accelerometer, magnetometer;
 
     private ActionBarDrawerToggle drawerToggle;
-    private MenuItem miResetBounds, miShowMyPos, miTrackedPoly, miMapMaxBounds;
+    private MenuItem miResetBounds, miShowMyPos, miTrackedPoly, miMapMaxBounds, miMapSettings, miGpsSettings;
     private SlidingUpPanelLayout slidingLayout;
     private TextView tvNavPid, tvNavPoly, tvNavDistMt, tvNavDistFt, tvNavAzTrue, tvNavAzMag;
     private ImageView ivArrow;
@@ -144,7 +144,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
     private TtPoint fromPoint, toPoint;
     private boolean fromMyLoc = true;
 
-    private boolean showCompass, mapMoved = true, showMyPos, polysCreated, mapHasMaxExtents;
+    private boolean showCompass, mapMoved = true, showMyPos, polysCreated, mapHasMaxExtents, isMapReady;
     private MapTracking mapTracking = MapTracking.FOLLOW;
     private Integer zone;
 
@@ -458,6 +458,16 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
             miMapMaxBounds.setVisible(mapHasMaxExtents);
         }
 
+        miMapSettings = menu.findItem(R.id.mmMenuMapSettings);
+        if (miMapSettings != null) {
+            miMapSettings.setEnabled(isMapReady);
+        }
+
+        miGpsSettings = menu.findItem(R.id.mapMenuGps);
+        if (miGpsSettings != null) {
+            miGpsSettings.setEnabled(isMapReady);
+        }
+
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -626,12 +636,12 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
         if (mapFragment != null) {
             getSupportFragmentManager().putFragment(outState, FRAGMENT, mapFragment);
             outState.putInt(MAP_TYPE, mapType.getValue());
         }
+
+        super.onSaveInstanceState(outState);
     }
 
 
@@ -745,6 +755,17 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
     //region Map Events
     @Override
     public void onMapReady() {
+        isMapReady = true;
+
+        if (miMapSettings != null) {
+            miMapSettings.setEnabled(true);
+        }
+
+        if (miGpsSettings != null) {
+            miGpsSettings.setEnabled(true);
+        }
+
+
         if (mmFrag != null) {
             for (PolygonGraphicManager pgm : polyGraphicManagers) {
                 mmFrag.addPolygon(pgm, null);
@@ -1138,6 +1159,9 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
 
             if (usedBounds > 0) {
                 completeBnds = builder.build();
+                if (completeBnds.getEast() == 0 && completeBnds.getWest() == 0 ||
+                        completeBnds.getNorth() == 0 && completeBnds.getSouth() == 0)
+                    completeBnds = null;
             } else {
                 completeBnds = null;
             }

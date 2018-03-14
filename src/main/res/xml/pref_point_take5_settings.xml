@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:title="@string/op_take5">
+
+    <PreferenceCategory
+        android:title="Filters">
+
+        <com.usda.fmsc.twotrails.preferences.GpsFixPreference
+            android:title="GPS Fix"
+            android:key="@string/set_TAKE5_FILTER_FIX"/>
+
+        <com.usda.fmsc.twotrails.preferences.GpsFixTypePreference
+            android:title="Fix Type"
+            android:key="@string/set_TAKE5_FILTER_FIX_TYPE"/>
+
+        <com.usda.fmsc.twotrails.preferences.DopTypePreference
+            android:title="DOP Type"
+            android:key="@string/set_TAKE5_FILTER_DOP_TYPE"/>
+
+        <com.usda.fmsc.android.preferences.NumberPickerPreference
+            android:title="DOP Value"
+            android:key="@string/set_TAKE5_FILTER_DOP_VALUE"
+            android:defaultValue="20"
+            app:valueInSummary="true"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Notifications">
+
+        <com.usda.fmsc.android.preferences.SwitchCompatPreference
+            android:title="Ring On Create"
+            android:key="@string/set_TAKE5_RING_ON_CREATE_POINT"/>
+
+        <com.usda.fmsc.android.preferences.SwitchCompatPreference
+            android:title="Vibrate On Create"
+            android:key="@string/set_TAKE5_VIB_ON_CREATE_POINT"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Misc Settings">
+
+        <com.usda.fmsc.android.preferences.NumberPickerPreference
+            android:title="Increment Amount"
+            android:summary="The number to increment PID by in the Take5 tool"
+            android:key="@string/set_TAKE5_INCREMENT"
+            android:defaultValue="5" />
+
+        <com.usda.fmsc.android.preferences.NumberPickerPreference
+            android:title="Take 5 Amount"
+            android:summary="Amount of Bursts to create a Take5 point"
+            android:key="@string/set_TAKE5_NMEA_AMOUNT"
+            android:enabled="false"/>
+
+        <com.usda.fmsc.android.preferences.SwitchCompatPreference
+            android:title="Ignore First Bursts"
+            android:summary="Ignore the first X bursts when creating a Take5 point"
+            android:key="@string/set_TAKE5_IGNORE_NMEA"
+            android:enabled="false"/>
+
+        <com.usda.fmsc.android.preferences.NumberPickerPreference
+            android:title="Ignore Furst Bursts Amount"
+            android:summary="Amount of bursts to ignore when creating a Take5 point"
+            android:key="@string/set_TAKE5_IGNORE_NMEA_AMOUNT"
+            android:defaultValue="2"
+            android:enabled="false"/>
+
+        <com.usda.fmsc.android.preferences.NumberPickerPreference
+            android:title="NMEA Fail Amount"
+            android:summary="Amount of failed bursts to wait until canceling a Take5 point"
+            android:key="@string/set_TAKE5_FAIL_AMOUNT"
+            android:defaultValue="10"
+            android:enabled="false"/>
+    </PreferenceCategory>
+</PreferenceScreen>
