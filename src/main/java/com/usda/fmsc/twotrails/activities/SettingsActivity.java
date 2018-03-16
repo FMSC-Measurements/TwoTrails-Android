@@ -7,6 +7,7 @@ import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
 import android.support.annotation.XmlRes;
+import android.support.v7.app.ActionBar;
 import android.view.MenuItem;
 
 import com.usda.fmsc.twotrails.R;
@@ -89,7 +90,7 @@ public class SettingsActivity extends CustomToolbarActivity {
             case POINT_WALK_SETTINGS_PAGE: return R.xml.pref_point_walk_settings;
             case MAP_SETTINGS_PAGE: return R.xml.pref_map_settings;
             case MEDIA_SETTINGS_PAGE: return R.xml.pref_media_settings;
-            case MISC_SETTINGS_PAGE: return R.xml.pref_misc_settings;
+            case MISC_SETTINGS_PAGE: return R.xml.pref_other_settings;
             case DIALOG_SETTINGS_PAGE: return R.xml.pref_dialog_settings;
             default: return 0;
         }
@@ -98,6 +99,8 @@ public class SettingsActivity extends CustomToolbarActivity {
 
     public static class SettingsFragment extends PreferenceFragment {
         public static final String SETTINGS_PAGE = "CurrentPage";
+
+        private String settingsPageKey;
 
         public static SettingsFragment newInstance(String settingsKey) {
             SettingsFragment fragment = new SettingsFragment();
@@ -116,11 +119,39 @@ public class SettingsActivity extends CustomToolbarActivity {
             @XmlRes int settingsPage = R.xml.pref_main;
 
             Bundle bundle = getArguments();
-            if (bundle != null && bundle.containsKey(SETTINGS_PAGE)) {
-                settingsPage = getSettingsPageRes(bundle.getString(SETTINGS_PAGE));
+            if (bundle != null && bundle.containsKey(SETTINGS_PAGE) && (settingsPageKey = bundle.getString(SETTINGS_PAGE)) != null) {
+                settingsPage = getSettingsPageRes(settingsPageKey);
             }
 
             addPreferencesFromResource(settingsPage);
+
+        }
+
+        @Override
+        public void onResume() {
+            super.onResume();
+
+            String settingsTitle = "Settings";
+
+            switch (settingsPageKey) {
+                case DEVICE_SETUP_SETTINGS_PAGE: settingsTitle = "Device Setup"; break;
+                case POINT_SETTINGS_PAGE: settingsTitle = "Point Settings"; break;
+                case POINT_GPS_SETTINGS_PAGE: settingsTitle = "GPS Point Settings"; break;
+                case POINT_TAKE5_SETTINGS_PAGE: settingsTitle = "Take5 Point Settings"; break;
+                case POINT_WALK_SETTINGS_PAGE:  settingsTitle = "Walk Point Settings"; break;
+                case MAP_SETTINGS_PAGE: settingsTitle = "Map Settings"; break;
+                case MEDIA_SETTINGS_PAGE: settingsTitle = "Media Settings"; break;
+                case DIALOG_SETTINGS_PAGE: settingsTitle = "Dialog Settings"; break;
+            }
+
+            ActionBar actionBar = ((CustomToolbarActivity)getActivity()).getSupportActionBar();
+
+            if (actionBar != null) {
+                actionBar.setHomeButtonEnabled(true);
+                actionBar.setDisplayHomeAsUpEnabled(true);
+                actionBar.setDisplayShowTitleEnabled(true);
+                actionBar.setTitle(settingsTitle);
+            }
         }
 
         @Override

@@ -86,7 +86,6 @@ public class DeviceSettingsFragment extends PreferenceFragment {
                 actionBar.setHomeButtonEnabled(true);
                 actionBar.setDisplayHomeAsUpEnabled(true);
                 actionBar.setDisplayShowTitleEnabled(true);
-                actionBar.setTitle(getPreferenceScreen().getTitle());
 
                 if (moveToPage != null) {
                     switch (moveToPage) {
@@ -95,24 +94,6 @@ public class DeviceSettingsFragment extends PreferenceFragment {
                             break;
                         case SettingsActivity.LASER_SETTINGS_PAGE:
                             actionBar.setTitle("Range Finder Setup");
-                            break;
-                        case SettingsActivity.POINT_GPS_SETTINGS_PAGE:
-                            actionBar.setTitle("GPS Point Settings");
-                            break;
-                        case SettingsActivity.POINT_TAKE5_SETTINGS_PAGE:
-                            actionBar.setTitle("Take5 Point Settings");
-                            break;
-                        case SettingsActivity.POINT_WALK_SETTINGS_PAGE:
-                            actionBar.setTitle("Walk Point Settings");
-                            break;
-                        case SettingsActivity.MAP_SETTINGS_PAGE:
-                            actionBar.setTitle("Map Settings");
-                            break;
-                        case SettingsActivity.DIALOG_SETTINGS_PAGE:
-                            actionBar.setTitle("Dialog Options");
-                            break;
-                        case SettingsActivity.MISC_SETTINGS_PAGE:
-                            actionBar.setTitle("Misc Settings");
                             break;
                         default:
                             actionBar.setTitle("Settings");
