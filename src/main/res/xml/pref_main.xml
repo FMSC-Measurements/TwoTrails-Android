@@ -25,7 +25,7 @@
     <!--</PreferenceScreen>-->
 
     <Preference
-        android:title="Misc Settings"
+        android:title="Other Settings"
         android:key="miscSetup"
         android:persistent="false">
     </Preference>

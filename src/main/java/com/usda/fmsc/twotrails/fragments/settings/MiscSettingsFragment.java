@@ -4,15 +4,17 @@ package com.usda.fmsc.twotrails.fragments.settings;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
+import android.support.v7.app.ActionBar;
 
 import com.usda.fmsc.twotrails.R;
+import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.logic.SettingsLogic;
 
 public class MiscSettingsFragment extends PreferenceFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        addPreferencesFromResource(R.xml.pref_misc_settings);
+        addPreferencesFromResource(R.xml.pref_other_settings);
         setHasOptionsMenu(true);
 
         findPreference(getString(R.string.set_RESET)).setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
@@ -46,5 +48,14 @@ public class MiscSettingsFragment extends PreferenceFragment {
                 return false;
             }
         });
+
+        ActionBar actionBar = ((CustomToolbarActivity)getActivity()).getSupportActionBar();
+
+        if (actionBar != null) {
+            actionBar.setHomeButtonEnabled(true);
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setDisplayShowTitleEnabled(true);
+            actionBar.setTitle("Other Settings");
+        }
     }
 }
