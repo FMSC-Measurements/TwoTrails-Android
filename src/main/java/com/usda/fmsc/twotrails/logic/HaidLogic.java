@@ -144,11 +144,11 @@ public class HaidLogic {
 
         double travError = closeError < Consts.Minimum_Point_Accuracy ? Double.POSITIVE_INFINITY : travLength / closeError;
 
-        sb.append(String.format("\tTraverse Total Segments: %d%s",
+        sb.append(StringEx.format("\tTraverse Total Segments: %d%s",
                 traverseSegments, Consts.NewLine));
-        sb.append(String.format("\tTraverse Total Distance: %.2f feet.%s",
+        sb.append(StringEx.format("\tTraverse Total Distance: %.2f feet.%s",
                 TtUtils.Math.round(TtUtils.Convert.toFeetTenths(travLength, Dist.Meters), 2), Consts.NewLine));
-        sb.append(String.format("\tTraverse Closing Distance: %.2f feet.%s",
+        sb.append(StringEx.format("\tTraverse Closing Distance: %.2f feet.%s",
                 TtUtils.Math.round(TtUtils.Convert.toFeetTenths(closeError, Dist.Meters), 2), Consts.NewLine));
         sb.append(String.format("\tTraverse Close Error: 1 part in %s.%s",
                 Double.isInfinite(travError) ? INFINITE_SYMBOL : StringEx.toStringRound(travError, 2),
@@ -187,9 +187,9 @@ public class HaidLogic {
                 }
 
                 if (!fromQuondam && showPoints) {
-                    sb.append(String.format("Point %d: %s %s- ", point.getPID(), point.isOnBnd() ? " " : "*",
+                    sb.append(StringEx.format("Point %d: %s %s- ", point.getPID(), point.isOnBnd() ? " " : "*",
                             point.getOp().toString()));
-                    sb.append(String.format("Accuracy is %.3f meters.%s", point.getAccuracy(), Consts.NewLine));
+                    sb.append(StringEx.format("Accuracy is %.3f meters.%s", point.getAccuracy(), Consts.NewLine));
                 }
                 break;
             }
@@ -231,7 +231,7 @@ public class HaidLogic {
             {
                 if (showPoints)
                 {
-                    sb.append(String.format("Point %d: %s SideShot off Point %d.%s",
+                    sb.append(StringEx.format("Point %d: %s SideShot off Point %d.%s",
                             point.getPID(), point.isOnBnd() ? " " : "*", lastGpsPtPID, Consts.NewLine));
                 }
 
@@ -267,7 +267,7 @@ public class HaidLogic {
                 }
 
                 if (showPoints) {
-                    sb.append(String.format("Point %d: %s Quondam to Point %d.%s", point.getPID(),
+                    sb.append(StringEx.format("Point %d: %s Quondam to Point %d.%s", point.getPID(),
                             point.isOnBnd() ? " " : "*", qp.getParentPID(), Consts.NewLine));
                 }
                 break;
@@ -283,39 +283,39 @@ public class HaidLogic {
         StringBuilder sb = new StringBuilder();
 
         if (polygon.getArea() > Consts.Minimum_Point_Accuracy) {
-            sb.append(String.format("The polygon area is: %s%.2f Ha (%.0f ac).%s",
+            sb.append(StringEx.format("The polygon area is: %s%.2f Ha (%.0f ac).%s",
                 save ? "          " : "",
                 TtUtils.Math.round(TtUtils.Convert.metersSquaredToHa(polygon.getArea()), 2),
-                TtUtils.Math.round(TtUtils.Convert.metersSquaredToAcres(polygon.getArea()), 0),
+                TtUtils.Math.round(TtUtils.Convert.metersSquaredToAcres(polygon.getArea()), 2),
                 Consts.NewLine));
 
-            sb.append(String.format("The polygon exterior perimeter is: %s%.2f M (%.0f ft).%s%s",
+            sb.append(StringEx.format("The polygon exterior perimeter is: %s%.2f M (%.0f ft).%s%s",
                 save ? "     " : "",
                 TtUtils.Math.round(polygon.getPerimeter(), 2),
-                TtUtils.Math.round(TtUtils.Convert.toFeetTenths(polygon.getPerimeter(), Dist.Meters), 0),
+                TtUtils.Math.round(TtUtils.Convert.toFeetTenths(polygon.getPerimeter(), Dist.Meters), 2),
                 Consts.NewLine, Consts.NewLine));
         }
 
         if (totalGpsError > Consts.Minimum_Point_Accuracy) {
-            sb.append(String.format("GPS Contribution: %s%.4f Ha (%.0f ac)%s",
+            sb.append(StringEx.format("GPS Contribution: %s%.4f Ha (%.0f ac)%s",
                 save ? "              " : "",
                 TtUtils.Math.round(TtUtils.Convert.metersSquaredToHa(totalGpsError), 4),
                 TtUtils.Math.round(TtUtils.Convert.metersSquaredToAcres(totalGpsError), 2),
                 Consts.NewLine));
 
-            sb.append(String.format("GPS Contribution Ratio of area-error-area to area is: %.2f%%.%s%s",
+            sb.append(StringEx.format("GPS Contribution Ratio of area-error-area to area is: %.2f%%.%s%s",
                 TtUtils.Math.round(totalGpsError / polygon.getArea() * 100.0, 2),
                 Consts.NewLine, Consts.NewLine));
         }
 
         if (totalTravError > Consts.Minimum_Point_Accuracy) {
-            sb.append(String.format("Traverse Contribution: %s%.2f Ha (%.0f ac)%s",
+            sb.append(StringEx.format("Traverse Contribution: %s%.2f Ha (%.0f ac)%s",
                 save ? "        " : "",
                 TtUtils.Math.round(TtUtils.Convert.metersSquaredToHa(totalTravError), 2),
                 TtUtils.Math.round(TtUtils.Convert.metersSquaredToAcres(totalTravError), 2),
                 Consts.NewLine));
 
-            sb.append(String.format("Traverse Contribution Ratio of area-error-area to area is: %.2f%%.%s%s",
+            sb.append(StringEx.format("Traverse Contribution Ratio of area-error-area to area is: %.2f%%.%s%s",
                 TtUtils.Math.round(totalTravError / polygon.getArea() * 100.0, 2),
                 Consts.NewLine, Consts.NewLine));
         }
