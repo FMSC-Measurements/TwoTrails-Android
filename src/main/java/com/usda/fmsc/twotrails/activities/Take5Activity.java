@@ -640,7 +640,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
             }
             case R.id.take5MenuTake5Settings: {
                 startActivityForResult(new Intent(this, SettingsActivity.class)
-                                .putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.FILTER_TAKE5_SETTINGS_PAGE),
+                                .putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.POINT_TAKE5_SETTINGS_PAGE),
                         Consts.Codes.Activites.SETTINGS);
                 break;
             }

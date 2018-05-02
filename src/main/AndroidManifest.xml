@@ -141,10 +141,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.PreferenceActivity"
-            android:label="@string/title_activity_settings"
-            android:screenOrientation="portrait" />
-        <activity
             android:name=".activities.PointsActivity"
             android:label="@string/title_activity_points"
             android:screenOrientation="portrait" />

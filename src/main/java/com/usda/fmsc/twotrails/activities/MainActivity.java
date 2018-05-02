@@ -1,5 +1,6 @@
 package com.usda.fmsc.twotrails.activities;
 
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -121,6 +122,10 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
             tabLayout.setupWithViewPager(mViewPager);
         }
 
+        AndroidUtils.App.requestPermission(MainActivity.this,
+                new String[] { Manifest.permission.WRITE_EXTERNAL_STORAGE, android.Manifest.permission.READ_EXTERNAL_STORAGE},
+                Consts.Codes.Requests.CREATE_FILE, "TwoTrails needs storage permissions in order to Open and Create files.");
+
         //setup values
         new Thread(new Runnable() {
             @Override
@@ -150,7 +155,9 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
         super.onResume();
         updateAppInfo();
 
-        if (!askLocation && !AndroidUtils.App.requestLocationPermission(MainActivity.this, Consts.Codes.Requests.LOCATION)) {
+        if (!askLocation && !AndroidUtils.App.requestPermission(MainActivity.this,
+                new String[] { Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION},
+                Consts.Codes.Requests.LOCATION, "TwoTrails needs location permissions in order to create collect location information.")) {
             askLocation = true;
         }
 
@@ -177,7 +184,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
         switch (item.getItemId()) {
             case R.id.mainMenuSettings:
-                startActivityForResult(new Intent(this, PreferenceActivity.class), Consts.Codes.Activites.SETTINGS);
+                startActivityForResult(new Intent(this, SettingsActivity.class), Consts.Codes.Activites.SETTINGS);
                 break;
             case R.id.mainMenuGpsSettings:
                 startActivity(new Intent(this, SettingsActivity.class).
@@ -405,6 +412,9 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
                         });
 
                     } else {
+                        if (Global.getDAL().needsAdjusting())
+                            PolygonAdjuster.adjust(Global.getDAL());
+
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {

@@ -2,8 +2,9 @@
 <PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <PreferenceCategory
-        android:title="Device Setup">
+    <PreferenceScreen
+        android:title="Device Setup"
+        android:key="devSetup">
 
         <PreferenceScreen
             android:title="@string/menu_x_gps_settings"
@@ -70,10 +71,11 @@
             <!--Create settings (if above check): auto apply as fwd az-->
             <!--Create settings (if 2 above check, disable 1 above and set 1 above true): auto create SS (data must include az. uses as fwd as only)-->
         </PreferenceScreen>
-    </PreferenceCategory>
+    </PreferenceScreen>
 
-    <PreferenceCategory
-        android:title="Point Settings">
+    <PreferenceScreen
+        android:title="Point Settings"
+        android:key="pointSetup">
 
         <PreferenceScreen
             android:title="@string/op_gps"
@@ -246,73 +248,70 @@
                     android:summary="Remember walk OnBoundary selection option"/>
             </PreferenceCategory>
         </PreferenceScreen>
-    </PreferenceCategory>
+    </PreferenceScreen>
 
-    <PreferenceCategory
-        android:title="Other">
+    <PreferenceScreen
+        android:title="Map Settings"
+        android:key="mapSetup">
 
-        <PreferenceScreen
-            android:title="Map Options"
-            android:key="mapSetup">
+        <PreferenceCategory
+            android:title="Map Options">
 
-            <PreferenceCategory
-                android:title="Map Options">
+            <com.usda.fmsc.android.preferences.SwitchCompatPreference
+                android:title="Show My Position"
+                android:key="@string/set_MAP_SHOW_MY_POS"/>
 
-                <com.usda.fmsc.android.preferences.SwitchCompatPreference
-                    android:title="Show My Position"
-                    android:key="@string/set_MAP_SHOW_MY_POS"/>
+            <com.usda.fmsc.android.preferences.SwitchCompatPreference
+                android:title="Use UTM Navigation"
+                android:key="@string/set_MAP_USE_UTM_NAV"/>
 
-                <com.usda.fmsc.android.preferences.SwitchCompatPreference
-                    android:title="Use UTM Navigation"
-                    android:key="@string/set_MAP_USE_UTM_NAV"/>
+            <com.usda.fmsc.twotrails.preferences.MapTrackingPreference
+                android:title="Map Tracking"
+                android:key="@string/set_MAP_TRACKING_OPTION"
+                android:summary="Use UTM instead of Lat/Lon for Navigation"/>
 
-                <com.usda.fmsc.twotrails.preferences.MapTrackingPreference
-                    android:title="Map Tracking"
-                    android:key="@string/set_MAP_TRACKING_OPTION"
-                    android:summary="Use UTM instead of Lat/Lon for Navigation"/>
+            <com.usda.fmsc.android.preferences.SwitchCompatPreference
+                android:title="Show Compass"
+                android:key="@string/set_MAP_COMPASS_ENABLED" />
 
-                <com.usda.fmsc.android.preferences.SwitchCompatPreference
-                    android:title="Show Compass"
-                    android:key="@string/set_MAP_COMPASS_ENABLED" />
+            <com.usda.fmsc.android.preferences.SwitchCompatPreference
+                android:title="Show My Position Button"
+                android:key="@string/set_MAP_MY_POS_BUTTON" />
 
-                <com.usda.fmsc.android.preferences.SwitchCompatPreference
-                    android:title="Show My Position Button"
-                    android:key="@string/set_MAP_MY_POS_BUTTON" />
+            <!--<CheckBoxPreference-->
+            <!--android:title="Show Zoom Buttons"-->
+            <!--android:key="@string/set_MAP_ZOOM_BUTTONS" />-->
+        </PreferenceCategory>
+    </PreferenceScreen>
 
-                <!--<CheckBoxPreference-->
-                    <!--android:title="Show Zoom Buttons"-->
-                    <!--android:key="@string/set_MAP_ZOOM_BUTTONS" />-->
-            </PreferenceCategory>
-        </PreferenceScreen>
 
-        <!--<PreferenceScreen-->
-            <!--android:title="Dialog Options"-->
-            <!--android:key="dialogSetup">-->
+    <!--<PreferenceScreen-->
+    <!--android:title="Dialog Options"-->
+    <!--android:key="dialogSetup">-->
 
-            <!--<PreferenceCategory-->
-                <!--android:title="Dialog Options">-->
+    <!--<PreferenceCategory-->
+    <!--android:title="Dialog Options">-->
 
-                <!--<com.usda.fmsc.android.preferences.SwitchCompatPreference-->
-                    <!--android:title="OnBoundary"-->
-                    <!--android:key="@string/set_AUTO_UPDATE_WALK_ONBND_ASK"-->
-                    <!--android:summary="Remember walk OnBoundary selection option"/>-->
+    <!--<com.usda.fmsc.android.preferences.SwitchCompatPreference-->
+    <!--android:title="OnBoundary"-->
+    <!--android:key="@string/set_AUTO_UPDATE_WALK_ONBND_ASK"-->
+    <!--android:summary="Remember walk OnBoundary selection option"/>-->
 
-                <!--<com.usda.fmsc.android.preferences.SwitchCompatPreference-->
-                    <!--android:title="Update Metadata on GPS"-->
-                    <!--android:key="@string/set_AUTO_SET_GPS_NAME_TO_META_ASK"-->
-                    <!--android:summary="Remember to update metadata on GPS receiver change"/>-->
+    <!--<com.usda.fmsc.android.preferences.SwitchCompatPreference-->
+    <!--android:title="Update Metadata on GPS"-->
+    <!--android:key="@string/set_AUTO_SET_GPS_NAME_TO_META_ASK"-->
+    <!--android:summary="Remember to update metadata on GPS receiver change"/>-->
 
-                <!--<com.usda.fmsc.android.preferences.SwitchCompatPreference-->
-                    <!--android:title="Overwrite PlotGrid"-->
-                    <!--android:key="@string/set_AUTO_OVERWRITE_PLOTGRID_ASK"-->
-                    <!--android:summary="Remember to overwrite the PlotGrid on regenerate"/>-->
-            <!--</PreferenceCategory>-->
-        <!--</PreferenceScreen>-->
+    <!--<com.usda.fmsc.android.preferences.SwitchCompatPreference-->
+    <!--android:title="Overwrite PlotGrid"-->
+    <!--android:key="@string/set_AUTO_OVERWRITE_PLOTGRID_ASK"-->
+    <!--android:summary="Remember to overwrite the PlotGrid on regenerate"/>-->
+    <!--</PreferenceCategory>-->
+    <!--</PreferenceScreen>-->
 
-        <PreferenceScreen
-            android:title="Misc Settings"
-            android:key="miscSetup">
-        </PreferenceScreen>
+    <PreferenceScreen
+        android:title="Misc Settings"
+        android:key="miscSetup">
 
         <com.usda.fmsc.android.preferences.SwitchCompatPreference
             android:title="Open last project on start"
@@ -338,5 +337,5 @@
         <Preference
             android:title="Enter Code"
             android:key="@string/set_CODE" />
-    </PreferenceCategory>
+    </PreferenceScreen>
 </PreferenceScreen>

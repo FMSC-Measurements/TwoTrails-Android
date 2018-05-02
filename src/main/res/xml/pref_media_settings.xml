@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="Media Settings">
 
     <com.usda.fmsc.android.preferences.SwitchCompatPreference
         android:key="@string/set_MEDIA_COPY_TO_PROJECT"

@@ -529,7 +529,7 @@ public class MetadataActivity extends CustomToolbarActivity {
                 }
             });
 
-            inputDialog.setNeutralButton("Get Zone", null);
+            //inputDialog.setNeutralButton("Get Zone", null);
 
             inputDialog.setNegativeButton(R.string.str_cancel, null);
 

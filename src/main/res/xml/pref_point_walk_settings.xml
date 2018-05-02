@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:title="@string/op_walk">
+
+    <PreferenceCategory
+        android:title="Filters">
+
+        <com.usda.fmsc.twotrails.preferences.GpsFixPreference
+            android:title="GPS Fix"
+            android:key="@string/set_WALK_FILTER_FIX"/>
+
+        <com.usda.fmsc.twotrails.preferences.GpsFixTypePreference
+            android:title="Fix Type"
+            android:key="@string/set_WALK_FILTER_FIX_TYPE"/>
+
+        <com.usda.fmsc.twotrails.preferences.DopTypePreference
+            android:title="DOP Type"
+            android:key="@string/set_WALK_FILTER_DOP_TYPE"/>
+
+        <com.usda.fmsc.android.preferences.NumberPickerPreference
+            android:title="DOP Value"
+            android:key="@string/set_WALK_FILTER_DOP_VALUE"
+            android:defaultValue="20"
+            app:valueInSummary="true"/>
+
+        <com.usda.fmsc.android.preferences.NumberPickerPreference
+            android:title="Accuracy"
+            android:summary="Distance between points (Meters)"
+            android:key="@string/set_WALK_FILTER_ACCURACY"/>
+
+        <com.usda.fmsc.android.preferences.NumberPickerPreference
+            android:title="Frequency"
+            android:summary="Frequency between points (Seconds)"
+            android:key="@string/set_WALK_FILTER_FREQUENCY"
+            app:maximumValue="60"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Notifications">
+
+        <com.usda.fmsc.android.preferences.SwitchCompatPreference
+            android:title="Ring On Create"
+            android:key="@string/set_WALK_RING_ON_CREATE_POINT"/>
+
+        <com.usda.fmsc.android.preferences.SwitchCompatPreference
+            android:title="Vibrate On Create"
+            android:key="@string/set_WALK_VIB_ON_CREATE_POINT"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Misc Settings">
+
+        <com.usda.fmsc.android.preferences.NumberPickerPreference
+            android:title="Increment Amount"
+            android:key="@string/set_WALK_INCREMENT"
+            android:defaultValue="2"
+            app:valueInSummary="true" />
+
+        <com.usda.fmsc.android.preferences.SwitchCompatPreference
+            android:title="OnBoundary"
+            android:key="@string/set_AUTO_UPDATE_WALK_ONBND_ASK"
+            android:summary="Remember walk OnBoundary selection option"/>
+    </PreferenceCategory>
+</PreferenceScreen>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <Preference
+        android:title="Device Setup"
+        android:key="devSetup"
+        android:persistent="false">
+    </Preference>
+
+    <Preference
+        android:title="Point Settings"
+        android:key="pointSetup"
+        android:persistent="false">
+    </Preference>
+
+    <Preference
+        android:title="Map Settings"
+        android:key="mapSetup"
+        android:persistent="false">
+    </Preference>
+
+    <!--<PreferenceScreen-->
+    <!--android:title="Dialog Options"-->
+    <!--android:key="dialogSetup"-->
+    <!--android:persistent="false">-->
+    <!--</PreferenceScreen>-->
+
+    <Preference
+        android:title="Other Settings"
+        android:key="miscSetup"
+        android:persistent="false">
+    </Preference>
+</PreferenceScreen>
