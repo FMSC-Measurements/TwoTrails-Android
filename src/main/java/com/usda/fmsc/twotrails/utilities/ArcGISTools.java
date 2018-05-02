@@ -55,6 +55,7 @@ public class ArcGISTools {
     private static HashMap<Integer, DownloadOfflineArcGISMapTask> tasks = new HashMap<>();
     private static long lastUpdate = System.currentTimeMillis();
 
+    private static WebRequest webRequest;
 
     private static void init() {
         mapLayers = new HashMap<>();
@@ -426,7 +427,10 @@ public class ArcGISTools {
             jUrl = String.format("%s?f=pjson", jUrl);
         }
 
-        WebRequest.getJson(jUrl, context, new Response.Listener<JSONObject>() {
+        if (webRequest == null)
+            webRequest = new WebRequest(context);
+
+        webRequest.getJson(jUrl, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 if (response.has("currentVersion")) {
