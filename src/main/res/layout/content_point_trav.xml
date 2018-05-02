@@ -53,7 +53,8 @@
                     style="@style/NumDecValueTextStyle"
                     android:layout_height="wrap_content"
                     android:layout_width="0dp"
-                    android:layout_weight="1" />
+                    android:layout_weight="1"
+                    android:nextFocusForward="@id/pointTravTxtSlopeDist"/>
 
                 <TextView
                     android:text="@string/points_trav_az_bk"
@@ -66,7 +67,8 @@
                     style="@style/NumDecValueTextStyle"
                     android:layout_height="wrap_content"
                     android:layout_width="0dp"
-                    android:layout_weight="1" />
+                    android:layout_weight="1"
+                    android:nextFocusForward="@id/pointTravTxtSlopeDist" />
 
                 <TextView
                     android:id="@+id/pointTravAzDiff"
@@ -105,7 +107,8 @@
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     style="@style/NumDecValueTextStyle"
-                    android:inputType="numberDecimal" />
+                    android:inputType="numberDecimal"
+                    android:nextFocusRight="@id/pointTravTxtSlopeAng" />
 
                 <TextView
                     android:text="@string/str_ang"
@@ -118,7 +121,8 @@
                     android:layout_height="wrap_content"
                     android:layout_width="0dp"
                     android:layout_weight="1"
-                    style="@style/NumDecValueTextStyle" />
+                    style="@style/NumDecValueTextStyle"
+                    android:nextFocusForward="@id/pointTxtCmt" />
             </TableRow>
 
             <TableRow>

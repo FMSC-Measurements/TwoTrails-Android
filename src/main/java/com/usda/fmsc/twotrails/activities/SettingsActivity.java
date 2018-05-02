@@ -1,25 +1,37 @@
 package com.usda.fmsc.twotrails.activities;
 
+import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.Preference;
+import android.preference.PreferenceFragment;
+import android.preference.PreferenceScreen;
+import android.support.annotation.XmlRes;
+import android.support.v7.app.ActionBar;
 import android.view.MenuItem;
 
-import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
-import com.usda.fmsc.twotrails.fragments.settings.SettingsFragment;
 import com.usda.fmsc.twotrails.R;
+import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
+import com.usda.fmsc.twotrails.fragments.settings.DeviceSettingsFragment;
+import com.usda.fmsc.twotrails.fragments.settings.MiscSettingsFragment;
 
 public class SettingsActivity extends CustomToolbarActivity {
     public static final String SETTINGS_PAGE = "settings_page";
 
     public static final String MAIN_SETTINGS_PAGE = "main";
-    public static final String GPS_SETTINGS_PAGE = "gpsSetup";
-    public static final String LASER_SETTINGS_PAGE = "rfSetup";
-    public static final String FILTER_GPS_SETTINGS_PAGE = "gpsPointSetup";
-    public static final String FILTER_WALK_SETTINGS_PAGE = "walkPointSetup";
-    public static final String FILTER_TAKE5_SETTINGS_PAGE = "take5PointSetup";
+    public static final String DEVICE_SETUP_SETTINGS_PAGE = "devSetup";
+    public static final String POINT_SETTINGS_PAGE = "pointSetup";
     public static final String MAP_SETTINGS_PAGE = "mapSetup";
+    public static final String MEDIA_SETTINGS_PAGE = "mediaSetup";
     public static final String DIALOG_SETTINGS_PAGE = "diagSetup";
     public static final String MISC_SETTINGS_PAGE = "miscSetup";
+
+    public static final String GPS_SETTINGS_PAGE = "gpsSetup";
+    public static final String LASER_SETTINGS_PAGE = "rfSetup";
+
+    public static final String POINT_GPS_SETTINGS_PAGE = "gpsPointSetup";
+    public static final String POINT_WALK_SETTINGS_PAGE = "walkPointSetup";
+    public static final String POINT_TAKE5_SETTINGS_PAGE = "take5PointSetup";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,8 +46,7 @@ public class SettingsActivity extends CustomToolbarActivity {
             page = getIntent().getStringExtra(SETTINGS_PAGE);
         }
 
-        getFragmentManager().beginTransaction()
-                .replace(R.id.content2, SettingsFragment.newInstance(page)).commit();
+        getFragmentManager().beginTransaction().replace(R.id.content, getSettingsFragment(page)).commit();
     }
 
     @Override
@@ -47,4 +58,117 @@ public class SettingsActivity extends CustomToolbarActivity {
         return super.onOptionsItemSelected(item);
     }
 
+
+    public static Fragment getSettingsFragment(String key) {
+        Fragment frag = null;
+
+        switch (key) {
+            case MISC_SETTINGS_PAGE: frag = new MiscSettingsFragment(); break;
+            case GPS_SETTINGS_PAGE:
+            case LASER_SETTINGS_PAGE: frag = DeviceSettingsFragment.newInstance(key); break;
+            case MAIN_SETTINGS_PAGE:
+            case DEVICE_SETUP_SETTINGS_PAGE:
+            case POINT_SETTINGS_PAGE:
+            case MAP_SETTINGS_PAGE:
+            case MEDIA_SETTINGS_PAGE:
+            case POINT_GPS_SETTINGS_PAGE:
+            case POINT_TAKE5_SETTINGS_PAGE:
+            case POINT_WALK_SETTINGS_PAGE:
+            case DIALOG_SETTINGS_PAGE: frag = SettingsFragment.newInstance(key); break;
+        }
+
+        return frag;
+    }
+
+    public static  @XmlRes int getSettingsPageRes(String key) {
+        switch (key) {
+            case MAIN_SETTINGS_PAGE: return R.xml.pref_main;
+            case DEVICE_SETUP_SETTINGS_PAGE: return R.xml.pref_dev_settings;
+            case POINT_SETTINGS_PAGE: return R.xml.pref_point_settings;
+            case POINT_GPS_SETTINGS_PAGE: return R.xml.pref_point_gps_settings;
+            case POINT_TAKE5_SETTINGS_PAGE: return R.xml.pref_point_take5_settings;
+            case POINT_WALK_SETTINGS_PAGE: return R.xml.pref_point_walk_settings;
+            case MAP_SETTINGS_PAGE: return R.xml.pref_map_settings;
+            case MEDIA_SETTINGS_PAGE: return R.xml.pref_media_settings;
+            case MISC_SETTINGS_PAGE: return R.xml.pref_other_settings;
+            case DIALOG_SETTINGS_PAGE: return R.xml.pref_dialog_settings;
+            default: return 0;
+        }
+    }
+
+
+    public static class SettingsFragment extends PreferenceFragment {
+        public static final String SETTINGS_PAGE = "CurrentPage";
+
+        private String settingsPageKey;
+
+        public static SettingsFragment newInstance(String settingsKey) {
+            SettingsFragment fragment = new SettingsFragment();
+            Bundle args = new Bundle();
+            args.putString(SETTINGS_PAGE, settingsKey);
+            fragment.setArguments(args);
+            return fragment;
+        }
+
+        public SettingsFragment() { }
+
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+
+            @XmlRes int settingsPage = R.xml.pref_main;
+
+            Bundle bundle = getArguments();
+            if (bundle != null && bundle.containsKey(SETTINGS_PAGE) && (settingsPageKey = bundle.getString(SETTINGS_PAGE)) != null) {
+                settingsPage = getSettingsPageRes(settingsPageKey);
+            }
+
+            addPreferencesFromResource(settingsPage);
+
+        }
+
+        @Override
+        public void onResume() {
+            super.onResume();
+
+            String settingsTitle = "Settings";
+
+            switch (settingsPageKey) {
+                case DEVICE_SETUP_SETTINGS_PAGE: settingsTitle = "Device Setup"; break;
+                case POINT_SETTINGS_PAGE: settingsTitle = "Point Settings"; break;
+                case POINT_GPS_SETTINGS_PAGE: settingsTitle = "GPS Point Settings"; break;
+                case POINT_TAKE5_SETTINGS_PAGE: settingsTitle = "Take5 Point Settings"; break;
+                case POINT_WALK_SETTINGS_PAGE:  settingsTitle = "Walk Point Settings"; break;
+                case MAP_SETTINGS_PAGE: settingsTitle = "Map Settings"; break;
+                case MEDIA_SETTINGS_PAGE: settingsTitle = "Media Settings"; break;
+                case DIALOG_SETTINGS_PAGE: settingsTitle = "Dialog Settings"; break;
+            }
+
+            ActionBar actionBar = ((CustomToolbarActivity)getActivity()).getSupportActionBar();
+
+            if (actionBar != null) {
+                actionBar.setHomeButtonEnabled(true);
+                actionBar.setDisplayHomeAsUpEnabled(true);
+                actionBar.setDisplayShowTitleEnabled(true);
+                actionBar.setTitle(settingsTitle);
+            }
+        }
+
+        @Override
+        public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
+            if (preference != null && preference.hasKey()) {
+                Fragment frag = getSettingsFragment(preference.getKey());
+
+                if (frag != null){
+                    getFragmentManager()
+                            .beginTransaction()
+                            .replace(R.id.content, frag)
+                            .addToBackStack(frag.getClass().getSimpleName())
+                            .commit();
+                }
+            }
+
+            return super.onPreferenceTreeClick(preferenceScreen, preference);
+        }
+    }
 }

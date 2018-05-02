@@ -29,6 +29,7 @@ import com.usda.fmsc.android.utilities.PostDelayHandler;
 import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.activities.SettingsActivity;
+import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.devices.TtBluetoothManager;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.dialogs.CheckNmeaDialog;
@@ -42,12 +43,11 @@ import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
 import com.usda.fmsc.utilities.StringEx;
 
-public class SettingsFragment extends PreferenceFragment {
+public class DeviceSettingsFragment extends PreferenceFragment {
     public static final String CURRENT_PAGE = "CurrentPage";
 
     private Preference prefGpsCheck, prefRFCheck;
@@ -60,8 +60,8 @@ public class SettingsFragment extends PreferenceFragment {
     private int stringRecvCount = 0;
 
 
-    public static SettingsFragment newInstance(String currPageKey) {
-        SettingsFragment fragment = new SettingsFragment();
+    public static DeviceSettingsFragment newInstance(String currPageKey) {
+        DeviceSettingsFragment fragment = new DeviceSettingsFragment();
         Bundle args = new Bundle();
         args.putString(CURRENT_PAGE, currPageKey);
         fragment.setArguments(args);
@@ -75,18 +75,17 @@ public class SettingsFragment extends PreferenceFragment {
 
         Bundle bundle = getArguments();
 
-        addPreferencesFromResource(R.xml.settings);
+        addPreferencesFromResource(R.xml.pref_device_setup);
 
         if (bundle != null && bundle.containsKey(CURRENT_PAGE)) {
             moveToPage = bundle.getString(CURRENT_PAGE);
 
-            ActionBar actionBar = ((SettingsActivity)getActivity()).getSupportActionBar();
+            ActionBar actionBar = ((CustomToolbarActivity)getActivity()).getSupportActionBar();
 
             if (actionBar != null) {
                 actionBar.setHomeButtonEnabled(true);
                 actionBar.setDisplayHomeAsUpEnabled(true);
                 actionBar.setDisplayShowTitleEnabled(true);
-                actionBar.setTitle(getPreferenceScreen().getTitle());
 
                 if (moveToPage != null) {
                     switch (moveToPage) {
@@ -96,23 +95,8 @@ public class SettingsFragment extends PreferenceFragment {
                         case SettingsActivity.LASER_SETTINGS_PAGE:
                             actionBar.setTitle("Range Finder Setup");
                             break;
-                        case SettingsActivity.FILTER_GPS_SETTINGS_PAGE:
-                            actionBar.setTitle("GPS Point Settings");
-                            break;
-                        case SettingsActivity.FILTER_TAKE5_SETTINGS_PAGE:
-                            actionBar.setTitle("Take5 Point Settings");
-                            break;
-                        case SettingsActivity.FILTER_WALK_SETTINGS_PAGE:
-                            actionBar.setTitle("Walk Point Settings");
-                            break;
-                        case SettingsActivity.MAP_SETTINGS_PAGE:
-                            actionBar.setTitle("Map Options");
-                            break;
-                        case SettingsActivity.DIALOG_SETTINGS_PAGE:
-                            actionBar.setTitle("Dialog Options");
-                            break;
-                        case SettingsActivity.MISC_SETTINGS_PAGE:
-                            actionBar.setTitle("Misc Settings");
+                        default:
+                            actionBar.setTitle("Settings");
                             break;
                     }
                 } else {
@@ -127,11 +111,7 @@ public class SettingsFragment extends PreferenceFragment {
         prefGpsCheck = findPreference(getString(R.string.set_GPS_CHECK));
         prefLstRFDevice = (ListCompatPreference)findPreference(getString(R.string.set_RF_LIST_DEVICE));
         prefRFCheck = findPreference(getString(R.string.set_RF_CHECK));
-        Preference prefClearLog = findPreference(getString(R.string.set_CLEAR_LOG));
-        Preference prefExportReport = findPreference(getString(R.string.set_EXPORT_REPORT));
-        Preference prefResetDevice = findPreference(getString(R.string.set_RESET));
         Preference prefCheckNmea = findPreference(getString(R.string.set_GPS_CHECK_NMEA));
-        Preference prefCode = findPreference(getString(R.string.set_CODE));
 
         swtUseExGpsDev.setOnPreferenceChangeListener(useExternalListener);
         swtUseExGpsDev.setSummary(getString(swtUseExGpsDev.isChecked() ? R.string.ds_gps_use_external : R.string.ds_gps_use_internal));
@@ -142,39 +122,7 @@ public class SettingsFragment extends PreferenceFragment {
         prefLstGpsDevice.setOnPreferenceChangeListener(btnGPSList);
         prefLstRFDevice.setOnPreferenceChangeListener(btnRFList);
 
-        prefResetDevice.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                SettingsLogic.reset(getActivity());
-                return false;
-            }
-        });
-
-        prefClearLog.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                SettingsLogic.clearLog(getActivity());
-                return false;
-            }
-        });
-
         prefCheckNmea.setOnPreferenceClickListener(checkNmeaListener);
-
-        prefExportReport.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                SettingsLogic.exportReport(getActivity());
-                return false;
-            }
-        });
-
-        prefCode.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                SettingsLogic.enterCode(getActivity());
-                return false;
-            }
-        });
 
         //get initial bluetooth devices
         setBTValues(prefLstGpsDevice);
@@ -256,7 +204,6 @@ public class SettingsFragment extends PreferenceFragment {
             switchToExternal();
         }
     }
-
 
     Preference.OnPreferenceClickListener gpsCheckListener = new Preference.OnPreferenceClickListener() {
         @Override
@@ -424,7 +371,7 @@ public class SettingsFragment extends PreferenceFragment {
                     }).start();
 
                 } catch (Exception ex) {
-                    TtUtils.TtReport.writeError(ex.getMessage(), "SettingsFragment:checkGPS");
+                    TtUtils.TtReport.writeError(ex.getMessage(), "DeviceSettingsFragment:checkGPS");
                     Toast.makeText(getActivity(), "Error", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -578,7 +525,7 @@ public class SettingsFragment extends PreferenceFragment {
                     }).start();
 
                 } catch (Exception ex) {
-                    TtUtils.TtReport.writeError(ex.getMessage(), "SettingsFragment:checkRF");
+                    TtUtils.TtReport.writeError(ex.getMessage(), "DeviceSettingsFragment:checkRF");
                     Toast.makeText(getActivity(), "Error", Toast.LENGTH_SHORT).show();
                 }
             }
