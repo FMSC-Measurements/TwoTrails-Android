@@ -7,7 +7,9 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
+import android.text.Editable;
 import android.text.InputType;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -15,6 +17,7 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 
+import com.usda.fmsc.android.listeners.SimpleTextWatcher;
 import com.usda.fmsc.twotrails.R;
 
 import java.util.List;
@@ -53,6 +56,12 @@ public class EditableListDialog extends DialogFragment {
         editText.setText(selectedItem);
         editText.setSelection(selectedItem.length());
         editText.setInputType(InputType.TYPE_CLASS_TEXT);
+        editText.addTextChangedListener(new SimpleTextWatcher(){
+            @Override
+            public void afterTextChanged(Editable s) {
+                selectedItem = s.toString();
+            }
+        });
 
         final ListView listView = (ListView)view.findViewById(R.id.diagEitableListListValues);
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), R.layout.list_row_diag_editable);
