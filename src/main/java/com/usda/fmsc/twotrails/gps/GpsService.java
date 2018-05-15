@@ -474,7 +474,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
 
                 location.setLatitude(lastPosition.getLatitudeSignedDecimal());
                 location.setLongitude(lastPosition.getLongitudeSignedDecimal());
-                location.setAltitude(lastPosition.getElevation());
+                location.setAltitude(lastPosition.hasElevation() ? lastPosition.getElevation() : 0);
 
                 try {
                     gmapListener.onLocationChanged(location);
