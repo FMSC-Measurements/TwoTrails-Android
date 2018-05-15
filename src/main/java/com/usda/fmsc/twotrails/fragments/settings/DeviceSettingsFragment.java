@@ -25,7 +25,6 @@ import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.dialogs.DontAskAgainDialog;
 import com.usda.fmsc.android.preferences.ListCompatPreference;
 import com.usda.fmsc.android.preferences.SwitchCompatPreference;
-import com.usda.fmsc.android.utilities.PostDelayHandler;
 import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.activities.SettingsActivity;
@@ -35,7 +34,6 @@ import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.dialogs.CheckNmeaDialog;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.logic.SettingsLogic;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.rangefinder.RangeFinderService;
 import com.usda.fmsc.twotrails.rangefinder.TtRangeFinderData;
@@ -350,6 +348,9 @@ public class DeviceSettingsFragment extends PreferenceFragment {
                                                     pd.hide();
                                                 }
                                             });
+
+                                            binder.removeListener(this);
+                                            binder.stopGps();
                                         }
                                     };
 
@@ -361,12 +362,10 @@ public class DeviceSettingsFragment extends PreferenceFragment {
 
                             Looper.prepare();
 
-                            if (binder.isGpsRunning()) {
+                            if (binder.isGpsRunning())
                                 binder.stopGps();
-                                new PostDelayHandler(1000, runGPS).post();
-                            } else {
-                                runGPS.run();
-                            }
+
+                            runGPS.run();
                         }
                     }).start();
 
@@ -503,6 +502,9 @@ public class DeviceSettingsFragment extends PreferenceFragment {
                                                     pd.hide();
                                                 }
                                             });
+
+                                            binder.removeListener(this);
+                                            binder.stopRangeFinder();
                                         }
                                     };
 
@@ -515,12 +517,10 @@ public class DeviceSettingsFragment extends PreferenceFragment {
 
                             Looper.prepare();
 
-                            if (binder.isRangeFinderRunning()) {
+                            if (binder.isRangeFinderRunning())
                                 binder.startRangeFinder();
-                                new PostDelayHandler(1000, runRF).post();
-                            } else {
-                                runRF.run();
-                            }
+
+                            runRF.run();
                         }
                     }).start();
 

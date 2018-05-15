@@ -841,7 +841,7 @@ public class TtUtils {
                             x += java.lang.Math.cos(lat) * java.lang.Math.cos(lon);
                             y += java.lang.Math.cos(lat) * java.lang.Math.sin(lon);
                             q += java.lang.Math.sin(lat);
-                            z += p.getElevation();
+                            z += p.hasElevation() ? p.getElevation() : 0;
 
                             coords = UTMTools.convertLatLonSignedDecToUTM(lat, lon, newZone);
 

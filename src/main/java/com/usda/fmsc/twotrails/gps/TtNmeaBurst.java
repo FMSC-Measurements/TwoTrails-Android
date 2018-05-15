@@ -341,7 +341,7 @@ public class TtNmeaBurst extends TtObject implements Parcelable {
 
 
     public double getElevation() {
-        return position.getElevation();
+        return position.hasElevation() ? position.getElevation() : 0;
     }
 
     public UomElevation getUomElevation() {

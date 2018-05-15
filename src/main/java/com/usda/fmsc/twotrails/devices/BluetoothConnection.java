@@ -13,6 +13,7 @@ import com.usda.fmsc.utilities.StringEx;
 public class BluetoothConnection extends Thread {
     private BluetoothSocket btSocket;
     private BufferedReader bufferedReader;
+    private InputStreamReader inputStreamReader;
 
     private boolean running, disconnect;
 
@@ -22,58 +23,60 @@ public class BluetoothConnection extends Thread {
         listeners = new ArrayList<>();
 
         btSocket = socket;
-
-        bufferedReader = new BufferedReader(new InputStreamReader(btSocket.getInputStream()));
     }
 
 
     public void run() {
-        running = true;
+        try {
+            running = true;
 
-        if (!btSocket.isConnected()) {
-            try {
+            if (!btSocket.isConnected()) {
                 btSocket.connect();
-            } catch (IOException e) {
-                e.printStackTrace();
             }
-        }
 
-        if (btSocket.isConnected()) {
-            try {
-                String str = StringEx.Empty;
+            if (btSocket.isConnected()) {
+                inputStreamReader = new InputStreamReader(btSocket.getInputStream());
+                bufferedReader = new BufferedReader(inputStreamReader);
 
-                while (!disconnect) {
-                    try {
-                        str += bufferedReader.readLine();
+                try {
+                    String str = StringEx.Empty;
 
-                        if (!StringEx.isEmpty(str) && str.contains("*") && !disconnect) {
-                            for (Listener l : listeners) {
-                                l.receivedString(str);
+                    while (!disconnect) {
+                        try {
+                            str += bufferedReader.readLine();
+
+                            if (!StringEx.isEmpty(str) && str.contains("*") && !disconnect) {
+                                for (Listener l : listeners) {
+                                    l.receivedString(str);
+                                }
+
+                                str = StringEx.Empty;
                             }
+                        } catch (Exception e) {
+                            if (!disconnect) {
+                                for (Listener l : listeners) {
+                                    l.connectionLost();
+                                }
 
-                            str = StringEx.Empty;
-                        }
-                      } catch (Exception e) {
-                        if (!disconnect) {
-                            for (Listener l : listeners) {
-                                l.connectionLost();
+                                btSocket.connect();
                             }
-
-                            btSocket.connect();
+                            break;
                         }
-                        break;
                     }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    running = false;
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
-                running = false;
-            }
 
-            for (Listener l : listeners) {
-                l.connectionEnded();
+                for (Listener l : listeners) {
+                    l.connectionEnded();
+                }
+            } else {
+                for (Listener l : listeners) {
+                    l.failedToConnect();
+                }
             }
-        } else {
-
+        } catch (IOException ioex) {
             for (Listener l : listeners) {
                 l.failedToConnect();
             }
@@ -86,6 +89,16 @@ public class BluetoothConnection extends Thread {
 
         if (btSocket != null) {
             try {
+                if (bufferedReader != null) {
+                    bufferedReader.close();
+                    bufferedReader = null;
+                }
+
+                if (inputStreamReader != null) {
+                    inputStreamReader.close();
+                    inputStreamReader = null;
+                }
+
                 btSocket.close();
             } catch (IOException e) {
                 e.printStackTrace();

@@ -983,7 +983,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
 
             currentLocation.setLatitude(position.getLatitudeSignedDecimal());
             currentLocation.setLongitude(position.getLongitudeSignedDecimal());
-            currentLocation.setAltitude(position.getElevation());
+            currentLocation.setAltitude(position.hasElevation() ? position.getElevation() : 0);
 
             if (lastPosition == null) {
                 onFirstPositionReceived(position);
