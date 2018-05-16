@@ -14,6 +14,8 @@ import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
 
 public class TtBluetoothManager {
     private BluetoothAdapter adapter;
+    private static final UUID UUID_VALUE = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+
 
     public TtBluetoothManager() {
         adapter = BluetoothAdapter.getDefaultAdapter();
@@ -54,18 +56,18 @@ public class TtBluetoothManager {
 
         if (device != null) {
             try {
-                Method m = device.getClass().getMethod("createRfcommSocket", int.class);
-                socket = (BluetoothSocket)m.invoke(device, 1);
+                socket = device.createRfcommSocketToServiceRecord(UUID_VALUE);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            catch (NoSuchMethodException ignore) {
+
+            if (socket == null) {
                 try {
-                    socket = device.createRfcommSocketToServiceRecord(UUID.fromString(uuid));
-                } catch (IOException e) {
+                    Method m = device.getClass().getMethod("createRfcommSocket", int.class);
+                    socket = (BluetoothSocket) m.invoke(device, 1);
+                } catch (Exception e){
                     e.printStackTrace();
                 }
-            }
-            catch (Exception e) {
-                e.printStackTrace();
             }
         }
 

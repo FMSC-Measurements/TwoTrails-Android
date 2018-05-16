@@ -137,7 +137,6 @@ public class Global {
 
         TtUtils.TtReport.writeEvent(StringEx.format("TwoTrails Started (%s)", AndroidUtils.App.getVersionName(_ApplicationContext)));
 
-        //TODO set arc license for release
         ArcGISRuntime.setClientId(_ApplicationContext.getString(R.string.arcgis_client_id));
 
         initUI();

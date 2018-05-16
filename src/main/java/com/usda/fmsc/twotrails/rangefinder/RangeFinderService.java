@@ -156,13 +156,13 @@ public class RangeFinderService extends Service implements BluetoothConnection.L
                 btConn.start();
                 postRangeFinderStart();
             } else {
+                if (btConn != null) {
+                    btConn.disconnect();
+                }
+                postError(RangeFinderError.NoExternalRangeFinderSocket);
+
                 return RangeFinderDeviceStatus.RangeFinderNotFound;
             }
-        } catch (IOException ioe) {
-            if (btConn != null) {
-                btConn.disconnect();
-            }
-            postError(RangeFinderError.NoExternalRangeFinderSocket);
         } catch (Exception e) {
             TtUtils.TtReport.writeError(e.getMessage(), "RangeFinderService:startExternalRangeFinder");
             return RangeFinderDeviceStatus.RangeFinderError;

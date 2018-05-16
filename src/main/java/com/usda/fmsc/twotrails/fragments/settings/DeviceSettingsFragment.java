@@ -532,21 +532,19 @@ public class DeviceSettingsFragment extends PreferenceFragment {
         public boolean onPreferenceChange(Preference preference, Object newValue) {
             boolean useExternal = (boolean)newValue;
 
-            boolean sucess = false;
+            boolean success = false;
 
-            if (useExternal) {
-                if (AndroidUtils.App.requestBluetoothPermission(getActivity(), Consts.Codes.Requests.BLUETOOH)) {
-                    sucess = switchToExternal();
-                }
-            } else if (AndroidUtils.App.requestLocationPermission(getActivity(), Consts.Codes.Requests.LOCATION)) {
-                sucess = switchToInternal();
+            if (useExternal && AndroidUtils.App.requestBluetoothPermission(getActivity(), Consts.Codes.Requests.BLUETOOH)) {
+                success = switchToExternal();
+            } else if (!useExternal && AndroidUtils.App.requestLocationPermission(getActivity(), Consts.Codes.Requests.LOCATION)) {
+                success = switchToInternal();
             }
 
-            if (sucess) {
+            if (success) {
                 swtUseExGpsDev.setSummary(getString(useExternal ? R.string.ds_gps_use_external : R.string.ds_gps_use_internal));
             }
 
-            return sucess;
+            return success;
         }
     };
 
