@@ -55,8 +55,6 @@ public class DeviceSettingsFragment extends PreferenceFragment {
 
     private String moveToPage;
 
-    private int stringRecvCount = 0;
-
 
     public static DeviceSettingsFragment newInstance(String currPageKey) {
         DeviceSettingsFragment fragment = new DeviceSettingsFragment();
@@ -216,8 +214,6 @@ public class DeviceSettingsFragment extends PreferenceFragment {
 
                     prefGpsCheck.setSummary(R.string.ds_gps_not_connected);
 
-                    stringRecvCount = 0;
-
                     new Thread(new Runnable() {
                         final GpsService.GpsBinder binder = Global.getGpsBinder();
 
@@ -260,51 +256,48 @@ public class DeviceSettingsFragment extends PreferenceFragment {
 
                                                 Global.Settings.DeviceSettings.setGpsConfigured(true);
 
-                                                if (1 > stringRecvCount++) {
-                                                    activity.runOnUiThread(new Runnable() {
-                                                        @Override
-                                                        public void run() {
-                                                            pd.setMessage(activity.getString(R.string.ds_gps_connected));
+                                                activity.runOnUiThread(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        pd.setMessage(activity.getString(R.string.ds_gps_connected));
 
-                                                            if (Global.Settings.DeviceSettings.isGpsAlwaysOn()) {
-                                                                prefGpsCheck.setSummary(R.string.ds_gps_connected);
-                                                            } else {
-                                                                prefGpsCheck.setSummary(R.string.ds_dev_configured);
-                                                                binder.stopGps();
-                                                            }
-
-                                                            if (Global.Settings.DeviceSettings.getAutoSetGpsNameToMetaAsk()) {
-                                                                DontAskAgainDialog dialog = new DontAskAgainDialog(getActivity(),
-                                                                        Global.Settings.DeviceSettings.AUTO_SET_GPS_NAME_TO_META_ASK,
-                                                                        Global.Settings.DeviceSettings.AUTO_SET_GPS_NAME_TO_META,
-                                                                        Global.Settings.PreferenceHelper.getPrefs());
-
-                                                                dialog.setMessage("Do you want to update metadata with the current GPS receiver?");
-
-                                                                dialog.setPositiveButton("Default", setMetaListener, 1);
-
-                                                                if (Global.getDAL() != null)
-                                                                    dialog.setNegativeButton("All", setMetaListener, 2);
-
-                                                                dialog.setNeutralButton("None", null, 0);
-
-                                                                dialog.show();
-                                                            } else {
-                                                                setMetaListener.onClick(null, 0, Global.Settings.DeviceSettings.getAutoSetGpsNameToMeta());
-                                                            }
+                                                        if (Global.Settings.DeviceSettings.isGpsAlwaysOn()) {
+                                                            prefGpsCheck.setSummary(R.string.ds_gps_connected);
+                                                        } else {
+                                                            prefGpsCheck.setSummary(R.string.ds_dev_configured);
+                                                            binder.stopGps();
                                                         }
-                                                    });
 
+                                                        if (Global.Settings.DeviceSettings.getAutoSetGpsNameToMetaAsk()) {
+                                                            DontAskAgainDialog dialog = new DontAskAgainDialog(getActivity(),
+                                                                    Global.Settings.DeviceSettings.AUTO_SET_GPS_NAME_TO_META_ASK,
+                                                                    Global.Settings.DeviceSettings.AUTO_SET_GPS_NAME_TO_META,
+                                                                    Global.Settings.PreferenceHelper.getPrefs());
 
-                                                    Thread.sleep(1000);
+                                                            dialog.setMessage("Do you want to update metadata with the current GPS receiver?");
 
-                                                    activity.runOnUiThread(new Runnable() {
-                                                        @Override
-                                                        public void run() {
-                                                            pd.hide();
+                                                            dialog.setPositiveButton("Default", setMetaListener, 1);
+
+                                                            if (Global.getDAL() != null)
+                                                                dialog.setNegativeButton("All", setMetaListener, 2);
+
+                                                            dialog.setNeutralButton("None", null, 0);
+
+                                                            dialog.show();
+                                                        } else {
+                                                            setMetaListener.onClick(null, 0, Global.Settings.DeviceSettings.getAutoSetGpsNameToMeta());
                                                         }
-                                                    });
-                                                }
+                                                    }
+                                                });
+
+                                                Thread.sleep(1000);
+
+                                                activity.runOnUiThread(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        pd.hide();
+                                                    }
+                                                });
                                             } catch (InterruptedException e) {
                                                 e.printStackTrace();
                                             }
@@ -391,8 +384,6 @@ public class DeviceSettingsFragment extends PreferenceFragment {
                     final ProgressDialog pd = new ProgressDialog(getActivity());
 
                     prefRFCheck.setSummary(R.string.ds_rf_not_connected);
-
-                    stringRecvCount = 0;
 
                     new Thread(new Runnable() {
 
