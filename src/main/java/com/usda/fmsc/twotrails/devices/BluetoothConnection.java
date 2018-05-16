@@ -19,7 +19,7 @@ public class BluetoothConnection extends Thread {
 
     private ArrayList<Listener> listeners;
 
-    public BluetoothConnection(BluetoothSocket socket) throws IOException {
+    public BluetoothConnection(BluetoothSocket socket) {
         listeners = new ArrayList<>();
 
         btSocket = socket;

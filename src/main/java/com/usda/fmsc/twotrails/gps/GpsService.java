@@ -251,17 +251,17 @@ public class GpsService extends Service implements LocationListener, LocationSou
             BluetoothSocket socket = bluetoothManager.getSocket(_deviceUUID);
 
             if (socket != null) {
+                if (btConn != null) {
+                    btConn.unregister(this);
+                    btConn.disconnect();
+                }
+
                 btConn = new BluetoothConnection(socket);
                 btConn.register(this);
                 btConn.start();
             } else {
                 return GpsDeviceStatus.ExternalGpsNotFound;
             }
-        } catch (IOException ioe) {
-            if (btConn != null) {
-                btConn.disconnect();
-            }
-            postError(GpsError.NoExternalGpsSocket);
         } catch (Exception e) {
             TtUtils.TtReport.writeError(e.getMessage(), "GpsService:startExternalGps");
             return GpsDeviceStatus.ExternalGpsError;
@@ -337,7 +337,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
 
 
     public void setGpsProvider(String deviceUUID) throws RuntimeException {
-        if(isGpsRunning())
+        if (isGpsRunning())
             throw new RuntimeException("GPS must be stopped before setting provider.");
         else
             _deviceUUID = deviceUUID;
