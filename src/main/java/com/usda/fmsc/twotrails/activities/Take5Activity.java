@@ -89,6 +89,8 @@ import jp.wasabeef.recyclerview.animators.FadeInAnimator;
 import jp.wasabeef.recyclerview.animators.SlideInUpAnimator;
 
 public class Take5Activity extends AcquireGpsMapActivity implements PointMediaController {
+    private static final boolean enableCardFading = false;
+
     private HashMap<String, PointMediaListener> listeners = new HashMap<>();
 
     private RecyclerViewEx rvPoints;
@@ -112,8 +114,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
 
     private int increment, takeAmount, nmeaCount = 0;
     private boolean saved = true, updated, onBnd = true, createSSVisible = true, cancelVisible, commitSSVisible,
-            ignoreScroll, useRing, useVib, mapViewMode, killAcquire, _Locked, cameraSupported, gpsInfoHidden,
-            enableCardFading = false;
+            ignoreScroll, useRing, useVib, mapViewMode, killAcquire, cameraSupported, gpsInfoHidden, centerPosition = false, _Locked;
 
     //region Media
     private TtMedia _CurrentMedia, _BackupMedia;
@@ -675,6 +676,11 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                     cvGpsInfo.setVisibility(View.GONE);
                     miHideGpsInfo.setTitle(R.string.menu_x_show_gps_info);
                 }
+                break;
+            }
+            case R.id.take5MenuCenterPositionToggle: {
+                centerPosition = !centerPosition;
+                break;
             }
         }
 
@@ -829,7 +835,13 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
     public void updatePoint(TtPoint point) {
         if (_CurrentPoint == point) {
             updated = true;
-            onBnd = point.isOnBnd();
+
+            if (onBnd != point.isOnBnd()) {
+                onBnd = point.isOnBnd();
+
+                removeLastPosition();
+                addPosition(_CurrentPoint);
+            }
         }
     }
 
@@ -1550,6 +1562,8 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                     mediaLoaded = true;
 
                     setMediaTitle(isMapDrawerOpen(GravityCompat.END) ? _CurrentMedia.getName() : null);
+                    _Locked = false;
+                    onLockChange();
                 }
             });
         }
@@ -1677,7 +1691,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
 
     @Override
     protected MapTracking getMapTracking() {
-        return mapViewMode ? MapTracking.NONE : MapTracking.FOLLOW;
+        return mapViewMode || centerPosition ? MapTracking.NONE : MapTracking.FOLLOW;
     }
 
 

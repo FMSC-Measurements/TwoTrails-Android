@@ -4,13 +4,6 @@
     tools:context="com.usda.fmsc.twotrails.activities.Take5ActivityOld">
 
     <item
-        android:id="@+id/take5MenuToBottom"
-        android:title="@string/menu_take5_goto_bottom"
-        app:showAsAction="ifRoom"
-        android:icon="@drawable/ic_file_download_white_36dp"
-        android:visible="true"/>
-
-    <item
         android:id="@+id/take5MenuMode"
         android:title="@string/menu_take5_map_mode"
         app:showAsAction="always"
@@ -23,6 +16,13 @@
         app:showAsAction="always"
         android:icon="@drawable/ic_camera_alt_white_36dp"
         android:visible="true"/>
+
+    <item
+        android:id="@+id/take5MenuToBottom"
+        android:title="@string/menu_take5_goto_bottom"
+        app:showAsAction="never"
+        android:visible="true"/>
+    <!--android:icon="@drawable/ic_file_download_white_36dp"-->
 
     <item
         android:id="@+id/mmMenuSelectMap"
@@ -45,6 +45,14 @@
         android:title="@string/menu_x_hide_gps_info"
         app:showAsAction="never"
         android:visible="true"/>
+
+    <item
+        android:id="@+id/take5MenuCenterPositionToggle"
+        android:title="@string/menu_x_center_position"
+        app:showAsAction="never"
+        android:visible="true"
+        android:checkable="true"
+        android:checked="false"/>
 
     <item
         android:id="@+id/take5MenuTake5Settings"

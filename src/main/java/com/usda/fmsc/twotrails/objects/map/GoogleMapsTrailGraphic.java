@@ -85,8 +85,10 @@ public class GoogleMapsTrailGraphic implements ITrailGraphic, IMarkerDataGraphic
 
         llBuilder.include(marker.getPosition());
 
-        latLngs.add(marker.getPosition());
-        polyline.setPoints(latLngs);
+        if (point.isOnBnd()) {
+            latLngs.add(marker.getPosition());
+            polyline.setPoints(latLngs);
+        }
 
         return new GeoPosition(markerOptions.getPosition().latitude, markerOptions.getPosition().longitude, point.getUnAdjZ(), metadata.getElevation());
     }
@@ -95,6 +97,8 @@ public class GoogleMapsTrailGraphic implements ITrailGraphic, IMarkerDataGraphic
     public void deleteLastPoint() {
         if (_Markers.size() > 0) {
             Marker m = _Markers.remove(_Markers.size() - 1);
+
+            latLngs.remove(latLngs.size() - 1);
 
             if (m != null) {
                 _MarkerData.remove(m.getId());

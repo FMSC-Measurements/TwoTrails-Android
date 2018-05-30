@@ -95,11 +95,13 @@ public class ArcGisTrailGraphic implements ITrailGraphic, IMarkerDataGraphic {
         _MarkerData.put(key, new IMultiMapFragment.MarkerData(point, metadata, true));
         keys.add(key);
 
-        if (_TrailPolyline == null) {
-            _TrailPolyline = new Polyline();
-            _TrailPolyline.startPath(posLL);
-        } else {
-            _TrailPolyline.lineTo(posLL);
+        if (point.isOnBnd()) {
+            if (_TrailPolyline == null) {
+                _TrailPolyline = new Polyline();
+                _TrailPolyline.startPath(posLL);
+            } else {
+                _TrailPolyline.lineTo(posLL);
+            }
         }
 
 
