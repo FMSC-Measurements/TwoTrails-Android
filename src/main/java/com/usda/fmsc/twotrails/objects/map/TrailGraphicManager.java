@@ -88,6 +88,13 @@ public class TrailGraphicManager implements IGraphicManager {
         return position;
     }
 
+    public void removeLastPoint() {
+        if (trailGraphic != null && positions.size() > 0) {
+            trailGraphic.deleteLastPoint();
+            positions.remove(points.size() - 1);
+        }
+    }
+
 
     public void setVisible(boolean visible) {
         trailGraphic.setVisible(visible);

@@ -153,6 +153,7 @@
     <string name="menu_x_point_settings">Point Settings</string>
     <string name="menu_x_hide_gps_info">Hide GPS Info</string>
     <string name="menu_x_show_gps_info">Show GPS Info</string>
+    <string name="menu_x_center_position">Center Position</string>
     <string name="menu_poly_reset">Reset Polygon</string>
     <string name="menu_poly_delete">Delete Polygon</string>
     <string name="menu_poly_goto">Go To Polygon</string>

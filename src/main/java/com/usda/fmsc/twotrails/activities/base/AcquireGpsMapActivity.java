@@ -194,6 +194,9 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
         }
     }
 
+    public void removeLastPosition() {
+        trailGraphicManager.removeLastPoint();
+    }
 
     @Override
     protected ArrayList<TtPolygon> getPolygonsToMap() {
