@@ -79,7 +79,7 @@
     <string name="str_dist">Distance</string>
     <string name="str_az">Azimuth</string>
     <string name="str_slp">Slope</string>
-    <string name="str_ang">Angle</string>
+    <string name="str_slp_ang">S. Angle</string>
     <string name="str_mag">Magnetic</string>
     <string name="str_true">True</string>
     <string name="str_false">False</string>
@@ -124,6 +124,7 @@
     <string name="str_test">Test</string>
     <string name="str_mag_dec">Mag Dec</string>
     <string name="str_img_info">Media Info</string>
+    <string name="str_uom">UOM</string>
 
     <string name="zero">0</string>
     <string name="str_x">X</string>
@@ -477,7 +478,7 @@
 
     <string name="map_adj_misc_pts">Adjusted Misc Points</string>
     <string name="map_unadj_misc_pts">Unadjusted Misc Points</string>
-    <string name="map_way_pts">Way Points</string>
+    <string name="map_way_pts">Waypoints</string>
 
     <string name="map_more_opts">More Map Options</string>
 

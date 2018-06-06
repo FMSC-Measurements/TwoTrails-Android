@@ -1,23 +1,29 @@
 package com.usda.fmsc.twotrails.activities;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.usda.fmsc.android.dialogs.DontAskAgainDialog;
 import com.usda.fmsc.android.dialogs.InputDialog;
+import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
-import com.usda.fmsc.twotrails.adapters.MetadataDetailsSpinnerAdapter;
 import com.usda.fmsc.twotrails.adapters.PointDetailsSpinnerAdapter;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
@@ -26,14 +32,20 @@ import com.usda.fmsc.twotrails.logic.PolygonAdjuster;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
+import com.usda.fmsc.twotrails.units.Dist;
 import com.usda.fmsc.twotrails.utilities.AppUnits;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 
+import com.usda.fmsc.utilities.EnumEx;
 import com.usda.fmsc.utilities.ParseEx;
+import com.usda.fmsc.utilities.StringEx;
+
+import org.joda.time.DateTime;
 
 import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
 
@@ -50,10 +62,12 @@ public class PlotGridActivity extends CustomToolbarActivity {
 
     private TtPolygon selectedPoly;
     private TtPoint startPoint;
-    private TtMetadata selectedMeta;
+    private Dist selectedDist = Dist.FeetTenths;
 
     private PlotGenerator generator;
     boolean generating = false, adjust;
+
+    private Random random = new Random(DateTime.now().getMillis());
 
 
     PlotGenerator.PlotGenListener plotGenListener = new PlotGenerator.PlotGenListener() {
@@ -127,7 +141,7 @@ public class PlotGridActivity extends CustomToolbarActivity {
 
         if (polygons.size() > 0) {
             Spinner spnPolys = (Spinner)findViewById(R.id.plotSpnPoly);
-            Spinner spnMeta = (Spinner)findViewById(R.id.plotSpnMeta);
+            Spinner spnDist = (Spinner)findViewById(R.id.plotSpnDistUom);
             spnPoints = (Spinner)findViewById(R.id.plotSpnPoint);
             spnPointLoc = (Spinner)findViewById(R.id.plotSpnLoc);
             spnSampleType = (Spinner)findViewById(R.id.plotSpnSubsample);
@@ -190,7 +204,11 @@ public class PlotGridActivity extends CustomToolbarActivity {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                     if (selectedPoly != null) {
-                        pointSelected(polyPoints.get(selectedPoly.getCN()).get(position));
+                        if (position > 0) {
+                            pointSelected(polyPoints.get(selectedPoly.getCN()).get(position - 1));
+                        } else {
+                            pointSelected(null);
+                        }
                     }
                 }
 
@@ -200,21 +218,16 @@ public class PlotGridActivity extends CustomToolbarActivity {
                 }
             });
 
+            ArrayAdapter<CharSequence> distAdapter = new ArrayAdapter<CharSequence>(this, android.R.layout.simple_spinner_item, EnumEx.getNames(Dist.class));
+
             metadata = Global.getDAL().getMetadataMap();
 
-            final List<TtMetadata> metalist = new ArrayList<>();
+            spnDist.setAdapter(distAdapter);
 
-            for (TtMetadata meta : metadata.values()) {
-                metalist.add(meta);
-            }
-
-            MetadataDetailsSpinnerAdapter metaAdapter = new MetadataDetailsSpinnerAdapter(this, metalist,R.layout.simple_large_spinner_item);
-            spnMeta.setAdapter(metaAdapter);
-
-            spnMeta.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            spnDist.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    metaSelected(metalist.get(position));
+                    distUomSelected(Dist.parse(position));
                 }
 
                 @Override
@@ -279,7 +292,7 @@ public class PlotGridActivity extends CustomToolbarActivity {
     private void polySelected(TtPolygon poly) {
         selectedPoly = poly;
 
-        spnPoints.setAdapter(new PointDetailsSpinnerAdapter(polyPoints.get(selectedPoly.getCN()), this,
+        spnPoints.setAdapter(new PointDetailsSkip1SpinnerAdapter(polyPoints.get(selectedPoly.getCN()), this,
                 AppUnits.IconColor.Primary, R.layout.simple_large_spinner_item));
     }
 
@@ -287,8 +300,8 @@ public class PlotGridActivity extends CustomToolbarActivity {
         startPoint = point;
     }
 
-    private void metaSelected(TtMetadata meta) {
-        selectedMeta = meta;
+    private void distUomSelected(Dist dist) {
+        selectedDist = dist;
     }
 
 
@@ -347,14 +360,17 @@ public class PlotGridActivity extends CustomToolbarActivity {
         boolean inside = spnPointLoc.getSelectedItemPosition() < 1;
         boolean sample = chkSubSample.isChecked();
 
+        List<TtPoint> points = polyPoints.get(selectedPoly.getCN());
+
         PlotGenerator.PlotParams params = new PlotGenerator.PlotParams(
                 polyName,
-                startPoint,
-                polyPoints.get(selectedPoly.getCN()),
+                startPoint != null ? startPoint : points.get(random.nextInt(points.size() - 1)),
+                points,
+                selectedDist,
                 gridX,
                 gridY,
                 angle,
-                selectedMeta,
+                metadata.get(Consts.EmptyGuid),
                 inside,
                 sample
         );
@@ -492,6 +508,104 @@ public class PlotGridActivity extends CustomToolbarActivity {
         if (!generating && areSettingsValid()) {
             String polyName = String.format("%s_PltSample", selectedPoly.getName());
             generatePoints(polyName);
+        }
+    }
+
+
+
+    public class PointDetailsSkip1SpinnerAdapter extends BaseAdapter {
+        private List<TtPoint> points;
+        private LayoutInflater inflater;
+        private Context context;
+        private AppUnits.IconColor iconColor;
+        private boolean showPolygon = false;
+        private int itemView;
+
+        public PointDetailsSkip1SpinnerAdapter(List<TtPoint> points, Context context, AppUnits.IconColor iconColor, int itemView) {
+            this.points = points;
+            this.context = context;
+            this.itemView = itemView;
+            inflater = LayoutInflater.from(this.context);
+            this.iconColor = iconColor;
+        }
+
+        @Override
+        public int getCount() {
+            return points.size() + 1;
+        }
+
+        @Override
+        public TtPoint getItem(int i) {
+            return (i == 0) ? null : points.get(i - 1);
+        }
+
+        @Override
+        public long getItemId(int i) {
+            return i + 1;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            PointDetailsSkip1SpinnerAdapter.ViewHolder mViewHolder;
+
+            if(convertView == null) {
+                convertView = inflater.inflate(itemView, null);
+                mViewHolder = new PointDetailsSkip1SpinnerAdapter.ViewHolder();
+                convertView.setTag(mViewHolder);
+
+                mViewHolder.text = (TextView) convertView.findViewById(android.R.id.text1);
+            } else {
+                mViewHolder = (PointDetailsSkip1SpinnerAdapter.ViewHolder) convertView.getTag();
+            }
+
+            if (position > 0) {
+                TtPoint point = getItem(position);
+
+                mViewHolder.text.setText(String.format("%d", point.getPID()));
+            } else {
+                mViewHolder.text.setText("Random");
+            }
+
+            return convertView;
+        }
+
+        @Override
+        public View getDropDownView(int position, View convertView, ViewGroup parent) {
+            PointDetailsSkip1SpinnerAdapter.DropDownViewHolder mViewHolder;
+
+            if(convertView == null) {
+                convertView = inflater.inflate(R.layout.content_details_points_ops, parent, false);
+                mViewHolder = new PointDetailsSkip1SpinnerAdapter.DropDownViewHolder();
+                convertView.setTag(mViewHolder);
+
+                mViewHolder.text = (TextView) convertView.findViewById(R.id.text1);
+                mViewHolder.image = (ImageView) convertView.findViewById(R.id.image);
+            } else {
+                mViewHolder = (PointDetailsSkip1SpinnerAdapter.DropDownViewHolder) convertView.getTag();
+            }
+
+            if (position > 0) {
+                TtPoint point = getItem(position);
+
+                mViewHolder.image.setImageDrawable(TtUtils.UI.getTtOpDrawable(point.getOp(), iconColor, context));
+                mViewHolder.image.setVisibility(View.VISIBLE);
+                mViewHolder.text.setText(String.format("%d%s", point.getPID(),
+                        showPolygon ? " - " + point.getPolyName() : StringEx.Empty));
+            } else {
+                mViewHolder.image.setVisibility(View.INVISIBLE);
+                mViewHolder.text.setText("Random");
+            }
+
+            return convertView;
+        }
+
+        private class DropDownViewHolder {
+            ImageView image;
+            TextView text;
+        }
+
+        private class ViewHolder {
+            TextView text;
         }
     }
 }
