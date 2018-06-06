@@ -669,12 +669,12 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
             String filepath = Global.getDAL().getFilePath();
 
-            String dupFile = String.format("%s_bk%s", filepath.substring(0, filepath.length() - 3), Consts.FILE_EXTENSION);
+            String dupFile = String.format("%s_bk%s", filepath.substring(0, filepath.length() - 4), Consts.FILE_EXTENSION);
             int inc = 2;
 
             while (true) {
                 if (FileUtils.fileExists(dupFile)) {
-                    dupFile = StringEx.format("%s_bk%d%s", filepath.substring(0, filepath.length() - 3), inc, Consts.FILE_EXTENSION);
+                    dupFile = StringEx.format("%s_bk%d%s", filepath.substring(0, filepath.length() - 4), inc, Consts.FILE_EXTENSION);
                     inc++;
                     continue;
                 }

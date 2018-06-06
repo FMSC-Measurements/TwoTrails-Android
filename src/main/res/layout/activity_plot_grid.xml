@@ -89,13 +89,13 @@
                 <TableRow>
 
                     <TextView
-                        android:text="@string/str_meta"
+                        android:text="@string/str_uom"
                         android:textSize="22sp"
                         android:gravity="center_vertical"
                         android:layout_gravity="center_vertical" />
 
                     <Spinner
-                        android:id="@+id/plotSpnMeta"
+                        android:id="@+id/plotSpnDistUom"
                         android:layout_height="40dp"
                         android:gravity="center_vertical"
                         android:layout_gravity="center_vertical"

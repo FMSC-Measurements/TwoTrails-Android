@@ -66,9 +66,9 @@ public class PlotGenerator extends AsyncTask<PlotGenerator.PlotParams, Void, TtP
             double gridX = pp.GridX;
             double gridY = pp.GridY;
 
-            if (pp.Metadata.getDistance() != Dist.Meters) {
-                gridX = TtUtils.Convert.distance(gridX, Dist.Meters, pp.Metadata.getDistance());
-                gridY = TtUtils.Convert.distance(gridY, Dist.Meters, pp.Metadata.getDistance());
+            if (pp.DistUom != Dist.Meters) {
+                gridX = TtUtils.Convert.distance(gridX, Dist.Meters, pp.DistUom);
+                gridY = TtUtils.Convert.distance(gridY, Dist.Meters, pp.DistUom);
             }
 
             int angle;
@@ -272,13 +272,14 @@ public class PlotGenerator extends AsyncTask<PlotGenerator.PlotParams, Void, TtP
         public Integer Angle, SampleValue;
         public TtMetadata Metadata;
         public boolean Inside, Sample, SamplePercent;
+        public Dist DistUom;
 
-        public PlotParams(String polyName, TtPoint startPoint, List<TtPoint> points,
-                          int gridX, int gridY, Integer angle, TtMetadata metadata,
-                          boolean inside, boolean sample) {
+        public PlotParams(String polyName, TtPoint startPoint, List<TtPoint> points, Dist distUom,
+                          int gridX, int gridY, Integer angle, TtMetadata metadata, boolean inside, boolean sample) {
             PolyName = polyName;
             StartPoint = startPoint;
             Points = points;
+            DistUom = distUom;
             GridX = gridX;
             GridY = gridY;
             Angle = angle;
