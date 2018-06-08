@@ -96,7 +96,7 @@ public class ImportGpxFragment extends BaseImportFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_import_xml_type, container, false);
 
-        rvImport = (RecyclerViewEx)view.findViewById(R.id.importFragRv);
+        rvImport = view.findViewById(R.id.importFragRv);
         rvImport.setLayoutManager(new LinearLayoutManager(getContext()));
         rvImport.setHasFixedSize(true);
         rvImport.setItemAnimator(new SlideInUpAnimator());

@@ -58,14 +58,14 @@ public class GPSPointFragment extends BasePointFragment {
     public View onCreateViewEx(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_points_gpspoint_card, container, false);
 
-        txtX = (EditText)view.findViewById(R.id.pointsFragGpsTxtX);
-        txtY = (EditText)view.findViewById(R.id.pointsFragGpsTxtY);
-        txtElev = (EditText)view.findViewById(R.id.pointsFragGpsTxtElev);
-        txtManAcc = (EditText)view.findViewById(R.id.pointsFragGpsTvManAcc);
+        txtX = view.findViewById(R.id.pointsFragGpsTxtX);
+        txtY = view.findViewById(R.id.pointsFragGpsTxtY);
+        txtElev = view.findViewById(R.id.pointsFragGpsTxtElev);
+        txtManAcc = view.findViewById(R.id.pointsFragGpsTvManAcc);
 
-        tvElev = (TextView)view.findViewById(R.id.pointsFragGpsTvElev);
-        tvRMSEr = (TextView)view.findViewById(R.id.pointsFragGpsTvRMSEr);
-        tvNSSDA = (TextView)view.findViewById(R.id.pointsFragGpsTvNSSDA);
+        tvElev = view.findViewById(R.id.pointsFragGpsTvElev);
+        tvRMSEr = view.findViewById(R.id.pointsFragGpsTvRMSEr);
+        tvNSSDA = view.findViewById(R.id.pointsFragGpsTvNSSDA);
 
         if (_GpsPoint != null) {
             setViews();
@@ -143,7 +143,7 @@ public class GPSPointFragment extends BasePointFragment {
         //endregion
 
         final View parent = view.findViewById(R.id.parentLayout);
-        EditText txtCmt = (EditText)view.findViewById(R.id.pointTxtCmt);
+        EditText txtCmt = view.findViewById(R.id.pointTxtCmt);
 
         //region Focus
         AndroidUtils.UI.removeSelectionOnUnfocus(txtX);

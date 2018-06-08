@@ -102,13 +102,13 @@ public class SelectMapTypeDialog extends DialogFragment {
         View view = inflater.inflate(mode == SelectMapMode.ALL ? R.layout.diag_select_map :  R.layout.diag_select_map_arc_map, fl);
 
         if (mode != SelectMapMode.ALL) {
-            Toolbar toolbar = (Toolbar)view.findViewById(R.id.toolbar);
+            Toolbar toolbar = view.findViewById(R.id.toolbar);
 
             toolbar.setTitle(String.format("%sArc Maps",
                     mode == SelectMapMode.ALL_ARC ? "" :
                     mode == SelectMapMode.ARC_ONLINE ? "Online " : "Offline "));
 
-            lvArcMap = (ListView)view.findViewById(R.id.diagSelectArcMapListView);
+            lvArcMap = view.findViewById(R.id.diagSelectArcMapListView);
 
 
             List<ArcGisMapLayer> amls;
@@ -138,11 +138,11 @@ public class SelectMapTypeDialog extends DialogFragment {
             final MapTypePagerAdapter pagerAdapter = new MapTypePagerAdapter();
 
             // Set up the ViewPager with the sections arcMapAdapter.
-            ViewPager viewPager = (ViewPager)view.findViewById(R.id.diagViewPager);
+            ViewPager viewPager = view.findViewById(R.id.diagViewPager);
             viewPager.setAdapter(pagerAdapter);
 
             //Setup Tabs
-            final TabLayout tabLayout = (TabLayout)view.findViewById(R.id.tabs);
+            final TabLayout tabLayout = view.findViewById(R.id.tabs);
             tabLayout.setupWithViewPager(viewPager);
         }
 
@@ -186,7 +186,7 @@ public class SelectMapTypeDialog extends DialogFragment {
                 if (arcView == null) {
                     arcView = inflater.inflate(R.layout.content_list_view, null);
 
-                    lvArcMap = (ListView)arcView.findViewById(R.id.listView);
+                    lvArcMap = arcView.findViewById(R.id.listView);
                     arcMapAdapter = new ArcGisMapSelectionAdapter(getContext(), mapLayers, -1, this);
                     lvArcMap.setAdapter(arcMapAdapter);
                 }
@@ -196,7 +196,7 @@ public class SelectMapTypeDialog extends DialogFragment {
                 if (gmapView == null) {
                     gmapView = inflater.inflate(R.layout.content_list_view, null);
 
-                    ListView lvGmap = (ListView)gmapView.findViewById(R.id.listView);
+                    ListView lvGmap = gmapView.findViewById(R.id.listView);
                     gMapAdapter = new GoogleMapSelectionAdapter(getContext(), -1, this);
                     lvGmap.setAdapter(gMapAdapter);
                 }

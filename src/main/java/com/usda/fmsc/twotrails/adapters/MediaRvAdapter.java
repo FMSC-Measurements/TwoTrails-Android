@@ -147,7 +147,7 @@ public class MediaRvAdapter extends SelectableAdapterEx<TtMedia, SelectableAdapt
 
         public ImageViewHolder(View itemView) {
             super(itemView);
-            ivImage = (ImageView) itemView.findViewById(R.id.img);
+            ivImage = itemView.findViewById(R.id.img);
 
             ivImage.setOnClickListener(new View.OnClickListener() {
                 @Override

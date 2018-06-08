@@ -75,10 +75,10 @@ public abstract class BasePointFragment extends AnimationCardFragment implements
 
         header = view.findViewById(R.id.cardHeader);
 
-        tvPID = (TextView)view.findViewById(R.id.pointHeaderTvPid);
-        ibBnd = (ImageButton)view.findViewById(R.id.pointHeaderIbBnd);
-        ivOp = (ImageView)view.findViewById(R.id.pointHeaderIvOp);
-        txtCmt = (EditText)view.findViewById(R.id.pointTxtCmt);
+        tvPID = view.findViewById(R.id.pointHeaderTvPid);
+        ibBnd = view.findViewById(R.id.pointHeaderIbBnd);
+        ivOp = view.findViewById(R.id.pointHeaderIvOp);
+        txtCmt = view.findViewById(R.id.pointTxtCmt);
 
         preFocus = view.findViewById(R.id.preFocusView);
 

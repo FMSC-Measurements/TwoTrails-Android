@@ -47,18 +47,18 @@ public class MapDetailsActivity extends CustomToolbarActivity {
 
         getToolbar().setTitle(getString(R.string.title_activity_edit_arc_map));
 
-        ivStatusIcon = (ImageView) findViewById(R.id.amdIcon);
-        tvName = (TextView) findViewById(R.id.amdName);
-        tvUrl = (TextView)findViewById(R.id.amdTvUrl);
-        tvFile = (TextView)findViewById(R.id.amdTvFile);
-        txtLoc = (EditText) findViewById(R.id.amdTxtLoc);
-        txtDesc = (EditText) findViewById(R.id.amdTxtDesc);
-        tvScaleMin = (TextView)findViewById(R.id.amdTvScaleMin);
-        tvScaleMax = (TextView)findViewById(R.id.amdTvScaleMax);
+        ivStatusIcon = findViewById(R.id.amdIcon);
+        tvName = findViewById(R.id.amdName);
+        tvUrl = findViewById(R.id.amdTvUrl);
+        tvFile = findViewById(R.id.amdTvFile);
+        txtLoc = findViewById(R.id.amdTxtLoc);
+        txtDesc = findViewById(R.id.amdTxtDesc);
+        tvScaleMin = findViewById(R.id.amdTvScaleMin);
+        tvScaleMax = findViewById(R.id.amdTvScaleMax);
 
         setValues(arcGisMapLayer);
 
-        ofmb = (PopupMenuButton)findViewById(R.id.amdMenu);
+        ofmb = findViewById(R.id.amdMenu);
         if (ofmb != null) {
             ofmb.setItemVisible(R.id.amdMenuUpdatePath, !arcGisMapLayer.isOnline());
             setUpdated(false);

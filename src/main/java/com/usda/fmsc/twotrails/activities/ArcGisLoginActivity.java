@@ -34,13 +34,13 @@ public class ArcGisLoginActivity extends CustomToolbarActivity {
         Bundle bundle = getIntent().getExtras();
 
         // Set up the login form.
-        txtUsername = (EditText) findViewById(R.id.username);
+        txtUsername = findViewById(R.id.username);
 
         if (bundle != null && bundle.containsKey(USERNAME)) {
             txtUsername.setText(bundle.getString(USERNAME));
         }
 
-        txtPassword = (EditText) findViewById(R.id.password);
+        txtPassword = findViewById(R.id.password);
         txtPassword.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
@@ -52,7 +52,7 @@ public class ArcGisLoginActivity extends CustomToolbarActivity {
             }
         });
 
-        Button btnLogin = (Button) findViewById(R.id.sign_in_button);
+        Button btnLogin = findViewById(R.id.sign_in_button);
 
         if (btnLogin != null) {
             btnLogin.setOnClickListener(new OnClickListener() {

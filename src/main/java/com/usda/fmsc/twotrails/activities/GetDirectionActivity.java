@@ -47,11 +47,11 @@ public class GetDirectionActivity extends CustomToolbarActivity implements Camer
             }
         }
 
-        txtAzimuth = (EditText)findViewById(R.id.gdTxtAzimuth);
-        txtRoll = (EditText)findViewById(R.id.gdTxtRoll);
-        txtPitch = (EditText)findViewById(R.id.gdTxtPitch);
+        txtAzimuth = findViewById(R.id.gdTxtAzimuth);
+        txtRoll = findViewById(R.id.gdTxtRoll);
+        txtPitch = findViewById(R.id.gdTxtPitch);
 
-        btnAqr = (Button)findViewById(R.id.gdBtnAcquire);
+        btnAqr = findViewById(R.id.gdBtnAcquire);
         if (!AndroidUtils.Device.isFullOrientationAvailable(this)) {
             btnAqr.setEnabled(false);
             btnAqr.setAlpha(Consts.DISABLED_ALPHA);

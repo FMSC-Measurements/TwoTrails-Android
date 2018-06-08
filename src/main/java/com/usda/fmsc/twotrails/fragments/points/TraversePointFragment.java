@@ -59,13 +59,13 @@ public class TraversePointFragment extends BasePointFragment {
     public View onCreateViewEx(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_points_travpoint_card, container, false);
 
-        txtFwd = (EditText)view.findViewById(R.id.pointTravTxtAzFwd);
-        txtBk = (EditText)view.findViewById(R.id.pointTravTxtAzBk);
-        txtSlopeDist = (EditText)view.findViewById(R.id.pointTravTxtSlopeDist);
-        txtSlopeAng = (EditText)view.findViewById(R.id.pointTravTxtSlopeAng);
+        txtFwd = view.findViewById(R.id.pointTravTxtAzFwd);
+        txtBk = view.findViewById(R.id.pointTravTxtAzBk);
+        txtSlopeDist = view.findViewById(R.id.pointTravTxtSlopeDist);
+        txtSlopeAng = view.findViewById(R.id.pointTravTxtSlopeAng);
 
-        tvMagDec = (TextView)view.findViewById(R.id.pointTravTvMagDec);
-        tvAzDiff = (TextView)view.findViewById(R.id.pointTravAzDiff);
+        tvMagDec = view.findViewById(R.id.pointTravTvMagDec);
+        tvAzDiff = view.findViewById(R.id.pointTravAzDiff);
 
         if (_TravPoint != null) {
             setViews();

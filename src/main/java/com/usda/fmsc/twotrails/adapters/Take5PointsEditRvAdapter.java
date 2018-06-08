@@ -220,10 +220,10 @@ public class Take5PointsEditRvAdapter extends RecyclerViewEx.BaseAdapterEx {
         public PointViewHolderEx(View itemView) {
             super(itemView);
 
-            tvPID = (TextView)itemView.findViewById(R.id.pointHeaderTvPid);
-            ibBnd = (ImageButton)itemView.findViewById(R.id.pointHeaderIbBnd);
-            txtCmt = (EditText)itemView.findViewById(R.id.pointTxtCmt);
-            ivOp = (ImageView)itemView.findViewById(R.id.pointHeaderIvOp);
+            tvPID = itemView.findViewById(R.id.pointHeaderTvPid);
+            ibBnd = itemView.findViewById(R.id.pointHeaderIbBnd);
+            txtCmt = itemView.findViewById(R.id.pointTxtCmt);
+            ivOp = itemView.findViewById(R.id.pointHeaderIvOp);
         }
 
         public void setLocked(boolean lock) {
@@ -240,10 +240,10 @@ public class Take5PointsEditRvAdapter extends RecyclerViewEx.BaseAdapterEx {
 
             ivOp.setImageDrawable(TtUtils.UI.getTtOpDrawable(OpType.Take5, AppUnits.IconColor.Dark, activity));
 
-            tvX = (TextView)itemView.findViewById(R.id.pointCardTvX);
-            tvY = (TextView)itemView.findViewById(R.id.pointCardTvY);
-            tvElev = (TextView)itemView.findViewById(R.id.pointCardTvElev);
-            tvElevType = (TextView)itemView.findViewById(R.id.pointCardTvElevType);
+            tvX = itemView.findViewById(R.id.pointCardTvX);
+            tvY = itemView.findViewById(R.id.pointCardTvY);
+            tvElev = itemView.findViewById(R.id.pointCardTvElev);
+            tvElevType = itemView.findViewById(R.id.pointCardTvElevType);
         }
     }
 
@@ -256,13 +256,13 @@ public class Take5PointsEditRvAdapter extends RecyclerViewEx.BaseAdapterEx {
 
             ivOp.setImageDrawable(TtUtils.UI.getTtOpDrawable(OpType.SideShot, AppUnits.IconColor.Dark, activity));
 
-            txtFwdAz = (EditText)itemView.findViewById(R.id.pointTravTxtAzFwd);
-            txtBkAz = (EditText)itemView.findViewById(R.id.pointTravTxtAzBk);
-            txtSlpDist = (EditText)itemView.findViewById(R.id.pointTravTxtSlopeDist);
-            txtSlpAng = (EditText)itemView.findViewById(R.id.pointTravTxtSlopeAng);
+            txtFwdAz = itemView.findViewById(R.id.pointTravTxtAzFwd);
+            txtBkAz = itemView.findViewById(R.id.pointTravTxtAzBk);
+            txtSlpDist = itemView.findViewById(R.id.pointTravTxtSlopeDist);
+            txtSlpAng = itemView.findViewById(R.id.pointTravTxtSlopeAng);
 
-            tvDiff = (TextView)itemView.findViewById(R.id.pointTravAzDiff);
-            tvMagDec = (TextView)itemView.findViewById(R.id.pointTravTvMagDec);
+            tvDiff = itemView.findViewById(R.id.pointTravAzDiff);
+            tvMagDec = itemView.findViewById(R.id.pointTravTvMagDec);
         }
 
         @Override

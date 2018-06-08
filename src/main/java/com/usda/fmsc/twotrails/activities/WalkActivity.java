@@ -130,23 +130,23 @@ public class WalkActivity extends AcquireGpsMapActivity {
             _Group = new TtGroup(TtGroup.GroupType.Walk);
             Global.getDAL().insertGroup(_Group);
 
-            fabWalk = (FloatingActionButton)findViewById(R.id.walkFabWalk);
+            fabWalk = findViewById(R.id.walkFabWalk);
             walkCardView = findViewById(R.id.walkCardWalk);
             preFocusView = findViewById(R.id.preFocusView);
 
-            tvPID = (TextView)findViewById(R.id.pointHeaderTvPid);
-            tvX = (TextView)findViewById(R.id.pointCardTvX);
-            tvY = (TextView)findViewById(R.id.pointCardTvY);
-            tvElev = (TextView)findViewById(R.id.pointCardTvElev);
-            txtCmt = (EditText)findViewById(R.id.pointTxtCmt);
-            ibBnd = (ImageButton)findViewById(R.id.pointHeaderIbBnd);
+            tvPID = findViewById(R.id.pointHeaderTvPid);
+            tvX = findViewById(R.id.pointCardTvX);
+            tvY = findViewById(R.id.pointCardTvY);
+            tvElev = findViewById(R.id.pointCardTvElev);
+            txtCmt = findViewById(R.id.pointTxtCmt);
+            ibBnd = findViewById(R.id.pointHeaderIbBnd);
 
-            ImageView ivOp = (ImageView)findViewById(R.id.pointHeaderIvOp);
+            ImageView ivOp = findViewById(R.id.pointHeaderIvOp);
             if (ivOp != null) {
                 ivOp.setImageDrawable(TtUtils.UI.getTtOpDrawable(OpType.Walk, AppUnits.IconColor.Dark, this));
             }
 
-            TextView tvElevType = (TextView)findViewById(R.id.pointCardTvElevType);
+            TextView tvElevType = findViewById(R.id.pointCardTvElevType);
             if (tvElevType != null) {
                 tvElevType.setText(_Metadata.getElevation().toString());
             }

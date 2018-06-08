@@ -47,13 +47,13 @@ public class PictureMediaFragment extends BaseMediaFragment {
     public View onCreateViewEx(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.content_details_media_pic, container, false);
 
-        ivBackground = (ImageView) view.findViewById(R.id.pmdIvBackground);
+        ivBackground = view.findViewById(R.id.pmdIvBackground);
 
         bitmapManager = ((PointMediaController)getActivity()).getBitmapManager();
 
-        txtAz = (EditText)view.findViewById(R.id.pmdFragPicTxtAzimuth);
-        txtPitch = (EditText)view.findViewById(R.id.pmdFragPicTxtPitch);
-        txtRoll = (EditText)view.findViewById(R.id.pmdFragPicTxtRoll);
+        txtAz = view.findViewById(R.id.pmdFragPicTxtAzimuth);
+        txtPitch = view.findViewById(R.id.pmdFragPicTxtPitch);
+        txtRoll = view.findViewById(R.id.pmdFragPicTxtRoll);
 
         if (_Picture != null) {
             setViews();

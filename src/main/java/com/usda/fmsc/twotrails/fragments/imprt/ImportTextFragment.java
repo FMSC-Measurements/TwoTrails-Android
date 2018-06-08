@@ -86,35 +86,35 @@ public class ImportTextFragment extends BaseImportFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_import_text, container, false);
 
-        swtAdvanced = (SwitchCompat)view.findViewById(R.id.importFragSwtAdvanced);
+        swtAdvanced = view.findViewById(R.id.importFragSwtAdvanced);
 
         //region Rows
-        rowCN = (TableRow)view.findViewById(R.id.importFragItemRowCN);
-        rowOp = (TableRow)view.findViewById(R.id.importFragItemRowOp);
-        rowIndex = (TableRow)view.findViewById(R.id.importFragItemRowIndex);
-        rowPID = (TableRow)view.findViewById(R.id.importFragItemRowPID);
-        rowTime = (TableRow)view.findViewById(R.id.importFragItemRowTime);
-        rowPoly = (TableRow)view.findViewById(R.id.importFragItemRowPoly);
-        rowGroup = (TableRow)view.findViewById(R.id.importFragItemRowGroup);
-        rowCmt = (TableRow)view.findViewById(R.id.importFragItemRowCmt);
+        rowCN = view.findViewById(R.id.importFragItemRowCN);
+        rowOp = view.findViewById(R.id.importFragItemRowOp);
+        rowIndex = view.findViewById(R.id.importFragItemRowIndex);
+        rowPID = view.findViewById(R.id.importFragItemRowPID);
+        rowTime = view.findViewById(R.id.importFragItemRowTime);
+        rowPoly = view.findViewById(R.id.importFragItemRowPoly);
+        rowGroup = view.findViewById(R.id.importFragItemRowGroup);
+        rowCmt = view.findViewById(R.id.importFragItemRowCmt);
         //rowMeta = (TableRow)view.findViewById(R.id.importFragItemRowMeta);
-        rowBnd = (TableRow)view.findViewById(R.id.importFragItemRowBnd);
-        rowX = (TableRow)view.findViewById(R.id.importFragItemRowX);
-        rowY = (TableRow)view.findViewById(R.id.importFragItemRowY);
-        rowZ = (TableRow)view.findViewById(R.id.importFragItemRowZ);
+        rowBnd = view.findViewById(R.id.importFragItemRowBnd);
+        rowX = view.findViewById(R.id.importFragItemRowX);
+        rowY = view.findViewById(R.id.importFragItemRowY);
+        rowZ = view.findViewById(R.id.importFragItemRowZ);
         //rowAcc = (TableRow)view.findViewById(R.id.importFragItemRowAcc);
-        rowManAcc = (TableRow)view.findViewById(R.id.importFragItemRowManAcc);
-        rowLat = (TableRow)view.findViewById(R.id.importFragItemRowLat);
-        rowLon = (TableRow)view.findViewById(R.id.importFragItemRowLon);
-        rowElev = (TableRow)view.findViewById(R.id.importFragItemRowElev);
-        rowRMSEr = (TableRow)view.findViewById(R.id.importFragItemRowRMSEr);
-        rowFwdAz = (TableRow)view.findViewById(R.id.importFragItemRowFwdAz);
-        rowBkAz = (TableRow)view.findViewById(R.id.importFragItemRowBkAz);
-        rowSlpDist = (TableRow)view.findViewById(R.id.importFragItemRowSlpDist);
-        rowSlpDistType = (TableRow)view.findViewById(R.id.importFragItemRowSlpDistType);
-        rowSlpAng = (TableRow)view.findViewById(R.id.importFragItemRowSlpAng);
-        rowSlpAngType = (TableRow)view.findViewById(R.id.importFragItemRowSlpAngType);
-        rowParentCN = (TableRow)view.findViewById(R.id.importFragItemRowParentCN);
+        rowManAcc = view.findViewById(R.id.importFragItemRowManAcc);
+        rowLat = view.findViewById(R.id.importFragItemRowLat);
+        rowLon = view.findViewById(R.id.importFragItemRowLon);
+        rowElev = view.findViewById(R.id.importFragItemRowElev);
+        rowRMSEr = view.findViewById(R.id.importFragItemRowRMSEr);
+        rowFwdAz = view.findViewById(R.id.importFragItemRowFwdAz);
+        rowBkAz = view.findViewById(R.id.importFragItemRowBkAz);
+        rowSlpDist = view.findViewById(R.id.importFragItemRowSlpDist);
+        rowSlpDistType = view.findViewById(R.id.importFragItemRowSlpDistType);
+        rowSlpAng = view.findViewById(R.id.importFragItemRowSlpAng);
+        rowSlpAngType = view.findViewById(R.id.importFragItemRowSlpAngType);
+        rowParentCN = view.findViewById(R.id.importFragItemRowParentCN);
         //end region
         
         
@@ -137,32 +137,32 @@ public class ImportTextFragment extends BaseImportFragment {
         
 
         //region Spinners
-        spnCN = (Spinner)view.findViewById(R.id.importFragSpnCN);
-        spnOp = (Spinner)view.findViewById(R.id.importFragSpnOp);
-        spnIndex = (Spinner)view.findViewById(R.id.importFragSpnIndex);
-        spnPID = (Spinner)view.findViewById(R.id.importFragSpnPID);
-        spnTime = (Spinner)view.findViewById(R.id.importFragSpnTime);
-        spnPoly = (Spinner)view.findViewById(R.id.importFragSpnPoly);
-        spnGroup = (Spinner)view.findViewById(R.id.importFragSpnGroup);
-        spnCmt = (Spinner)view.findViewById(R.id.importFragSpnCmt);
+        spnCN = view.findViewById(R.id.importFragSpnCN);
+        spnOp = view.findViewById(R.id.importFragSpnOp);
+        spnIndex = view.findViewById(R.id.importFragSpnIndex);
+        spnPID = view.findViewById(R.id.importFragSpnPID);
+        spnTime = view.findViewById(R.id.importFragSpnTime);
+        spnPoly = view.findViewById(R.id.importFragSpnPoly);
+        spnGroup = view.findViewById(R.id.importFragSpnGroup);
+        spnCmt = view.findViewById(R.id.importFragSpnCmt);
         //spnMeta = (Spinner)view.findViewById(R.id.importFragSpnMeta);
-        spnBnd = (Spinner)view.findViewById(R.id.importFragSpnBnd);
-        spnX = (Spinner)view.findViewById(R.id.importFragSpnX);
-        spnY = (Spinner)view.findViewById(R.id.importFragSpnY);
-        spnZ = (Spinner)view.findViewById(R.id.importFragSpnZ);
+        spnBnd = view.findViewById(R.id.importFragSpnBnd);
+        spnX = view.findViewById(R.id.importFragSpnX);
+        spnY = view.findViewById(R.id.importFragSpnY);
+        spnZ = view.findViewById(R.id.importFragSpnZ);
         //spnAcc = (Spinner)view.findViewById(R.id.importFragSpnAcc);
-        spnManAcc = (Spinner)view.findViewById(R.id.importFragSpnManAcc);
-        spnLat = (Spinner)view.findViewById(R.id.importFragSpnLat);
-        spnLon = (Spinner)view.findViewById(R.id.importFragSpnLon);
-        spnElev = (Spinner)view.findViewById(R.id.importFragSpnElev);
-        spnRMSEr = (Spinner)view.findViewById(R.id.importFragSpnRMSEr);
-        spnFwdAz = (Spinner)view.findViewById(R.id.importFragSpnFwdAz);
-        spnBkAz = (Spinner)view.findViewById(R.id.importFragSpnBkAz);
-        spnSlpDist = (Spinner)view.findViewById(R.id.importFragSpnSlpDist);
-        spnSlpDistType = (Spinner)view.findViewById(R.id.importFragSpnSlpDistType);
-        spnSlpAng = (Spinner)view.findViewById(R.id.importFragSpnSlpAng);
-        spnSlpAngType = (Spinner)view.findViewById(R.id.importFragSpnSlpAngType);
-        spnParentCN = (Spinner)view.findViewById(R.id.importFragSpnParentCN);
+        spnManAcc = view.findViewById(R.id.importFragSpnManAcc);
+        spnLat = view.findViewById(R.id.importFragSpnLat);
+        spnLon = view.findViewById(R.id.importFragSpnLon);
+        spnElev = view.findViewById(R.id.importFragSpnElev);
+        spnRMSEr = view.findViewById(R.id.importFragSpnRMSEr);
+        spnFwdAz = view.findViewById(R.id.importFragSpnFwdAz);
+        spnBkAz = view.findViewById(R.id.importFragSpnBkAz);
+        spnSlpDist = view.findViewById(R.id.importFragSpnSlpDist);
+        spnSlpDistType = view.findViewById(R.id.importFragSpnSlpDistType);
+        spnSlpAng = view.findViewById(R.id.importFragSpnSlpAng);
+        spnSlpAngType = view.findViewById(R.id.importFragSpnSlpAngType);
+        spnParentCN = view.findViewById(R.id.importFragSpnParentCN);
 
         AdapterView.OnItemSelectedListener sl = new AdapterView.OnItemSelectedListener() {
             @Override

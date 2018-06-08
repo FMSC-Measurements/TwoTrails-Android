@@ -90,9 +90,9 @@ public class GpxTracksAdapter extends RecyclerViewEx.AdapterEx<SimpleMultiSelect
         public GpxBaseTrackHolder(View itemView) {
             super(itemView, mSelector);
 
-            mcb = (MultiStateTouchCheckBox)itemView.findViewById(R.id.importContMcbImport);
-            tvName = (TextView)itemView.findViewById(R.id.importContTvName);
-            tvPointCount = (TextView)itemView.findViewById(R.id.importContTvPointCount);
+            mcb = itemView.findViewById(R.id.importContMcbImport);
+            tvName = itemView.findViewById(R.id.importContTvName);
+            tvPointCount = itemView.findViewById(R.id.importContTvPointCount);
 
             mcb.setOnCheckedStateChangeListener(this);
         }

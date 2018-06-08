@@ -35,16 +35,16 @@ public class MapActivity extends BaseMapActivity {
 
         setContentView(R.layout.activity_map);
 
-        fabMyPos = (FloatingActionButton)findViewById(R.id.mapFabMyPos);
+        fabMyPos = findViewById(R.id.mapFabMyPos);
 
-        tvLocX = (TextView)findViewById(R.id.mapTbTvLocX);
-        tvLocXType = (TextView)findViewById(R.id.mapTbTvLocXType);
-        tvLocY = (TextView)findViewById(R.id.mapTbTvLocY);
-        tvLocYType = (TextView)findViewById(R.id.mapTbTvLocYType);
-        tvLocZone = (TextView)findViewById(R.id.mapTbTvLocZone);
-        tvZoneLbl = (TextView)findViewById(R.id.mapTbTvLocZoneLabel);
+        tvLocX = findViewById(R.id.mapTbTvLocX);
+        tvLocXType = findViewById(R.id.mapTbTvLocXType);
+        tvLocY = findViewById(R.id.mapTbTvLocY);
+        tvLocYType = findViewById(R.id.mapTbTvLocYType);
+        tvLocZone = findViewById(R.id.mapTbTvLocZone);
+        tvZoneLbl = findViewById(R.id.mapTbTvLocZoneLabel);
 
-        ivGps = (ImageView)findViewById(R.id.mapIvGps);
+        ivGps = findViewById(R.id.mapIvGps);
 
         fabMyPos.setVisibility(myPosBtn && getLastPosition() != null ? View.VISIBLE : View.GONE);
         setDisplayLocInfoVisible();

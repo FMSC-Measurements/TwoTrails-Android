@@ -140,19 +140,19 @@ public class PlotGridActivity extends CustomToolbarActivity {
         }
 
         if (polygons.size() > 0) {
-            Spinner spnPolys = (Spinner)findViewById(R.id.plotSpnPoly);
-            Spinner spnDist = (Spinner)findViewById(R.id.plotSpnDistUom);
-            spnPoints = (Spinner)findViewById(R.id.plotSpnPoint);
-            spnPointLoc = (Spinner)findViewById(R.id.plotSpnLoc);
-            spnSampleType = (Spinner)findViewById(R.id.plotSpnSubsample);
+            Spinner spnPolys = findViewById(R.id.plotSpnPoly);
+            Spinner spnDist = findViewById(R.id.plotSpnDistUom);
+            spnPoints = findViewById(R.id.plotSpnPoint);
+            spnPointLoc = findViewById(R.id.plotSpnLoc);
+            spnSampleType = findViewById(R.id.plotSpnSubsample);
 
-            txtGridX = (EditText)findViewById(R.id.plotTxtGridX);
-            txtGridY = (EditText)findViewById(R.id.plotTxtGridY);
-            txtTilt = (EditText)findViewById(R.id.plotTxtTilt);
-            txtSubSample = (EditText)findViewById(R.id.plotTxtSubsample);
-            chkSubSample = (CheckBox)findViewById(R.id.plotChkSubSample);
+            txtGridX = findViewById(R.id.plotTxtGridX);
+            txtGridY = findViewById(R.id.plotTxtGridY);
+            txtTilt = findViewById(R.id.plotTxtTilt);
+            txtSubSample = findViewById(R.id.plotTxtSubsample);
+            chkSubSample = findViewById(R.id.plotChkSubSample);
 
-            progressBar = (MaterialProgressBar)findViewById(R.id.plotProgress);
+            progressBar = findViewById(R.id.plotProgress);
             layControls = findViewById(R.id.plotLayOverlay);
 
 
@@ -376,8 +376,8 @@ public class PlotGridActivity extends CustomToolbarActivity {
         );
 
         if (sample) {
-            params.SamplePercent = spnSampleType.getSelectedItemPosition() > 0;
-            params.SampleValue = ParseEx.parseInteger(txtSubSample.getText().toString());
+            params.setSamplePercent(spnSampleType.getSelectedItemPosition() > 0);
+            params.setSampleValue(ParseEx.parseInteger(txtSubSample.getText().toString()));
         }
 
         generator = new PlotGenerator(Global.getDAL(), metadata, plotGenListener);
@@ -553,7 +553,7 @@ public class PlotGridActivity extends CustomToolbarActivity {
                 mViewHolder = new PointDetailsSkip1SpinnerAdapter.ViewHolder();
                 convertView.setTag(mViewHolder);
 
-                mViewHolder.text = (TextView) convertView.findViewById(android.R.id.text1);
+                mViewHolder.text = convertView.findViewById(android.R.id.text1);
             } else {
                 mViewHolder = (PointDetailsSkip1SpinnerAdapter.ViewHolder) convertView.getTag();
             }
@@ -578,8 +578,8 @@ public class PlotGridActivity extends CustomToolbarActivity {
                 mViewHolder = new PointDetailsSkip1SpinnerAdapter.DropDownViewHolder();
                 convertView.setTag(mViewHolder);
 
-                mViewHolder.text = (TextView) convertView.findViewById(R.id.text1);
-                mViewHolder.image = (ImageView) convertView.findViewById(R.id.image);
+                mViewHolder.text = convertView.findViewById(R.id.text1);
+                mViewHolder.image = convertView.findViewById(R.id.image);
             } else {
                 mViewHolder = (PointDetailsSkip1SpinnerAdapter.DropDownViewHolder) convertView.getTag();
             }
@@ -589,7 +589,7 @@ public class PlotGridActivity extends CustomToolbarActivity {
 
                 mViewHolder.image.setImageDrawable(TtUtils.UI.getTtOpDrawable(point.getOp(), iconColor, context));
                 mViewHolder.image.setVisibility(View.VISIBLE);
-                mViewHolder.text.setText(String.format("%d%s", point.getPID(),
+                mViewHolder.text.setText(StringEx.format("%d%s", point.getPID(),
                         showPolygon ? " - " + point.getPolyName() : StringEx.Empty));
             } else {
                 mViewHolder.image.setVisibility(View.INVISIBLE);

@@ -49,11 +49,11 @@ public class HaidActivity extends CustomToolbarActivity {
             actionBar.setDisplayHomeAsUpEnabled(false);
         }
 
-        drawerLayout = (DrawerLayout)findViewById(R.id.haidNavDrawer);
-        progress = (ProgressBar)findViewById(R.id.progress);
+        drawerLayout = findViewById(R.id.haidNavDrawer);
+        progress = findViewById(R.id.progress);
 
-        ListView lvPolys = (ListView)findViewById(R.id.haidLvPolys);
-        tvInfo = (TextView)findViewById(R.id.haidTxtInfo);
+        ListView lvPolys = findViewById(R.id.haidLvPolys);
+        tvInfo = findViewById(R.id.haidTxtInfo);
 
         ArrayList<TtPolygon> polys = Global.getDAL().getPolygons();
 

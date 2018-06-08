@@ -162,7 +162,7 @@ public class HaidLogic {
 
     static TtPoint _LastTravPoint = null;
 
-    private static String getPointSummary(TtPoint point, boolean fromQuondam, boolean showPoints) throws Exception {
+    private static String getPointSummary(TtPoint point, boolean fromQuondam, boolean showPoints) {
         StringBuilder sb = new StringBuilder();
 
         switch (point.getOp()) {
@@ -279,7 +279,7 @@ public class HaidLogic {
         return sb.toString();
     }
 
-    private static String getPolygonSummary(TtPolygon polygon, boolean save) throws Exception {
+    private static String getPolygonSummary(TtPolygon polygon, boolean save) {
         StringBuilder sb = new StringBuilder();
 
         if (polygon.getArea() > Consts.Minimum_Point_Accuracy) {

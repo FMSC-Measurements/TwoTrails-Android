@@ -98,13 +98,13 @@ public class NewArcMapDialog extends DialogFragment {
 
         View view = LayoutInflater.from(getContext()).inflate(R.layout.diag_create_arc_map, null);
 
-        txtUri = (EditText)view.findViewById(R.id.txtUri);
-        txtName = (EditText)view.findViewById(R.id.txtName);
-        txtLoc = (EditText)view.findViewById(R.id.txtLocation);
-        txtDesc = (EditText)view.findViewById(R.id.txtDesc);
-        chkmkavUrlStatus = (CheckMarkAnimatedView)view.findViewById(R.id.chkmkavUrlStatus);
-        progressBar = (MaterialProgressBar)view.findViewById(R.id.progress);
-        ivBadUri = (ImageView)view.findViewById(R.id.ivBadUri);
+        txtUri = view.findViewById(R.id.txtUri);
+        txtName = view.findViewById(R.id.txtName);
+        txtLoc = view.findViewById(R.id.txtLocation);
+        txtDesc = view.findViewById(R.id.txtDesc);
+        chkmkavUrlStatus = view.findViewById(R.id.chkmkavUrlStatus);
+        progressBar = view.findViewById(R.id.progress);
+        ivBadUri = view.findViewById(R.id.ivBadUri);
 
         txtUri.setHint(mode != CreateMode.OFFLINE_FROM_FILE ? "Url" : "File");
 
@@ -353,7 +353,7 @@ public class NewArcMapDialog extends DialogFragment {
 
         private final int value;
 
-        private CreateMode(int value) {
+        CreateMode(int value) {
             this.value = value;
         }
 

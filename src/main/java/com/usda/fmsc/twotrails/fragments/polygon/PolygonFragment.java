@@ -82,22 +82,22 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
         // Inflate the layout for this fragment
         final View view = inflater.inflate(R.layout.fragment_polygon_card, container, false);
 
-        tvName = (TextView)view.findViewById(R.id.polyFragTvName);
-        txtName = (EditText)view.findViewById(R.id.polyFragTxtName);
-        txtDesc = (EditText)view.findViewById(R.id.polyFragTxtDesc);
-        txtInc = (EditText)view.findViewById(R.id.polyFragTxtInc);
-        txtPsi = (EditText)view.findViewById(R.id.polyFragTxtPsi);
-        txtAcc = (EditText)view.findViewById(R.id.polyFragTxtAcc);
+        tvName = view.findViewById(R.id.polyFragTvName);
+        txtName = view.findViewById(R.id.polyFragTxtName);
+        txtDesc = view.findViewById(R.id.polyFragTxtDesc);
+        txtInc = view.findViewById(R.id.polyFragTxtInc);
+        txtPsi = view.findViewById(R.id.polyFragTxtPsi);
+        txtAcc = view.findViewById(R.id.polyFragTxtAcc);
 
-        tvPerimFt = (TextView)view.findViewById(R.id.polyFragTvPerimFt);
-        tvPerimMt = (TextView)view.findViewById(R.id.polyFragTvPerimMt);
-        tvPerimLineFt = (TextView)view.findViewById(R.id.polyFragTvPerimLineFt);
-        tvPerimLineMt = (TextView)view.findViewById(R.id.polyFragTvPerimLineMt);
-        tvAreaAc = (TextView)view.findViewById(R.id.polyFragTvAreaAc);
-        tvAreaHa = (TextView)view.findViewById(R.id.polyFragTvAreaHa);
+        tvPerimFt = view.findViewById(R.id.polyFragTvPerimFt);
+        tvPerimMt = view.findViewById(R.id.polyFragTvPerimMt);
+        tvPerimLineFt = view.findViewById(R.id.polyFragTvPerimLineFt);
+        tvPerimLineMt = view.findViewById(R.id.polyFragTvPerimLineMt);
+        tvAreaAc = view.findViewById(R.id.polyFragTvAreaAc);
+        tvAreaHa = view.findViewById(R.id.polyFragTvAreaHa);
 
-        scrollView = (ScrollView)view.findViewById(R.id.polyFragScrollView);
-        spv = (StaticPolygonView)view.findViewById(R.id.polySPView);
+        scrollView = view.findViewById(R.id.polyFragScrollView);
+        spv = view.findViewById(R.id.polySPView);
 
         viewPreFocus = view.findViewById(R.id.preFocusView);
 

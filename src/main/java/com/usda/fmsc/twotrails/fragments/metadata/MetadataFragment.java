@@ -63,19 +63,19 @@ public class MetadataFragment extends AnimationCardFragment implements MetadataA
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_metadata, container, false);
 
-        txtName = (TextView)view.findViewById(R.id.metaFragTxtName);
-        txtZone = (TextView)view.findViewById(R.id.metaFragTxtZone);
-        txtDec = (TextView)view.findViewById(R.id.metaFragTxtDec);
-        txtDecType = (TextView)view.findViewById(R.id.metaFragTxtDecType);
-        txtDatum = (TextView)view.findViewById(R.id.metaFragTxtDatum);
-        txtDist = (TextView)view.findViewById(R.id.metaFragTxtDist);
-        txtElev = (TextView)view.findViewById(R.id.metaFragTxtElev);
-        txtSlope = (TextView)view.findViewById(R.id.metaFragTxtSlope);
-        txtGPSRec = (TextView)view.findViewById(R.id.metaFragTxtGpsRec);
-        txtRangeFinder = (TextView)view.findViewById(R.id.metaFragTxtRangeFinder);
-        txtCompass = (TextView)view.findViewById(R.id.metaFragTxtCompass);
-        txtCrew = (TextView)view.findViewById(R.id.metaFragTxtCrew);
-        txtCmt = (TextView)view.findViewById(R.id.metaFragTxtCmt);
+        txtName = view.findViewById(R.id.metaFragTxtName);
+        txtZone = view.findViewById(R.id.metaFragTxtZone);
+        txtDec = view.findViewById(R.id.metaFragTxtDec);
+        txtDecType = view.findViewById(R.id.metaFragTxtDecType);
+        txtDatum = view.findViewById(R.id.metaFragTxtDatum);
+        txtDist = view.findViewById(R.id.metaFragTxtDist);
+        txtElev = view.findViewById(R.id.metaFragTxtElev);
+        txtSlope = view.findViewById(R.id.metaFragTxtSlope);
+        txtGPSRec = view.findViewById(R.id.metaFragTxtGpsRec);
+        txtRangeFinder = view.findViewById(R.id.metaFragTxtRangeFinder);
+        txtCompass = view.findViewById(R.id.metaFragTxtCompass);
+        txtCrew = view.findViewById(R.id.metaFragTxtCrew);
+        txtCmt = view.findViewById(R.id.metaFragTxtCmt);
 
         layGroup = view.findViewById(R.id.metafragLayout);
 

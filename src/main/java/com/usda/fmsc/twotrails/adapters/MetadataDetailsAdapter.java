@@ -56,9 +56,9 @@ public class MetadataDetailsAdapter extends BaseAdapter {
             mViewHolder = new ViewHolder();
             convertView.setTag(mViewHolder);
 
-            mViewHolder.name = (TextView)convertView.findViewById(R.id.listRowDiagPointEditorTvName);
-            mViewHolder.dist = (TextView)convertView.findViewById(R.id.listRowDiagPointEditorTvDist);
-            mViewHolder.elev = (TextView)convertView.findViewById(R.id.listRowDiagPointEditorTvElev);
+            mViewHolder.name = convertView.findViewById(R.id.listRowDiagPointEditorTvName);
+            mViewHolder.dist = convertView.findViewById(R.id.listRowDiagPointEditorTvDist);
+            mViewHolder.elev = convertView.findViewById(R.id.listRowDiagPointEditorTvElev);
             mViewHolder.parent = convertView.findViewById(R.id.parent);
         } else {
             mViewHolder = (ViewHolder) convertView.getTag();

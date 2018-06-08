@@ -78,8 +78,8 @@ public class CheckablePolygonAdapter extends ArrayAdapter<TtPolygon> {
         public TextView textView;
 
         public ViewHolder(View view) {
-            checkBox = (CheckBox)view.findViewById(R.id.checkBox1);
-            textView = (TextView)view.findViewById(R.id.text1);
+            checkBox = view.findViewById(R.id.checkBox1);
+            textView = view.findViewById(R.id.text1);
         }
     }
 }

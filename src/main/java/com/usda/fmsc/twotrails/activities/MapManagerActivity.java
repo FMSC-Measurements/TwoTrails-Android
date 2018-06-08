@@ -106,7 +106,7 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
         }
 
 
-        RecyclerViewEx rvMaps = (RecyclerViewEx) findViewById(R.id.mmRvMaps);
+        RecyclerViewEx rvMaps = findViewById(R.id.mmRvMaps);
 
         if (rvMaps != null) {
             rvMaps.setViewHasFooter(true);
@@ -118,7 +118,7 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
             rvMaps.setAdapter(adapter);
         }
 
-        MSFloatingActionButton fabMenu = (MSFloatingActionButton)findViewById(R.id.mmFabMenu);
+        MSFloatingActionButton fabMenu = findViewById(R.id.mmFabMenu);
         View overlay = findViewById(R.id.overlay);
         View sheetView = findViewById(R.id.fab_sheet);
 
@@ -394,9 +394,9 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
             public MapViewHolder(View view) {
                 super(view);
 
-                ivStatusIcon = (ImageView) view.findViewById(R.id.mhIcon);
-                tvName = (TextView) view.findViewById(R.id.mhName);
-                ofmbMenu = (PopupMenuButton)view.findViewById(R.id.mhMenu);
+                ivStatusIcon = view.findViewById(R.id.mhIcon);
+                tvName = view.findViewById(R.id.mhName);
+                ofmbMenu = view.findViewById(R.id.mhMenu);
                 lay = view.findViewById(R.id.lay1);
             }
 

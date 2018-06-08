@@ -46,7 +46,7 @@ public class PointEditorDialog extends DialogFragment {
     PointEditorListener listener;
 
 
-    public static PointEditorDialog newInstance(String cn, int pid, String metacn, HashMap<String, TtMetadata> metas) throws IOException {
+    public static PointEditorDialog newInstance(String cn, int pid, String metacn, HashMap<String, TtMetadata> metas) {
         PointEditorDialog f = new PointEditorDialog();
 
         Bundle args = new Bundle();
@@ -95,8 +95,8 @@ public class PointEditorDialog extends DialogFragment {
 
         View view = inflater.inflate(R.layout.diag_edit_point, null);
 
-        final EditText txtPID = (EditText)view.findViewById(R.id.diagEditPointTxtPID);
-        lvcMeta = (ListView)view.findViewById(R.id.diagEditPointLvcMeta);
+        final EditText txtPID = view.findViewById(R.id.diagEditPointTxtPID);
+        lvcMeta = view.findViewById(R.id.diagEditPointLvcMeta);
 
         txtPID.setText(pid);
         txtPID.setInputType(InputType.TYPE_CLASS_NUMBER);

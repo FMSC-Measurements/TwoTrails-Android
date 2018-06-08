@@ -99,25 +99,25 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
     public void setContentView(int layoutResID) {
         super.setContentView(layoutResID);
 
-        tvGpsStatus = (TextView)findViewById(R.id.gpsInfoTvGpsStatus);
-        tvGpsMode = (TextView)findViewById(R.id.gpsInfoTvGpsMode);
-        tvLat = (TextView)findViewById(R.id.gpsInfoTvLat);
-        tvLon = (TextView)findViewById(R.id.gpsInfoTvLon);
-        tvUtmX = (TextView)findViewById(R.id.gpsInfoTvUtmX);
-        tvUtmY = (TextView)findViewById(R.id.gpsInfoTvUtmY);
-        tvZone = (TextView)findViewById(R.id.gpsInfoTvZone);
-        tvDec = (TextView)findViewById(R.id.gpsInfoTvDec);
-        tvSat = (TextView)findViewById(R.id.gpsInfoTvSats);
-        tvElev = (TextView)findViewById(R.id.gpsInfoTvElev);
-        tvPdop = (TextView)findViewById(R.id.gpsInfoTvPdop);
-        tvHdop = (TextView)findViewById(R.id.gpsInfoTvHdop);
+        tvGpsStatus = findViewById(R.id.gpsInfoTvGpsStatus);
+        tvGpsMode = findViewById(R.id.gpsInfoTvGpsMode);
+        tvLat = findViewById(R.id.gpsInfoTvLat);
+        tvLon = findViewById(R.id.gpsInfoTvLon);
+        tvUtmX = findViewById(R.id.gpsInfoTvUtmX);
+        tvUtmY = findViewById(R.id.gpsInfoTvUtmY);
+        tvZone = findViewById(R.id.gpsInfoTvZone);
+        tvDec = findViewById(R.id.gpsInfoTvDec);
+        tvSat = findViewById(R.id.gpsInfoTvSats);
+        tvElev = findViewById(R.id.gpsInfoTvElev);
+        tvPdop = findViewById(R.id.gpsInfoTvPdop);
+        tvHdop = findViewById(R.id.gpsInfoTvHdop);
 
         tvGpsMode.setText(GGASentence.GpsFixType.NoFix.toString());
 
         viewGpsInfoLaySatInfo = findViewById(R.id.gpsInfoLaySatInfo);
 
-        skyView = (GpsStatusSkyView)findViewById(R.id.gpsInfoSatSky);
-        statusView = (GpsStatusSatView)findViewById(R.id.gpsInfoSatStatus);
+        skyView = findViewById(R.id.gpsInfoSatSky);
+        statusView = findViewById(R.id.gpsInfoSatStatus);
 
         final ViewTreeObserver observer = skyView.getViewTreeObserver();
         observer.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -126,7 +126,7 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
                 skyView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                 hideExtraGpsStatus(false);
 
-                TableLayout gpsInfoLayStats = (TableLayout) findViewById(R.id.gpsInfoLayStats);
+                TableLayout gpsInfoLayStats = findViewById(R.id.gpsInfoLayStats);
 
                 if (gpsInfoLayStats != null) {
                     mapOffsetY = AndroidUtils.Convert.dpToPx(getBaseContext(), 80) + gpsInfoLayStats.getHeight();
@@ -465,7 +465,7 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
     protected void hideExtraGpsStatus(boolean animate) {
         if (gpsExtraVisible) {
             if (!gpsExtraLayoutSet) {
-                RelativeLayout lay = (RelativeLayout) findViewById(R.id.gpsInfoLaySatInfoSub);
+                RelativeLayout lay = findViewById(R.id.gpsInfoLaySatInfoSub);
 
                 if (lay != null) {
                     lay.getLayoutParams().width = lay.getWidth();

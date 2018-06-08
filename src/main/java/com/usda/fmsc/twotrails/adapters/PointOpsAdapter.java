@@ -56,8 +56,8 @@ public class PointOpsAdapter extends BaseAdapter {
             viewHolder = new ViewHolder();
             view.setTag(viewHolder);
 
-            viewHolder.text = (TextView)view.findViewById(R.id.text1);
-            viewHolder.image = (ImageView)view.findViewById(R.id.image);
+            viewHolder.text = view.findViewById(R.id.text1);
+            viewHolder.image = view.findViewById(R.id.image);
         } else {
             viewHolder = (ViewHolder) view.getTag();
         }

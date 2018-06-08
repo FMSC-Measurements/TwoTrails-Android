@@ -23,8 +23,8 @@ public class GpsInfoControl implements GpsService.Listener {
     public GpsInfoControl(View view) {
         viewGpsInfoLaySatInfo = view.findViewById(R.id.gpsInfoLaySatInfo);
 
-        skyView = (GpsStatusSkyView)view.findViewById(R.id.gpsInfoSatSky);
-        statusView = (GpsStatusSatView)view.findViewById(R.id.gpsInfoSatStatus);
+        skyView = view.findViewById(R.id.gpsInfoSatSky);
+        statusView = view.findViewById(R.id.gpsInfoSatStatus);
 
         final ViewTreeObserver observer = skyView.getViewTreeObserver();
         observer.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {

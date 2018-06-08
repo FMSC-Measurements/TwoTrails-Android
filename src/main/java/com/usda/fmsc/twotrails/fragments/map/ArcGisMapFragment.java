@@ -137,7 +137,7 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_arc_gis_map, container, false);
 
-        mMapView = (MapView)view.findViewById(R.id.map);
+        mMapView = view.findViewById(R.id.map);
         mMapView.enableWrapAround(true);
         mMapView.setAllowRotationByPinch(true);
 
@@ -146,7 +146,7 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
         mMapView.setOnPanListener(this);
         mMapView.setOnTouchListener(new TouchListener(getContext(), mMapView));
 
-        compass = (ArcMapCompass)view.findViewById(R.id.compass);
+        compass = view.findViewById(R.id.compass);
         compass.setMapView(mMapView);
 
         if (startArcOpts != null) {

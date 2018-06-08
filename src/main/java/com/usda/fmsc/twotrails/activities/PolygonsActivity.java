@@ -104,7 +104,7 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
         mSectionsPagerAdapter.saveFragmentStates(false);
 
-        mViewPager = (ViewPager) findViewById(R.id.polysViewPager);
+        mViewPager = findViewById(R.id.polysViewPager);
         if (mViewPager != null) {
             mViewPager.setAdapter(mSectionsPagerAdapter);
 

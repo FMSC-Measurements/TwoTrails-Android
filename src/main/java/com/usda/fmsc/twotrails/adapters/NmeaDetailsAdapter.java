@@ -119,8 +119,8 @@ public class NmeaDetailsAdapter extends ArrayAdapter<NmeaDetailsAdapter.NmeaDeta
 
         public ViewHolder(View view)
         {
-            talkerID = (TextView)view.findViewById(R.id.listRowTalkerId);
-            nmeaIDs = (TextView)view.findViewById(R.id.listRowNmeaIds);
+            talkerID = view.findViewById(R.id.listRowTalkerId);
+            nmeaIDs = view.findViewById(R.id.listRowNmeaIds);
         }
     }
 }

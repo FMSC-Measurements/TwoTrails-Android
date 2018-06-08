@@ -82,8 +82,8 @@ public class PointColorPickerDialog extends DialogFragment {
 
         final View view = inflater.inflate(R.layout.diag_point_color_picker, null);
 
-        picker = (ColorPicker) view.findViewById(R.id.picker);
-        ValueBar valueBar = (ValueBar) view.findViewById(R.id.valuebar);
+        picker = view.findViewById(R.id.picker);
+        ValueBar valueBar = view.findViewById(R.id.valuebar);
 
         picker.addValueBar(valueBar);
         picker.setColor(originalColorOptions[0]);
@@ -116,7 +116,7 @@ public class PointColorPickerDialog extends DialogFragment {
         };
 
         for (int i = 0; i < NUMBER_OF_COLORS; i++) {
-            ImageView iv = (ImageView)view.findViewById(ids[i]);
+            ImageView iv = view.findViewById(ids[i]);
             iv.setBackgroundColor(colorOptions[i]);
 
             final int index = i;

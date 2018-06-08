@@ -32,11 +32,11 @@ public class MainDataFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_main_data, container, false);
         viewExists = true;
 
-        btnPoint = (Button)view.findViewById(R.id.mainFragDataBtnPoints);
-        btnPoly = (Button)view.findViewById(R.id.mainFragDataBtnPolygons);
-        btnMeta = (Button)view.findViewById(R.id.mainFragDataBtnMetadata);
-        btnProj = (Button)view.findViewById(R.id.mainFragDataBtnProjectInfo);
-        btnTable = (Button)view.findViewById(R.id.mainFragDataBtnPointTable);
+        btnPoint = view.findViewById(R.id.mainFragDataBtnPoints);
+        btnPoly = view.findViewById(R.id.mainFragDataBtnPolygons);
+        btnMeta = view.findViewById(R.id.mainFragDataBtnMetadata);
+        btnProj = view.findViewById(R.id.mainFragDataBtnProjectInfo);
+        btnTable = view.findViewById(R.id.mainFragDataBtnPointTable);
 
         enableButtons(enabled);
 

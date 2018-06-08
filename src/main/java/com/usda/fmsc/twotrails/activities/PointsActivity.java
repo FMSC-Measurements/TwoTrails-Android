@@ -422,7 +422,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         pointSectionsPagerAdapter = new PointsPagerAdapter(getSupportFragmentManager());
         pointSectionsPagerAdapter.saveFragmentStates(false);
 
-        pointViewPager = (ViewPager)findViewById(R.id.pointsViewPager);
+        pointViewPager = findViewById(R.id.pointsViewPager);
 
         if (pointViewPager != null) {
             pointViewPager.setAdapter(pointSectionsPagerAdapter);
@@ -432,8 +432,8 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         bitmapManager = new BitmapManager(getResources());
 
         //region Main Buttons
-        fabAqr = (FloatingActionButton)findViewById(R.id.pointsFabAqr);
-        fabMenu = (MSFloatingActionButton)findViewById(R.id.pointsFabMenu);
+        fabAqr = findViewById(R.id.pointsFabAqr);
+        fabMenu = findViewById(R.id.pointsFabMenu);
         View overlay = findViewById(R.id.overlay);
         View sheetView = findViewById(R.id.fab_sheet);
 
@@ -486,7 +486,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
         polyAdapter.setDropDownViewResource(R.layout.list_item_fill);
 
-        final AppCompatSpinner spinnerPoly = (AppCompatSpinner)findViewById(R.id.pointsToolBarSpinnerPoly);
+        final AppCompatSpinner spinnerPoly = findViewById(R.id.pointsToolBarSpinnerPoly);
         if (spinnerPoly != null) {
             spinnerPoly.setAdapter(polyAdapter);
 
@@ -526,7 +526,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         //endregion
 
         //region Transitions
-        slexAqr = (SheetLayoutEx)findViewById(R.id.pointsSLExAqr);
+        slexAqr = findViewById(R.id.pointsSLExAqr);
         if (slexAqr != null) {
             slexAqr.setFab(fabAqr);
             slexAqr.setFabAnimationEndListener(new SheetLayoutEx.OnFabAnimationEndListener() {
@@ -537,7 +537,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
             });
         }
 
-        slexCreate = (SheetLayoutEx)findViewById(R.id.pointsSLExCreate);
+        slexCreate = findViewById(R.id.pointsSLExCreate);
         if (slexCreate != null) {
             slexCreate.setFab(fabMenu);
             slexCreate.setFabAnimationEndListener(new SheetLayoutEx.OnFabAnimationEndListener() {
@@ -565,7 +565,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         //endregion
 
         //region Media Layouts
-        pmbMedia = (PopupMenuButton)findViewById(R.id.pmdMenu);
+        pmbMedia = findViewById(R.id.pmdMenu);
         if (pmbMedia != null) {
             if (!AndroidUtils.Device.isCameraAvailable(PointsActivity.this)) {
                 pmbMedia.setItemEnabled(R.id.ctx_menu_capture, false);
@@ -574,12 +574,12 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
             pmbMedia.setListener(menuPopupListener);
         }
 
-        tvPmdTitle = (TextView)findViewById(R.id.pmdTitle);
+        tvPmdTitle = findViewById(R.id.pmdTitle);
 
-        slidingLayout = (SlidingUpPanelLayout) findViewById(R.id.pointSlidingPanelLayout);
+        slidingLayout = findViewById(R.id.pointSlidingPanelLayout);
         pmdScroller = findViewById(R.id.pmdScroller);
         final View layMDH = findViewById(R.id.pmdHeader);
-        rvMedia = (RecyclerViewEx) findViewById(R.id.pmdRvMedia);
+        rvMedia = findViewById(R.id.pmdRvMedia);
         if (rvMedia != null) {
             rvMedia.setViewHasFooter(true);
             rvMedia.setLayoutManager(new LinearLayoutManagerWithSmoothScroller(this, LinearLayoutManager.HORIZONTAL, false));
@@ -587,7 +587,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
             rvMedia.setItemAnimator(new FadeInAnimator());
         }
 
-        mediaViewPager = (ViewPager)findViewById(R.id.pmdViewPager);
+        mediaViewPager = findViewById(R.id.pmdViewPager);
         if (slidingLayout != null && layMDH != null && pmdScroller != null && mediaViewPager != null) {
             collapsedHeight = AndroidUtils.Convert.dpToPx(this, 50);
 
@@ -651,7 +651,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         }
 
 
-        ivFullscreen = (ImageView)findViewById(R.id.pmdIvFullscreen);
+        ivFullscreen = findViewById(R.id.pmdIvFullscreen);
         if (ivFullscreen != null) {
             ivFullscreen.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -2497,31 +2497,26 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
     }
 
     public void btnPointInfo(View view) {
-        try {
-            PointEditorDialog dialog = PointEditorDialog.newInstance(_CurrentPoint.getCN(), _CurrentPoint.getPID(), _CurrentPoint.getMetadataCN(), _MetaData);
+        PointEditorDialog dialog = PointEditorDialog.newInstance(_CurrentPoint.getCN(), _CurrentPoint.getPID(), _CurrentPoint.getMetadataCN(), _MetaData);
 
-            dialog.setEditPointListener(new PointEditorDialog.PointEditorListener() {
-                @Override
-                public void onEdited(String cn, int pid, String metacn) {
-                    if (_CurrentPoint.getCN().equals(cn)) {
-                        _CurrentPoint.setPID(pid);
-                        _CurrentPoint.setMetadataCN(metacn);
+        dialog.setEditPointListener(new PointEditorDialog.PointEditorListener() {
+            @Override
+            public void onEdited(String cn, int pid, String metacn) {
+                if (_CurrentPoint.getCN().equals(cn)) {
+                    _CurrentPoint.setPID(pid);
+                    _CurrentPoint.setMetadataCN(metacn);
 
-                        onPointUpdate();
-                    }
+                    onPointUpdate();
                 }
+            }
 
-                @Override
-                public void onCanceled() {
+            @Override
+            public void onCanceled() {
 
-                }
-            });
+            }
+        });
 
-            dialog.show(getSupportFragmentManager(), "POINT_EDITOR");
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        dialog.show(getSupportFragmentManager(), "POINT_EDITOR");
     }
 
     //region Add Points

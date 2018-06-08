@@ -111,13 +111,13 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
         progressLayout = findViewById(R.id.progressLayout);
 
         // Set up the ViewPager with the sections adapter.
-        mViewPager = (ViewPager) findViewById(R.id.mainViewPager);
+        mViewPager = findViewById(R.id.mainViewPager);
         if (mViewPager != null) {
             mViewPager.setAdapter(mTabsPagerAdapter);
         }
 
         //Setup Tabs
-        TabLayout tabLayout = (TabLayout)findViewById(R.id.mainTabs);
+        TabLayout tabLayout = findViewById(R.id.mainTabs);
         if (tabLayout != null) {
             tabLayout.setupWithViewPager(mViewPager);
         }
