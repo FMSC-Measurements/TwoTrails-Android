@@ -275,25 +275,25 @@ public class PolyMarkerMapRvAdapter extends RecyclerView.Adapter<PolyMarkerMapRv
         PolyMarkerMapViewHolder(View itemView) {
             super(itemView);
 
-            tvPolyName = (TextView)itemView.findViewById(R.id.pmcTvPolyName);
+            tvPolyName = itemView.findViewById(R.id.pmcTvPolyName);
 
             layHeader = itemView.findViewById(R.id.pmcLayHeader);
             layContent = itemView.findViewById(R.id.pmcLayPolyContent);
-            tcbPoly = (MultiStateTouchCheckBox)itemView.findViewById(R.id.pmcTcbPoly);
+            tcbPoly = itemView.findViewById(R.id.pmcTcbPoly);
 
-            fcbAdjBnd = (FlipCheckBoxEx)itemView.findViewById(R.id.pmcFcbAdjBnd);
-            fcbAdjNav = (FlipCheckBoxEx)itemView.findViewById(R.id.pmcFcbAdjNav);
-            fcbUnAdjBnd = (FlipCheckBoxEx)itemView.findViewById(R.id.pmcFcbUnadjBnd);
-            fcbUnAdjNav = (FlipCheckBoxEx)itemView.findViewById(R.id.pmcFcbUnadjNav);
-            fcbAdjBndPts = (FlipCheckBoxEx)itemView.findViewById(R.id.pmcFcbAdjBndPts);
-            fcbAdjNavPts = (FlipCheckBoxEx)itemView.findViewById(R.id.pmcFcbAdjNavPts);
-            fcbUnAdjBndPts = (FlipCheckBoxEx)itemView.findViewById(R.id.pmcFcbUnadjBndPts);
-            fcbUnAdjNavPts = (FlipCheckBoxEx)itemView.findViewById(R.id.pmcFcbUnadjNavPts);
-            fcbAdjMiscPts = (FlipCheckBoxEx)itemView.findViewById(R.id.pmcFcbAdjMiscPts);
-            fcbUnAdjMiscPts = (FlipCheckBoxEx)itemView.findViewById(R.id.pmcFcbUnadjMiscPts);
-            fcbWayPts = (FlipCheckBoxEx)itemView.findViewById(R.id.pmcFcbWayPts);
+            fcbAdjBnd = itemView.findViewById(R.id.pmcFcbAdjBnd);
+            fcbAdjNav = itemView.findViewById(R.id.pmcFcbAdjNav);
+            fcbUnAdjBnd = itemView.findViewById(R.id.pmcFcbUnadjBnd);
+            fcbUnAdjNav = itemView.findViewById(R.id.pmcFcbUnadjNav);
+            fcbAdjBndPts = itemView.findViewById(R.id.pmcFcbAdjBndPts);
+            fcbAdjNavPts = itemView.findViewById(R.id.pmcFcbAdjNavPts);
+            fcbUnAdjBndPts = itemView.findViewById(R.id.pmcFcbUnadjBndPts);
+            fcbUnAdjNavPts = itemView.findViewById(R.id.pmcFcbUnadjNavPts);
+            fcbAdjMiscPts = itemView.findViewById(R.id.pmcFcbAdjMiscPts);
+            fcbUnAdjMiscPts = itemView.findViewById(R.id.pmcFcbUnadjMiscPts);
+            fcbWayPts = itemView.findViewById(R.id.pmcFcbWayPts);
 
-            pmbOptions = (PopupMenuButton) itemView.findViewById(R.id.pmcPmbMenu);
+            pmbOptions = itemView.findViewById(R.id.pmcPmbMenu);
 
             layHeader.setOnClickListener(new View.OnClickListener() {
                 @Override

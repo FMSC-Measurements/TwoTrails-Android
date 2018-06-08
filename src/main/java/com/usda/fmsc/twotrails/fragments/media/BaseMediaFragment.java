@@ -51,9 +51,9 @@ public abstract class BaseMediaFragment extends Fragment implements PointMediaLi
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = onCreateViewEx(inflater, container, savedInstanceState);
 
-        txtName = (EditText)view.findViewById(R.id.pmdFragTxtName);
-        txtCmt = (EditText)view.findViewById(R.id.pmdFragTxtCmt);
-        tvFile = (TextView) view.findViewById(R.id.pmdFragTvFile);
+        txtName = view.findViewById(R.id.pmdFragTxtName);
+        txtCmt = view.findViewById(R.id.pmdFragTxtCmt);
+        tvFile = view.findViewById(R.id.pmdFragTvFile);
 
         setView();
 

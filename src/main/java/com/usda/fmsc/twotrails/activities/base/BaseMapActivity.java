@@ -246,25 +246,25 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
     }
 
     private void setupUI() {
-        tvNavPid = (TextView)findViewById(R.id.mapNavTvPid);
-        tvNavPoly = (TextView)findViewById(R.id.mapNavTvPoly);
-        ivArrow = (ImageView)findViewById(R.id.mapNavIbArrow);
+        tvNavPid = findViewById(R.id.mapNavTvPid);
+        tvNavPoly = findViewById(R.id.mapNavTvPoly);
+        ivArrow = findViewById(R.id.mapNavIbArrow);
 
-        btnFromPoly = (Button)findViewById(R.id.mapNavBtnFromPoly);
-        btnFromPoint = (Button)findViewById(R.id.mapNavBtnFromPoint);
-        btnToPoly = (Button)findViewById(R.id.mapNavBtnToPoly);
-        btnToPoint = (Button)findViewById(R.id.mapNavBtnToPoint);
+        btnFromPoly = findViewById(R.id.mapNavBtnFromPoly);
+        btnFromPoint = findViewById(R.id.mapNavBtnFromPoint);
+        btnToPoly = findViewById(R.id.mapNavBtnToPoly);
+        btnToPoint = findViewById(R.id.mapNavBtnToPoint);
 
-        tvNavDistFt = (TextView)findViewById(R.id.mapNavTvDistFeet);
-        tvNavDistMt = (TextView)findViewById(R.id.mapNavTvDistMeters);
-        tvNavAzTrue = (TextView)findViewById(R.id.mapNavTvAzTrue);
-        tvNavAzMag = (TextView)findViewById(R.id.mapNavTvAzMag);
+        tvNavDistFt = findViewById(R.id.mapNavTvDistFeet);
+        tvNavDistMt = findViewById(R.id.mapNavTvDistMeters);
+        tvNavAzTrue = findViewById(R.id.mapNavTvAzTrue);
+        tvNavAzMag = findViewById(R.id.mapNavTvAzMag);
 
-        baseMapDrawer = (DrawerLayout)findViewById(R.id.mapDrawer);
+        baseMapDrawer = findViewById(R.id.mapDrawer);
     }
 
     private void setupPolygonOptionsUI() {
-        RecyclerView rvPolyOptions = (RecyclerView)findViewById(R.id.mapRvPolyOptions);
+        RecyclerView rvPolyOptions = findViewById(R.id.mapRvPolyOptions);
 
         if (rvPolyOptions != null) {
             rvPolyOptions.setHasFixedSize(true);
@@ -276,7 +276,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
             rvPolyOptions.setItemAnimator(new SlideInUpAnimator());
             rvPolyOptions.setAdapter(pmmAdapter);
 
-            slidingLayout = (SlidingUpPanelLayout)findViewById(R.id.mapSlidingPanelLayout);
+            slidingLayout = findViewById(R.id.mapSlidingPanelLayout);
             slidingLayout.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
                 @Override
                 public void onPanelSlide(View panel, float slideOffset) {
@@ -347,7 +347,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
         LayoutInflater inflater = LayoutInflater.from(this);
 
         View view = inflater.inflate(layoutResID, null);
-        FrameLayout container = (FrameLayout)findViewById(R.id.contentContainer);
+        FrameLayout container = findViewById(R.id.contentContainer);
 
         if (view != null) {
             if (container != null) {
@@ -373,7 +373,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
         }
 
         if (getMapRightDrawerLayoutId() != 0) {
-            FrameLayout rightDrawer = (FrameLayout)findViewById(R.id.mapRightDrawer);
+            FrameLayout rightDrawer = findViewById(R.id.mapRightDrawer);
             view = inflater.inflate(getMapRightDrawerLayoutId(), null);
             if (view != null) {
                 rightDrawer.addView(view);
@@ -1189,19 +1189,19 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
 
         View layHeader = findViewById(R.id.mpcLayHeader);
         layContent = findViewById(R.id.mpcLayPolyContent);
-        tcbPoly = (MultiStateTouchCheckBox)findViewById(R.id.mpcTcbPoly);
+        tcbPoly = findViewById(R.id.mpcTcbPoly);
 
-        tcbAdjBnd = (MultiStateTouchCheckBox)findViewById(R.id.mpcTcbAdjBnd);
-        tcbAdjNav = (MultiStateTouchCheckBox)findViewById(R.id.mpcTcbAdjNav);
-        tcbUnAdjBnd = (MultiStateTouchCheckBox)findViewById(R.id.mpcTcbUnadjBnd);
-        tcbUnAdjNav = (MultiStateTouchCheckBox)findViewById(R.id.mpcTcbUnadjNav);
-        tcbAdjBndPts = (MultiStateTouchCheckBox)findViewById(R.id.mpcTcbAdjBndPts);
-        tcbAdjNavPts = (MultiStateTouchCheckBox)findViewById(R.id.mpcTcbAdjNavPts);
-        tcbUnAdjBndPts = (MultiStateTouchCheckBox)findViewById(R.id.mpcTcbUnadjBndPts);
-        tcbUnAdjNavPts = (MultiStateTouchCheckBox)findViewById(R.id.mpcTcbUnadjNavPts);
-        tcbAdjMiscPts = (MultiStateTouchCheckBox)findViewById(R.id.mpcTcbAdjMiscPts);
-        tcbUnAdjMiscPts = (MultiStateTouchCheckBox)findViewById(R.id.mpcTcbUnadjMiscPts);
-        tcbWayPts = (MultiStateTouchCheckBox)findViewById(R.id.mpcTcbWayPts);
+        tcbAdjBnd = findViewById(R.id.mpcTcbAdjBnd);
+        tcbAdjNav = findViewById(R.id.mpcTcbAdjNav);
+        tcbUnAdjBnd = findViewById(R.id.mpcTcbUnadjBnd);
+        tcbUnAdjNav = findViewById(R.id.mpcTcbUnadjNav);
+        tcbAdjBndPts = findViewById(R.id.mpcTcbAdjBndPts);
+        tcbAdjNavPts = findViewById(R.id.mpcTcbAdjNavPts);
+        tcbUnAdjBndPts = findViewById(R.id.mpcTcbUnadjBndPts);
+        tcbUnAdjNavPts = findViewById(R.id.mpcTcbUnadjNavPts);
+        tcbAdjMiscPts = findViewById(R.id.mpcTcbAdjMiscPts);
+        tcbUnAdjMiscPts = findViewById(R.id.mpcTcbUnadjMiscPts);
+        tcbWayPts = findViewById(R.id.mpcTcbWayPts);
 
         tcbAdjBnd.setCheckBoxDrawable(new PolygonProgressDrawable(5, 90));
         tcbUnAdjBnd.setCheckBoxDrawable(new UnadjustedDrawable());

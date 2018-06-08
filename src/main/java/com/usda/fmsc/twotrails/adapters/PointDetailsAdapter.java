@@ -50,8 +50,8 @@ public class PointDetailsAdapter extends SelectableArrayAdapter<TtPoint> {
             mViewHolder = new ViewHolder();
             convertView.setTag(mViewHolder);
 
-            mViewHolder.text = (TextView)convertView.findViewById(R.id.text1);
-            mViewHolder.image = (ImageView)convertView.findViewById(R.id.image);
+            mViewHolder.text = convertView.findViewById(R.id.text1);
+            mViewHolder.image = convertView.findViewById(R.id.image);
         } else {
             mViewHolder = (ViewHolder) convertView.getTag();
         }

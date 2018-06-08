@@ -79,19 +79,17 @@ public class AcquireGpsActivity extends AcquireGpsMapActivity {
                 actionBar.setDisplayShowTitleEnabled(false);
             }
 
-            tvLogged = (TextView)findViewById(R.id.acquireGpsToolbarLblLoggedValue);
-            tvRecv = (TextView)findViewById(R.id.acquireGpsToolbarLblReceivedValue);
+            tvLogged = findViewById(R.id.acquireGpsToolbarLblLoggedValue);
+            tvRecv = findViewById(R.id.acquireGpsToolbarLblReceivedValue);
 
-            btnLog = (Button)findViewById(R.id.aqrBtnLog);
-            btnCalc = (Button)findViewById(R.id.aqrBtnCalc);
+            btnLog = findViewById(R.id.aqrBtnLog);
+            btnCalc = findViewById(R.id.aqrBtnCalc);
 
             if (_Bursts.size() > 0) {
                 btnCalc.setEnabled(true);
             } else {
                 btnCalc.setBackgroundColor(AndroidUtils.UI.getColor(this, R.color.primaryLighter));
             }
-
-            //setupMap();
         }
     }
 

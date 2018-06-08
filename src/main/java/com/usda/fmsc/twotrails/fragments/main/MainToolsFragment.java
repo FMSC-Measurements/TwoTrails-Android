@@ -34,13 +34,13 @@ public class MainToolsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_main_tools, container, false);
         viewExists = true;
 
-        btnMap = (Button)view.findViewById(R.id.mainFragToolsBtnMap);
-        btnGEarth = (Button)view.findViewById(R.id.mainFragToolsBtnGoogleEarth);
-        btnHAID = (Button)view.findViewById(R.id.mainFragToolsBtnHAID);
-        btnExport = (Button)view.findViewById(R.id.mainFragToolsBtnExport);
-        btnPlotGrid = (Button)view.findViewById(R.id.mainFragToolsBtnPlotGrid);
-        btnGpsLogger = (Button)view.findViewById(R.id.mainFragToolsBtnGpsLogger);
-        btnGpsStatus = (Button)view.findViewById(R.id.mainFragToolsBtnGpsStatus);
+        btnMap = view.findViewById(R.id.mainFragToolsBtnMap);
+        btnGEarth = view.findViewById(R.id.mainFragToolsBtnGoogleEarth);
+        btnHAID = view.findViewById(R.id.mainFragToolsBtnHAID);
+        btnExport = view.findViewById(R.id.mainFragToolsBtnExport);
+        btnPlotGrid = view.findViewById(R.id.mainFragToolsBtnPlotGrid);
+        btnGpsLogger = view.findViewById(R.id.mainFragToolsBtnGpsLogger);
+        btnGpsStatus = view.findViewById(R.id.mainFragToolsBtnGpsStatus);
         viewTest = view.findViewById(R.id.mainFragToolsTest);
 
         enableButtons(enabled);

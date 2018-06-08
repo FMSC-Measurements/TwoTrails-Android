@@ -653,10 +653,8 @@ public class TtUtils {
                     Double acc = gps.getManualAccuracy();
                     Double oAcc = origGps.getManualAccuracy();
 
-                    if ((acc == null ^ oAcc == null) ||
-                        (acc != null && !Math.cmpa(acc, oAcc))) {
-                        return true;
-                    }
+                    return (acc == null ^ oAcc == null) ||
+                            (acc != null && !Math.cmpa(acc, oAcc));
                 } else if (point.isTravType()) {
                     TravPoint trav = (TravPoint) point;
                     TravPoint origTrav = (TravPoint) origPoint;
@@ -687,9 +685,7 @@ public class TtUtils {
                     origValue = origTrav.getSlopeAngle();
                     value = trav.getSlopeAngle();
 
-                    if (!Math.cmpa(value, origValue)) {
-                        return true;
-                    }
+                    return !Math.cmpa(value, origValue);
                 } else if (point.getOp() == OpType.Quondam) {
                     QuondamPoint qp = (QuondamPoint)point;
                     QuondamPoint origQp = (QuondamPoint)origPoint;
@@ -702,10 +698,8 @@ public class TtUtils {
                     Double origValue = origQp.getManualAccuracy();
                     Double value = qp.getManualAccuracy();
 
-                    if ((value == null ^ origValue == null) ||
-                            value != null && !Math.cmpa(value, origValue)) {
-                        return true;
-                    }
+                    return (value == null ^ origValue == null) ||
+                            value != null && !Math.cmpa(value, origValue);
                 }
             }
 
@@ -1777,8 +1771,8 @@ public class TtUtils {
         public static View createInfoWindow(LayoutInflater inflater, IMultiMapFragment.MarkerData markerData) {
             View view = inflater.inflate(R.layout.content_map_popup, null);
 
-            TextView title = (TextView)view.findViewById(R.id.title);
-            TextView content = (TextView)view.findViewById(R.id.text1);
+            TextView title = view.findViewById(R.id.title);
+            TextView content = view.findViewById(R.id.text1);
 
             title.setText(String.format("%d", markerData.Point.getPID()));
             content.setText(getInfoWindowSnippet(markerData.Point, markerData.Adjusted, markerData.Metadata));

@@ -265,14 +265,14 @@ public class PlotGenerator extends AsyncTask<PlotGenerator.PlotParams, Void, TtP
     }
 
     public static class PlotParams {
-        public String PolyName;
-        public TtPoint StartPoint;
-        public List<TtPoint> Points;
-        public int GridX, GridY;
-        public Integer Angle, SampleValue;
-        public TtMetadata Metadata;
-        public boolean Inside, Sample, SamplePercent;
-        public Dist DistUom;
+        private String PolyName;
+        private TtPoint StartPoint;
+        private List<TtPoint> Points;
+        private int GridX, GridY;
+        private Integer Angle, SampleValue;
+        private TtMetadata Metadata;
+        private boolean Inside, Sample, SamplePercent;
+        private Dist DistUom;
 
         public PlotParams(String polyName, TtPoint startPoint, List<TtPoint> points, Dist distUom,
                           int gridX, int gridY, Integer angle, TtMetadata metadata, boolean inside, boolean sample) {
@@ -286,6 +286,14 @@ public class PlotGenerator extends AsyncTask<PlotGenerator.PlotParams, Void, TtP
             Metadata = metadata;
             Inside = inside;
             Sample = sample;
+        }
+
+        public void setSampleValue(int sampleValue) {
+            SampleValue = sampleValue;
+        }
+
+        public void setSamplePercent(boolean samplePercent) {
+            SamplePercent = samplePercent;
         }
     }
 

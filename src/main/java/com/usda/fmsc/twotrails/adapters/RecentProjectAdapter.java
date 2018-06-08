@@ -60,7 +60,7 @@ public class RecentProjectAdapter extends BaseAdapter {
 
     // or you can try better way
     private TextView detail(View v, int resId, String text) {
-        TextView tv = (TextView) v.findViewById(resId);
+        TextView tv = v.findViewById(resId);
         tv.setText(text);
         return tv;
     }

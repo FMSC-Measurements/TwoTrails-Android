@@ -139,15 +139,15 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
                     DrawerLayout.LOCK_MODE_LOCKED_OPEN : DrawerLayout.LOCK_MODE_LOCKED_CLOSED,
                 GravityCompat.END);
 
-        Toolbar tbCalc = (Toolbar)findViewById(R.id.toolbarCalc);
+        Toolbar tbCalc = findViewById(R.id.toolbarCalc);
         if (tbCalc != null)
             tbCalc.setTitle("Average NMEA");
 
-        tvLogged = (TextView)findViewById(R.id.acquireGpsToolbarLblLoggedValue);
-        tvRecv = (TextView)findViewById(R.id.acquireGpsToolbarLblReceivedValue);
+        tvLogged = findViewById(R.id.acquireGpsToolbarLblLoggedValue);
+        tvRecv = findViewById(R.id.acquireGpsToolbarLblReceivedValue);
 
-        btnLog = (Button)findViewById(R.id.aqrBtnLog);
-        btnCalc = (Button)findViewById(R.id.aqrBtnCalc);
+        btnLog = findViewById(R.id.aqrBtnLog);
+        btnCalc = findViewById(R.id.aqrBtnCalc);
 
         if (_Bursts.size() > 0) {
             btnCalc.setEnabled(true);
@@ -160,33 +160,33 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
         options.DopValue = Global.Settings.DeviceSettings.getGpsFilterDopValue();
         options.FixType = Global.Settings.DeviceSettings.getGpsFilterFixType();
 
-        btnCreate = (Button)findViewById(R.id.calcBtnCreate);
+        btnCreate = findViewById(R.id.calcBtnCreate);
 
-        chkG1 = (CheckBox)findViewById(R.id.calcChkGroup1);
-        chkG2 = (CheckBox)findViewById(R.id.calcChkGroup2);
-        chkG3 = (CheckBox)findViewById(R.id.calcChkGroup3);
+        chkG1 = findViewById(R.id.calcChkGroup1);
+        chkG2 = findViewById(R.id.calcChkGroup2);
+        chkG3 = findViewById(R.id.calcChkGroup3);
 
-        tvUtmX1 = (TextView)findViewById(R.id.calcTvUtmXG1);
-        tvUtmX2 = (TextView)findViewById(R.id.calcTvUtmXG2);
-        tvUtmX3 = (TextView)findViewById(R.id.calcTvUtmXG3);
-        tvUtmXF = (TextView)findViewById(R.id.calcTvUtmXF);
+        tvUtmX1 = findViewById(R.id.calcTvUtmXG1);
+        tvUtmX2 = findViewById(R.id.calcTvUtmXG2);
+        tvUtmX3 = findViewById(R.id.calcTvUtmXG3);
+        tvUtmXF = findViewById(R.id.calcTvUtmXF);
 
-        tvUtmY1 = (TextView)findViewById(R.id.calcTvUtmYG1);
-        tvUtmY2 = (TextView)findViewById(R.id.calcTvUtmYG2);
-        tvUtmY3 = (TextView)findViewById(R.id.calcTvUtmYG3);
-        tvUtmYF = (TextView)findViewById(R.id.calcTvUtmYF);
+        tvUtmY1 = findViewById(R.id.calcTvUtmYG1);
+        tvUtmY2 = findViewById(R.id.calcTvUtmYG2);
+        tvUtmY3 = findViewById(R.id.calcTvUtmYG3);
+        tvUtmYF = findViewById(R.id.calcTvUtmYF);
 
-        tvNssda1 = (TextView)findViewById(R.id.calcTvNssdaG1);
-        tvNssda2 = (TextView)findViewById(R.id.calcTvNssdaG2);
-        tvNssda3 = (TextView)findViewById(R.id.calcTvNssdaG3);
-        tvNssdaF = (TextView)findViewById(R.id.calcTvNssdaF);
+        tvNssda1 = findViewById(R.id.calcTvNssdaG1);
+        tvNssda2 = findViewById(R.id.calcTvNssdaG2);
+        tvNssda3 = findViewById(R.id.calcTvNssdaG3);
+        tvNssdaF = findViewById(R.id.calcTvNssdaF);
 
-        Spinner spDop = (Spinner)findViewById(R.id.calcSpinnerDopType);
-        spFix = (Spinner)findViewById(R.id.calcSpinnerFix);
+        Spinner spDop = findViewById(R.id.calcSpinnerDopType);
+        spFix = findViewById(R.id.calcSpinnerFix);
 
-        txtDop = (EditText)findViewById(R.id.calcTxtDopValue);
-        EditText txtGroup = (EditText)findViewById(R.id.calcTxtGroup);
-        EditText txtRange = (EditText)findViewById(R.id.calcTxtRange);
+        txtDop = findViewById(R.id.calcTxtDopValue);
+        EditText txtGroup = findViewById(R.id.calcTxtGroup);
+        EditText txtRange = findViewById(R.id.calcTxtRange);
         //endregion
 
         if (txtRange != null) {
@@ -309,7 +309,7 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
             }
         });
 
-        nmeaPointsView = (NmeaPointsView)findViewById(R.id.calcNPV);
+        nmeaPointsView = findViewById(R.id.calcNPV);
         //endregion
     }
 

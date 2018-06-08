@@ -142,9 +142,9 @@ public class ArcGisMapSelectionAdapter extends ArrayAdapter<ArcGisMapLayer> {
         TextView tvName;
 
         public MapViewHolder(View view) {
-            ivStatusIcon = (ImageView)view.findViewById(R.id.mhIcon);
-            ofmbMenu = (PopupMenuButton) view.findViewById(R.id.mhMenu);
-            tvName = (TextView)view.findViewById(R.id.mhName);
+            ivStatusIcon = view.findViewById(R.id.mhIcon);
+            ofmbMenu = view.findViewById(R.id.mhMenu);
+            tvName = view.findViewById(R.id.mhName);
         }
     }
 

@@ -127,9 +127,9 @@ public class TableViewActivity extends CustomToolbarActivity {
 
         activity = this;
 
-        ssvPoints = (SpreadsheetView)findViewById(R.id.teSsvPoints);
+        ssvPoints = findViewById(R.id.teSsvPoints);
         ssvPoints.setFinalLayout();
-        progressBar = (MaterialProgressBar)findViewById(R.id.teProgress);
+        progressBar = findViewById(R.id.teProgress);
         filterView = findViewById(R.id.teLayFilters);
 
         colorNotPressed = AndroidUtils.UI.getColor(this, R.color.primaryLight);
@@ -604,7 +604,7 @@ public class TableViewActivity extends CustomToolbarActivity {
         }
 
         private void setText(int row, int columnIndex, View view) {
-            TextView tv = ((TextView) view.findViewById(android.R.id.text1));
+            TextView tv = view.findViewById(android.R.id.text1);
 
             String value = getValue(row, columnIndex);
 

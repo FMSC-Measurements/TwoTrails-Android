@@ -45,20 +45,20 @@ public class ExportActivity extends CustomToolbarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_export);
 
-        FloatingActionButton fabExport = (FloatingActionButton)findViewById(R.id.exportFabExport);
-        progCircle = (FABProgressCircleEx)findViewById(R.id.exportFabExportProgressCircle);
+        FloatingActionButton fabExport = findViewById(R.id.exportFabExport);
+        progCircle = findViewById(R.id.exportFabExportProgressCircle);
 
-        chkAll = (MultiStateTouchCheckBox)findViewById(R.id.exportChkAll);
-        chkPc = (MultiStateTouchCheckBox)findViewById(R.id.exportChkPC);
-        chkPoints = (MultiStateTouchCheckBox)findViewById(R.id.exportChkPoints);
-        chkPolys = (MultiStateTouchCheckBox)findViewById(R.id.exportChkPolys);
-        chkMeta = (MultiStateTouchCheckBox)findViewById(R.id.exportChkMeta);
-        chkImgInfo = (MultiStateTouchCheckBox)findViewById(R.id.exportChkImgInfo);
-        chkProj = (MultiStateTouchCheckBox)findViewById(R.id.exportChkProject);
-        chkNmea = (MultiStateTouchCheckBox)findViewById(R.id.exportChkNMEA);
-        chkKmz = (MultiStateTouchCheckBox)findViewById(R.id.exportChkKMZ);
-        chkGpx = (MultiStateTouchCheckBox)findViewById(R.id.exportChkGPX);
-        chkSum = (MultiStateTouchCheckBox)findViewById(R.id.exportChkSummary);
+        chkAll = findViewById(R.id.exportChkAll);
+        chkPc = findViewById(R.id.exportChkPC);
+        chkPoints = findViewById(R.id.exportChkPoints);
+        chkPolys = findViewById(R.id.exportChkPolys);
+        chkMeta = findViewById(R.id.exportChkMeta);
+        chkImgInfo = findViewById(R.id.exportChkImgInfo);
+        chkProj = findViewById(R.id.exportChkProject);
+        chkNmea = findViewById(R.id.exportChkNMEA);
+        chkKmz = findViewById(R.id.exportChkKMZ);
+        chkGpx = findViewById(R.id.exportChkGPX);
+        chkSum = findViewById(R.id.exportChkSummary);
 
         chkAll.setOnCheckedStateChangeListener(new MultiStateTouchCheckBox.OnCheckedStateChangeListener() {
             @Override

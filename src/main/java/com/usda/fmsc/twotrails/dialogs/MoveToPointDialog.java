@@ -50,8 +50,8 @@ public class MoveToPointDialog extends DialogFragment {
 
         builder.setView(view);
 
-        ImageButton fButton = (ImageButton)view.findViewById(R.id.diagMoveToLocFirst);
-        ImageButton lButton = (ImageButton)view.findViewById(R.id.diagMoveToLocLast);
+        ImageButton fButton = view.findViewById(R.id.diagMoveToLocFirst);
+        ImageButton lButton = view.findViewById(R.id.diagMoveToLocLast);
 
         if (currentIndex < 1 && fButton != null) {
             fButton.setEnabled(false);
@@ -64,7 +64,7 @@ public class MoveToPointDialog extends DialogFragment {
         }
 
 
-        final ListView listView = (ListView)view.findViewById(R.id.diagEitableListListValues);
+        final ListView listView = view.findViewById(R.id.diagEitableListListValues);
 
         PointDetailsAdapter adapter = new PointDetailsAdapter(getActivity(), points, AppUnits.IconColor.Primary);
         @ColorInt int transparent = AndroidUtils.UI.getColor(getContext(), android.R.color.transparent);

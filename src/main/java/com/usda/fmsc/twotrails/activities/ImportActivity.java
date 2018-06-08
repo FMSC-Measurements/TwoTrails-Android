@@ -130,8 +130,8 @@ public class ImportActivity extends CustomToolbarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_import);
 
-        fabImport = (FloatingActionButton)findViewById(R.id.importFabImport);
-        fabProgCircle = (FABProgressCircleEx)findViewById(R.id.importFabImportProgressCircle);
+        fabImport = findViewById(R.id.importFabImport);
+        fabProgCircle = findViewById(R.id.importFabImportProgressCircle);
 
         fabProgCircle.attachListener(new FABProgressCircleEx.FABProgressListener() {
             @Override
@@ -140,7 +140,7 @@ public class ImportActivity extends CustomToolbarActivity {
             }
         });
 
-        txtFile = (EditText)findViewById(R.id.importTxtFile);
+        txtFile = findViewById(R.id.importTxtFile);
         AndroidUtils.UI.removeSelectionOnUnfocus(txtFile);
 
 

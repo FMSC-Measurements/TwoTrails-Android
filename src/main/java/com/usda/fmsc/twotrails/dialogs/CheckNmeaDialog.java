@@ -49,7 +49,7 @@ public class CheckNmeaDialog extends DialogFragment implements GpsService.Listen
 
         final View view = inflater.inflate(R.layout.diag_check_nmea, null);
 
-        lvNmea = (ListView)view.findViewById(R.id.diagCheckNmeaList);
+        lvNmea = view.findViewById(R.id.diagCheckNmeaList);
         adapter = new NmeaDetailsAdapter(getContext(), nmeaDetails);
         lvNmea.setAdapter(adapter);
 

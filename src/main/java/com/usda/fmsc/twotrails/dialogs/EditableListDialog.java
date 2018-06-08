@@ -52,7 +52,7 @@ public class EditableListDialog extends DialogFragment {
             selectedItem = StringEx.Empty;
         }
 
-        final EditText editText = (EditText)view.findViewById(R.id.diagEitableListTxtValue);
+        final EditText editText = view.findViewById(R.id.diagEitableListTxtValue);
         editText.setText(selectedItem);
         editText.setSelection(selectedItem.length());
         editText.setInputType(InputType.TYPE_CLASS_TEXT);
@@ -63,7 +63,7 @@ public class EditableListDialog extends DialogFragment {
             }
         });
 
-        final ListView listView = (ListView)view.findViewById(R.id.diagEitableListListValues);
+        final ListView listView = view.findViewById(R.id.diagEitableListListValues);
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), R.layout.list_row_diag_editable);
 
 

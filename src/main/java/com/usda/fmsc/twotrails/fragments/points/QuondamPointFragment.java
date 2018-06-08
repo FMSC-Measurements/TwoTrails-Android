@@ -92,9 +92,9 @@ public class QuondamPointFragment extends BasePointFragment {
             _PolygonNames.add(poly.getName());
         }
 
-        lvPolys = (ListView)view.findViewById(R.id.pointsFragQndmLvPolys);
-        lvPoints = (ListView)view.findViewById(R.id.pointsFragQndmLvPoints);
-        txtManAcc = (EditText)view.findViewById(R.id.pointsFragQndmTxtManAcc);
+        lvPolys = view.findViewById(R.id.pointsFragQndmLvPolys);
+        lvPoints = view.findViewById(R.id.pointsFragQndmLvPoints);
+        txtManAcc = view.findViewById(R.id.pointsFragQndmTxtManAcc);
 
         polysAdapter = new SelectableStringArrayAdapter(getActivity(), android.R.layout.simple_list_item_1, _PolygonNames);
         polysAdapter.setSelectedColor(selectedColor);

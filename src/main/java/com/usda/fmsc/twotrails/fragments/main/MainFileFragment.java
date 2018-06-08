@@ -45,17 +45,17 @@ public class MainFileFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_main_file, container, false);
         viewExists = true;
 
-        tblInfo = (TableLayout)view.findViewById(R.id.mainFragFileTblInfo);
+        tblInfo = view.findViewById(R.id.mainFragFileTblInfo);
 
-        tvDate = (TextView)view.findViewById(R.id.mainFragFileTvDate);
-        tvPolys = (TextView)view.findViewById(R.id.mainFragFileTvPolys);
-        tvPoints = (TextView)view.findViewById(R.id.mainFragFileTvPoints);
-        tvGroups = (TextView)view.findViewById(R.id.mainFragFileTvGroups);
-        tvMeta = (TextView)view.findViewById(R.id.mainFragFileTvMeta);
+        tvDate = view.findViewById(R.id.mainFragFileTvDate);
+        tvPolys = view.findViewById(R.id.mainFragFileTvPolys);
+        tvPoints = view.findViewById(R.id.mainFragFileTvPoints);
+        tvGroups = view.findViewById(R.id.mainFragFileTvGroups);
+        tvMeta = view.findViewById(R.id.mainFragFileTvMeta);
 
-        btnImport = (Button)view.findViewById(R.id.mainFragFileBtnImport);
-        btnDup = (Button)view.findViewById(R.id.mainFragFileBtnDup);
-        btnCleanDb = (Button)view.findViewById(R.id.mainFragFileBtnCleanDb);
+        btnImport = view.findViewById(R.id.mainFragFileBtnImport);
+        btnDup = view.findViewById(R.id.mainFragFileBtnDup);
+        btnCleanDb = view.findViewById(R.id.mainFragFileBtnCleanDb);
         viewCleanDb = view.findViewById(R.id.mainFragFileCleanDb);
 
         enableButtons(enabled);

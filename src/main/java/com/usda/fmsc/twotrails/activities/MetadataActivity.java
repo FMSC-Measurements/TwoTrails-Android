@@ -96,7 +96,6 @@ public class MetadataActivity extends CustomToolbarActivity {
     };
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -113,7 +112,7 @@ public class MetadataActivity extends CustomToolbarActivity {
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
         mSectionsPagerAdapter.saveFragmentStates(false);
 
-        mViewPager = (ViewPager) findViewById(R.id.metaViewPager);
+        mViewPager = findViewById(R.id.metaViewPager);
         if (mViewPager != null) {
             mViewPager.setAdapter(mSectionsPagerAdapter);
             mViewPager.addOnPageChangeListener(onPageChangeListener);
@@ -962,6 +961,7 @@ public class MetadataActivity extends CustomToolbarActivity {
 
     public interface Listener {
         void onLockChange(boolean locked);
+
         void onMetadataUpdated(TtMetadata metadata);
     }
 }

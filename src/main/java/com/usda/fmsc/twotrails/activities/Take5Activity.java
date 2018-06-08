@@ -458,19 +458,19 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
             _Group = new TtGroup(TtGroup.GroupType.Take5);
             Global.getDAL().insertGroup(_Group);
 
-            fabT5 = (FloatingActionButton)findViewById(R.id.take5FabT5);
-            fabSS = (FloatingActionButton)findViewById(R.id.take5FabSideShot);
-            fabCancel = (FloatingActionButton)findViewById(R.id.take5FabCancel);
-            fabSSCommit = (FloatingActionButton)findViewById(R.id.take5FabSideShotCommit);
+            fabT5 = findViewById(R.id.take5FabT5);
+            fabSS = findViewById(R.id.take5FabSideShot);
+            fabCancel = findViewById(R.id.take5FabCancel);
+            fabSSCommit = findViewById(R.id.take5FabSideShotCommit);
 
-            layCardInfo = (LinearLayout)findViewById(R.id.take5LayInfo);
+            layCardInfo = findViewById(R.id.take5LayInfo);
 
             t5pAdapter = new Take5PointsEditRvAdapter(this, _Points, _Metadata);
             linearLayoutManager = new LinearLayoutManagerWithSmoothScroller(this);
 
             cvGpsInfo = findViewById(R.id.take5CardGpsInfo);
 
-            rvPoints = (RecyclerViewEx)findViewById(R.id.take5RvPoints);
+            rvPoints = findViewById(R.id.take5RvPoints);
             if (rvPoints != null) {
                 rvPoints.setViewHasFooter(true);
                 rvPoints.setLayoutManager(linearLayoutManager);
@@ -481,12 +481,12 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                 rvPoints.addOnScrollListener(scrollListener);
             }
 
-            progLay = (RelativeLayout)findViewById(R.id.progressLayout);
-            tvProg = (TextView)findViewById(R.id.take5ProgressText);
+            progLay = findViewById(R.id.progressLayout);
+            tvProg = findViewById(R.id.take5ProgressText);
 
 
             //region Media Layout
-            toolbarMedia = (Toolbar)findViewById(R.id.toolbarMedia);
+            toolbarMedia = findViewById(R.id.toolbarMedia);
             toolbarMedia.setNavigationIcon(AndroidUtils.UI.getDrawable(Take5Activity.this, R.drawable.ic_arrow_back_white_24dp));
             toolbarMedia.setNavigationOnClickListener(new View.OnClickListener() {
                 @Override
@@ -496,7 +496,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                 }
             });
 
-            pmbMedia = (PopupMenuButton)findViewById(R.id.pmdMenu);
+            pmbMedia = findViewById(R.id.pmdMenu);
             if (pmbMedia != null) {
                 cameraSupported = AndroidUtils.Device.isCameraAvailable(Take5Activity.this);
 
@@ -508,7 +508,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                 pmbMedia.setItemEnabled(R.id.ctx_menu_add, false);
             }
             
-            rvMedia = (RecyclerViewEx) findViewById(R.id.pmdRvMedia);
+            rvMedia = findViewById(R.id.pmdRvMedia);
             if (rvMedia != null) {
                 rvMedia.setViewHasFooter(true);
                 rvMedia.setLayoutManager(new LinearLayoutManagerWithSmoothScroller(this, LinearLayoutManager.HORIZONTAL, false));
@@ -516,7 +516,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                 rvMedia.setItemAnimator(new FadeInAnimator());
             }
 
-            mediaViewPager = (ViewPager)findViewById(R.id.pmdViewPager);
+            mediaViewPager = findViewById(R.id.pmdViewPager);
             if (mediaViewPager != null) {
                 rvMediaAdapter = new MediaRvAdapter(Take5Activity.this, Collections.synchronizedList(new ArrayList<TtMedia>()), mediaListener,
                         AndroidUtils.Convert.dpToPx(Take5Activity.this, 90), bitmapManager);
@@ -537,7 +537,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                 loadMedia(_CurrentPoint, false);
             }
 
-            ImageView ivFullscreen = (ImageView)findViewById(R.id.pmdIvFullscreen);
+            ImageView ivFullscreen = findViewById(R.id.pmdIvFullscreen);
             if (ivFullscreen != null) {
                 ivFullscreen.setOnClickListener(new View.OnClickListener() {
                     @Override

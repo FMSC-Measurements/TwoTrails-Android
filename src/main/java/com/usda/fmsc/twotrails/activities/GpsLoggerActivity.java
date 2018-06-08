@@ -46,7 +46,7 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gps_logger);
 
-        lvNmea = (ListView)findViewById(R.id.logLvNmea);
+        lvNmea = findViewById(R.id.logLvNmea);
 
         if (lvNmea != null) {
             lvNmea.setFadingEdgeLength(0);
@@ -58,7 +58,7 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
                 binder.startGps();
             }
 
-            btnLog = (Button) findViewById(R.id.loggerBtnLog);
+            btnLog = findViewById(R.id.loggerBtnLog);
 
             if (savedInstanceState != null) {
                 restoreState(savedInstanceState);

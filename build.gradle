@@ -10,7 +10,7 @@ android {
     def vCode = 0
 
     if (versionPropsFile.canRead()) {
-        def Properties versionProps = new Properties()
+        Properties versionProps = new Properties()
 
         versionProps.load(new FileInputStream(versionPropsFile))
 
@@ -130,5 +130,5 @@ dependencies {
     implementation 'com.larswerkman:HoloColorPicker:1.5'
     implementation 'org.apache.commons:commons-csv:1.2'
     implementation 'com.mcxiaoke.volley:library:1.0.19'
-    implementation 'com.android.support.constraint:constraint-layout:1.1.0'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.1'
 }

@@ -61,8 +61,8 @@ public class GetMapExtentsActivity extends AppCompatActivity implements GpsServi
             return;
         }
 
-        btnMap = (FloatingActionButton)findViewById(R.id.getMapFabMap);
-        btnGps = (FloatingActionButton)findViewById(R.id.getMapFabPos);
+        btnMap = findViewById(R.id.getMapFabMap);
+        btnGps = findViewById(R.id.getMapFabPos);
 
         btnMap.setOnLongClickListener(new View.OnLongClickListener() {
             @Override

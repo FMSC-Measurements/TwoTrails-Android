@@ -78,7 +78,7 @@ public class CustomToolbarActivity extends AppCompatActivity {
 
 
     protected void setupToolbar(View view) {
-        toolbar = (Toolbar)view.findViewById(R.id.toolbar);
+        toolbar = view.findViewById(R.id.toolbar);
 
         if (toolbar != null) {
             setSupportActionBar(toolbar);

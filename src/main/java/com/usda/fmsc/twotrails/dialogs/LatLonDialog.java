@@ -98,18 +98,18 @@ public class LatLonDialog extends DialogFragment {
         layDD = view.findViewById(R.id.diagLatLonLayDD);
         layDMS = view.findViewById(R.id.diagLatLonLayDMS);
 
-        txtLat = (EditText)view.findViewById(R.id.diagLatLonTxtLat);
-        txtLatDeg = (EditText)view.findViewById(R.id.diagLatLonTxtLatDeg);
-        txtLatMin = (EditText)view.findViewById(R.id.diagLatLonTxtLatMin);
-        txtLatSec = (EditText)view.findViewById(R.id.diagLatLonTxtLatSec);
+        txtLat = view.findViewById(R.id.diagLatLonTxtLat);
+        txtLatDeg = view.findViewById(R.id.diagLatLonTxtLatDeg);
+        txtLatMin = view.findViewById(R.id.diagLatLonTxtLatMin);
+        txtLatSec = view.findViewById(R.id.diagLatLonTxtLatSec);
 
-        txtLon = (EditText)view.findViewById(R.id.diagLatLonTxtLon);
-        txtLonDeg = (EditText)view.findViewById(R.id.diagLatLonTxtLonDeg);
-        txtLonMin = (EditText)view.findViewById(R.id.diagLatLonTxtLonMin);
-        txtLonSec = (EditText)view.findViewById(R.id.diagLatLonTxtLonSec);
+        txtLon = view.findViewById(R.id.diagLatLonTxtLon);
+        txtLonDeg = view.findViewById(R.id.diagLatLonTxtLonDeg);
+        txtLonMin = view.findViewById(R.id.diagLatLonTxtLonMin);
+        txtLonSec = view.findViewById(R.id.diagLatLonTxtLonSec);
 
-        final Button btnDD = (Button)view.findViewById(R.id.diagLatLonBtnDD);
-        final Button btnDMS = (Button)view.findViewById(R.id.diagLatLonBtnDMS);
+        final Button btnDD = view.findViewById(R.id.diagLatLonBtnDD);
+        final Button btnDMS = view.findViewById(R.id.diagLatLonBtnDMS);
 
         btnDD.setOnClickListener(new View.OnClickListener() {
             @Override
