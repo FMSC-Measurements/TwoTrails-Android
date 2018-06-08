@@ -138,7 +138,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
     private TtPolygon _CurrentPolygon;
     private TtMetadata _CurrentMetadata;
     private int _CurrentIndex = INVALID_INDEX, _deleteIndex = INVALID_INDEX;
-    private boolean _PointUpdated, _PointLocked, _MediaUpdated;
+    private boolean _PointUpdated, _PointLocked, _MediaUpdated, overrideHalfTrav;
     private String addedPoint;
 
     private boolean autoSetTrav, autoSetAzFwd, autoSetAz;
@@ -193,7 +193,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
             if (_deleteIndex > INVALID_INDEX) {
                 boolean halfFinishedTrav = false;
 
-                if (_deletePoint.isTravType()) {
+                if (!overrideHalfTrav && _deletePoint.isTravType()) {
                     TravPoint tp = (TravPoint)_deletePoint;
 
                     if ((tp.getFwdAz() != null || tp.getBkAz() != null) && tp.getSlopeDistance() <= 0) {
@@ -201,7 +201,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                     }
                 }
 
-                if (!halfFinishedTrav && (Global.Settings.DeviceSettings.getDropZeros() || !_deletePoint.getPolyCN().equals(_CurrentPolygon.getCN()))) {
+                if (!_deletePoint.getPolyCN().equals(_CurrentPolygon.getCN()) || overrideHalfTrav || (!halfFinishedTrav && Global.Settings.DeviceSettings.getDropZeros())) {
                     deleteWithoutMoving();
                 } else {
                     AlertDialog.Builder dialog = new AlertDialog.Builder(PointsActivity.this);
@@ -795,6 +795,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                     alert.setPositiveButton(R.string.str_delete, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
+                            overrideHalfTrav = true;
 
                             AnimationCardFragment card = ((AnimationCardFragment) pointSectionsPagerAdapter.getFragments().get(_CurrentIndex));
 
@@ -1160,6 +1161,8 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
     private boolean deletePoint(TtPoint point, int index) {
         try {
             if (point != null) {
+                overrideHalfTrav = false;
+
                 Global.getDAL().deletePointSafe(point);
 
                 if (point.getOp() == OpType.Quondam) {
