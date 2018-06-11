@@ -4,7 +4,6 @@ import android.bluetooth.BluetoothSocket;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 
@@ -15,7 +14,7 @@ public class BluetoothConnection extends Thread {
     private BufferedReader bufferedReader;
     private InputStreamReader inputStreamReader;
 
-    private boolean running, disconnect;
+    private boolean running, disconnect, receiving;
 
     private ArrayList<Listener> listeners;
 
@@ -38,35 +37,36 @@ public class BluetoothConnection extends Thread {
                 inputStreamReader = new InputStreamReader(btSocket.getInputStream());
                 bufferedReader = new BufferedReader(inputStreamReader);
 
-                try {
-                    String str = StringEx.Empty;
+                String str = StringEx.Empty;
 
-                    while (!disconnect) {
-                        try {
-                            str += bufferedReader.readLine();
+                while (!disconnect) {
+                    try {
+                        str += bufferedReader.readLine();
 
-                            if (!StringEx.isEmpty(str) && str.contains("*") && !disconnect) {
-                                for (Listener l : listeners) {
-                                    l.receivedString(str);
-                                }
-
-                                str = StringEx.Empty;
+                        if (!StringEx.isEmpty(str) && str.contains("*") && !disconnect) {
+                            for (Listener l : listeners) {
+                                l.receivedString(str);
                             }
-                        } catch (Exception e) {
-                            if (!disconnect) {
-                                for (Listener l : listeners) {
-                                    l.connectionLost();
-                                }
 
-                                btSocket.connect();
-                            }
-                            break;
+                            str = StringEx.Empty;
                         }
+
+                        receiving = true;
+                    } catch (Exception e) {
+                        receiving = false;
+
+                        if (!disconnect) {
+                            for (Listener l : listeners) {
+                                l.connectionLost();
+                            }
+
+                            btSocket.connect();
+                        }
+                        break;
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    running = false;
                 }
+
+                receiving = false;
 
                 for (Listener l : listeners) {
                     l.connectionEnded();
@@ -77,15 +77,20 @@ public class BluetoothConnection extends Thread {
                 }
             }
         } catch (IOException ioex) {
+            receiving = false;
+
             for (Listener l : listeners) {
                 l.failedToConnect();
             }
         }
+
+        running = false;
     }
 
     public void disconnect() {
         disconnect = true;
         running = false;
+        receiving = false;
 
         if (btSocket != null) {
             try {
@@ -111,6 +116,10 @@ public class BluetoothConnection extends Thread {
 
     public boolean isConnected() {
         return running;
+    }
+
+    public boolean isReceiving() {
+        return receiving;
     }
 
 

@@ -11,10 +11,12 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.twotrails.Consts;
+import com.usda.fmsc.twotrails.activities.base.BaseMapActivity;
 import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.gps.GpsService;
@@ -241,7 +243,8 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
         if (logging) {
             if (Global.Settings.DeviceSettings.isGpsConfigured()) {
                 if (!binder.isGpsRunning()) {
-                    binder.startGps();
+                    Toast.makeText(GpsLoggerActivity.this, "GPS is not Receiving", Toast.LENGTH_SHORT).show();
+                    return;
                 }
 
                 btnLog.setText(R.string.aqr_log_pause);

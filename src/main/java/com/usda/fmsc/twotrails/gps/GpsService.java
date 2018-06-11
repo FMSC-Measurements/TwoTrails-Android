@@ -26,7 +26,6 @@ import com.usda.fmsc.twotrails.utilities.TtUtils;
 import org.joda.time.DateTime;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
@@ -347,7 +346,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
         if(getGpsProvider() == GpsProvider.Internal) {
             return locManager != null;
         } else {
-            return btConn != null && btConn.isConnected();
+            return btConn != null && btConn.isConnected() && btConn.isReceiving();
         }
     }
 

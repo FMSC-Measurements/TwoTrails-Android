@@ -239,10 +239,6 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
         }
 
         _Polygons = Global.getDAL().getPolygonsMap();
-
-//        for (TtPolygon poly : getPolygonsToMap()) {
-//            polyPoints.put(poly.getCN(), Global.getDAL().getPointsInPolygon(poly.getCN()));
-//        }
     }
 
     private void setupUI() {
@@ -577,6 +573,19 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
                 mSensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_UI);
             } catch (Exception e) {
                 e.printStackTrace();
+            }
+        }
+
+        if (Global.Settings.DeviceSettings.getGpsExternal()) {
+            if (Global.Settings.DeviceSettings.isGpsConfigured())
+            {
+                if (!binder.isGpsRunning()) {
+                    Toast.makeText(BaseMapActivity.this, "GPS is not Receiving", Toast.LENGTH_SHORT).show();
+                }
+            }
+            else
+            {
+                Toast.makeText(BaseMapActivity.this, "GPS is not Configured", Toast.LENGTH_SHORT).show();
             }
         }
     }

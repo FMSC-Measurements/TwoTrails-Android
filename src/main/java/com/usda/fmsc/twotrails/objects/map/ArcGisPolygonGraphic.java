@@ -169,17 +169,13 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
         }
 
         SimpleLineSymbol outline = new SimpleLineSymbol(graphicOptions.getAdjBndColor(), graphicOptions.getAdjWidth(), SimpleLineSymbol.STYLE.SOLID);
-        //SimpleFillSymbol fill = new SimpleFillSymbol(Color.TRANSPARENT, SimpleFillSymbol.STYLE.NULL);
-        //fill.setOutline(outline);
         _AdjBnd.addGraphic(new Graphic(adjBndPLO, outline));
         _AdjBndCB.addGraphic(new Graphic(adjBndPO, outline));
 
-        
         outline = new SimpleLineSymbol(graphicOptions.getUnAdjBndColor(), graphicOptions.getUnAdjWidth(), SimpleLineSymbol.STYLE.SOLID);
         _UnadjBnd.addGraphic(new Graphic(unadjBndPLO, outline));
         _UnadjBndCB.addGraphic(new Graphic(unadjBndPO, outline));
 
-        
         outline = new SimpleLineSymbol(graphicOptions.getAdjNavColor(), graphicOptions.getAdjWidth(), SimpleLineSymbol.STYLE.SOLID);
         _AdjNav.addGraphic(new Graphic(adjNavPLO, outline));
 
@@ -248,7 +244,7 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
         } else {
             _AdjBnd.setVisible(false);
             _AdjBndCB.setVisible(false);
-            
+
             _UnadjBnd.setVisible(false);
             _UnadjBndCB.setVisible(false);
 
@@ -267,23 +263,23 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
             _WayPts.setVisible(false);
         }
 
-        map.addLayer(_AdjBnd);
-        map.addLayer(_AdjBndCB);
-
         map.addLayer(_UnadjBnd);
         map.addLayer(_UnadjBndCB);
 
-        map.addLayer(_AdjNav);
+        map.addLayer(_AdjBnd);
+        map.addLayer(_AdjBndCB);
+
         map.addLayer(_UnadjNav);
+        map.addLayer(_AdjNav);
 
-        map.addLayer(_AdjBndPts);
         map.addLayer(_UnadjBndPts);
+        map.addLayer(_AdjBndPts);
 
-        map.addLayer(_AdjNavPts);
         map.addLayer(_UnadjNavPts);
+        map.addLayer(_AdjNavPts);
 
-        map.addLayer(_AdjMiscPts);
         map.addLayer(_UnadjMiscPts);
+        map.addLayer(_AdjMiscPts);
 
         map.addLayer(_WayPts);
     }
