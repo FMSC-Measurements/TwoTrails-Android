@@ -239,6 +239,7 @@
     <string name="set_RESET">prefResetDevice</string>
     <string name="set_CODE">prefEnterCode</string>
     <string name="set_MEDIA_COPY_TO_PROJECT">prefCopyToProject</string>
+    <string name="set_KEEP_SCREEN_ON">KeepScreenOn</string>
 
 
     <string name="set_settings_page">settings_page</string>

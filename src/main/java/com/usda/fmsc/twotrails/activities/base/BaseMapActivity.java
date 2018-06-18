@@ -26,6 +26,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
 import android.widget.AdapterView;
@@ -213,6 +214,10 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
                     });
                 }
             });
+        }
+
+        if (Global.Settings.DeviceSettings.getKeepScreenOn()) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }
 
         super.setContentView(R.layout.activity_map_base);

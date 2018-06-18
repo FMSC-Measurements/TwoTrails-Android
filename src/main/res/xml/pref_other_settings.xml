@@ -11,6 +11,11 @@
         android:title="Drop Zeros"
         android:summary="Drop Empty Points" />
 
+    <com.usda.fmsc.android.preferences.SwitchCompatPreference
+        android:key="@string/set_KEEP_SCREEN_ON"
+        android:title="Keep Screen On"
+        android:summary="Keep Screen on when in Map and Collecting Points" />
+
     <Preference
         android:title="Export Report"
         android:key="@string/set_EXPORT_REPORT"/>
