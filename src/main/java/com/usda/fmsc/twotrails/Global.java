@@ -575,6 +575,7 @@ public class Global {
 
             public static final String DROP_ZERO = "DropZero";
             public static final String ROUND_POINTS = "RoundPoints";
+            public static final String KEEP_SCREEN_ON = "KeepScreenOn";
 
             public static final String GPS_EXTERNAL = "GpsExternal";
             public static final String GPS_ALWAYS_ON = "GpsAlwaysOn";
@@ -747,6 +748,7 @@ public class Global {
                 editor.putBoolean(ROUND_POINTS, DEFAULT_ROUND_POINTS);
 
                 editor.putBoolean(GPS_ALWAYS_ON, true);
+                editor.putBoolean(KEEP_SCREEN_ON, false);
 
                 editor.putInt(GPS_FILTER_DOP_TYPE, DEFAULT_GPS_DOP_TYPE.getValue());
                 editor.putInt(GPS_FILTER_DOP_VALUE, DEFAULT_GPS_DOP_VALUE);
@@ -1466,6 +1468,16 @@ public class Global {
             public static void setUseTtCamera(int value) {
                 setInt(USE_TTCAMERA, value);
             }
+
+
+            public static boolean getKeepScreenOn() {
+                return getBool(KEEP_SCREEN_ON, false);
+            }
+
+            public static void setKeepScreenOn(boolean value) {
+                setBool(KEEP_SCREEN_ON, value);
+            }
+
             //endregion
         }
 
