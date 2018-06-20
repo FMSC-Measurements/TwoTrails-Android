@@ -122,32 +122,33 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
             tabLayout.setupWithViewPager(mViewPager);
         }
 
-        AndroidUtils.App.requestPermission(MainActivity.this,
-                new String[] { Manifest.permission.WRITE_EXTERNAL_STORAGE, android.Manifest.permission.READ_EXTERNAL_STORAGE},
-                Consts.Codes.Requests.CREATE_FILE, "TwoTrails needs storage permissions in order to Open and Create files.");
+//        AndroidUtils.App.requestPermission(MainActivity.this,
+//                new String[] { Manifest.permission.WRITE_EXTERNAL_STORAGE, android.Manifest.permission.READ_EXTERNAL_STORAGE},
+//                Consts.Codes.Requests.CREATE_FILE, "TwoTrails needs storage permissions in order to Open and Create files.");
 
-        //setup values
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Global.init(getApplicationContext());
+        Global.init(getApplicationContext());
 
-                final Intent intent = getIntent();
-                final String action = intent.getAction();
+        Global.startRangefinderService(getApplicationContext());
 
-                if (Intent.ACTION_VIEW.equals(action)){
-                    Uri uri = intent.getData();
-                    openFile(uri);
-                }
+        if (AndroidUtils.App.checkLocationPermission(getApplicationContext()))
+            Global.startGpsService(getApplicationContext());
 
-                if (Global.Settings.DeviceSettings.getAutoOpenLastProject()) {
-                    ArrayList<RecentProject> recentProjects = Global.Settings.ProjectSettings.getRecentProjects();
-                    if (recentProjects.size() > 0) {
-                        openFile(recentProjects.get(0).File);
-                    }
+        if (Global.isFoldersInitiated()) {
+            final Intent intent = getIntent();
+            final String action = intent.getAction();
+
+            if (Intent.ACTION_VIEW.equals(action)){
+                Uri uri = intent.getData();
+                openFile(uri);
+            }
+
+            if (Global.Settings.DeviceSettings.getAutoOpenLastProject()) {
+                ArrayList<RecentProject> recentProjects = Global.Settings.ProjectSettings.getRecentProjects();
+                if (recentProjects.size() > 0) {
+                    openFile(recentProjects.get(0).File);
                 }
             }
-        }).start();
+        }
     }
 
     @Override
@@ -258,12 +259,21 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
                     startActivity(new Intent(this, MapActivity.class));
                     break;
                 case Consts.Codes.Requests.CREATE_FILE:
+                    if (!Global.isFoldersInitiated())
+                        Global.initFolders();
+
                     if (tmpFile != null)
                         createFile(tmpFile);
                     break;
                 case Consts.Codes.Requests.OPEN_FILE:
+                    if (!Global.isFoldersInitiated())
+                        Global.initFolders();
+
                     if (tmpFile != null)
                         openFile(tmpFile);
+                    break;
+                case  Consts.Codes.Requests.LOCATION:
+                    Global.startGpsService(getApplicationContext());
                     break;
             }
         } else {
