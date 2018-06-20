@@ -65,6 +65,8 @@ public class Global {
 
     private static TtBluetoothManager bluetoothManager;
 
+    private static Boolean foldersInitiated = false;
+
 
     private static GpsService.GpsBinder gpsBinder;
     private static RangeFinderService.RangeFinderBinder rfBinder;
@@ -96,7 +98,6 @@ public class Global {
 
     public static void init(Context applicationContext) {
         _ApplicationContext = applicationContext;
-        //_MainActivity = mainActivity;
 
         Settings.DeviceSettings.init();
 
@@ -114,32 +115,37 @@ public class Global {
 
         TtNotifyManager.init(applicationContext);
 
-        File dir = new File(getTtFileDir());
-        if(!dir.exists()) {
-            dir.mkdirs();
+        initFolders();
+
+        if (AndroidUtils.App.checkStoragePermission(_ApplicationContext)) {
+            TtUtils.TtReport.writeEvent(StringEx.format("TwoTrails Started (%s)", AndroidUtils.App.getVersionName(_ApplicationContext)));
         }
-
-        dir = new File(getOfflineMapsDir());
-        if(!dir.exists()) {
-            dir.mkdirs();
-        }
-
-        dir = new File(getOfflineMapsRecoveryDir());
-        if(!dir.exists()) {
-            dir.mkdirs();
-        }
-
-        _ApplicationContext.startService(new Intent(_ApplicationContext, GpsService.class));
-        _ApplicationContext.bindService(new Intent(_ApplicationContext, GpsService.class), gpsServiceConnection, Context.BIND_AUTO_CREATE);
-
-        _ApplicationContext.startService(new Intent(_ApplicationContext, RangeFinderService.class));
-        _ApplicationContext.bindService(new Intent(_ApplicationContext, RangeFinderService.class), rfServiceConnection, Context.BIND_AUTO_CREATE);
-
-        TtUtils.TtReport.writeEvent(StringEx.format("TwoTrails Started (%s)", AndroidUtils.App.getVersionName(_ApplicationContext)));
 
         ArcGISRuntime.setClientId(_ApplicationContext.getString(R.string.arcgis_client_id));
 
         initUI();
+
+        foldersInitiated = true;
+    }
+
+    public static void initFolders() {
+        if (AndroidUtils.App.checkStoragePermission(_ApplicationContext)) {
+
+            File dir = new File(getTtFileDir());
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+
+            dir = new File(getOfflineMapsDir());
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+
+            dir = new File(getOfflineMapsRecoveryDir());
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+        }
     }
 
     private static void initUI() {
@@ -160,6 +166,24 @@ public class Global {
         TtUtils.TtReport.writeEvent("TwoTrails Stopped");
         TtUtils.TtReport.closeReport();
         System.exit(0);
+    }
+
+
+    public static void startGpsService(Context applicationContext) {
+        if (AndroidUtils.App.checkLocationPermission(applicationContext)) {
+            applicationContext.startService(new Intent(applicationContext, GpsService.class));
+            applicationContext.bindService(new Intent(applicationContext, GpsService.class), gpsServiceConnection, Context.BIND_AUTO_CREATE);
+        }
+    }
+
+    public static void startRangefinderService(Context applicationContext) {
+        applicationContext.startService(new Intent(applicationContext, RangeFinderService.class));
+        applicationContext.bindService(new Intent(applicationContext, RangeFinderService.class), rfServiceConnection, Context.BIND_AUTO_CREATE);
+
+    }
+
+    public static Boolean isFoldersInitiated() {
+        return foldersInitiated;
     }
 
 
