@@ -45,6 +45,8 @@ import java.util.List;
 import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
 import com.usda.fmsc.utilities.StringEx;
 
+import org.joda.time.DateTime;
+
 public class DeviceSettingsFragment extends PreferenceFragment {
     public static final String CURRENT_PAGE = "CurrentPage";
 
@@ -54,6 +56,8 @@ public class DeviceSettingsFragment extends PreferenceFragment {
     private ListCompatPreference prefLstGpsDevice, prefLstRFDevice;
 
     private String moveToPage;
+
+    private DateTime lastMetaAsk = DateTime.now();
 
 
     public static DeviceSettingsFragment newInstance(String currPageKey) {
@@ -269,21 +273,25 @@ public class DeviceSettingsFragment extends PreferenceFragment {
                                                         }
 
                                                         if (Global.Settings.DeviceSettings.getAutoSetGpsNameToMetaAsk()) {
-                                                            DontAskAgainDialog dialog = new DontAskAgainDialog(getActivity(),
-                                                                    Global.Settings.DeviceSettings.AUTO_SET_GPS_NAME_TO_META_ASK,
-                                                                    Global.Settings.DeviceSettings.AUTO_SET_GPS_NAME_TO_META,
-                                                                    Global.Settings.PreferenceHelper.getPrefs());
+                                                            if (lastMetaAsk.isBefore(DateTime.now().minusSeconds(10))) {
+                                                                DontAskAgainDialog dialog = new DontAskAgainDialog(getActivity(),
+                                                                        Global.Settings.DeviceSettings.AUTO_SET_GPS_NAME_TO_META_ASK,
+                                                                        Global.Settings.DeviceSettings.AUTO_SET_GPS_NAME_TO_META,
+                                                                        Global.Settings.PreferenceHelper.getPrefs());
 
-                                                            dialog.setMessage("Do you want to update metadata with the current GPS receiver?");
+                                                                dialog.setMessage("Do you want to update metadata with the current GPS receiver?");
 
-                                                            dialog.setPositiveButton("Default", setMetaListener, 1);
+                                                                dialog.setPositiveButton("Default", setMetaListener, 1);
 
-                                                            if (Global.getDAL() != null)
-                                                                dialog.setNegativeButton("All", setMetaListener, 2);
+                                                                if (Global.getDAL() != null)
+                                                                    dialog.setNegativeButton("All", setMetaListener, 2);
 
-                                                            dialog.setNeutralButton("None", null, 0);
+                                                                dialog.setNeutralButton("None", null, 0);
 
-                                                            dialog.show();
+                                                                dialog.show();
+
+                                                                lastMetaAsk = DateTime.now();
+                                                            }
                                                         } else {
                                                             setMetaListener.onClick(null, 0, Global.Settings.DeviceSettings.getAutoSetGpsNameToMeta());
                                                         }
