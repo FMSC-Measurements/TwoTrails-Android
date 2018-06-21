@@ -90,6 +90,8 @@ public class AcquireGpsActivity extends AcquireGpsMapActivity {
             } else {
                 btnCalc.setBackgroundColor(AndroidUtils.UI.getColor(this, R.color.primaryLighter));
             }
+
+            setMapGesturesEnabled(true);
         }
     }
 
