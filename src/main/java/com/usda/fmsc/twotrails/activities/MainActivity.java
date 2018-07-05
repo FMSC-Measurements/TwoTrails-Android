@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -22,6 +23,7 @@ import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.MimeTypeMap;
 import android.widget.Toast;
 
 import com.usda.fmsc.android.AndroidUtils;
@@ -783,16 +785,14 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
                 progressLayout.setVisibility(View.GONE);
 
                 if (!StringEx.isEmpty(kmlPath)) {
-                    File KML = new File(kmlPath);
-                    Intent i = getPackageManager().getLaunchIntentForPackage(gEarth);
-
-                    if (i != null) {
-                        i.setDataAndType(FileProvider.getUriForFile(
-                                    MainActivity.this,
-                                    BuildConfig.APPLICATION_ID + ".provider",
-                                    KML),
-                                "application/vnd.google-earth.kml+xml");
-                        startActivity(i);
+                    try {
+                        Intent intent = new Intent(Intent.ACTION_VIEW);
+                        intent.setDataAndType(AndroidUtils.Files.getUri(MainActivity.this,BuildConfig.APPLICATION_ID, kmlPath), "application/vnd.google-earth.kml+xml");
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        startActivity(intent);
+                    } catch (IllegalArgumentException e) {
+                        Toast.makeText(MainActivity.this, "Error opening Google Earth", Toast.LENGTH_LONG).show();
                     }
                 }
             }

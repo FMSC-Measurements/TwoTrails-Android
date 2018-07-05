@@ -354,10 +354,7 @@ public class ExportActivity extends CustomToolbarActivity {
                                 public void onClick(View v) {
                                     Intent intent = new Intent(Intent.ACTION_VIEW);
                                     intent.setDataAndType(
-                                            FileProvider.getUriForFile(
-                                                    ExportActivity.this,
-                                                    BuildConfig.APPLICATION_ID + ".provider",
-                                                    directory),
+                                            AndroidUtils.Files.getUri(ExportActivity.this, BuildConfig.APPLICATION_ID, directory),
                                             "resource/folder");
 
                                     if (snackbar != null)
