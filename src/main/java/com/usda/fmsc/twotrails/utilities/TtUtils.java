@@ -1142,10 +1142,7 @@ public class TtUtils {
                             dateTime.getYear(), dateTime.getMonthOfYear(), dateTime.getDayOfMonth(), dateTime.getMillisOfDay()));
 
                     intent.putExtra(MediaStore.EXTRA_OUTPUT,
-                            FileProvider.getUriForFile(
-                                activity,
-                                BuildConfig.APPLICATION_ID + ".provider",
-                                photo)
+                            AndroidUtils.Files.getUri(activity, BuildConfig.APPLICATION_ID, photo)
                     );
 
                     if (intent.resolveActivity(activity.getPackageManager()) != null) {
