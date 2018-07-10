@@ -2,34 +2,33 @@ package com.usda.fmsc.twotrails.activities;
 
 import android.Manifest;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.os.Build;
+import android.net.Uri;
+import android.os.Bundle;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.content.FileProvider;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AlertDialog;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.net.Uri;
-import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.webkit.MimeTypeMap;
 import android.widget.Toast;
 
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.dialogs.InputDialog;
 import com.usda.fmsc.twotrails.BuildConfig;
 import com.usda.fmsc.twotrails.Consts;
+import com.usda.fmsc.twotrails.Global;
+import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.activities.base.TtAjusterCustomToolbarActivity;
 import com.usda.fmsc.twotrails.adapters.RecentProjectAdapter;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
@@ -37,18 +36,15 @@ import com.usda.fmsc.twotrails.data.TwoTrailsSchema;
 import com.usda.fmsc.twotrails.fragments.main.MainDataFragment;
 import com.usda.fmsc.twotrails.fragments.main.MainFileFragment;
 import com.usda.fmsc.twotrails.fragments.main.MainToolsFragment;
-import com.usda.fmsc.twotrails.Global;
-import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.logic.PolygonAdjuster;
 import com.usda.fmsc.twotrails.objects.RecentProject;
 import com.usda.fmsc.twotrails.utilities.Export;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
+import com.usda.fmsc.utilities.FileUtils;
+import com.usda.fmsc.utilities.StringEx;
 
 import java.io.File;
 import java.util.ArrayList;
-
-import com.usda.fmsc.utilities.FileUtils;
-import com.usda.fmsc.utilities.StringEx;
 
 
 public class MainActivity extends TtAjusterCustomToolbarActivity {
@@ -141,7 +137,10 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
             if (Intent.ACTION_VIEW.equals(action)){
                 Uri uri = intent.getData();
-                openFile(uri);
+
+                if (uri != null) {
+                    openFile(uri);
+                }
             }
 
             if (Global.Settings.DeviceSettings.getAutoOpenLastProject()) {
@@ -306,7 +305,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     //region Tabs
     public class TabsPagerAdapter extends FragmentPagerAdapter {
 
-        public TabsPagerAdapter(FragmentManager fm) {
+        private TabsPagerAdapter(FragmentManager fm) {
             super(fm);
         }
 
@@ -357,9 +356,9 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
         switch (requestCode) {
             case Consts.Codes.Dialogs.REQUEST_FILE: {
-                if(data == null)
-                    return;
-                openFile(data.getData());
+                if(data != null && data.getData() != null) {
+                    openFile(data.getData());
+                }
                 break;
             }
             case UPDATE_INFO_AND_GOTO_DATA_TAB:
@@ -376,9 +375,6 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
                 updateAppInfo();
                 break;
             }
-
-            default:
-                break;
         }
     }
 

@@ -120,6 +120,7 @@ dependencies {
     implementation 'com.android.support:support-v4:27.1.1'
     implementation 'com.android.support:design:27.1.1'
     implementation 'com.android.support:multidex:1.0.3'
+    implementation 'com.android.support:exifinterface:27.1.1'
     implementation 'joda-time:joda-time:2.9.2'
     implementation 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
     implementation 'me.zhanghai.android.materialprogressbar:library:1.1.4'
@@ -130,5 +131,5 @@ dependencies {
     implementation 'com.larswerkman:HoloColorPicker:1.5'
     implementation 'org.apache.commons:commons-csv:1.2'
     implementation 'com.mcxiaoke.volley:library:1.0.19'
-    implementation 'com.android.support.constraint:constraint-layout:1.1.1'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.2'
 }

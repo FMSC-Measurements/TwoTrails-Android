@@ -7,6 +7,7 @@ import com.usda.fmsc.twotrails.Consts;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Date;
 
@@ -17,20 +18,21 @@ public class TtReport {
     private static TtReport inst = new TtReport();
     private static PrintWriter logWriter;
     private static String filePath;
+    private static File logFile;
 
     public TtReport() {}
 
     private synchronized void changeFilePathString(String path) {
         filePath = path;
 
-        if (logWriter != null) {
-            logWriter.close();
-        }
+        closeFile();
+
+        openFile(path);
 
         try {
-            logWriter = new PrintWriter(new FileOutputStream(new File(path), true));
+            logWriter = new PrintWriter(new FileOutputStream(logFile, true));
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            Log.e(Consts.LOG_TAG, "changeFilePathString-logWriter:\n" + e.getMessage());
         }
     }
 
@@ -49,9 +51,23 @@ public class TtReport {
     public void clearReport() {
         closeReport();
         try {
-            logWriter = new PrintWriter(new FileOutputStream(new File(filePath), false));
+            logWriter = new PrintWriter(new FileOutputStream(logFile, false));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+        }
+    }
+
+    private synchronized void openFile(String path) {
+        if (logFile == null) {
+            logFile = new File(path);
+
+            if (!logFile.exists()) {
+                try {
+                    logFile.createNewFile();
+                } catch (IOException e) {
+                    Log.e(Consts.LOG_TAG, "changeFilePathString-createNewFile:\n" + e.getMessage());
+                }
+            }
         }
     }
 
@@ -63,6 +79,8 @@ public class TtReport {
     }
 
     private synchronized void writeToReport(String text) {
+        openFile(getFilePath());
+
         try {
             logWriter.println(text);
             logWriter.flush();

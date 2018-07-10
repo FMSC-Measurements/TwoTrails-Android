@@ -9,7 +9,7 @@ import android.database.Cursor;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
-import android.media.ExifInterface;
+import android.support.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
@@ -81,6 +81,7 @@ import com.usda.fmsc.utilities.ParseEx;
 import com.usda.fmsc.utilities.StringEx;
 
 
+@SuppressWarnings({"WeakerAccess", "UnusedReturnValue", "unused", "SameParameterValue"})
 public class TtUtils {
     public static TtReport TtReport = new TtReport();
 
@@ -384,9 +385,9 @@ public class TtUtils {
         //endregion
 
 
+        @SuppressWarnings("BooleanMethodIsAlwaysInverted")
         public static boolean cmpa(double value1, double value2) {
-            double d = java.lang.Math.abs(value1 - value2);
-            return d < Consts.Minimum_Point_Accuracy;
+            return java.lang.Math.abs(value1 - value2) < Consts.Minimum_Point_Accuracy;
         }
 
         @Nullable
@@ -935,6 +936,7 @@ public class TtUtils {
 
     public static class Media {
         public static Comparator<TtMedia> PictureTimeComparator = new Comparator<TtMedia>() {
+            @SuppressWarnings("ComparatorMethodParameterNotUsed")
             @Override
             public int compare(TtMedia lhs, TtMedia rhs) {
                 return lhs.getTimeCreated().isAfter(rhs.getTimeCreated()) ? 1 : -1;
@@ -1026,7 +1028,7 @@ public class TtUtils {
                         String filePath = cursor.getString(columnIndex);
 
                         if (copyToProject) {
-                            String newFilePath = String.format("%s%s%s", mediaDirStr, File.separator, FileUtils.getFileName(filePath));
+                            String newFilePath = StringEx.format("%s%s%s", mediaDirStr, File.separator, FileUtils.getFileName(filePath));
                             if (FileUtils.copyFile(filePath, newFilePath)) {
                                 filePath = newFilePath;
                             }
@@ -1051,7 +1053,7 @@ public class TtUtils {
                     cursor.close();
 
                     if (copyToProject) {
-                        String newFilePath = String.format("%s%s%s", mediaDirStr, File.separator, FileUtils.getFileName(uri));
+                        String newFilePath = StringEx.format("%s%s%s", mediaDirStr, File.separator, FileUtils.getFileName(uri));
                         if (FileUtils.copyFile(uri, newFilePath)) {
                             uri = newFilePath;
                         }
@@ -1138,7 +1140,7 @@ public class TtUtils {
 
                     DateTime dateTime = DateTime.now();
 
-                    File photo = new File(Global.getTtMediaDir(), String.format("IMG_%d%d%d_%d.jpg",
+                    File photo = new File(Global.getTtMediaDir(), StringEx.format("IMG_%d%d%d_%d.jpg",
                             dateTime.getYear(), dateTime.getMonthOfYear(), dateTime.getDayOfMonth(), dateTime.getMillisOfDay()));
 
                     intent.putExtra(MediaStore.EXTRA_OUTPUT,
@@ -1552,18 +1554,18 @@ public class TtUtils {
                     lon = position.getLongitudeSignedDecimal();
                 }
 
-                String snippet = String.format("UTM X: %.3f\nUTM Y: %.3f\nElev (%s): %.1f\n\nLat: %.4f\nLon: %.4f%s",
+                String snippet = StringEx.format("UTM X: %.3f\nUTM Y: %.3f\nElev (%s): %.1f\n\nLat: %.4f\nLon: %.4f%s",
                         x, y, meta.getElevation().toStringAbv(), Convert.distance(z, meta.getElevation(), UomElevation.Meters), lat, lon,
                         !StringEx.isEmpty(point.getComment()) ?
-                                String.format("\n\nComment: %s", point.getComment()) :
+                                StringEx.format("\n\nComment: %s", point.getComment()) :
                                 StringEx.Empty
                 );
 
 
                 MarkerOptions options = new MarkerOptions();
 
-                options.title(String.format("%d (%s)", point.getPID(), adjusted ? "Adj" : "UnAdj"));
-                options.snippet(String.format("%s\n\n%s", point.getOp().toString(), snippet));
+                options.title(StringEx.format("%d (%s)", point.getPID(), adjusted ? "Adj" : "UnAdj"));
+                options.snippet(StringEx.format("%s\n\n%s", point.getOp().toString(), snippet));
 
                 LatLng ll = new LatLng(lat, lon);
 
@@ -1590,36 +1592,35 @@ public class TtUtils {
             Double faz = point.getFwdAz();
             Double baz = point.getBkAz();
 
-            String sFaz = faz == null ? StringEx.Empty : String.format("%.2f", faz);
-            String sBaz = baz == null ? StringEx.Empty : String.format("%.2f", baz);
+            String sFaz = faz == null ? StringEx.Empty : StringEx.format("%.2f", faz);
+            String sBaz = baz == null ? StringEx.Empty : StringEx.format("%.2f", baz);
 
-            String snippet = String.format("UTM X: %.3f\nUTM Y: %.3f\nElev (%s): %.1f\n\nFwd Az: %s\nBk Az:   %s\nSlpDist (%s): %.2f\nSlope (%s): %.2f%s",
+            String snippet = StringEx.format("UTM X: %.3f\nUTM Y: %.3f\nElev (%s): %.1f\n\nFwd Az: %s\nBk Az:   %s\nSlpDist (%s): %.2f\nSlope (%s): %.2f%s",
                     x, y, meta.getElevation().toStringAbv(), Convert.distance(z, meta.getElevation(), UomElevation.Meters),
                     sFaz, sBaz, meta.getDistance().toString(), point.getSlopeAngle(),
                     meta.getSlope().toStringAbv(), point.getSlopeAngle(),
                     !StringEx.isEmpty(point.getComment()) ?
-                    String.format("\n\nComment: %s", point.getComment()) :
+                    StringEx.format("\n\nComment: %s", point.getComment()) :
                     StringEx.Empty
             );
 
             GeoPosition position = UTMTools.convertUTMtoLatLonSignedDec(x, y, meta.getZone());
 
             return new MarkerOptions()
-                    .title(String.format("%d (%s)", point.getPID(), adjusted ? "Adj" : "UnAdj"))
-                    .snippet(String.format("%s\n\n%s%s", point.getOp(), snippet,
+                    .title(StringEx.format("%d (%s)", point.getPID(), adjusted ? "Adj" : "UnAdj"))
+                    .snippet(StringEx.format("%s\n\n%s%s", point.getOp(), snippet,
                             !StringEx.isEmpty(point.getComment()) ?
-                                    String.format("\n\nComment: %s", point.getComment()) :
+                                    StringEx.format("\n\nComment: %s", point.getComment()) :
                                     StringEx.Empty))
                     .position(new LatLng(position.getLatitudeSignedDecimal(), position.getLongitudeSignedDecimal()));
         }
 
         public static MarkerOptions createMarkerOptions(QuondamPoint point, boolean adjusted, HashMap<String, TtMetadata> meta) {
-
             MarkerOptions markerOptions = createMarkerOptions(point.getParentPoint(), adjusted, meta);
 
             return markerOptions
                     .title(Integer.toString(point.getPID()))
-                    .snippet(String.format("%s -> %d %s",
+                    .snippet(StringEx.format("%s -> %d %s",
                             point.getOp().toString(),
                             point.getParentPID(),
                             markerOptions.getSnippet()));
@@ -1771,7 +1772,7 @@ public class TtUtils {
             TextView title = view.findViewById(R.id.title);
             TextView content = view.findViewById(R.id.text1);
 
-            title.setText(String.format("%d", markerData.Point.getPID()));
+            title.setText(StringEx.format("%d", markerData.Point.getPID()));
             content.setText(getInfoWindowSnippet(markerData.Point, markerData.Adjusted, markerData.Metadata));
 
             return view;
@@ -1822,11 +1823,11 @@ public class TtUtils {
                     lon = position.getLongitudeSignedDecimal();
                 }
 
-                return String.format("%s\n\nUTM X: %.3f\nUTM Y: %.3f\nElev (%s): %.1f\n\nLat: %.4f\nLon: %.4f%s",
+                return StringEx.format("%s\n\nUTM X: %.3f\nUTM Y: %.3f\nElev (%s): %.1f\n\nLat: %.4f\nLon: %.4f%s",
                         point.getOp().toString(),
                         x, y, meta.getElevation().toStringAbv(), Convert.distance(z, meta.getElevation(), UomElevation.Meters), lat, lon,
                         !StringEx.isEmpty(point.getComment()) ?
-                                String.format("\n\nComment: %s", point.getComment()) :
+                                StringEx.format("\n\nComment: %s", point.getComment()) :
                                 StringEx.Empty);
             } catch (Exception ex) {
                 TtReport.writeError(ex.getMessage(), "TtUtils:getInfoWindowSnippet");
@@ -1843,26 +1844,26 @@ public class TtUtils {
             Double faz = point.getFwdAz();
             Double baz = point.getBkAz();
 
-            String sFaz = faz == null ? StringEx.Empty : String.format("%.2f", faz);
-            String sBaz = baz == null ? StringEx.Empty : String.format("%.2f", baz);
+            String sFaz = faz == null ? StringEx.Empty : StringEx.format("%.2f", faz);
+            String sBaz = baz == null ? StringEx.Empty : StringEx.format("%.2f", baz);
 
-            return String.format("%s\n\nUTM X: %.3f\nUTM Y: %.3f\nElev (%s): %.1f\n\nFwd Az: %s\nBk Az:   %s\nSlpDist (%s): %.2f\nSlope (%s): %.2f%s",
+            return StringEx.format("%s\n\nUTM X: %.3f\nUTM Y: %.3f\nElev (%s): %.1f\n\nFwd Az: %s\nBk Az:   %s\nSlpDist (%s): %.2f\nSlope (%s): %.2f%s",
                     point.getOp(),
                     x, y, meta.getElevation().toStringAbv(), Convert.distance(z, meta.getElevation(), UomElevation.Meters),
                     sFaz, sBaz, meta.getDistance().toString(), point.getSlopeAngle(),
                     meta.getSlope().toStringAbv(), point.getSlopeAngle(),
                     !StringEx.isEmpty(point.getComment()) ?
-                            String.format("\n\nComment: %s", point.getComment()) :
+                            StringEx.format("\n\nComment: %s", point.getComment()) :
                             StringEx.Empty);
         }
 
         private static String getInfoWindowSnippet(QuondamPoint point, boolean adjusted, TtMetadata meta) {
-            return String.format("%s -> %d %s%s",
+            return StringEx.format("%s -> %d %s%s",
                 point.getOp().toString(),
                 point.getParentPID(),
                 getInfoWindowSnippet(point.getParentPoint(), adjusted, meta),
                     !StringEx.isEmpty(point.getComment()) ?
-                            String.format("\n\nComment: %s", point.getComment()) :
+                            StringEx.format("\n\nComment: %s", point.getComment()) :
                             StringEx.Empty);
         }
 
@@ -1870,12 +1871,12 @@ public class TtUtils {
 
 
     public static String getDeviceName() {
-        return String.format("%s %s %s",
+        return StringEx.format("%s %s %s",
                 Build.MANUFACTURER, Build.MODEL, Build.ID);
     }
 
     public static String exportReport(DataAccessLayer dal) {
-        String filename = String.format("%s%sTwoTrailsReport_%s.zip",
+        String filename = StringEx.format("%s%sTwoTrailsReport_%s.zip",
                 Global.getTtLogFileDir(),
                 File.separator,
                 DateTime.now().toString());

@@ -13,6 +13,7 @@ import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.annotation.ColorInt;
 import android.support.v4.app.NotificationCompat;
+import android.util.SparseArray;
 
 import com.esri.android.runtime.ArcGISRuntime;
 import com.google.gson.Gson;
@@ -54,6 +55,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
+@SuppressWarnings({"WeakerAccess", "UnusedReturnValue", "unused", "SameParameterValue"})
 public class Global {
     private static DataAccessLayer _DAL;
     private static MediaAccessLayer _MAL;
@@ -337,7 +339,6 @@ public class Global {
 
     public static String getTtLogFileDir() {
         return getTtFileDir();
-        //return String.format("%s%s%s", getTtFileDir(), File.separator, "LogFiles");
     }
 
     public static String getLogFileName() {
@@ -356,13 +357,13 @@ public class Global {
         private static NotificationCompat.Builder _GpsBuilder;
         private static int _UsedDrawable;
         private static String _UsedText;
-        private static HashMap<Integer, NotificationCompat.Builder> _DownloadingNotifs;
+        private static SparseArray<NotificationCompat.Builder> _DownloadingNotifs;
 
         private static void init(Context ctx) {
             _NotificationManager = (NotificationManager)ctx.getSystemService(Context.NOTIFICATION_SERVICE);
-            _GpsBuilder = new NotificationCompat.Builder(ctx);
+            _GpsBuilder = new NotificationCompat.Builder(ctx, Consts.LOG_TAG);
             _GpsBuilder.setOngoing(true);
-            _DownloadingNotifs = new HashMap<>();
+            _DownloadingNotifs = new SparseArray<>();
         }
 
         public static NotificationManager getNotificationManager() {
@@ -444,7 +445,7 @@ public class Global {
 
 
         public static void startMapDownload(int id, String name) {
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(_ApplicationContext);
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(_ApplicationContext, Consts.LOG_TAG);
             builder.setOngoing(true)
                     .setSmallIcon(R.drawable.ic_map_black_36dp)
                     .setContentTitle(String.format("Downloading Map %s", name))

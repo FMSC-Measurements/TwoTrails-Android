@@ -3,6 +3,7 @@ package com.usda.fmsc.twotrails.fragments.polygon;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Looper;
+import android.support.annotation.NonNull;
 import android.text.Editable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -77,7 +78,7 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         final View view = inflater.inflate(R.layout.fragment_polygon_card, container, false);
@@ -326,8 +327,8 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
         tvPerimLineFt.setText(StringEx.toStringRound(TtUtils.Convert.toFeetTenths(_Polygon.getPerimeterLine(), Dist.Meters), 2));
         tvPerimLineMt.setText(StringEx.toStringRound(_Polygon.getPerimeterLine(), 2));
 
-        tvAreaAc.setText(StringEx.toStringRound(TtUtils.Convert.metersSquaredToAcres(_Polygon.getArea()), 2));
-        tvAreaHa.setText(StringEx.toStringRound(TtUtils.Convert.metersSquaredToHa(_Polygon.getArea()), 2));
+        tvAreaAc.setText(StringEx.toStringRound(TtUtils.Convert.metersSquaredToAcres(_Polygon.getArea()), 4));
+        tvAreaHa.setText(StringEx.toStringRound(TtUtils.Convert.metersSquaredToHa(_Polygon.getArea()), 4));
 
         List<PointD> polyPoints = activity.getDrawPoints(_Polygon, spv.getWidth(), false);
 
