@@ -9,6 +9,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
 
+@SuppressWarnings("unused")
 public class Consts {
     public static final DateTimeFormatter DateTimeFormatter = DateTimeFormat.forPattern("M/d/yyyy h:mm:ss a");
 
