@@ -3,7 +3,6 @@ package com.usda.fmsc.twotrails.data;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.support.annotation.Nullable;
 
 import com.usda.fmsc.geospatial.EastWest;
 import com.usda.fmsc.geospatial.NorthSouth;
@@ -35,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 import com.usda.fmsc.geospatial.GeoPosition;
 import com.usda.fmsc.geospatial.nmea.sentences.GGASentence;
@@ -43,6 +43,7 @@ import com.usda.fmsc.utilities.FileUtils;
 import com.usda.fmsc.utilities.ParseEx;
 import com.usda.fmsc.utilities.StringEx;
 
+@SuppressWarnings({"UnusedReturnValue", "unused", "WeakerAccess"})
 public class DataAccessLayer extends IDataLayer {
     public String getFilePath() {
         return _FilePath;
@@ -314,7 +315,7 @@ public class DataAccessLayer extends IDataLayer {
     public TtPolygon getPolygonByCN(String cn) {
         ArrayList<TtPolygon> polys = getPolygons(String.format("%s = '%s'", TwoTrailsSchema.SharedSchema.CN, cn));
 
-        if(polys != null && polys.size() > 0)
+        if (polys != null && polys.size() > 0)
             return polys.get(0);
         return null;
     }
@@ -366,7 +367,7 @@ public class DataAccessLayer extends IDataLayer {
             c.close();
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:getPolygons");
-            return null;
+            throw new RuntimeException("DAL:getPolygons");
         }
 
         return polys;
@@ -472,7 +473,7 @@ public class DataAccessLayer extends IDataLayer {
             getPoints(String.format("%s = '%s'",
                     TwoTrailsSchema.SharedSchema.CN, cn));
 
-        if(points.size() > 0)
+        if (points.size() > 0)
             return points.get(0);
         return null;
     }
@@ -482,7 +483,7 @@ public class DataAccessLayer extends IDataLayer {
                 getPoints(String.format("%s = '%s'",
                         TwoTrailsSchema.PointSchema.PolyCN, polyCN), 1);
 
-        if(points != null && points.size() > 0)
+        if (points != null && points.size() > 0)
             return points.get(0);
         return null;
     }
@@ -561,7 +562,6 @@ public class DataAccessLayer extends IDataLayer {
         return getPoints(where, 0);
     }
 
-    @Nullable
     private ArrayList<TtPoint> getPoints(String where, int limit) {
         ArrayList<TtPoint> points = new ArrayList<>();
 
@@ -581,7 +581,7 @@ public class DataAccessLayer extends IDataLayer {
             if (c.moveToFirst()) {
                 do {
 
-                    if(!c.isNull(7)) {
+                    if (!c.isNull(7)) {
                         point = TtUtils.Points.createNewPointByOpType(OpType.parse(c.getInt(7)));
                     } else {
                         throw new Exception("Point has no OpType");
@@ -663,7 +663,7 @@ public class DataAccessLayer extends IDataLayer {
             c.close();
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:getPoints");
-            return null;
+            throw new RuntimeException("DAL:getPoints");
         }
 
         return points;
@@ -696,15 +696,15 @@ public class DataAccessLayer extends IDataLayer {
             Cursor c = _db.rawQuery(query, null);
 
             if (c.moveToFirst()) {
-                if(!c.isNull(1))
+                if (!c.isNull(1))
                     g.setLatitude(c.getDouble(1));
-                if(!c.isNull(2))
+                if (!c.isNull(2))
                     g.setLongitude(c.getDouble(2));
-                if(!c.isNull(3))
+                if (!c.isNull(3))
                     g.setElevation(c.getDouble(3));
-                if(!c.isNull(4))
+                if (!c.isNull(4))
                     g.setManualAccuracy(c.getDouble(4));
-                if(!c.isNull(5))
+                if (!c.isNull(5))
                     g.setRMSEr(c.getDouble(5));
             }
 
@@ -727,13 +727,13 @@ public class DataAccessLayer extends IDataLayer {
             Cursor c = _db.rawQuery(query, null);
 
             if (c.moveToFirst()) {
-                if(!c.isNull(1))
+                if (!c.isNull(1))
                     t.setFwdAz(c.getDouble(1));
-                if(!c.isNull(2))
+                if (!c.isNull(2))
                     t.setBkAz(c.getDouble(2));
-                if(!c.isNull(3))
+                if (!c.isNull(3))
                     t.setSlopeDistance(c.getDouble(3));
-                if(!c.isNull(4))
+                if (!c.isNull(4))
                     t.setSlopeAngle(c.getDouble(4));
             }
 
@@ -756,13 +756,13 @@ public class DataAccessLayer extends IDataLayer {
             Cursor c = _db.rawQuery(query, null);
 
             if (c.moveToFirst()) {
-                if(!c.isNull(1)) {
+                if (!c.isNull(1)) {
                     TtPoint p = getPointByCN(c.getString(1));
                     if (p != null)
                         q.setParentPoint(p);
                 }
 
-                if(!c.isNull(2))
+                if (!c.isNull(2))
                     q.setManualAccuracy(c.getDouble(2));
             }
 
@@ -776,7 +776,7 @@ public class DataAccessLayer extends IDataLayer {
 
     //region Insert
     public boolean insertPoint(TtPoint point) {
-        boolean success = false;
+        boolean success;
 
         if (point == null)
             return false;
@@ -786,7 +786,7 @@ public class DataAccessLayer extends IDataLayer {
 
             success = insertBasePoint(point);
 
-            if(success) {
+            if (success) {
                 _db.setTransactionSuccessful();
 
                 _Activity.updateAction(DataActionType.InsertedPoints);
@@ -817,7 +817,7 @@ public class DataAccessLayer extends IDataLayer {
                 }
             }
 
-            if(success) {
+            if (success) {
                 _db.setTransactionSuccessful();
 
                 _Activity.updateAction(DataActionType.ModifiedPoints);
@@ -834,7 +834,7 @@ public class DataAccessLayer extends IDataLayer {
 
 
     private boolean insertBasePoint(TtPoint point) {
-        if(point == null)
+        if (point == null)
             return false;
 
         try {
@@ -965,7 +965,7 @@ public class DataAccessLayer extends IDataLayer {
 
             success = updateBasePoint(updatedPoint, updatedPoint);
 
-            if(success) {
+            if (success) {
                 _db.setTransactionSuccessful();
 
                 _Activity.updateAction(DataActionType.ModifiedPoints);
@@ -986,7 +986,7 @@ public class DataAccessLayer extends IDataLayer {
 
             success = updateBasePoint(updatedPoint, oldPoint);
 
-            if(success) {
+            if (success) {
                 _db.setTransactionSuccessful();
 
                 _Activity.updateAction(DataActionType.ModifiedPoints);
@@ -1008,11 +1008,11 @@ public class DataAccessLayer extends IDataLayer {
             for(TtPoint point : updatedPoints) {
                 success = updateBasePoint(point, point);
 
-                if(!success)
+                if (!success)
                     break;
             }
 
-            if(success) {
+            if (success) {
                 _db.setTransactionSuccessful();
 
                 _Activity.updateAction(DataActionType.ModifiedPoints);
@@ -1028,7 +1028,7 @@ public class DataAccessLayer extends IDataLayer {
     public boolean updatePoints(List<TtPoint> updatedPoints, List<TtPoint> oldPoints) {
         boolean success = false;
 
-        if(updatedPoints == null || oldPoints == null ||
+        if (updatedPoints == null || oldPoints == null ||
                 updatedPoints.size() != oldPoints.size() ||
                 updatedPoints.size() < 1)
             return false;
@@ -1039,11 +1039,11 @@ public class DataAccessLayer extends IDataLayer {
             for (int i = 0; i < updatedPoints.size(); i++) {
                 success = updateBasePoint(updatedPoints.get(i), oldPoints.get(i));
 
-                if(!success)
+                if (!success)
                     break;
             }
 
-            if(success) {
+            if (success) {
                 _db.setTransactionSuccessful();
 
                 _Activity.updateAction(DataActionType.ModifiedPoints);
@@ -1057,13 +1057,13 @@ public class DataAccessLayer extends IDataLayer {
     }
 
     private boolean updateBasePoint(TtPoint updatedPoint, TtPoint oldPoint) {
-        if(updatedPoint == null)
+        if (updatedPoint == null)
             return false;
 
-        if(oldPoint == null) {
+        if (oldPoint == null) {
             return insertBasePoint(updatedPoint);
         } else {
-            if(!updatedPoint.getCN().equals(oldPoint.getCN()))
+            if (!updatedPoint.getCN().equals(oldPoint.getCN()))
                 return false;
 
             try {
@@ -1103,7 +1103,7 @@ public class DataAccessLayer extends IDataLayer {
                 if (rows < 1)
                     return false;
 
-                if(updatedPoint.getOp() != oldPoint.getOp()) {
+                if (updatedPoint.getOp() != oldPoint.getOp()) {
                     changeOperation(updatedPoint, oldPoint);
                 } else {
                     switch (updatedPoint.getOp()) {
@@ -1200,7 +1200,7 @@ public class DataAccessLayer extends IDataLayer {
         cvs.put(TwoTrailsSchema.SharedSchema.CN, updatedPoint.getCN());
         cvs.put(TwoTrailsSchema.QuondamPointSchema.ManualAccuracy, updatedPoint.getManualAccuracy());
 
-        if(!updatedPoint.getParentCN().equals(oldPoint.getParentCN())) {
+        if (!updatedPoint.getParentCN().equals(oldPoint.getParentCN())) {
             cvs.put(TwoTrailsSchema.QuondamPointSchema.ParentPointCN, updatedPoint.getParentCN());
 
             removeQuondamLink(oldPoint);
@@ -1213,10 +1213,10 @@ public class DataAccessLayer extends IDataLayer {
 
 
     private void updateQuondamLink(QuondamPoint point) {
-        if(point.hasParent()) {
+        if (point.hasParent()) {
             TtPoint linkedPoint = getPointByCN(point.getParentCN());
 
-            if(linkedPoint != null) {
+            if (linkedPoint != null) {
                 linkedPoint.addQuondamLink(point.getCN());
                 updatePoint(linkedPoint, point.getParentPoint());
             }
@@ -1226,10 +1226,10 @@ public class DataAccessLayer extends IDataLayer {
     }
 
     private void removeQuondamLink(QuondamPoint point) {
-        if(point.hasParent()) {
+        if (point.hasParent()) {
             TtPoint linkedPoint = getPointByCN(point.getParentCN());
 
-            if(linkedPoint != null) {
+            if (linkedPoint != null) {
                 linkedPoint.removeQuondamLink(point.getCN());
                 updatePoint(linkedPoint, point.getParentPoint());
             }
@@ -1312,7 +1312,7 @@ public class DataAccessLayer extends IDataLayer {
     }
 
 
-    public boolean deletePoints(Collection<TtPoint> points) {
+    private boolean deletePoints(Collection<TtPoint> points) {
         boolean success = true;
 
         try {
@@ -1383,7 +1383,7 @@ public class DataAccessLayer extends IDataLayer {
     public TtMetadata getMetadataByCN(String cn) {
         ArrayList<TtMetadata> metas = getMetadata(String.format("%s = '%s'", TwoTrailsSchema.SharedSchema.CN, cn));
 
-        if(metas != null && metas.size() > 0)
+        if (metas != null && metas.size() > 0)
             return metas.get(0);
         return null;
     }
@@ -1443,7 +1443,7 @@ public class DataAccessLayer extends IDataLayer {
             c.close();
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:getMetadata");
-            return null;
+            throw new RuntimeException("DAL:getMetadata ");
         }
 
         return metas;
@@ -1599,7 +1599,7 @@ public class DataAccessLayer extends IDataLayer {
     }
 
     public ArrayList<TtGroup> getGroupsByType(TtGroup.GroupType type) {
-        return getGroups(String.format("%s = %d",
+        return getGroups(String.format(Locale.US, "%s = %d",
                 TwoTrailsSchema.GroupSchema.Type,
                 type.getValue()));
     }
@@ -1649,7 +1649,7 @@ public class DataAccessLayer extends IDataLayer {
             c.close();
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:getGroups");
-            return null;
+            throw new RuntimeException("DAL:getGroups");
         }
 
         return groups;
@@ -1968,7 +1968,7 @@ public class DataAccessLayer extends IDataLayer {
             c.close();
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:getNmeaBursts");
-            return null;
+            throw new RuntimeException("DAL:getNmeaBursts");
         }
 
         return nmeas;
@@ -2235,9 +2235,9 @@ public class DataAccessLayer extends IDataLayer {
         {
             c = _db.rawQuery(getQuery, null);
 
-            if(c.moveToFirst())
+            if (c.moveToFirst())
             {
-                if(!c.isNull(0))
+                if (!c.isNull(0))
                     retString = c.getString(0);
             }
         }
@@ -2433,7 +2433,7 @@ public class DataAccessLayer extends IDataLayer {
             c.close();
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:getPolygonGraphicOptions");
-            return null;
+            throw new RuntimeException("DAL:getPolygonGraphicOptions");
         }
 
         return graphicOptions;
@@ -2564,7 +2564,7 @@ public class DataAccessLayer extends IDataLayer {
             c.close();
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:getUserActivity");
-            return null;
+            throw new RuntimeException("DAL:getUserActivity");
         }
 
         return activities;

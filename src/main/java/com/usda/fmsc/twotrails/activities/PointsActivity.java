@@ -13,7 +13,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
@@ -90,7 +89,6 @@ import com.usda.fmsc.twotrails.utilities.AppUnits;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -104,6 +102,7 @@ import com.usda.fmsc.utilities.StringEx;
 
 import jp.wasabeef.recyclerview.animators.FadeInAnimator;
 
+@SuppressWarnings("unused")
 public class PointsActivity extends CustomToolbarActivity implements PointMediaController, RangeFinderService.Listener {
     private HashMap<String, PointMediaListener> listeners;
 
@@ -209,11 +208,11 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                     dialog.setTitle("Invalid Point");
 
                     if (halfFinishedTrav) {
-                        dialog.setMessage(String.format("The %s point %d has a partial value. Would you like to finish or delete the point.",
+                        dialog.setMessage(StringEx.format("The %s point %d has a partial value. Would you like to finish or delete the point.",
                                 _deletePoint.getOp().toString(),
                                 _deletePoint.getPID()));
                     } else {
-                        dialog.setMessage(String.format("The point %d has no value. Would you like to edit or delete the point.",
+                        dialog.setMessage(StringEx.format("The point %d has no value. Would you like to edit or delete the point.",
                                 _deletePoint.getPID()));
                     }
 
@@ -790,7 +789,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                     anchorMediaIfExpanded();
 
                     AlertDialog.Builder alert = new AlertDialog.Builder(this);
-                    alert.setMessage(String.format("Delete Point %d", _CurrentPoint.getPID()));
+                    alert.setMessage(StringEx.format("Delete Point %d", _CurrentPoint.getPID()));
 
                     alert.setPositiveButton(R.string.str_delete, new DialogInterface.OnClickListener() {
                         @Override
@@ -1025,7 +1024,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
             Bundle bundle = data.getExtras();
             int created = 1;
 
-            if (bundle.containsKey(Consts.Codes.Data.NUMBER_OF_CREATED_POINTS)) {
+            if (bundle != null && bundle.containsKey(Consts.Codes.Data.NUMBER_OF_CREATED_POINTS)) {
                 created = bundle.getInt(Consts.Codes.Data.NUMBER_OF_CREATED_POINTS);
             }
 
@@ -1383,7 +1382,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
     private void resetPoint() {
         if (_PointUpdated) {
             new AlertDialog.Builder(this)
-            .setTitle(String.format("Reset Point %d", _CurrentPoint.getPID()))
+            .setTitle(StringEx.format("Reset Point %d", _CurrentPoint.getPID()))
             .setMessage(getString(R.string.points_reset_diag))
             .setPositiveButton("Reset", new DialogInterface.OnClickListener() {
                 @Override
@@ -1405,7 +1404,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         if (_MediaUpdated && _CurrentMedia != null) {
             if (!Global.getOrCreateMAL().updateMedia(_CurrentMedia)) {
                 Toast.makeText(PointsActivity.this,
-                        String.format("Unable to save %s", _CurrentMedia.getMediaType().toString()),
+                        StringEx.format("Unable to save %s", _CurrentMedia.getMediaType().toString()),
                         Toast.LENGTH_LONG
                 ).show();
             } else {
@@ -1478,7 +1477,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
             }
 
             if (error > 0) {
-                Toast.makeText(PointsActivity.this, String.format("Error saving %d pictures", pictures.size()), Toast.LENGTH_LONG).show();
+                Toast.makeText(PointsActivity.this, StringEx.format("Error saving %d pictures", pictures.size()), Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -1486,8 +1485,8 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
     private void resetMedia() {
         if (_MediaUpdated) {
             new AlertDialog.Builder(this)
-                    .setTitle(String.format("Reset Media %s", _CurrentMedia.getName()))
-                    .setMessage(String.format("This will reset this %s back to its original values.",
+                    .setTitle(StringEx.format("Reset Media %s", _CurrentMedia.getName()))
+                    .setMessage(StringEx.format("This will reset this %s back to its original values.",
                             _CurrentMedia.getMediaType().toString().toLowerCase()))
                     .setPositiveButton("Reset", new DialogInterface.OnClickListener() {
                         @Override
@@ -1505,7 +1504,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
     private void deleteMedia() {
         if (!_PointLocked && _CurrentMedia != null) {
             new AlertDialog.Builder(PointsActivity.this)
-                    .setMessage(String.format(
+                    .setMessage(StringEx.format(
                             "Would you like to delete %s '%s' from storage or only remove its association with the point?",
                             _CurrentMedia.getMediaType().toString().toLowerCase(),
                             _CurrentMedia.getName()))
@@ -1519,7 +1518,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             new AlertDialog.Builder(PointsActivity.this)
-                                    .setMessage(String.format("You are about to delete file '%s'.", _CurrentMedia.getFilePath()))
+                                    .setMessage(StringEx.format("You are about to delete file '%s'.", _CurrentMedia.getFilePath()))
                                     .setPositiveButton(R.string.str_delete, new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialog, int which) {
@@ -1670,7 +1669,10 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                 listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                        moveToPoint(pda.getItem(i));
+                        TtPoint point = pda.getItem(i);
+                        if (point != null) {
+                            moveToPoint(point);
+                        }
                         dialog.dismiss();
                     }
                 });
@@ -1681,7 +1683,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
                 final TtPoint linkedPoint = points.get(0);
 
-                dialog.setMessage(String.format("Move to Quondam %d in polygon %s.",
+                dialog.setMessage(StringEx.format("Move to Quondam %d in polygon %s.",
                         linkedPoint.getPID(), _Polygons.get(linkedPoint.getPolyCN()).getName()));
 
                 dialog.setPositiveButton(R.string.str_move, new DialogInterface.OnClickListener() {
@@ -2062,7 +2064,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         if (title != null) {
             tvPmdTitle.setText(title);
         } else {
-            tvPmdTitle.setText(String.format("Media (%d)", mediaCount));
+            tvPmdTitle.setText(StringEx.format("Media (%d)", mediaCount));
         }
     }
 
@@ -2134,7 +2136,13 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
 
     public TtMetadata getMetadata(String cn) {
-        return _MetaData.get(cn);
+        if (_MetaData.containsKey(cn)) {
+            return _MetaData.get(cn);
+        } else if (!_MetaData.containsKey(Consts.EmptyGuid)) {
+            throw new RuntimeException("Default Metadata not found");
+        } else {
+            return _MetaData.get(Consts.EmptyGuid);
+        }
     }
 
     public HashMap<String, TtPolygon> getPolygons() {
@@ -2567,15 +2575,11 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
 
     //region Range Finder
-    boolean autoCreatePoint;
-
     @Override
     public void rfDataReceived(final TtRangeFinderData rfData) {
         if (rfData.isValid()) {
             if (!_PointLocked) {
-                if (autoCreatePoint) {
-                    //create Sideshot
-                } else if (_CurrentPoint.getOp().isTravType()) {
+                if (_CurrentPoint.getOp().isTravType()) {
                     TravPoint tp = (TravPoint)_CurrentPoint;
 
                     if (tp.getFwdAz() != null || tp.getBkAz() != null || tp.getSlopeDistance() > 0) {
