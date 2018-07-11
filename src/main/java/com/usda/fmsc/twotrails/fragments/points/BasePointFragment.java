@@ -4,7 +4,7 @@ package com.usda.fmsc.twotrails.fragments.points;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
+import android.support.annotation.NonNull;
 import android.text.Editable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -66,9 +66,8 @@ public abstract class BasePointFragment extends AnimationCardFragment implements
         }
     }
 
-    @Nullable
     @Override
-    public final View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public final View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View view = onCreateViewEx(inflater, container, savedInstanceState);
 
         input = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
