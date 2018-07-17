@@ -9,13 +9,14 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v4.content.FileProvider;
+import android.support.v4.provider.DocumentFile;
 import android.support.v7.app.AlertDialog;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.nononsenseapps.filepicker.FilePickerActivity;
+import com.applandeo.FilePicker;
+import com.applandeo.listeners.OnSelectFileListener;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.dialogs.DontAskAgainDialog;
 import com.usda.fmsc.android.widget.FABProgressCircleEx;
@@ -104,10 +105,22 @@ public class ExportActivity extends CustomToolbarActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode == Consts.Codes.Requests.FOLDER && resultCode == RESULT_OK) {
-            String directory = data.getData().getPath();
 
-            if(directory != null) {
-                startExport(directory, true);
+
+            Uri directoryUri = data.getData();
+
+            boolean noDir = true;
+            if (directoryUri != null) {
+                DocumentFile dir = DocumentFile.fromTreeUri(this, directoryUri);
+
+                if (dir.isDirectory()) {
+                    startExport(dir.getUri().getPath(), true);
+                    noDir = false;
+                }
+            }
+
+            if (noDir) {
+                Toast.makeText(ExportActivity.this, "Unable to find Directory", Toast.LENGTH_LONG).show();
             }
         }
 
@@ -318,19 +331,15 @@ public class ExportActivity extends CustomToolbarActivity {
 
 
     private void selectDirectory(String initDir) {
-        Intent i = new Intent(this, FilePickerActivity.class);
-
-        i.putExtra(FilePickerActivity.EXTRA_ALLOW_MULTIPLE, false);
-        i.putExtra(FilePickerActivity.EXTRA_ALLOW_CREATE_DIR, false);
-        i.putExtra(FilePickerActivity.EXTRA_MODE, FilePickerActivity.MODE_DIR);
-
-        i.putExtra(FilePickerActivity.EXTRA_START_PATH, initDir);
-
-        try {
-            startActivityForResult(i, Consts.Codes.Requests.FOLDER);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        new FilePicker.Builder(this, new OnSelectFileListener() {
+            @Override
+            public void onSelect(File file) {
+                startExport(file.getPath(), true);
+            }
+        })
+        .hideFiles(true)
+        .directory(initDir)
+        .show();
     }
 
     private void export(final File directory) {
@@ -360,7 +369,11 @@ public class ExportActivity extends CustomToolbarActivity {
                                     if (snackbar != null)
                                         snackbar.dismiss();
 
-                                    startActivity(Intent.createChooser(intent, "Open Folder"));
+                                    if (intent.resolveActivityInfo(getPackageManager(), 0) != null) {
+                                        startActivity(Intent.createChooser(intent, "View Folder"));
+                                    } else {
+                                        Toast.makeText(ExportActivity.this, "No compatible File Explorers found", Toast.LENGTH_LONG).show();
+                                    }
                                 }
                             })
                             .setActionTextColor(AndroidUtils.UI.getColor(getBaseContext(), R.color.primaryLighter));

@@ -126,27 +126,30 @@ public class Global {
         ArcGISRuntime.setClientId(_ApplicationContext.getString(R.string.arcgis_client_id));
 
         initUI();
-
-        foldersInitiated = true;
     }
 
-    public static void initFolders() {
+    public static boolean initFolders() {
         if (AndroidUtils.App.checkStoragePermission(_ApplicationContext)) {
+            foldersInitiated = true;
 
             File dir = new File(getTtFileDir());
             if (!dir.exists()) {
-                dir.mkdirs();
+                foldersInitiated &= dir.mkdirs();
             }
 
             dir = new File(getOfflineMapsDir());
             if (!dir.exists()) {
-                dir.mkdirs();
+                foldersInitiated &= dir.mkdirs();
             }
 
             dir = new File(getOfflineMapsRecoveryDir());
             if (!dir.exists()) {
-                dir.mkdirs();
+                foldersInitiated &= dir.mkdirs();
             }
+
+            return foldersInitiated;
+        } else {
+            return false;
         }
     }
 
