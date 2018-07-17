@@ -39,6 +39,7 @@ import com.usda.fmsc.twotrails.fragments.main.MainToolsFragment;
 import com.usda.fmsc.twotrails.logic.PolygonAdjuster;
 import com.usda.fmsc.twotrails.objects.RecentProject;
 import com.usda.fmsc.twotrails.utilities.Export;
+import com.usda.fmsc.twotrails.utilities.TtReport;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 import com.usda.fmsc.utilities.FileUtils;
 import com.usda.fmsc.utilities.StringEx;
@@ -66,11 +67,18 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        Global.init(getApplicationContext());
+
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             @Override
             public void uncaughtException(Thread errorThread, Throwable exception) {
+                if (!Global.isFoldersInitiated()) {
+                    Global.initFolders();
+                    TtUtils.TtReport.changeDirectory(Global.getTtFileDir());
+                }
 
                 TtUtils.TtReport.writeError(exception.getMessage(), errorThread.getName(), exception.getStackTrace());
+
 
                 new Thread() {
                     @Override
@@ -123,8 +131,6 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 //        AndroidUtils.App.requestPermission(MainActivity.this,
 //                new String[] { Manifest.permission.WRITE_EXTERNAL_STORAGE, android.Manifest.permission.READ_EXTERNAL_STORAGE},
 //                Consts.Codes.Requests.CREATE_FILE, "TwoTrails needs storage permissions in order to Open and Create files.");
-
-        Global.init(getApplicationContext());
 
         Global.startRangefinderService(getApplicationContext());
 

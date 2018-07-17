@@ -5,7 +5,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
@@ -17,7 +16,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 
-import com.nononsenseapps.filepicker.FilePickerActivity;
+//import com.nononsenseapps.filepicker.FilePickerActivity;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.listeners.SimpleTextWatcher;
 import com.usda.fmsc.android.utilities.PostDelayHandler;
@@ -202,15 +201,20 @@ public class NewArcMapDialog extends DialogFragment {
                 btnNeg.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Intent i = new Intent(getActivity(), FilePickerActivity.class);
+//                        Intent i = new Intent(getActivity(), FilePickerActivity.class);
+//
+//                        i.putExtra(FilePickerActivity.EXTRA_ALLOW_MULTIPLE, false);
+//                        i.putExtra(FilePickerActivity.EXTRA_ALLOW_CREATE_DIR, false);
+//                        i.putExtra(FilePickerActivity.EXTRA_MODE, FilePickerActivity.MODE_FILE_AND_DIR);
+//
+//                        i.putExtra(FilePickerActivity.EXTRA_START_PATH, Environment.getExternalStorageDirectory().getPath());
+//
+//                        startActivityForResult(i, Consts.Codes.Dialogs.REQUEST_FILE);
 
-                        i.putExtra(FilePickerActivity.EXTRA_ALLOW_MULTIPLE, false);
-                        i.putExtra(FilePickerActivity.EXTRA_ALLOW_CREATE_DIR, false);
-                        i.putExtra(FilePickerActivity.EXTRA_MODE, FilePickerActivity.MODE_FILE_AND_DIR);
 
-                        i.putExtra(FilePickerActivity.EXTRA_START_PATH, Environment.getExternalStorageDirectory().getPath());
+                        AndroidUtils.App.openFileIntentFromFragment(NewArcMapDialog.this, Consts.FileExtensions.TPK, Consts.Codes.Dialogs.REQUEST_FILE);
 
-                        startActivityForResult(i, Consts.Codes.Dialogs.REQUEST_FILE);
+
                     }
                 });
             }
