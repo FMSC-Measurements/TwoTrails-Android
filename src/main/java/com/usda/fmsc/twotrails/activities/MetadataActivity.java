@@ -107,6 +107,10 @@ public class MetadataActivity extends CustomToolbarActivity {
         if (_Metadata.size() > 0) {
             _CurrentIndex = 0;
             _CurrentMetadata = getMetaAtIndex(_CurrentIndex);
+        } else {
+            TtUtils.TtReport.writeError("No Metadata, Invalid Project File.", "MetadataActivity");
+            Toast.makeText(MetadataActivity.this, "Metadata not found, Invalid Project File.", Toast.LENGTH_LONG).show();
+            finish();
         }
 
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());

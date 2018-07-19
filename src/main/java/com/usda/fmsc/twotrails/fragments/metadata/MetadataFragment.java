@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.twotrails.activities.MetadataActivity;
@@ -14,6 +15,7 @@ import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.fragments.AnimationCardFragment;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
+import com.usda.fmsc.twotrails.utilities.TtUtils;
 import com.usda.fmsc.utilities.StringEx;
 
 
@@ -27,6 +29,7 @@ public class MetadataFragment extends AnimationCardFragment implements MetadataA
 
     private View layGroup;
     private TtMetadata _Metadata;
+    private String _MetaCN;
 
 
     public static MetadataFragment newInstance(String metaCN, boolean hidden) {
@@ -49,12 +52,13 @@ public class MetadataFragment extends AnimationCardFragment implements MetadataA
         Bundle bundle = getArguments();
 
         if (bundle != null) {
-            String metaCN = bundle.getString(METADATA_CN);
+            _MetaCN = bundle.getString(METADATA_CN);
 
-            if (activity != null) {
-                _Metadata = activity.getMetadata(metaCN);
-                activity.register(metaCN, this);
-            }
+//            if (activity != null) {
+//                _Metadata = activity.getMetadata(_MetaCN);
+//                TtUtils.TtReport.writeError("Unable to get Metadata", "MetadataFragment");
+//                activity.register(_MetaCN, this);
+//            }
         }
     }
 
@@ -93,6 +97,12 @@ public class MetadataFragment extends AnimationCardFragment implements MetadataA
         super.onAttach(activity);
         try {
             this.activity = (MetadataActivity) activity;
+
+            if (activity != null) {
+                _Metadata = this.activity.getMetadata(_MetaCN);
+                TtUtils.TtReport.writeError("Unable to get Metadata", "MetadataFragment");
+                this.activity.register(_MetaCN, this);
+            }
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
                     + " must implement Metadata PointMediaListener");
