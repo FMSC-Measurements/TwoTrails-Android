@@ -45,6 +45,7 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
     private boolean settingView;
 
     private TtPolygon _Polygon;
+    private String _PolyCN;
 
 
     public static PolygonFragment newInstance(String polyCN, boolean hidden) {
@@ -68,12 +69,12 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
         Bundle bundle = getArguments();
 
         if (bundle != null) {
-            String polyCN = bundle.getString(POLYGON_CN);
+            _PolyCN = bundle.getString(POLYGON_CN);
 
-            if (activity != null) {
-                _Polygon = activity.getPolygon(polyCN);
-                activity.register(polyCN, this);
-            }
+//            if (activity != null) {
+//                _Polygon = activity.getPolygon(_PolyCN);
+//                activity.register(_PolyCN, this);
+//            }
         }
     }
 
@@ -249,6 +250,12 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
         super.onAttach(activity);
         try {
             this.activity = (PolygonsActivity) activity;
+
+            if (activity != null) {
+                _Polygon = this.activity.getPolygon(_PolyCN);
+                TtUtils.TtReport.writeError("Unable to get Polygon", "PolygonFragment");
+                this.activity.register(_PolyCN, this);
+            }
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString() + " must implement PolygonsActivity");
         }
