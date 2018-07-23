@@ -39,7 +39,6 @@ import com.usda.fmsc.twotrails.fragments.main.MainToolsFragment;
 import com.usda.fmsc.twotrails.logic.PolygonAdjuster;
 import com.usda.fmsc.twotrails.objects.RecentProject;
 import com.usda.fmsc.twotrails.utilities.Export;
-import com.usda.fmsc.twotrails.utilities.TtReport;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 import com.usda.fmsc.utilities.FileUtils;
 import com.usda.fmsc.utilities.StringEx;
