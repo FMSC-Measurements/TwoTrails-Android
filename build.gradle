@@ -116,7 +116,7 @@ dependencies {
     implementation project(':GeoSpatial')
     implementation project(':Utilities')
     implementation 'com.google.android.gms:play-services-maps:15.0.1'
-    implementation 'com.google.code.gson:gson:2.8.1'
+    implementation 'com.google.code.gson:gson:2.8.2'
     implementation 'com.android.support:recyclerview-v7:27.1.1'
     implementation 'com.android.support:mediarouter-v7:27.1.1'
     implementation 'com.android.support:appcompat-v7:27.1.1'
