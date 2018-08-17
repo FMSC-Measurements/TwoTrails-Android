@@ -440,7 +440,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
 
         miTrackedPoly = menu.findItem(R.id.mapMenuZoomToPoly);
         if (miTrackedPoly != null) {
-            miTrackedPoly.setVisible(getMapTracking() == MapTracking.POLY_BOUNDS);
+            miTrackedPoly.setVisible(true);//getMapTracking() == MapTracking.POLY_BOUNDS);
         }
 
         miShowMyPos = menu.findItem(R.id.mapMenuShowMyPos);
@@ -514,32 +514,40 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
             case R.id.mapMenuZoomToPoly: {
                 int gSize = getPolyGraphicManagers().size();
                 if (gSize > 0) {
-                    final String[] polyStrs = new String[polyPoints.size()];
+                    if (gSize > 1) {
+                        final String[] polyStrs = new String[polyPoints.size()];
 
-                    for (int i = 0; i < gSize; i++) {
-                        polyStrs[i] = getPolyGraphicManagers().get(i).getPolyName();
-                    }
-
-                    AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
-
-                    dialogBuilder.setTitle("Track Polygon");
-
-                    dialogBuilder.setItems(polyStrs, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            PolygonGraphicManager pmm = getPolyGraphicManagers().get(which);
-                            trackedPoly = pmm.getExtents();
-                            Global.Settings.ProjectSettings.setTrackedPolyCN(pmm.getPolygonCN());
-                            mapMoved = true;
-                            updateMapView(null);
+                        for (int i = 0; i < gSize; i++) {
+                            polyStrs[i] = getPolyGraphicManagers().get(i).getPolyName();
                         }
-                    });
 
-                    dialogBuilder.setNegativeButton(R.string.str_cancel, null);
+                        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
 
-                    final AlertDialog dialog = dialogBuilder.create();
+                        dialogBuilder.setTitle("Track Polygon");
 
-                    dialog.show();
+                        dialogBuilder.setItems(polyStrs, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                PolygonGraphicManager pmm = getPolyGraphicManagers().get(which);
+                                trackedPoly = pmm.getExtents();
+                                Global.Settings.ProjectSettings.setTrackedPolyCN(pmm.getPolygonCN());
+                                mapMoved = true;
+                                moveToLocation(pmm.getExtents(), Consts.Location.PADDING, true);
+                            }
+                        });
+
+                        dialogBuilder.setNegativeButton(R.string.str_cancel, null);
+
+                        final AlertDialog dialog = dialogBuilder.create();
+
+                        dialog.show();
+                    } else {
+                        PolygonGraphicManager pmm = getPolyGraphicManagers().get(0);
+                        trackedPoly = pmm.getExtents();
+                        Global.Settings.ProjectSettings.setTrackedPolyCN(pmm.getPolygonCN());
+                        mapMoved = true;
+                        moveToLocation(pmm.getExtents(), Consts.Location.PADDING, true);
+                    }
                 } else {
                     Toast.makeText(this, "No Polygons", Toast.LENGTH_SHORT).show();
                 }
@@ -774,7 +782,9 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
 
             if (getMapTracking() == MapTracking.POLY_BOUNDS && getTrackedPoly() != null) {
                 moveToLocation(getTrackedPoly(), Consts.Location.PADDING, true);
-            } else if (getMapTracking() == MapTracking.COMPLETE_BOUNDS && getCompleteBounds() != null) {
+            } else if (getMapTracking() == MapTracking.FOLLOW && getLastPosition() != null) {
+                moveToLocation(getLastPosition(), Consts.Location.ZOOM_CLOSE, true);
+            } else if (getCompleteBounds() != null) {
                 moveToLocation(getCompleteBounds(), Consts.Location.PADDING, true);
             } else {
                 moveToLocation(Consts.Location.USA_BOUNDS, Consts.Location.PADDING, true);
@@ -904,7 +914,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
         }
 
         if (miTrackedPoly != null) {
-            miTrackedPoly.setVisible(getMapTracking() == MapTracking.POLY_BOUNDS);
+            miTrackedPoly.setVisible(true);//getMapTracking() == MapTracking.POLY_BOUNDS);
         }
 
         if (getShowMyPos()) {

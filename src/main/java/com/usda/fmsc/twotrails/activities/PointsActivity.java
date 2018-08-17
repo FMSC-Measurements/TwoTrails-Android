@@ -2427,10 +2427,11 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                 alert.setPositiveButton("Acquire NMEA", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        Intent intent = new Intent(getBaseContext(), AcquireGpsActivity.class);
+                        Intent intent = new Intent(getBaseContext(), AcquireAndCalculateGpsActivity.class);
                         intent.putExtra(Consts.Codes.Data.POINT_DATA, new GpsPoint(_CurrentPoint));
                         intent.putExtra(Consts.Codes.Data.POLYGON_DATA, _CurrentPolygon);
                         intent.putExtra(Consts.Codes.Data.METADATA_DATA, _MetaData.get(_CurrentPoint.getMetadataCN()));
+                        intent.putExtra(AcquireAndCalculateGpsActivity.CALCULATE_ONLY_MODE, false);
 
                         startActivityForResult(intent, Consts.Codes.Activites.ACQUIRE);
                     }

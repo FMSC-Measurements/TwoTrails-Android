@@ -89,6 +89,8 @@ public class ExportActivity extends CustomToolbarActivity {
                 }
             });
         }
+
+        chkPc.setCheckedState(MultiStateTouchCheckBox.CheckedState.Checked);
     }
 
     @Override

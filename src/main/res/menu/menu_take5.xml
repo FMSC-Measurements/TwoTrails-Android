@@ -65,5 +65,10 @@
         android:title="@string/menu_rename_group"
         app:showAsAction="never"/>
 
+    <item
+        android:id="@+id/mapMenuZoomToPoly"
+        android:title="@string/menu_map_zoom_to_poly"
+        app:showAsAction="never"
+        android:visible="false"/>
 
 </menu>
