@@ -950,7 +950,8 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
 
                     //temp adjust for map
                     TtPoint tmp;
-                    for (int i = _Points.size() - 2; i > -1 && i < _Points.size(); i++) {
+                    int i;
+                    for (i = _Points.size() - 2; i > -1; i--) {
                         tmp =_Points.get(i);
 
                         if (tmp.getOp().isGpsType()) {
@@ -960,7 +961,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                         }
                     }
 
-                    return true;
+                    return i > -1;
                 } else {
                     Toast.makeText(Take5Activity.this, "SideShot requires a distance of greater than zero", Toast.LENGTH_SHORT).show();
                 }
