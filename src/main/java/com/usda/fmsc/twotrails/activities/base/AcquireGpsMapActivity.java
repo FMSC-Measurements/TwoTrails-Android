@@ -233,7 +233,7 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
 
     @Override
     protected Extent getCompleteBounds() {
-        if (trailGraphicManager != null) {
+        if (trailGraphicManager != null && trailGraphicManager.getPositionsCount() > 0) {
             Extent.Builder builder = new Extent.Builder();
             builder.include(super.getCompleteBounds());
             builder.include(trailGraphicManager.getExtents());

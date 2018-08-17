@@ -66,15 +66,12 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Bundle bundle = getArguments();
+        if (_PolyCN == null && getArguments() != null) {
+            _PolyCN = getArguments().getString(POLYGON_CN);
 
-        if (bundle != null) {
-            _PolyCN = bundle.getString(POLYGON_CN);
-
-//            if (activity != null) {
-//                _Polygon = activity.getPolygon(_PolyCN);
-//                activity.register(_PolyCN, this);
-//            }
+            if (activity != null) {
+                _Polygon = activity.getPolygon(_PolyCN);
+            }
         }
     }
 
@@ -252,7 +249,17 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
             this.activity = (PolygonsActivity) activity;
 
             if (activity != null) {
-                _Polygon = this.activity.getPolygon(_PolyCN);
+                if (_PolyCN == null) {
+                    Bundle bundle = getArguments();
+                    if (bundle != null) {
+                        _PolyCN = bundle.getString(POLYGON_CN);
+                    }
+                }
+
+                if (_PolyCN != null) {
+                    _Polygon = this.activity.getPolygon(_PolyCN);
+                }
+
                 TtUtils.TtReport.writeError("Unable to get Polygon", "PolygonFragment");
                 this.activity.register(_PolyCN, this);
             }

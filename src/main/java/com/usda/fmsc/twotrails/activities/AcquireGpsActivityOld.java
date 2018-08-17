@@ -25,7 +25,7 @@ import com.usda.fmsc.twotrails.units.MapTracking;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 import com.usda.fmsc.utilities.StringEx;
 
-public class AcquireGpsActivity extends AcquireGpsMapActivity {
+public class AcquireGpsActivityOld extends AcquireGpsMapActivity {
     private TextView tvLogged, tvRecv;
 
     private GpsPoint _Point;
@@ -40,7 +40,7 @@ public class AcquireGpsActivity extends AcquireGpsMapActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_acquire_gps);
+        setContentView(R.layout.activity_acquire_gps_old);
 
         setUseExitWarning(true);
         setUseLostConnectionWarning(true);
@@ -65,7 +65,7 @@ public class AcquireGpsActivity extends AcquireGpsMapActivity {
                     }
 
                 } catch (Exception e) {
-                    TtUtils.TtReport.writeError(e.getMessage(), "AcquireGpsActivity:onCreate", e.getStackTrace());
+                    TtUtils.TtReport.writeError(e.getMessage(), "AcquireGpsActivityOld:onCreate", e.getStackTrace());
                     setResult(Consts.Codes.Results.ERROR);
                 }
             } else {
@@ -212,7 +212,7 @@ public class AcquireGpsActivity extends AcquireGpsMapActivity {
         }
 
         try {
-            Intent intent = new Intent(this, CalculateGpsActivity.class);
+            Intent intent = new Intent(this, CalculateGpsActivityOld.class);
 
             intent.putExtra(Consts.Codes.Data.POINT_DATA, _Point);
             intent.putExtra(Consts.Codes.Data.METADATA_DATA, _Metadata);
@@ -221,8 +221,8 @@ public class AcquireGpsActivity extends AcquireGpsMapActivity {
 
             startActivityForResult(intent, Consts.Codes.Activites.CALCULATE);
         } catch (Exception e) {
-            TtUtils.TtReport.writeError(e.getMessage(), "AcquireGpsActivity:btnCalcClick", e.getStackTrace());
-            new AlertDialog.Builder(AcquireGpsActivity.this)
+            TtUtils.TtReport.writeError(e.getMessage(), "AcquireGpsActivityOld:btnCalcClick", e.getStackTrace());
+            new AlertDialog.Builder(AcquireGpsActivityOld.this)
                     .setMessage("Unable to start Calculation")
                     .show();
         }

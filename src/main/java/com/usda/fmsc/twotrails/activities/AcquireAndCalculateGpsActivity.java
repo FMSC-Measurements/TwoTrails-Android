@@ -191,7 +191,7 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
 
         if (txtRange != null) {
             if (_Bursts.size() > 0) {
-                txtRange.setText(String.format("1-%d", _Bursts.size()));
+                txtRange.setText(StringEx.format("1-%d", _Bursts.size()));
             }
 
             txtRange.addTextChangedListener(new SimpleTextWatcher() {
@@ -410,7 +410,7 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
                 tvUtmY1.setText(StringEx.toString(y, 2));
                 tvNssda1.setText(StringEx.toString(dRMSEr, 2));
                 chkG1.setEnabled(true);
-                chkG1.setText(String.format("(%d)", count));
+                chkG1.setText(StringEx.format("(%d)", count));
                 //endregion
 
                 //region Group 2
@@ -596,7 +596,7 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
                 //endregion
             }
         } catch (Exception e) {
-            TtUtils.TtReport.writeError(e.getMessage(), "CalculateGpsActivity:calculate", e.getStackTrace());
+            TtUtils.TtReport.writeError(e.getMessage(), "CalculateGpsActivityOld:calculate", e.getStackTrace());
         }
     }
 
@@ -809,6 +809,10 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
 
         if (lastPosition != null) {
             moveToLocation(lastPosition, Consts.Location.ZOOM_CLOSE, true);
+        } else if (getTrackedPolyCN() != null) {
+            moveToLocation(getTrackedPoly(), Consts.Location.PADDING, true);
+        } else if (getCompleteBounds() != null) {
+            moveToLocation(getCompleteBounds(), Consts.Location.PADDING, true);
         }
     }
     //endregion

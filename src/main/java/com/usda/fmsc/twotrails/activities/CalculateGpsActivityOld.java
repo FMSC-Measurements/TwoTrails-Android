@@ -38,7 +38,7 @@ import com.usda.fmsc.utilities.EnumEx;
 import com.usda.fmsc.utilities.ParseEx;
 import com.usda.fmsc.utilities.StringEx;
 
-public class CalculateGpsActivity extends CustomToolbarActivity {
+public class CalculateGpsActivityOld extends CustomToolbarActivity {
     private static final Pattern pattern = Pattern.compile("[a-zA-Z]");
 
     private GpsPoint _Point;
@@ -82,7 +82,7 @@ public class CalculateGpsActivity extends CustomToolbarActivity {
                 _Bursts = intent.getParcelableArrayListExtra(Consts.Codes.Data.ADDITIVE_NMEA_DATA);
                 _FilteredBursts = new ArrayList<>();
             } catch (Exception e) {
-                TtUtils.TtReport.writeError(e.getMessage(), "CalculateGpsActivity:onCreate", e.getStackTrace());
+                TtUtils.TtReport.writeError(e.getMessage(), "CalculateGpsActivityOld:onCreate", e.getStackTrace());
                 setResult(Consts.Codes.Results.ERROR);
                 finish();
                 return;
@@ -524,7 +524,7 @@ public class CalculateGpsActivity extends CustomToolbarActivity {
                 //endregion
             }
         } catch (Exception e) {
-            TtUtils.TtReport.writeError(e.getMessage(), "CalculateGpsActivity:calculate", e.getStackTrace());
+            TtUtils.TtReport.writeError(e.getMessage(), "CalculateGpsActivityOld:calculate", e.getStackTrace());
         }
     }
 

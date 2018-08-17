@@ -102,7 +102,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
 
     private RelativeLayout progLay;
     private TextView tvProg;
-    private MenuItem miMode, miMoveToEnd, miHideGpsInfo;
+    private MenuItem miMode, miMoveToEnd, miHideGpsInfo, miCenterPosition;
 
     private ArrayList<TtPoint> _Points;
     private ArrayList<TtNmeaBurst> _Bursts, _UsedBursts;
@@ -591,6 +591,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
         miMoveToEnd = menu.findItem(R.id.take5MenuToBottom);
         miMode = menu.findItem(R.id.take5MenuMode);
         miHideGpsInfo = menu.findItem(R.id.take5MenuGpsInfoToggle);
+        miCenterPosition = menu.findItem(R.id.take5MenuCenterPositionToggle);
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -655,13 +656,13 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                 setMapGesturesEnabled(mapViewMode);
                 layCardInfo.setEnabled(!mapViewMode);
                 layCardInfo.setVisibility(mapViewMode ? View.GONE : View.VISIBLE);
+                miCenterPosition.setVisible(mapViewMode);
 
                 if (mapViewMode) {
                     hideCreateSS();
                 } else {
                     showCreateSS();
                 }
-                //fabSS.setVisibility(mapViewMode ? View.GONE : View.VISIBLE);
 
                 miMode.setIcon(mapViewMode ? R.drawable.ic_add_location_white_36dp : R.drawable.ic_map_white_36dp);
                 break;
@@ -680,6 +681,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
             }
             case R.id.take5MenuCenterPositionToggle: {
                 centerPosition = !centerPosition;
+                miCenterPosition.setChecked(centerPosition);
                 break;
             }
         }
@@ -1691,7 +1693,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
 
     @Override
     protected MapTracking getMapTracking() {
-        return mapViewMode || centerPosition ? MapTracking.NONE : MapTracking.FOLLOW;
+        return !mapViewMode || centerPosition ? MapTracking.FOLLOW : MapTracking.NONE;
     }
 
 

@@ -49,16 +49,12 @@ public class MetadataFragment extends AnimationCardFragment implements MetadataA
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Bundle bundle = getArguments();
+        if (_MetaCN == null && getArguments() != null) {
+            _MetaCN = getArguments().getString(METADATA_CN);
 
-        if (bundle != null) {
-            _MetaCN = bundle.getString(METADATA_CN);
-
-//            if (activity != null) {
-//                _Metadata = activity.getMetadata(_MetaCN);
-//                TtUtils.TtReport.writeError("Unable to get Metadata", "MetadataFragment");
-//                activity.register(_MetaCN, this);
-//            }
+            if (activity != null) {
+                _Metadata = activity.getMetadata(_MetaCN);
+            }
         }
     }
 
@@ -99,7 +95,17 @@ public class MetadataFragment extends AnimationCardFragment implements MetadataA
             this.activity = (MetadataActivity) activity;
 
             if (activity != null) {
-                _Metadata = this.activity.getMetadata(_MetaCN);
+                if (_MetaCN == null) {
+                    Bundle bundle = getArguments();
+                    if (bundle != null) {
+                        _MetaCN = bundle.getString(METADATA_CN);
+                    }
+                }
+
+                if (_MetaCN != null) {
+                    _Metadata = this.activity.getMetadata(_MetaCN);
+                }
+                
                 TtUtils.TtReport.writeError("Unable to get Metadata", "MetadataFragment");
                 this.activity.register(_MetaCN, this);
             }
