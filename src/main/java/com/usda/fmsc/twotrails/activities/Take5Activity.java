@@ -959,13 +959,14 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                             break;
                         }
                     }
+
+                    return true;
                 } else {
                     Toast.makeText(Take5Activity.this, "SideShot requires a distance of greater than zero", Toast.LENGTH_SHORT).show();
                 }
             } else {
                 Toast.makeText(Take5Activity.this, "SideShot requires a forward or back azimuth", Toast.LENGTH_SHORT).show();
             }
-
             return false;
         }
 
