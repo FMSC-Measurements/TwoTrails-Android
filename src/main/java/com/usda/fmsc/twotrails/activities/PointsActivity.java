@@ -2139,8 +2139,10 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         if (_MetaData.containsKey(cn)) {
             return _MetaData.get(cn);
         } else if (!_MetaData.containsKey(Consts.EmptyGuid)) {
+            TtUtils.TtReport.writeError("Default Metadata not found", "PointsActivity:getMetadata");
             throw new RuntimeException("Default Metadata not found");
         } else {
+            TtUtils.TtReport.writeError("Defaulting to Default Metadata", "PointsActivity:getMetadata");
             return _MetaData.get(Consts.EmptyGuid);
         }
     }
