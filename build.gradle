@@ -6,7 +6,7 @@ android {
 
     def versionPropsFile = file('version.properties')
 
-    def vName = "0.9"
+    def vName = ""
     def vCode = 0
 
     if (versionPropsFile.canRead()) {
