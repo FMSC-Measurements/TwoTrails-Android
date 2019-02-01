@@ -1,5 +1,6 @@
 package com.usda.fmsc.twotrails.activities;
 
+import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -88,6 +89,7 @@ import com.usda.fmsc.geospatial.GeoTools;
 import jp.wasabeef.recyclerview.animators.FadeInAnimator;
 import jp.wasabeef.recyclerview.animators.SlideInUpAnimator;
 
+@SuppressLint("RestrictedApi")
 public class Take5Activity extends AcquireGpsMapActivity implements PointMediaController {
     private static final boolean enableCardFading = false;
 
