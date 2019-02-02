@@ -1792,7 +1792,7 @@ public class DataAccessLayer extends IDataLayer {
                     String pointCN, satsInView;
                     boolean used;
                     DateTime fixTime;
-                    Double groundSpeed, trackAngle, magVar, pdop, hdop, vdop, horizDilution, geoidHeight;
+                    double groundSpeed, trackAngle, magVar, pdop, hdop, vdop, horizDilution, geoidHeight;
                     EastWest magVarDir;
                     GSASentence.Mode mode;
                     GSASentence.Fix fix;

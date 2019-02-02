@@ -404,7 +404,7 @@ public abstract class TtPoint extends TtObject implements Comparable<TtPoint>, C
 
     @Override
     public String toString() {
-        return String.format("%d: %s", _PID, getOp());
+        return StringEx.format("%d: %s", _PID, getOp());
     }
 
     @Override

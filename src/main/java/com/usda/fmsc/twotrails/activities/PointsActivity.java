@@ -102,7 +102,7 @@ import com.usda.fmsc.utilities.StringEx;
 
 import jp.wasabeef.recyclerview.animators.FadeInAnimator;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "RestrictedApi"})
 public class PointsActivity extends CustomToolbarActivity implements PointMediaController, RangeFinderService.Listener {
     private HashMap<String, PointMediaListener> listeners;
 
