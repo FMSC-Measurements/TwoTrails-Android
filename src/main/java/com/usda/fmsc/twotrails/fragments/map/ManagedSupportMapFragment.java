@@ -12,7 +12,6 @@ import com.google.android.gms.maps.GoogleMapOptions;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
@@ -39,7 +38,8 @@ import java.util.ArrayList;
 import java.util.Queue;
 
 public class ManagedSupportMapFragment extends SupportMapFragment implements IMultiMapFragment,
-        OnMapReadyCallback, GoogleMap.OnMapLoadedCallback, GoogleMap.OnCameraChangeListener, GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener {
+        OnMapReadyCallback, GoogleMap.OnMapLoadedCallback, GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener,
+        GoogleMap.OnCameraMoveStartedListener, GoogleMap.OnCameraMoveListener, GoogleMap.OnCameraIdleListener {
 
     private MultiMapListener mmlistener;
 
@@ -129,7 +129,9 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
         }
 
         map.setOnMapLoadedCallback(this);
-        map.setOnCameraChangeListener(this);
+        map.setOnCameraMoveListener(this);
+        map.setOnCameraMoveStartedListener(this);
+        map.setOnCameraIdleListener(this);
 
         map.setInfoWindowAdapter(new MultiLineInfoWindowAdapter(getContext()));
         map.setOnMapClickListener(this);
@@ -187,9 +189,20 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
         }
     }
 
+
     @Override
-    public void onCameraChange(CameraPosition cameraPosition) {
+    public void onCameraIdle() {
+
+    }
+
+    @Override
+    public void onCameraMove() {
         onMapLocationChanged();
+    }
+
+    @Override
+    public void onCameraMoveStarted(int i) {
+
     }
 
     @Override
@@ -436,4 +449,5 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
     public void removeTrail(TrailGraphicManager graphicManager) {
 
     }
+
 }

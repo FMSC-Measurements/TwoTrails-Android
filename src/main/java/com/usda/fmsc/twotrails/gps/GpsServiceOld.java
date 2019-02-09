@@ -4,11 +4,10 @@ import android.app.Service;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.location.GnssStatus;
+import android.location.GpsStatus;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.location.OnNmeaMessageListener;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -17,17 +16,12 @@ import android.os.Looper;
 
 import com.google.android.gms.maps.LocationSource;
 import com.usda.fmsc.android.AndroidUtils;
-import com.usda.fmsc.geospatial.GeoPosition;
-import com.usda.fmsc.geospatial.nmea.INmeaBurst;
-import com.usda.fmsc.geospatial.nmea.NmeaBurstEx;
 import com.usda.fmsc.geospatial.nmea.NmeaIDs;
-import com.usda.fmsc.geospatial.nmea.NmeaParser;
-import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
-import com.usda.fmsc.twotrails.Global;
+import com.usda.fmsc.geospatial.nmea.NmeaBurstEx;
 import com.usda.fmsc.twotrails.devices.BluetoothConnection;
 import com.usda.fmsc.twotrails.devices.TtBluetoothManager;
+import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
-import com.usda.fmsc.utilities.StringEx;
 
 import org.joda.time.DateTime;
 
@@ -35,9 +29,14 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
-public class GpsService extends Service implements LocationListener, LocationSource, OnNmeaMessageListener,
+import com.usda.fmsc.geospatial.GeoPosition;
+import com.usda.fmsc.geospatial.nmea.INmeaBurst;
+import com.usda.fmsc.geospatial.nmea.NmeaParser;
+import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
+import com.usda.fmsc.utilities.StringEx;
 
-        NmeaParser.Listener, BluetoothConnection.Listener, SharedPreferences.OnSharedPreferenceChangeListener {
+public class GpsServiceOld extends Service implements LocationListener, LocationSource, GpsStatus.Listener,
+        GpsStatus.NmeaListener, NmeaParser.Listener, BluetoothConnection.Listener, SharedPreferences.OnSharedPreferenceChangeListener {
 
     public final int GPS_UPDATE_INTERVAL = 1000;    //in milliseconds
     public final int GPS_MINIMUM_DISTANCE = 0;      //in meters
@@ -62,30 +61,8 @@ public class GpsService extends Service implements LocationListener, LocationSou
 
     private GpsSyncer gpsSyncer;
 
-    GnssStatus.Callback mGnssStatusCallback = new GnssStatus.Callback() {
-        @Override
-        public void onStarted() {
-            postGpsStart();
-        }
 
-        @Override
-        public void onStopped() {
-            postGpsStop();
-        }
-
-        @Override
-        public void onFirstFix(int ttffMillis) {
-            //
-        }
-
-        @Override
-        public void onSatelliteStatusChanged(GnssStatus status) {
-            //
-        }
-    };
-
-
-    public GpsService() {
+    public GpsServiceOld() {
     }
 
     @Override
@@ -117,7 +94,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
 
             logBurstDetails = Global.Settings.DeviceSettings.getGpsLogBurstDetails();
         } else {
-            TtUtils.TtReport.writeError("Unable to get preferences", "GpsService:onCreate");
+            TtUtils.TtReport.writeError("Unable to get preferences", "GpsServiceOld:onCreate");
         }
     }
 
@@ -219,7 +196,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
                 Global.TtNotifyManager.setGpsOff();
             }
         } else {
-            status = GpsDeviceStatus.GpsServiceInUse;
+            status = GpsDeviceStatus.GpsServiceOldInUse;
         }
 
         return status;
@@ -233,7 +210,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
             if (isInternalGpsEnabled()) {
                 if (AndroidUtils.App.checkLocationPermission(this)) {
                     locManager.addNmeaListener(this);
-                    locManager.registerGnssStatusCallback(mGnssStatusCallback);
+                    locManager.addGpsStatusListener(this);
                     locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_UPDATE_INTERVAL, GPS_MINIMUM_DISTANCE, this);
                     return GpsDeviceStatus.InternalGpsStarted;
                 } else {
@@ -243,7 +220,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
                 return GpsDeviceStatus.InternalGpsNotEnabled;
             }
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "GpsService:startInternalGps");
+            TtUtils.TtReport.writeError(ex.getMessage(), "GpsServiceOld:startInternalGps");
         }
 
         return GpsDeviceStatus.InternalGpsError;
@@ -253,7 +230,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
         if(locManager != null) {
             if (AndroidUtils.App.checkLocationPermission(this)) {
                 locManager.removeNmeaListener(this);
-                locManager.unregisterGnssStatusCallback(mGnssStatusCallback);
+                locManager.removeGpsStatusListener(this);
                 locManager.removeUpdates(this);
 
                 locManager = null;
@@ -285,7 +262,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
                 return GpsDeviceStatus.ExternalGpsNotFound;
             }
         } catch (Exception e) {
-            TtUtils.TtReport.writeError(e.getMessage(), "GpsService:startExternalGps");
+            TtUtils.TtReport.writeError(e.getMessage(), "GpsServiceOld:startExternalGps");
             return GpsDeviceStatus.ExternalGpsError;
         }
 
@@ -414,16 +391,28 @@ public class GpsService extends Service implements LocationListener, LocationSou
     //endregion
 
     //region Internal Android GPS
-//    @Override
-//    public void onNmeaReceived(long timestamp, String nmea) {
-//        parseNmeaString(nmea);
-//    }
+    @Override
+    public void onNmeaReceived(long timestamp, String nmea) {
+        parseNmeaString(nmea);
+    }
 
 
     @Override
-    public void onNmeaMessage(String message, long timestamp) {
-        parseNmeaString(message);
+    public void onGpsStatusChanged(int event) {
+        switch (event) {
+            case GpsStatus.GPS_EVENT_FIRST_FIX:
+                break;
+            case GpsStatus.GPS_EVENT_SATELLITE_STATUS:
+                break;
+            case GpsStatus.GPS_EVENT_STARTED:
+                postGpsStart();
+                break;
+            case GpsStatus.GPS_EVENT_STOPPED:
+                postGpsStop();
+                break;
+        }
     }
+
 
     @Override
     public void onLocationChanged(Location location) {
@@ -466,7 +455,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
                     logPrintWriter.println(nmeaString);
                     logPrintWriter.flush();
                 } catch (Exception e) {
-                    TtUtils.TtReport.writeError(e.getMessage(), "GpsService:parseNmeaString:logToFile");
+                    TtUtils.TtReport.writeError(e.getMessage(), "GpsServiceOld:parseNmeaString:logToFile");
                 }
             }
         }
@@ -490,7 +479,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
                     gmapListener.onLocationChanged(location);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    TtUtils.TtReport.writeError(e.getMessage(), "GpsService:onBurstReceived:gmap");
+                    TtUtils.TtReport.writeError(e.getMessage(), "GpsServiceOld:onBurstReceived:gmap");
                 }
             }
         }
@@ -500,7 +489,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
                 logPrintWriter.println(burst.toString());
                 logPrintWriter.flush();
             } catch (Exception e) {
-                TtUtils.TtReport.writeError(e.getMessage(), "GpsService:parseNmeaString:logToFile");
+                TtUtils.TtReport.writeError(e.getMessage(), "GpsServiceOld:parseNmeaString:logToFile");
             }
         }
     }
@@ -578,7 +567,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
                     }
                 });
             } catch (Exception ex) {
-                TtUtils.TtReport.writeError("GpsService:postStart", ex.getMessage());
+                TtUtils.TtReport.writeError("GpsServiceOld:postStart", ex.getMessage());
             }
         }
     }
@@ -594,7 +583,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
                     }
                 });
             } catch (Exception ex) {
-                TtUtils.TtReport.writeError("GpsService:postStop", ex.getMessage());
+                TtUtils.TtReport.writeError("GpsServiceOld:postStop", ex.getMessage());
             }
         }
     }
@@ -606,11 +595,11 @@ public class GpsService extends Service implements LocationListener, LocationSou
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        listener.gpsServiceStarted();
+                        listener.GpsServiceOldStarted();
                     }
                 });
             } catch (Exception ex) {
-                TtUtils.TtReport.writeError("GpsService:postStart", ex.getMessage());
+                TtUtils.TtReport.writeError("GpsServiceOld:postStart", ex.getMessage());
             }
         }
     }
@@ -622,11 +611,11 @@ public class GpsService extends Service implements LocationListener, LocationSou
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        listener.gpsServiceStopped();
+                        listener.GpsServiceOldStopped();
                     }
                 });
             } catch (Exception ex) {
-                TtUtils.TtReport.writeError("GpsService:postStop", ex.getMessage());
+                TtUtils.TtReport.writeError("GpsServiceOld:postStop", ex.getMessage());
             }
         }
     }
@@ -641,12 +630,12 @@ public class GpsService extends Service implements LocationListener, LocationSou
                         try {
                             listener.gpsError(error);
                         } catch (Exception e) {
-                            TtUtils.TtReport.writeError(e.getMessage(), "GpsService:postError");
+                            TtUtils.TtReport.writeError(e.getMessage(), "GpsServiceOld:postError");
                         }
                     }
                 });
             } catch (Exception ex) {
-                TtUtils.TtReport.writeError(ex.getMessage(), "GpsService:postError-handler.post");
+                TtUtils.TtReport.writeError(ex.getMessage(), "GpsServiceOld:postError-handler.post");
             }
         }
     }
@@ -691,7 +680,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
         ExternalGpsError,
         GpsAlreadyStarted,
         GpsAlreadyStopped,
-        GpsServiceInUse,
+        GpsServiceOldInUse,
         Unknown
     }
 
@@ -703,8 +692,8 @@ public class GpsService extends Service implements LocationListener, LocationSou
 
     public class GpsBinder extends Binder implements Controller {
 
-        public GpsService getService() {
-            return GpsService.this;
+        public GpsServiceOld getService() {
+            return GpsServiceOld.this;
         }
 
         //@Override
@@ -717,81 +706,83 @@ public class GpsService extends Service implements LocationListener, LocationSou
         @Override
         public void removeListener(Listener callback) {
             try {
-                listeners.remove(callback);
+                if (listeners.contains(callback)) {
+                    listeners.remove(callback);
+                }
             } catch (Exception e) {
-                TtUtils.TtReport.writeError(e.getMessage(), "GpsService:removeListener", e.getStackTrace());
+                TtUtils.TtReport.writeError(e.getMessage(), "GpsServiceOld:removeListener", e.getStackTrace());
             }
         }
 
 
         @Override
         public GpsDeviceStatus startGps() {
-            return GpsService.this.startGps();
+            return GpsServiceOld.this.startGps();
         }
 
         @Override
         public GpsDeviceStatus stopGps() {
-            return GpsService.this.stopGps();
+            return GpsServiceOld.this.stopGps();
         }
 
         @Override
         public void stopService() {
-            GpsService.this.stopGps();
-            GpsService.this.stopLogging();
-            GpsService.this.stopSelf();
+            GpsServiceOld.this.stopGps();
+            GpsServiceOld.this.stopLogging();
+            GpsServiceOld.this.stopSelf();
         }
 
         @Override
         public void setGpsProvider(String provider) {
-            GpsService.this.setGpsProvider(provider);
+            GpsServiceOld.this.setGpsProvider(provider);
         }
 
         @Override
         public boolean isInternalGpsEnabled() {
-            return GpsService.this.isInternalGpsEnabled();
+            return GpsServiceOld.this.isInternalGpsEnabled();
         }
 
         @Override
         public boolean isGpsRunning() {
-            return GpsService.this.isGpsRunning();
+            return GpsServiceOld.this.isGpsRunning();
         }
 
         @Override
         public boolean isExternalGpsUsed() {
-            return GpsService.this.isExternalGpsUsed();
+            return GpsServiceOld.this.isExternalGpsUsed();
         }
 
         @Override
         public GpsProvider getGpsProvider() {
-            return GpsService.this.getGpsProvider();
+            return GpsServiceOld.this.getGpsProvider();
         }
 
         @Override
         public void postAllNmeaStrings(boolean postAllStrings) {
-            GpsService.this.postAllNmeaStrings = postAllStrings;
+            GpsServiceOld.this.postAllNmeaStrings = postAllStrings;
         }
 
         public boolean postsAllNmeaStrings() {
-            return GpsService.this.postAllNmeaStrings;
+            return GpsServiceOld.this.postAllNmeaStrings;
         }
 
         @Override
         public void startLogging(String fileName) {
-            GpsService.this.startLogging(fileName);
+            GpsServiceOld.this.startLogging(fileName);
         }
 
         @Override
         public void stopLogging() {
-            GpsService.this.stopLogging();
+            GpsServiceOld.this.stopLogging();
         }
 
         @Override
         public boolean isLogging() {
-            return GpsService.this.isLogging();
+            return GpsServiceOld.this.isLogging();
         }
 
         public GeoPosition getLastPosition() {
-            return GpsService.this.getLastPosition();
+            return GpsServiceOld.this.getLastPosition();
         }
     }
 
@@ -804,8 +795,8 @@ public class GpsService extends Service implements LocationListener, LocationSou
         void gpsStarted();
         void gpsStopped();
 
-        void gpsServiceStarted();
-        void gpsServiceStopped();
+        void GpsServiceOldStarted();
+        void GpsServiceOldStopped();
         void gpsError(GpsError error);
     }
 
