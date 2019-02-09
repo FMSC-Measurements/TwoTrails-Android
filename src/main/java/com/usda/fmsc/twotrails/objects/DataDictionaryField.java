@@ -4,7 +4,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.usda.fmsc.android.utilities.ParcelTools;
-import com.usda.fmsc.utilities.ListUtils;
 import com.usda.fmsc.utilities.StringEx;
 
 import java.util.ArrayList;
@@ -161,7 +160,7 @@ public class DataDictionaryField extends TtObject {
                 this._DataType == other._DataType &&
                 this._ValueRequired == other._ValueRequired &&
                 ((this._Values == null) == (other._Values == null) &&
-                        (this._Values == null || (this._Values.size() == other._Values.size() && ListUtils.equalLists(this._Values, other._Values)))) &&
+                        (this._Values == null || (this._Values.size() == other._Values.size() && this._Values.equals(other._Values)))) &&
                 ((this._DefaultValue == null) == (other._DefaultValue == null) &&
                         (this._DefaultValue == null || this._DefaultValue.equals(other._DefaultValue)));
         }

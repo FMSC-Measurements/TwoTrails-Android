@@ -35,11 +35,7 @@ public class AnimationCardFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        if (view == null) {
-            this.view = getView();
-        } else {
-            this.view = view;
-        }
+        this.view = view;
 
         if (isCardHidden()) {
             if (this.view != null) {
