@@ -41,7 +41,9 @@ public class Consts {
 
     public static class DeviceNames {
         public static final String[] GPS_RECEIVERS = new String[]{
-                "QStar XT",
+                "EOS Arrow",
+                "Juniper Geode",
+                "QStarz 1000XT",
                 "Trimble R1",
                 "Other"
         };
