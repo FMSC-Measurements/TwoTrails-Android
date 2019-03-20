@@ -12,6 +12,8 @@
         android:glEsVersion="0x00020000"
         android:required="true" />
 
+    <uses-permission android:name="android.permission.READ_INTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_INTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -96,12 +98,8 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data
-                    android:host="*"
-                    android:scheme="http" />
-                <data
-                    android:host="*"
-                    android:scheme="file" />
+                <data android:host="*" android:scheme="http" />
+                <data android:host="*" android:scheme="file" />
                 <data android:mimeType="*/*" />
                 <data android:pathPattern="/.*\\.ttx" />
             </intent-filter>
@@ -113,21 +111,44 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
 
-                <data
-                    android:host="*"
-                    android:scheme="http" />
+                <data android:host="*" android:scheme="http" />
                 <data android:mimeType="application/tt" />
             </intent-filter>
 
             <!-- from a file browser app -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
-
                 <category android:name="android.intent.category.DEFAULT" />
 
                 <data android:scheme="file" />
                 <data android:host="*" />
                 <data android:pathPattern="/.*\\.ttx" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="file" />
+                <data android:mimeType="*/*" />
+                <data android:pathPattern=".*\\.ttx" />
+                <data android:host="*" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="content" />
+                <data android:host="*" />
+                <data android:mimeType="*/*" />
+                <data android:pathPattern=".*\\.ttx" />
+                <data android:pathPattern=".*\\..*\\.ttx" />
+                <data android:pathPattern=".*\\..*\\..*\\.ttx" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.ttx" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.ttx" />
             </intent-filter>
         </activity>
         <activity
