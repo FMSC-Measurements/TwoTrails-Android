@@ -4,9 +4,10 @@ public class TwoTrailsSchema {
     //Old Schema Versions
     public static final TtVersion OSV_2_0_1 = new TtVersion(2, 0, 1);
     public static final TtVersion OSV_2_0_2 = new TtVersion(2, 0, 2);
+    public static final TtVersion OSV_2_0_3 = new TtVersion(2, 0, 3);
 
     //Schema Version
-    public static final TtVersion SchemaVersion = OSV_2_0_2;
+    public static final TtVersion SchemaVersion = OSV_2_0_3;
 
 
     public static class SharedSchema {
@@ -534,4 +535,7 @@ public class TwoTrailsSchema {
                     DataType;
     }
     //endregion
+
+
+    public static final String UPGRADE_OSV_2_0_3 = "UPDATE " + TtNmeaSchema.TableName + " SET " + TtNmeaSchema.Fix + " = " + TtNmeaSchema.Fix + " + 1;";
 }

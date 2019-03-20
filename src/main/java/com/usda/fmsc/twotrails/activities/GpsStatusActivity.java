@@ -141,7 +141,11 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
                         tvZone.setText(StringEx.toString(zone));
                     }
 
-                    tvElev.setText(String.format("%.2f", burst.getElevation()));
+                    if (burst.hasElevation()) {
+                        tvElev.setText(String.format("%.2f", burst.getElevation()));
+                    } else {
+                        tvElev.setText(nVal);
+                    }
                 } else {
                     tvLat.setText(nVal);
                     tvLon.setText(nVal);

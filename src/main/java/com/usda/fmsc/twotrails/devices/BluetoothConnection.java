@@ -130,9 +130,7 @@ public class BluetoothConnection extends Thread {
     }
 
     public void unregister(Listener listener) {
-        if (listeners.contains(listener)) {
-            listeners.remove(listener);
-        }
+        listeners.remove(listener);
     }
 
 

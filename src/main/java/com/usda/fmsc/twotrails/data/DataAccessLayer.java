@@ -2229,25 +2229,13 @@ public class DataAccessLayer extends IDataLayer {
         String getQuery = String.format("select %s from %s",
                 columnName, TwoTrailsSchema.ProjectInfoSchema.TableName);
 
-        Cursor c = null;
-
-        try
-        {
-            c = _db.rawQuery(getQuery, null);
-
-            if (c.moveToFirst())
-            {
+        try (Cursor c = _db.rawQuery(getQuery, null)) {
+            if (c.moveToFirst()) {
                 if (!c.isNull(0))
                     retString = c.getString(0);
             }
-        }
-        catch (Exception ex)
-        {
+        } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DataAccessLayer:getProjectInfoField");
-        } finally {
-            if (c != null) {
-                c.close();
-            }
         }
 
         return retString;
@@ -2750,6 +2738,30 @@ public class DataAccessLayer extends IDataLayer {
         } catch (Exception ex) {
             TtUtils.TtReport.writeError(ex.getMessage(), "DAL:clean");
         }
+    }
+
+
+    public boolean Upgrade(DataAccessUpgrader.Upgrade upgrade) {
+        boolean success = false;
+
+        try {
+            _db.beginTransaction();
+
+            if (upgrade.Version.toIntVersion() < TwoTrailsSchema.OSV_2_0_3.toIntVersion()) {
+                _db.execSQL(TwoTrailsSchema.UPGRADE_OSV_2_0_3);
+            }
+
+            _db.setTransactionSuccessful();
+            success = true;
+
+            _Activity.updateAction(DataActionType.InsertedGroups);
+        } catch (Exception ex) {
+            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:Upgrade");
+        } finally {
+            _db.endTransaction();
+        }
+
+        return success;
     }
     //endregion
 }

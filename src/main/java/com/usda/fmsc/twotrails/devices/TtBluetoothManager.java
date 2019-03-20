@@ -4,13 +4,8 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 
-import com.usda.fmsc.twotrails.utilities.TtUtils;
-
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.UUID;
-
-import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
 
 public class TtBluetoothManager {
     private BluetoothAdapter adapter;

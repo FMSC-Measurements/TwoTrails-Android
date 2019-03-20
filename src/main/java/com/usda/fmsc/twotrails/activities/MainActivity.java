@@ -21,6 +21,7 @@ import android.support.v7.app.AlertDialog;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.MimeTypeMap;
 import android.widget.Toast;
 
 import com.usda.fmsc.android.AndroidUtils;
@@ -32,6 +33,7 @@ import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.activities.base.TtAjusterCustomToolbarActivity;
 import com.usda.fmsc.twotrails.adapters.RecentProjectAdapter;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
+import com.usda.fmsc.twotrails.data.DataAccessUpgrader;
 import com.usda.fmsc.twotrails.data.TwoTrailsSchema;
 import com.usda.fmsc.twotrails.fragments.main.MainDataFragment;
 import com.usda.fmsc.twotrails.fragments.main.MainFileFragment;
@@ -410,20 +412,26 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
                     Global.setDAL(new DataAccessLayer(filePath));
 
                     if (Global.getDAL().getVersion().toIntVersion() < TwoTrailsSchema.SchemaVersion.toIntVersion()) {
-                        //upgrade?
-
-                        //if upgrade
-
-                        //else
-                        Global.setDAL(null);
-
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Toast.makeText(MainActivity.this, "Upgrade Canceled", Toast.LENGTH_SHORT).show();
+                        switch (DataAccessUpgrader.UpgradeDAL(Global.getDAL())) {
+                            case Successful:
+                            case Failed:
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(MainActivity.this, "Upgrade Failed. See Log File for details.", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                                break;
+                            case VersionUnsupported: {
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(MainActivity.this, "This file needs an Upgrade that needs to be done on the PC", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                                break;
                             }
-                        });
-
+                        }
                     } else {
                         if (Global.getDAL().needsAdjusting())
                             PolygonAdjuster.adjust(Global.getDAL());
@@ -627,7 +635,12 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     }
 
     public void btnOpenClick(View view) {
-        AndroidUtils.App.openFileIntent(this, Consts.FileExtensions.TWO_TRAILS, Consts.Codes.Dialogs.REQUEST_FILE);
+        //AndroidUtils.App.openFileIntent(this, "file/*",
+        //        new String[] { "file/*.ttx", "ttx", "*ttx", "*.ttx", "*/*", "*"},
+        //        Consts.Codes.Dialogs.REQUEST_FILE);
+        //AndroidUtils.App.openFileIntent(this, MimeTypeMap.getSingleton().getExtensionFromMimeType("ttx"), Consts.Codes.Dialogs.REQUEST_FILE);
+        //AndroidUtils.App.openFileIntent(this, Consts.FileExtensions.TWO_TRAILS, Consts.Codes.Dialogs.REQUEST_FILE)
+        AndroidUtils.App.openFileIntent(this, "*/*", Consts.Codes.Dialogs.REQUEST_FILE);
     }
 
     public void btnOpenRecClick(View view) {
