@@ -1,6 +1,5 @@
 package com.usda.fmsc.twotrails.activities.base;
 
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.MenuRes;
 import android.support.v7.app.ActionBar;
@@ -14,10 +13,10 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.usda.fmsc.android.AndroidUtils;
-import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
+import com.usda.fmsc.twotrails.TwoTrailApp;
 
-public class CustomToolbarActivity extends AppCompatActivity {
+public abstract class CustomToolbarActivity extends AppCompatActivity {
     private final String DEFAULT_EXIT_WARNING = "Press again to exit.";
 
     private Toolbar toolbar;
@@ -142,4 +141,10 @@ public class CustomToolbarActivity extends AppCompatActivity {
     protected boolean isAboutToExit() {
         return exit;
     }
+
+
+    public static TwoTrailApp getAppContext() {
+        return TwoTrailApp.getAppContext();
+    }
+
 }

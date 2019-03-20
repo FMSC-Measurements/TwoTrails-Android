@@ -154,10 +154,6 @@ public class Global {
     }
 
     private static void initUI() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            AndroidUtils.UI.setOverscrollColor(_ApplicationContext.getResources(), _ApplicationContext, R.color.primary);
-        }
-
         ImageLoader.getInstance().init(new ImageLoaderConfiguration.Builder(_ApplicationContext).build());
     }
 
