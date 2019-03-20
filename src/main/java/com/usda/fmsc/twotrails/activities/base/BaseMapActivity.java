@@ -97,7 +97,7 @@ import static android.support.v4.widget.DrawerLayout.LOCK_MODE_UNDEFINED;
 import static android.support.v4.widget.DrawerLayout.LOCK_MODE_UNLOCKED;
 
 
-public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapFragment.MultiMapListener, GpsService.Listener,
+public abstract class BaseMapActivity extends CustomToolbarActivity implements IMultiMapFragment.MultiMapListener, GpsService.Listener,
         SensorEventListener, PolyMarkerMapRvAdapter.Listener {
 
     //region Lock and Gravity Defs
@@ -185,7 +185,7 @@ public class BaseMapActivity extends CustomToolbarActivity implements IMultiMapF
                                 case Google:
                                     if (internetAvailable || mapId == GoogleMapType.MAP_TYPE_NONE.getValue()) {
                                         // check google play services and setup map
-                                        Integer code = AndroidUtils.App.checkPlayServices(BaseMapActivity.this, Consts.Codes.Services.REQUEST_GOOGLE_PLAY_SERVICES);
+                                        int code = AndroidUtils.App.checkPlayServices(BaseMapActivity.this, Consts.Codes.Services.REQUEST_GOOGLE_PLAY_SERVICES);
                                         if (code == 0) {
                                             startGMap();
                                         } else {

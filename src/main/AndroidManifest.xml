@@ -30,7 +30,7 @@
     <uses-permission android:name="com.usda.fmsc.twotrails.permission.MAPS_RECEIVE" />
 
     <application
-        android:name="android.support.multidex.MultiDexApplication"
+        android:name=".TwoTrailApp"
         android:allowBackup="true"
         android:allowClearUserData="true"
         android:fullBackupContent="true"
