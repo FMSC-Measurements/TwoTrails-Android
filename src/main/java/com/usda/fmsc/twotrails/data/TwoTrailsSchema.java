@@ -7,7 +7,7 @@ public class TwoTrailsSchema {
     public static final TtVersion OSV_2_0_3 = new TtVersion(2, 0, 3);
 
     //Schema Version
-    public static final TtVersion SchemaVersion = OSV_2_0_3;
+    public static final TtVersion SchemaVersion = OSV_2_0_2;
 
 
     public static class SharedSchema {
