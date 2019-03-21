@@ -143,8 +143,8 @@ public abstract class CustomToolbarActivity extends AppCompatActivity {
     }
 
 
-    public static TwoTrailApp getAppContext() {
-        return TwoTrailApp.getAppContext();
+    public TwoTrailApp getTtAppContext() {
+        return (TwoTrailApp)getApplicationContext();
     }
 
 }
