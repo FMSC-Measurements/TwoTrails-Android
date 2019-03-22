@@ -46,15 +46,15 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class AppLifecycle implements Application.ActivityLifecycleCallbacks {
 
-    public static final long CHECK_DELAY = 500;
-    public static final String TAG = AppLifecycle.class.getName();
+    private static final long CHECK_DELAY = 500;
+    private static final String TAG = AppLifecycle.class.getName();
 
     public interface Listener {
-        public void onBecameForeground(Activity activity);
-        public void onBecameBackground(Activity activity);
-        public void onResume(Activity activity);
-        public void onCreated(Activity activity);
-        public void onDestroyed(Activity activity);
+        void onBecameForeground(Activity activity);
+        void onBecameBackground(Activity activity);
+        void onResume(Activity activity);
+        void onCreated(Activity activity);
+        void onDestroyed(Activity activity);
     }
 
     private static AppLifecycle instance;
@@ -127,7 +127,7 @@ public class AppLifecycle implements Application.ActivityLifecycleCallbacks {
     }
 
     @Override
-    public void onActivityResumed(Activity activity) {
+    public void onActivityResumed(final Activity activity) {
         paused = false;
         boolean wasBackground = !foreground;
         foreground = true;

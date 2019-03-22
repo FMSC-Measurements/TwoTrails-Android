@@ -8,7 +8,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
@@ -21,7 +20,6 @@ import android.support.v7.app.AlertDialog;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.webkit.MimeTypeMap;
 import android.widget.Toast;
 
 import com.usda.fmsc.android.AndroidUtils;
@@ -30,6 +28,7 @@ import com.usda.fmsc.twotrails.BuildConfig;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
+import com.usda.fmsc.twotrails.TwoTrailApp;
 import com.usda.fmsc.twotrails.activities.base.TtAjusterCustomToolbarActivity;
 import com.usda.fmsc.twotrails.adapters.RecentProjectAdapter;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
@@ -62,43 +61,46 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
     private String tmpFile;
 
+    private TwoTrailApp TtAppCtx;
 
     //region Main Activity Functions
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Global.init(getApplicationContext());
+        TtAppCtx = getTtAppContext();
 
-        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-            @Override
-            public void uncaughtException(Thread errorThread, Throwable exception) {
-                if (!Global.isFoldersInitiated()) {
-                    Global.initFolders();
-                    TtUtils.TtReport.changeDirectory(Global.getTtFileDir());
-                }
+//        TtAppCtx.init(getApplicationContext());
 
-                TtUtils.TtReport.writeError(exception.getMessage(), errorThread.getName(), exception.getStackTrace());
-
-
-                new Thread() {
-                    @Override
-                    public void run() {
-                        Looper.prepare();
-                        Toast.makeText(MainActivity.this,"Fatal Error. Check Log for details.", Toast.LENGTH_LONG).show();
-                        Looper.loop();
-                    }
-                }.start();
-                try
-                {
-                    Thread.sleep(4000); // Let the Toast display before app will get shutdown
-                }
-                catch (InterruptedException e) {
-                    //
-                }
-                System.exit(2);
-            }
-        });
+//        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+//            @Override
+//            public void uncaughtException(Thread errorThread, Throwable exception) {
+//                if (!TtAppCtx.isFoldersInitiated()) {
+//                    TtAppCtx.initFolders();
+//                    TtUtils.TtReport.changeDirectory(TtAppCtx.getTtFileDir());
+//                }
+//
+//                TtUtils.TtReport.writeError(exception.getMessage(), errorThread.getName(), exception.getStackTrace());
+//
+//
+//                new Thread() {
+//                    @Override
+//                    public void run() {
+//                        Looper.prepare();
+//                        Toast.makeText(MainActivity.this,"Fatal Error. Check Log for details.", Toast.LENGTH_LONG).show();
+//                        Looper.loop();
+//                    }
+//                }.start();
+//                try
+//                {
+//                    Thread.sleep(4000); // Let the Toast display before app will get shutdown
+//                }
+//                catch (InterruptedException e) {
+//                    //
+//                }
+//                System.exit(2);
+//            }
+//        });
 
         setContentView(R.layout.activity_main);
 
@@ -129,16 +131,14 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
             tabLayout.setupWithViewPager(mViewPager);
         }
 
-//        AndroidUtils.App.requestPermission(MainActivity.this,
-//                new String[] { Manifest.permission.WRITE_EXTERNAL_STORAGE, android.Manifest.permission.READ_EXTERNAL_STORAGE},
-//                Consts.Codes.Requests.CREATE_FILE, "TwoTrails needs storage permissions in order to Open and Create files.");
 
-        Global.startRangefinderService(getApplicationContext());
+        if (AndroidUtils.App.checkBluetoothPermission(TtAppCtx))
+            TtAppCtx.startRangefinderService();
 
-        if (AndroidUtils.App.checkLocationPermission(getApplicationContext()))
-            Global.startGpsService(getApplicationContext());
+        if (AndroidUtils.App.checkLocationPermission(TtAppCtx))
+            TtAppCtx.startGpsService();
 
-        if (Global.isFoldersInitiated()) {
+        if (TtAppCtx.areFoldersInitiated()) {
             final Intent intent = getIntent();
             final String action = intent.getAction();
 
@@ -150,8 +150,8 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
                 }
             }
 
-            if (Global.Settings.DeviceSettings.getAutoOpenLastProject()) {
-                ArrayList<RecentProject> recentProjects = Global.Settings.ProjectSettings.getRecentProjects();
+            if (TtAppCtx.getDeviceSettings().getAutoOpenLastProject()) {
+                ArrayList<RecentProject> recentProjects = TtAppCtx.getProjectSettings().getRecentProjects();
                 if (recentProjects.size() > 0) {
                     openFile(recentProjects.get(0).File);
                 }
@@ -163,6 +163,12 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     protected void onResume() {
         super.onResume();
         updateAppInfo();
+
+        if (!AndroidUtils.App.checkStoragePermission(MainActivity.this)) {
+            AndroidUtils.App.requestPermission(MainActivity.this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, android.Manifest.permission.READ_EXTERNAL_STORAGE},
+                    Consts.Codes.Requests.CREATE_FILE, "TwoTrails needs storage permissions in order to Open and Create files.");
+        }
 
         if (!askLocation && !AndroidUtils.App.requestPermission(MainActivity.this,
                 new String[] { Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION},
@@ -179,7 +185,8 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     protected void onDestroy() {
         super.onDestroy();
         closeFile();
-        Global.destroy();
+        //TtAppCtx.destroy();
+        finishAndRemoveTask();
     }
 
     @Override
@@ -267,21 +274,20 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
                     startActivity(new Intent(this, MapActivity.class));
                     break;
                 case Consts.Codes.Requests.CREATE_FILE:
-                    if (!Global.isFoldersInitiated())
-                        Global.initFolders();
+                    if (!TtAppCtx.areFoldersInitiated())
+                        TtAppCtx.initFolders();
 
                     if (tmpFile != null)
                         createFile(tmpFile);
                     break;
                 case Consts.Codes.Requests.OPEN_FILE:
-                    if (!Global.isFoldersInitiated())
-                        Global.initFolders();
+                    TtAppCtx.initFolders();
 
                     if (tmpFile != null)
                         openFile(tmpFile);
                     break;
                 case  Consts.Codes.Requests.LOCATION:
-                    Global.startGpsService(getApplicationContext());
+                    TtAppCtx.startGpsService();
                     break;
             }
         } else {
@@ -409,10 +415,10 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
                 if (!FileUtils.fileExists(filePath)) {
                     createFile(filePath);
                 } else {
-                    Global.setDAL(new DataAccessLayer(filePath));
+                    TtAppCtx.setDAL(new DataAccessLayer(filePath));
 
-                    if (Global.getDAL().getVersion().toIntVersion() < TwoTrailsSchema.SchemaVersion.toIntVersion()) {
-                        switch (DataAccessUpgrader.UpgradeDAL(Global.getDAL())) {
+                    if (TtAppCtx.getDAL().getVersion().toIntVersion() < TwoTrailsSchema.SchemaVersion.toIntVersion()) {
+                        switch (DataAccessUpgrader.UpgradeDAL(TtAppCtx.getDAL())) {
                             case Successful:
                             case Failed:
                                 runOnUiThread(new Runnable() {
@@ -433,8 +439,8 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
                             }
                         }
                     } else {
-                        if (Global.getDAL().needsAdjusting())
-                            PolygonAdjuster.adjust(Global.getDAL());
+                        if (TtAppCtx.getDAL().needsAdjusting())
+                            PolygonAdjuster.adjust(TtAppCtx.getDAL());
 
                         runOnUiThread(new Runnable() {
                             @Override
@@ -480,9 +486,9 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
         }
 
         try {
-            Global.setDAL(new DataAccessLayer(filePath));
+            TtAppCtx.setDAL(new DataAccessLayer(filePath));
 
-            Global.Settings.ProjectSettings.initProjectSettings(Global.getDAL());
+            TtAppCtx.getProjectSettings().initProjectSettings(TtAppCtx.getDAL());
 
             startActivityForResult(new Intent(this, ProjectActivity.class), UPDATE_INFO_AND_GOTO_DATA_TAB);
 
@@ -496,27 +502,27 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     }
 
     private void closeFile() {
-        if (Global.getDAL() != null) {
-            Global.getDAL().close();
-            Global.setDAL(null);
+        if (TtAppCtx.getDAL() != null) {
+            TtAppCtx.getDAL().close();
+            TtAppCtx.setDAL(null);
         }
 
-        if (Global.getMAL() != null) {
-            Global.getMAL().close();
-            Global.setMAL(null);
+        if (TtAppCtx.getMAL() != null) {
+            TtAppCtx.getMAL().close();
+            TtAppCtx.setMAL(null);
         }
     }
 
     private void updateAppInfo() {
         boolean enable = false;
-        if(Global.getDAL() != null) {
-            Global.Settings.ProjectSettings.updateRecentProjects(
-                    new RecentProject(Global.getDAL().getProjectID(), Global.getDAL().getFilePath()));
+        if(TtAppCtx.getDAL() != null) {
+            TtAppCtx.getProjectSettings().updateRecentProjects(
+                    new RecentProject(TtAppCtx.getDAL().getProjectID(), TtAppCtx.getDAL().getFilePath()));
             
-            setTitle("TwoTrails - " + Global.getDAL().getProjectID());
+            setTitle("TwoTrails - " + TtAppCtx.getDAL().getProjectID());
             enable = true;
 
-            mFragFile.updateInfo(Global.getDAL());
+            mFragFile.updateInfo(TtAppCtx.getDAL());
         } else {
             setTitle(R.string.app_name);
         }
@@ -532,7 +538,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     }
 
     private void duplicateFile(final String fileName) {
-        if (Global.getDAL().duplicate(fileName)) {
+        if (TtAppCtx.getDAL().duplicate(fileName)) {
             View view = findViewById(R.id.parent);
             if (view != null) {
                 Snackbar snackbar = Snackbar.make(view, "File duplicated", Snackbar.LENGTH_LONG).setAction("Open", new View.OnClickListener() {
@@ -615,7 +621,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
             .setPositiveButton(R.string.str_yes, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    PolygonAdjuster.adjust(Global.getDAL(), true, MainActivity.this);
+                    PolygonAdjuster.adjust(TtAppCtx.getDAL(), true, MainActivity.this);
                 }
             })
             .setNeutralButton(R.string.str_no, null)
@@ -649,7 +655,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
         builderSingle.setTitle("Recently Opened");
 
-        ArrayList<RecentProject> recentProjects = Global.Settings.ProjectSettings.getRecentProjects();
+        ArrayList<RecentProject> recentProjects = TtAppCtx.getProjectSettings().getRecentProjects();
 
         if (recentProjects.size() > 0) {
             final RecentProjectAdapter adapter = new RecentProjectAdapter(MainActivity.this, recentProjects);
@@ -693,7 +699,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
         } else {
             AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 
-            String filepath = Global.getDAL().getFilePath();
+            String filepath = TtAppCtx.getDAL().getFilePath();
 
             String dupFile = String.format("%s_bk%s", filepath.substring(0, filepath.length() - 4), Consts.FILE_EXTENSION);
             int inc = 2;
@@ -735,7 +741,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
                         pd.show();
 
-                        Global.getDAL().clean();
+                        TtAppCtx.getDAL().clean();
 
                         pd.cancel();
                     }
@@ -746,7 +752,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
     //region Data
     public void btnPointsClick(View view) {
-        if (Global.getDAL().hasPolygons()) {
+        if (TtAppCtx.getDAL().hasPolygons()) {
             startActivityForResult(new Intent(this, PointsActivity.class), UPDATE_INFO);
         } else {
             Toast.makeText(this, "No Polygons in Project", Toast.LENGTH_SHORT).show();
@@ -766,7 +772,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     }
 
     public void btnPointTableClick(View view) {
-        if (Global.getDAL().getItemCount(TwoTrailsSchema.PointSchema.TableName) > 0) {
+        if (TtAppCtx.getDAL().getItemCount(TwoTrailsSchema.PointSchema.TableName) > 0) {
             startActivityForResult(new Intent(this, TableViewActivity.class), UPDATE_INFO);
         } else {
             Toast.makeText(this, "No Points in Project", Toast.LENGTH_SHORT).show();
@@ -777,7 +783,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     //region Tools
     public void btnMapClick(View view) {
         if (AndroidUtils.App.requestNetworkPermission(this, Consts.Codes.Requests.INTERNET)) {
-            if (Global.getDAL().needsAdjusting()) {
+            if (TtAppCtx.getDAL().needsAdjusting()) {
                 askToAdjust();
             } else {
                 startActivity(new Intent(this, MapActivity.class));
@@ -789,12 +795,12 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
         final String gEarth = "com.google.earth";
 
         if (AndroidUtils.App.isPackageInstalled(MainActivity.this, gEarth)) {
-            if (Global.getDAL().needsAdjusting()) {
+            if (TtAppCtx.getDAL().needsAdjusting()) {
                 askToAdjust();
             } else {
                 progressLayout.setVisibility(View.VISIBLE);
 
-                String kmlPath = Export.kml(Global.getDAL(), Global.getTtFileDir());
+                String kmlPath = Export.kml(TtAppCtx.getDAL(), Global.getTtFileDir());
 
                 progressLayout.setVisibility(View.GONE);
 
@@ -826,8 +832,8 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     }
 
     public void btnHAIDClick(View view) {
-        if (Global.getDAL().hasPolygons()) {
-            if (Global.getDAL().needsAdjusting()) {
+        if (TtAppCtx.getDAL().hasPolygons()) {
+            if (TtAppCtx.getDAL().needsAdjusting()) {
                 askToAdjust();
             } else {
                 startActivity(new Intent(this, HaidActivity.class));
@@ -838,8 +844,8 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     }
 
     public void btnExportClick(View view) {
-        if (Global.getDAL().hasPolygons()) {
-            if (Global.getDAL().needsAdjusting()) {
+        if (TtAppCtx.getDAL().hasPolygons()) {
+            if (TtAppCtx.getDAL().needsAdjusting()) {
                 askToAdjust();
             } else {
                 startActivity(new Intent(this, ExportActivity.class));
@@ -850,7 +856,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     }
 
     public void btnPlotGridClick(View view) {
-        if(Global.getDAL().hasPolygons()) {
+        if(TtAppCtx.getDAL().hasPolygons()) {
             startActivityForResult(new Intent(this, PlotGridActivity.class), UPDATE_INFO);
         } else {
             Toast.makeText(this, "No Polygons in Project", Toast.LENGTH_SHORT).show();
@@ -859,7 +865,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
     public void btnMultiEdit(View view) {
         /*
-        if(Global.getDAL().hasPolygons()) {
+        if(TtAppCtx.getDAL().hasPolygons()) {
             startActivityForResult(new Intent(this, MultiEditActivity.class), UPDATE_INFO);
         } else {
             Toast.makeText(this, "No Polygons in Project", Toast.LENGTH_SHORT).show();

@@ -2252,10 +2252,10 @@ public class DataAccessLayer extends IDataLayer {
                     TwoTrailsSchema.SchemaVersion.toString());
 
             cvs.put(TwoTrailsSchema.ProjectInfoSchema.TtVersion,
-                    Global.getTwoTrailsVersion());
+                    Global.getApplicationVersion());
 
             cvs.put(TwoTrailsSchema.ProjectInfoSchema.CreatedTtVersion,
-                    Global.getTwoTrailsVersion());
+                    Global.getApplicationVersion());
 
             cvs.put(TwoTrailsSchema.ProjectInfoSchema.Region,
                     Global.Settings.ProjectSettings.getRegion());

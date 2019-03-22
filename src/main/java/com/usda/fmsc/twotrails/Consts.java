@@ -4,6 +4,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.geospatial.Position;
+import com.usda.fmsc.twotrails.objects.TtGroup;
 
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -185,5 +186,19 @@ public class Consts {
                             new LatLng(north, east)
                     );
         }
+    }
+
+    public static class Defaults {
+        public static TtGroup createDefaultGroup() {
+            TtGroup group = new TtGroup();
+            group.setCN(Consts.EmptyGuid);
+            group.setName("Main Group");
+            group.setDescription("Group for unassigned points.");
+            group.setGroupType(TtGroup.GroupType.General);
+
+            return group;
+        }
+
+
     }
 }
