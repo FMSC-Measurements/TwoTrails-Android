@@ -56,6 +56,7 @@ import com.usda.fmsc.geospatial.utm.UTMTools;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
+import com.usda.fmsc.twotrails.TwoTrailApp;
 import com.usda.fmsc.twotrails.activities.SettingsActivity;
 import com.usda.fmsc.twotrails.adapters.PointDetailsAdapter;
 import com.usda.fmsc.twotrails.adapters.PolyMarkerMapRvAdapter;
@@ -116,7 +117,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     private static final String SELECT_MAP = "selectMap";
 
     //region Vars
-    private GpsService.GpsBinder binder;
+    protected TwoTrailApp TtAppCtx;
 
     private MapType mapType = MapType.None;
     private int mapId;
@@ -153,8 +154,8 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     private float[] mGravity, mGeomagnetic;
 
     private HashMap<String, ArrayList<TtPoint>> polyPoints = new HashMap<>();
-    private HashMap<String, TtPolygon> _Polygons = new HashMap<>();
-    private HashMap<String, TtMetadata> _Metadata;
+    private HashMap<String, TtPolygon> _Polygons2 = new HashMap<>();
+    private HashMap<String, TtMetadata> _Metadata2;
 
     private Extent completeBnds, trackedPoly;
 
@@ -163,17 +164,37 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     private int[] dpc = new int[12];
     //endregion
 
+    //region get/set
+    
+    protected HashMap<String, TtMetadata> getMetadata() {
+        if (_Metadata2 == null || _Metadata2.size() == 0) {
+            _Metadata2 = TtAppCtx.getDAL().getMetadataMap();
+        }
+        
+        return _Metadata2;
+    }
+    
+    protected HashMap<String, TtPolygon> getPolygons() {
+        if (_Polygons2 == null || _Polygons2.size() == 0) {
+            _Polygons2 = TtAppCtx.getDAL().getPolygonsMap();
+        }
+
+        return _Polygons2;
+    }
+    //endregion
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
+        TtAppCtx = getTtAppContext();
 
         if (savedInstanceState != null && savedInstanceState.containsKey(FRAGMENT) && savedInstanceState.containsKey(MAP_TYPE)) {
             mapType = MapType.parse(savedInstanceState.getInt(MAP_TYPE));
             mapFragment = getSupportFragmentManager().getFragment(savedInstanceState, FRAGMENT);
         } else {
-            mapType = Global.Settings.DeviceSettings.getMapType();
-            mapId = Global.Settings.DeviceSettings.getMapId();
+            mapType = TtAppCtx.getDeviceSettings().getMapType();
+            mapId = TtAppCtx.getDeviceSettings().getMapId();
 
             AndroidUtils.Device.isInternetAvailable(new AndroidUtils.Device.InternetAvailableCallback() {
                 @Override
@@ -216,7 +237,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
             });
         }
 
-        if (Global.Settings.DeviceSettings.getKeepScreenOn()) {
+        if (TtAppCtx.getDeviceSettings().getKeepScreenOn()) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }
 
@@ -227,8 +248,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         setCompassEnabled(getShowCompass());
         setLocationEnabled(getShowMyPos());
 
-        binder = Global.getGpsBinder();
-        binder.addListener(this);
+        TtAppCtx.listenToGps(this);
 
         if (AndroidUtils.Device.isFullOrientationAvailable(this)) {
             mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
@@ -237,13 +257,6 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         }
 
         getMapSettings();
-
-        if (Global.getDAL() != null) {
-            _Metadata = Global.getDAL().getMetadataMap();
-            zone = _Metadata.get(Consts.EmptyGuid).getZone();
-        }
-
-        _Polygons = Global.getDAL().getPolygonsMap();
     }
 
     private void setupUI() {
@@ -445,7 +458,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
 
         miShowMyPos = menu.findItem(R.id.mapMenuShowMyPos);
         if (miShowMyPos != null) {
-            miShowMyPos.setChecked(Global.Settings.DeviceSettings.getMapShowMyPos());
+            miShowMyPos.setChecked(TtAppCtx.getDeviceSettings().getMapShowMyPos());
         }
 
         miMapMaxBounds = menu.findItem(R.id.mmMenuMoveToMaxBounds);
@@ -467,7 +480,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         switch (item.getItemId()) {
             case R.id.mapMenuShowMyPos: {
                 showMyPos = !showMyPos;
-                Global.Settings.DeviceSettings.setMapShowMyPos(showMyPos);
+                TtAppCtx.getDeviceSettings().setMapShowMyPos(showMyPos);
                 miShowMyPos.setChecked(showMyPos);
 
                 if (getShowMyPos()) {
@@ -530,7 +543,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
                             public void onClick(DialogInterface dialog, int which) {
                                 PolygonGraphicManager pmm = getPolyGraphicManagers().get(which);
                                 trackedPoly = pmm.getExtents();
-                                Global.Settings.ProjectSettings.setTrackedPolyCN(pmm.getPolygonCN());
+                                TtAppCtx.getProjectSettings().setTrackedPolyCN(pmm.getPolygonCN());
                                 mapMoved = true;
                                 moveToLocation(pmm.getExtents(), Consts.Location.PADDING, true);
                             }
@@ -544,7 +557,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
                     } else {
                         PolygonGraphicManager pmm = getPolyGraphicManagers().get(0);
                         trackedPoly = pmm.getExtents();
-                        Global.Settings.ProjectSettings.setTrackedPolyCN(pmm.getPolygonCN());
+                        TtAppCtx.getProjectSettings().setTrackedPolyCN(pmm.getPolygonCN());
                         mapMoved = true;
                         moveToLocation(pmm.getExtents(), Consts.Location.PADDING, true);
                     }
@@ -589,10 +602,10 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
             }
         }
 
-        if (Global.Settings.DeviceSettings.getGpsExternal()) {
-            if (Global.Settings.DeviceSettings.isGpsConfigured())
+        if (TtAppCtx.getDeviceSettings().getGpsExternal()) {
+            if (TtAppCtx.getDeviceSettings().isGpsConfigured())
             {
-                if (!binder.isGpsRunning()) {
+                if (!TtAppCtx.isGpsRunning()) {
                     Toast.makeText(BaseMapActivity.this, "GPS is not Receiving", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -607,13 +620,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     protected void onDestroy() {
         super.onDestroy();
 
-        if (binder != null) {
-            binder.removeListener(this);
-
-            if (!Global.Settings.DeviceSettings.isGpsAlwaysOn()) {
-                binder.stopGps();
-            }
-        }
+        TtAppCtx.stopListeningToGps(this);
     }
 
     @Override
@@ -727,8 +734,8 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
             getSupportFragmentManager().beginTransaction().replace(R.id.mapContainer, mapFragment).commit();
         }
 
-        Global.Settings.DeviceSettings.setMapType(mapType);
-        Global.Settings.DeviceSettings.setMapId(mapId);
+        TtAppCtx.getDeviceSettings().setMapType(mapType);
+        TtAppCtx.getDeviceSettings().setMapId(mapId);
     }
 
 
@@ -801,7 +808,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
 
     @Override
     public void onMapLocationChanged() {
-        //Global.Settings.DeviceSettings.setLastViewedExtents();
+        //TtAppCtx.getDeviceSettings().setLastViewedExtents();
     }
 
     @Override
@@ -814,13 +821,13 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     public void onMarkerClick(IMultiMapFragment.MarkerData markerData) {
         TtPoint currentPoint = markerData.Point;
 
-        targetLocation = TtUtils.Points.getPointLocation(currentPoint, markerData.Adjusted, _Metadata);
+        targetLocation = TtUtils.Points.getPointLocation(currentPoint, markerData.Adjusted, getMetadata());
 
         tvNavPid.setText(StringEx.toString(currentPoint.getPID()));
         tvNavPoly.setText(currentPoint.getPolyName());
 
         toPoint = currentPoint;
-        toPoly = _Polygons.get(currentPoint.getPolyCN());
+        toPoly = getPolygons().get(currentPoint.getPolyCN());
         btnToPoint.setText(StringEx.toString(toPoint.getPID()));
         btnToPoly.setText(toPoly.getName());
         calculateDir();
@@ -838,7 +845,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
                         .setPositiveButton("Adjust Polygons", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                PolygonAdjuster.adjust(Global.getDAL());
+                                PolygonAdjuster.adjust(TtAppCtx.getDAL());
                                 finish();
                             }
                         })
@@ -901,9 +908,9 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
 
     //region Settings
     private void getMapSettings() {
-        mapTracking = Global.Settings.DeviceSettings.getMapTrackingOption();
-        showCompass = Global.Settings.DeviceSettings.getMapCompassEnabled();
-        showMyPos = Global.Settings.DeviceSettings.getMapShowMyPos();
+        mapTracking = TtAppCtx.getDeviceSettings().getMapTrackingOption();
+        showCompass = TtAppCtx.getDeviceSettings().getMapCompassEnabled();
+        showMyPos = TtAppCtx.getDeviceSettings().getMapShowMyPos();
 
         if (miResetBounds != null) {
             miResetBounds.setVisible(getMapTracking() != MapTracking.FOLLOW);
@@ -956,7 +963,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         if (followPosition) {
             mapTracking = MapTracking.FOLLOW;
         } else {
-            mapTracking = Global.Settings.DeviceSettings.getMapTrackingOption();
+            mapTracking = TtAppCtx.getDeviceSettings().getMapTrackingOption();
         }
     }
 
@@ -1177,7 +1184,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         ArrayList<TtPoint> points;
         for (TtPolygon polygon : getSortedPolys()) {
             if (!polyPoints.containsKey(polygon.getCN())) {
-                points = Global.getDAL().getPointsInPolygon(polygon.getCN());
+                points = TtAppCtx.getDAL().getPointsInPolygon(polygon.getCN());
                 polyPoints.put(polygon.getCN(), points);
             } else {
                 points = polyPoints.get(polygon.getCN());
@@ -1186,10 +1193,10 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
             polygonGraphicManager = new PolygonGraphicManager(
                     polygon,
                     points,
-                    _Metadata,
-                    Global.MapSettings.getPolyGraphicOptions(polygon.getCN()));
+                    getMetadata(),
+                    TtAppCtx.getMapSettings().getPolyGraphicOptions(polygon.getCN()));
 
-            addPolygonGraphic(polygonGraphicManager, Global.MapSettings.getPolyDrawOptions(polygon.getCN()));
+            addPolygonGraphic(polygonGraphicManager, TtAppCtx.getMapSettings().getPolyDrawOptions(polygon.getCN()));
 
             if (trackedPolyCN != null && polygon.getCN().equals(trackedPolyCN)) {
                 trackedPoly = polygonGraphicManager.getExtents();
@@ -1462,14 +1469,14 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         if (tcb != null) {
             if (vis && invis) {
                 tcb.setCheckedStateNoEvent(MultiStateTouchCheckBox.CheckedState.PartialChecked);
-                Global.MapSettings.getMasterPolyDrawOptions().setValue(code, true);
+                TtAppCtx.getMapSettings().getMasterPolyDrawOptions().setValue(code, true);
             } else {
                 if (vis) {
                     tcb.setCheckedStateNoEvent(MultiStateTouchCheckBox.CheckedState.Checked);
-                    Global.MapSettings.getMasterPolyDrawOptions().setValue(code, true);
+                    TtAppCtx.getMapSettings().getMasterPolyDrawOptions().setValue(code, true);
                 } else {
                     tcb.setCheckedStateNoEvent(MultiStateTouchCheckBox.CheckedState.NotChecked);
-                    Global.MapSettings.getMasterPolyDrawOptions().setValue(code, false);
+                    TtAppCtx.getMapSettings().getMasterPolyDrawOptions().setValue(code, false);
                 }
             }
         }
@@ -1669,7 +1676,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
 
                     hideSelectedMarkerInfo();
 
-                    targetLocation = TtUtils.Points.getPointLocation(toPoint, false, _Metadata);
+                    targetLocation = TtUtils.Points.getPointLocation(toPoint, false, getMetadata());
 
                     dialog.dismiss();
                 }
@@ -1701,7 +1708,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
                 double distInFt = TtUtils.Convert.toFeetTenths(distInMt, Dist.Meters);
 
                 double azimuth = TtUtils.Math.azimuthOfPoint(currPos.getX(), currPos.getY(), toPoint.getUnAdjX(), toPoint.getUnAdjY());
-                double azMag = azimuth - _Metadata.get(toPoint.getMetadataCN()).getMagDec();
+                double azMag = azimuth - getMetadata().get(toPoint.getMetadataCN()).getMagDec();
 
                 tvNavDistFt.setText(StringEx.toString(distInFt, 2));
                 tvNavDistMt.setText(StringEx.toString(distInMt, 2));
@@ -1748,7 +1755,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
 
     protected final void startGps() {
         if (shouldStartGps()) {
-            binder.startGps();
+            TtAppCtx.startGps();
         }
     }
 
@@ -1758,7 +1765,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
 
     protected final void stopGps() {
         if (shouldStopGps()) {
-            binder.startGps();
+            TtAppCtx.stopGps();
         }
     }
 
@@ -1766,24 +1773,16 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         return !getShowMyPos();
     }
 
-    protected final HashMap<String, TtPolygon> getPolygons() {
-        return _Polygons;
-    }
-
     protected Collection<TtPolygon> getPolygonsToMap() {
-        return _Polygons.values();
+        return getPolygons().values();
     }
 
     protected String getTrackedPolyCN() {
-        return Global.Settings.ProjectSettings.getTrackedPolyCN();
+        return TtAppCtx.getProjectSettings().getTrackedPolyCN();
     }
 
     protected Extent getTrackedPoly() {
         return trackedPoly;
-    }
-
-    protected final HashMap<String, TtMetadata> getMetadata() {
-        return _Metadata;
     }
 
     protected Extent getCompleteBounds() {

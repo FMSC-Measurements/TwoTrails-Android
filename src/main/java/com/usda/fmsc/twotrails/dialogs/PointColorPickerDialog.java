@@ -157,13 +157,13 @@ public class PointColorPickerDialog extends DialogFragment {
 
                     @Override
                     public void onClick(View view) {
-                        updateColor(0, Global.MapSettings.defaults.getDefaultAdjBndColor());
-                        updateColor(1, Global.MapSettings.defaults.getDefaultAdjNavColor());
-                        updateColor(2, Global.MapSettings.defaults.getDefaultUnAdjBndColor());
-                        updateColor(3, Global.MapSettings.defaults.getDefaultUnAdjNavColor());
-                        updateColor(4, Global.MapSettings.defaults.getDefaultAdjPtsColor());
-                        updateColor(5, Global.MapSettings.defaults.getDefaultUnAdjPtsColor());
-                        updateColor(6, Global.MapSettings.defaults.getDefaultWayPtsColor());
+                        updateColor(0, TtAppCtx.getMapSettings().defaults.getDefaultAdjBndColor());
+                        updateColor(1, TtAppCtx.getMapSettings().defaults.getDefaultAdjNavColor());
+                        updateColor(2, TtAppCtx.getMapSettings().defaults.getDefaultUnAdjBndColor());
+                        updateColor(3, TtAppCtx.getMapSettings().defaults.getDefaultUnAdjNavColor());
+                        updateColor(4, TtAppCtx.getMapSettings().defaults.getDefaultAdjPtsColor());
+                        updateColor(5, TtAppCtx.getMapSettings().defaults.getDefaultUnAdjPtsColor());
+                        updateColor(6, TtAppCtx.getMapSettings().defaults.getDefaultWayPtsColor());
                     }
                 });
             }

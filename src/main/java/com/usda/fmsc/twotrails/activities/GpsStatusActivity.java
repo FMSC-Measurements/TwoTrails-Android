@@ -45,8 +45,8 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gps_status);
 
-        if (Global.getDAL() != null) {
-            TtMetadata metadata = Global.getDAL().getDefaultMetadata();
+        if (TtAppCtx.getDAL() != null) {
+            TtMetadata metadata = TtAppCtx.getDAL().getDefaultMetadata();
 
             if (metadata != null) {
                 zone = metadata.getZone();
@@ -56,7 +56,7 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
         binder = Global.getGpsBinder();
         binder.addListener(this);
 
-        if (Global.Settings.DeviceSettings.isGpsConfigured()) {
+        if (TtAppCtx.getDeviceSettings().isGpsConfigured()) {
             binder.startGps();
         }
     }
@@ -65,7 +65,7 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
     protected void onDestroy() {
         super.onDestroy();
 
-        if (!Global.Settings.DeviceSettings.isGpsAlwaysOn()) {
+        if (!TtAppCtx.getDeviceSettings().isGpsAlwaysOn()) {
             binder.stopGps();
         }
     }
@@ -116,7 +116,7 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == Consts.Codes.Activites.SETTINGS) {
-            if (Global.Settings.DeviceSettings.isGpsConfigured()) {
+            if (TtAppCtx.getDeviceSettings().isGpsConfigured()) {
                 binder.startGps();
             }
         }

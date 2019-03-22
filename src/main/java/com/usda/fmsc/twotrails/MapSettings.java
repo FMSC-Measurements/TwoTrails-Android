@@ -22,9 +22,7 @@ public class MapSettings {
     }
 
 
-    public class defaults {
-        private @ColorInt
-        Integer adjBnd;
+        private @ColorInt Integer adjBnd;
         public @ColorInt int getDefaultAdjBndColor() {
             if (adjBnd == null)
                 adjBnd = AndroidUtils.UI.getColor(_Context, R.color.map_adj_bnd);
@@ -72,7 +70,6 @@ public class MapSettings {
                 waypts = AndroidUtils.UI.getColor(_Context, R.color.map_way_pts);
             return waypts;
         }
-    }
 
     public void reset() {
         for (PolygonGraphicOptions pgo : _PolyGraphicOptions.values()) {
@@ -88,13 +85,13 @@ public class MapSettings {
         } else {
             _MasterPolyGraphicOptions = new PolygonGraphicOptions(
                     Consts.EmptyGuid,
-                    Global.MapSettings.defaults.getDefaultAdjBndColor(),
-                    Global.MapSettings.defaults.getDefaultUnAdjNavColor(),
-                    Global.MapSettings.defaults.getDefaultAdjNavColor(),
-                    Global.MapSettings.defaults.getDefaultUnAdjNavColor(),
-                    Global.MapSettings.defaults.getDefaultAdjPtsColor(),
-                    Global.MapSettings.defaults.getDefaultUnAdjPtsColor(),
-                    Global.MapSettings.defaults.getDefaultWayPtsColor(),
+                    getDefaultAdjBndColor(),
+                    getDefaultUnAdjNavColor(),
+                    getDefaultAdjNavColor(),
+                    getDefaultUnAdjNavColor(),
+                    getDefaultAdjPtsColor(),
+                    getDefaultUnAdjPtsColor(),
+                    getDefaultWayPtsColor(),
                     _Context.getDeviceSettings().getMapAdjLineWidth(),
                     _Context.getDeviceSettings().getMapUnAdjLineWidth()
             );

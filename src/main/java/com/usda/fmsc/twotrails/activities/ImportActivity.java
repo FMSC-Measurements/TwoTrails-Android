@@ -54,7 +54,7 @@ public class ImportActivity extends CustomToolbarActivity {
                                 .setAction("View Map", new View.OnClickListener() {
                                     @Override
                                     public void onClick(View v) {
-                                        PolygonAdjuster.adjust(Global.getDAL(), false, new PolygonAdjuster.Listener() {
+                                        PolygonAdjuster.adjust(TtAppCtx.getDAL(), false, new PolygonAdjuster.Listener() {
                                             @Override
                                             public void adjusterStarted() {
 
@@ -267,13 +267,13 @@ public class ImportActivity extends CustomToolbarActivity {
         super.onDestroy();
 
         if (adjust) {
-            PolygonAdjuster.adjust(Global.getDAL(), true);
+            PolygonAdjuster.adjust(TtAppCtx.getDAL(), true);
         }
     }
 
     public void btnImport(View view) {
         if (fragment != null) {
-            fragment.importFile(Global.getDAL());
+            fragment.importFile(TtAppCtx.getDAL());
         }
     }
 

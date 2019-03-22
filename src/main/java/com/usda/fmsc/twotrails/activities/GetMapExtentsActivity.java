@@ -124,7 +124,7 @@ public class GetMapExtentsActivity extends AppCompatActivity implements GpsServi
 
         getSupportFragmentManager().beginTransaction().add(R.id.mapContainer, fragment).commit();
 
-        if (Global.Settings.DeviceSettings.isGpsConfigured()) {
+        if (TtAppCtx.getDeviceSettings().isGpsConfigured()) {
             binder = Global.getGpsBinder();
 
             if (binder != null) {
@@ -156,7 +156,7 @@ public class GetMapExtentsActivity extends AppCompatActivity implements GpsServi
     protected void onDestroy() {
         super.onDestroy();
         if (binder != null) {
-            if (binder.isGpsRunning() && !Global.Settings.DeviceSettings.isGpsAlwaysOn()) {
+            if (binder.isGpsRunning() && !TtAppCtx.getDeviceSettings().isGpsAlwaysOn()) {
                 binder.stopGps();
             }
 

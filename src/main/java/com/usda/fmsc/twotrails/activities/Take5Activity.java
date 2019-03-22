@@ -192,10 +192,10 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                 }
                 case R.id.ctx_menu_capture: {
                     if (AndroidUtils.Device.isFullOrientationAvailable(Take5Activity.this)) {
-                        if (Global.Settings.DeviceSettings.getUseTtCameraAsk()) {
+                        if (TtAppCtx.getDeviceSettings().getUseTtCameraAsk()) {
                             DontAskAgainDialog dialog = new DontAskAgainDialog(Take5Activity.this,
-                                    Global.Settings.DeviceSettings.USE_TTCAMERA_ASK,
-                                    Global.Settings.DeviceSettings.USE_TTCAMERA,
+                                    TtAppCtx.getDeviceSettings().USE_TTCAMERA_ASK,
+                                    TtAppCtx.getDeviceSettings().USE_TTCAMERA,
                                     Global.Settings.PreferenceHelper.getPrefs());
 
                             dialog.setMessage(Take5Activity.this.getString(R.string.points_camera_diag))
@@ -214,7 +214,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                                     .setNeutralButton(getString(R.string.str_cancel), null, 0)
                                     .show();
                         } else {
-                            captureImageUri = TtUtils.Media.captureImage(Take5Activity.this, Global.Settings.DeviceSettings.getUseTtCamera() == 2, _CurrentPoint);
+                            captureImageUri = TtUtils.Media.captureImage(Take5Activity.this, TtAppCtx.getDeviceSettings().getUseTtCamera() == 2, _CurrentPoint);
                         }
                     } else {
                         captureImageUri = TtUtils.Media.captureImage(Take5Activity.this, false, _CurrentPoint);
@@ -458,7 +458,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
             }
 
             _Group = new TtGroup(TtGroup.GroupType.Take5);
-            Global.getDAL().insertGroup(_Group);
+            TtAppCtx.getDAL().insertGroup(_Group);
 
             fabT5 = findViewById(R.id.take5FabT5);
             fabSS = findViewById(R.id.take5FabSideShot);
@@ -575,15 +575,15 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
     protected void getSettings() {
         super.getSettings();
 
-        options.Fix = Global.Settings.DeviceSettings.getTake5FilterFix();
-        options.FixType = Global.Settings.DeviceSettings.getTake5FilterFixType();
-        options.DopType = Global.Settings.DeviceSettings.getTake5FilterDopType();
-        options.DopValue = Global.Settings.DeviceSettings.getTake5FilterDopValue();
-        increment = Global.Settings.DeviceSettings.getTake5Increment();
-        takeAmount = Global.Settings.DeviceSettings.getTake5NmeaAmount();
+        options.Fix = TtAppCtx.getDeviceSettings().getTake5FilterFix();
+        options.FixType = TtAppCtx.getDeviceSettings().getTake5FilterFixType();
+        options.DopType = TtAppCtx.getDeviceSettings().getTake5FilterDopType();
+        options.DopValue = TtAppCtx.getDeviceSettings().getTake5FilterDopValue();
+        increment = TtAppCtx.getDeviceSettings().getTake5Increment();
+        takeAmount = TtAppCtx.getDeviceSettings().getTake5NmeaAmount();
 
-        useVib = Global.Settings.DeviceSettings.getTake5VibrateOnCreate();
-        useRing = Global.Settings.DeviceSettings.getTake5RingOnCreate();
+        useVib = TtAppCtx.getDeviceSettings().getTake5VibrateOnCreate();
+        useRing = TtAppCtx.getDeviceSettings().getTake5RingOnCreate();
     }
 
     @Override
@@ -801,7 +801,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                 setResult(Consts.Codes.Results.POINT_CREATED, new Intent().putExtra(Consts.Codes.Data.NUMBER_OF_CREATED_POINTS, _Points.size()));
             } else {
                 if (_Group != null) {
-                    Global.getDAL().deleteGroup(_Group.getCN());
+                    TtAppCtx.getDAL().deleteGroup(_Group.getCN());
                 }
 
                 setResult(RESULT_CANCELED);
@@ -853,19 +853,19 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
         if (point != null) {
             if (point == _CurrentPoint) {
                 if (!saved) {
-                    Global.getDAL().insertPoint(point);
-                    Global.getDAL().insertNmeaBursts(_Bursts);
+                    TtAppCtx.getDAL().insertPoint(point);
+                    TtAppCtx.getDAL().insertNmeaBursts(_Bursts);
 
                     _Bursts = new ArrayList<>();
                     _UsedBursts = new ArrayList<>();
                 } else if (updated) {
-                    Global.getDAL().updatePoint(point, point);
+                    TtAppCtx.getDAL().updatePoint(point, point);
                 }
 
                 saved = true;
                 updated = false;
             } else {
-                Global.getDAL().updatePoint(point, point);
+                TtAppCtx.getDAL().updatePoint(point, point);
             }
         }
 

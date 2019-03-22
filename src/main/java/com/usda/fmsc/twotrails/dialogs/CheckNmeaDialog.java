@@ -78,7 +78,7 @@ public class CheckNmeaDialog extends DialogFragment implements GpsService.Listen
         super.onStop();
 
         if (binder != null) {
-            if (!Global.Settings.DeviceSettings.isGpsAlwaysOn()) {
+            if (!TtAppCtx.getDeviceSettings().isGpsAlwaysOn()) {
                 binder.stopGps();
             }
 

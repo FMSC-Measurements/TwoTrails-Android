@@ -84,7 +84,7 @@ public class MainFileFragment extends Fragment {
 
             tblInfo.setVisibility(enable ? View.VISIBLE : View.INVISIBLE);
 
-            if (Global.Settings.DeviceSettings.isDeveloperOptionsEnabled()) {
+            if (TtAppCtx.getDeviceSettings().isDeveloperOptionsEnabled()) {
                 viewCleanDb.setVisibility(View.VISIBLE);
             } else {
                 viewCleanDb.setVisibility(View.GONE);

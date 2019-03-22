@@ -11,18 +11,18 @@ import com.usda.fmsc.twotrails.units.Slope;
 import com.usda.fmsc.utilities.StringEx;
 
 public class MetadataSettings extends Settings {
-    private final String META_NAME = "Name";
-    private final String META_ZONE = "Zone";
-    private final String META_DATUM = "Datum";
-    private final String META_DISTANCE = "Distance";
-    private final String META_ELEVATION = "Elevation";
-    private final String META_SLOPE = "Slope";
-    private final String META_DECTYPE = "Declination";
-    private final String META_MAGDEC = "MagneticDeclination";
-    private final String META_RECEIVER = "Receiver";
-    private final String META_LASER = "RangeFinder";
-    private final String META_COMPASS = "Compass";
-    private final String META_CREW = "Crew";
+    private static final String META_NAME = "Name";
+    private static final String META_ZONE = "Zone";
+    private static final String META_DATUM = "Datum";
+    private static final String META_DISTANCE = "Distance";
+    private static final String META_ELEVATION = "Elevation";
+    private static final String META_SLOPE = "Slope";
+    private static final String META_DECTYPE = "Declination";
+    private static final String META_MAGDEC = "MagneticDeclination";
+    private static final String META_RECEIVER = "Receiver";
+    private static final String META_LASER = "RangeFinder";
+    private static final String META_COMPASS = "Compass";
+    private static final String META_CREW = "Crew";
 
 
     public MetadataSettings(Context context) {

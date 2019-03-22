@@ -127,7 +127,7 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
             startUpMapOptions = new MapOptions(0, Consts.Location.USA_BOUNDS);
         }
 
-        if (Global.Settings.DeviceSettings.isGpsConfigured()) {
+        if (TtAppCtx.getDeviceSettings().isGpsConfigured()) {
             binder = Global.getGpsBinder();
             binder.addListener(this);
         }

@@ -10,7 +10,8 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 
-import com.usda.fmsc.twotrails.Global;
+import com.usda.fmsc.twotrails.DeviceSettings;
+import com.usda.fmsc.twotrails.TwoTrailApp;
 import com.usda.fmsc.twotrails.devices.BluetoothConnection;
 import com.usda.fmsc.twotrails.devices.TtBluetoothManager;
 import com.usda.fmsc.twotrails.units.Dist;
@@ -21,11 +22,12 @@ import com.usda.fmsc.utilities.ParseEx;
 import org.joda.time.DateTime;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
 public class RangeFinderService extends Service implements BluetoothConnection.Listener, SharedPreferences.OnSharedPreferenceChangeListener {
+
+    private TwoTrailApp TtAppCtx;
 
     private boolean postAllRFStrings = true, logging;
     private TtRangeFinderData lastRFData;
@@ -48,16 +50,18 @@ public class RangeFinderService extends Service implements BluetoothConnection.L
     public void onCreate() {
         super.onCreate();
 
-        bluetoothManager = Global.getBluetoothManager();
+        TtAppCtx = (TwoTrailApp) getApplicationContext();
 
-        SharedPreferences prefs = Global.Settings.PreferenceHelper.getPrefs();
+        bluetoothManager = new TtBluetoothManager();
+
+        SharedPreferences prefs = TtAppCtx.getDeviceSettings().getPrefs();
 
         if (prefs != null) {
             prefs.registerOnSharedPreferenceChangeListener(this);
 
-            _deviceUUID = Global.Settings.DeviceSettings.getRangeFinderDeviceID();
+            _deviceUUID = TtAppCtx.getDeviceSettings().getRangeFinderDeviceID();
 
-            if (Global.Settings.DeviceSettings.isRangeFinderConfigured() && Global.Settings.DeviceSettings.isRangeFinderAlwaysOn()) {
+            if (TtAppCtx.getDeviceSettings().isRangeFinderConfigured() && TtAppCtx.getDeviceSettings().isRangeFinderAlwaysOn()) {
                 startRangeFinder();
             }
         } else {
@@ -74,7 +78,7 @@ public class RangeFinderService extends Service implements BluetoothConnection.L
             logPrintWriter.close();
         }
 
-        Global.Settings.PreferenceHelper.getPrefs().unregisterOnSharedPreferenceChangeListener(this);
+        TtAppCtx.getDeviceSettings().getPrefs().unregisterOnSharedPreferenceChangeListener(this);
     }
 
     @Override
@@ -86,10 +90,10 @@ public class RangeFinderService extends Service implements BluetoothConnection.L
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 
         switch (key) {
-            case Global.Settings.DeviceSettings.RANGE_FINDER_ALWAYS_ON:
-            case Global.Settings.DeviceSettings.RANGE_FINDER_CONFIGURED: {
-                boolean keepOn = sharedPreferences.getBoolean(Global.Settings.DeviceSettings.RANGE_FINDER_ALWAYS_ON, false);
-                boolean rangeFinderConfigured = sharedPreferences.getBoolean(Global.Settings.DeviceSettings.RANGE_FINDER_CONFIGURED, false);
+            case DeviceSettings.RANGE_FINDER_ALWAYS_ON:
+            case DeviceSettings.RANGE_FINDER_CONFIGURED: {
+                boolean keepOn = sharedPreferences.getBoolean(DeviceSettings.RANGE_FINDER_ALWAYS_ON, false);
+                boolean rangeFinderConfigured = sharedPreferences.getBoolean(DeviceSettings.RANGE_FINDER_CONFIGURED, false);
 
                 boolean running = isRangeFinderRunning();
 
@@ -193,7 +197,7 @@ public class RangeFinderService extends Service implements BluetoothConnection.L
                 logPrintWriter.close();
             }
 
-            File logFileDir = new File(Global.getTtLogFileDir());
+            File logFileDir = new File(TtUtils.getTtLogFileDir());
             if (!logFileDir.exists()) {
                 logFileDir.mkdirs();
             }
@@ -219,7 +223,7 @@ public class RangeFinderService extends Service implements BluetoothConnection.L
     }
 
     private void writeStartLog() {
-        logPrintWriter.println(String.format("[%s] RangeFinder Started [%s]", DateTime.now(), Global.Settings.DeviceSettings.getRangeFinderDeviceName()));
+        logPrintWriter.println(String.format("[%s] RangeFinder Started [%s]", DateTime.now(), TtAppCtx.getDeviceSettings().getRangeFinderDeviceName()));
         logPrintWriter.flush();
     }
 
@@ -513,6 +517,10 @@ public class RangeFinderService extends Service implements BluetoothConnection.L
             } catch (Exception e) {
                 TtUtils.TtReport.writeError(e.getMessage(), "RangeFinderService:removeListener", e.getStackTrace());
             }
+        }
+
+        public boolean isListening(Listener callback) {
+            return listeners.contains(callback);
         }
 
 

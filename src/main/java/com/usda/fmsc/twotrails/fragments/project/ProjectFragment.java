@@ -23,20 +23,20 @@ public class ProjectFragment extends PreferenceFragment implements SharedPrefere
 
         addPreferencesFromResource(R.xml.project_settings);
 
-        EditTextPreference editTextPref = (EditTextPreference) findPreference(Global.Settings.ProjectSettings.PROJECT_ID);
-        editTextPref.setSummary(Global.getDAL().getProjectID());
+        EditTextPreference editTextPref = (EditTextPreference) findPreference(TtAppCtx.getProjectSettings().PROJECT_ID);
+        editTextPref.setSummary(TtAppCtx.getDAL().getProjectID());
 
-        editTextPref = (EditTextPreference) findPreference(Global.Settings.ProjectSettings.DESCRIPTION);
-        editTextPref.setSummary(Global.getDAL().getProjectDescription());
+        editTextPref = (EditTextPreference) findPreference(TtAppCtx.getProjectSettings().DESCRIPTION);
+        editTextPref.setSummary(TtAppCtx.getDAL().getProjectDescription());
 
-        editTextPref = (EditTextPreference) findPreference(Global.Settings.ProjectSettings.DISTRICT);
-        editTextPref.setSummary(Global.Settings.ProjectSettings.getDistrict());
+        editTextPref = (EditTextPreference) findPreference(TtAppCtx.getProjectSettings().DISTRICT);
+        editTextPref.setSummary(TtAppCtx.getProjectSettings().getDistrict());
 
-        editTextPref = (EditTextPreference) findPreference(Global.Settings.ProjectSettings.FOREST);
-        editTextPref.setSummary(Global.Settings.ProjectSettings.getForest());
+        editTextPref = (EditTextPreference) findPreference(TtAppCtx.getProjectSettings().FOREST);
+        editTextPref.setSummary(TtAppCtx.getProjectSettings().getForest());
 
-        editTextPref = (EditTextPreference) findPreference(Global.Settings.ProjectSettings.REGION);
-        editTextPref.setSummary(Global.Settings.ProjectSettings.getRegion());
+        editTextPref = (EditTextPreference) findPreference(TtAppCtx.getProjectSettings().REGION);
+        editTextPref.setSummary(TtAppCtx.getProjectSettings().getRegion());
     }
 
     @Override
@@ -65,20 +65,20 @@ public class ProjectFragment extends PreferenceFragment implements SharedPrefere
         }
 
         switch (key) {
-            case Global.Settings.ProjectSettings.PROJECT_ID:
-                Global.getDAL().setProjectID(value);
+            case TtAppCtx.getProjectSettings().PROJECT_ID:
+                TtAppCtx.getDAL().setProjectID(value);
                 break;
-            case Global.Settings.ProjectSettings.DESCRIPTION:
-                Global.getDAL().setProjectDescription(value);
+            case TtAppCtx.getProjectSettings().DESCRIPTION:
+                TtAppCtx.getDAL().setProjectDescription(value);
                 break;
-            case Global.Settings.ProjectSettings.DISTRICT:
-                Global.getDAL().setProjectDistrict(value);
+            case TtAppCtx.getProjectSettings().DISTRICT:
+                TtAppCtx.getDAL().setProjectDistrict(value);
                 break;
-            case Global.Settings.ProjectSettings.FOREST:
-                Global.getDAL().setProjectForest(value);
+            case TtAppCtx.getProjectSettings().FOREST:
+                TtAppCtx.getDAL().setProjectForest(value);
                 break;
-            case Global.Settings.ProjectSettings.REGION:
-                Global.getDAL().setProjectRegion(value);
+            case TtAppCtx.getProjectSettings().REGION:
+                TtAppCtx.getDAL().setProjectRegion(value);
                 break;
         }
     }

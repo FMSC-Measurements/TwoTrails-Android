@@ -59,7 +59,7 @@ public class ArcGISTools {
 
     private static void init() {
         mapLayers = new HashMap<>();
-        for (ArcGisMapLayer layer : Global.Settings.DeviceSettings.getArcGisMayLayers()) {
+        for (ArcGisMapLayer layer : TtAppCtx.getDeviceSettings().getArcGisMayLayers()) {
             mapLayers.put(layer.getId(), layer);
         }
 
@@ -183,12 +183,12 @@ public class ArcGISTools {
 
         mapLayers.put(layer.getId(), layer);
 
-        Global.Settings.DeviceSettings.setArcGisMayLayers(mapLayers.values());
+        TtAppCtx.getDeviceSettings().setArcGisMayLayers(mapLayers.values());
     }
 
     public static void reset() {
         idCounter = 0;
-        Global.Settings.DeviceSettings.setArcGisMapIdCounter(idCounter);
+        TtAppCtx.getDeviceSettings().setArcGisMapIdCounter(idCounter);
         mapLayers = new HashMap<>();
         createDefaultMaps();
     }
@@ -215,7 +215,7 @@ public class ArcGISTools {
         }
 
         if (idCounter == 0) {
-            idCounter = Global.Settings.DeviceSettings.getArcGisIdCounter();
+            idCounter = TtAppCtx.getDeviceSettings().getArcGisIdCounter();
         }
 
         if (idCounter < mapLayers.size()) {
@@ -226,7 +226,7 @@ public class ArcGISTools {
             idCounter++;
         }
 
-        Global.Settings.DeviceSettings.setArcGisMapIdCounter(++idCounter);
+        TtAppCtx.getDeviceSettings().setArcGisMapIdCounter(++idCounter);
         return idCounter;
     }
 
@@ -295,7 +295,7 @@ public class ArcGISTools {
         }
 
         mapLayers.put(layer.getId(), layer);
-        Global.Settings.DeviceSettings.setArcGisMayLayers(mapLayers.values());
+        TtAppCtx.getDeviceSettings().setArcGisMayLayers(mapLayers.values());
 
         for (IArcToolsListener l : listeners) {
             if (l != null)
@@ -313,7 +313,7 @@ public class ArcGISTools {
         }
 
         final ArcGisMapLayer layer = mapLayers.remove(id);
-        Global.Settings.DeviceSettings.setArcGisMayLayers(mapLayers.values());
+        TtAppCtx.getDeviceSettings().setArcGisMayLayers(mapLayers.values());
 
         if (askDeleteFile && layer != null && !layer.isOnline()) {
             new AlertDialog.Builder(context)
@@ -353,7 +353,7 @@ public class ArcGISTools {
 
         if (mapLayers.containsKey(layer.getId())) {
             mapLayers.put(layer.getId(), layer);
-            Global.Settings.DeviceSettings.setArcGisMayLayers(mapLayers.values());
+            TtAppCtx.getDeviceSettings().setArcGisMayLayers(mapLayers.values());
         } else {
             throw new RuntimeException("Map does not exist to update.");
         }
@@ -665,7 +665,7 @@ public class ArcGISTools {
     }
 
     public static UserCredentials getCredentials(Context context) {
-        String credStr = Global.Settings.DeviceSettings.getArcCredentials();
+        String credStr = TtAppCtx.getDeviceSettings().getArcCredentials();
 
         if (userCredentials != null)
             return userCredentials;
@@ -699,7 +699,7 @@ public class ArcGISTools {
 
             userCredentials = credentials;
 
-            Global.Settings.DeviceSettings.setArcCredentials(Base64.encodeToString(encoded, Base64.DEFAULT));
+            TtAppCtx.getDeviceSettings().setArcCredentials(Base64.encodeToString(encoded, Base64.DEFAULT));
 
             return true;
         } catch (Exception e) {
@@ -710,7 +710,7 @@ public class ArcGISTools {
     }
 
     public static void deleteCredentials() {
-        Global.Settings.DeviceSettings.setArcCredentials(StringEx.Empty);
+        TtAppCtx.getDeviceSettings().setArcCredentials(StringEx.Empty);
         userCredentials = null;
     }
 

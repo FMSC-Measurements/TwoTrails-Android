@@ -13,14 +13,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ProjectSettings extends Settings {
-    public final String PROJECT_ID = "ProjectID";
-    public final String DESCRIPTION = "Description";
-    public final String REGION = "Region";
-    public final String FOREST = "Forest";
-    public final String DISTRICT = "District";
-    public final String RECENT_PROJS = "Recent";
-    public final String LAST_EDITED_POLY_CN = "LastEditedPolyCN";
-    public final String TRACKED_POLY_CN = "TrackedPolyCN";
+    public static final String PROJECT_ID = "ProjectID";
+    public static final String DESCRIPTION = "Description";
+    public static final String REGION = "Region";
+    public static final String FOREST = "Forest";
+    public static final String DISTRICT = "District";
+    public static final String RECENT_PROJS = "Recent";
+    public static final String LAST_EDITED_POLY_CN = "LastEditedPolyCN";
+    public static final String TRACKED_POLY_CN = "TrackedPolyCN";
 
 
     public ProjectSettings(Context context) {

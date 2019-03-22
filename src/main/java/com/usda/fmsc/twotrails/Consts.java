@@ -189,16 +189,16 @@ public class Consts {
     }
 
     public static class Defaults {
+        public static final String MainGroupName = "Main Group";
+
         public static TtGroup createDefaultGroup() {
             TtGroup group = new TtGroup();
-            group.setCN(Consts.EmptyGuid);
-            group.setName("Main Group");
+            group.setCN(EmptyGuid);
+            group.setName(MainGroupName);
             group.setDescription("Group for unassigned points.");
             group.setGroupType(TtGroup.GroupType.General);
 
             return group;
         }
-
-
     }
 }
