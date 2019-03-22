@@ -155,10 +155,10 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
             btnCalc.setBackgroundColor(AndroidUtils.UI.getColor(this, R.color.primaryLighter));
         }
 
-        options.Fix = Global.Settings.DeviceSettings.getGpsFilterFix();
-        options.DopType = Global.Settings.DeviceSettings.getGpsFilterDopType();
-        options.DopValue = Global.Settings.DeviceSettings.getGpsFilterDopValue();
-        options.FixType = Global.Settings.DeviceSettings.getGpsFilterFixType();
+        options.Fix = TtAppCtx.getDeviceSettings().getGpsFilterFix();
+        options.DopType = TtAppCtx.getDeviceSettings().getGpsFilterDopType();
+        options.DopValue = TtAppCtx.getDeviceSettings().getGpsFilterDopValue();
+        options.FixType = TtAppCtx.getDeviceSettings().getGpsFilterFixType();
 
         btnCreate = findViewById(R.id.calcBtnCreate);
 
@@ -259,7 +259,7 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
                 @Override
                 public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                     options.DopType = DopType.parse(i);
-                    Global.Settings.DeviceSettings.setGpsFilterDopType(options.DopType);
+                    TtAppCtx.getDeviceSettings().setGpsFilterDopType(options.DopType);
                     calculate();
                 }
 
@@ -292,7 +292,7 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
 
                 if (value != null) {
                     options.DopValue = value;
-                    Global.Settings.DeviceSettings.setGpsFilterDopValue(value);
+                    TtAppCtx.getDeviceSettings().setGpsFilterDopValue(value);
                     txtDop.setTextColor(AndroidUtils.UI.getColor(getBaseContext(), R.color.black_1000));
                     calculate();
                 } else {
@@ -753,8 +753,8 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
             }
         }
 
-        Global.Settings.DeviceSettings.setGpsFilterFix(options.Fix);
-        Global.Settings.DeviceSettings.setGpsFilterFixType(options.FixType);
+        TtAppCtx.getDeviceSettings().setGpsFilterFix(options.Fix);
+        TtAppCtx.getDeviceSettings().setGpsFilterFixType(options.FixType);
     }
 
     //region Controls
@@ -785,7 +785,7 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
     public void btnCreateClick(View view) {
         if (calculated) {
 
-            Global.getDAL().insertNmeaBursts(_Bursts);
+            TtAppCtx.getDAL().insertNmeaBursts(_Bursts);
 
             setResult(Consts.Codes.Results.POINT_CREATED, new Intent().putExtra(Consts.Codes.Data.POINT_DATA, _Point));
             finish();

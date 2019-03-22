@@ -103,7 +103,7 @@ public class MetadataActivity extends CustomToolbarActivity {
 
         listeners = new HashMap<>();
 
-        _Metadata = Global.getDAL().getMetadata();
+        _Metadata = TtAppCtx.getDAL().getMetadata();
         if (_Metadata.size() > 0) {
             _CurrentIndex = 0;
             _CurrentMetadata = getMetaAtIndex(_CurrentIndex);
@@ -137,7 +137,7 @@ public class MetadataActivity extends CustomToolbarActivity {
         saveMetadata();
 
         if (adjust) {
-            PolygonAdjuster.adjust(Global.getDAL(), true);
+            PolygonAdjuster.adjust(TtAppCtx.getDAL(), true);
         }
     }
 
@@ -238,7 +238,7 @@ public class MetadataActivity extends CustomToolbarActivity {
     //region Save Delete Create Reset
     private void saveMetadata() {
         if (_MetadataUpdated && _CurrentMetadata != null) {
-            Global.getDAL().updateMetadata(_CurrentMetadata);
+            TtAppCtx.getDAL().updateMetadata(_CurrentMetadata);
             _Metadata.set(_CurrentIndex, _CurrentMetadata);
             _MetadataUpdated = false;
         }
@@ -267,7 +267,7 @@ public class MetadataActivity extends CustomToolbarActivity {
     private boolean deleteMetadata(TtMetadata metadata, int index) {
         try {
             if (metadata != null) {
-                if (Global.getDAL().deleteMetadataSafe(metadata.getCN())) {
+                if (TtAppCtx.getDAL().deleteMetadataSafe(metadata.getCN())) {
                     mSectionsPagerAdapter.notifyDataSetChanged();
                 } else {
                     return false;
@@ -296,12 +296,12 @@ public class MetadataActivity extends CustomToolbarActivity {
     private void createMetadata() {
         saveMetadata();
 
-        int metaCount = Global.getDAL().getItemCount(TwoTrailsSchema.MetadataSchema.TableName);
+        int metaCount = TtAppCtx.getDAL().getItemCount(TwoTrailsSchema.MetadataSchema.TableName);
 
         TtMetadata newMetadata = Global.Settings.MetaDataSetting.getDefaultmetaData();
         newMetadata.setCN(java.util.UUID.randomUUID().toString());
         newMetadata.setName(String.format("Meta %d", metaCount + 1));
-        Global.getDAL().insertMetadata(newMetadata);
+        TtAppCtx.getDAL().insertMetadata(newMetadata);
 
         addedMeta = newMetadata.getCN();
 
@@ -504,17 +504,17 @@ public class MetadataActivity extends CustomToolbarActivity {
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
-                                ArrayList<TtPoint> points = Global.getDAL().getGpsTypePointsWithMeta(_CurrentMetadata.getCN());
+                                ArrayList<TtPoint> points = TtAppCtx.getDAL().getGpsTypePointsWithMeta(_CurrentMetadata.getCN());
                                 progressDialog.setMax(points.size() * 2);
 
                                 if (points.size() > 0) {
                                     for (int i = 0; i < points.size(); i++) {
-                                        points.set(i, TtUtils.Points.reCalculateGps(points.get(i), zone, Global.getDAL(), null));
+                                        points.set(i, TtUtils.Points.reCalculateGps(points.get(i), zone, TtAppCtx.getDAL(), null));
 
                                         progressDialog.setProgress(i);
                                     }
 
-                                    Global.getDAL().updatePoints(points);
+                                    TtAppCtx.getDAL().updatePoints(points);
 
                                     progressDialog.setProgress(points.size() * 2);
                                 }
@@ -550,7 +550,7 @@ public class MetadataActivity extends CustomToolbarActivity {
                         @Override
                         public void onClick(View view) {
 
-                            if (Global.Settings.DeviceSettings.isGpsConfigured()) {
+                            if (TtAppCtx.getDeviceSettings().isGpsConfigured()) {
                                 final GpsService.GpsBinder binder = Global.getGpsBinder();
 
                                 gotNmea = false;
@@ -560,7 +560,7 @@ public class MetadataActivity extends CustomToolbarActivity {
                                 listener = new GpsService.Listener() {
                                     @Override
                                     public void nmeaBurstReceived(INmeaBurst nmeaBurst) {
-                                        if (!Global.Settings.DeviceSettings.isGpsAlwaysOn()) {
+                                        if (!TtAppCtx.getDeviceSettings().isGpsAlwaysOn()) {
                                             binder.stopGps();
                                         }
 
@@ -605,7 +605,7 @@ public class MetadataActivity extends CustomToolbarActivity {
 
                                     @Override
                                     public void gpsError(GpsService.GpsError error) {
-                                        if (!Global.Settings.DeviceSettings.isGpsAlwaysOn()) {
+                                        if (!TtAppCtx.getDeviceSettings().isGpsAlwaysOn()) {
                                             binder.stopGps();
                                         }
 
@@ -624,7 +624,7 @@ public class MetadataActivity extends CustomToolbarActivity {
                                         try {
                                             Thread.sleep(10000);
 
-                                            if (!Global.Settings.DeviceSettings.isGpsAlwaysOn()) {
+                                            if (!TtAppCtx.getDeviceSettings().isGpsAlwaysOn()) {
                                                 binder.stopGps();
                                             }
 

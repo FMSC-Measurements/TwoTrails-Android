@@ -23,7 +23,8 @@ import com.usda.fmsc.geospatial.nmea.NmeaBurstEx;
 import com.usda.fmsc.geospatial.nmea.NmeaIDs;
 import com.usda.fmsc.geospatial.nmea.NmeaParser;
 import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
-import com.usda.fmsc.twotrails.Global;
+import com.usda.fmsc.twotrails.DeviceSettings;
+import com.usda.fmsc.twotrails.TwoTrailApp;
 import com.usda.fmsc.twotrails.devices.BluetoothConnection;
 import com.usda.fmsc.twotrails.devices.TtBluetoothManager;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
@@ -41,6 +42,8 @@ public class GpsService extends Service implements LocationListener, LocationSou
 
     public final int GPS_UPDATE_INTERVAL = 1000;    //in milliseconds
     public final int GPS_MINIMUM_DISTANCE = 0;      //in meters
+
+    private TwoTrailApp TtAppCtx;
 
     private OnLocationChangedListener gmapListener;
 
@@ -92,7 +95,9 @@ public class GpsService extends Service implements LocationListener, LocationSou
     public void onCreate() {
         super.onCreate();
 
-        bluetoothManager = Global.getBluetoothManager();
+        TtAppCtx = (TwoTrailApp) getApplicationContext();
+
+        bluetoothManager = new TtBluetoothManager();
 
         gpsSyncer = new GpsSyncer();
 
@@ -102,20 +107,20 @@ public class GpsService extends Service implements LocationListener, LocationSou
         parser.addListener(this);
 
 
-        SharedPreferences prefs = Global.Settings.PreferenceHelper.getPrefs();
+        SharedPreferences prefs = TtAppCtx.getDeviceSettings().getPrefs();
 
         if (prefs != null) {
             prefs.registerOnSharedPreferenceChangeListener(this);
 
-            if (Global.Settings.DeviceSettings.getGpsExternal()) {
-                _deviceUUID = Global.Settings.DeviceSettings.getGpsDeviceID();
+            if (TtAppCtx.getDeviceSettings().getGpsExternal()) {
+                _deviceUUID = TtAppCtx.getDeviceSettings().getGpsDeviceID();
             }
 
-            if (Global.Settings.DeviceSettings.isGpsConfigured() && Global.Settings.DeviceSettings.isGpsAlwaysOn()) {
+            if (TtAppCtx.getDeviceSettings().isGpsConfigured() && TtAppCtx.getDeviceSettings().isGpsAlwaysOn()) {
                 startGps();
             }
 
-            logBurstDetails = Global.Settings.DeviceSettings.getGpsLogBurstDetails();
+            logBurstDetails = TtAppCtx.getDeviceSettings().getGpsLogBurstDetails();
         } else {
             TtUtils.TtReport.writeError("Unable to get preferences", "GpsService:onCreate");
         }
@@ -134,7 +139,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
             logPrintWriter.close();
         }
 
-        Global.Settings.PreferenceHelper.getPrefs().unregisterOnSharedPreferenceChangeListener(this);
+        TtAppCtx.getDeviceSettings().getPrefs().unregisterOnSharedPreferenceChangeListener(this);
     }
 
     @Override
@@ -146,10 +151,10 @@ public class GpsService extends Service implements LocationListener, LocationSou
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 
         switch (key) {
-            case Global.Settings.DeviceSettings.GPS_ALWAYS_ON:
-            case Global.Settings.DeviceSettings.GPS_CONFIGURED: {
-                boolean keepOn = sharedPreferences.getBoolean(Global.Settings.DeviceSettings.GPS_ALWAYS_ON, false);
-                boolean gpsConfigured = sharedPreferences.getBoolean(Global.Settings.DeviceSettings.GPS_CONFIGURED, false);
+            case DeviceSettings.GPS_ALWAYS_ON:
+            case DeviceSettings.GPS_CONFIGURED: {
+                boolean keepOn = sharedPreferences.getBoolean(DeviceSettings.GPS_ALWAYS_ON, false);
+                boolean gpsConfigured = sharedPreferences.getBoolean(DeviceSettings.GPS_CONFIGURED, false);
 
                 boolean running = isGpsRunning();
 
@@ -160,9 +165,9 @@ public class GpsService extends Service implements LocationListener, LocationSou
                 }
                 break;
             }
-            case Global.Settings.DeviceSettings.GPS_LOG_BURST_DETAILS: {
-                logBurstDetails = sharedPreferences.getBoolean(Global.Settings.DeviceSettings.GPS_LOG_BURST_DETAILS,
-                        Global.Settings.DeviceSettings.DEFAULT_GPS_LOG_BURST_DETAILS);
+            case DeviceSettings.GPS_LOG_BURST_DETAILS: {
+                logBurstDetails = sharedPreferences.getBoolean(DeviceSettings.GPS_LOG_BURST_DETAILS,
+                        TtAppCtx.getDeviceSettings().DEFAULT_GPS_LOG_BURST_DETAILS);
             }
         }
     }
@@ -183,7 +188,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
             if (status == GpsDeviceStatus.ExternalGpsStarted ||
                     status == GpsDeviceStatus.InternalGpsStarted) {
                 //started
-                Global.TtNotifyManager.setGpsOn();
+                TtAppCtx.getTtNotifyManager().setGpsOn();
 
                 if (logging) {
                     writeStartLog();
@@ -191,7 +196,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
             }
         } else {
             status = GpsDeviceStatus.GpsAlreadyStarted;
-            Global.TtNotifyManager.setGpsOn();
+            TtAppCtx.getTtNotifyManager().setGpsOn();
         }
 
         return status;
@@ -208,7 +213,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
                 if (status == GpsDeviceStatus.ExternalGpsStopped ||
                         status == GpsDeviceStatus.InternalGpsStopped) {
                     //stopped
-                    Global.TtNotifyManager.setGpsOff();
+                    TtAppCtx.getTtNotifyManager().setGpsOff();
 
                     if (logging) {
                         writeEndLog();
@@ -216,7 +221,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
                 }
             } else {
                 status = GpsDeviceStatus.GpsAlreadyStopped;
-                Global.TtNotifyManager.setGpsOff();
+                TtAppCtx.getTtNotifyManager().setGpsOff();
             }
         } else {
             status = GpsDeviceStatus.GpsServiceInUse;
@@ -314,7 +319,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
                 logPrintWriter.close();
             }
 
-            File logFileDir = new File(Global.getTtLogFileDir());
+            File logFileDir = new File(TtUtils.getTtLogFileDir());
             if (!logFileDir.exists()) {
                 logFileDir.mkdirs();
             }
@@ -342,7 +347,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
     private void writeStartLog() {
         logPrintWriter.println(String.format("[%s] %s GPS Started%s", DateTime.now(),
                 isExternalGpsUsed() ? "External" : "Internal",
-                isExternalGpsUsed() ? String.format(" [%s]", Global.Settings.DeviceSettings.getGpsDeviceName()) : StringEx.Empty));
+                isExternalGpsUsed() ? String.format(" [%s]", TtAppCtx.getDeviceSettings().getGpsDeviceName()) : StringEx.Empty));
         logPrintWriter.flush();
     }
 
@@ -401,13 +406,13 @@ public class GpsService extends Service implements LocationListener, LocationSou
 
     @Override
     public void connectionEnded() {
-        Global.TtNotifyManager.setGpsOff();
+        TtAppCtx.getTtNotifyManager().setGpsOff();
         //postError(GpsError.DeviceConnectionEnded);
     }
 
     @Override
     public void failedToConnect() {
-        Global.TtNotifyManager.setGpsOff();
+        TtAppCtx.getTtNotifyManager().setGpsOff();
         postError(GpsError.FailedToConnect);
     }
 
@@ -519,8 +524,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
     private void postINmeaBurst(final INmeaBurst burst) {
         for(final Listener listener : listeners) {
             try {
-                Handler handler = new Handler(Looper.getMainLooper());
-                handler.post(new Runnable() {
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
                         listener.nmeaBurstReceived(burst);
@@ -536,8 +540,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
     private void postNmeaString(final String nmeaString) {
         for (final Listener listener : listeners) {
             try {
-                Handler handler = new Handler(Looper.getMainLooper());
-                handler.post(new Runnable() {
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
                         listener.nmeaStringReceived(nmeaString);
@@ -553,8 +556,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
     private void postNmeaSentence(final NmeaSentence sentence) {
         for (final Listener listener : listeners) {
             try {
-                Handler handler = new Handler(Looper.getMainLooper());
-                handler.post(new Runnable() {
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
                         listener.nmeaSentenceReceived(sentence);
@@ -570,8 +572,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
     private void postGpsStart() {
         for (final Listener listener : listeners) {
             try {
-                Handler handler = new Handler(Looper.getMainLooper());
-                handler.post(new Runnable() {
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
                         listener.gpsStarted();
@@ -586,8 +587,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
     private void postGpsStop() {
         for (final Listener listener : listeners) {
             try {
-                Handler handler = new Handler(Looper.getMainLooper());
-                handler.post(new Runnable() {
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
                         listener.gpsStopped();
@@ -602,8 +602,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
     private void postServiceStart() {
         for (final Listener listener : listeners) {
             try {
-                Handler handler = new Handler(Looper.getMainLooper());
-                handler.post(new Runnable() {
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
                         listener.gpsServiceStarted();
@@ -618,8 +617,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
     private void postServiceStop() {
         for (final Listener listener : listeners) {
             try {
-                Handler handler = new Handler(Looper.getMainLooper());
-                handler.post(new Runnable() {
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
                         listener.gpsServiceStopped();
@@ -634,8 +632,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
     private void postError(final GpsError error) {
         for (final Listener listener : listeners) {
             try {
-                Handler handler = new Handler(Looper.getMainLooper());
-                handler.post(new Runnable() {
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
                         try {
@@ -708,21 +705,23 @@ public class GpsService extends Service implements LocationListener, LocationSou
         }
 
         //@Override
-        public void addListener(Listener callback) {
+        public boolean addListener(Listener callback) {
             if (!listeners.contains(callback)) {
                 listeners.add(callback);
+                return true;
             }
+
+            return false;
         }
 
         @Override
         public void removeListener(Listener callback) {
-            try {
-                listeners.remove(callback);
-            } catch (Exception e) {
-                TtUtils.TtReport.writeError(e.getMessage(), "GpsService:removeListener", e.getStackTrace());
-            }
+            listeners.remove(callback);
         }
 
+        public boolean isListening(Listener callback) {
+            return listeners.contains(callback);
+        }
 
         @Override
         public GpsDeviceStatus startGps() {
@@ -811,7 +810,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
 
 
     public interface Controller {
-        void addListener(Listener callback);
+        boolean addListener(Listener callback);
 
         void removeListener(Listener callback);
 

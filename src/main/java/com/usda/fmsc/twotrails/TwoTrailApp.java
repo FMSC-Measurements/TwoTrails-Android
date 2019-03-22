@@ -35,8 +35,6 @@ public class TwoTrailApp extends Application {
     private DataAccessLayer _DAL;
     private MediaAccessLayer _MAL;
 
-    private TtBluetoothManager bluetoothManager;
-
     private TtReport Report;
 
     private Boolean _FoldersInitiated = false;
@@ -52,7 +50,7 @@ public class TwoTrailApp extends Application {
 
     private GpsService.GpsBinder gpsServiceBinder;
     private RangeFinderService.RangeFinderBinder rfServiceBinder;
-    private int gpsListenerCount = 0;
+    //private int gpsListenerCount = 0;
 
     private ServiceConnection gpsServiceConnection = new ServiceConnection() {
         @Override
@@ -101,6 +99,11 @@ public class TwoTrailApp extends Application {
 
     public MapSettings getMapSettings() {
         return _MapSettings;
+    }
+
+
+    public TtNotifyManager getTtNotifyManager() {
+        return _TtNotifyManager;
     }
 
 
@@ -165,7 +168,7 @@ public class TwoTrailApp extends Application {
             public void uncaughtException(Thread errorThread, Throwable exception) {
                 if (!areFoldersInitiated()) {
                     initFolders();
-                    TtUtils.TtReport.changeDirectory(Global.getTtFileDir());
+                    TtUtils.TtReport.changeDirectory(TtUtils.getTtFileDir());
                 }
 
                 TtUtils.TtReport.writeError(exception.getMessage(), errorThread.getName(), exception.getStackTrace());
@@ -199,8 +202,6 @@ public class TwoTrailApp extends Application {
         _MetadataSettings = new MetadataSettings(this);
         _MapSettings = new MapSettings(this);
         _TtNotifyManager = new TtNotifyManager(this);
-
-        bluetoothManager = new TtBluetoothManager();
 
         ArcGISRuntime.setClientId(this.getString(R.string.arcgis_client_id));
 
@@ -258,17 +259,17 @@ public class TwoTrailApp extends Application {
         if (AndroidUtils.App.checkStoragePermission(_AppContext)) {
             _FoldersInitiated = true;
 
-            File dir = new File(Global.getTtFileDir());
+            File dir = new File(TtUtils.getTtFileDir());
             if (!dir.exists()) {
                 _FoldersInitiated &= dir.mkdirs();
             }
 
-            dir = new File(Global.getOfflineMapsDir());
+            dir = new File(TtUtils.getOfflineMapsDir());
             if (!dir.exists()) {
                 _FoldersInitiated &= dir.mkdirs();
             }
 
-            dir = new File(Global.getOfflineMapsRecoveryDir());
+            dir = new File(TtUtils.getOfflineMapsRecoveryDir());
             if (!dir.exists()) {
                 _FoldersInitiated &= dir.mkdirs();
             }
@@ -276,11 +277,37 @@ public class TwoTrailApp extends Application {
 
         if (_FoldersInitiated && Report == null) {
             Report = new TtReport();
-            Report.changeDirectory(Global.getTtLogFileDir());
+            Report.changeDirectory(TtUtils.getTtLogFileDir());
         }
 
         return _FoldersInitiated;
     }
+
+
+    public void listenToGps(GpsService.Listener listener) {
+        if (gpsServiceBinder != null) {
+            gpsServiceBinder.addListener(listener);
+//            if (gpsServiceBinder.addListener(listener)) {
+//                gpsListenerCount++;
+//
+//                if (!gpsServiceBinder.isGpsRunning() && getDeviceSettings().isGpsConfigured()) {
+//                    gpsServiceBinder.startGps();
+//                }
+//            }
+        }
+    }
+
+    public void stopListeningToGps(GpsService.Listener listener) {
+        if (gpsServiceBinder != null && gpsServiceBinder.isListening(listener)) {
+            gpsServiceBinder.removeListener(listener);
+//            gpsListenerCount--;
+//
+//            if (gpsListenerCount < 1 && !getDeviceSettings().isGpsAlwaysOn()) {
+//                gpsServiceBinder.stopGps();
+//            }
+        }
+    }
+
 
     public void startGpsService() {
         if (AndroidUtils.App.checkLocationPermission(this)) {
@@ -294,30 +321,73 @@ public class TwoTrailApp extends Application {
         this.bindService(new Intent(this, RangeFinderService.class), rfServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
-    public void listenToGps(GpsService.Listener listener) {
-        if (gpsServiceBinder != null) {
-            gpsServiceBinder.addListener(listener);
-            gpsListenerCount++;
-
-            if (!gpsServiceBinder.isGpsRunning() && getDeviceSettings().isGpsConfigured()) {
-                gpsServiceBinder.startGps();
-            }
-        }
-    }
-
-    public void stopListeningToGps(GpsService.Listener listener) {
-        if (gpsServiceBinder != null) {
-            gpsServiceBinder.removeListener(listener);
-            gpsListenerCount--;
-
-            if (gpsListenerCount < 1 && !getDeviceSettings().isGpsAlwaysOn()) {
-                gpsServiceBinder.stopGps();
-            }
-        }
+    public boolean isInternalGpsEnabled() {
+        return gpsServiceBinder != null && gpsServiceBinder.isInternalGpsEnabled();
     }
 
     public boolean isGpsRunning() {
         return gpsServiceBinder != null && gpsServiceBinder.isGpsRunning();
+    }
+
+    public void setGpsProvider(String provider) {
+        if (gpsServiceBinder != null) {
+            gpsServiceBinder.setGpsProvider(provider);
+        }
+    }
+
+    public GpsService.GpsDeviceStatus startGps() {
+        if (gpsServiceBinder != null) {
+            gpsServiceBinder.startGps();
+        }
+
+        return GpsService.GpsDeviceStatus.Unknown;
+    }
+
+    public GpsService.GpsDeviceStatus stopGps() {
+        if (gpsServiceBinder != null) {
+            gpsServiceBinder.stopGps();
+        }
+
+        return GpsService.GpsDeviceStatus.Unknown;
+    }
+
+
+    public void listenToRangeFinder(RangeFinderService.Listener listener) {
+        if (rfServiceBinder != null) {
+            rfServiceBinder.addListener(listener);
+        }
+    }
+
+    public void stopListeningToRangeFinder(RangeFinderService.Listener listener) {
+        if (rfServiceBinder != null && rfServiceBinder.isListening(listener)) {
+            rfServiceBinder.removeListener(listener);
+        }
+    }
+    
+    public boolean isRangeFinderRunning() {
+        return rfServiceBinder != null && rfServiceBinder.isRangeFinderRunning();
+    }
+
+    public void setRangeFinderProvider(String provider) {
+        if (rfServiceBinder != null) {
+            rfServiceBinder.setRangeFinderProvider(provider);
+        }
+    }
+
+    public RangeFinderService.RangeFinderDeviceStatus startRangeFinder() {
+        if (rfServiceBinder != null) {
+            rfServiceBinder.startRangeFinder();
+        }
+
+        return RangeFinderService.RangeFinderDeviceStatus.Unknown;
+    }
+
+    public RangeFinderService.RangeFinderDeviceStatus stopRangeFinder() {
+        if (rfServiceBinder != null) {
+            rfServiceBinder.startRangeFinder();
+        }
+
+        return RangeFinderService.RangeFinderDeviceStatus.Unknown;
     }
 
 

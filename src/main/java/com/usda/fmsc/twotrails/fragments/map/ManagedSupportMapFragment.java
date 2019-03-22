@@ -121,7 +121,7 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
         map = googleMap;
 
         //use external GPS if available
-        if (Global.Settings.DeviceSettings.isGpsConfigured() && Global.Settings.DeviceSettings.getGpsExternal()) {
+        if (TtAppCtx.getDeviceSettings().isGpsConfigured() && TtAppCtx.getDeviceSettings().getGpsExternal()) {
             GpsService.GpsBinder binder = Global.getGpsBinder();
             GpsService service = binder.getService();
 

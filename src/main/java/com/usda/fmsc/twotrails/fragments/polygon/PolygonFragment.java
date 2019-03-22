@@ -112,7 +112,7 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
                 });
             }
 
-            if (Global.getDAL().getBoundaryPointsCountInPoly(_Polygon.getCN()) < 3) {
+            if (TtAppCtx.getDAL().getBoundaryPointsCountInPoly(_Polygon.getCN()) < 3) {
                 View polyLayImage = view.findViewById(R.id.polyLayImage);
 
                 if (polyLayImage != null) {

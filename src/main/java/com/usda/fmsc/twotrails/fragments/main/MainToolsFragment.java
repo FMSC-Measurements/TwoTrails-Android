@@ -67,7 +67,7 @@ public class MainToolsFragment extends Fragment {
             //btnGpsLogger.setEnabled(enable);
             //btnGpsStatus.setEnabled(enable);
 
-            if (Global.Settings.DeviceSettings.isDeveloperOptionsEnabled()) {
+            if (TtAppCtx.getDeviceSettings().isDeveloperOptionsEnabled()) {
                 viewTest.setVisibility(View.VISIBLE);
             } else {
                 viewTest.setVisibility(View.GONE);

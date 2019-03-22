@@ -94,8 +94,8 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
 
         listeners = new HashMap<>();
 
-        metadata = Global.getDAL().getMetadataMap();
-        _Polygons = Global.getDAL().getPolygons();
+        metadata = TtAppCtx.getDAL().getMetadataMap();
+        _Polygons = TtAppCtx.getDAL().getPolygons();
         if (_Polygons.size() > 0) {
             _CurrentIndex = 0;
             _CurrentPolygon = getPolyAtIndex(_CurrentIndex);
@@ -126,7 +126,7 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
         savePolygon();
 
         if (adjust) {
-            PolygonAdjuster.adjust(Global.getDAL(), true);
+            PolygonAdjuster.adjust(TtAppCtx.getDAL(), true);
         }
     }
 
@@ -213,7 +213,7 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
                 break;
             }
             case R.id.polyMenuAdjust: {
-                PolygonAdjuster.adjust(Global.getDAL());
+                PolygonAdjuster.adjust(TtAppCtx.getDAL());
                 break;
             }
             case android.R.id.home: {
@@ -240,7 +240,7 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
         if (result == PolygonAdjuster.AdjustResult.SUCCESSFUL) {
             final int index = _CurrentIndex;
 
-            _Polygons = Global.getDAL().getPolygons();
+            _Polygons = TtAppCtx.getDAL().getPolygons();
 
             runOnUiThread(new Runnable() {
                 @Override
@@ -258,7 +258,7 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
     //region Save Delete Create Reset
     private void savePolygon() {
         if (_PolygonUpdated && _CurrentPolygon != null) {
-            Global.getDAL().updatePolygon(_CurrentPolygon);
+            TtAppCtx.getDAL().updatePolygon(_CurrentPolygon);
             _Polygons.set(_CurrentIndex, _CurrentPolygon);
             _PolygonUpdated = false;
         }
@@ -287,8 +287,8 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
     private boolean deletePolygon(TtPolygon polygon, int index) {
         try {
             if (polygon != null) {
-                if (Global.getDAL().deletePointsInPolygon(polygon.getCN())) {
-                    Global.getDAL().deletePolygon(polygon.getCN());
+                if (TtAppCtx.getDAL().deletePointsInPolygon(polygon.getCN())) {
+                    TtAppCtx.getDAL().deletePolygon(polygon.getCN());
                     mSectionsPagerAdapter.notifyDataSetChanged();
                 } else {
                     return false;
@@ -319,12 +319,12 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
     private void createPolygon() {
         savePolygon();
 
-        int polyCount = Global.getDAL().getItemCount(TwoTrailsSchema.PolygonSchema.TableName);
+        int polyCount = TtAppCtx.getDAL().getItemCount(TwoTrailsSchema.PolygonSchema.TableName);
 
         TtPolygon newPolygon = new TtPolygon(polyCount * 1000 + 1010);
         newPolygon.setName(String.format("Poly %d", polyCount + 1));
         newPolygon.setAccuracy(Consts.Default_Point_Accuracy);
-        Global.getDAL().insertPolygon(newPolygon);
+        TtAppCtx.getDAL().insertPolygon(newPolygon);
 
         addedPoly = newPolygon.getCN();
 
@@ -516,8 +516,8 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        if (Global.getDAL().getBoundaryPointsCountInPoly(poly.getCN()) > 2) {
-                            final List<TtPoint> points = Global.getDAL().getBoundaryPointsInPoly(poly.getCN());
+                        if (TtAppCtx.getDAL().getBoundaryPointsCountInPoly(poly.getCN()) > 2) {
+                            final List<TtPoint> points = TtAppCtx.getDAL().getBoundaryPointsInPoly(poly.getCN());
 
                             if (points != null && points.size() > 2) {
                                 new Thread(new Runnable() {

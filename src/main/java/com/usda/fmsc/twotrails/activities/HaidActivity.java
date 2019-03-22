@@ -55,7 +55,7 @@ public class HaidActivity extends CustomToolbarActivity {
         ListView lvPolys = findViewById(R.id.haidLvPolys);
         tvInfo = findViewById(R.id.haidTxtInfo);
 
-        ArrayList<TtPolygon> polys = Global.getDAL().getPolygons();
+        ArrayList<TtPolygon> polys = TtAppCtx.getDAL().getPolygons();
 
         if (polys.size() < 1) {
             finish();
@@ -257,7 +257,7 @@ public class HaidActivity extends CustomToolbarActivity {
 
         @Override
         protected String doInBackground(PolyInfoParams... params) {
-            return HaidLogic.generatePolyStats(params[0].polygon, Global.getDAL(), params[0].isShowingPoints(), false);
+            return HaidLogic.generatePolyStats(params[0].polygon, TtAppCtx.getDAL(), params[0].isShowingPoints(), false);
         }
 
         @Override

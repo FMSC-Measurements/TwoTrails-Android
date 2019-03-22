@@ -2258,17 +2258,17 @@ public class DataAccessLayer extends IDataLayer {
                     Global.getApplicationVersion());
 
             cvs.put(TwoTrailsSchema.ProjectInfoSchema.Region,
-                    Global.Settings.ProjectSettings.getRegion());
+                    TtAppCtx.getProjectSettings().getRegion());
 
             cvs.put(TwoTrailsSchema.ProjectInfoSchema.ID, getFileName());
 
             cvs.put(TwoTrailsSchema.ProjectInfoSchema.DeviceID, TtUtils.getDeviceName());
 
             cvs.put(TwoTrailsSchema.ProjectInfoSchema.Forest,
-                    Global.Settings.ProjectSettings.getForest());
+                    TtAppCtx.getProjectSettings().getForest());
 
             cvs.put(TwoTrailsSchema.ProjectInfoSchema.District,
-                    Global.Settings.ProjectSettings.getDistrict());
+                    TtAppCtx.getProjectSettings().getDistrict());
 
             cvs.put(TwoTrailsSchema.ProjectInfoSchema.Description, StringEx.Empty);
 
@@ -2377,43 +2377,43 @@ public class DataAccessLayer extends IDataLayer {
                     if (!c.isNull(1))
                         adjbnd = c.getInt(1);
                     else
-                        adjbnd = Global.MapSettings.defaults.getDefaultAdjBndColor();
+                        adjbnd = TtAppCtx.getMapSettings().defaults.getDefaultAdjBndColor();
 
                     if (!c.isNull(2))
                         unadjbnd = c.getInt(2);
                     else
-                        unadjbnd = Global.MapSettings.defaults.getDefaultUnAdjBndColor();
+                        unadjbnd = TtAppCtx.getMapSettings().defaults.getDefaultUnAdjBndColor();
 
                     if (!c.isNull(3))
                         adjnav = c.getInt(3);
                     else
-                        adjnav = Global.MapSettings.defaults.getDefaultAdjNavColor();
+                        adjnav = TtAppCtx.getMapSettings().defaults.getDefaultAdjNavColor();
 
                     if (!c.isNull(4))
                         unadjnav = c.getInt(4);
                     else
-                        unadjnav = Global.MapSettings.defaults.getDefaultUnAdjNavColor();
+                        unadjnav = TtAppCtx.getMapSettings().defaults.getDefaultUnAdjNavColor();
 
                     if (!c.isNull(5))
                         adjpts = c.getInt(5);
                     else
-                        adjpts = Global.MapSettings.defaults.getDefaultAdjPtsColor();
+                        adjpts = TtAppCtx.getMapSettings().defaults.getDefaultAdjPtsColor();
 
                     if (!c.isNull(6))
                         unadjpts = c.getInt(6);
                     else
-                        unadjpts = Global.MapSettings.defaults.getDefaultUnAdjPtsColor();
+                        unadjpts = TtAppCtx.getMapSettings().defaults.getDefaultUnAdjPtsColor();
 
                     if (!c.isNull(7))
                         waypts = c.getInt(7);
                     else
-                        waypts = Global.MapSettings.defaults.getDefaultWayPtsColor();
+                        waypts = TtAppCtx.getMapSettings().defaults.getDefaultWayPtsColor();
 
                     graphicOptions.add(
                             new PolygonGraphicOptions(cn,
                                     adjbnd, unadjbnd, adjnav, unadjnav, adjpts, unadjpts, waypts,
-                                    Global.Settings.DeviceSettings.getMapAdjLineWidth(),
-                                    Global.Settings.DeviceSettings.getMapUnAdjLineWidth())
+                                    TtAppCtx.getDeviceSettings().getMapAdjLineWidth(),
+                                    TtAppCtx.getDeviceSettings().getMapUnAdjLineWidth())
                     );
                 } while (c.moveToNext());
             }

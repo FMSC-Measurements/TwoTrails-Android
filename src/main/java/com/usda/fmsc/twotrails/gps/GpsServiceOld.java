@@ -84,15 +84,15 @@ public class GpsServiceOld extends Service implements LocationListener, Location
         if (prefs != null) {
             prefs.registerOnSharedPreferenceChangeListener(this);
 
-            if (Global.Settings.DeviceSettings.getGpsExternal()) {
-                _deviceUUID = Global.Settings.DeviceSettings.getGpsDeviceID();
+            if (TtAppCtx.getDeviceSettings().getGpsExternal()) {
+                _deviceUUID = TtAppCtx.getDeviceSettings().getGpsDeviceID();
             }
 
-            if (Global.Settings.DeviceSettings.isGpsConfigured() && Global.Settings.DeviceSettings.isGpsAlwaysOn()) {
+            if (TtAppCtx.getDeviceSettings().isGpsConfigured() && TtAppCtx.getDeviceSettings().isGpsAlwaysOn()) {
                 startGps();
             }
 
-            logBurstDetails = Global.Settings.DeviceSettings.getGpsLogBurstDetails();
+            logBurstDetails = TtAppCtx.getDeviceSettings().getGpsLogBurstDetails();
         } else {
             TtUtils.TtReport.writeError("Unable to get preferences", "GpsServiceOld:onCreate");
         }
@@ -123,10 +123,10 @@ public class GpsServiceOld extends Service implements LocationListener, Location
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 
         switch (key) {
-            case Global.Settings.DeviceSettings.GPS_ALWAYS_ON:
-            case Global.Settings.DeviceSettings.GPS_CONFIGURED: {
-                boolean keepOn = sharedPreferences.getBoolean(Global.Settings.DeviceSettings.GPS_ALWAYS_ON, false);
-                boolean gpsConfigured = sharedPreferences.getBoolean(Global.Settings.DeviceSettings.GPS_CONFIGURED, false);
+            case TtAppCtx.getDeviceSettings().GPS_ALWAYS_ON:
+            case TtAppCtx.getDeviceSettings().GPS_CONFIGURED: {
+                boolean keepOn = sharedPreferences.getBoolean(TtAppCtx.getDeviceSettings().GPS_ALWAYS_ON, false);
+                boolean gpsConfigured = sharedPreferences.getBoolean(TtAppCtx.getDeviceSettings().GPS_CONFIGURED, false);
 
                 boolean running = isGpsRunning();
 
@@ -137,9 +137,9 @@ public class GpsServiceOld extends Service implements LocationListener, Location
                 }
                 break;
             }
-            case Global.Settings.DeviceSettings.GPS_LOG_BURST_DETAILS: {
-                logBurstDetails = sharedPreferences.getBoolean(Global.Settings.DeviceSettings.GPS_LOG_BURST_DETAILS,
-                        Global.Settings.DeviceSettings.DEFAULT_GPS_LOG_BURST_DETAILS);
+            case TtAppCtx.getDeviceSettings().GPS_LOG_BURST_DETAILS: {
+                logBurstDetails = sharedPreferences.getBoolean(TtAppCtx.getDeviceSettings().GPS_LOG_BURST_DETAILS,
+                        TtAppCtx.getDeviceSettings().DEFAULT_GPS_LOG_BURST_DETAILS);
             }
         }
     }
@@ -319,7 +319,7 @@ public class GpsServiceOld extends Service implements LocationListener, Location
     private void writeStartLog() {
         logPrintWriter.println(String.format("[%s] %s GPS Started%s", DateTime.now(),
                 isExternalGpsUsed() ? "External" : "Internal",
-                isExternalGpsUsed() ? String.format(" [%s]", Global.Settings.DeviceSettings.getGpsDeviceName()) : StringEx.Empty));
+                isExternalGpsUsed() ? String.format(" [%s]", TtAppCtx.getDeviceSettings().getGpsDeviceName()) : StringEx.Empty));
         logPrintWriter.flush();
     }
 

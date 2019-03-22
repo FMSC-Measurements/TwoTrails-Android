@@ -56,7 +56,7 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
             binder = Global.getGpsBinder();
             binder.addListener(this);
 
-            if (Global.Settings.DeviceSettings.isGpsConfigured()) {
+            if (TtAppCtx.getDeviceSettings().isGpsConfigured()) {
                 binder.startGps();
             }
 
@@ -101,7 +101,7 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
             alert.setNegativeButton("Stop", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
-                    if (!Global.Settings.DeviceSettings.isGpsAlwaysOn()) {
+                    if (!TtAppCtx.getDeviceSettings().isGpsAlwaysOn()) {
                         binder.stopGps();
                     }
                     activity.onBackPressed();
@@ -110,7 +110,7 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
 
             alert.setNeutralButton(R.string.str_cancel, null);
         } else {
-            if (!Global.Settings.DeviceSettings.isGpsAlwaysOn()) {
+            if (!TtAppCtx.getDeviceSettings().isGpsAlwaysOn()) {
                 binder.stopGps();
             }
             super.onBackPressed();
@@ -167,7 +167,7 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == Consts.Codes.Activites.SETTINGS) {
-            if (Global.Settings.DeviceSettings.isGpsConfigured()) {
+            if (TtAppCtx.getDeviceSettings().isGpsConfigured()) {
                 binder.startGps();
             }
         }
@@ -241,7 +241,7 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
         logging = !logging;
 
         if (logging) {
-            if (Global.Settings.DeviceSettings.isGpsConfigured()) {
+            if (TtAppCtx.getDeviceSettings().isGpsConfigured()) {
                 if (!binder.isGpsRunning()) {
                     Toast.makeText(GpsLoggerActivity.this, "GPS is not Receiving", Toast.LENGTH_SHORT).show();
                     return;

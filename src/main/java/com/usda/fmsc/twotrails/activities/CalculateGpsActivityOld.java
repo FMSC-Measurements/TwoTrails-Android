@@ -93,10 +93,10 @@ public class CalculateGpsActivityOld extends CustomToolbarActivity {
             return;
         }
 
-        options.Fix = Global.Settings.DeviceSettings.getGpsFilterFix();
-        options.DopType = Global.Settings.DeviceSettings.getGpsFilterDopType();
-        options.DopValue = Global.Settings.DeviceSettings.getGpsFilterDopValue();
-        options.FixType = Global.Settings.DeviceSettings.getGpsFilterFixType();
+        options.Fix = TtAppCtx.getDeviceSettings().getGpsFilterFix();
+        options.DopType = TtAppCtx.getDeviceSettings().getGpsFilterDopType();
+        options.DopValue = TtAppCtx.getDeviceSettings().getGpsFilterDopValue();
+        options.FixType = TtAppCtx.getDeviceSettings().getGpsFilterFixType();
 
         //region Control Assign
         btnCreate = findViewById(R.id.calcBtnCreate);
@@ -153,7 +153,7 @@ public class CalculateGpsActivityOld extends CustomToolbarActivity {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 options.DopType = DopType.parse(i);
-                Global.Settings.DeviceSettings.setGpsFilterDopType(options.DopType);
+                TtAppCtx.getDeviceSettings().setGpsFilterDopType(options.DopType);
                 calculate();
             }
 
@@ -167,7 +167,7 @@ public class CalculateGpsActivityOld extends CustomToolbarActivity {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 options.Fix = GSASentence.Fix.parse(i);
-                Global.Settings.DeviceSettings.setGpsFilterFix(options.Fix);
+                TtAppCtx.getDeviceSettings().setGpsFilterFix(options.Fix);
                 calculate();
             }
 
@@ -187,7 +187,7 @@ public class CalculateGpsActivityOld extends CustomToolbarActivity {
 
                 if (value != null) {
                     options.DopValue = value;
-                    Global.Settings.DeviceSettings.setGpsFilterDopValue(value);
+                    TtAppCtx.getDeviceSettings().setGpsFilterDopValue(value);
                     txtDop.setTextColor(AndroidUtils.UI.getColor(getBaseContext(), R.color.black_1000));
                     calculate();
                 } else {
@@ -532,7 +532,7 @@ public class CalculateGpsActivityOld extends CustomToolbarActivity {
     public void btnCreateClick(View view) {
         if (calculated) {
 
-            Global.getDAL().insertNmeaBursts(_Bursts);
+            TtAppCtx.getDAL().insertNmeaBursts(_Bursts);
 
             setResult(Consts.Codes.Results.POINT_CREATED, new Intent().putExtra(Consts.Codes.Data.POINT_DATA, _Point));
             finish();

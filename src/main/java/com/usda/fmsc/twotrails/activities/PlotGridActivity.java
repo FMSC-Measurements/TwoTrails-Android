@@ -87,7 +87,7 @@ public class PlotGridActivity extends CustomToolbarActivity {
             allPolys.add(polygon);
 
             Toast.makeText(getBaseContext(), String.format("%d Plots created",
-                            Global.getDAL().getPointCountInPolygon(polygon.getCN())),
+                            TtAppCtx.getDAL().getPointCountInPolygon(polygon.getCN())),
                     Toast.LENGTH_SHORT).show();
             hideProgress();
         }
@@ -124,10 +124,10 @@ public class PlotGridActivity extends CustomToolbarActivity {
 
         List<TtPoint> tmpPoints;
 
-        for (TtPolygon poly : Global.getDAL().getPolygons()) {
-            if (Global.getDAL().getPointCountInPolygon(poly.getCN()) > 2) {
+        for (TtPolygon poly : TtAppCtx.getDAL().getPolygons()) {
+            if (TtAppCtx.getDAL().getPointCountInPolygon(poly.getCN()) > 2) {
 
-                tmpPoints = Global.getDAL().getPointsInPolygon(poly.getCN());
+                tmpPoints = TtAppCtx.getDAL().getPointsInPolygon(poly.getCN());
                 if (TtUtils.Points.isValidPolygon(tmpPoints)) {
                     polyPoints.put(poly.getCN(), tmpPoints);
                     polygons.add(poly);
@@ -220,7 +220,7 @@ public class PlotGridActivity extends CustomToolbarActivity {
 
             ArrayAdapter<CharSequence> distAdapter = new ArrayAdapter<CharSequence>(this, android.R.layout.simple_spinner_item, EnumEx.getNames(Dist.class));
 
-            metadata = Global.getDAL().getMetadataMap();
+            metadata = TtAppCtx.getDAL().getMetadataMap();
 
             spnDist.setAdapter(distAdapter);
 
@@ -283,7 +283,7 @@ public class PlotGridActivity extends CustomToolbarActivity {
         super.onDestroy();
 
         if (adjust) {
-            PolygonAdjuster.adjust(Global.getDAL(), true);
+            PolygonAdjuster.adjust(TtAppCtx.getDAL(), true);
         }
     }
 
@@ -311,11 +311,11 @@ public class PlotGridActivity extends CustomToolbarActivity {
 
         for (final TtPolygon poly : allPolys) {
             if (poly.getName().equals(polyName)) {
-                if (Global.Settings.DeviceSettings.getAutoOverwritePlotGridAsk()) {
+                if (TtAppCtx.getDeviceSettings().getAutoOverwritePlotGridAsk()) {
                     DontAskAgainDialog dialog = new DontAskAgainDialog(
                             this,
-                            Global.Settings.DeviceSettings.AUTO_OVERWRITE_PLOTGRID_ASK,
-                            Global.Settings.DeviceSettings.AUTO_OVERWRITE_PLOTGRID,
+                            TtAppCtx.getDeviceSettings().AUTO_OVERWRITE_PLOTGRID_ASK,
+                            TtAppCtx.getDeviceSettings().AUTO_OVERWRITE_PLOTGRID,
                             Global.Settings.PreferenceHelper.getPrefs());
 
                     dialog.setMessage(String.format("The polygon name '%s' already exists. Would you like to rename or overwrite it?", polyName));
@@ -343,7 +343,7 @@ public class PlotGridActivity extends CustomToolbarActivity {
 
                     dialog.show();
                 } else {
-                    if (Global.Settings.DeviceSettings.getAutoOverwritePlotGrid() == 2) {
+                    if (TtAppCtx.getDeviceSettings().getAutoOverwritePlotGrid() == 2) {
                         overwritePoly(poly);
                     } else {
                         renamePlot(polyName);
@@ -380,7 +380,7 @@ public class PlotGridActivity extends CustomToolbarActivity {
             params.setSampleValue(ParseEx.parseInteger(txtSubSample.getText().toString()));
         }
 
-        generator = new PlotGenerator(Global.getDAL(), metadata, plotGenListener);
+        generator = new PlotGenerator(TtAppCtx.getDAL(), metadata, plotGenListener);
         generator.execute(params);
         layControls.setEnabled(false);
         progressBar.setVisibility(View.VISIBLE);
@@ -430,8 +430,8 @@ public class PlotGridActivity extends CustomToolbarActivity {
                 polyPoints.remove(polygon.getCN());
 
                 try {
-                    Global.getDAL().deletePolygon(polygon.getCN());
-                    Global.getDAL().deletePointsInPolygon(polygon.getCN());
+                    TtAppCtx.getDAL().deletePolygon(polygon.getCN());
+                    TtAppCtx.getDAL().deletePointsInPolygon(polygon.getCN());
                     generatePoints(polygon.getName());
                 } catch (Exception ex) {
                     TtUtils.TtReport.writeError(ex.getMessage(), "PlotGridActivity:overwritePoly");

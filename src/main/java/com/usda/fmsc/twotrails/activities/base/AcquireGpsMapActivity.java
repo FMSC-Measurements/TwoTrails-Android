@@ -22,7 +22,6 @@ import com.usda.fmsc.geospatial.nmea.NmeaIDs;
 import com.usda.fmsc.geospatial.nmea.sentences.GGASentence;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.twotrails.Consts;
-import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
@@ -64,7 +63,7 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        if (!Global.Settings.DeviceSettings.isGpsConfigured()) {
+        if (!TtAppCtx.getDeviceSettings().isGpsConfigured()) {
             canceling = true;
             setResult(Consts.Codes.Results.GPS_NOT_CONFIGURED);
             finish();
@@ -161,15 +160,15 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
     private void setupTrailMode(TtPolygon poly) {
         _Polygon = poly;
 
-        ArrayList<TtPoint> points = Global.getDAL().getPointsInPolygon(poly.getCN());
+        ArrayList<TtPoint> points = TtAppCtx.getDAL().getPointsInPolygon(poly.getCN());
 
-        PolygonGraphicOptions pgo = Global.MapSettings.getPolyGraphicOptions(poly.getCN());
+        PolygonGraphicOptions pgo = TtAppCtx.getMapSettings().getPolyGraphicOptions(poly.getCN());
 
         trailGraphicManager = new TrailGraphicManager(poly, points, getMetadata(),
                 new TrailGraphicOptions(
                         pgo.getUnAdjNavColor(),
                         pgo.getAdjPtsColor(),
-                        Global.Settings.DeviceSettings.getMapUnAdjLineWidth()
+                        TtAppCtx.getDeviceSettings().getMapUnAdjLineWidth()
                 )
         );
     }
@@ -294,11 +293,11 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
                 if (burst.hasPosition()) {
                     UTMCoords coords = zone != null ? burst.getUTM(zone) : burst.getTrueUTM();
 
-                    tvLat.setText(String.format("%.4f", burst.getLatitude()));
-                    tvLon.setText(String.format("%.4f", burst.getLongitude()));
+                    tvLat.setText(StringEx.format("%.4f", burst.getLatitude()));
+                    tvLon.setText(StringEx.format("%.4f", burst.getLongitude()));
 
-                    tvUtmX.setText(String.format("%.3f", coords.getX()));
-                    tvUtmY.setText(String.format("%.3f", coords.getY()));
+                    tvUtmX.setText(StringEx.format("%.3f", coords.getX()));
+                    tvUtmY.setText(StringEx.format("%.3f", coords.getY()));
 
                     if (zone == null) {
                         tvZone.setText(StringEx.toString(coords.getZone()));
@@ -307,7 +306,7 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
                     }
 
                     if (burst.hasElevation()) {
-                        tvElev.setText(String.format("%.2f", burst.getElevation()));
+                        tvElev.setText(StringEx.format("%.2f", burst.getElevation()));
                     } else {
                         tvElev.setText(nVal);
                     }
@@ -326,7 +325,7 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
                 }
 
                 if (burst.isValid(NmeaIDs.SentenceID.RMC) && burst.getMagVarDir() != null) {
-                    tvDec.setText(String.format("%.2f %s", burst.getMagVar(), burst.getMagVarDir().toStringAbv()));
+                    tvDec.setText(StringEx.format("%.2f %s", burst.getMagVar(), burst.getMagVarDir().toStringAbv()));
                 } else {
                     tvDec.setText(nVal);
                 }
@@ -339,8 +338,8 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
 
                 if (burst.isValid(NmeaIDs.SentenceID.GSA)) {
                     tvGpsStatus.setText(burst.getFix().toString());
-                    tvPdop.setText(String.format("%.2f", burst.getPDOP()));
-                    tvHdop.setText(String.format("%.2f", burst.getHDOP()));
+                    tvPdop.setText(StringEx.format("%.2f", burst.getPDOP()));
+                    tvHdop.setText(StringEx.format("%.2f", burst.getHDOP()));
                 } else {
                     tvGpsStatus.setText(nVal);
                     tvHdop.setText(nVal);
@@ -349,7 +348,7 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
 
                 if (burst.isValid(NmeaIDs.SentenceID.GSV)) {
 
-                    tvSat.setText(String.format("%d/%d/%d",
+                    tvSat.setText(StringEx.format("%d/%d/%d",
                             burst.isValid(NmeaIDs.SentenceID.GSA) ? burst.getUsedSatellitesCount() : 0,
                             burst.isValid(NmeaIDs.SentenceID.GGA) ? burst.getTrackedSatellitesCount() : 0,
                             burst.getSatellitesInViewCount()));
@@ -407,16 +406,16 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
                     final Activity activity = this;
 
                     dialog.setTitle("GPS Connection Lost");
-                    dialog.setMessage("The GPS bluetooth connection has been broken. Would you like to try and reestablith the connection?");
+                    dialog.setMessage("The GPS bluetooth connection has been broken. Would you like to try and reestablish the connection?");
 
                     dialog.setPositiveButton("Connect", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            GpsService.GpsDeviceStatus status = Global.getGpsBinder().startGps();
+                            GpsService.GpsDeviceStatus status = TtAppCtx.startGps();
 
                             if (status != GpsService.GpsDeviceStatus.ExternalGpsStarted &&
                                     status != GpsService.GpsDeviceStatus.InternalGpsStarted) {
-                                Toast.makeText(AcquireGpsMapActivity.this, "Unabled to conenct to GPS.", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(AcquireGpsMapActivity.this, "Unable to connect to GPS.", Toast.LENGTH_SHORT).show();
                                 activity.setResult(RESULT_CANCELED);
                                 activity.finish();
                             } else {

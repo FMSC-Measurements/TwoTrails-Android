@@ -128,7 +128,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
             }
 
             _Group = new TtGroup(TtGroup.GroupType.Walk);
-            Global.getDAL().insertGroup(_Group);
+            TtAppCtx.getDAL().insertGroup(_Group);
 
             fabWalk = findViewById(R.id.walkFabWalk);
             walkCardView = findViewById(R.id.walkCardWalk);
@@ -178,16 +178,16 @@ public class WalkActivity extends AcquireGpsMapActivity {
     protected void getSettings() {
         super.getSettings();
 
-        options.Fix = Global.Settings.DeviceSettings.getWalkFilterFix();
-        options.FixType = Global.Settings.DeviceSettings.getWalkFilterFixType();
-        options.DopType = Global.Settings.DeviceSettings.getWalkFilterDopType();
-        options.DopValue = Global.Settings.DeviceSettings.getWalkFilterDopValue();
-        increment = Global.Settings.DeviceSettings.getWalkIncrement();
-        frequency = Global.Settings.DeviceSettings.getWalkFilterFrequency() * 1000;  //to milliseconds
-        minWalkDist = Global.Settings.DeviceSettings.getWalkFilterAccuracy();
+        options.Fix = TtAppCtx.getDeviceSettings().getWalkFilterFix();
+        options.FixType = TtAppCtx.getDeviceSettings().getWalkFilterFixType();
+        options.DopType = TtAppCtx.getDeviceSettings().getWalkFilterDopType();
+        options.DopValue = TtAppCtx.getDeviceSettings().getWalkFilterDopValue();
+        increment = TtAppCtx.getDeviceSettings().getWalkIncrement();
+        frequency = TtAppCtx.getDeviceSettings().getWalkFilterFrequency() * 1000;  //to milliseconds
+        minWalkDist = TtAppCtx.getDeviceSettings().getWalkFilterAccuracy();
 
-        useVib = Global.Settings.DeviceSettings.getWalkVibrateOnCreate();
-        useRing = Global.Settings.DeviceSettings.getWalkRingOnCreate();
+        useVib = TtAppCtx.getDeviceSettings().getWalkVibrateOnCreate();
+        useRing = TtAppCtx.getDeviceSettings().getWalkRingOnCreate();
     }
 
     @Override
@@ -285,7 +285,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
     @Override
     public void finish() {
         if (updated) {
-            Global.getDAL().updatePoint(_CurrentPoint);
+            TtAppCtx.getDAL().updatePoint(_CurrentPoint);
         }
 
         if (pointsCreated > 0) {
@@ -293,7 +293,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
                     new Intent().putExtra(Consts.Codes.Data.NUMBER_OF_CREATED_POINTS, pointsCreated));
         } else {
             if (_Group != null) {
-                Global.getDAL().deleteGroup(_Group.getCN());
+                TtAppCtx.getDAL().deleteGroup(_Group.getCN());
             }
 
             setResult(RESULT_CANCELED);
@@ -314,20 +314,20 @@ public class WalkActivity extends AcquireGpsMapActivity {
                 String name = dialog.getText();
 
                 _Group.setName(name);
-                Global.getDAL().updateGroup(_Group);
+                TtAppCtx.getDAL().updateGroup(_Group);
 
                 if (_CurrentPoint != null) {
                     _CurrentPoint.setGroupName(name);
                     updated = true;
 
-                    List<TtPoint> points = Global.getDAL().getPointsInGroup(_Group.getCN());
+                    List<TtPoint> points = TtAppCtx.getDAL().getPointsInGroup(_Group.getCN());
 
                     if (points.size() > 0) {
                         for (TtPoint p : points) {
                             p.setGroupName(name);
                         }
 
-                        Global.getDAL().updatePoints(points);
+                        TtAppCtx.getDAL().updatePoints(points);
                     }
                 }
             }
@@ -349,7 +349,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
 
     private void createPoint(INmeaBurst nmeaBurst, UTMCoords utmCoords) {
         if (updated) {
-            Global.getDAL().updatePoint(_CurrentPoint);
+            TtAppCtx.getDAL().updatePoint(_CurrentPoint);
             updated = false;
         }
 
@@ -383,8 +383,8 @@ public class WalkActivity extends AcquireGpsMapActivity {
         _CurrentPoint.setAndCalc(utmCoords.getX(), utmCoords.getY(), burst.getElevation(), _Polygon);
 
         try {
-            Global.getDAL().insertPoint(_CurrentPoint);
-            Global.getDAL().insertNmeaBurst(burst);
+            TtAppCtx.getDAL().insertPoint(_CurrentPoint);
+            TtAppCtx.getDAL().insertNmeaBurst(burst);
             pointsCreated++;
 
             lastPointCreationTime = System.currentTimeMillis();

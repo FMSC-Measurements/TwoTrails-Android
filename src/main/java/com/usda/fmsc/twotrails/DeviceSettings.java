@@ -20,94 +20,94 @@ import java.util.Collection;
 public class DeviceSettings extends Settings {
 
     //region Preference Names
-    private final String SETTINGS_CREATED = "SettingsCreated";
-    private final String DEVELOPER_OPTIONS = "DeveloperOptions";
+    private static final String SETTINGS_CREATED = "SettingsCreated";
+    private static final String DEVELOPER_OPTIONS = "DeveloperOptions";
 
-    public final String DROP_ZERO = "DropZero";
-    public final String ROUND_POINTS = "RoundPoints";
-    public final String KEEP_SCREEN_ON = "KeepScreenOn";
+    public static final String DROP_ZERO = "DropZero";
+    public static final String ROUND_POINTS = "RoundPoints";
+    public static final String KEEP_SCREEN_ON = "KeepScreenOn";
 
-    public final String GPS_EXTERNAL = "GpsExternal";
-    public final String GPS_ALWAYS_ON = "GpsAlwaysOn";
-    public final String LOG_ALL_GPS = "LogAllGps";
-    public final String GPS_CONFIGURED = "GPSConfigured";
-    public final String GPS_LOG_BURST_DETAILS = "GPSLogBurstDetails";
+    public static final String GPS_EXTERNAL = "GpsExternal";
+    public static final String GPS_ALWAYS_ON = "GpsAlwaysOn";
+    public static final String LOG_ALL_GPS = "LogAllGps";
+    public static final String GPS_CONFIGURED = "GPSConfigured";
+    public static final String GPS_LOG_BURST_DETAILS = "GPSLogBurstDetails";
 
-    public final String RANGE_FINDER_ALWAYS_ON = "RangeFinderAlwaysOn";
-    public final String LOG_ALL_RANGE_FINDER = "LogAllRangeFinder";
-    public final String RANGE_FINDER_CONFIGURED = "RangeFinderConfigured";
-    public final String RANGE_FINDER_LOG_BURST_DETAILS = "RangeFinderLogBurstDetails";
+    public static final String RANGE_FINDER_ALWAYS_ON = "RangeFinderAlwaysOn";
+    public static final String LOG_ALL_RANGE_FINDER = "LogAllRangeFinder";
+    public static final String RANGE_FINDER_CONFIGURED = "RangeFinderConfigured";
+    public static final String RANGE_FINDER_LOG_BURST_DETAILS = "RangeFinderLogBurstDetails";
 
-    public final String GPS_DEVICE_ID = "GpsDeviceID";
-    public final String GPS_DEVICE_NAME = "GpsDeviceName";
-    public final String RANGE_FINDER_DEVICE_ID = "RangeFinderDeviceID";
-    public final String RANGE_FINDER_DEVICE_NAME = "RangeFinderDeviceName";
+    public static final String GPS_DEVICE_ID = "GpsDeviceID";
+    public static final String GPS_DEVICE_NAME = "GpsDeviceName";
+    public static final String RANGE_FINDER_DEVICE_ID = "RangeFinderDeviceID";
+    public static final String RANGE_FINDER_DEVICE_NAME = "RangeFinderDeviceName";
 
-    public final String AUTO_FILL_FROM_RANGE_FINDER = "AutoFillFromRangeFinder";
-    public final String AUTO_FILL_FROM_RANGE_FINDER_ASK = "AutoFillFromRangeFinderAsk";
+    public static final String AUTO_FILL_FROM_RANGE_FINDER = "AutoFillFromRangeFinder";
+    public static final String AUTO_FILL_FROM_RANGE_FINDER_ASK = "AutoFillFromRangeFinderAsk";
 
-    public final String GPS_FILTER_DOP_TYPE = "GpsFilterDopType";
-    public final String GPS_FILTER_DOP_VALUE = "GpsFilterDopValue";
-    public final String GPS_FILTER_FIX_TYPE = "GpsFilterFixType";
-    public final String GPS_FILTER_FIX = "GpsFilterFix";
+    public static final String GPS_FILTER_DOP_TYPE = "GpsFilterDopType";
+    public static final String GPS_FILTER_DOP_VALUE = "GpsFilterDopValue";
+    public static final String GPS_FILTER_FIX_TYPE = "GpsFilterFixType";
+    public static final String GPS_FILTER_FIX = "GpsFilterFix";
 
-    public final String TAKE5_FILTER_DOP_TYPE = "Take5FilterDopType";
-    public final String TAKE5_FILTER_DOP_VALUE = "Take5FilterDopValue";
-    public final String TAKE5_FILTER_FIX_TYPE = "Take5FilterFixType";
-    public final String TAKE5_FILTER_FIX = "Take5FilterFix";
-    public final String TAKE5_NMEA_AMOUNT = "Take5NmeaAmount";
-    public final String TAKE5_IGNORE_FIRST_NMEA = "Take5IgnoreNmea";
-    public final String TAKE5_IGNORE_FIRST_NMEA_AMOUNT = "Take5IgnoreNmeaAmount";
-    public final String TAKE5_FAIL_AMOUNT = "Take5FailAmount";
-    public final String TAKE5_INCREMENT = "Take5Increment";
-    public final String TAKE5_VIBRATE_ON_CREATE = "Take5VibrationOnCreate";
-    public final String TAKE5_RING_ON_CREATE = "Take5RingOnCreate";
+    public static final String TAKE5_FILTER_DOP_TYPE = "Take5FilterDopType";
+    public static final String TAKE5_FILTER_DOP_VALUE = "Take5FilterDopValue";
+    public static final String TAKE5_FILTER_FIX_TYPE = "Take5FilterFixType";
+    public static final String TAKE5_FILTER_FIX = "Take5FilterFix";
+    public static final String TAKE5_NMEA_AMOUNT = "Take5NmeaAmount";
+    public static final String TAKE5_IGNORE_FIRST_NMEA = "Take5IgnoreNmea";
+    public static final String TAKE5_IGNORE_FIRST_NMEA_AMOUNT = "Take5IgnoreNmeaAmount";
+    public static final String TAKE5_FAIL_AMOUNT = "Take5FailAmount";
+    public static final String TAKE5_INCREMENT = "Take5Increment";
+    public static final String TAKE5_VIBRATE_ON_CREATE = "Take5VibrationOnCreate";
+    public static final String TAKE5_RING_ON_CREATE = "Take5RingOnCreate";
 
-    public final String WALK_FILTER_DOP_TYPE = "WalkFilterDopType";
-    public final String WALK_FILTER_DOP_VALUE = "WalkFilterDopValue";
-    public final String WALK_FILTER_FIX_TYPE = "WalkFilterFixType";
-    public final String WALK_FILTER_FIX = "WalkFilterFix";
-    public final String WALK_FILTER_ACCURACY = "WalkFilterAccuracy";
-    public final String WALK_FILTER_FREQUENCY = "WalkFilterFrequency";
-    public final String WALK_INCREMENT = "WalkIncrement";
-    public final String WALK_VIBRATE_ON_CREATE = "WalkVibrationOnCreate";
-    public final String WALK_RING_ON_CREATE = "WalkRingOnCreate";
-    public final String WALK_SHOW_ALL_POINTS_ON_MAP = "WalkShowAllPointsOnMap";
+    public static final String WALK_FILTER_DOP_TYPE = "WalkFilterDopType";
+    public static final String WALK_FILTER_DOP_VALUE = "WalkFilterDopValue";
+    public static final String WALK_FILTER_FIX_TYPE = "WalkFilterFixType";
+    public static final String WALK_FILTER_FIX = "WalkFilterFix";
+    public static final String WALK_FILTER_ACCURACY = "WalkFilterAccuracy";
+    public static final String WALK_FILTER_FREQUENCY = "WalkFilterFrequency";
+    public static final String WALK_INCREMENT = "WalkIncrement";
+    public static final String WALK_VIBRATE_ON_CREATE = "WalkVibrationOnCreate";
+    public static final String WALK_RING_ON_CREATE = "WalkRingOnCreate";
+    public static final String WALK_SHOW_ALL_POINTS_ON_MAP = "WalkShowAllPointsOnMap";
 
-    public final String AUTO_UPDATE_INDEX = "AutoUpdateIndex";
-    public final String AUTO_SET_GPS_NAME_TO_META = "AutoSetGpsNameToMeta";
-    public final String AUTO_SET_GPS_NAME_TO_META_ASK = "AutoSetGpsNameToMetaAsk";
-    public final String AUTO_UPDATE_WALK_ONBND = "AutoUpdateWalkOnBnd";
-    public final String AUTO_UPDATE_WALK_ONBND_ASK = "AutoUpdateWalkOnBndAsk";
-    public final String AUTO_OVERWRITE_PLOTGRID = "AutoOverwritePlotGrid";
-    public final String AUTO_OVERWRITE_PLOTGRID_ASK = "AutoOverwritePlotGridAsk";
-    public final String AUTO_OVERWRITE_EXPORT = "AutoOverwriteExport";
-    public final String AUTO_OVERWRITE_EXPORT_ASK = "AutoOverwriteExportAsk";
-    public final String AUTO_INTERNALIZE_EXPORT = "AutoInternalizeExport";
-    public final String AUTO_INTERNALIZE_EXPORT_ASK = "AutoInternalizeExportAsk";
-    public final String USE_TTCAMERA = "UseTtCamera";
-    public final String USE_TTCAMERA_ASK = "UseTtCameraAsk";
+    public static final String AUTO_UPDATE_INDEX = "AutoUpdateIndex";
+    public static final String AUTO_SET_GPS_NAME_TO_META = "AutoSetGpsNameToMeta";
+    public static final String AUTO_SET_GPS_NAME_TO_META_ASK = "AutoSetGpsNameToMetaAsk";
+    public static final String AUTO_UPDATE_WALK_ONBND = "AutoUpdateWalkOnBnd";
+    public static final String AUTO_UPDATE_WALK_ONBND_ASK = "AutoUpdateWalkOnBndAsk";
+    public static final String AUTO_OVERWRITE_PLOTGRID = "AutoOverwritePlotGrid";
+    public static final String AUTO_OVERWRITE_PLOTGRID_ASK = "AutoOverwritePlotGridAsk";
+    public static final String AUTO_OVERWRITE_EXPORT = "AutoOverwriteExport";
+    public static final String AUTO_OVERWRITE_EXPORT_ASK = "AutoOverwriteExportAsk";
+    public static final String AUTO_INTERNALIZE_EXPORT = "AutoInternalizeExport";
+    public static final String AUTO_INTERNALIZE_EXPORT_ASK = "AutoInternalizeExportAsk";
+    public static final String USE_TTCAMERA = "UseTtCamera";
+    public static final String USE_TTCAMERA_ASK = "UseTtCameraAsk";
 
-    public final String AUTO_OPEN_LAST_PROJECT = "AutoOpenLastProject";
-    public final String LAST_OPENED_PROJECT = "AutoOpenLastProject";
+    public static final String AUTO_OPEN_LAST_PROJECT = "AutoOpenLastProject";
+    public static final String LAST_OPENED_PROJECT = "AutoOpenLastProject";
 
-    public final String MAP_TRACKING_OPTION = "MapTrackingOption";
-    public final String MAP_COMPASS_ENABLED = "MapCompassEnabled";
-    public final String MAP_MYPOS_BUTTON = "MapMyPosButton";
-    public final String MAP_MIN_DIST = "MapMinDist";
-    public final String MAP_SHOW_MY_POS = "MapShowMyPos";
-    public final String MAP_DISPLAY_GPS_LOCATION = "MapDisplayGpsLocation";
-    public final String MAP_USE_UTM_NAV = "MapUseUtmNav";
-    public final String MAP_TYPE = "MapType";
-    public final String MAP_ID = "MapTerrainType";
-    public final String ARC_GIS_MAPS = "ArcGISMaps";
-    public final String ARC_GIS_MAP_ID_COUNTER = "ArcGISMapIdCounter";
-    public final String MAP_ADJ_LINE_WIDTH = "MapAdjLineWidth";
-    public final String MAP_UNADJ_LINE_WIDTH = "MapUnAdjLineWidth";
+    public static final String MAP_TRACKING_OPTION = "MapTrackingOption";
+    public static final String MAP_COMPASS_ENABLED = "MapCompassEnabled";
+    public static final String MAP_MYPOS_BUTTON = "MapMyPosButton";
+    public static final String MAP_MIN_DIST = "MapMinDist";
+    public static final String MAP_SHOW_MY_POS = "MapShowMyPos";
+    public static final String MAP_DISPLAY_GPS_LOCATION = "MapDisplayGpsLocation";
+    public static final String MAP_USE_UTM_NAV = "MapUseUtmNav";
+    public static final String MAP_TYPE = "MapType";
+    public static final String MAP_ID = "MapTerrainType";
+    public static final String ARC_GIS_MAPS = "ArcGISMaps";
+    public static final String ARC_GIS_MAP_ID_COUNTER = "ArcGISMapIdCounter";
+    public static final String MAP_ADJ_LINE_WIDTH = "MapAdjLineWidth";
+    public static final String MAP_UNADJ_LINE_WIDTH = "MapUnAdjLineWidth";
 
-    public final String ARC_CREDENTIALS = "ArcCredentials";
+    public static final String ARC_CREDENTIALS = "ArcCredentials";
 
-    public final String MEDIA_COPY_TO_PROJECT = "CopyToProject";
+    public static final String MEDIA_COPY_TO_PROJECT = "CopyToProject";
     //endregion
 
     //region Default Values
@@ -170,7 +170,7 @@ public class DeviceSettings extends Settings {
     public final boolean DEFAULT_MAP_USE_UTM_NAV = true;
     public final int DEFAULT_MAP_TYPE = 1;
     public final int DEFAULT_MAP_ID = 1;
-    public final String DEFAULT_ARC_GIS_MAPS = StringEx.Empty;
+    public static final String DEFAULT_ARC_GIS_MAPS = StringEx.Empty;
     public final int DEFAULT_ARC_GIS_MAP_ID_COUNTER = 0;
     public final int DEFAULT_MAP_ADJ_LINE_WIDTH = 6;
     public final int DEFAULT_MAP_UNADJ_LINE_WIDTH = 16;

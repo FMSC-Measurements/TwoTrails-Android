@@ -28,7 +28,7 @@ public class SettingsLogic {
         alert.setPositiveButton("Reset", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                Global.Settings.DeviceSettings.reset();
+                TtAppCtx.getDeviceSettings().reset();
                 ArcGISTools.reset();
             }
         });
@@ -60,12 +60,12 @@ public class SettingsLogic {
     public static void exportReport(final Activity activity) {
         AlertDialog.Builder dialog = new AlertDialog.Builder(activity);
 
-        if (Global.getDAL() != null) {
+        if (TtAppCtx.getDAL() != null) {
             dialog.setMessage("Would you like to include the current project into the report?")
                     .setPositiveButton(R.string.str_yes, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            onExportReportComplete(TtUtils.exportReport(Global.getDAL()), activity);
+                            onExportReportComplete(TtUtils.exportReport(TtAppCtx.getDAL()), activity);
                         }
                     })
                     .setNegativeButton(R.string.str_no, new DialogInterface.OnClickListener() {
@@ -117,12 +117,12 @@ public class SettingsLogic {
             public void onClick(DialogInterface dialog, int which) {
                 switch (idialog.getText().toLowerCase()) {
                     case "dev": {
-                        Global.Settings.DeviceSettings.enabledDevelopterOptions(true);
+                        TtAppCtx.getDeviceSettings().enabledDevelopterOptions(true);
                         Toast.makeText(context, "Developer Mode Enabled", Toast.LENGTH_LONG).show();
                         break;
                     }
                     case "disable dev": {
-                        Global.Settings.DeviceSettings.enabledDevelopterOptions(false);
+                        TtAppCtx.getDeviceSettings().enabledDevelopterOptions(false);
                         Toast.makeText(context, "Developer Mode Disabled", Toast.LENGTH_LONG).show();
                         break;
                     }

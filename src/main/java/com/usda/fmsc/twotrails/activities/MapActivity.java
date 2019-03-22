@@ -49,7 +49,7 @@ public class MapActivity extends BaseMapActivity {
         fabMyPos.setVisibility(myPosBtn && getLastPosition() != null ? View.VISIBLE : View.GONE);
         setDisplayLocInfoVisible();
 
-        if (Global.Settings.DeviceSettings.isGpsConfigured() && shouldStartGps()) {
+        if (TtAppCtx.getDeviceSettings().isGpsConfigured() && shouldStartGps()) {
             Global.getGpsBinder().startGps();
         }
 
@@ -82,9 +82,9 @@ public class MapActivity extends BaseMapActivity {
     protected void getSettings() {
         super.getSettings();
 
-        myPosBtn = Global.Settings.DeviceSettings.getMapMyPosBtns();
-        dispLoc = Global.Settings.DeviceSettings.getMapDisplayGpsLocation();
-        locUtm = Global.Settings.DeviceSettings.getMapUseUtmNav();
+        myPosBtn = TtAppCtx.getDeviceSettings().getMapMyPosBtns();
+        dispLoc = TtAppCtx.getDeviceSettings().getMapDisplayGpsLocation();
+        locUtm = TtAppCtx.getDeviceSettings().getMapUseUtmNav();
 
 
         if (created) {

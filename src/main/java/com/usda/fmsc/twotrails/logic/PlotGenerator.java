@@ -3,9 +3,9 @@ package com.usda.fmsc.twotrails.logic;
 import android.os.AsyncTask;
 
 import com.usda.fmsc.twotrails.Consts;
+import com.usda.fmsc.twotrails.TwoTrailApp;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
 import com.usda.fmsc.twotrails.data.TwoTrailsSchema;
-import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.objects.PointD;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
@@ -56,7 +56,7 @@ public class PlotGenerator extends AsyncTask<PlotGenerator.PlotParams, Void, TtP
 
         TtPolygon poly = new TtPolygon();
         poly.setName(pp.PolyName);
-        poly.setPointStartIndex(Global.getDAL().getItemCount(TwoTrailsSchema.PolygonSchema.TableName) * 1000 + 1010);
+        poly.setPointStartIndex(TwoTrailApp.getContext().getDAL().getItemCount(TwoTrailsSchema.PolygonSchema.TableName) * 1000 + 1010);
         poly.setIncrementBy(1);
         poly.setAccuracy(Consts.Default_Point_Accuracy);
 
@@ -210,8 +210,8 @@ public class PlotGenerator extends AsyncTask<PlotGenerator.PlotParams, Void, TtP
                     way.setOnBnd(false);
                     way.setIndex(a);
                     way.setComment("Generated Point");
-                    way.setGroupCN(Global.getMainGroup().getCN());
-                    way.setGroupName(Global.getMainGroup().getName());
+                    way.setGroupCN(Consts.EmptyGuid);
+                    way.setGroupName(Consts.Defaults.MainGroupName);
 
                     if (lastWay == null)
                         way.setPID(PointNamer.nameFirstPoint(poly));

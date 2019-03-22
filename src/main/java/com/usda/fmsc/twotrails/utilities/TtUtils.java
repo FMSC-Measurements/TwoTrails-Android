@@ -1,14 +1,17 @@
 package com.usda.fmsc.twotrails.utilities;
 
 import android.app.Activity;
+import android.app.Application;
 import android.content.ClipData;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.database.Cursor;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
+import android.os.Environment;
 import android.support.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
@@ -31,7 +34,7 @@ import com.usda.fmsc.android.utilities.DeviceOrientationEx;
 import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.twotrails.BuildConfig;
 import com.usda.fmsc.twotrails.Consts;
-import com.usda.fmsc.twotrails.Global;
+import com.usda.fmsc.twotrails.TwoTrailApp;
 import com.usda.fmsc.twotrails.activities.GetDirectionActivity;
 import com.usda.fmsc.twotrails.activities.TtCameraActivity;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
@@ -994,14 +997,14 @@ public class TtUtils {
             return null;
         }
 
-        public static ArrayList<TtImage> getPicturesFromImageIntent(Context context, Intent intent, String pointCN) {
+        public static ArrayList<TtImage> getPicturesFromImageIntent(TwoTrailApp context, Intent intent, String pointCN) {
             String[] filePathColumn = { MediaStore.Images.Media.DATA };
             ArrayList<TtImage> pictures = new ArrayList<>();
 
             String mediaDirStr = null;
-            boolean copyToProject = Global.Settings.DeviceSettings.getMediaCopyToProject();
+            boolean copyToProject = context.getDeviceSettings().getMediaCopyToProject();
             if (copyToProject) {
-                mediaDirStr = Global.getTtMediaDir();
+                mediaDirStr = TtUtils.getTtMediaDir();
 
                 File noMedia = new File(mediaDirStr, ".nomedia");
                 try {
@@ -1140,7 +1143,7 @@ public class TtUtils {
 
                     DateTime dateTime = DateTime.now();
 
-                    File photo = new File(Global.getTtMediaDir(), StringEx.format("IMG_%d%d%d_%d.jpg",
+                    File photo = new File(TtUtils.getTtMediaDir(), StringEx.format("IMG_%d%d%d_%d.jpg",
                             dateTime.getYear(), dateTime.getMonthOfYear(), dateTime.getDayOfMonth(), dateTime.getMillisOfDay()));
 
                     intent.putExtra(MediaStore.EXTRA_OUTPUT,
@@ -1877,7 +1880,7 @@ public class TtUtils {
 
     public static String exportReport(DataAccessLayer dal) {
         String filename = StringEx.format("%s%sTwoTrailsReport_%s.zip",
-                Global.getTtLogFileDir(),
+                TtUtils.getTtLogFileDir(),
                 File.separator,
                 DateTime.now().toString());
 
@@ -1891,4 +1894,89 @@ public class TtUtils {
 
         return exported ? filename : null;
     }
+
+
+
+    public static String getApplicationVersion(Application context) {
+        try {
+            PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+
+            return String.format("ANDROID: %s", pInfo.versionName);
+        } catch (Exception ex) {
+            //
+        }
+
+        return "ANDROID: ???";
+    }
+
+    //region Files
+    public static String getTtFilePath(String fileName) {
+        if(!fileName.endsWith(Consts.FILE_EXTENSION))
+            fileName += Consts.FILE_EXTENSION;
+
+        return getTtFileDir() + File.separator + fileName;
+    }
+
+    public static String getDocumentsDir() {
+        return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).getAbsolutePath();
+    }
+
+    private static String _OfflineMapsDir;
+    public static String getOfflineMapsDir() {
+        if (_OfflineMapsDir == null)
+            _OfflineMapsDir = String.format("%s%s%s", getDocumentsDir(), File.separator, "OfflineMaps");
+        return _OfflineMapsDir;
+    }
+
+    private static String _OfflineMapsRecoveryDir;
+    public static String getOfflineMapsRecoveryDir() {
+        if (_OfflineMapsRecoveryDir == null)
+            _OfflineMapsRecoveryDir = String.format("%s%s%s", getOfflineMapsDir(), File.separator, "Recovery");
+        return _OfflineMapsRecoveryDir;
+    }
+
+    private static String _TtFileDir;
+    public static String getTtFileDir() {
+        if (_TtFileDir == null)
+            _TtFileDir = String.format("%s%s%s", getDocumentsDir(), File.separator, "TwoTrailsFiles");
+        return _TtFileDir;
+    }
+
+    private static String _TtMediaDir;
+    public static String getTtMediaDir() {
+        if (_TtMediaDir == null)
+            _TtMediaDir = String.format("%s%s%s", getTtFileDir(), File.separator, "Media");
+
+        return _TtMediaDir;
+    }
+    public static String getTtMediaDir(DataAccessLayer dal) throws RuntimeException {
+        _TtMediaDir = getTtMediaDir();
+
+        if (dal != null) {
+            String mdir = String.format("%s%s%s", _TtMediaDir, File.separator, dal.getFileName());
+
+            File dir = new File(mdir);
+            if (!dir.exists()) {
+                if (!dir.mkdirs()) {
+                    throw new RuntimeException("Unable to create Media Folder");
+                }
+            }
+
+            return mdir;
+        }
+
+        return _TtMediaDir;
+    }
+
+    public static String getTtLogFileDir() {
+        return getTtFileDir();
+    }
+
+    public static String getLogFileName() {
+        return String.format("%s%sTtGpsLog_%s.txt",
+                getTtLogFileDir(),
+                File.separator,
+                DateTime.now().toString());
+    }
+    //endregion
 }
