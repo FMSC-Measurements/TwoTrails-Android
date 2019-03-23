@@ -23,9 +23,8 @@ import android.widget.Toast;
 import com.usda.fmsc.android.dialogs.DontAskAgainDialog;
 import com.usda.fmsc.android.dialogs.InputDialog;
 import com.usda.fmsc.twotrails.Consts;
+import com.usda.fmsc.twotrails.DeviceSettings;
 import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
-import com.usda.fmsc.twotrails.adapters.PointDetailsSpinnerAdapter;
-import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.logic.PlotGenerator;
 import com.usda.fmsc.twotrails.logic.PolygonAdjuster;
@@ -314,9 +313,9 @@ public class PlotGridActivity extends CustomToolbarActivity {
                 if (TtAppCtx.getDeviceSettings().getAutoOverwritePlotGridAsk()) {
                     DontAskAgainDialog dialog = new DontAskAgainDialog(
                             this,
-                            TtAppCtx.getDeviceSettings().AUTO_OVERWRITE_PLOTGRID_ASK,
-                            TtAppCtx.getDeviceSettings().AUTO_OVERWRITE_PLOTGRID,
-                            Global.Settings.PreferenceHelper.getPrefs());
+                            DeviceSettings.AUTO_OVERWRITE_PLOTGRID_ASK,
+                            DeviceSettings.AUTO_OVERWRITE_PLOTGRID,
+                            TtAppCtx.getDeviceSettings().getPrefs());
 
                     dialog.setMessage(String.format("The polygon name '%s' already exists. Would you like to rename or overwrite it?", polyName));
 

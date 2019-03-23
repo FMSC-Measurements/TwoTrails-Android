@@ -11,8 +11,8 @@ import android.widget.Toast;
 import com.usda.fmsc.android.widget.RecyclerViewEx;
 import com.usda.fmsc.android.widget.multiselection.MultiSelector;
 import com.usda.fmsc.android.widget.multiselection.SelectableHolder;
-import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
+import com.usda.fmsc.twotrails.TwoTrailApp;
 import com.usda.fmsc.twotrails.adapters.GpxTracksAdapter;
 import com.usda.fmsc.twotrails.adapters.KmlPolygonsAdapter;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
@@ -180,7 +180,8 @@ public class ImportKmlFragment extends BaseImportFragment {
 
         for (KmlPolygonsAdapter.KmlPolygonHolder holder : polyParams) {
             params.add(new Import.KMLImportTask.KMLPolyParams(
-                    holder.getName(), null, null, null, null, polygons.get(holder.getAdapterPosition()), Global.getDefaultMeta()));
+                    holder.getName(), null, null, null, null, polygons.get(holder.getAdapterPosition()),
+                    TwoTrailApp.getContext().getMetadataSettings().getDefaultMetadata()));
         }
 
         return params;

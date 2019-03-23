@@ -143,7 +143,7 @@ public class DeviceSettingsFragment extends PreferenceFragment {
         }
 
         if (TtAppCtx.getDeviceSettings().isGpsConfigured()) {
-            if (TtAppCtx.isGpsRunning()) {
+            if (TtAppCtx.getGps().isGpsRunning()) {
                 prefGpsCheck.setSummary(R.string.ds_gps_connected);
             } else {
                 prefGpsCheck.setSummary(R.string.ds_dev_configured);
@@ -160,7 +160,7 @@ public class DeviceSettingsFragment extends PreferenceFragment {
         }
 
         if (TtAppCtx.getDeviceSettings().isRangeFinderConfigured()) {
-            if (TtAppCtx.isRangeFinderRunning()) {
+            if (TtAppCtx.getRF().isRangeFinderRunning()) {
                 prefRFCheck.setSummary(R.string.ds_rf_connected);
             } else {
                 prefRFCheck.setSummary(R.string.ds_dev_configured);
@@ -233,7 +233,7 @@ public class DeviceSettingsFragment extends PreferenceFragment {
                             pd.setOnDismissListener(new DialogInterface.OnDismissListener() {
                                 @Override
                                 public void onDismiss(DialogInterface dialog) {
-                                    TtAppCtx.stopGps();
+                                    TtAppCtx.getGps().stopGps();
                                 }
                             });
 
@@ -247,7 +247,7 @@ public class DeviceSettingsFragment extends PreferenceFragment {
                             Runnable runGPS = new Runnable() {
                                 @Override
                                 public void run() {
-                                    TtAppCtx.setGpsProvider(TtAppCtx.getDeviceSettings().getGpsDeviceID());
+                                    TtAppCtx.getGps().setGpsProvider(TtAppCtx.getDeviceSettings().getGpsDeviceID());
 
 
                                     GpsService.Listener listener = new GpsService.Listener() {
@@ -259,7 +259,7 @@ public class DeviceSettingsFragment extends PreferenceFragment {
                                         @Override
                                         public void nmeaStringReceived(String nmeaString) {
                                             try {
-                                                TtAppCtx.stopListeningToGps(this);
+                                                TtAppCtx.getGps().addListener(this);
 
                                                 TtAppCtx.getDeviceSettings().setGpsConfigured(true);
 
@@ -272,7 +272,7 @@ public class DeviceSettingsFragment extends PreferenceFragment {
                                                             prefGpsCheck.setSummary(R.string.ds_gps_connected);
                                                         } else {
                                                             prefGpsCheck.setSummary(R.string.ds_dev_configured);
-                                                            TtAppCtx.stopGps();
+                                                            TtAppCtx.getGps().stopGps();
                                                         }
 
                                                         if (TtAppCtx.getDeviceSettings().getAutoSetGpsNameToMetaAsk()) {
@@ -353,21 +353,21 @@ public class DeviceSettingsFragment extends PreferenceFragment {
                                                 }
                                             });
 
-                                            TtAppCtx.stopListeningToGps(this);
-                                            TtAppCtx.stopGps();
+                                            TtAppCtx.getGps().removeListener(this);
+                                            TtAppCtx.getGps().stopGps();
                                         }
                                     };
 
-                                    TtAppCtx.listenToGps(listener);
+                                    TtAppCtx.getGps().addListener(listener);
 
-                                    TtAppCtx.startGps();
+                                    TtAppCtx.getGps().startGps();
                                 }
                             };
 
                             Looper.prepare();
 
-                            if (TtAppCtx.isGpsRunning())
-                                TtAppCtx.stopGps();
+                            if (TtAppCtx.getGps().isGpsRunning())
+                                TtAppCtx.getGps().stopGps();
 
                             runGPS.run();
                         }
@@ -407,7 +407,7 @@ public class DeviceSettingsFragment extends PreferenceFragment {
                             pd.setOnDismissListener(new DialogInterface.OnDismissListener() {
                                 @Override
                                 public void onDismiss(DialogInterface dialog) {
-                                    TtAppCtx.stopRangeFinder();
+                                    TtAppCtx.getRF().stopRangeFinder();
                                 }
                             });
 
@@ -421,7 +421,7 @@ public class DeviceSettingsFragment extends PreferenceFragment {
                             Runnable runRF = new Runnable() {
                                 @Override
                                 public void run() {
-                                    TtAppCtx.setRangeFinderProvider(TtAppCtx.getDeviceSettings().getRangeFinderDeviceID());
+                                    TtAppCtx.getRF().setRangeFinderProvider(TtAppCtx.getDeviceSettings().getRangeFinderDeviceID());
 
                                     RangeFinderService.Listener listener = new RangeFinderService.Listener() {
                                         @Override
@@ -432,7 +432,7 @@ public class DeviceSettingsFragment extends PreferenceFragment {
                                         @Override
                                         public void rfStringReceived(String rfString) {
                                             try {
-                                                TtAppCtx.stopListeningToRangeFinder(this);
+                                                TtAppCtx.getRF().removeListener(this);
 
                                                 TtAppCtx.getDeviceSettings().setRangeFinderConfigured(true);
 
@@ -445,7 +445,7 @@ public class DeviceSettingsFragment extends PreferenceFragment {
                                                             prefRFCheck.setSummary(R.string.ds_rf_connected);
                                                         } else {
                                                             prefRFCheck.setSummary(R.string.ds_dev_configured);
-                                                            TtAppCtx.stopRangeFinder();
+                                                            TtAppCtx.getRF().stopRangeFinder();
                                                         }
                                                     }
                                                 });
@@ -503,22 +503,22 @@ public class DeviceSettingsFragment extends PreferenceFragment {
                                                 }
                                             });
 
-                                            TtAppCtx.stopListeningToRangeFinder(this);
-                                            TtAppCtx.stopRangeFinder();
+                                            TtAppCtx.getRF().removeListener(this);
+                                            TtAppCtx.getRF().stopRangeFinder();
                                         }
                                     };
 
 
-                                    TtAppCtx.listenToRangeFinder(listener);
+                                    TtAppCtx.getRF().addListener(listener);
 
-                                    TtAppCtx.startRangeFinder();
+                                    TtAppCtx.getRF().startRangeFinder();
                                 }
                             };
 
                             Looper.prepare();
 
-                            if (TtAppCtx.isRangeFinderRunning())
-                                TtAppCtx.startRangeFinder();
+                            if (TtAppCtx.getRF().isRangeFinderRunning())
+                                TtAppCtx.getRF().startRangeFinder();
 
                             runRF.run();
                         }
@@ -583,15 +583,15 @@ public class DeviceSettingsFragment extends PreferenceFragment {
     }
 
     private boolean switchToInternal() {
-        if (!TtAppCtx.isInternalGpsEnabled()) {
+        if (!TtAppCtx.getGps().isInternalGpsEnabled()) {
             ActivityCompat.requestPermissions(getActivity(), new String[]{
                             android.Manifest.permission.ACCESS_FINE_LOCATION,
                             android.Manifest.permission.ACCESS_COARSE_LOCATION
                     },
                     Consts.Codes.Services.REQUEST_GPS_SERVICE);
         } else {
-            TtAppCtx.stopGps();
-            TtAppCtx.setGpsProvider(null);
+            TtAppCtx.getGps().stopGps();
+            TtAppCtx.getGps().setGpsProvider(null);
 
             TtAppCtx.getDeviceSettings().setGpsConfigured(true);
             exGpsCat.setEnabled(false);

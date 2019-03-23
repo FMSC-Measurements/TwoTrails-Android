@@ -12,7 +12,7 @@ import com.usda.fmsc.twotrails.TwoTrailApp;
 public class TtNotifyManager {
     private int GPS_NOTIFICATION_ID = 123;
 
-    private TwoTrailApp _TtContext;
+    private TwoTrailApp TtAppCtx;
     
     private NotificationManager _NotificationManager;
     private NotificationCompat.Builder _GpsBuilder;
@@ -21,9 +21,9 @@ public class TtNotifyManager {
     private SparseArray<NotificationCompat.Builder> _DownloadingNotifs;
 
     public TtNotifyManager(TwoTrailApp context) {
-        _TtContext = context;
-        _NotificationManager = (NotificationManager) _TtContext.getSystemService(Context.NOTIFICATION_SERVICE);
-        _GpsBuilder = new NotificationCompat.Builder(_TtContext, Consts.LOG_TAG);
+        TtAppCtx = context;
+        _NotificationManager = (NotificationManager) TtAppCtx.getSystemService(Context.NOTIFICATION_SERVICE);
+        _GpsBuilder = new NotificationCompat.Builder(TtAppCtx, Consts.LOG_TAG);
         _GpsBuilder.setOngoing(true);
         _DownloadingNotifs = new SparseArray<>();
     }
@@ -68,7 +68,7 @@ public class TtNotifyManager {
     }
 
     public void stopWalking() {
-        if (_TtContext.isGpsRunning()) {
+        if (TtAppCtx.getGps().isGpsRunning()) {
             setGpsOn();
         } else {
             setGpsOff();
@@ -107,7 +107,7 @@ public class TtNotifyManager {
 
 
     public void startMapDownload(int id, String name) {
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(_TtContext, Consts.LOG_TAG);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(TtAppCtx, Consts.LOG_TAG);
         builder.setOngoing(true)
                 .setSmallIcon(R.drawable.ic_map_black_36dp)
                 .setContentTitle(String.format("Downloading Map %s", name))

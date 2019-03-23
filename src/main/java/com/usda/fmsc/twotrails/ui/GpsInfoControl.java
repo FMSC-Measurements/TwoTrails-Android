@@ -7,8 +7,8 @@ import android.view.ViewTreeObserver;
 import com.usda.fmsc.android.animation.ViewAnimator;
 import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
-import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
+import com.usda.fmsc.twotrails.TwoTrailApp;
 import com.usda.fmsc.twotrails.gps.GpsService;
 
 public class GpsInfoControl implements GpsService.Listener {
@@ -35,7 +35,7 @@ public class GpsInfoControl implements GpsService.Listener {
             }
         });
 
-        Global.getGpsBinder().addListener(this);
+        TwoTrailApp.getContext().getGps().addListener(this);
     }
 
 
@@ -154,6 +154,6 @@ public class GpsInfoControl implements GpsService.Listener {
     }
 
     public void destroy() {
-        Global.getGpsBinder().removeListener(this);
+        TwoTrailApp.getContext().getGps().removeListener(this);
     }
 }

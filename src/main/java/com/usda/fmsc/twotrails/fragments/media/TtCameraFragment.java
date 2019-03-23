@@ -9,10 +9,10 @@ import android.support.annotation.Nullable;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.fragments.CameraFragment;
 import com.usda.fmsc.android.utilities.DeviceOrientationEx;
-import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.objects.media.TtImage;
 import com.usda.fmsc.twotrails.objects.media.TtPanorama;
 import com.usda.fmsc.twotrails.units.PictureType;
+import com.usda.fmsc.twotrails.utilities.TtUtils;
 import com.usda.fmsc.utilities.FileUtils;
 import com.usda.fmsc.utilities.StringEx;
 
@@ -158,7 +158,7 @@ public class TtCameraFragment extends CameraFragment {
 
     @Override
     protected String getImageSaveDir() {
-        return Global.getTtMediaDir();
+        return TtUtils.getTtMediaDir();
     }
 
     public TtImage getLastTtImage() {

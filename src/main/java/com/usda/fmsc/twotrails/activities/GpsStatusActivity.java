@@ -17,7 +17,6 @@ import com.usda.fmsc.geospatial.nmea.sentences.GGASentence;
 import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.twotrails.Consts;
-import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.gps.GpsService;
@@ -53,7 +52,7 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
             }
         }
 
-        binder = Global.getGpsBinder();
+        binder = TtAppCtx.getGps();
         binder.addListener(this);
 
         if (TtAppCtx.getDeviceSettings().isGpsConfigured()) {
@@ -268,7 +267,7 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
                 dialog.setPositiveButton("Connect", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        GpsService.GpsDeviceStatus status = Global.getGpsBinder().startGps();
+                        GpsService.GpsDeviceStatus status = binder.startGps();
 
                         if (status != GpsService.GpsDeviceStatus.ExternalGpsStarted &&
                                 status != GpsService.GpsDeviceStatus.InternalGpsStarted) {

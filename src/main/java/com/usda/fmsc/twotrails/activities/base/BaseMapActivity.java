@@ -54,7 +54,6 @@ import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.geospatial.utm.UTMTools;
 import com.usda.fmsc.twotrails.Consts;
-import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.TwoTrailApp;
 import com.usda.fmsc.twotrails.activities.SettingsActivity;
@@ -170,10 +169,10 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         if (_Metadata2 == null || _Metadata2.size() == 0) {
             _Metadata2 = TtAppCtx.getDAL().getMetadataMap();
         }
-        
+
         return _Metadata2;
     }
-    
+
     protected HashMap<String, TtPolygon> getPolygons() {
         if (_Polygons2 == null || _Polygons2.size() == 0) {
             _Polygons2 = TtAppCtx.getDAL().getPolygonsMap();
@@ -186,7 +185,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
         TtAppCtx = getTtAppContext();
 
         if (savedInstanceState != null && savedInstanceState.containsKey(FRAGMENT) && savedInstanceState.containsKey(MAP_TYPE)) {
@@ -218,10 +217,10 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
                                     }
                                     break;
                                 case ArcGIS:
-                                    ArcGisMapLayer agml = ArcGISTools.getMapLayer(mapId);
+                                    ArcGisMapLayer agml = TtAppCtx.getArcGISTools().getMapLayer(mapId);
                                     if (agml == null) {
                                         mapId = 0;
-                                        agml = ArcGISTools.getMapLayer(mapId);
+                                        agml = TtAppCtx.getArcGISTools().getMapLayer(mapId);
                                     }
 
                                     if (agml.isOnline() && !internetAvailable) {
@@ -248,7 +247,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         setCompassEnabled(getShowCompass());
         setLocationEnabled(getShowMyPos());
 
-        TtAppCtx.listenToGps(this);
+        TtAppCtx.getGps().addListener(this);
 
         if (AndroidUtils.Device.isFullOrientationAvailable(this)) {
             mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
@@ -327,13 +326,13 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if (ArcGISTools.offlineMapsAvailable()) {
+                if (TtAppCtx.getArcGISTools().offlineMapsAvailable()) {
                     new AlertDialog.Builder(BaseMapActivity.this)
                             .setMessage("There is no internet connection. Would you like to use an offline map?")
                             .setPositiveButton(R.string.str_yes, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    SelectMapTypeDialog.newInstance(new ArrayList<>(ArcGISTools.getMapLayers()),
+                                    SelectMapTypeDialog.newInstance(new ArrayList<>(TtAppCtx.getArcGISTools().getMapLayers()),
                                             SelectMapTypeDialog.SelectMapMode.ARC_OFFLINE)
                                             .setOnMapSelectedListener(new SelectMapTypeDialog.OnMapSelectedListener() {
                                                 @Override
@@ -605,7 +604,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         if (TtAppCtx.getDeviceSettings().getGpsExternal()) {
             if (TtAppCtx.getDeviceSettings().isGpsConfigured())
             {
-                if (!TtAppCtx.isGpsRunning()) {
+                if (!TtAppCtx.getGps().isGpsRunning()) {
                     Toast.makeText(BaseMapActivity.this, "GPS is not Receiving", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -620,7 +619,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     protected void onDestroy() {
         super.onDestroy();
 
-        TtAppCtx.stopListeningToGps(this);
+        TtAppCtx.getGps().removeListener(this);
     }
 
     @Override
@@ -705,7 +704,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     }
 
     protected void selectMapType(SelectMapTypeDialog.SelectMapMode mode) {
-        SelectMapTypeDialog dialog = SelectMapTypeDialog.newInstance(new ArrayList<>(ArcGISTools.getMapLayers()), mode);
+        SelectMapTypeDialog dialog = SelectMapTypeDialog.newInstance(new ArrayList<>(TtAppCtx.getArcGISTools().getMapLayers()), mode);
 
         dialog.setOnMapSelectedListener(new SelectMapTypeDialog.OnMapSelectedListener() {
             @Override
@@ -1755,7 +1754,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
 
     protected final void startGps() {
         if (shouldStartGps()) {
-            TtAppCtx.startGps();
+            TtAppCtx.getGps().startGps();
         }
     }
 
@@ -1765,7 +1764,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
 
     protected final void stopGps() {
         if (shouldStopGps()) {
-            TtAppCtx.stopGps();
+            TtAppCtx.getGps().stopGps();
         }
     }
 

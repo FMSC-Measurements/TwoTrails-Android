@@ -7,8 +7,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
-import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
+import com.usda.fmsc.twotrails.TwoTrailApp;
 
 
 public class MainToolsFragment extends Fragment {
@@ -67,7 +67,7 @@ public class MainToolsFragment extends Fragment {
             //btnGpsLogger.setEnabled(enable);
             //btnGpsStatus.setEnabled(enable);
 
-            if (TtAppCtx.getDeviceSettings().isDeveloperOptionsEnabled()) {
+            if (TwoTrailApp.getContext().getDeviceSettings().isDeveloperOptionsEnabled()) {
                 viewTest.setVisibility(View.VISIBLE);
             } else {
                 viewTest.setVisibility(View.GONE);

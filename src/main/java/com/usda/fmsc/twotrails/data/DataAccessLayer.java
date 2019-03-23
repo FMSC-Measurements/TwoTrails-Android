@@ -8,7 +8,9 @@ import com.usda.fmsc.geospatial.EastWest;
 import com.usda.fmsc.geospatial.NorthSouth;
 import com.usda.fmsc.geospatial.UomElevation;
 import com.usda.fmsc.twotrails.Consts;
-import com.usda.fmsc.twotrails.Global;
+import com.usda.fmsc.twotrails.MapSettings;
+import com.usda.fmsc.twotrails.ProjectSettings;
+import com.usda.fmsc.twotrails.TwoTrailApp;
 import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
 import com.usda.fmsc.twotrails.objects.DataActionType;
 import com.usda.fmsc.twotrails.objects.TtUserAction;
@@ -45,6 +47,8 @@ import com.usda.fmsc.utilities.StringEx;
 
 @SuppressWarnings({"UnusedReturnValue", "unused", "WeakerAccess"})
 public class DataAccessLayer extends IDataLayer {
+    private TwoTrailApp TtAppCtx;
+
     public String getFilePath() {
         return _FilePath;
     }
@@ -70,7 +74,9 @@ public class DataAccessLayer extends IDataLayer {
 
 
     //region Constructors / Open / Close
-    public DataAccessLayer(String filePath) {
+    public DataAccessLayer(String filePath, TwoTrailApp contex) {
+        TtAppCtx = contex;
+
         _FilePath = filePath;
 
         if (FileUtils.fileExists(_FilePath))
@@ -140,8 +146,8 @@ public class DataAccessLayer extends IDataLayer {
             CreateActivityTable();
             CreateDataDictionaryTable();
             SetupProjInfo();
-            insertMetadata(Global.getDefaultMeta());
-            insertGroup(Global.getMainGroup());
+            insertMetadata(TtAppCtx.getMetadataSettings().getDefaultMetadata());
+            insertGroup(Consts.Defaults.createDefaultGroup());
 
         } catch (Exception ex) {
             //say that db creation failed, specific tables have already been logged
@@ -2251,24 +2257,22 @@ public class DataAccessLayer extends IDataLayer {
             cvs.put(TwoTrailsSchema.ProjectInfoSchema.TtDbSchemaVersion,
                     TwoTrailsSchema.SchemaVersion.toString());
 
-            cvs.put(TwoTrailsSchema.ProjectInfoSchema.TtVersion,
-                    Global.getApplicationVersion());
+            String version = TtUtils.getApplicationVersion(TtAppCtx);
+            ProjectSettings ps = TtAppCtx.getProjectSettings();
 
-            cvs.put(TwoTrailsSchema.ProjectInfoSchema.CreatedTtVersion,
-                    Global.getApplicationVersion());
+            cvs.put(TwoTrailsSchema.ProjectInfoSchema.TtVersion, version);
 
-            cvs.put(TwoTrailsSchema.ProjectInfoSchema.Region,
-                    TtAppCtx.getProjectSettings().getRegion());
+            cvs.put(TwoTrailsSchema.ProjectInfoSchema.CreatedTtVersion, version);
+
+            cvs.put(TwoTrailsSchema.ProjectInfoSchema.Region, ps.getRegion());
 
             cvs.put(TwoTrailsSchema.ProjectInfoSchema.ID, getFileName());
 
             cvs.put(TwoTrailsSchema.ProjectInfoSchema.DeviceID, TtUtils.getDeviceName());
 
-            cvs.put(TwoTrailsSchema.ProjectInfoSchema.Forest,
-                    TtAppCtx.getProjectSettings().getForest());
+            cvs.put(TwoTrailsSchema.ProjectInfoSchema.Forest, ps.getForest());
 
-            cvs.put(TwoTrailsSchema.ProjectInfoSchema.District,
-                    TtAppCtx.getProjectSettings().getDistrict());
+            cvs.put(TwoTrailsSchema.ProjectInfoSchema.District, ps.getDistrict());
 
             cvs.put(TwoTrailsSchema.ProjectInfoSchema.Description, StringEx.Empty);
 
@@ -2366,6 +2370,8 @@ public class DataAccessLayer extends IDataLayer {
             String cn;
             int adjbnd, unadjbnd, adjnav, unadjnav, adjpts, unadjpts, waypts;
 
+            MapSettings ms = TtAppCtx.getMapSettings();
+
             if (c.moveToFirst()) {
                 do {
 
@@ -2377,37 +2383,37 @@ public class DataAccessLayer extends IDataLayer {
                     if (!c.isNull(1))
                         adjbnd = c.getInt(1);
                     else
-                        adjbnd = TtAppCtx.getMapSettings().defaults.getDefaultAdjBndColor();
+                        adjbnd = ms.getDefaultAdjBndColor();
 
                     if (!c.isNull(2))
                         unadjbnd = c.getInt(2);
                     else
-                        unadjbnd = TtAppCtx.getMapSettings().defaults.getDefaultUnAdjBndColor();
+                        unadjbnd = ms.getDefaultUnAdjBndColor();
 
                     if (!c.isNull(3))
                         adjnav = c.getInt(3);
                     else
-                        adjnav = TtAppCtx.getMapSettings().defaults.getDefaultAdjNavColor();
+                        adjnav = ms.getDefaultAdjNavColor();
 
                     if (!c.isNull(4))
                         unadjnav = c.getInt(4);
                     else
-                        unadjnav = TtAppCtx.getMapSettings().defaults.getDefaultUnAdjNavColor();
+                        unadjnav = ms.getDefaultUnAdjNavColor();
 
                     if (!c.isNull(5))
                         adjpts = c.getInt(5);
                     else
-                        adjpts = TtAppCtx.getMapSettings().defaults.getDefaultAdjPtsColor();
+                        adjpts = ms.getDefaultAdjPtsColor();
 
                     if (!c.isNull(6))
                         unadjpts = c.getInt(6);
                     else
-                        unadjpts = TtAppCtx.getMapSettings().defaults.getDefaultUnAdjPtsColor();
+                        unadjpts = ms.getDefaultUnAdjPtsColor();
 
                     if (!c.isNull(7))
                         waypts = c.getInt(7);
                     else
-                        waypts = TtAppCtx.getMapSettings().defaults.getDefaultWayPtsColor();
+                        waypts = ms.getDefaultWayPtsColor();
 
                     graphicOptions.add(
                             new PolygonGraphicOptions(cn,
@@ -2611,7 +2617,7 @@ public class DataAccessLayer extends IDataLayer {
 
     public boolean duplicate(String duplicateFileName) {
         try {
-            DataAccessLayer dDal = new DataAccessLayer(duplicateFileName);
+            DataAccessLayer dDal = new DataAccessLayer(duplicateFileName, TtAppCtx);
 
             dDal.setProjectID(getProjectID());
             dDal.setProjectDescription(getProjectDescription());

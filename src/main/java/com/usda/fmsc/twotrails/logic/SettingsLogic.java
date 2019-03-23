@@ -13,8 +13,8 @@ import android.widget.Toast;
 
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.dialogs.InputDialog;
-import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
+import com.usda.fmsc.twotrails.TwoTrailApp;
 import com.usda.fmsc.twotrails.utilities.ArcGISTools;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
@@ -28,8 +28,8 @@ public class SettingsLogic {
         alert.setPositiveButton("Reset", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                TtAppCtx.getDeviceSettings().reset();
-                ArcGISTools.reset();
+                TwoTrailApp.getContext().getDeviceSettings().reset();
+                TwoTrailApp.getContext().getArcGISTools().reset();
             }
         });
 
@@ -60,12 +60,12 @@ public class SettingsLogic {
     public static void exportReport(final Activity activity) {
         AlertDialog.Builder dialog = new AlertDialog.Builder(activity);
 
-        if (TtAppCtx.getDAL() != null) {
+        if (TwoTrailApp.getContext().getDAL() != null) {
             dialog.setMessage("Would you like to include the current project into the report?")
                     .setPositiveButton(R.string.str_yes, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            onExportReportComplete(TtUtils.exportReport(TtAppCtx.getDAL()), activity);
+                            onExportReportComplete(TtUtils.exportReport(TwoTrailApp.getContext().getDAL()), activity);
                         }
                     })
                     .setNegativeButton(R.string.str_no, new DialogInterface.OnClickListener() {
@@ -90,7 +90,7 @@ public class SettingsLogic {
                         @Override
                         public void onClick(View v) {
                             Intent intent = new Intent(Intent.ACTION_VIEW);
-                            intent.setDataAndType(Uri.parse(Global.getTtFileDir()), "resource/folder");
+                            intent.setDataAndType(Uri.parse(TtUtils.getTtFileDir()), "resource/folder");
 
                             if (snackbar != null)
                                 snackbar.dismiss();
@@ -117,12 +117,12 @@ public class SettingsLogic {
             public void onClick(DialogInterface dialog, int which) {
                 switch (idialog.getText().toLowerCase()) {
                     case "dev": {
-                        TtAppCtx.getDeviceSettings().enabledDevelopterOptions(true);
+                        TwoTrailApp.getContext().getDeviceSettings().enabledDevelopterOptions(true);
                         Toast.makeText(context, "Developer Mode Enabled", Toast.LENGTH_LONG).show();
                         break;
                     }
                     case "disable dev": {
-                        TtAppCtx.getDeviceSettings().enabledDevelopterOptions(false);
+                        TwoTrailApp.getContext().getDeviceSettings().enabledDevelopterOptions(false);
                         Toast.makeText(context, "Developer Mode Disabled", Toast.LENGTH_LONG).show();
                         break;
                     }

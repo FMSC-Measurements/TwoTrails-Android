@@ -20,8 +20,8 @@ import com.usda.fmsc.android.adapters.MultiLineInfoWindowAdapter;
 import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.twotrails.Consts;
-import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
+import com.usda.fmsc.twotrails.TwoTrailApp;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.objects.map.GoogleMapsPolygonGrahpic;
 import com.usda.fmsc.twotrails.objects.map.GoogleMapsTrailGraphic;
@@ -121,8 +121,10 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
         map = googleMap;
 
         //use external GPS if available
+        TwoTrailApp TtAppCtx = TwoTrailApp.getContext();
+
         if (TtAppCtx.getDeviceSettings().isGpsConfigured() && TtAppCtx.getDeviceSettings().getGpsExternal()) {
-            GpsService.GpsBinder binder = Global.getGpsBinder();
+            GpsService.GpsBinder binder = TtAppCtx.getGps();
             GpsService service = binder.getService();
 
             map.setLocationSource(service);

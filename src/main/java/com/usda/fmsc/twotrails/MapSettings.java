@@ -21,55 +21,54 @@ public class MapSettings {
         _Context = context;
     }
 
+    private @ColorInt Integer adjBnd;
+    public @ColorInt int getDefaultAdjBndColor() {
+        if (adjBnd == null)
+            adjBnd = AndroidUtils.UI.getColor(_Context, R.color.map_adj_bnd);
+        return adjBnd;
+    }
 
-        private @ColorInt Integer adjBnd;
-        public @ColorInt int getDefaultAdjBndColor() {
-            if (adjBnd == null)
-                adjBnd = AndroidUtils.UI.getColor(_Context, R.color.map_adj_bnd);
-            return adjBnd;
-        }
+    private @ColorInt Integer adjNav;
+    public @ColorInt int getDefaultAdjNavColor() {
+        if (adjNav == null)
+            adjNav = AndroidUtils.UI.getColor(_Context, R.color.map_adj_nav);
+        return adjNav;
+    }
 
-        private @ColorInt Integer adjNav;
-        public @ColorInt int getDefaultAdjNavColor() {
-            if (adjNav == null)
-                adjNav = AndroidUtils.UI.getColor(_Context, R.color.map_adj_nav);
-            return adjNav;
-        }
+    private @ColorInt Integer unadjBnd;
+    public @ColorInt int getDefaultUnAdjBndColor() {
+        if (unadjBnd == null)
+            unadjBnd = AndroidUtils.UI.getColor(_Context, R.color.map_unadj_bnd);
+        return unadjBnd;
+    }
 
-        private @ColorInt Integer unadjBnd;
-        public @ColorInt int getDefaultUnAdjBndColor() {
-            if (unadjBnd == null)
-                unadjBnd = AndroidUtils.UI.getColor(_Context, R.color.map_unadj_bnd);
-            return unadjBnd;
-        }
+    private @ColorInt Integer unadjNav;
+    public @ColorInt int getDefaultUnAdjNavColor() {
+        if (unadjNav == null)
+            unadjNav = AndroidUtils.UI.getColor(_Context, R.color.map_unadj_nav);
+        return unadjNav;
+    }
 
-        private @ColorInt Integer unadjNav;
-        public @ColorInt int getDefaultUnAdjNavColor() {
-            if (unadjNav == null)
-                unadjNav = AndroidUtils.UI.getColor(_Context, R.color.map_unadj_nav);
-            return unadjNav;
-        }
+    private @ColorInt Integer adjpts;
+    public @ColorInt int getDefaultAdjPtsColor() {
+        if (adjpts == null)
+            adjpts = AndroidUtils.UI.getColor(_Context, R.color.map_adj_pts);
+        return adjpts;
+    }
 
-        private @ColorInt Integer adjpts;
-        public @ColorInt int getDefaultAdjPtsColor() {
-            if (adjpts == null)
-                adjpts = AndroidUtils.UI.getColor(_Context, R.color.map_adj_pts);
-            return adjpts;
-        }
+    private @ColorInt Integer unadjpts;
+    public @ColorInt int getDefaultUnAdjPtsColor() {
+        if (unadjpts == null)
+            unadjpts = AndroidUtils.UI.getColor(_Context, R.color.map_unadj_pts);
+        return unadjpts;
+    }
 
-        private @ColorInt Integer unadjpts;
-        public @ColorInt int getDefaultUnAdjPtsColor() {
-            if (unadjpts == null)
-                unadjpts = AndroidUtils.UI.getColor(_Context, R.color.map_unadj_pts);
-            return unadjpts;
-        }
-
-        private @ColorInt Integer waypts;
-        public @ColorInt int getDefaultWayPtsColor() {
-            if (waypts == null)
-                waypts = AndroidUtils.UI.getColor(_Context, R.color.map_way_pts);
-            return waypts;
-        }
+    private @ColorInt Integer waypts;
+    public @ColorInt int getDefaultWayPtsColor() {
+        if (waypts == null)
+            waypts = AndroidUtils.UI.getColor(_Context, R.color.map_way_pts);
+        return waypts;
+    }
 
     public void reset() {
         for (PolygonGraphicOptions pgo : _PolyGraphicOptions.values()) {

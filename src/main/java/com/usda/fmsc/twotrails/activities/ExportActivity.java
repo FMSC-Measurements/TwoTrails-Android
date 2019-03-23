@@ -23,8 +23,8 @@ import com.usda.fmsc.android.widget.FABProgressCircleEx;
 import com.usda.fmsc.android.widget.MultiStateTouchCheckBox;
 import com.usda.fmsc.twotrails.BuildConfig;
 import com.usda.fmsc.twotrails.Consts;
+import com.usda.fmsc.twotrails.DeviceSettings;
 import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
-import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.data.MediaAccessLayer;
 import com.usda.fmsc.twotrails.objects.media.TtImage;
@@ -33,6 +33,7 @@ import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.io.File;
 import java.util.List;
+import java.util.TimerTask;
 
 public class ExportActivity extends CustomToolbarActivity {
     private MultiStateTouchCheckBox chkAll, chkPoints, chkPolys, chkMeta, chkProj, chkNmea, chkKmz, chkGpx, chkSum, chkImgInfo, chkPc;
@@ -182,9 +183,9 @@ public class ExportActivity extends CustomToolbarActivity {
                 Toast.makeText(this, "No options selected for export", Toast.LENGTH_SHORT).show();
             } else {
                 if (selectdir) {
-                    selectDirectory(Global.getTtFileDir());
+                    selectDirectory(TtUtils.getTtFileDir());
                 } else {
-                    startExport(Global.getTtFileDir(), true);
+                    startExport(TtUtils.getTtFileDir(), true);
                 }
             }
         }
@@ -192,13 +193,13 @@ public class ExportActivity extends CustomToolbarActivity {
 
     private void startExport(final String directory, boolean checkExternalMedia) {
         if (checkExternalMedia && chkPc.isChecked()) {
-            final MediaAccessLayer mal = Global.getOrCreateMAL();
+            final MediaAccessLayer mal = TtAppCtx.getOrCreateMAL();
             if (mal != null && mal.hasExternalImages()) {
                 if (TtAppCtx.getDeviceSettings().getAutoInternalizeExportAsk()) {
                     new DontAskAgainDialog(this,
-                            TtAppCtx.getDeviceSettings().AUTO_INTERNALIZE_EXPORT_ASK,
-                            TtAppCtx.getDeviceSettings().AUTO_INTERNALIZE_EXPORT,
-                            Global.Settings.PreferenceHelper.getPrefs())
+                            DeviceSettings.AUTO_INTERNALIZE_EXPORT_ASK,
+                            DeviceSettings.AUTO_INTERNALIZE_EXPORT,
+                            TtAppCtx.getDeviceSettings().getPrefs())
 
                     .setMessage("There are Images that are saved outside of the media database. Would you like to include them to simplify image transfer?")
 
@@ -236,9 +237,9 @@ public class ExportActivity extends CustomToolbarActivity {
         if (dir.exists()) {
             if (TtAppCtx.getDeviceSettings().getAutoOverwriteExportAsk()) {
                 new DontAskAgainDialog(this,
-                        TtAppCtx.getDeviceSettings().AUTO_OVERWRITE_EXPORT_ASK,
-                        TtAppCtx.getDeviceSettings().AUTO_OVERWRITE_EXPORT,
-                        Global.Settings.PreferenceHelper.getPrefs())
+                        DeviceSettings.AUTO_OVERWRITE_EXPORT_ASK,
+                        DeviceSettings.AUTO_OVERWRITE_EXPORT,
+                        TtAppCtx.getDeviceSettings().getPrefs())
 
                 .setMessage("There is already a folder that that contains a previous export. Would you like to change the directory or overwrite it?")
 
@@ -414,7 +415,7 @@ public class ExportActivity extends CustomToolbarActivity {
             exportTask.execute(
                     new Export.ExportTask.ExportParams(
                             TtAppCtx.getDAL(),
-                            Global.hasMAL() ? Global.getOrCreateMAL() : null,
+                            TtAppCtx.hasMAL() ? TtAppCtx.getOrCreateMAL() : null,
                             directory,
                             chkPoints.isChecked(),
                             chkPolys.isChecked(),

@@ -22,7 +22,6 @@ import com.usda.fmsc.twotrails.units.OpType;
 import com.usda.fmsc.twotrails.units.Slope;
 import com.usda.fmsc.utilities.StringEx;
 import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
-import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
 
 import com.usda.fmsc.twotrails.objects.points.GpsPoint;

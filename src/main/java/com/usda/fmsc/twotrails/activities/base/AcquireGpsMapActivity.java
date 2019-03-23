@@ -411,7 +411,7 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
                     dialog.setPositiveButton("Connect", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            GpsService.GpsDeviceStatus status = TtAppCtx.startGps();
+                            GpsService.GpsDeviceStatus status = getTtAppContext().getGps().startGps();
 
                             if (status != GpsService.GpsDeviceStatus.ExternalGpsStarted &&
                                     status != GpsService.GpsDeviceStatus.InternalGpsStarted) {
