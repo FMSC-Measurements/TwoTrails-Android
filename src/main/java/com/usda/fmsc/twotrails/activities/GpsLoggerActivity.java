@@ -16,9 +16,7 @@ import android.widget.Toast;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.twotrails.Consts;
-import com.usda.fmsc.twotrails.activities.base.BaseMapActivity;
 import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
-import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.R;
 
@@ -27,6 +25,7 @@ import org.joda.time.DateTime;
 import java.util.ArrayList;
 
 import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
+import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 public class GpsLoggerActivity extends CustomToolbarActivity implements GpsService.Listener {
     private final String STRINGS_KEY = "strings";
@@ -53,7 +52,7 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
         if (lvNmea != null) {
             lvNmea.setFadingEdgeLength(0);
 
-            binder = Global.getGpsBinder();
+            binder = TtAppCtx.getGps();
             binder.addListener(this);
 
             if (TtAppCtx.getDeviceSettings().isGpsConfigured()) {
@@ -82,7 +81,7 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
 
     @Override
     public void onBackPressed() {
-        final GpsService.GpsBinder binder = Global.getGpsBinder();
+        final GpsService.GpsBinder binder = TtAppCtx.getGps();
         final Activity activity = this;
 
         if (binder.isLogging()) {
@@ -133,7 +132,7 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
                     item.setChecked(false);
 
                     if (logging) {
-                        Global.getGpsBinder().stopLogging();
+                        TtAppCtx.getGps().stopLogging();
                         logging = false;
                     }
                 } else {
@@ -141,7 +140,7 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
                         item.setChecked(true);
 
                         if (logging) {
-                            Global.getGpsBinder().startLogging(Global.getLogFileName());
+                            TtAppCtx.getGps().startLogging(TtUtils.getLogFileName());
                         }
                     }
                 }
@@ -250,7 +249,7 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
                 btnLog.setText(R.string.aqr_log_pause);
 
                 if (miCheckLtf.isChecked()) {
-                    binder.startLogging(Global.getLogFileName());
+                    binder.startLogging(TtUtils.getLogFileName());
                 }
             } else {
                 logging = false;

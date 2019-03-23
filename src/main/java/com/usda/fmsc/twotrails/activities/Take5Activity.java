@@ -7,7 +7,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -47,6 +46,7 @@ import com.usda.fmsc.android.widget.SheetLayoutEx;
 import com.usda.fmsc.android.widget.layoutmanagers.LinearLayoutManagerWithSmoothScroller;
 import com.usda.fmsc.android.widget.RecyclerViewEx;
 import com.usda.fmsc.geospatial.nmea.INmeaBurst;
+import com.usda.fmsc.twotrails.DeviceSettings;
 import com.usda.fmsc.twotrails.activities.base.AcquireGpsMapActivity;
 import com.usda.fmsc.twotrails.activities.base.PointMediaController;
 import com.usda.fmsc.twotrails.activities.base.PointMediaListener;
@@ -62,7 +62,6 @@ import com.usda.fmsc.twotrails.units.OpType;
 import com.usda.fmsc.utilities.StringEx;
 import com.usda.fmsc.twotrails.adapters.Take5PointsEditRvAdapter;
 import com.usda.fmsc.twotrails.Consts;
-import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
 import com.usda.fmsc.twotrails.R;
@@ -181,11 +180,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
             switch (item.getItemId()) {
                 case R.id.ctx_menu_add: {
                     Intent intent = new Intent(Intent.ACTION_PICK);
-
-                    if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-                    }
-
+                    intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
                     intent.setType("image/*");
                     startActivityForResult(intent, Consts.Codes.Requests.ADD_IMAGES);
                     break;
@@ -194,9 +189,9 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                     if (AndroidUtils.Device.isFullOrientationAvailable(Take5Activity.this)) {
                         if (TtAppCtx.getDeviceSettings().getUseTtCameraAsk()) {
                             DontAskAgainDialog dialog = new DontAskAgainDialog(Take5Activity.this,
-                                    TtAppCtx.getDeviceSettings().USE_TTCAMERA_ASK,
-                                    TtAppCtx.getDeviceSettings().USE_TTCAMERA,
-                                    Global.Settings.PreferenceHelper.getPrefs());
+                                    DeviceSettings.USE_TTCAMERA_ASK,
+                                    DeviceSettings.USE_TTCAMERA,
+                                    TtAppCtx.getDeviceSettings().getPrefs());
 
                             dialog.setMessage(Take5Activity.this.getString(R.string.points_camera_diag))
                                     .setPositiveButton("TwoTrails", new DontAskAgainDialog.OnClickListener() {
@@ -695,14 +690,14 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
             case Consts.Codes.Activites.SETTINGS: {
-                Global.getGpsBinder().startGps();
+                TtAppCtx.getGps().startGps();
 
                 getSettings();
                 break;
             }
             case Consts.Codes.Requests.ADD_IMAGES: {
                 if (data != null) {
-                    List<TtImage> images = TtUtils.Media.getPicturesFromImageIntent(Take5Activity.this, data, _CurrentPoint.getCN());
+                    List<TtImage> images = TtUtils.Media.getPicturesFromImageIntent(TtAppCtx, data, _CurrentPoint.getCN());
 
                     if (images.size() == 1) {
                         TtUtils.Media.askAndUpdateImageOrientation(Take5Activity.this, null);
@@ -993,7 +988,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
 
             ignoreScroll = true;
 
-            Global.TtNotifyManager.showPointAquired();
+            TtAppCtx.getTtNotifyManager().showPointAquired();
 
             t5pAdapter.notifyItemInserted(_Points.size() - 1);
             rvPoints.smoothScrollToPosition(_Points.size() - 1);
@@ -1346,7 +1341,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
     //region Media
     private void saveMedia() {
         if (_MediaUpdated && _CurrentMedia != null) {
-            if (!Global.getOrCreateMAL().updateMedia(_CurrentMedia)) {
+            if (!TtAppCtx.getOrCreateMAL().updateMedia(_CurrentMedia)) {
                 Toast.makeText(Take5Activity.this,
                         String.format("Unable to save %s", _CurrentMedia.getMediaType().toString()),
                         Toast.LENGTH_LONG
@@ -1361,7 +1356,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
         List<TtMedia> mediaList = rvMediaAdapter.getItems();
         int index = mediaList.indexOf(media);
 
-        Global.getOrCreateMAL().deleteMedia(media);
+        TtAppCtx.getOrCreateMAL().deleteMedia(media);
 
         if (delete) {
             File file = new File(media.getFilePath());
@@ -1392,7 +1387,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
 
     private void addImage(final TtImage picture) {
         if (picture != null) {
-            if (Global.getOrCreateMAL().insertMedia(picture)) {
+            if (TtAppCtx.getOrCreateMAL().insertMedia(picture)) {
                 mediaSelectionIndex = TtUtils.Media.getMediaIndex(picture, rvMediaAdapter.getItems());
                 loadImageToList(picture);
             } else {
@@ -1408,7 +1403,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
             Collections.sort(pictures, TtUtils.Media.PictureTimeComparator);
 
             for (int i = 0; i <pictures.size(); i++) {
-                if (!Global.getOrCreateMAL().insertMedia(pictures.get(i))) {
+                if (!TtAppCtx.getOrCreateMAL().insertMedia(pictures.get(i))) {
                     pictures.remove(i--);
                     error++;
                 }
@@ -1454,12 +1449,12 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
             mediaLoaded = false;
 
             if (point != null) {
-                if (Global.hasMAL()) {
+                if (TtAppCtx.hasMAL()) {
                     if (loadPoints) {
                         mediaCount = 0;
                         mediaSelectionIndex = INVALID_INDEX;
 
-                        ArrayList<TtImage> pictures = Global.getOrCreateMAL().getImagesInPoint(point.getCN());
+                        ArrayList<TtImage> pictures = TtAppCtx.getOrCreateMAL().getImagesInPoint(point.getCN());
 
                         Collections.sort(pictures, TtUtils.Media.PictureTimeComparator);
                         for (final TtImage p : pictures) {
@@ -1469,7 +1464,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                         if (mediaCount > 0)
                             mediaSelectionIndex = 0;
                     } else {
-                        mediaCount = Global.getOrCreateMAL().getItemsCount(
+                        mediaCount = TtAppCtx.getOrCreateMAL().getItemsCount(
                                 TwoTrailsMediaSchema.Media.TableName,
                                 TwoTrailsMediaSchema.Media.PointCN,
                                 point.getCN());
@@ -1488,7 +1483,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
     private void loadImageToList(final TtImage picture) {
         mediaCount++;
 
-        Global.getOrCreateMAL().loadImage(picture, new MediaAccessLayer.SimpleMalListener() {
+        TtAppCtx.getOrCreateMAL().loadImage(picture, new MediaAccessLayer.SimpleMalListener() {
             @Override
             public void imageLoaded(TtImage image, View view, Bitmap bitmap) {
                 addImageToList(picture, true, bitmap);

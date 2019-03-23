@@ -25,13 +25,13 @@ import com.usda.fmsc.android.dialogs.NumericInputDialog;
 import com.usda.fmsc.android.listeners.ComplexOnPageChangeListener;
 import com.usda.fmsc.geospatial.UomElevation;
 import com.usda.fmsc.geospatial.nmea.INmeaBurst;
+import com.usda.fmsc.twotrails.TwoTrailApp;
 import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.data.TwoTrailsSchema;
 import com.usda.fmsc.twotrails.dialogs.EditableListDialog;
 import com.usda.fmsc.twotrails.fragments.AnimationCardFragment;
 import com.usda.fmsc.twotrails.fragments.metadata.MetadataFragment;
-import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.logic.PolygonAdjuster;
@@ -52,6 +52,8 @@ import com.usda.fmsc.utilities.StringEx;
 
 public class MetadataActivity extends CustomToolbarActivity {
     private HashMap<String, Listener> listeners;
+
+    TwoTrailApp TtAppCtx;
 
     private GpsService.Listener listener;
 
@@ -99,6 +101,9 @@ public class MetadataActivity extends CustomToolbarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        TtAppCtx = getTtAppContext();
+
         setContentView(R.layout.activity_metadata);
 
         listeners = new HashMap<>();
@@ -222,7 +227,7 @@ public class MetadataActivity extends CustomToolbarActivity {
                 break;
             }
             case R.id.metaMenuDefault: {
-                Global.Settings.MetaDataSetting.setDefaultMetadata(_CurrentMetadata);
+                TtAppCtx.getMetadataSettings().setDefaultMetadata(_CurrentMetadata);
                 Toast.makeText(this, String.format("%s saved as default.", _CurrentMetadata.getName()), Toast.LENGTH_SHORT).show();
                 break;
             }
@@ -298,9 +303,9 @@ public class MetadataActivity extends CustomToolbarActivity {
 
         int metaCount = TtAppCtx.getDAL().getItemCount(TwoTrailsSchema.MetadataSchema.TableName);
 
-        TtMetadata newMetadata = Global.Settings.MetaDataSetting.getDefaultmetaData();
+        TtMetadata newMetadata = TtAppCtx.getMetadataSettings().getDefaultMetadata();
         newMetadata.setCN(java.util.UUID.randomUUID().toString());
-        newMetadata.setName(String.format("Meta %d", metaCount + 1));
+        newMetadata.setName(StringEx.format("Meta %d", metaCount + 1));
         TtAppCtx.getDAL().insertMetadata(newMetadata);
 
         addedMeta = newMetadata.getCN();
@@ -551,17 +556,15 @@ public class MetadataActivity extends CustomToolbarActivity {
                         public void onClick(View view) {
 
                             if (TtAppCtx.getDeviceSettings().isGpsConfigured()) {
-                                final GpsService.GpsBinder binder = Global.getGpsBinder();
-
                                 gotNmea = false;
 
-                                binder.startGps();
+                                TtAppCtx.getGps().startGps();
 
                                 listener = new GpsService.Listener() {
                                     @Override
                                     public void nmeaBurstReceived(INmeaBurst nmeaBurst) {
                                         if (!TtAppCtx.getDeviceSettings().isGpsAlwaysOn()) {
-                                            binder.stopGps();
+                                            TtAppCtx.getGps().stopGps();
                                         }
 
                                         inputDialog.getInput().setText(StringEx.toString(nmeaBurst.getTrueUTM().getZone()));
@@ -569,7 +572,7 @@ public class MetadataActivity extends CustomToolbarActivity {
                                         gotNmea = true;
 
                                         if (listener != null) {
-                                            binder.removeListener(listener);
+                                            TtAppCtx.getGps().addListener(listener);
                                         }
                                     }
 
@@ -606,16 +609,16 @@ public class MetadataActivity extends CustomToolbarActivity {
                                     @Override
                                     public void gpsError(GpsService.GpsError error) {
                                         if (!TtAppCtx.getDeviceSettings().isGpsAlwaysOn()) {
-                                            binder.stopGps();
+                                            TtAppCtx.getGps().stopGps();
                                         }
 
                                         if (listener != null) {
-                                            binder.removeListener(listener);
+                                            TtAppCtx.getGps().addListener(listener);
                                         }
                                     }
                                 };
 
-                                binder.addListener(listener);
+                                TtAppCtx.getGps().addListener(listener);
 
                                 final Handler mHandler = new Handler();
 
@@ -625,7 +628,7 @@ public class MetadataActivity extends CustomToolbarActivity {
                                             Thread.sleep(10000);
 
                                             if (!TtAppCtx.getDeviceSettings().isGpsAlwaysOn()) {
-                                                binder.stopGps();
+                                                TtAppCtx.getGps().stopGps();
                                             }
 
                                             if (!gotNmea) {

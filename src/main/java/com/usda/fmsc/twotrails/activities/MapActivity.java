@@ -1,5 +1,6 @@
 package com.usda.fmsc.twotrails.activities;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.view.Menu;
@@ -12,7 +13,6 @@ import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.activities.base.BaseMapActivity;
-import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment;
 import com.usda.fmsc.twotrails.R;
 
@@ -21,6 +21,7 @@ import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.geospatial.utm.UTMTools;
 import com.usda.fmsc.utilities.StringEx;
 
+@SuppressLint("RestrictedApi")
 public class MapActivity extends BaseMapActivity {
     private TextView tvLocX, tvLocY, tvLocZone, tvLocXType, tvLocYType, tvZoneLbl;
     private FloatingActionButton fabMyPos;
@@ -50,7 +51,7 @@ public class MapActivity extends BaseMapActivity {
         setDisplayLocInfoVisible();
 
         if (TtAppCtx.getDeviceSettings().isGpsConfigured() && shouldStartGps()) {
-            Global.getGpsBinder().startGps();
+            TtAppCtx.getGps().startGps();
         }
 
         created = true;
@@ -132,7 +133,7 @@ public class MapActivity extends BaseMapActivity {
         GeoPosition lastPosition = getLastPosition();
 
         if (lastPosition == null) {
-            lastPosition = Global.getGpsBinder().getLastPosition();
+            lastPosition = TtAppCtx.getGps().getLastPosition();
         }
 
         if (lastPosition != null) {

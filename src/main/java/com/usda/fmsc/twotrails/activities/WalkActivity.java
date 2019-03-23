@@ -26,7 +26,6 @@ import com.usda.fmsc.android.widget.SheetLayoutEx;
 import com.usda.fmsc.android.widget.drawables.AnimationDrawableEx;
 import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.twotrails.Consts;
-import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.activities.base.AcquireGpsMapActivity;
 import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
 import com.usda.fmsc.twotrails.R;
@@ -267,7 +266,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
 
         switch (requestCode) {
             case Consts.Codes.Activites.SETTINGS: {
-                Global.getGpsBinder().startGps();
+                TtAppCtx.getGps().startGps();
                 getSettings();
                 break;
             }
@@ -478,7 +477,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
             }
         }
 
-        Global.TtNotifyManager.showPointAquired();
+        TtAppCtx.getTtNotifyManager().showPointAquired();
 
         addPosition(_CurrentPoint, getLastPosition() != null);
     }
@@ -518,7 +517,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
 
         setStartWalkingDrawable(true);
 
-        Global.TtNotifyManager.startWalking();
+        TtAppCtx.getTtNotifyManager().startWalking();
     }
 
     @Override
@@ -537,7 +536,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
 
         setStartWalkingDrawable(false);
 
-        Global.TtNotifyManager.stopWalking();
+        TtAppCtx.getTtNotifyManager().stopWalking();
     }
 
     @Override

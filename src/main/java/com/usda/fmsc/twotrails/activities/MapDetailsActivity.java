@@ -107,7 +107,7 @@ public class MapDetailsActivity extends CustomToolbarActivity {
                                 .setPositiveButton(R.string.str_delete, new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
-                                        ArcGISTools.deleteMapLayer(MapDetailsActivity.this, arcGisMapLayer.getId(), true, new IListener() {
+                                        TtAppCtx.getArcGISTools().deleteMapLayer(MapDetailsActivity.this, arcGisMapLayer.getId(), true, new IListener() {
                                             @Override
                                             public void onEventTriggerd(Object o) {
                                                 setUpdated(false);
@@ -203,7 +203,7 @@ public class MapDetailsActivity extends CustomToolbarActivity {
             i.putExtra(Consts.Codes.Data.MAP_DATA, arcGisMapLayer);
             setResult(Consts.Codes.Results.MAP_UPDATED, i);
 
-            ArcGISTools.updateMapLayer(arcGisMapLayer);
+            TtAppCtx.getArcGISTools().updateMapLayer(arcGisMapLayer);
         }
 
         super.finish();
@@ -263,7 +263,7 @@ public class MapDetailsActivity extends CustomToolbarActivity {
             }
         } else {
             if (overwrites[0] || overwrites[1] || overwrites[2]) {
-                ArcGISTools.getLayerFromUrl(arcGisMapLayer.getUrl(), MapDetailsActivity.this, new ArcGISTools.IGetArcMapLayerListener() {
+                TtAppCtx.getArcGISTools().getLayerFromUrl(arcGisMapLayer.getUrl(), MapDetailsActivity.this, new ArcGISTools.IGetArcMapLayerListener() {
                     @Override
                     public void onComplete(ArcGisMapLayer layer) {
                         if (overwrites[0]) {

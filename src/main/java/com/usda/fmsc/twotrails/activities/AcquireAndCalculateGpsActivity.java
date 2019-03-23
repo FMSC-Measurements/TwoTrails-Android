@@ -26,7 +26,7 @@ import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.geospatial.nmea.sentences.GGASentence;
 import com.usda.fmsc.geospatial.nmea.sentences.GSASentence;
 import com.usda.fmsc.twotrails.Consts;
-import com.usda.fmsc.twotrails.Global;
+import com.usda.fmsc.twotrails.DeviceSettings;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.activities.base.AcquireGpsMapActivity;
 import com.usda.fmsc.twotrails.gps.GpsService;
@@ -155,10 +155,12 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
             btnCalc.setBackgroundColor(AndroidUtils.UI.getColor(this, R.color.primaryLighter));
         }
 
-        options.Fix = TtAppCtx.getDeviceSettings().getGpsFilterFix();
-        options.DopType = TtAppCtx.getDeviceSettings().getGpsFilterDopType();
-        options.DopValue = TtAppCtx.getDeviceSettings().getGpsFilterDopValue();
-        options.FixType = TtAppCtx.getDeviceSettings().getGpsFilterFixType();
+        DeviceSettings ds = TtAppCtx.getDeviceSettings();
+
+        options.Fix = ds.getGpsFilterFix();
+        options.DopType = ds.getGpsFilterDopType();
+        options.DopValue = ds.getGpsFilterDopValue();
+        options.FixType = ds.getGpsFilterFixType();
 
         btnCreate = findViewById(R.id.calcBtnCreate);
 
@@ -804,7 +806,7 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
         GeoPosition lastPosition = getLastPosition();
 
         if (lastPosition == null) {
-            lastPosition = Global.getGpsBinder().getLastPosition();
+            lastPosition = TtAppCtx.getGps().getLastPosition();
         }
 
         if (lastPosition != null) {

@@ -6,7 +6,7 @@ import com.usda.fmsc.geospatial.UomElevation;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.geospatial.utm.UTMTools;
 import com.usda.fmsc.twotrails.Consts;
-import com.usda.fmsc.twotrails.Global;
+import com.usda.fmsc.twotrails.TwoTrailApp;
 import com.usda.fmsc.twotrails.units.Dist;
 import com.usda.fmsc.twotrails.units.OpType;
 import com.usda.fmsc.twotrails.units.Slope;
@@ -313,8 +313,8 @@ public class Import {
                     if (hasGroups) {
                         temp = record.get(fGroupName);
 
-                        if (temp.equals(Global.getMainGroup().getName())) {
-                            tempGroup = Global.getMainGroup();
+                        if (temp.equals(Consts.Defaults.MainGroupName)) {
+                            tempGroup = TwoTrailApp.getContext().getDAL().getGroupByCN(Consts.EmptyGuid);
                         } else if (!groupNameToCN.containsKey(temp)) {
                             tempGroup = new TtGroup(temp);
                             groupNameToCN.put(tempGroup.getName(), tempGroup.getCN());
@@ -323,7 +323,7 @@ public class Import {
                             tempGroup = groups.get(groupNameToCN.get(temp));
                         }
                     } else if (tempGroup == null) {
-                        tempGroup = Global.getMainGroup();
+                        tempGroup = TwoTrailApp.getContext().getDAL().getGroupByCN(Consts.EmptyGuid);
                     }
 
                     point.setGroupCN(tempGroup.getCN());
@@ -720,8 +720,8 @@ public class Import {
                         point.setPolyCN(poly.getCN());
                         point.setPolyName(poly.getName());
 
-                        point.setGroupCN(Global.getMainGroup().getCN());
-                        point.setGroupName(Global.getMainGroup().getName());
+                        point.setGroupCN(Consts.EmptyGuid);
+                        point.setGroupName(Consts.Defaults.MainGroupName);
 
                         point.setMetadataCN(gpp.Metadata.getCN());
 
@@ -899,8 +899,8 @@ public class Import {
                         point.setPolyCN(poly.getCN());
                         point.setPolyName(poly.getName());
 
-                        point.setGroupCN(Global.getMainGroup().getCN());
-                        point.setGroupName(Global.getMainGroup().getName());
+                        point.setGroupCN(Consts.EmptyGuid);
+                        point.setGroupName(Consts.Defaults.MainGroupName);
 
                         point.setMetadataCN(gpp.Metadata.getCN());
 

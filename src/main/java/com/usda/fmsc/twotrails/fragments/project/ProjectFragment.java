@@ -6,36 +6,39 @@ import android.preference.EditTextPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 
-import com.usda.fmsc.twotrails.Global;
+import com.usda.fmsc.twotrails.ProjectSettings;
 import com.usda.fmsc.twotrails.R;
+import com.usda.fmsc.twotrails.TwoTrailApp;
 
 
 public class ProjectFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
+    private TwoTrailApp TtAppCtx;
 
     public static ProjectFragment newInstance() {
         return new ProjectFragment();
     }
 
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
+        TtAppCtx = TwoTrailApp.getContext();
 
         addPreferencesFromResource(R.xml.project_settings);
 
-        EditTextPreference editTextPref = (EditTextPreference) findPreference(TtAppCtx.getProjectSettings().PROJECT_ID);
+        EditTextPreference editTextPref = (EditTextPreference) findPreference(ProjectSettings.PROJECT_ID);
         editTextPref.setSummary(TtAppCtx.getDAL().getProjectID());
 
-        editTextPref = (EditTextPreference) findPreference(TtAppCtx.getProjectSettings().DESCRIPTION);
+        editTextPref = (EditTextPreference) findPreference(ProjectSettings.DESCRIPTION);
         editTextPref.setSummary(TtAppCtx.getDAL().getProjectDescription());
 
-        editTextPref = (EditTextPreference) findPreference(TtAppCtx.getProjectSettings().DISTRICT);
+        editTextPref = (EditTextPreference) findPreference(ProjectSettings.DISTRICT);
         editTextPref.setSummary(TtAppCtx.getProjectSettings().getDistrict());
 
-        editTextPref = (EditTextPreference) findPreference(TtAppCtx.getProjectSettings().FOREST);
+        editTextPref = (EditTextPreference) findPreference(ProjectSettings.FOREST);
         editTextPref.setSummary(TtAppCtx.getProjectSettings().getForest());
 
-        editTextPref = (EditTextPreference) findPreference(TtAppCtx.getProjectSettings().REGION);
+        editTextPref = (EditTextPreference) findPreference(ProjectSettings.REGION);
         editTextPref.setSummary(TtAppCtx.getProjectSettings().getRegion());
     }
 
@@ -65,19 +68,19 @@ public class ProjectFragment extends PreferenceFragment implements SharedPrefere
         }
 
         switch (key) {
-            case TtAppCtx.getProjectSettings().PROJECT_ID:
+            case ProjectSettings.PROJECT_ID:
                 TtAppCtx.getDAL().setProjectID(value);
                 break;
-            case TtAppCtx.getProjectSettings().DESCRIPTION:
+            case ProjectSettings.DESCRIPTION:
                 TtAppCtx.getDAL().setProjectDescription(value);
                 break;
-            case TtAppCtx.getProjectSettings().DISTRICT:
+            case ProjectSettings.DISTRICT:
                 TtAppCtx.getDAL().setProjectDistrict(value);
                 break;
-            case TtAppCtx.getProjectSettings().FOREST:
+            case ProjectSettings.FOREST:
                 TtAppCtx.getDAL().setProjectForest(value);
                 break;
-            case TtAppCtx.getProjectSettings().REGION:
+            case ProjectSettings.REGION:
                 TtAppCtx.getDAL().setProjectRegion(value);
                 break;
         }

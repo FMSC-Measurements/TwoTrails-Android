@@ -23,7 +23,6 @@ import com.usda.fmsc.utilities.StringEx;
 public class GetDirectionActivity extends CustomToolbarActivity implements CameraFragment.CameraListener {
     private TtCameraFragment cameraFragment;
 
-    private Button btnAqr;
     private View cameraView;
     private EditText txtAzimuth, txtRoll, txtPitch;
     private boolean _canceled = true, updating;
@@ -51,7 +50,7 @@ public class GetDirectionActivity extends CustomToolbarActivity implements Camer
         txtRoll = findViewById(R.id.gdTxtRoll);
         txtPitch = findViewById(R.id.gdTxtPitch);
 
-        btnAqr = findViewById(R.id.gdBtnAcquire);
+        Button btnAqr = findViewById(R.id.gdBtnAcquire);
         if (!AndroidUtils.Device.isFullOrientationAvailable(this)) {
             btnAqr.setEnabled(false);
             btnAqr.setAlpha(Consts.DISABLED_ALPHA);

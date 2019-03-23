@@ -1,5 +1,6 @@
 package com.usda.fmsc.twotrails.activities;
 
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -13,21 +14,25 @@ import com.usda.fmsc.geospatial.GeoPosition;
 import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
 import com.usda.fmsc.twotrails.Consts;
-import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
+import com.usda.fmsc.twotrails.TwoTrailApp;
 import com.usda.fmsc.twotrails.fragments.map.ArcGisMapFragment;
 import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
 import com.usda.fmsc.twotrails.utilities.ArcGISTools;
 import com.usda.fmsc.twotrails.utilities.DownloadOfflineArcGISMapTask;
+import com.usda.fmsc.twotrails.utilities.TtUtils;
 import com.usda.fmsc.utilities.FileUtils;
 import com.usda.fmsc.utilities.StringEx;
 
 import java.io.File;
 
+@SuppressLint("RestrictedApi")
 public class GetMapExtentsActivity extends AppCompatActivity implements GpsService.Listener {
     public static final String MAP_LAYER = "MapLayer";
+
+    private TwoTrailApp TtAppCtx;
 
     private ArcGisMapFragment fragment;
     private ArcGisMapLayer agml = null;
@@ -46,6 +51,9 @@ public class GetMapExtentsActivity extends AppCompatActivity implements GpsServi
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        TtAppCtx = TwoTrailApp.getContext();
+
         setContentView(R.layout.activity_get_map_extents);
 
         setResult(RESULT_CANCELED);
@@ -72,7 +80,7 @@ public class GetMapExtentsActivity extends AppCompatActivity implements GpsServi
                         fragment.getArcExtents(),
                         fragment.getSpatialReference(),
                         null,
-                        ArcGISTools.getCredentials(GetMapExtentsActivity.this));
+                        TtAppCtx.getArcGISTools().getCredentials(GetMapExtentsActivity.this));
 
                 task.getMapServiceInfo(new DownloadOfflineArcGISMapTask.ServiceInfoListener() {
                     @Override
@@ -125,12 +133,8 @@ public class GetMapExtentsActivity extends AppCompatActivity implements GpsServi
         getSupportFragmentManager().beginTransaction().add(R.id.mapContainer, fragment).commit();
 
         if (TtAppCtx.getDeviceSettings().isGpsConfigured()) {
-            binder = Global.getGpsBinder();
-
-            if (binder != null) {
-                binder.startGps();
-                binder.addListener(this);
-            }
+            TtAppCtx.getGps().startGps();
+            TtAppCtx.getGps().addListener(this);
         }
     }
 
@@ -181,7 +185,7 @@ public class GetMapExtentsActivity extends AppCompatActivity implements GpsServi
             progressDialog.setMessage("Estimating Map Size");
             progressDialog.show();
 
-            String omapDir = Global.getOfflineMapsDir();
+            String omapDir = TtUtils.getOfflineMapsDir();
             File dir = new File(omapDir);
 
             if (!dir.exists()) {
@@ -193,7 +197,7 @@ public class GetMapExtentsActivity extends AppCompatActivity implements GpsServi
             int inc = 1;
 
             while (FileUtils.fileExists(fileLocation)) {
-                fileLocation = String.format("%s%s%s(%d).tpk", Global.getOfflineMapsDir(), File.separator, StringEx.sanitizeForFile(agml.getName()), ++inc);
+                fileLocation = String.format("%s%s%s(%d).tpk", TtUtils.getOfflineMapsDir(), File.separator, StringEx.sanitizeForFile(agml.getName()), ++inc);
             }
 
             int level = fragment.getMapZoomLevel();
@@ -209,7 +213,7 @@ public class GetMapExtentsActivity extends AppCompatActivity implements GpsServi
                     //fragment.getArcExtentsFromScreen(location[0], location[1], location[2], location[3]),
                     fragment.getSpatialReference(),
                     fileLocation,
-                    ArcGISTools.getCredentials(GetMapExtentsActivity.this), level, 5);
+                    TtAppCtx.getArcGISTools().getCredentials(GetMapExtentsActivity.this), level, 5);
 
             task.estimateMapSize(new DownloadOfflineArcGISMapTask.EstimateListener() {
                 @Override
@@ -247,7 +251,7 @@ public class GetMapExtentsActivity extends AppCompatActivity implements GpsServi
                                 .setPositiveButton("Download", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
-                                        ArcGISTools.startOfflineMapDownload(task);
+                                        TtAppCtx.getArcGISTools().startOfflineMapDownload(task);
                                         GetMapExtentsActivity.this.setResult(Consts.Codes.Results.DOWNLOADING_MAP);
                                         GetMapExtentsActivity.this.finish();
                                     }

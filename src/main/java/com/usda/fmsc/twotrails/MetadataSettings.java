@@ -139,7 +139,7 @@ public class MetadataSettings extends Settings {
     }
     //endregion
 
-    public TtMetadata getDefaultmetaData() {
+    public TtMetadata getDefaultMetadata() {
         TtMetadata meta = new TtMetadata();
 
         String tmp;

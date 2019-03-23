@@ -32,8 +32,8 @@ import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
 import com.usda.fmsc.twotrails.Consts;
-import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
+import com.usda.fmsc.twotrails.TwoTrailApp;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
 import com.usda.fmsc.twotrails.objects.map.ArcGisPolygonGraphic;
@@ -53,6 +53,8 @@ import java.util.ArrayList;
 
 public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, GpsService.Listener, OnStatusChangedListener, OnZoomListener, OnPanListener {
     private static final String START_ARC_OPTIONS = "StartupArcOptions";
+    
+    private TwoTrailApp TtAppCtx;
 
     private static final int TOLERANCE = 30;
 
@@ -112,6 +114,8 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
+        TtAppCtx = TwoTrailApp.getContext();
 
         inflater = LayoutInflater.from(getContext());
 
@@ -127,8 +131,8 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
             startUpMapOptions = new MapOptions(0, Consts.Location.USA_BOUNDS);
         }
 
-        if (TtAppCtx.getDeviceSettings().isGpsConfigured()) {
-            binder = Global.getGpsBinder();
+        if (TwoTrailApp.getContext().getDeviceSettings().isGpsConfigured()) {
+            binder = TwoTrailApp.getContext().getGps();
             binder.addListener(this);
         }
     }
@@ -218,7 +222,7 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
             if (centerOnLoad) {
 
                 if (startUpMapOptions.hasExtents()) {
-                    Envelope e = ArcGISTools.getEnvelopFromLatLngExtents(
+                    Envelope e = TtAppCtx.getArcGISTools().getEnvelopFromLatLngExtents(
                             startUpMapOptions.getNorth(),
                             startUpMapOptions.getEast(),
                             startUpMapOptions.getSouth(),
@@ -256,7 +260,7 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
 
 
     private void changeBasemap(int basemapId) {
-        changeBasemap(ArcGISTools.getMapLayer(basemapId));
+        changeBasemap(TtAppCtx.getArcGISTools().getMapLayer(basemapId));
     }
 
     public void changeBasemap(final ArcGisMapLayer agml) {
@@ -265,7 +269,7 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
             mBasemapLayer = null;
         } else {
             try {
-                Layer newLayer = ArcGISTools.getBaseLayer(getContext(), agml);
+                Layer newLayer = TtAppCtx.getArcGISTools().getBaseLayer(getContext(), agml);
 
                 if (mBasemapLayer != null)
                     mMapView.removeLayer(mBasemapLayer);
@@ -294,7 +298,7 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
                         @Override
                         public void onCheckInternet(boolean internetAvailable) {
                             if (internetAvailable) {
-                                ArcGISTools.getLayerFromUrl(agml.getUrl(), getActivity(), new ArcGISTools.IGetArcMapLayerListener() {
+                                TtAppCtx.getArcGISTools().getLayerFromUrl(agml.getUrl(), getActivity(), new ArcGISTools.IGetArcMapLayerListener() {
                                     @Override
                                     public void onComplete(ArcGisMapLayer layer) {
                                         boolean updated = false;
@@ -311,7 +315,7 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
                                         }
 
                                         if (updated) {
-                                            ArcGISTools.updateMapLayer(agml);
+                                            TtAppCtx.getArcGISTools().updateMapLayer(agml);
 
                                             if (currentGisMapLayer.getId() == agml.getId()) {
                                                 currentGisMapLayer = agml;
@@ -370,7 +374,7 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
                 }
 
                 if (zoomLevel > -1) {
-                    mMapView.zoomToScale(ArcGISTools.latLngToMapSpatial(lat, lon, mMapView), zoomLevel);
+                    mMapView.zoomToScale(TtAppCtx.getArcGISTools().latLngToMapSpatial(lat, lon, mMapView), zoomLevel);
                 } else {
                     mMapView.centerAt(lat, lon, true);
                 }
@@ -383,7 +387,7 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
     @Override
     public void moveToLocation(Extent extents, int padding, boolean animate) {
         if (mMapView != null) {
-            mMapView.setExtent(ArcGISTools.getEnvelopFromLatLngExtents(extents, mMapView), padding, animate);
+            mMapView.setExtent(TtAppCtx.getArcGISTools().getEnvelopFromLatLngExtents(extents, mMapView), padding, animate);
         }
     }
 
@@ -418,7 +422,7 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
 
     @Override
     public Position getLatLon() {
-        Point point = ArcGISTools.pointToLatLng(mMapView.getCenter(), mMapView);
+        Point point = TtAppCtx.getArcGISTools().pointToLatLng(mMapView.getCenter(), mMapView);
 
         return new Position(point.getY(), point.getX());
     }
@@ -428,8 +432,8 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
         Polygon polygon = mMapView.getExtent();
 
         if (polygon != null) {
-            Point ne = ArcGISTools.pointToLatLng(polygon.getPoint(1), mMapView);
-            Point sw = ArcGISTools.pointToLatLng(polygon.getPoint(3), mMapView);
+            Point ne = TtAppCtx.getArcGISTools().pointToLatLng(polygon.getPoint(1), mMapView);
+            Point sw = TtAppCtx.getArcGISTools().pointToLatLng(polygon.getPoint(3), mMapView);
 
             return new Extent(sw.getY(), ne.getX(), ne.getY(), sw.getX());
         }
@@ -476,8 +480,8 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
 
 
     public Extent getExtentsFromScreen(int xmin, int ymin, int xmax, int ymax) {
-        Point ne = ArcGISTools.pointToLatLng(getMapPoint(xmin, ymin), mMapView);
-        Point sw = ArcGISTools.pointToLatLng(getMapPoint(xmax, ymax), mMapView);
+        Point ne = TtAppCtx.getArcGISTools().pointToLatLng(getMapPoint(xmin, ymin), mMapView);
+        Point sw = TtAppCtx.getArcGISTools().pointToLatLng(getMapPoint(xmax, ymax), mMapView);
 
         return new Extent(sw.getX(), ne.getY(), ne.getX(), sw.getY());
     }
@@ -498,7 +502,7 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
 
             if (mmListener.shouldStartGps()) {
                 if (binder == null)
-                    binder = Global.getGpsBinder();
+                    binder = TwoTrailApp.getContext().getGps();
                 binder.startGps();
             }
         }
@@ -613,7 +617,7 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
     @Override
     public void nmeaBurstReceived(INmeaBurst nmeaBurst) {
         if (showPosition && nmeaBurst.hasPosition() && mMapView != null) {
-            Point point = ArcGISTools.latLngToMapSpatial(nmeaBurst.getLatitude(), nmeaBurst.getLongitude(), mMapView);
+            Point point = TtAppCtx.getArcGISTools().latLngToMapSpatial(nmeaBurst.getLatitude(), nmeaBurst.getLongitude(), mMapView);
 
             if (locationLayer != null) {
                 Layer[] layers = mMapView.getLayers();
@@ -735,7 +739,7 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
             }
 
             if (!infoDisplayed && mmListener != null) {
-                Point pointLL = ArcGISTools.pointToLatLng(point.getX(), point.getY(), mMapView);
+                Point pointLL = TtAppCtx.getArcGISTools().pointToLatLng(point.getX(), point.getY(), mMapView);
 
                 mmListener.onMapClick(new Position(pointLL.getY(), pointLL.getX()));
             }

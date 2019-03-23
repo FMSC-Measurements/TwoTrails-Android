@@ -19,8 +19,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.usda.fmsc.android.AndroidUtils;
+import com.usda.fmsc.twotrails.TwoTrailApp;
 import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
-import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.logic.HaidLogic;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
@@ -257,7 +257,7 @@ public class HaidActivity extends CustomToolbarActivity {
 
         @Override
         protected String doInBackground(PolyInfoParams... params) {
-            return HaidLogic.generatePolyStats(params[0].polygon, TtAppCtx.getDAL(), params[0].isShowingPoints(), false);
+            return HaidLogic.generatePolyStats(params[0].polygon, TwoTrailApp.getContext().getDAL(), params[0].isShowingPoints(), false);
         }
 
         @Override

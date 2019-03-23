@@ -112,7 +112,7 @@ public class ArcGisLoginActivity extends CustomToolbarActivity {
 
                 //todo check to see if credentials are valid
 
-                if (!ArcGISTools.saveCredentials(ArcGisLoginActivity.this, credentials)) {
+                if (!TtAppCtx.getArcGISTools().saveCredentials(ArcGisLoginActivity.this, credentials)) {
                     Toast.makeText(ArcGisLoginActivity.this, "Unable to save Credentials", Toast.LENGTH_LONG).show();
                 } else {
                     setResult(RESULT_OK);

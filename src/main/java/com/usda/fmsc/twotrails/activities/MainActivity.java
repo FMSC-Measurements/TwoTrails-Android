@@ -26,7 +26,6 @@ import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.dialogs.InputDialog;
 import com.usda.fmsc.twotrails.BuildConfig;
 import com.usda.fmsc.twotrails.Consts;
-import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.TwoTrailApp;
 import com.usda.fmsc.twotrails.activities.base.TtAjusterCustomToolbarActivity;
@@ -61,14 +60,10 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
     private String tmpFile;
 
-    private TwoTrailApp TtAppCtx;
-
     //region Main Activity Functions
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        TtAppCtx = getTtAppContext();
 
 //        TtAppCtx.init(getApplicationContext());
 
@@ -415,7 +410,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
                 if (!FileUtils.fileExists(filePath)) {
                     createFile(filePath);
                 } else {
-                    TtAppCtx.setDAL(new DataAccessLayer(filePath));
+                    TtAppCtx.setDAL(new DataAccessLayer(filePath, TtAppCtx));
 
                     if (TtAppCtx.getDAL().getVersion().toIntVersion() < TwoTrailsSchema.SchemaVersion.toIntVersion()) {
                         switch (DataAccessUpgrader.UpgradeDAL(TtAppCtx.getDAL())) {
@@ -486,7 +481,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
         }
 
         try {
-            TtAppCtx.setDAL(new DataAccessLayer(filePath));
+            TtAppCtx.setDAL(new DataAccessLayer(filePath, TtAppCtx));
 
             TtAppCtx.getProjectSettings().initProjectSettings(TtAppCtx.getDAL());
 
@@ -572,7 +567,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
                 String value = inputDialog.getText().trim();
 
                 if (value.length() > 0) {
-                    String filePath = Global.getTtFilePath(value);
+                    String filePath = TtUtils.getTtFilePath(value);
 
                     if (FileUtils.fileExists(filePath)) {
                         OverwriteFileDialog(filePath);
@@ -800,7 +795,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
             } else {
                 progressLayout.setVisibility(View.VISIBLE);
 
-                String kmlPath = Export.kml(TtAppCtx.getDAL(), Global.getTtFileDir());
+                String kmlPath = Export.kml(TtAppCtx.getDAL(), TtUtils.getTtFileDir());
 
                 progressLayout.setVisibility(View.GONE);
 

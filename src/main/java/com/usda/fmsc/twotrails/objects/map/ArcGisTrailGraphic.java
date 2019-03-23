@@ -9,6 +9,7 @@ import com.esri.core.symbol.SimpleLineSymbol;
 import com.esri.core.symbol.SimpleMarkerSymbol;
 import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.geospatial.GeoPosition;
+import com.usda.fmsc.twotrails.TwoTrailApp;
 import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
@@ -88,7 +89,7 @@ public class ArcGisTrailGraphic implements ITrailGraphic, IMarkerDataGraphic {
         TtMetadata metadata = meta.get(point.getMetadataCN());
 
         GeoPosition pos = TtUtils.Points.getLatLonFromPoint(point, false, metadata);
-        Point posLL = ArcGISTools.latLngToMapSpatial(pos.getLatitudeSignedDecimal(), pos.getLongitudeSignedDecimal(), map);
+        Point posLL = TwoTrailApp.getContext().getArcGISTools().latLngToMapSpatial(pos.getLatitudeSignedDecimal(), pos.getLongitudeSignedDecimal(), map);
         Graphic mk = new Graphic(posLL, markerOpts);
 
         String key = Integer.toHexString(_PtsLayer.addGraphic(mk));

@@ -18,8 +18,9 @@ import android.widget.RelativeLayout;
 import com.larswerkman.holocolorpicker.ColorPicker;
 import com.larswerkman.holocolorpicker.ValueBar;
 import com.usda.fmsc.android.AndroidUtils;
-import com.usda.fmsc.twotrails.Global;
+import com.usda.fmsc.twotrails.MapSettings;
 import com.usda.fmsc.twotrails.R;
+import com.usda.fmsc.twotrails.TwoTrailApp;
 
 import java.util.Arrays;
 
@@ -153,17 +154,20 @@ public class PointColorPickerDialog extends DialogFragment {
             @Override
             public void onShow(DialogInterface dialog) {
                 Button button = ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_NEGATIVE);
+
                 button.setOnClickListener(new View.OnClickListener() {
 
                     @Override
                     public void onClick(View view) {
-                        updateColor(0, TtAppCtx.getMapSettings().defaults.getDefaultAdjBndColor());
-                        updateColor(1, TtAppCtx.getMapSettings().defaults.getDefaultAdjNavColor());
-                        updateColor(2, TtAppCtx.getMapSettings().defaults.getDefaultUnAdjBndColor());
-                        updateColor(3, TtAppCtx.getMapSettings().defaults.getDefaultUnAdjNavColor());
-                        updateColor(4, TtAppCtx.getMapSettings().defaults.getDefaultAdjPtsColor());
-                        updateColor(5, TtAppCtx.getMapSettings().defaults.getDefaultUnAdjPtsColor());
-                        updateColor(6, TtAppCtx.getMapSettings().defaults.getDefaultWayPtsColor());
+                        MapSettings ms = TwoTrailApp.getContext().getMapSettings();
+
+                        updateColor(0, ms.getDefaultAdjBndColor());
+                        updateColor(1, ms.getDefaultAdjNavColor());
+                        updateColor(2, ms.getDefaultUnAdjBndColor());
+                        updateColor(3, ms.getDefaultUnAdjNavColor());
+                        updateColor(4, ms.getDefaultAdjPtsColor());
+                        updateColor(5, ms.getDefaultUnAdjPtsColor());
+                        updateColor(6, ms.getDefaultWayPtsColor());
                     }
                 });
             }

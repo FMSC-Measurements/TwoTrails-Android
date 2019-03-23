@@ -21,7 +21,6 @@ import com.usda.fmsc.twotrails.fragments.imprt.BaseImportFragment;
 import com.usda.fmsc.twotrails.fragments.imprt.ImportGpxFragment;
 import com.usda.fmsc.twotrails.fragments.imprt.ImportKmlFragment;
 import com.usda.fmsc.twotrails.fragments.imprt.ImportTextFragment;
-import com.usda.fmsc.twotrails.Global;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.logic.PolygonAdjuster;
 import com.usda.fmsc.twotrails.utilities.Import;
