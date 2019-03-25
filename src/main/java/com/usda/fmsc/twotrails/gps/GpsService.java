@@ -124,11 +124,15 @@ public class GpsService extends Service implements LocationListener, LocationSou
         } else {
             TtUtils.TtReport.writeError("Unable to get preferences", "GpsService:onCreate");
         }
+
+        postServiceStart();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
+
+        postServiceStop();
 
         if (parser != null) {
             parser.removeListener(this);
@@ -188,7 +192,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
             if (status == GpsDeviceStatus.ExternalGpsStarted ||
                     status == GpsDeviceStatus.InternalGpsStarted) {
                 //started
-                TtAppCtx.getTtNotifyManager().setGpsOn();
+                TtAppCtx.getTtNotifyManager().setGpsOn(isExternalGpsUsed());
 
                 if (logging) {
                     writeStartLog();
@@ -196,7 +200,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
             }
         } else {
             status = GpsDeviceStatus.GpsAlreadyStarted;
-            TtAppCtx.getTtNotifyManager().setGpsOn();
+            //TtAppCtx.getTtNotifyManager().setGpsOn(isExternalGpsUsed());
         }
 
         return status;
@@ -205,27 +209,17 @@ public class GpsService extends Service implements LocationListener, LocationSou
     private GpsDeviceStatus stopGps() {
         GpsDeviceStatus status;
 
-        if (!logging) {
-            if (isGpsRunning()) {
-                status = (_deviceUUID == null) ?
-                        stopInternalGps() : stopExternalGps();
-
-                if (status == GpsDeviceStatus.ExternalGpsStopped ||
-                        status == GpsDeviceStatus.InternalGpsStopped) {
-                    //stopped
-                    TtAppCtx.getTtNotifyManager().setGpsOff();
-
-                    if (logging) {
-                        writeEndLog();
-                    }
-                }
-            } else {
-                status = GpsDeviceStatus.GpsAlreadyStopped;
-                TtAppCtx.getTtNotifyManager().setGpsOff();
-            }
-        } else {
-            status = GpsDeviceStatus.GpsServiceInUse;
+        if (logging) {
+            writeEndLog();
         }
+
+        if (isGpsRunning()) {
+            status = (_deviceUUID == null) ? stopInternalGps() : stopExternalGps();
+        } else {
+            status = GpsDeviceStatus.GpsAlreadyStopped;
+        }
+
+        TtAppCtx.getTtNotifyManager().setGpsOff();
 
         return status;
     }
@@ -738,6 +732,8 @@ public class GpsService extends Service implements LocationListener, LocationSou
             GpsService.this.stopGps();
             GpsService.this.stopLogging();
             GpsService.this.stopSelf();
+
+            postServiceStop();
         }
 
         @Override

@@ -126,13 +126,6 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
             tabLayout.setupWithViewPager(mViewPager);
         }
 
-
-        if (AndroidUtils.App.checkBluetoothPermission(TtAppCtx))
-            TtAppCtx.startRangefinderService();
-
-        if (AndroidUtils.App.checkLocationPermission(TtAppCtx))
-            TtAppCtx.startGpsService();
-
         if (TtAppCtx.areFoldersInitiated()) {
             final Intent intent = getIntent();
             final String action = intent.getAction();

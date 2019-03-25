@@ -2,6 +2,9 @@
 <resources>
     <!-- App -->
     <string name="app_name">TwoTrails</string>
+    <string name="app_notify_service_channel_id">TwoTrailsMainAppChannel</string>
+    <string name="app_notify_service_channel_name">TwoTrails Service</string>
+    <string name="app_notify_service_channel_desc">Provides GPS and RangeFinder Information</string>
 
     <!-- Common -->
     <string name="str_ok">OK</string>

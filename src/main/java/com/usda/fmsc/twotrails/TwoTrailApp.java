@@ -15,12 +15,15 @@ import com.esri.android.runtime.ArcGISRuntime;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.usda.fmsc.android.AndroidUtils;
+import com.usda.fmsc.geospatial.nmea.INmeaBurst;
+import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
 import com.usda.fmsc.twotrails.activities.MainActivity;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
 import com.usda.fmsc.twotrails.data.MediaAccessLayer;
 import com.usda.fmsc.twotrails.devices.TtBluetoothManager;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.rangefinder.RangeFinderService;
+import com.usda.fmsc.twotrails.rangefinder.TtRangeFinderData;
 import com.usda.fmsc.twotrails.utilities.ArcGISTools;
 import com.usda.fmsc.twotrails.utilities.TtNotifyManager;
 import com.usda.fmsc.twotrails.utilities.TtReport;
@@ -58,11 +61,55 @@ public class TwoTrailApp extends Application {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             gpsServiceBinder = (GpsService.GpsBinder)service;
+
+            gpsServiceBinder.addListener(new GpsService.Listener() {
+                @Override
+                public void nmeaBurstReceived(INmeaBurst INmeaBurst) {
+
+                }
+
+                @Override
+                public void nmeaStringReceived(String nmeaString) {
+
+                }
+
+                @Override
+                public void nmeaSentenceReceived(NmeaSentence nmeaSentence) {
+
+                }
+
+                @Override
+                public void gpsStarted() {
+
+                }
+
+                @Override
+                public void gpsStopped() {
+
+                }
+
+                @Override
+                public void gpsServiceStarted() {
+                    if (getDeviceSettings().isGpsAlwaysOn()) {
+                        getGps().startGps();
+                    }
+                }
+
+                @Override
+                public void gpsServiceStopped() {
+                    //gpsServiceBinder = null;
+                }
+
+                @Override
+                public void gpsError(GpsService.GpsError error) {
+
+                }
+            });
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-
+            gpsServiceBinder = null;
         }
     };
 
@@ -70,11 +117,53 @@ public class TwoTrailApp extends Application {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             rfServiceBinder = (RangeFinderService.RangeFinderBinder)service;
+
+            rfServiceBinder.addListener(new RangeFinderService.Listener() {
+                @Override
+                public void rfDataReceived(TtRangeFinderData rfData) {
+
+                }
+
+                @Override
+                public void rfStringReceived(String rfString) {
+
+                }
+
+                @Override
+                public void rfInvalidStringReceived(String rfString) {
+
+                }
+
+                @Override
+                public void rangeFinderStarted() {
+
+                }
+
+                @Override
+                public void rangeFinderStopped() {
+
+                }
+
+                @Override
+                public void rangeFinderServiceStarted() {
+
+                }
+
+                @Override
+                public void rangeFinderServiceStopped() {
+                    //rfServiceBinder = null;
+                }
+
+                @Override
+                public void rangeFinderError(RangeFinderService.RangeFinderError error) {
+
+                }
+            });
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-
+            rfServiceBinder = null;
         }
     };
 
@@ -233,21 +322,34 @@ public class TwoTrailApp extends Application {
             public void onResume(Activity activity) {
                 Log.d(Consts.LOG_TAG, "Resume: (" + activity.getClass().getSimpleName() + ")" + activity.getClass().getName());
 
+                if (activity instanceof MainActivity) {
+                    if (!AndroidUtils.App.isServiceRunning(_AppContext, GpsService.class)) {
+                        startGpsService();
+                    } else {
+                        gpsServiceBinder.startGps();
+                    }
+
+                    if (!AndroidUtils.App.isServiceRunning(_AppContext, RangeFinderService.class)) {
+                        startRangefinderService();
+                    }
+                }
             }
 
             @Override
             public void onDestroyed(Activity activity) {
                 Log.d(Consts.LOG_TAG, "Destroyed: (" + activity.getClass().getSimpleName() + ")" + activity.getClass().getName());
 
-                if (activity.getClass().isInstance(MainActivity.class)) {
+                if (activity instanceof MainActivity) {
                     if (gpsServiceBinder != null) {
                         gpsServiceBinder.stopService();
-                        gpsServiceBinder = null;
+                        stopService(new Intent(_AppContext, GpsService.class));
+                        //gpsServiceBinder = null;
                     }
 
                     if (rfServiceBinder != null) {
                         rfServiceBinder.stopService();
-                        rfServiceBinder = null;
+                        stopService(new Intent(_AppContext, RangeFinderService.class));
+                        //rfServiceBinder = null;
                     }
 
                     if (Report != null) {
@@ -291,15 +393,17 @@ public class TwoTrailApp extends Application {
 
 
     public void startGpsService() {
-        if (AndroidUtils.App.checkLocationPermission(this)) {
+        if (gpsServiceBinder == null && AndroidUtils.App.checkLocationPermission(this)) {
             this.startService(new Intent(this, GpsService.class));
             this.bindService(new Intent(this, GpsService.class), gpsServiceConnection, Context.BIND_AUTO_CREATE);
         }
     }
 
     public void startRangefinderService() {
-        this.startService(new Intent(this, RangeFinderService.class));
-        this.bindService(new Intent(this, RangeFinderService.class), rfServiceConnection, Context.BIND_AUTO_CREATE);
+        if (rfServiceBinder == null && AndroidUtils.App.checkBluetoothPermission(this)) {
+            this.startService(new Intent(this, RangeFinderService.class));
+            this.bindService(new Intent(this, RangeFinderService.class), rfServiceConnection, Context.BIND_AUTO_CREATE);
+        }
     }
 
 

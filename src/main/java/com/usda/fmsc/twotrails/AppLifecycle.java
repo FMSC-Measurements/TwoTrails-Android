@@ -139,7 +139,7 @@ public class AppLifecycle implements Application.ActivityLifecycleCallbacks {
             try {
                 l.onResume(activity);
             } catch (Exception exc) {
-                Log.e(TAG, "Listener threw exception!", exc);
+                Log.e(TAG, "onActivityResumed threw exception!", exc);
             }
         }
 
@@ -149,7 +149,7 @@ public class AppLifecycle implements Application.ActivityLifecycleCallbacks {
                 try {
                     l.onBecameForeground(activity);
                 } catch (Exception exc) {
-                    Log.e(TAG, "Listener threw exception!", exc);
+                    Log.e(TAG, "onBecameForeground threw exception!", exc);
                 }
             }
         } else {
@@ -174,7 +174,7 @@ public class AppLifecycle implements Application.ActivityLifecycleCallbacks {
                         try {
                             l.onBecameBackground(activity);
                         } catch (Exception exc) {
-                            Log.e(TAG, "Listener threw exception!", exc);
+                            Log.e(TAG, "onBecameBackground threw exception!", exc);
                         }
                     }
                 } else {
@@ -190,7 +190,7 @@ public class AppLifecycle implements Application.ActivityLifecycleCallbacks {
             try {
                 l.onCreated(activity);
             } catch (Exception exc) {
-                Log.e(TAG, "Listener threw exception!", exc);
+                Log.e(TAG, "onActivityCreated threw exception!", exc);
             }
         }
     }
@@ -210,7 +210,7 @@ public class AppLifecycle implements Application.ActivityLifecycleCallbacks {
             try {
                 l.onDestroyed(activity);
             } catch (Exception exc) {
-                Log.e(TAG, "Listener threw exception!", exc);
+                Log.e(TAG, "onActivityDestroyed threw exception!", exc);
             }
         }
     }
