@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Looper;
 import android.preference.ListPreference;
 import android.preference.Preference;
@@ -219,13 +220,140 @@ public class DeviceSettingsFragment extends PreferenceFragment {
                 try {
                     TtAppCtx.getDeviceSettings().setGpsConfigured(false);
 
-                    final ProgressDialog pd = new ProgressDialog(getActivity());
+                    final Activity activity = getActivity();
+                    final ProgressDialog pd = new ProgressDialog(activity);
+                    final GpsService.GpsBinder gps = TtAppCtx.getGps();
 
                     prefGpsCheck.setSummary(R.string.ds_gps_not_connected);
 
-                    new Thread(new Runnable() {
-                        final Activity activity = getActivity();
+                    final GpsService.Listener listener = new GpsService.Listener() {
+                        @Override
+                        public void nmeaBurstReceived(INmeaBurst nmeaBurst) {
 
+                        }
+
+                        @Override
+                        public void nmeaStringReceived(String nmeaString) {
+                            gps.removeListener(this);
+
+                            TtAppCtx.getDeviceSettings().setGpsConfigured(true);
+
+                            activity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    pd.setMessage(activity.getString(R.string.ds_gps_connected));
+
+                                    if (TtAppCtx.getDeviceSettings().isGpsAlwaysOn()) {
+                                        prefGpsCheck.setSummary(R.string.ds_gps_connected);
+                                    } else {
+                                        prefGpsCheck.setSummary(R.string.ds_dev_configured);
+                                        gps.stopGps();
+                                    }
+
+                                    if (TtAppCtx.getDeviceSettings().getAutoSetGpsNameToMetaAsk()) {
+                                        if (lastMetaAsk.isBefore(DateTime.now().minusSeconds(10))) {
+                                            DontAskAgainDialog dialog = new DontAskAgainDialog(getActivity(),
+                                                    DeviceSettings.AUTO_SET_GPS_NAME_TO_META_ASK,
+                                                    DeviceSettings.AUTO_SET_GPS_NAME_TO_META,
+                                                    TtAppCtx.getDeviceSettings().getPrefs());
+
+                                            dialog.setMessage("GPS is connected. Do you want to update metadata with the current GPS receiver?");
+
+                                            dialog.setPositiveButton("Default", setMetaListener, 1);
+
+                                            if (TtAppCtx.getDAL() != null)
+                                                dialog.setNegativeButton("All", setMetaListener, 2);
+
+                                            dialog.setNeutralButton("None", null, 0);
+
+                                            dialog.show();
+
+                                            lastMetaAsk = DateTime.now();
+                                        }
+
+                                        pd.hide();
+                                    } else {
+                                        setMetaListener.onClick(null, 0, TtAppCtx.getDeviceSettings().getAutoSetGpsNameToMeta());
+                                        new Handler().postDelayed(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                pd.hide();
+                                            }
+                                        }, 1000);
+                                    }
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void nmeaSentenceReceived(NmeaSentence nmeaSentence) {
+                            //
+                        }
+
+                        @Override
+                        public void gpsStarted() {
+
+                        }
+
+                        @Override
+                        public void gpsStopped() {
+
+                        }
+
+                        @Override
+                        public void gpsServiceStarted() {
+
+                        }
+
+                        @Override
+                        public void gpsServiceStopped() {
+
+                        }
+
+                        @Override
+                        public void gpsError(GpsService.GpsError error) {
+                            gps.removeListener(this);
+                            gps.stopGps();
+
+                            TtAppCtx.getDeviceSettings().setGpsConfigured(false);
+
+                            String message = "";
+
+                            switch (error) {
+                                case LostDeviceConnection: message = "Lost connection to bluetooth device."; break;
+                                case DeviceConnectionEnded: message = "Bluetooth connection terminated."; break;
+                                case NoExternalGpsSocket: message = "Failed to create bluetooth socket."; break;
+                                case FailedToConnect: message = "Failed to connect to bluetooth device."; break;
+                                case Unknown: message = error.toString(); break;
+                            }
+
+                            activity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    pd.setMessage(getString(R.string.ds_gps_not_connected));
+                                    pd.hide();
+                                }
+                            });
+
+                            Toast.makeText(activity, message, Toast.LENGTH_SHORT).show();
+                        }
+                    };
+
+                    TtAppCtx.getGps().addListener(listener);
+
+                    final Runnable hideDialog = new Runnable() {
+                        @Override
+                        public void run() {
+                            activity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    pd.show();
+                                }
+                            });
+                        }
+                    };
+
+                    new Thread(new Runnable() {
                         @Override
                         public void run() {
                             pd.setMessage(getString(R.string.ds_gps_connecting));
@@ -233,149 +361,75 @@ public class DeviceSettingsFragment extends PreferenceFragment {
                             pd.setOnDismissListener(new DialogInterface.OnDismissListener() {
                                 @Override
                                 public void onDismiss(DialogInterface dialog) {
-                                    TtAppCtx.getGps().stopGps();
-                                }
-                            });
-
-                            activity.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    pd.show();
+                                    gps.stopGps();
                                 }
                             });
 
                             Runnable runGPS = new Runnable() {
                                 @Override
                                 public void run() {
-                                    TtAppCtx.getGps().setGpsProvider(TtAppCtx.getDeviceSettings().getGpsDeviceID());
+                                    gps.setGpsProvider(TtAppCtx.getDeviceSettings().getGpsDeviceID());
 
-
-                                    GpsService.Listener listener = new GpsService.Listener() {
-                                        @Override
-                                        public void nmeaBurstReceived(INmeaBurst nmeaBurst) {
-
+                                    switch (gps.startGps()) {
+                                        case InternalGpsStarted: {
+                                            pd.setMessage("Internal GPS Started. Listening For Data.");
+                                            break;
                                         }
-
-                                        @Override
-                                        public void nmeaStringReceived(String nmeaString) {
-                                            try {
-                                                TtAppCtx.getGps().addListener(this);
-
-                                                TtAppCtx.getDeviceSettings().setGpsConfigured(true);
-
-                                                activity.runOnUiThread(new Runnable() {
-                                                    @Override
-                                                    public void run() {
-                                                        pd.setMessage(activity.getString(R.string.ds_gps_connected));
-
-                                                        if (TtAppCtx.getDeviceSettings().isGpsAlwaysOn()) {
-                                                            prefGpsCheck.setSummary(R.string.ds_gps_connected);
-                                                        } else {
-                                                            prefGpsCheck.setSummary(R.string.ds_dev_configured);
-                                                            TtAppCtx.getGps().stopGps();
-                                                        }
-
-                                                        if (TtAppCtx.getDeviceSettings().getAutoSetGpsNameToMetaAsk()) {
-                                                            if (lastMetaAsk.isBefore(DateTime.now().minusSeconds(10))) {
-                                                                DontAskAgainDialog dialog = new DontAskAgainDialog(getActivity(),
-                                                                        DeviceSettings.AUTO_SET_GPS_NAME_TO_META_ASK,
-                                                                        DeviceSettings.AUTO_SET_GPS_NAME_TO_META,
-                                                                        TtAppCtx.getDeviceSettings().getPrefs());
-
-                                                                dialog.setMessage("Do you want to update metadata with the current GPS receiver?");
-
-                                                                dialog.setPositiveButton("Default", setMetaListener, 1);
-
-                                                                if (TtAppCtx.getDAL() != null)
-                                                                    dialog.setNegativeButton("All", setMetaListener, 2);
-
-                                                                dialog.setNeutralButton("None", null, 0);
-
-                                                                dialog.show();
-
-                                                                lastMetaAsk = DateTime.now();
-                                                            }
-                                                        } else {
-                                                            setMetaListener.onClick(null, 0, TtAppCtx.getDeviceSettings().getAutoSetGpsNameToMeta());
-                                                        }
-                                                    }
-                                                });
-
-                                                Thread.sleep(1000);
-
-                                                activity.runOnUiThread(new Runnable() {
-                                                    @Override
-                                                    public void run() {
-                                                        pd.hide();
-                                                    }
-                                                });
-                                            } catch (InterruptedException e) {
-                                                e.printStackTrace();
-                                            }
+                                        case InternalGpsNotEnabled: {
+                                            hideDialog.run();
+                                            Toast.makeText(activity, "The internal GPS is not enabled.", Toast.LENGTH_LONG).show();
+                                            break;
                                         }
-
-                                        @Override
-                                        public void nmeaSentenceReceived(NmeaSentence nmeaSentence) {
-                                            //
+                                        case InternalGpsNeedsPermissions: {
+                                            hideDialog.run();
+                                            Toast.makeText(activity, "The GpsService needs location permissions to use the internal GPS.", Toast.LENGTH_LONG).show();
+                                            break;
                                         }
-
-                                        @Override
-                                        public void gpsStarted() {
-
+                                        case InternalGpsError: {
+                                            hideDialog.run();
+                                            Toast.makeText(activity, "The was an error starting the Internal GPS.", Toast.LENGTH_LONG).show();
+                                            break;
                                         }
-
-                                        @Override
-                                        public void gpsStopped() {
-
+                                        case ExternalGpsStarted: {
+                                            pd.setMessage("External GPS started. Listening for Data.");
+                                            break;
                                         }
-
-                                        @Override
-                                        public void gpsServiceStarted() {
-
+                                        case ExternalGpsNotFound: {
+                                            hideDialog.run();
+                                            Toast.makeText(activity, "The external bluetooth GPS was not found.", Toast.LENGTH_LONG).show();
+                                            break;
                                         }
-
-                                        @Override
-                                        public void gpsServiceStopped() {
-
+                                        case ExternalGpsNotConnected: {
+                                            hideDialog.run();
+                                            Toast.makeText(activity, "The external bluetooth GPS is not connected.", Toast.LENGTH_LONG).show();
+                                            break;
                                         }
-
-                                        @Override
-                                        public void gpsError(GpsService.GpsError error) {
-                                            TtAppCtx.getDeviceSettings().setGpsConfigured(false);
-
-                                            Toast.makeText(activity, error.toString(), Toast.LENGTH_SHORT).show();
-
-                                            activity.runOnUiThread(new Runnable() {
-                                                @Override
-                                                public void run() {
-                                                    pd.setMessage(getString(R.string.ds_gps_not_connected));
-                                                    pd.hide();
-                                                }
-                                            });
-
-                                            TtAppCtx.getGps().removeListener(this);
-                                            TtAppCtx.getGps().stopGps();
+                                        case ExternalGpsError: {
+                                            hideDialog.run();
+                                            break;
                                         }
-                                    };
-
-                                    TtAppCtx.getGps().addListener(listener);
-
-                                    TtAppCtx.getGps().startGps();
+                                        case GpsAlreadyStarted: {
+                                            pd.setMessage("GPS started. Listening for Data.");
+                                            break;
+                                        }
+                                    }
                                 }
                             };
 
                             Looper.prepare();
 
-                            if (TtAppCtx.getGps().isGpsRunning())
+                            if (TtAppCtx.getGps().isGpsRunning()) {
                                 TtAppCtx.getGps().stopGps();
-
-                            runGPS.run();
+                                new Handler().postDelayed(runGPS, 1000);
+                            } else {
+                                runGPS.run();
+                            }
                         }
                     }).start();
 
                 } catch (Exception ex) {
                     TtUtils.TtReport.writeError(ex.getMessage(), "DeviceSettingsFragment:checkGPS");
-                    Toast.makeText(getActivity(), "Error", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "Unknown Error. See log for details.", Toast.LENGTH_SHORT).show();
                 }
             }
 

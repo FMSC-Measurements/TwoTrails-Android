@@ -131,20 +131,21 @@ public class RangeFinderService extends Service implements BluetoothConnection.L
     private RangeFinderDeviceStatus stopRangeFinder() {
         RangeFinderDeviceStatus status;
 
-        if (!logging) {
-            if (isRangeFinderRunning()) {
-                status = stopExternalRangeFinder();
+        if (isRangeFinderRunning()) {
+            status = stopExternalRangeFinder();
 
-                if (status == RangeFinderDeviceStatus.RangeFinderStopped) {
-                    if (logging) {
-                        writeEndLog();
-                    }
-                }
-            } else {
-                status = RangeFinderDeviceStatus.RangeFinderAlreadyStopped;
+            if (logging) {
+                writeEndLog();
+            }
+
+            logging = false;
+
+            if (logPrintWriter != null) {
+                logPrintWriter.flush();
+                logPrintWriter.close();
             }
         } else {
-            status = RangeFinderDeviceStatus.RangeFinderServiceInUse;
+            status = RangeFinderDeviceStatus.RangeFinderAlreadyStopped;
         }
 
         return status;
