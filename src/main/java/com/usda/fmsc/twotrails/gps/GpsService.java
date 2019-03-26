@@ -37,7 +37,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 
 public class GpsService extends Service implements LocationListener, LocationSource, OnNmeaMessageListener,
-
         NmeaParser.Listener, BluetoothConnection.Listener, SharedPreferences.OnSharedPreferenceChangeListener {
 
     public final int GPS_UPDATE_INTERVAL = 1000;    //in milliseconds
@@ -211,6 +210,13 @@ public class GpsService extends Service implements LocationListener, LocationSou
 
         if (logging) {
             writeEndLog();
+        }
+
+        logging = false;
+
+        if (logPrintWriter != null) {
+            logPrintWriter.flush();
+            logPrintWriter.close();
         }
 
         if (isGpsRunning()) {
@@ -413,12 +419,6 @@ public class GpsService extends Service implements LocationListener, LocationSou
     //endregion
 
     //region Internal Android GPS
-//    @Override
-//    public void onNmeaReceived(long timestamp, String nmea) {
-//        parseNmeaString(nmea);
-//    }
-
-
     @Override
     public void onNmeaMessage(String message, long timestamp) {
         parseNmeaString(message);
@@ -711,10 +711,6 @@ public class GpsService extends Service implements LocationListener, LocationSou
         @Override
         public void removeListener(Listener callback) {
             listeners.remove(callback);
-        }
-
-        public boolean isListening(Listener callback) {
-            return listeners.contains(callback);
         }
 
         @Override
