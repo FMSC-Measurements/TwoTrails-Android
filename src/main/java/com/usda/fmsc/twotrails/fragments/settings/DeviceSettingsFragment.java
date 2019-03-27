@@ -1,5 +1,6 @@
 package com.usda.fmsc.twotrails.fragments.settings;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
@@ -16,7 +17,6 @@ import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -111,7 +111,7 @@ public class DeviceSettingsFragment extends PreferenceFragment {
             }
         }
 
-        swtUseExGpsDev = (SwitchCompatPreference)findPreference(TtAppCtx.getDeviceSettings().GPS_EXTERNAL);
+        swtUseExGpsDev = (SwitchCompatPreference)findPreference(getString(R.string.set_GPS_EXTERNAL));
         exGpsCat = (PreferenceCategory)findPreference(getString(R.string.set_GPS_CAT));
         prefLstGpsDevice = (ListCompatPreference)findPreference(getString(R.string.set_GPS_LIST_DEVICE));
         prefGpsCheck = findPreference(getString(R.string.set_GPS_CHECK));
@@ -211,6 +211,8 @@ public class DeviceSettingsFragment extends PreferenceFragment {
         }
     }
 
+
+    //region GPSCheck
     Preference.OnPreferenceClickListener gpsCheckListener = new Preference.OnPreferenceClickListener() {
         @Override
         public boolean onPreferenceClick(Preference preference) {
@@ -269,9 +271,16 @@ public class DeviceSettingsFragment extends PreferenceFragment {
                                             dialog.show();
 
                                             lastMetaAsk = DateTime.now();
-                                        }
 
-                                        pd.hide();
+                                            pd.hide();
+                                        } else {
+                                            new Handler().postDelayed(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    pd.hide();
+                                                }
+                                            }, 1000);
+                                        }
                                     } else {
                                         setMetaListener.onClick(null, 0, TtAppCtx.getDeviceSettings().getAutoSetGpsNameToMeta());
                                         new Handler().postDelayed(new Runnable() {
@@ -339,7 +348,7 @@ public class DeviceSettingsFragment extends PreferenceFragment {
                         }
                     };
 
-                    TtAppCtx.getGps().addListener(listener);
+                    gps.addListener(listener);
 
                     final Runnable hideDialog = new Runnable() {
                         @Override
@@ -347,86 +356,94 @@ public class DeviceSettingsFragment extends PreferenceFragment {
                             activity.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    pd.show();
+                                    pd.hide();
                                 }
                             });
                         }
                     };
 
-                    new Thread(new Runnable() {
+                    pd.setMessage(getString(R.string.ds_gps_connecting));
+
+                    pd.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                        @Override
+                        public void onDismiss(DialogInterface dialog) {
+                            gps.stopGps();
+                        }
+                    });
+
+                    Runnable runGPS = new Runnable() {
                         @Override
                         public void run() {
-                            pd.setMessage(getString(R.string.ds_gps_connecting));
+                            gps.setGpsProvider(TtAppCtx.getDeviceSettings().getGpsDeviceID());
 
-                            pd.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                                @Override
-                                public void onDismiss(DialogInterface dialog) {
-                                    gps.stopGps();
-                                }
-                            });
-
-                            Runnable runGPS = new Runnable() {
-                                @Override
-                                public void run() {
-                                    gps.setGpsProvider(TtAppCtx.getDeviceSettings().getGpsDeviceID());
-
-                                    switch (gps.startGps()) {
-                                        case InternalGpsStarted: {
+                            switch (gps.startGps()) {
+                                case InternalGpsStarted: {
+                                    activity.runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
                                             pd.setMessage("Internal GPS Started. Listening For Data.");
-                                            break;
                                         }
-                                        case InternalGpsNotEnabled: {
-                                            hideDialog.run();
-                                            Toast.makeText(activity, "The internal GPS is not enabled.", Toast.LENGTH_LONG).show();
-                                            break;
-                                        }
-                                        case InternalGpsNeedsPermissions: {
-                                            hideDialog.run();
-                                            Toast.makeText(activity, "The GpsService needs location permissions to use the internal GPS.", Toast.LENGTH_LONG).show();
-                                            break;
-                                        }
-                                        case InternalGpsError: {
-                                            hideDialog.run();
-                                            Toast.makeText(activity, "The was an error starting the Internal GPS.", Toast.LENGTH_LONG).show();
-                                            break;
-                                        }
-                                        case ExternalGpsStarted: {
-                                            pd.setMessage("External GPS started. Listening for Data.");
-                                            break;
-                                        }
-                                        case ExternalGpsNotFound: {
-                                            hideDialog.run();
-                                            Toast.makeText(activity, "The external bluetooth GPS was not found.", Toast.LENGTH_LONG).show();
-                                            break;
-                                        }
-                                        case ExternalGpsNotConnected: {
-                                            hideDialog.run();
-                                            Toast.makeText(activity, "The external bluetooth GPS is not connected.", Toast.LENGTH_LONG).show();
-                                            break;
-                                        }
-                                        case ExternalGpsError: {
-                                            hideDialog.run();
-                                            break;
-                                        }
-                                        case GpsAlreadyStarted: {
-                                            pd.setMessage("GPS started. Listening for Data.");
-                                            break;
-                                        }
-                                    }
+                                    });
+                                    break;
                                 }
-                            };
-
-                            Looper.prepare();
-
-                            if (TtAppCtx.getGps().isGpsRunning()) {
-                                TtAppCtx.getGps().stopGps();
-                                new Handler().postDelayed(runGPS, 1000);
-                            } else {
-                                runGPS.run();
+                                case InternalGpsNotEnabled: {
+                                    hideDialog.run();
+                                    Toast.makeText(activity, "The internal GPS is not enabled.", Toast.LENGTH_LONG).show();
+                                    break;
+                                }
+                                case InternalGpsNeedsPermissions: {
+                                    hideDialog.run();
+                                    Toast.makeText(activity, "The GpsService needs location permissions to use the internal GPS.", Toast.LENGTH_LONG).show();
+                                    break;
+                                }
+                                case InternalGpsError: {
+                                    hideDialog.run();
+                                    Toast.makeText(activity, "The was an error starting the Internal GPS.", Toast.LENGTH_LONG).show();
+                                    break;
+                                }
+                                case ExternalGpsStarted: {
+                                    activity.runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            pd.setMessage("External GPS started. Listening for Data.");
+                                        }
+                                    });
+                                    break;
+                                }
+                                case ExternalGpsNotFound: {
+                                    hideDialog.run();
+                                    Toast.makeText(activity, "The external bluetooth GPS was not found.", Toast.LENGTH_LONG).show();
+                                    break;
+                                }
+                                case ExternalGpsNotConnected: {
+                                    hideDialog.run();
+                                    Toast.makeText(activity, "The external bluetooth GPS is not connected.", Toast.LENGTH_LONG).show();
+                                    break;
+                                }
+                                case ExternalGpsError: {
+                                    hideDialog.run();
+                                    Toast.makeText(activity,"External GPS error.", Toast.LENGTH_LONG).show();
+                                    break;
+                                }
+                                case GpsAlreadyStarted: {
+                                    hideDialog.run();
+                                    Toast.makeText(activity,"GPS started. Listening for Data.", Toast.LENGTH_LONG).show();
+                                    break;
+                                }
+                                default: hideDialog.run();
+                                    break;
                             }
                         }
-                    }).start();
+                    };
 
+                    pd.show();
+
+                    if (gps.isGpsRunning()) {
+                        gps.stopGps();
+                        new Handler().postDelayed(runGPS, 1000);
+                    } else {
+                        runGPS.run();
+                    }
                 } catch (Exception ex) {
                     TtUtils.TtReport.writeError(ex.getMessage(), "DeviceSettingsFragment:checkGPS");
                     Toast.makeText(getActivity(), "Unknown Error. See log for details.", Toast.LENGTH_SHORT).show();
@@ -436,160 +453,181 @@ public class DeviceSettingsFragment extends PreferenceFragment {
             return false;
         }
     };
+    //endregion
 
+    //region RangeFinderCheck
     Preference.OnPreferenceClickListener rfCheckListener = new Preference.OnPreferenceClickListener() {
         @Override
         public boolean onPreferenceClick(Preference preference) {
-            if (StringEx.isEmpty(TtAppCtx.getDeviceSettings().getRangeFinderDeviceID())) {
-                Toast.makeText(getActivity(), "Range Finder must first be selected", Toast.LENGTH_LONG).show();
+            if (StringEx.isEmpty(TtAppCtx.getDeviceSettings().getGpsDeviceID())) {
+                Toast.makeText(getActivity(), "RangeFinder must first be selected", Toast.LENGTH_LONG).show();
             } else {
                 try {
                     TtAppCtx.getDeviceSettings().setRangeFinderConfigured(false);
 
-                    final ProgressDialog pd = new ProgressDialog(getActivity());
+                    final Activity activity = getActivity();
+                    final ProgressDialog pd = new ProgressDialog(activity);
+                    final RangeFinderService.RangeFinderBinder rf = TtAppCtx.getRF();
 
                     prefRFCheck.setSummary(R.string.ds_rf_not_connected);
 
-                    new Thread(new Runnable() {
+                    final RangeFinderService.Listener listener = new RangeFinderService.Listener() {
+                        @Override
+                        public void rfDataReceived(TtRangeFinderData rfData) {
 
-                        final Activity activity = getActivity();
+                        }
 
                         @Override
-                        public void run() {
-                            pd.setMessage(getString(R.string.ds_rf_connecting));
+                        public void rfStringReceived(String rfString) {
+                            try {
+                                rf.removeListener(this);
 
-                            pd.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                                @Override
-                                public void onDismiss(DialogInterface dialog) {
-                                    TtAppCtx.getRF().stopRangeFinder();
-                                }
-                            });
+                                TtAppCtx.getDeviceSettings().setRangeFinderConfigured(true);
+
+                                activity.runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        pd.setMessage(activity.getString(R.string.ds_rf_connected));
+
+                                        if (TtAppCtx.getDeviceSettings().isRangeFinderAlwaysOn()) {
+                                            prefRFCheck.setSummary(R.string.ds_rf_connected);
+                                        } else {
+                                            prefRFCheck.setSummary(R.string.ds_dev_configured);
+                                            rf.stopRangeFinder();
+                                        }
+                                    }
+                                });
+
+                                new Handler().postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        pd.hide();
+                                    }
+                                }, 1000);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                        @Override
+                        public void rfInvalidStringReceived(String rfString) {
+
+                        }
+
+                        @Override
+                        public void rangeFinderStarted() {
+
+                        }
+
+                        @Override
+                        public void rangeFinderStopped() {
+
+                        }
+
+                        @Override
+                        public void rangeFinderServiceStarted() {
+
+                        }
+
+                        @Override
+                        public void rangeFinderServiceStopped() {
+
+                        }
+
+                        @Override
+                        public void rangeFinderError(RangeFinderService.RangeFinderError error) {
+                            TtAppCtx.getDeviceSettings().setRangeFinderConfigured(false);
+
+                            Toast.makeText(activity, error.toString(), Toast.LENGTH_SHORT).show();
 
                             activity.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    pd.show();
+                                    pd.setMessage(getString(R.string.ds_rf_not_connected));
+                                    pd.hide();
                                 }
                             });
 
-                            Runnable runRF = new Runnable() {
+                            rf.removeListener(this);
+                            rf.stopRangeFinder();
+                        }
+                    };
+
+                    rf.addListener(listener);
+
+                    final Runnable hideDialog = new Runnable() {
+                        @Override
+                        public void run() {
+                            activity.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    TtAppCtx.getRF().setRangeFinderProvider(TtAppCtx.getDeviceSettings().getRangeFinderDeviceID());
-
-                                    RangeFinderService.Listener listener = new RangeFinderService.Listener() {
-                                        @Override
-                                        public void rfDataReceived(TtRangeFinderData rfData) {
-
-                                        }
-
-                                        @Override
-                                        public void rfStringReceived(String rfString) {
-                                            try {
-                                                TtAppCtx.getRF().removeListener(this);
-
-                                                TtAppCtx.getDeviceSettings().setRangeFinderConfigured(true);
-
-                                                activity.runOnUiThread(new Runnable() {
-                                                    @Override
-                                                    public void run() {
-                                                        pd.setMessage(activity.getString(R.string.ds_rf_connected));
-
-                                                        if (TtAppCtx.getDeviceSettings().isRangeFinderAlwaysOn()) {
-                                                            prefRFCheck.setSummary(R.string.ds_rf_connected);
-                                                        } else {
-                                                            prefRFCheck.setSummary(R.string.ds_dev_configured);
-                                                            TtAppCtx.getRF().stopRangeFinder();
-                                                        }
-                                                    }
-                                                });
-
-
-                                                Thread.sleep(1000);
-
-                                                activity.runOnUiThread(new Runnable() {
-                                                    @Override
-                                                    public void run() {
-                                                        pd.hide();
-                                                    }
-                                                });
-                                            } catch (InterruptedException e) {
-                                                e.printStackTrace();
-                                            }
-                                        }
-
-                                        @Override
-                                        public void rfInvalidStringReceived(String rfString) {
-
-                                        }
-
-                                        @Override
-                                        public void rangeFinderStarted() {
-
-                                        }
-
-                                        @Override
-                                        public void rangeFinderStopped() {
-
-                                        }
-
-                                        @Override
-                                        public void rangeFinderServiceStarted() {
-
-                                        }
-
-                                        @Override
-                                        public void rangeFinderServiceStopped() {
-
-                                        }
-
-                                        @Override
-                                        public void rangeFinderError(RangeFinderService.RangeFinderError error) {
-                                            TtAppCtx.getDeviceSettings().setRangeFinderConfigured(false);
-
-                                            Toast.makeText(activity, error.toString(), Toast.LENGTH_SHORT).show();
-
-                                            activity.runOnUiThread(new Runnable() {
-                                                @Override
-                                                public void run() {
-                                                    pd.setMessage(getString(R.string.ds_rf_not_connected));
-                                                    pd.hide();
-                                                }
-                                            });
-
-                                            TtAppCtx.getRF().removeListener(this);
-                                            TtAppCtx.getRF().stopRangeFinder();
-                                        }
-                                    };
-
-
-                                    TtAppCtx.getRF().addListener(listener);
-
-                                    TtAppCtx.getRF().startRangeFinder();
+                                    pd.hide();
                                 }
-                            };
-
-                            Looper.prepare();
-
-                            if (TtAppCtx.getRF().isRangeFinderRunning())
-                                TtAppCtx.getRF().startRangeFinder();
-
-                            runRF.run();
+                            });
                         }
-                    }).start();
+                    };
 
+                    pd.setMessage(getString(R.string.ds_rf_connecting));
+
+                    pd.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                        @Override
+                        public void onDismiss(DialogInterface dialog) {
+                            rf.stopRangeFinder();
+                        }
+                    });
+
+                    Runnable runRF = new Runnable() {
+                        @Override
+                        public void run() {
+                            rf.setRangeFinderProvider(TtAppCtx.getDeviceSettings().getRangeFinderDeviceID());
+
+                            switch (rf.startRangeFinder()) {
+                                case RangeFinderStarted:
+                                case RangeFinderAlreadyStarted:
+                                    activity.runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            pd.setMessage("RangeFinder started. Listening for Data.");
+                                        }
+                                    });
+                                    break;
+                                case RangeFinderError: {
+                                    hideDialog.run();
+                                    Toast.makeText(activity,"RangeFinder error.", Toast.LENGTH_LONG).show();
+                                    break;
+                                }
+                                case RangeFinderNotFound: {
+                                    hideDialog.run();
+                                    Toast.makeText(activity, "The external bluetooth RangeFinder was not found.", Toast.LENGTH_LONG).show();
+                                    break;
+                                }
+                                default: hideDialog.run();
+                                    break;
+                            }
+                        }
+                    };
+
+                    pd.show();
+
+                    if (rf.isRangeFinderRunning()) {
+                        rf.stopRangeFinder();
+                        new Handler().postDelayed(runRF, 1000);
+                    } else {
+                        runRF.run();
+                    }
                 } catch (Exception ex) {
                     TtUtils.TtReport.writeError(ex.getMessage(), "DeviceSettingsFragment:checkRF");
-                    Toast.makeText(getActivity(), "Error", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "Unknown Error. See log for details.", Toast.LENGTH_SHORT).show();
                 }
             }
 
             return false;
         }
     };
+    //endregion
 
 
-    //region External Switch
+    //region External/Internal Switch & Listener
     Preference.OnPreferenceChangeListener useExternalListener = new Preference.OnPreferenceChangeListener() {
         @Override
         public boolean onPreferenceChange(Preference preference, Object newValue) {
@@ -597,10 +635,20 @@ public class DeviceSettingsFragment extends PreferenceFragment {
 
             boolean success = false;
 
-            if (useExternal && AndroidUtils.App.requestBluetoothPermission(getActivity(), Consts.Codes.Requests.BLUETOOH)) {
-                success = switchToExternal();
-            } else if (!useExternal && AndroidUtils.App.requestLocationPermission(getActivity(), Consts.Codes.Requests.LOCATION)) {
-                success = switchToInternal();
+            if (useExternal) {
+                if (AndroidUtils.App.requestPermission(getActivity(),
+                        new String [] {Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN},
+                        Consts.Codes.Requests.BLUETOOH,
+                        "Bluetooth is required for connecting to the external GPS receiver.")) {
+                    success = switchToExternal();
+                }
+            } else {
+                if (AndroidUtils.App.requestPermission(getActivity(),
+                        new String[] { Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION},
+                        Consts.Codes.Requests.LOCATION,
+                        "Location is required for accessing the internal GPS receiver.")) {
+                    success = switchToInternal();
+                }
             }
 
             if (success) {
@@ -623,14 +671,14 @@ public class DeviceSettingsFragment extends PreferenceFragment {
                 exGpsCat.setEnabled(true);
                 return true;
             } else {
-                //bluetooth isnt turned on, request that it should be
+                //bluetooth isn't turned on, request that it should be
                 Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
             }
         } else {
             //no bluetooth option on device
-            Toast.makeText(getActivity().getApplicationContext(), R.string.ds_no_bt, Toast.LENGTH_LONG).show();
+            Toast.makeText(TtAppCtx, R.string.ds_no_bt, Toast.LENGTH_LONG).show();
         }
 
         return false;
@@ -638,11 +686,9 @@ public class DeviceSettingsFragment extends PreferenceFragment {
 
     private boolean switchToInternal() {
         if (!TtAppCtx.getGps().isInternalGpsEnabled()) {
-            ActivityCompat.requestPermissions(getActivity(), new String[]{
-                            android.Manifest.permission.ACCESS_FINE_LOCATION,
-                            android.Manifest.permission.ACCESS_COARSE_LOCATION
-                    },
-                    Consts.Codes.Services.REQUEST_GPS_SERVICE);
+
+            //DialogFragmentEx
+            AndroidUtils.App.requestLocationPermission(getActivity(), Consts.Codes.Services.REQUEST_GPS_SERVICE);
         } else {
             TtAppCtx.getGps().stopGps();
             TtAppCtx.getGps().setGpsProvider(null);
@@ -656,6 +702,8 @@ public class DeviceSettingsFragment extends PreferenceFragment {
     }
     //endregion
 
+
+    //region GPS Selection
     Preference.OnPreferenceChangeListener btnGPSList = new Preference.OnPreferenceChangeListener() {
         public boolean onPreferenceChange(Preference preference, Object newValue) {
 
@@ -663,12 +711,12 @@ public class DeviceSettingsFragment extends PreferenceFragment {
                 String[] values = newValue.toString().split(",");
 
                 if (values.length > 0) {
-
                     if (!TtAppCtx.getDeviceSettings().getGpsDeviceID().equals(values[0])) {
                         TtAppCtx.getDeviceSettings().setGpsDeviceId(values[0]);
                         TtAppCtx.getDeviceSettings().setGpsDeviceName(values[1]);
 
                         prefLstGpsDevice.setSummary(values[1]);
+                        prefGpsCheck.setSummary(R.string.ds_dev_not_configured);
                         TtAppCtx.getDeviceSettings().setGpsConfigured(false);
                     }
                 } else {
@@ -676,16 +724,19 @@ public class DeviceSettingsFragment extends PreferenceFragment {
                     TtAppCtx.getDeviceSettings().setGpsDeviceName(StringEx.Empty);
 
                     prefLstGpsDevice.setSummary(getString(R.string.ds_no_dev));
+                    prefGpsCheck.setSummary(R.string.ds_dev_not_configured);
                     TtAppCtx.getDeviceSettings().setGpsConfigured(false);
                 }
-            } catch (Exception e) {
-                //
+            } catch (Exception ex) {
+                TtUtils.TtReport.writeError(ex.getMessage(), "DeviceSettingsFragment:btnGPSList");
             }
 
             return true;
         }
     };
+    //endregion
 
+    //region RangeFinder Selection
     Preference.OnPreferenceChangeListener btnRFList = new Preference.OnPreferenceChangeListener() {
         public boolean onPreferenceChange(Preference preference, Object newValue) {
 
@@ -693,12 +744,12 @@ public class DeviceSettingsFragment extends PreferenceFragment {
                 String[] values = newValue.toString().split(",");
 
                 if (values.length > 0) {
-
                     if (!TtAppCtx.getDeviceSettings().getRangeFinderDeviceID().equals(values[0])) {
                         TtAppCtx.getDeviceSettings().setRangeFinderDeviceId(values[0]);
                         TtAppCtx.getDeviceSettings().setRangeFinderDeviceName(values[1]);
 
                         prefLstRFDevice.setSummary(values[1]);
+                        prefRFCheck.setSummary(R.string.ds_dev_not_configured);
                         TtAppCtx.getDeviceSettings().setRangeFinderConfigured(false);
                     }
                 } else {
@@ -706,6 +757,7 @@ public class DeviceSettingsFragment extends PreferenceFragment {
                     TtAppCtx.getDeviceSettings().setRangeFinderDeviceName(StringEx.Empty);
 
                     prefLstRFDevice.setSummary(getString(R.string.ds_no_dev));
+                    prefRFCheck.setSummary(R.string.ds_dev_not_configured);
                     TtAppCtx.getDeviceSettings().setRangeFinderConfigured(false);
                 }
             } catch (Exception e) {
@@ -715,7 +767,10 @@ public class DeviceSettingsFragment extends PreferenceFragment {
             return true;
         }
     };
+    //endregion
 
+
+    //region Check NMEA
     Preference.OnPreferenceClickListener checkNmeaListener = new Preference.OnPreferenceClickListener() {
         @Override
         public boolean onPreferenceClick(Preference preference) {
@@ -731,7 +786,10 @@ public class DeviceSettingsFragment extends PreferenceFragment {
             return false;
         }
     };
+    //endregion
 
+
+    //region MetaSelection
     DontAskAgainDialog.OnClickListener setMetaListener = new DontAskAgainDialog.OnClickListener() {
         @Override
         public void onClick(DialogInterface dialogInterface, int i, Object value) {
@@ -757,4 +815,5 @@ public class DeviceSettingsFragment extends PreferenceFragment {
             }
         }
     };
+    //endregion
 }

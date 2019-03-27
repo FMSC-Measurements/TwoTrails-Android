@@ -20,7 +20,6 @@ import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
 import com.usda.fmsc.twotrails.activities.MainActivity;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
 import com.usda.fmsc.twotrails.data.MediaAccessLayer;
-import com.usda.fmsc.twotrails.devices.TtBluetoothManager;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.rangefinder.RangeFinderService;
 import com.usda.fmsc.twotrails.rangefinder.TtRangeFinderData;
@@ -39,7 +38,7 @@ public class TwoTrailApp extends Application {
     private DataAccessLayer _DAL;
     private MediaAccessLayer _MAL;
 
-    private TtReport Report;
+    private TtReport _Report;
 
     private Boolean _FoldersInitiated = false;
 
@@ -201,6 +200,10 @@ public class TwoTrailApp extends Application {
         return _ArcGISTools;
     }
 
+    public TtReport getReport() {
+        return _Report;
+    }
+
     public boolean hasDAL() {
         return _DAL != null;
     }
@@ -352,9 +355,9 @@ public class TwoTrailApp extends Application {
                         //rfServiceBinder = null;
                     }
 
-                    if (Report != null) {
-                        Report.writeEvent("TwoTrails Stopped");
-                        Report.closeReport();
+                    if (_Report != null) {
+                        _Report.writeEvent("TwoTrails Stopped");
+                        _Report.closeReport();
                     }
                 }
             }
@@ -383,9 +386,9 @@ public class TwoTrailApp extends Application {
             }
         }
 
-        if (_FoldersInitiated && Report == null) {
-            Report = new TtReport();
-            Report.changeDirectory(TtUtils.getTtLogFileDir());
+        if (_FoldersInitiated && _Report == null) {
+            _Report = new TtReport();
+            _Report.changeDirectory(TtUtils.getTtLogFileDir());
         }
 
         return _FoldersInitiated;
