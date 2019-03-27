@@ -173,31 +173,31 @@ public class TwoTrailApp extends Application {
     }
 
     public DeviceSettings getDeviceSettings() {
-        return _DeviceSettings;
-        //return _DeviceSettings != null ? _DeviceSettings : (_DeviceSettings = new DeviceSettings(this));
+        //return _DeviceSettings;
+        return _DeviceSettings != null ? _DeviceSettings : (_DeviceSettings = new DeviceSettings(this));
     }
 
     public ProjectSettings getProjectSettings() {
-        return _ProjectSettings;
-        //return _ProjectSettings != null ? _ProjectSettings : (_ProjectSettings = new ProjectSettings(this));
+        //return _ProjectSettings;
+        return _ProjectSettings != null ? _ProjectSettings : (_ProjectSettings = new ProjectSettings(this));
     }
 
     public MetadataSettings getMetadataSettings() {
-        return _MetadataSettings;
-        //return _MetadataSettings != null ? _MetadataSettings : (_MetadataSettings = new MetadataSettings(this));
+        //return _MetadataSettings;
+        return _MetadataSettings != null ? _MetadataSettings : (_MetadataSettings = new MetadataSettings(this));
     }
 
     public MapSettings getMapSettings() {
-        return _MapSettings;
+        return _MapSettings != null ? _MapSettings : (_MapSettings = new MapSettings(this));
     }
 
 
     public TtNotifyManager getTtNotifyManager() {
-        return _TtNotifyManager;
+        return _TtNotifyManager != null ? _TtNotifyManager : (_TtNotifyManager = new TtNotifyManager(this));
     }
 
     public ArcGISTools getArcGISTools() {
-        return _ArcGISTools;
+        return _ArcGISTools != null ? _ArcGISTools : (_ArcGISTools = new ArcGISTools(this));
     }
 
     public TtReport getReport() {
@@ -219,7 +219,7 @@ public class TwoTrailApp extends Application {
         _DAL = dal;
 
         if (dal != null) {
-            _MapSettings.reset();
+            getMapSettings().reset();
         }
     }
 
@@ -296,13 +296,6 @@ public class TwoTrailApp extends Application {
         if (initFolders()) {
             _Report.writeEvent(StringEx.format("TwoTrails Started (%s)", AndroidUtils.App.getVersionName(this)));
         }
-
-        _DeviceSettings = new DeviceSettings(this);
-        _ProjectSettings = new ProjectSettings(this);
-        _MetadataSettings = new MetadataSettings(this);
-        _MapSettings = new MapSettings(this);
-        _TtNotifyManager = new TtNotifyManager(this);
-        _ArcGISTools = new ArcGISTools(this);
 
         ArcGISRuntime.setClientId(this.getString(R.string.arcgis_client_id));
 
