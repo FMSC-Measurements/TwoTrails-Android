@@ -408,6 +408,8 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
                     }
                 }
             } catch (Exception e) {
+                TtAppCtx.getReport().writeError(e.getMessage(), "MainActivity:openFile");
+
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {

@@ -23,6 +23,7 @@ import com.usda.fmsc.geospatial.nmea.sentences.GGASentence;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
+import com.usda.fmsc.twotrails.TwoTrailApp;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
@@ -63,7 +64,7 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        if (!TtAppCtx.getDeviceSettings().isGpsConfigured()) {
+        if (!TwoTrailApp.getContext().getDeviceSettings().isGpsConfigured()) {
             canceling = true;
             setResult(Consts.Codes.Results.GPS_NOT_CONFIGURED);
             finish();

@@ -54,7 +54,7 @@ public class MetadataSettings extends Settings {
     }
 
     public void setDatm(Datum value) {
-        setInt(META_ZONE, value.getValue());
+        setInt(META_DATUM, value.getValue());
     }
 
 
