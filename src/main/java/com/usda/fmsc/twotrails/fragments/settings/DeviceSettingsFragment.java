@@ -445,7 +445,7 @@ public class DeviceSettingsFragment extends PreferenceFragment {
                         runGPS.run();
                     }
                 } catch (Exception ex) {
-                    TtUtils.TtReport.writeError(ex.getMessage(), "DeviceSettingsFragment:checkGPS");
+                    TtAppCtx.getReport().writeError(ex.getMessage(), "DeviceSettingsFragment:checkGPS");
                     Toast.makeText(getActivity(), "Unknown Error. See log for details.", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -616,7 +616,7 @@ public class DeviceSettingsFragment extends PreferenceFragment {
                         runRF.run();
                     }
                 } catch (Exception ex) {
-                    TtUtils.TtReport.writeError(ex.getMessage(), "DeviceSettingsFragment:checkRF");
+                    TtAppCtx.getReport().writeError(ex.getMessage(), "DeviceSettingsFragment:checkRF");
                     Toast.makeText(getActivity(), "Unknown Error. See log for details.", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -728,7 +728,7 @@ public class DeviceSettingsFragment extends PreferenceFragment {
                     TtAppCtx.getDeviceSettings().setGpsConfigured(false);
                 }
             } catch (Exception ex) {
-                TtUtils.TtReport.writeError(ex.getMessage(), "DeviceSettingsFragment:btnGPSList");
+                TtAppCtx.getReport().writeError(ex.getMessage(), "DeviceSettingsFragment:btnGPSList");
             }
 
             return true;

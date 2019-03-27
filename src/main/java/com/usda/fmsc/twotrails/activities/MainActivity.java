@@ -448,7 +448,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
             startActivityForResult(new Intent(this, ProjectActivity.class), UPDATE_INFO_AND_GOTO_DATA_TAB);
 
         } catch (Exception e) {
-            TtUtils.TtReport.writeError("MainActivity:CreateFile", e.getMessage(), e.getStackTrace());
+            TtAppCtx.getReport().writeError("MainActivity:CreateFile", e.getMessage(), e.getStackTrace());
             e.printStackTrace();
             toastMessage = "Project creation failed";
         }

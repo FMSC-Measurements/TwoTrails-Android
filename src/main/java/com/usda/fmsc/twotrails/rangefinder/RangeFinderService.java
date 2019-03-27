@@ -65,7 +65,7 @@ public class RangeFinderService extends Service implements BluetoothConnection.L
                 startRangeFinder();
             }
         } else {
-            TtUtils.TtReport.writeError("Unable to get preferences", "RangeFinderService:onCreate");
+            TtAppCtx.getReport().writeError("Unable to get preferences", "RangeFinderService:onCreate");
         }
     }
 
@@ -169,7 +169,7 @@ public class RangeFinderService extends Service implements BluetoothConnection.L
                 return RangeFinderDeviceStatus.RangeFinderNotFound;
             }
         } catch (Exception e) {
-            TtUtils.TtReport.writeError(e.getMessage(), "RangeFinderService:startExternalRangeFinder");
+            TtAppCtx.getReport().writeError(e.getMessage(), "RangeFinderService:startExternalRangeFinder");
             return RangeFinderDeviceStatus.RangeFinderError;
         }
 
@@ -287,7 +287,7 @@ public class RangeFinderService extends Service implements BluetoothConnection.L
                     logPrintWriter.println(rfString);
                     logPrintWriter.flush();
                 } catch (Exception e) {
-                    TtUtils.TtReport.writeError(e.getMessage(), "RangeFinderService:parseRFString:logToFile");
+                    TtAppCtx.getReport().writeError(e.getMessage(), "RangeFinderService:parseRFString:logToFile");
                 }
             }
         }
@@ -339,7 +339,7 @@ public class RangeFinderService extends Service implements BluetoothConnection.L
 
                 return true;
             } catch (Exception ex) {
-                TtUtils.TtReport.writeError(ex.getMessage(), "RangeFinderService:parseRFData");
+                TtAppCtx.getReport().writeError(ex.getMessage(), "RangeFinderService:parseRFData");
             }
         }
 
@@ -400,7 +400,7 @@ public class RangeFinderService extends Service implements BluetoothConnection.L
                     }
                 });
             } catch (Exception ex) {
-                TtUtils.TtReport.writeError("RangeFinderService:postStart", ex.getMessage());
+                TtAppCtx.getReport().writeError("RangeFinderService:postStart", ex.getMessage());
             }
         }
     }
@@ -416,7 +416,7 @@ public class RangeFinderService extends Service implements BluetoothConnection.L
                     }
                 });
             } catch (Exception ex) {
-                TtUtils.TtReport.writeError("RangeFinderService:postStop", ex.getMessage());
+                TtAppCtx.getReport().writeError("RangeFinderService:postStop", ex.getMessage());
             }
         }
     }
@@ -432,7 +432,7 @@ public class RangeFinderService extends Service implements BluetoothConnection.L
                     }
                 });
             } catch (Exception ex) {
-                TtUtils.TtReport.writeError("RangeFinderService:postStart", ex.getMessage());
+                TtAppCtx.getReport().writeError("RangeFinderService:postStart", ex.getMessage());
             }
         }
     }
@@ -448,7 +448,7 @@ public class RangeFinderService extends Service implements BluetoothConnection.L
                     }
                 });
             } catch (Exception ex) {
-                TtUtils.TtReport.writeError("RangeFinderService:postStop", ex.getMessage());
+                TtAppCtx.getReport().writeError("RangeFinderService:postStop", ex.getMessage());
             }
         }
     }
@@ -463,12 +463,12 @@ public class RangeFinderService extends Service implements BluetoothConnection.L
                         try {
                             listener.rangeFinderError(error);
                         } catch (Exception e) {
-                            TtUtils.TtReport.writeError(e.getMessage(), "RangeFinderService:postError");
+                            TtAppCtx.getReport().writeError(e.getMessage(), "RangeFinderService:postError");
                         }
                     }
                 });
             } catch (Exception ex) {
-                TtUtils.TtReport.writeError(ex.getMessage(), "RangeFinderService:postError-handler.post");
+                TtAppCtx.getReport().writeError(ex.getMessage(), "RangeFinderService:postError-handler.post");
             }
         }
     }
@@ -516,7 +516,7 @@ public class RangeFinderService extends Service implements BluetoothConnection.L
                     listeners.remove(callback);
                 }
             } catch (Exception e) {
-                TtUtils.TtReport.writeError(e.getMessage(), "RangeFinderService:removeListener", e.getStackTrace());
+                TtAppCtx.getReport().writeError(e.getMessage(), "RangeFinderService:removeListener", e.getStackTrace());
             }
         }
 

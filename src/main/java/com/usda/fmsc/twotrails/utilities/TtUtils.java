@@ -86,7 +86,7 @@ import com.usda.fmsc.utilities.StringEx;
 
 @SuppressWarnings({"WeakerAccess", "UnusedReturnValue", "unused", "SameParameterValue"})
 public class TtUtils {
-    public static TtReport TtReport = new TtReport();
+    //public static TtReport TtReport = new TtReport();
 
     public static class Convert {
 
@@ -1580,9 +1580,8 @@ public class TtUtils {
 
                 return options;
             } catch (Exception ex) {
-
-                TtReport.writeError(ex.getMessage(), "TtUtils:createMarkerOptions");
-                return null;
+                TwoTrailApp.getContext().getReport().writeError(ex.getMessage(), "TtUtils:createMarkerOptions");
+                throw ex;
             }
         }
 
@@ -1833,7 +1832,7 @@ public class TtUtils {
                                 StringEx.format("\n\nComment: %s", point.getComment()) :
                                 StringEx.Empty);
             } catch (Exception ex) {
-                TtReport.writeError(ex.getMessage(), "TtUtils:getInfoWindowSnippet");
+                TwoTrailApp.getContext().getReport().writeError(ex.getMessage(), "TtUtils:getInfoWindowSnippet");
                 return null;
             }
         }
@@ -1887,9 +1886,9 @@ public class TtUtils {
         boolean exported;
 
         if (dal != null) {
-            exported = FileUtils.zipFiles(filename, TtReport.getFilePath(), dal.getFilePath());
+            exported = FileUtils.zipFiles(filename, TwoTrailApp.getContext().getReport().getFilePath(), dal.getFilePath());
         } else {
-            exported = FileUtils.zipFiles(filename, TtReport.getFilePath());
+            exported = FileUtils.zipFiles(filename, TwoTrailApp.getContext().getReport().getFilePath());
         }
 
         return exported ? filename : null;

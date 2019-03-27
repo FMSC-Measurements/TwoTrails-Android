@@ -389,7 +389,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
             lastPointCreationTime = System.currentTimeMillis();
             onPointCreated();
         } catch (Exception e) {
-            TtUtils.TtReport.writeError(e.getMessage(), "WalkActivity:createPoint");
+            TtAppCtx.getReport().writeError(e.getMessage(), "WalkActivity:createPoint");
             AndroidUtils.Device.vibrate(this, Consts.Notifications.VIB_ERROR);
             stopLogging();
         }

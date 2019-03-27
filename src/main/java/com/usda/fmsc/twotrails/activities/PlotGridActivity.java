@@ -433,7 +433,7 @@ public class PlotGridActivity extends CustomToolbarActivity {
                     TtAppCtx.getDAL().deletePointsInPolygon(polygon.getCN());
                     generatePoints(polygon.getName());
                 } catch (Exception ex) {
-                    TtUtils.TtReport.writeError(ex.getMessage(), "PlotGridActivity:overwritePoly");
+                    TtAppCtx.getReport().writeError(ex.getMessage(), "PlotGridActivity:overwritePoly");
                     Toast.makeText(getBaseContext(), "Overwrite polygon failed.", Toast.LENGTH_SHORT).show();
                 }
             }

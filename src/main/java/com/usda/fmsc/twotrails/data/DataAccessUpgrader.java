@@ -1,5 +1,6 @@
 package com.usda.fmsc.twotrails.data;
 
+import com.usda.fmsc.twotrails.TwoTrailApp;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 import com.usda.fmsc.utilities.FileUtils;
 
@@ -16,7 +17,7 @@ public class DataAccessUpgrader {
                 }
             }
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DataAccessUpgrader:UpgradeDAL", ex.getStackTrace());
+            TwoTrailApp.getContext().getReport().writeError(ex.getMessage(), "DataAccessUpgrader:UpgradeDAL", ex.getStackTrace());
         }
 
         return UpgradeResult.Failed;

@@ -113,7 +113,7 @@ public class MetadataActivity extends CustomToolbarActivity {
             _CurrentIndex = 0;
             _CurrentMetadata = getMetaAtIndex(_CurrentIndex);
         } else {
-            TtUtils.TtReport.writeError("No Metadata, Invalid Project File.", "MetadataActivity");
+            TtAppCtx.getReport().writeError("No Metadata, Invalid Project File.", "MetadataActivity");
             Toast.makeText(MetadataActivity.this, "Metadata not found, Invalid Project File.", Toast.LENGTH_LONG).show();
             finish();
         }
@@ -291,7 +291,7 @@ public class MetadataActivity extends CustomToolbarActivity {
                 adjust = true;
             }
         } catch (Exception e) {
-            TtUtils.TtReport.writeError(e.getMessage(), "PolygonsActivity:deletePolygon");
+            TtAppCtx.getReport().writeError(e.getMessage(), "PolygonsActivity:deletePolygon");
             return false;
         }
 

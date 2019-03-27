@@ -653,7 +653,7 @@ public class ArcGISTools {
                 userCredentials = (UserCredentials) SerializationTools.bytesToObject(decoded);
                 return userCredentials;
             } catch (Exception e) {
-                TtUtils.TtReport.writeError("ArcGISTools:getCredentials", e.getMessage(), e.getStackTrace());
+                TtAppCtx.getReport().writeError("ArcGISTools:getCredentials", e.getMessage(), e.getStackTrace());
             }
         }
 
@@ -675,7 +675,7 @@ public class ArcGISTools {
 
             return true;
         } catch (Exception e) {
-            TtUtils.TtReport.writeError("ArcGISTools:setCredentials", e.getMessage(), e.getStackTrace());
+            TtAppCtx.getReport().writeError("ArcGISTools:setCredentials", e.getMessage(), e.getStackTrace());
         }
 
         return false;

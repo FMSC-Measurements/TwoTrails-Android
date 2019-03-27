@@ -105,8 +105,8 @@ public class MetadataFragment extends AnimationCardFragment implements MetadataA
                 if (_MetaCN != null) {
                     _Metadata = this.activity.getMetadata(_MetaCN);
                 }
-                
-                TtUtils.TtReport.writeError("Unable to get Metadata", "MetadataFragment");
+
+                this.activity.getTtAppContext().getReport().writeError("Unable to get Metadata", "MetadataFragment");
                 this.activity.register(_MetaCN, this);
             }
         } catch (ClassCastException e) {

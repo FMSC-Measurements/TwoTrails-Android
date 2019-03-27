@@ -406,7 +406,7 @@ public class ExportActivity extends CustomToolbarActivity {
                     case InvalidParams:
                         progCircle.hide();
                         Toast.makeText(getBaseContext(), "Export error, See log for details", Toast.LENGTH_SHORT).show();
-                        TtUtils.TtReport.writeError("ExportActivity", result.getMessage());
+                        TtAppCtx.getReport().writeError("ExportActivity", result.getMessage());
                         break;
                 }
                 }

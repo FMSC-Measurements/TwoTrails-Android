@@ -201,6 +201,9 @@ public class TwoTrailApp extends Application {
     }
 
     public TtReport getReport() {
+        if (!_FoldersInitiated)
+            initFolders();
+        
         return _Report;
     }
 
@@ -228,7 +231,7 @@ public class TwoTrailApp extends Application {
     public MediaAccessLayer getOrCreateMAL() {
         if (_MAL == null && _DAL != null)
         {
-            _MAL = new MediaAccessLayer(getMALFilename());
+            _MAL = new MediaAccessLayer(getMALFilename(), this);
         }
 
         return _MAL;
@@ -265,10 +268,10 @@ public class TwoTrailApp extends Application {
             public void uncaughtException(Thread errorThread, Throwable exception) {
                 if (!areFoldersInitiated()) {
                     initFolders();
-                    TtUtils.TtReport.changeDirectory(TtUtils.getTtFileDir());
+                    _Report.changeDirectory(TtUtils.getTtFileDir());
                 }
 
-                TtUtils.TtReport.writeError(exception.getMessage(), errorThread.getName(), exception.getStackTrace());
+                _Report.writeError(exception.getMessage(), errorThread.getName(), exception.getStackTrace());
 
 
                 new Thread() {
@@ -291,7 +294,7 @@ public class TwoTrailApp extends Application {
         });
 
         if (initFolders()) {
-            TtUtils.TtReport.writeEvent(StringEx.format("TwoTrails Started (%s)", AndroidUtils.App.getVersionName(this)));
+            _Report.writeEvent(StringEx.format("TwoTrails Started (%s)", AndroidUtils.App.getVersionName(this)));
         }
 
         _DeviceSettings = new DeviceSettings(this);

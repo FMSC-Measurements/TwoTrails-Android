@@ -10,6 +10,7 @@ import android.view.View;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
+import com.usda.fmsc.twotrails.TwoTrailApp;
 import com.usda.fmsc.twotrails.objects.media.TtImage;
 import com.usda.fmsc.twotrails.objects.media.TtMedia;
 import com.usda.fmsc.twotrails.units.MediaType;
@@ -26,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MediaAccessLayer extends IDataLayer {
+    private TwoTrailApp TtAppCtx;
 
     public String getFilePath() {
         return _FilePath;
@@ -49,7 +51,8 @@ public class MediaAccessLayer extends IDataLayer {
     private File _dbFile;
 
     //region Constructors / Open / Close
-    public MediaAccessLayer(String filePath) {
+    public MediaAccessLayer(String filePath, TwoTrailApp context) {
+        TtAppCtx = context;
         _FilePath = filePath;
 
         if (FileUtils.fileExists(_FilePath))
@@ -81,7 +84,7 @@ public class MediaAccessLayer extends IDataLayer {
             File f = new File(_FilePath + "-journal");
             if (f.exists()) {
                 if (!f.delete()) {
-                    TtUtils.TtReport.writeError("sql journal not deleted", "MediaAccessLayer:close");
+                    TtAppCtx.getReport().writeError("sql journal not deleted", "MediaAccessLayer:close");
                 }
             }
         }
@@ -114,7 +117,7 @@ public class MediaAccessLayer extends IDataLayer {
             cvs.put(TwoTrailsMediaSchema.Info.TtMediaDbSchemaVersion, _Version.toString());
             _db.insert(TwoTrailsMediaSchema.Info.TableName, null, cvs);
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "MediaAccessLayer:CreateDB");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "MediaAccessLayer:CreateDB");
         }
     }
 
@@ -126,7 +129,7 @@ public class MediaAccessLayer extends IDataLayer {
         }
         catch (Exception ex)
         {
-            TtUtils.TtReport.writeError(ex.getMessage(), "MediaAccessLayer:CreateMediaTable");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "MediaAccessLayer:CreateMediaTable");
             throw ex;
         }
     }
@@ -138,7 +141,7 @@ public class MediaAccessLayer extends IDataLayer {
         }
         catch (Exception ex)
         {
-            TtUtils.TtReport.writeError(ex.getMessage(), "MediaAccessLayer:CreateImageTable");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "MediaAccessLayer:CreateImageTable");
             throw ex;
         }
     }
@@ -150,7 +153,7 @@ public class MediaAccessLayer extends IDataLayer {
         }
         catch (Exception ex)
         {
-            TtUtils.TtReport.writeError(ex.getMessage(), "MediaAccessLayer:CreateDataTable");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "MediaAccessLayer:CreateDataTable");
             throw ex;
         }
     }
@@ -162,7 +165,7 @@ public class MediaAccessLayer extends IDataLayer {
         }
         catch (Exception ex)
         {
-            TtUtils.TtReport.writeError(ex.getMessage(), "MediaAccessLayer:CreateInfoTable");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "MediaAccessLayer:CreateInfoTable");
             throw ex;
         }
     }
@@ -252,7 +255,7 @@ public class MediaAccessLayer extends IDataLayer {
 
             c.close();
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:getImages");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:getImages");
             return null;
         }
 
@@ -275,7 +278,7 @@ public class MediaAccessLayer extends IDataLayer {
             if(success)
                 _db.setTransactionSuccessful();
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:insertMedia");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:insertMedia");
             success = false;
         } finally {
             _db.endTransaction();
@@ -311,7 +314,7 @@ public class MediaAccessLayer extends IDataLayer {
                 result = false;
             }
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:insertBaseMedia");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:insertBaseMedia");
             result = false;
         }
 
@@ -331,7 +334,7 @@ public class MediaAccessLayer extends IDataLayer {
             _db.insert(TwoTrailsMediaSchema.Images.TableName, null, cvs);
 
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:insertImage");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:insertImage");
             return false;
         }
 
@@ -350,7 +353,7 @@ public class MediaAccessLayer extends IDataLayer {
 
             return _db.insert(TwoTrailsMediaSchema.Data.TableName, null, cvs) > 0;
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:insertImage");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:insertImage");
             return false;
         }
     }
@@ -371,7 +374,7 @@ public class MediaAccessLayer extends IDataLayer {
             if(success)
                 _db.setTransactionSuccessful();
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:updateMedia");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:updateMedia");
             success = false;
         } finally {
             _db.endTransaction();
@@ -401,7 +404,7 @@ public class MediaAccessLayer extends IDataLayer {
                     break;
             }
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:updateBaseMedia");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:updateBaseMedia");
             return false;
         }
 
@@ -420,7 +423,7 @@ public class MediaAccessLayer extends IDataLayer {
                     TwoTrailsMediaSchema.SharedSchema.CN + "=?", new String[]{ image.getCN() });
 
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:insertImage");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:insertImage");
         }
     }
     //endregion
@@ -445,7 +448,7 @@ public class MediaAccessLayer extends IDataLayer {
                 }
             }
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:deleteMedia");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:deleteMedia");
         }
 
         return success;
@@ -463,7 +466,7 @@ public class MediaAccessLayer extends IDataLayer {
                         new String[] { image.getCN()} );
             }
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:removeImageData");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:removeImageData");
         }
     }
     //endregion
@@ -527,7 +530,7 @@ public class MediaAccessLayer extends IDataLayer {
                 listener.internalizeImagesCompleted(internalizedImages, failedImages);
             }
         } catch (Exception e) {
-            TtUtils.TtReport.writeError(e.getMessage(), "MAL:internalizeImages", e.getStackTrace());
+            TtAppCtx.getReport().writeError(e.getMessage(), "MAL:internalizeImages", e.getStackTrace());
             if (listener != null)
                 listener.internalizeImagesFailed(internalizedImages, failedImages, e.getMessage());
         }
@@ -589,7 +592,7 @@ public class MediaAccessLayer extends IDataLayer {
 
                         c.close();
                     } catch (Exception ex) {
-                        TtUtils.TtReport.writeError(ex.getMessage(), "DAL:loadImage");
+                        TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:loadImage");
                     }
                 }
             }).start();
