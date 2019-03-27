@@ -65,38 +65,6 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-//        TtAppCtx.init(getApplicationContext());
-
-//        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-//            @Override
-//            public void uncaughtException(Thread errorThread, Throwable exception) {
-//                if (!TtAppCtx.isFoldersInitiated()) {
-//                    TtAppCtx.initFolders();
-//                    TtUtils.TtReport.changeDirectory(TtAppCtx.getTtFileDir());
-//                }
-//
-//                TtUtils.TtReport.writeError(exception.getMessage(), errorThread.getName(), exception.getStackTrace());
-//
-//
-//                new Thread() {
-//                    @Override
-//                    public void run() {
-//                        Looper.prepare();
-//                        Toast.makeText(MainActivity.this,"Fatal Error. Check Log for details.", Toast.LENGTH_LONG).show();
-//                        Looper.loop();
-//                    }
-//                }.start();
-//                try
-//                {
-//                    Thread.sleep(4000); // Let the Toast display before app will get shutdown
-//                }
-//                catch (InterruptedException e) {
-//                    //
-//                }
-//                System.exit(2);
-//            }
-//        });
-
         setContentView(R.layout.activity_main);
 
         ActionBar actionBar = getSupportActionBar();
@@ -125,26 +93,6 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
         if (tabLayout != null) {
             tabLayout.setupWithViewPager(mViewPager);
         }
-
-        if (TtAppCtx.areFoldersInitiated()) {
-            final Intent intent = getIntent();
-            final String action = intent.getAction();
-
-            if (Intent.ACTION_VIEW.equals(action)){
-                Uri uri = intent.getData();
-
-                if (uri != null) {
-                    openFile(uri);
-                }
-            }
-
-            if (TtAppCtx.getDeviceSettings().getAutoOpenLastProject()) {
-                ArrayList<RecentProject> recentProjects = TtAppCtx.getProjectSettings().getRecentProjects();
-                if (recentProjects.size() > 0) {
-                    openFile(recentProjects.get(0).File);
-                }
-            }
-        }
     }
 
     @Override
@@ -167,13 +115,32 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
         if (progressLayout != null) {
             progressLayout.setVisibility(View.GONE);
         }
+
+        if (TtAppCtx.areFoldersInitiated()) {
+            final Intent intent = getIntent();
+            final String action = intent.getAction();
+
+            if (Intent.ACTION_VIEW.equals(action)){
+                Uri uri = intent.getData();
+
+                if (uri != null) {
+                    openFile(uri);
+                }
+            }
+
+            if (!TtAppCtx.hasDAL() && TtAppCtx.getDeviceSettings().getAutoOpenLastProject()) {
+                ArrayList<RecentProject> recentProjects = TtAppCtx.getProjectSettings().getRecentProjects();
+                if (recentProjects.size() > 0) {
+                    openFile(recentProjects.get(0).File);
+                }
+            }
+        }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         closeFile();
-        //TtAppCtx.destroy();
         finishAndRemoveTask();
     }
 
