@@ -21,6 +21,7 @@ import com.usda.fmsc.geospatial.nmea.sentences.GGASentence;
 import com.usda.fmsc.geospatial.nmea.sentences.GSASentence;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.geospatial.utm.UTMTools;
+import com.usda.fmsc.twotrails.TwoTrailApp;
 import com.usda.fmsc.twotrails.objects.TtObject;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 import com.usda.fmsc.utilities.ParseEx;
@@ -241,7 +242,7 @@ public class TtNmeaBurst extends TtObject implements Parcelable {
 
             dest.writeString(getSatellitesInViewString());
         } catch (Exception e) {
-            TtUtils.TtReport.writeError(e.getMessage(), "TtNmeaBurst:writeToParcel");
+            TwoTrailApp.getContext().getReport().writeError(e.getMessage(), "TtNmeaBurst:writeToParcel");
             throw e;
         }
     }

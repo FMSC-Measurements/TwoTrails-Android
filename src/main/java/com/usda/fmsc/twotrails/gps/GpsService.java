@@ -121,7 +121,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
 
             logBurstDetails = TtAppCtx.getDeviceSettings().getGpsLogBurstDetails();
         } else {
-            TtUtils.TtReport.writeError("Unable to get preferences", "GpsService:onCreate");
+            TtAppCtx.getReport().writeError("Unable to get preferences", "GpsService:onCreate");
         }
 
         postServiceStart();
@@ -248,7 +248,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
                 return GpsDeviceStatus.InternalGpsNotEnabled;
             }
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "GpsService:startInternalGps");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "GpsService:startInternalGps");
         }
 
         return GpsDeviceStatus.InternalGpsError;
@@ -290,7 +290,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
                 return GpsDeviceStatus.ExternalGpsNotFound;
             }
         } catch (Exception e) {
-            TtUtils.TtReport.writeError(e.getMessage(), "GpsService:startExternalGps");
+            TtAppCtx.getReport().writeError(e.getMessage(), "GpsService:startExternalGps");
             return GpsDeviceStatus.ExternalGpsError;
         }
 
@@ -465,7 +465,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
                     logPrintWriter.println(nmeaString);
                     logPrintWriter.flush();
                 } catch (Exception e) {
-                    TtUtils.TtReport.writeError(e.getMessage(), "GpsService:parseNmeaString:logToFile");
+                    TtAppCtx.getReport().writeError(e.getMessage(), "GpsService:parseNmeaString:logToFile");
                 }
             }
         }
@@ -489,7 +489,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
                     gmapListener.onLocationChanged(location);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    TtUtils.TtReport.writeError(e.getMessage(), "GpsService:onBurstReceived:gmap");
+                    TtAppCtx.getReport().writeError(e.getMessage(), "GpsService:onBurstReceived:gmap");
                 }
             }
         }
@@ -499,7 +499,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
                 logPrintWriter.println(burst.toString());
                 logPrintWriter.flush();
             } catch (Exception e) {
-                TtUtils.TtReport.writeError(e.getMessage(), "GpsService:parseNmeaString:logToFile");
+                TtAppCtx.getReport().writeError(e.getMessage(), "GpsService:parseNmeaString:logToFile");
             }
         }
     }
@@ -573,7 +573,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
                     }
                 });
             } catch (Exception ex) {
-                TtUtils.TtReport.writeError("GpsService:postStart", ex.getMessage());
+                TtAppCtx.getReport().writeError("GpsService:postStart", ex.getMessage());
             }
         }
     }
@@ -588,7 +588,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
                     }
                 });
             } catch (Exception ex) {
-                TtUtils.TtReport.writeError("GpsService:postStop", ex.getMessage());
+                TtAppCtx.getReport().writeError("GpsService:postStop", ex.getMessage());
             }
         }
     }
@@ -603,7 +603,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
                     }
                 });
             } catch (Exception ex) {
-                TtUtils.TtReport.writeError("GpsService:postStart", ex.getMessage());
+                TtAppCtx.getReport().writeError("GpsService:postStart", ex.getMessage());
             }
         }
     }
@@ -618,7 +618,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
                     }
                 });
             } catch (Exception ex) {
-                TtUtils.TtReport.writeError("GpsService:postStop", ex.getMessage());
+                TtAppCtx.getReport().writeError("GpsService:postStop", ex.getMessage());
             }
         }
     }
@@ -632,12 +632,12 @@ public class GpsService extends Service implements LocationListener, LocationSou
                         try {
                             listener.gpsError(error);
                         } catch (Exception e) {
-                            TtUtils.TtReport.writeError(e.getMessage(), "GpsService:postError");
+                            TtAppCtx.getReport().writeError(e.getMessage(), "GpsService:postError");
                         }
                     }
                 });
             } catch (Exception ex) {
-                TtUtils.TtReport.writeError(ex.getMessage(), "GpsService:postError-handler.post");
+                TtAppCtx.getReport().writeError(ex.getMessage(), "GpsService:postError-handler.post");
             }
         }
     }

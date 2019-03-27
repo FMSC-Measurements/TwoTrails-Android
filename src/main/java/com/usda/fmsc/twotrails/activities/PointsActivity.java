@@ -1188,7 +1188,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                 adjust = true;
             }
         } catch (Exception e) {
-            TtUtils.TtReport.writeError(e.getMessage(), "PointsActivity:deletePoint");
+            TtAppCtx.getReport().writeError(e.getMessage(), "PointsActivity:deletePoint");
             return false;
         }
 
@@ -2127,10 +2127,10 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         if (_MetaData.containsKey(cn)) {
             return _MetaData.get(cn);
         } else if (!_MetaData.containsKey(Consts.EmptyGuid)) {
-            TtUtils.TtReport.writeError("Default Metadata not found", "PointsActivity:getMetadata");
+            TtAppCtx.getReport().writeError("Default Metadata not found", "PointsActivity:getMetadata");
             throw new RuntimeException("Default Metadata not found");
         } else {
-            TtUtils.TtReport.writeError("Defaulting to Default Metadata", "PointsActivity:getMetadata");
+            TtAppCtx.getReport().writeError("Defaulting to Default Metadata", "PointsActivity:getMetadata");
             return _MetaData.get(Consts.EmptyGuid);
         }
     }

@@ -2,6 +2,7 @@ package com.usda.fmsc.twotrails.logic;
 
 
 import com.usda.fmsc.twotrails.Consts;
+import com.usda.fmsc.twotrails.TwoTrailApp;
 import com.usda.fmsc.twotrails.objects.PointD;
 import com.usda.fmsc.twotrails.objects.points.QuondamPoint;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
@@ -106,7 +107,7 @@ public class HaidLogic {
                 sb.append("There are no points in the polygon.");
             }
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "HaidLogic:generatePolyStats", ex.getStackTrace());
+            TwoTrailApp.getContext().getReport().writeError(ex.getMessage(), "HaidLogic:generatePolyStats", ex.getStackTrace());
             return "Error generating polygon info";
         }
 
@@ -130,7 +131,7 @@ public class HaidLogic {
                 sb.append(String.format("%s%s", Consts.NewLine, Consts.NewLine));
             }
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "HaidLogic:generateAllPolyStats");
+            TwoTrailApp.getContext().getReport().writeError(ex.getMessage(), "HaidLogic:generateAllPolyStats");
             return "Error generating polygon info";
         }
 

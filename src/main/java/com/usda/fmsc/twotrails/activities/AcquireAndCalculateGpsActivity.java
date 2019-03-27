@@ -120,7 +120,7 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
 
                 _FilteredBursts = new ArrayList<>();
             } catch (Exception e) {
-                TtUtils.TtReport.writeError(e.getMessage(), "AcquireAndCalculateGpsActivity:onCreate", e.getStackTrace());
+                TtAppCtx.getReport().writeError(e.getMessage(), "AcquireAndCalculateGpsActivity:onCreate", e.getStackTrace());
                 setResult(Consts.Codes.Results.ERROR);
             }
         } else {
@@ -598,7 +598,7 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
                 //endregion
             }
         } catch (Exception e) {
-            TtUtils.TtReport.writeError(e.getMessage(), "CalculateGpsActivityOld:calculate", e.getStackTrace());
+            TtAppCtx.getReport().writeError(e.getMessage(), "CalculateGpsActivityOld:calculate", e.getStackTrace());
         }
     }
 

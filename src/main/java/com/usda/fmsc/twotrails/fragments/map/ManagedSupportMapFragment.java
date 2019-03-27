@@ -174,7 +174,7 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
                     ));
                 }
             } catch (Exception e) {
-                TtUtils.TtReport.writeError("ManagedSupportMapFragment:onMapReady", e.getMessage(), e.getStackTrace());
+                TwoTrailApp.getContext().getReport().writeError("ManagedSupportMapFragment:onMapReady", e.getMessage(), e.getStackTrace());
             }
         }
 
@@ -247,7 +247,7 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
         {
             moveToLocation(CameraUpdateFactory.newLatLng(new LatLng(lat, lon)), animate);
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "ManagedSupportMapFragment:moveToLocation(f,f,b)", ex.getStackTrace());
+            TwoTrailApp.getContext().getReport().writeError(ex.getMessage(), "ManagedSupportMapFragment:moveToLocation(f,f,b)", ex.getStackTrace());
         }
     }
 
@@ -259,7 +259,7 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
                     zoomLevel
             ), animate);
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "ManagedSupportMapFragment:moveToLocation(f,f,f,b)", ex.getStackTrace());
+            TwoTrailApp.getContext().getReport().writeError(ex.getMessage(), "ManagedSupportMapFragment:moveToLocation(f,f,f,b)", ex.getStackTrace());
         }
     }
 
@@ -274,7 +274,7 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
                     padding
             ), animate);
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "ManagedSupportMapFragment:moveToLocation(e,i,b)", ex.getStackTrace());
+            TwoTrailApp.getContext().getReport().writeError(ex.getMessage(), "ManagedSupportMapFragment:moveToLocation(e,i,b)", ex.getStackTrace());
         }
     }
 

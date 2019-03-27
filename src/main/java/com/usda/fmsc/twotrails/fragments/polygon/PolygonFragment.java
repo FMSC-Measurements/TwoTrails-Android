@@ -260,7 +260,7 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
                     _Polygon = this.activity.getPolygon(_PolyCN);
                 }
 
-                TtUtils.TtReport.writeError("Unable to get Polygon", "PolygonFragment");
+                this.activity.getTtAppContext().getReport().writeError("Unable to get Polygon", "PolygonFragment");
                 this.activity.register(_PolyCN, this);
             }
         } catch (ClassCastException e) {

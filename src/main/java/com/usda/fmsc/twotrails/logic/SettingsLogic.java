@@ -47,7 +47,7 @@ public class SettingsLogic {
         alert.setPositiveButton("Clear", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                TtUtils.TtReport.clearReport();
+                TwoTrailApp.getContext().getReport().clearReport();
                 Toast.makeText(context, "Log Cleared", Toast.LENGTH_SHORT).show();
             }
         });

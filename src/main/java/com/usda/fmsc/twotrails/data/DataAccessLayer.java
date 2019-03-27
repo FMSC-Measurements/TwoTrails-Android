@@ -112,7 +112,7 @@ public class DataAccessLayer extends IDataLayer {
             File f = new File(_FilePath + "-journal");
             if (f.exists()) {
                 if (!f.delete()) {
-                    TtUtils.TtReport.writeError("sql journal not deleted", "DataAccessLayer:close");
+                    TtAppCtx.getReport().writeError("sql journal not deleted", "DataAccessLayer:close");
                 }
             }
         }
@@ -152,7 +152,7 @@ public class DataAccessLayer extends IDataLayer {
         } catch (Exception ex) {
             //say that db creation failed, specific tables have already been logged
 
-            TtUtils.TtReport.writeError(ex.getMessage(), "DataAccessLayer:CreateDB");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DataAccessLayer:CreateDB");
         }
     }
 
@@ -164,7 +164,7 @@ public class DataAccessLayer extends IDataLayer {
         }
         catch (Exception ex)
         {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DataAccessLayer:CreatePointTable");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DataAccessLayer:CreatePointTable");
             throw ex;
         }
     }
@@ -176,7 +176,7 @@ public class DataAccessLayer extends IDataLayer {
         }
         catch (Exception ex)
         {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DataAccessLayer:CreatePolygonTable");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DataAccessLayer:CreatePolygonTable");
             throw ex;
         }
     }
@@ -188,7 +188,7 @@ public class DataAccessLayer extends IDataLayer {
         }
         catch (Exception ex)
         {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DataAccessLayer:CreatePolygonTable");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DataAccessLayer:CreatePolygonTable");
             throw ex;
         }
 
@@ -201,7 +201,7 @@ public class DataAccessLayer extends IDataLayer {
         }
         catch (Exception ex)
         {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DataAccessLayer:CreateMetaDataTable");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DataAccessLayer:CreateMetaDataTable");
             throw ex;
         }
     }
@@ -213,7 +213,7 @@ public class DataAccessLayer extends IDataLayer {
         }
         catch (Exception ex)
         {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DataAccessLayer:CreateGpsPointDataTable");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DataAccessLayer:CreateGpsPointDataTable");
         }
     }
 
@@ -224,7 +224,7 @@ public class DataAccessLayer extends IDataLayer {
         }
         catch (Exception ex)
         {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DataAccessLayer:CreateTravPointDataTable");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DataAccessLayer:CreateTravPointDataTable");
         }
     }
 
@@ -235,7 +235,7 @@ public class DataAccessLayer extends IDataLayer {
         }
         catch (Exception ex)
         {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DataAccessLayer:CreateQuondamPointDataTable");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DataAccessLayer:CreateQuondamPointDataTable");
         }
     }
 
@@ -246,7 +246,7 @@ public class DataAccessLayer extends IDataLayer {
         }
         catch (Exception ex)
         {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DataAccessLayer:CreateProjectInfoDataTable");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DataAccessLayer:CreateProjectInfoDataTable");
         }
     }
 
@@ -257,7 +257,7 @@ public class DataAccessLayer extends IDataLayer {
         }
         catch (Exception ex)
         {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DataAccessLayer:CreateTtnmeaTable");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DataAccessLayer:CreateTtnmeaTable");
         }
     }
 
@@ -268,7 +268,7 @@ public class DataAccessLayer extends IDataLayer {
         }
         catch (Exception ex)
         {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DataAccessLayer:CreatePolygonAttrTable");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DataAccessLayer:CreatePolygonAttrTable");
             throw ex;
         }
     }
@@ -280,7 +280,7 @@ public class DataAccessLayer extends IDataLayer {
         }
         catch (Exception ex)
         {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DataAccessLayer:CreateActivityTable");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DataAccessLayer:CreateActivityTable");
             throw ex;
         }
     }
@@ -292,7 +292,7 @@ public class DataAccessLayer extends IDataLayer {
         }
         catch (Exception ex)
         {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DataAccessLayer:CreateDataDictionaryTable");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DataAccessLayer:CreateDataDictionaryTable");
             throw ex;
         }
     }
@@ -372,7 +372,7 @@ public class DataAccessLayer extends IDataLayer {
 
             c.close();
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:getPolygons");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:getPolygons");
             throw new RuntimeException("DAL:getPolygons");
         }
 
@@ -406,7 +406,7 @@ public class DataAccessLayer extends IDataLayer {
 
             _Activity.updateAction(DataActionType.InsertedPolygons);
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:insertPolygon");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:insertPolygon");
         } finally {
             _db.endTransaction();
         }
@@ -439,7 +439,7 @@ public class DataAccessLayer extends IDataLayer {
 
             _Activity.updateAction(DataActionType.ModifiedPolygons);
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:updatePolygon");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:updatePolygon");
         } finally {
             _db.endTransaction();
         }
@@ -463,7 +463,7 @@ public class DataAccessLayer extends IDataLayer {
                 _Activity.updateAction(DataActionType.DeletedPolygons);
             }
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:deletePolygon");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:deletePolygon");
         }
 
         return success;
@@ -668,7 +668,7 @@ public class DataAccessLayer extends IDataLayer {
 
             c.close();
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:getPoints");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:getPoints");
             throw new RuntimeException("DAL:getPoints");
         }
 
@@ -716,7 +716,7 @@ public class DataAccessLayer extends IDataLayer {
 
             c.close();
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:getGpsPointData");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:getGpsPointData");
         }
     }
 
@@ -745,7 +745,7 @@ public class DataAccessLayer extends IDataLayer {
 
             c.close();
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:getTravPointData");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:getTravPointData");
         }
     }
 
@@ -774,7 +774,7 @@ public class DataAccessLayer extends IDataLayer {
 
             c.close();
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:getQuondamPointData");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:getQuondamPointData");
         }
     }
     //endregion
@@ -798,7 +798,7 @@ public class DataAccessLayer extends IDataLayer {
                 _Activity.updateAction(DataActionType.InsertedPoints);
             }
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:insertPoint");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:insertPoint");
             success = false;
         } finally {
             _db.endTransaction();
@@ -829,7 +829,7 @@ public class DataAccessLayer extends IDataLayer {
                 _Activity.updateAction(DataActionType.ModifiedPoints);
             }
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:insertPoints");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:insertPoints");
             success = false;
         } finally {
             _db.endTransaction();
@@ -894,7 +894,7 @@ public class DataAccessLayer extends IDataLayer {
                     break;
             }
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:insertBasePoint");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:insertBasePoint");
             return false;
         }
         return true;
@@ -914,7 +914,7 @@ public class DataAccessLayer extends IDataLayer {
             _db.insert(TwoTrailsSchema.GpsPointSchema.TableName, null, cvs);
 
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:insertGpsData");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:insertGpsData");
         }
     }
 
@@ -933,7 +933,7 @@ public class DataAccessLayer extends IDataLayer {
             _db.insert(TwoTrailsSchema.TravPointSchema.TableName, null, cvs);
 
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:insertTravData");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:insertTravData");
         }
     }
 
@@ -949,7 +949,7 @@ public class DataAccessLayer extends IDataLayer {
 
             updateQuondamLink(point);
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:insertQuondamData");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:insertQuondamData");
         }
     }
     //endregion
@@ -977,7 +977,7 @@ public class DataAccessLayer extends IDataLayer {
                 _Activity.updateAction(DataActionType.ModifiedPoints);
             }
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:updatePoint");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:updatePoint");
         } finally {
             _db.endTransaction();
         }
@@ -998,7 +998,7 @@ public class DataAccessLayer extends IDataLayer {
                 _Activity.updateAction(DataActionType.ModifiedPoints);
             }
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:updatePoint");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:updatePoint");
         } finally {
             _db.endTransaction();
         }
@@ -1024,7 +1024,7 @@ public class DataAccessLayer extends IDataLayer {
                 _Activity.updateAction(DataActionType.ModifiedPoints);
             }
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:updatePoint");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:updatePoint");
         } finally {
             _db.endTransaction();
         }
@@ -1055,7 +1055,7 @@ public class DataAccessLayer extends IDataLayer {
                 _Activity.updateAction(DataActionType.ModifiedPoints);
             }
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:updatePoint");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:updatePoint");
         } finally {
             _db.endTransaction();
         }
@@ -1129,7 +1129,7 @@ public class DataAccessLayer extends IDataLayer {
                     }
                 }
             } catch (Exception ex) {
-                TtUtils.TtReport.writeError(ex.getMessage(), "DAL:updateBasePoint");
+                TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:updateBasePoint");
                 return false;
             }
         }
@@ -1273,7 +1273,7 @@ public class DataAccessLayer extends IDataLayer {
                 _Activity.updateAction(DataActionType.DeletedPoints);
             }
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:deletePoint");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:deletePoint");
         }
 
         return success;
@@ -1302,7 +1302,7 @@ public class DataAccessLayer extends IDataLayer {
             if (success)
                 _Activity.updateAction(DataActionType.DeletedPoints);
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:deletePointSafe");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:deletePointSafe");
         }
 
         return success;
@@ -1331,7 +1331,7 @@ public class DataAccessLayer extends IDataLayer {
                 _Activity.updateAction(DataActionType.DeletedPoints);
             }
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:deletePoints");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:deletePoints");
             success = false;
         }
 
@@ -1347,7 +1347,7 @@ public class DataAccessLayer extends IDataLayer {
 
             deleteNmeaByPointCN(point.getCN());
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:removeGpsData");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:removeGpsData");
         }
     }
 
@@ -1357,7 +1357,7 @@ public class DataAccessLayer extends IDataLayer {
                     TwoTrailsSchema.SharedSchema.CN + "=?",
                     new String[] { point.getCN() });
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:removeTravData");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:removeTravData");
         }
     }
 
@@ -1369,7 +1369,7 @@ public class DataAccessLayer extends IDataLayer {
 
             removeQuondamLink(point);
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:removeQuondamData");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:removeQuondamData");
         }
     }
     //endregion
@@ -1448,7 +1448,7 @@ public class DataAccessLayer extends IDataLayer {
 
             c.close();
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:getMetadata");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:getMetadata");
             throw new RuntimeException("DAL:getMetadata ");
         }
 
@@ -1501,7 +1501,7 @@ public class DataAccessLayer extends IDataLayer {
 
             _Activity.updateAction(DataActionType.InsertedMetadata);
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:insertMetadata");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:insertMetadata");
         } finally {
             _db.endTransaction();
         }
@@ -1540,7 +1540,7 @@ public class DataAccessLayer extends IDataLayer {
 
             _Activity.updateAction(DataActionType.ModifiedMetadata);
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:updateMetadata");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:updateMetadata");
         } finally {
             _db.endTransaction();
         }
@@ -1570,7 +1570,7 @@ public class DataAccessLayer extends IDataLayer {
                 _Activity.updateAction(DataActionType.DeletedMetadata);
             }
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:deleteMetadataSafe");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:deleteMetadataSafe");
             success = false;
         }
 
@@ -1588,7 +1588,7 @@ public class DataAccessLayer extends IDataLayer {
             if (success)
                 _Activity.updateAction(DataActionType.DeletedMetadata);
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:deleteMetadata");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:deleteMetadata");
         }
 
         return success;
@@ -1654,7 +1654,7 @@ public class DataAccessLayer extends IDataLayer {
 
             c.close();
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:getGroups");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:getGroups");
             throw new RuntimeException("DAL:getGroups");
         }
 
@@ -1696,7 +1696,7 @@ public class DataAccessLayer extends IDataLayer {
 
             _Activity.updateAction(DataActionType.InsertedGroups);
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:insertGroup");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:insertGroup");
         } finally {
             _db.endTransaction();
         }
@@ -1727,7 +1727,7 @@ public class DataAccessLayer extends IDataLayer {
 
             _db.setTransactionSuccessful();
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:updateGroup");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:updateGroup");
         } finally {
             _db.endTransaction();
         }
@@ -1748,7 +1748,7 @@ public class DataAccessLayer extends IDataLayer {
             if (success)
                 _Activity.updateAction(DataActionType.DeletedGroups);
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:deleteGroup");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:deleteGroup");
         }
 
         return success;
@@ -1973,7 +1973,7 @@ public class DataAccessLayer extends IDataLayer {
 
             c.close();
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:getNmeaBursts");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:getNmeaBursts");
             throw new RuntimeException("DAL:getNmeaBursts");
         }
 
@@ -1995,7 +1995,7 @@ public class DataAccessLayer extends IDataLayer {
 
             _db.setTransactionSuccessful();
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:insertNmeaBursts");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:insertNmeaBursts");
         } finally {
             _db.endTransaction();
         }
@@ -2015,7 +2015,7 @@ public class DataAccessLayer extends IDataLayer {
                 _db.setTransactionSuccessful();
             }
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:insertNmeaBurst");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:insertNmeaBurst");
         } finally {
             _db.endTransaction();
         }
@@ -2068,7 +2068,7 @@ public class DataAccessLayer extends IDataLayer {
 
             success = true;
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:insertGroup");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:insertGroup");
         }
 
         return success;
@@ -2087,7 +2087,7 @@ public class DataAccessLayer extends IDataLayer {
 
             _db.setTransactionSuccessful();
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:updateNmeaBursts");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:updateNmeaBursts");
         } finally {
             _db.endTransaction();
         }
@@ -2103,7 +2103,7 @@ public class DataAccessLayer extends IDataLayer {
 
             _db.setTransactionSuccessful();
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:updateNmeaBurst");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:updateNmeaBurst");
         } finally {
             _db.endTransaction();
         }
@@ -2156,7 +2156,7 @@ public class DataAccessLayer extends IDataLayer {
                     String.format("%s = '%s'", TwoTrailsSchema.SharedSchema.CN, burst.getCN()), null);
 
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:updateNmea");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:updateNmea");
         }
 
         return success;
@@ -2171,7 +2171,7 @@ public class DataAccessLayer extends IDataLayer {
                     TwoTrailsSchema.SharedSchema.CN + "=?",
                     new String[] { cn });
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:deleteNmea");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:deleteNmea");
         }
     }
 
@@ -2181,7 +2181,7 @@ public class DataAccessLayer extends IDataLayer {
                 TwoTrailsSchema.TtNmeaSchema.PointCN + "=?",
                 new String[] { pointCN });
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:deleteNmea");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:deleteNmea");
         }
     }
     //endregion
@@ -2241,7 +2241,7 @@ public class DataAccessLayer extends IDataLayer {
                     retString = c.getString(0);
             }
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DataAccessLayer:getProjectInfoField");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DataAccessLayer:getProjectInfoField");
         }
 
         return retString;
@@ -2284,7 +2284,7 @@ public class DataAccessLayer extends IDataLayer {
         }
         catch (Exception ex)
         {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DataAccessLayer:SetupProjInfo");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DataAccessLayer:SetupProjInfo");
         }
     }
 
@@ -2334,7 +2334,7 @@ public class DataAccessLayer extends IDataLayer {
         }
         catch (Exception ex)
         {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DataAccessLayer:SetProjectInfoField");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DataAccessLayer:SetProjectInfoField");
         }
     }
     //endregion
@@ -2426,7 +2426,7 @@ public class DataAccessLayer extends IDataLayer {
 
             c.close();
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:getPolygonGraphicOptions");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:getPolygonGraphicOptions");
             throw new RuntimeException("DAL:getPolygonGraphicOptions");
         }
 
@@ -2470,7 +2470,7 @@ public class DataAccessLayer extends IDataLayer {
             _db.setTransactionSuccessful();
             success = true;
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:insertPolygonGraphicOption");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:insertPolygonGraphicOption");
         } finally {
             _db.endTransaction();
         }
@@ -2500,7 +2500,7 @@ public class DataAccessLayer extends IDataLayer {
 
             _db.setTransactionSuccessful();
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:updatePolygonGraphicOption");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:updatePolygonGraphicOption");
         } finally {
             _db.endTransaction();
         }
@@ -2518,7 +2518,7 @@ public class DataAccessLayer extends IDataLayer {
                     TwoTrailsSchema.SharedSchema.CN + "=?",
                     new String[] { cn }) > 0;
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:deletePolygonGraphicOption");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:deletePolygonGraphicOption");
         }
 
         return success;
@@ -2557,7 +2557,7 @@ public class DataAccessLayer extends IDataLayer {
 
             c.close();
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:getUserActivity");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:getUserActivity");
             throw new RuntimeException("DAL:getUserActivity");
         }
 
@@ -2594,7 +2594,7 @@ public class DataAccessLayer extends IDataLayer {
             _db.setTransactionSuccessful();
             success = true;
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:insertUserActivity");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:insertUserActivity");
         } finally {
             _db.endTransaction();
         }
@@ -2654,7 +2654,7 @@ public class DataAccessLayer extends IDataLayer {
 
             dDal.close();
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:duplicate", ex.getStackTrace());
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:duplicate", ex.getStackTrace());
             return false;
         }
 
@@ -2742,7 +2742,7 @@ public class DataAccessLayer extends IDataLayer {
                 _db.delete(TwoTrailsSchema.TtNmeaSchema.TableName, nmeaDeleteQuerys.get(i), null);
             }
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:clean");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:clean");
         }
     }
 
@@ -2762,7 +2762,7 @@ public class DataAccessLayer extends IDataLayer {
 
             _Activity.updateAction(DataActionType.InsertedGroups);
         } catch (Exception ex) {
-            TtUtils.TtReport.writeError(ex.getMessage(), "DAL:Upgrade");
+            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:Upgrade");
         } finally {
             _db.endTransaction();
         }

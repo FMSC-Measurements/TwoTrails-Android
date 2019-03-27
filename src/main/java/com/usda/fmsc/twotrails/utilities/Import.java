@@ -419,7 +419,7 @@ public class Import {
                     return new ImportResult(ImportResultCode.Cancelled);
                 }
             } catch (Exception ex) {
-                TtUtils.TtReport.writeError(ex.getMessage(), "Import:TextImportTask", ex.getStackTrace());
+                TwoTrailApp.getContext().getReport().writeError(ex.getMessage(), "Import:TextImportTask", ex.getStackTrace());
                 return new ImportResult(ImportResultCode.ImportFailure, "Data error");
             }
         }
@@ -774,7 +774,7 @@ public class Import {
                     return new ImportResult(ImportResultCode.Cancelled);
                 }
             } catch (Exception ex) {
-                TtUtils.TtReport.writeError(ex.getMessage(), "Import:GPXImportTask", ex.getStackTrace());
+                TwoTrailApp.getContext().getReport().writeError(ex.getMessage(), "Import:GPXImportTask", ex.getStackTrace());
                 return new ImportResult(ImportResultCode.ImportFailure, "Data error");
             }
         }
@@ -948,7 +948,7 @@ public class Import {
                     return new ImportResult(ImportResultCode.Cancelled);
                 }
             } catch (Exception ex) {
-                TtUtils.TtReport.writeError(ex.getMessage(), "Import:GPXImportTask", ex.getStackTrace());
+                TwoTrailApp.getContext().getReport().writeError(ex.getMessage(), "Import:GPXImportTask", ex.getStackTrace());
                 return new ImportResult(ImportResultCode.ImportFailure, "Data error");
             }
         }

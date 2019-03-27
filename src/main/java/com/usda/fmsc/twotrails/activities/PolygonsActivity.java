@@ -308,7 +308,7 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
                 adjust = true;
             }
         } catch (Exception e) {
-            TtUtils.TtReport.writeError(e.getMessage(), "PolygonsActivity:deletePolygon");
+            TtAppCtx.getReport().writeError(e.getMessage(), "PolygonsActivity:deletePolygon");
             return false;
         }
 
