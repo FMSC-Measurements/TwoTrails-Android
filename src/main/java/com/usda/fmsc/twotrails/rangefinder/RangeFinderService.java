@@ -35,7 +35,6 @@ public class RangeFinderService extends Service implements BluetoothConnection.L
     private ArrayList<Listener> listeners = new ArrayList<>();
     private final Binder binder = new RangeFinderBinder();
 
-    private TtBluetoothManager bluetoothManager;
     private BluetoothConnection btConn;
 
     private PrintWriter logPrintWriter;
@@ -51,8 +50,6 @@ public class RangeFinderService extends Service implements BluetoothConnection.L
         super.onCreate();
 
         TtAppCtx = (TwoTrailApp) getApplicationContext();
-
-        bluetoothManager = new TtBluetoothManager();
 
         SharedPreferences prefs = TtAppCtx.getDeviceSettings().getPrefs();
 
@@ -153,13 +150,13 @@ public class RangeFinderService extends Service implements BluetoothConnection.L
 
     private RangeFinderDeviceStatus startExternalRangeFinder() {
         try {
-            BluetoothSocket socket = bluetoothManager.getSocket(_deviceUUID);
+            BluetoothSocket socket = TtAppCtx.getBluetoothManager().getSocket(_deviceUUID);
 
             if (socket != null) {
                 btConn = new BluetoothConnection(socket);
                 btConn.register(this);
                 btConn.start();
-                postRangeFinderStart();
+                postRangeFinderConnecting();
             } else {
                 if (btConn != null) {
                     btConn.disconnect();
@@ -173,7 +170,7 @@ public class RangeFinderService extends Service implements BluetoothConnection.L
             return RangeFinderDeviceStatus.RangeFinderError;
         }
 
-        return RangeFinderDeviceStatus.RangeFinderStarted;
+        return RangeFinderDeviceStatus.RangeFinderConnecting;
     }
 
     private RangeFinderDeviceStatus stopExternalRangeFinder() {
@@ -253,6 +250,11 @@ public class RangeFinderService extends Service implements BluetoothConnection.L
     @Override
     public void receivedString(String data) {
         parseRFString(data);
+    }
+
+    @Override
+    public void connectionStarted() {
+        postRangeFinderStart();
     }
 
     @Override
@@ -421,6 +423,22 @@ public class RangeFinderService extends Service implements BluetoothConnection.L
         }
     }
 
+    private void postRangeFinderConnecting() {
+        for (final Listener listener : listeners) {
+            try {
+                Handler handler = new Handler(Looper.getMainLooper());
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        listener.rangeFinderConnecting();
+                    }
+                });
+            } catch (Exception ex) {
+                TtAppCtx.getReport().writeError("RangeFinderService:postStop", ex.getMessage());
+            }
+        }
+    }
+
     private void postServiceStart() {
         for (final Listener listener : listeners) {
             try {
@@ -486,6 +504,7 @@ public class RangeFinderService extends Service implements BluetoothConnection.L
     public enum RangeFinderDeviceStatus {
         RangeFinderStarted,
         RangeFinderStopped,
+        RangeFinderConnecting,
         RangeFinderNeedsPermissions,
         RangeFinderError,
         RangeFinderServiceInUse,
@@ -580,6 +599,7 @@ public class RangeFinderService extends Service implements BluetoothConnection.L
 
         void rangeFinderStarted();
         void rangeFinderStopped();
+        void rangeFinderConnecting();
 
         void rangeFinderServiceStarted();
         void rangeFinderServiceStopped();

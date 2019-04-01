@@ -30,6 +30,9 @@ public class TtBluetoothManager {
         return adapter;
     }
 
+    public boolean deviceExists(String uuid) {
+        return getBluetoothDevice(uuid) != null;
+    }
 
     public BluetoothDevice getBluetoothDevice(String uuid) {
         try {

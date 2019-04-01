@@ -1041,6 +1041,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     public void gpsError(GpsService.GpsError error) {
         switch (error) {
             case LostDeviceConnection:
+                Toast.makeText(BaseMapActivity.this, "Lost GPS Connection", Toast.LENGTH_LONG).show();
                 break;
             case NoExternalGpsSocket:
                 break;

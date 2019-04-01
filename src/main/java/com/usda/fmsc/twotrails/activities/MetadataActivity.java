@@ -25,7 +25,6 @@ import com.usda.fmsc.android.dialogs.NumericInputDialog;
 import com.usda.fmsc.android.listeners.ComplexOnPageChangeListener;
 import com.usda.fmsc.geospatial.UomElevation;
 import com.usda.fmsc.geospatial.nmea.INmeaBurst;
-import com.usda.fmsc.twotrails.TwoTrailApp;
 import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.data.TwoTrailsSchema;
@@ -53,18 +52,30 @@ import com.usda.fmsc.utilities.StringEx;
 public class MetadataActivity extends CustomToolbarActivity {
     private HashMap<String, Listener> listeners;
 
-    TwoTrailApp TtAppCtx;
-
     private GpsService.Listener listener;
 
     private MenuItem miLock, miReset, miDelete;
 
-    private List<TtMetadata> _Metadata;
+    private List<TtMetadata> _Metadata2;
     private TtMetadata _CurrentMetadata, _deleteMeta;
     private int _CurrentIndex = INVALID_INDEX, _deleteIndex = INVALID_INDEX;
     private boolean _MetadataUpdated, adjust, _MetaLocked = true, menuCreated = false, gotNmea;
     private boolean ignoreMetaChange;
     private String addedMeta = null;
+
+    private List<TtMetadata> getMetadata() {
+        if (_Metadata2 == null || _Metadata2.size() < 1) {
+            _Metadata2 = TtAppCtx.getDAL().getMetadata();
+            if (mSectionsPagerAdapter != null)
+                mSectionsPagerAdapter.notifyDataSetChanged();
+        }
+
+        return _Metadata2;
+    }
+
+    private boolean isMetdataUpdated() {
+        return _MetadataUpdated;
+    }
 
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private ViewPager mViewPager;
@@ -102,14 +113,11 @@ public class MetadataActivity extends CustomToolbarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        TtAppCtx = getTtAppContext();
-
         setContentView(R.layout.activity_metadata);
 
         listeners = new HashMap<>();
 
-        _Metadata = TtAppCtx.getDAL().getMetadata();
-        if (_Metadata.size() > 0) {
+        if (getMetadata().size() > 0) {
             _CurrentIndex = 0;
             _CurrentMetadata = getMetaAtIndex(_CurrentIndex);
         } else {
@@ -192,7 +200,7 @@ public class MetadataActivity extends CustomToolbarActivity {
                                                 ignoreMetaChange = true;
 
                                                 moveToMetadata(_CurrentIndex);
-                                            } else if (_Metadata.size() > 1) {
+                                            } else if (getMetadata().size() > 1) {
                                                 _deleteIndex = _CurrentIndex;
                                                 _deleteMeta = _CurrentMetadata;
 
@@ -242,10 +250,10 @@ public class MetadataActivity extends CustomToolbarActivity {
 
     //region Save Delete Create Reset
     private void saveMetadata() {
-        if (_MetadataUpdated && _CurrentMetadata != null) {
+        if (isMetdataUpdated() && _CurrentMetadata != null) {
             TtAppCtx.getDAL().updateMetadata(_CurrentMetadata);
-            _Metadata.set(_CurrentIndex, _CurrentMetadata);
-            _MetadataUpdated = false;
+            getMetadata().set(_CurrentIndex, _CurrentMetadata);
+            setMetadataUpdated(false, false);
         }
     }
 
@@ -279,14 +287,14 @@ public class MetadataActivity extends CustomToolbarActivity {
                 }
 
                 if (index > INVALID_INDEX) {
-                    _Metadata.remove(index);
+                    getMetadata().remove(index);
                     mSectionsPagerAdapter.notifyDataSetChanged();
                 } else {
                     _deleteIndex = INVALID_INDEX;
                     _deleteMeta = null;
                 }
 
-                setMetadataUpdated(false);
+                setMetadataUpdated(false, false);
 
                 adjust = true;
             }
@@ -310,16 +318,16 @@ public class MetadataActivity extends CustomToolbarActivity {
 
         addedMeta = newMetadata.getCN();
 
-        _Metadata.add(newMetadata);
+        getMetadata().add(newMetadata);
         mSectionsPagerAdapter.notifyDataSetChanged();
 
-        moveToMetadata(_Metadata.size() - 1);
+        moveToMetadata(getMetadata().size() - 1);
 
         lockMetadata(false);
     }
 
     private void resetMetadata() {
-        if (_MetadataUpdated) {
+        if (isMetdataUpdated()) {
             AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 
             dialog.setTitle(String.format("Reset Metadata %s", _CurrentMetadata.getName()));
@@ -331,7 +339,7 @@ public class MetadataActivity extends CustomToolbarActivity {
                     _CurrentMetadata = getMetaAtIndex(_CurrentIndex);
                     onMetadataUpdate();
                     updateButtons();
-                    setMetadataUpdated(false);
+                    setMetadataUpdated(false, true);
                     lockMetadata(false);
                 }
             });
@@ -350,7 +358,7 @@ public class MetadataActivity extends CustomToolbarActivity {
     }
 
     private void moveToMetadata(int index, boolean smoothScroll) {
-        if (index > INVALID_INDEX && index < _Metadata.size()) {
+        if (index > INVALID_INDEX && index < getMetadata().size()) {
             mViewPager.setCurrentItem(index, smoothScroll);
             _CurrentMetadata = getMetaAtIndex(index);
             _CurrentIndex = index;
@@ -363,8 +371,8 @@ public class MetadataActivity extends CustomToolbarActivity {
     }
 
     private TtMetadata getMetaAtIndex(int index) {
-        if (index > INVALID_INDEX && index < _Metadata.size()) {
-            return new TtMetadata(_Metadata.get(index));
+        if (index > INVALID_INDEX && index < getMetadata().size()) {
+            return new TtMetadata(getMetadata().get(index));
         }
 
         return null;
@@ -390,7 +398,7 @@ public class MetadataActivity extends CustomToolbarActivity {
 
             _MetaLocked = true;
             onLockChange();
-        } else if (_Metadata.size() > 0) {
+        } else if (getMetadata().size() > 0) {
             if (menuCreated) {
                 miLock.setTitle(R.string.str_lock);
                 miLock.setIcon(R.drawable.ic_action_lock_open_white_36dp);
@@ -401,7 +409,7 @@ public class MetadataActivity extends CustomToolbarActivity {
                     AndroidUtils.UI.disableMenuItem(miDelete);
                 }
 
-                if (_MetadataUpdated) {
+                if (isMetdataUpdated()) {
                     AndroidUtils.UI.enableMenuItem(miReset);
                 } else {
                     AndroidUtils.UI.disableMenuItem(miReset);
@@ -413,11 +421,11 @@ public class MetadataActivity extends CustomToolbarActivity {
         }
     }
 
-    private void setMetadataUpdated(boolean updated) {
+    private void setMetadataUpdated(boolean updated, boolean updateUI) {
         _MetadataUpdated = updated;
 
-        if (menuCreated) {
-            if (_MetadataUpdated) {
+        if (menuCreated && updateUI) {
+            if (_MetadataUpdated && !_MetaLocked) {
                 AndroidUtils.UI.enableMenuItem(miReset);
             } else {
                 AndroidUtils.UI.disableMenuItem(miReset);
@@ -435,23 +443,25 @@ public class MetadataActivity extends CustomToolbarActivity {
     }
 
     private void onMetadataUpdate() {
-        _MetadataUpdated = true;
-
-        if (!_MetaLocked) {
-            miReset.setEnabled(true);
-        }
+        setMetadataUpdated(true, true);
 
         if (listeners.containsKey(_CurrentMetadata.getCN())) {
-            listeners.get(_CurrentMetadata.getCN()).onMetadataUpdated(_CurrentMetadata);
+            Listener listener = listeners.get(_CurrentMetadata.getCN());
+            if (listener != null)
+                listener.onMetadataUpdated(_CurrentMetadata);
+            else
+                TtAppCtx.getReport().writeError("Null Listener", "MetadataActivity:onMetadataUpdate");
         }
     }
 
     public TtMetadata getMetadata(String cn) {
-        for (TtMetadata metadata : _Metadata) {
+        for (TtMetadata metadata : getMetadata()) {
             if (metadata.getCN().equals(cn)) {
                 return metadata;
             }
         }
+
+        TtAppCtx.getReport().writeError("Metadata '" + cn + "' Not Found", "MetadataActivity:getMetadata(cn)");
 
         return null;
     }
@@ -915,21 +925,19 @@ public class MetadataActivity extends CustomToolbarActivity {
     }
 
     public void unregister(String metaCN) {
-        if (listeners.containsKey(metaCN)) {
-            listeners.remove(metaCN);
-        }
+        listeners.remove(metaCN);
     }
 
 
     public class SectionsPagerAdapter extends FragmentStatePagerAdapterEx {
 
-        public SectionsPagerAdapter(FragmentManager fm) {
+        SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
         }
 
         @Override
         public Fragment getItem(int position) {
-            String metaCN = _Metadata.get(position).getCN();
+            String metaCN = getMetadata().get(position).getCN();
 
             boolean addCard = !StringEx.isEmpty(addedMeta) && addedMeta.equals(metaCN);
 
@@ -942,13 +950,13 @@ public class MetadataActivity extends CustomToolbarActivity {
 
         @Override
         public int getCount() {
-            return _Metadata.size();
+            return getMetadata().size();
         }
 
         @Override
         public CharSequence getPageTitle(int position) {
             try {
-                return _Metadata.get(position).getName();
+                return getMetadata().get(position).getName();
             } catch (Exception e) {
                 e.printStackTrace();
             }

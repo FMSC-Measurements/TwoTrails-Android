@@ -34,6 +34,10 @@ public class BluetoothConnection extends Thread {
             }
 
             if (btSocket.isConnected()) {
+                for (Listener l : listeners) {
+                    l.connectionStarted();
+                }
+
                 inputStreamReader = new InputStreamReader(btSocket.getInputStream());
                 bufferedReader = new BufferedReader(inputStreamReader);
 
@@ -136,6 +140,7 @@ public class BluetoothConnection extends Thread {
 
     public interface Listener {
         void receivedString(String data);
+        void connectionStarted();
         void connectionLost();
         void connectionEnded();
         void failedToConnect();
