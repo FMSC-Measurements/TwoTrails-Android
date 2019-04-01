@@ -39,7 +39,6 @@ import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.rangefinder.RangeFinderService;
 import com.usda.fmsc.twotrails.rangefinder.TtRangeFinderData;
-import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -181,7 +180,7 @@ public class DeviceSettingsFragment extends PreferenceFragment {
     }
 
     private void setBTValues(ListPreference lstPref) {
-        TtBluetoothManager btm = new TtBluetoothManager();
+        TtBluetoothManager btm = TtAppCtx.getBluetoothManager();
 
         try {
             if (btm.isEnabled() && btm.isAvailable()) {
@@ -301,7 +300,14 @@ public class DeviceSettingsFragment extends PreferenceFragment {
 
                         @Override
                         public void gpsStarted() {
-
+                            if (gps.isExternalGpsUsed()) {
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        pd.setMessage("External GPS Connected. Listening for data.");
+                                    }
+                                });
+                            }
                         }
 
                         @Override
@@ -326,7 +332,7 @@ public class DeviceSettingsFragment extends PreferenceFragment {
 
                             TtAppCtx.getDeviceSettings().setGpsConfigured(false);
 
-                            String message = "";
+                            String message;
 
                             switch (error) {
                                 case LostDeviceConnection: message = "Lost connection to bluetooth device."; break;
@@ -334,12 +340,12 @@ public class DeviceSettingsFragment extends PreferenceFragment {
                                 case NoExternalGpsSocket: message = "Failed to create bluetooth socket."; break;
                                 case FailedToConnect: message = "Failed to connect to bluetooth device."; break;
                                 case Unknown: message = error.toString(); break;
+                                default: message = "An Unknown GPS error as occurred"; break;
                             }
 
                             activity.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    pd.setMessage(getString(R.string.ds_gps_not_connected));
                                     pd.hide();
                                 }
                             });
@@ -381,7 +387,7 @@ public class DeviceSettingsFragment extends PreferenceFragment {
                                     activity.runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
-                                            pd.setMessage("Internal GPS Started. Listening For Data.");
+                                            pd.setMessage("Internal GPS started. Listening for data.");
                                         }
                                     });
                                     break;
@@ -405,7 +411,16 @@ public class DeviceSettingsFragment extends PreferenceFragment {
                                     activity.runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
-                                            pd.setMessage("External GPS started. Listening for Data.");
+                                            pd.setMessage("External GPS started. Listening for data.");
+                                        }
+                                    });
+                                    break;
+                                }
+                                case ExternalGpsConnecting: {
+                                    activity.runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            pd.setMessage("Connecting to external GPS.");
                                         }
                                     });
                                     break;
@@ -427,16 +442,21 @@ public class DeviceSettingsFragment extends PreferenceFragment {
                                 }
                                 case GpsAlreadyStarted: {
                                     hideDialog.run();
-                                    Toast.makeText(activity,"GPS started. Listening for Data.", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(activity,"GPS started. Listening for data.", Toast.LENGTH_LONG).show();
                                     break;
                                 }
                                 default: hideDialog.run();
                                     break;
                             }
+
+                            activity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    pd.show();
+                                }
+                            });
                         }
                     };
-
-                    pd.show();
 
                     if (gps.isGpsRunning()) {
                         gps.stopGps();
@@ -516,11 +536,21 @@ public class DeviceSettingsFragment extends PreferenceFragment {
 
                         @Override
                         public void rangeFinderStarted() {
-
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    pd.setMessage("RangeFinder Connected. Listening for data.");
+                                }
+                            });
                         }
 
                         @Override
                         public void rangeFinderStopped() {
+
+                        }
+
+                        @Override
+                        public void rangeFinderConnecting() {
 
                         }
 
@@ -536,20 +566,28 @@ public class DeviceSettingsFragment extends PreferenceFragment {
 
                         @Override
                         public void rangeFinderError(RangeFinderService.RangeFinderError error) {
-                            TtAppCtx.getDeviceSettings().setRangeFinderConfigured(false);
+                            rf.removeListener(this);
+                            rf.stopRangeFinder();
 
-                            Toast.makeText(activity, error.toString(), Toast.LENGTH_SHORT).show();
+                            String message;
+
+                            switch (error) {
+                                case LostDeviceConnection: message = "Lost connection to bluetooth device."; break;
+                                case DeviceConnectionEnded: message = "Bluetooth connection terminated."; break;
+                                case NoExternalRangeFinderSocket: message = "Failed to create bluetooth socket."; break;
+                                case FailedToConnect: message = "Failed to connect to bluetooth device."; break;
+                                case Unknown: message = error.toString(); break;
+                                default: message = "An unknown RangeFinder error as occurred"; break;
+                            }
 
                             activity.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    pd.setMessage(getString(R.string.ds_rf_not_connected));
                                     pd.hide();
                                 }
                             });
 
-                            rf.removeListener(this);
-                            rf.stopRangeFinder();
+                            Toast.makeText(activity, message, Toast.LENGTH_SHORT).show();
                         }
                     };
 
@@ -591,6 +629,15 @@ public class DeviceSettingsFragment extends PreferenceFragment {
                                         }
                                     });
                                     break;
+                                case RangeFinderConnecting: {
+                                    activity.runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            pd.setMessage("Connecting to RangeFinder.");
+                                        }
+                                    });
+                                    break;
+                                }
                                 case RangeFinderError: {
                                     hideDialog.run();
                                     Toast.makeText(activity,"RangeFinder error.", Toast.LENGTH_LONG).show();
@@ -661,7 +708,7 @@ public class DeviceSettingsFragment extends PreferenceFragment {
 
 
     private boolean switchToExternal() {
-        TtBluetoothManager btm = new TtBluetoothManager();
+        TtBluetoothManager btm = TtAppCtx.getBluetoothManager();
         TtAppCtx.getDeviceSettings().setGpsConfigured(false);
         prefGpsCheck.setSummary(R.string.ds_gps_not_connected);
 

@@ -52,7 +52,6 @@ public class GpsService extends Service implements LocationListener, LocationSou
     private ArrayList<Listener> listeners = new ArrayList<>();
     private final Binder binder = new GpsBinder();
 
-    private TtBluetoothManager bluetoothManager;
     private BluetoothConnection btConn;
 
     private PrintWriter logPrintWriter;
@@ -64,7 +63,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
 
     private GpsSyncer gpsSyncer;
 
-    GnssStatus.Callback mGnssStatusCallback = new GnssStatus.Callback() {
+    private GnssStatus.Callback mGnssStatusCallback = new GnssStatus.Callback() {
         @Override
         public void onStarted() {
             postGpsStart();
@@ -95,8 +94,6 @@ public class GpsService extends Service implements LocationListener, LocationSou
         super.onCreate();
 
         TtAppCtx = (TwoTrailApp) getApplicationContext();
-
-        bluetoothManager = new TtBluetoothManager();
 
         gpsSyncer = new GpsSyncer();
 
@@ -199,7 +196,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
             }
         } else {
             status = GpsDeviceStatus.GpsAlreadyStarted;
-            //TtAppCtx.getTtNotifyManager().setGpsOn(isExternalGpsUsed());
+            TtAppCtx.getTtNotifyManager().setGpsOn(isExternalGpsUsed());
         }
 
         return status;
@@ -275,7 +272,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
 
     private GpsDeviceStatus startExternalGps() {
         try {
-            BluetoothSocket socket = bluetoothManager.getSocket(_deviceUUID);
+            BluetoothSocket socket = TtAppCtx.getBluetoothManager().getSocket(_deviceUUID);
 
             if (socket != null) {
                 if (btConn != null) {
@@ -294,7 +291,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
             return GpsDeviceStatus.ExternalGpsError;
         }
 
-        return GpsDeviceStatus.ExternalGpsStarted;
+        return GpsDeviceStatus.ExternalGpsConnecting;
     }
 
     private GpsDeviceStatus stopExternalGps() {
@@ -400,7 +397,19 @@ public class GpsService extends Service implements LocationListener, LocationSou
     }
 
     @Override
+    public void connectionStarted() {
+        postGpsStart();
+    }
+
+    @Override
     public void connectionLost() {
+        TtAppCtx.getTtNotifyManager().setGpsOff();
+
+        if (btConn != null) {
+            btConn.unregister(this);
+            btConn = null;
+        }
+
         postError(GpsError.LostDeviceConnection);
     }
 
@@ -675,6 +684,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
         InternalGpsNotEnabled,
         InternalGpsNeedsPermissions,
         InternalGpsError,
+        ExternalGpsConnecting,
         ExternalGpsStarted,
         ExternalGpsStopped,
         ExternalGpsNotFound,

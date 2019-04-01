@@ -8,7 +8,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -49,7 +48,6 @@ import com.usda.fmsc.android.widget.SheetFab;
 import com.usda.fmsc.android.widget.SheetLayoutEx;
 import com.usda.fmsc.android.widget.layoutmanagers.LinearLayoutManagerWithSmoothScroller;
 import com.usda.fmsc.twotrails.DeviceSettings;
-import com.usda.fmsc.twotrails.TwoTrailApp;
 import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.activities.base.PointMediaController;
 import com.usda.fmsc.twotrails.activities.base.PointMediaListener;
@@ -131,7 +129,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
     private ArrayList<TtPoint> _Points;
     private HashMap<String, TtPolygon> _Polygons;
-    private HashMap<String, TtMetadata> _MetaData;
+    private HashMap<String, TtMetadata> _Metadata;
     private TtPoint _CurrentPoint, _deletePoint;
     private TtPolygon _CurrentPolygon;
     private TtMetadata _CurrentMetadata;
@@ -157,6 +155,23 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
     private PostDelayHandler mediaLoaderDelayedHandler = new PostDelayHandler(500);
 
 
+    public HashMap<String, TtPolygon> getPolygons() {
+        if (_Polygons == null) {
+            _Polygons = TtAppCtx.getDAL().getPolygonsMap();
+        }
+
+        return _Polygons;
+    }
+
+    public HashMap<String, TtMetadata> getMetadata() {
+        if (_Metadata == null || _Metadata.size() == 0) {
+            _Metadata = TtAppCtx.getDAL().getMetadataMap();
+        }
+
+        return _Metadata;
+    }
+
+
     //region Listeners
     private ComplexOnPageChangeListener onPointPageChangeListener = new ComplexOnPageChangeListener() {
         @Override
@@ -169,7 +184,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
                 _CurrentIndex = position;
                 _CurrentPoint = getPointAtIndex(_CurrentIndex);
-                _CurrentMetadata = _MetaData.get(_CurrentPoint.getMetadataCN());
+                _CurrentMetadata = getMetadata().get(_CurrentPoint.getMetadataCN());
                 updateButtons();
 
                 if (slidingLayout != null && slidingLayout.getPanelState() != SlidingUpPanelLayout.PanelState.COLLAPSED) {
@@ -331,11 +346,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
             switch (item.getItemId()) {
                 case R.id.ctx_menu_add: {
                     Intent intent = new Intent(Intent.ACTION_PICK);
-
-                    if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-                    }
-
+                    intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
                     intent.setType("image/*");
                     startActivityForResult(intent, Consts.Codes.Requests.ADD_IMAGES);
                     break;
@@ -411,10 +422,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
         listeners = new HashMap<>();
 
-        _Polygons = TtAppCtx.getDAL().getPolygonsMap();
-        _MetaData = TtAppCtx.getDAL().getMetadataMap();
-
-        final TtPolygon[] polyArray = _Polygons.values().toArray(new TtPolygon[_Polygons.size()]);
+        final TtPolygon[] polyArray = getPolygons().values().toArray(new TtPolygon[getPolygons().size()]);
         Arrays.sort(polyArray);
 
         _Points = new ArrayList<>();
@@ -492,10 +500,10 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
             spinnerPoly.setAdapter(polyAdapter);
 
             String lastPolyCN = TtAppCtx.getProjectSettings().getLastEditedPolyCN();
-            if (_Polygons.containsKey(lastPolyCN)) {
+            if (getPolygons().containsKey(lastPolyCN)) {
                 TtPolygon tmp;
                 boolean lastSet = false;
-                for (int i = 0; i < _Polygons.size(); i++) {
+                for (int i = 0; i < getPolygons().size(); i++) {
                     tmp = polyArray[i];
 
                     if (tmp.getCN().equals(lastPolyCN)) {
@@ -1547,7 +1555,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
     private void moveToPoint(TtPoint point) {
         if (!_CurrentPolygon.getCN().equals(point.getPolyCN())) {
-            changePolygon(_Polygons.get(point.getPolyCN()));
+            changePolygon(getPolygons().get(point.getPolyCN()));
         }
 
         moveToPoint(point.getCN());
@@ -1570,7 +1578,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         if (index > INVALID_INDEX && index < _Points.size()) {
             pointViewPager.setCurrentItem(index, smoothScroll);
             _CurrentPoint = getPointAtIndex(index);
-            _CurrentMetadata = _MetaData.get(_CurrentPoint.getMetadataCN());
+            _CurrentMetadata = getMetadata().get(_CurrentPoint.getMetadataCN());
             _CurrentIndex = index;
         } else {
             _CurrentPoint = null;
@@ -1671,19 +1679,24 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
                 final TtPoint linkedPoint = points.get(0);
 
-                dialog.setMessage(StringEx.format("Move to Quondam %d in polygon %s.",
-                        linkedPoint.getPID(), _Polygons.get(linkedPoint.getPolyCN()).getName()));
+                TtPolygon linkedPoly = getPolygons().get(linkedPoint.getPolyCN());
+                if (linkedPoly != null) {
+                    dialog.setMessage(StringEx.format("Move to Quondam %d in polygon %s.",
+                            linkedPoint.getPID(), linkedPoly.getName()));
 
-                dialog.setPositiveButton(R.string.str_move, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        moveToPoint(linkedPoint);
-                    }
-                });
+                    dialog.setPositiveButton(R.string.str_move, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            moveToPoint(linkedPoint);
+                        }
+                    });
 
-                dialog.setNeutralButton(R.string.str_cancel, null);
+                    dialog.setNeutralButton(R.string.str_cancel, null);
 
-                dialog.show();
+                    dialog.show();
+                } else {
+                    Toast.makeText(PointsActivity.this, "Cannot find polygon from linked point. Database may be corrupted. See log for details.", Toast.LENGTH_LONG).show();
+                }
             }
         } else {
             Toast.makeText(this, "No Linked Points", Toast.LENGTH_SHORT).show();
@@ -2067,25 +2080,43 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
     //region Fragment Interaction
     private void onLockChange() {
         if (_CurrentPoint != null && listeners.containsKey(_CurrentPoint.getCN())) {
-            listeners.get(_CurrentPoint.getCN()).onLockChange(_PointLocked);
+            PointMediaListener listener = listeners.get(_CurrentPoint.getCN());
+            if (listener != null) {
+                listener.onLockChange(_PointLocked);
+            } else {
+                TtAppCtx.getReport().writeError("Listener is null", "PointsActivity:onLockChange:point");
+            }
         }
 
         if (_CurrentMedia != null && listeners.containsKey(_CurrentMedia.getCN())) {
-            listeners.get(_CurrentMedia.getCN()).onLockChange(_PointLocked);
+            PointMediaListener listener = listeners.get(_CurrentMedia.getCN());
+            if (listener != null) {
+                listener.onLockChange(_PointLocked);
+            } else {
+                TtAppCtx.getReport().writeError("Listener is null", "PointsActivity:onLockChange:media");
+            }
         }
     }
 
     private void onPointUpdate() {
         setPointUpdated(true);
 
-        if (_CurrentPoint != null && listeners.containsKey(_CurrentPoint.getCN())) {
-            listeners.get(_CurrentPoint.getCN()).onPointUpdated(_CurrentPoint);
+        PointMediaListener listener = listeners.get(_CurrentPoint.getCN());
+        if (listener != null) {
+            listener.onPointUpdated(_CurrentPoint);
+        } else {
+            TtAppCtx.getReport().writeError("Listener is null", "PointsActivity:onPointUpdate");
         }
     }
 
     private void onPointUpdate(TtPoint point) {
         if (listeners.containsKey(point.getCN())) {
-            listeners.get(point.getCN()).onPointUpdated(point);
+            PointMediaListener listener = listeners.get(point.getCN());
+            if (listener != null) {
+                listener.onPointUpdated(point);
+            } else {
+                TtAppCtx.getReport().writeError("Listener is null", "PointsActivity:onPointUpdate(point)");
+            }
         }
     }
 
@@ -2093,13 +2124,23 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         setMediaUpdated(true);
 
         if (listeners.containsKey(_CurrentMedia.getCN())) {
-            listeners.get(_CurrentMedia.getCN()).onMediaUpdated(_CurrentMedia);
+            PointMediaListener listener = listeners.get(_CurrentMedia.getCN());
+            if (listener != null) {
+                listener.onMediaUpdated(_CurrentMedia);
+            } else {
+                TtAppCtx.getReport().writeError("Listener is null", "PointsActivity:onMediaUpdate");
+            }
         }
     }
 
     private void onMediaUpdate(TtMedia media) {
         if (listeners.containsKey(media.getCN())) {
-            listeners.get(media.getCN()).onMediaUpdated(media);
+            PointMediaListener listener = listeners.get(media.getCN());
+            if (listener != null) {
+                listener.onMediaUpdated(media);
+            } else {
+                TtAppCtx.getReport().writeError("Listener is null", "PointsActivity:onMediaUpdate(media)");
+            }
         }
     }
 
@@ -2124,19 +2165,12 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
 
     public TtMetadata getMetadata(String cn) {
-        if (_MetaData.containsKey(cn)) {
-            return _MetaData.get(cn);
-        } else if (!_MetaData.containsKey(Consts.EmptyGuid)) {
-            TtAppCtx.getReport().writeError("Default Metadata not found", "PointsActivity:getMetadata");
-            throw new RuntimeException("Default Metadata not found");
+        if (getMetadata().containsKey(cn)) {
+            return getMetadata().get(cn);
         } else {
-            TtAppCtx.getReport().writeError("Defaulting to Default Metadata", "PointsActivity:getMetadata");
-            return _MetaData.get(Consts.EmptyGuid);
+            TtAppCtx.getReport().writeError("Metadata not found", "PointsActivity:getMetadata");
+            throw new RuntimeException("Metadata not found");
         }
-    }
-
-    public HashMap<String, TtPolygon> getPolygons() {
-        return _Polygons;
     }
 
     public BitmapManager getBitmapManager() {
@@ -2224,7 +2258,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         Intent intent = new Intent(this, AcquireAndCalculateGpsActivity.class);
         intent.putExtra(Consts.Codes.Data.POINT_DATA, TtUtils.Points.clonePoint(point));
         intent.putExtra(Consts.Codes.Data.POLYGON_DATA, _CurrentPolygon);
-        intent.putExtra(Consts.Codes.Data.METADATA_DATA, _MetaData.get(point.getMetadataCN()));
+        intent.putExtra(Consts.Codes.Data.METADATA_DATA, getMetadata().get(point.getMetadataCN()));
 
         if (bursts != null && bursts.size() > 0) {
             try {
@@ -2305,7 +2339,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
             if (_CurrentMetadata != null) {
                 intent.putExtra(Consts.Codes.Data.METADATA_DATA, _CurrentMetadata);
             } else {
-                intent.putExtra(Consts.Codes.Data.METADATA_DATA, _MetaData.get(Consts.EmptyGuid));
+                intent.putExtra(Consts.Codes.Data.METADATA_DATA, getMetadata().get(Consts.EmptyGuid));
             }
 
             intent.putExtra(Consts.Codes.Data.POLYGON_DATA, _CurrentPolygon);
@@ -2382,7 +2416,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
             if (_CurrentMetadata != null) {
                 intent.putExtra(Consts.Codes.Data.METADATA_DATA, _CurrentMetadata);
             } else {
-                intent.putExtra(Consts.Codes.Data.METADATA_DATA, _MetaData.get(Consts.EmptyGuid));
+                intent.putExtra(Consts.Codes.Data.METADATA_DATA, getMetadata().get(Consts.EmptyGuid));
             }
 
             intent.putExtra(Consts.Codes.Data.POLYGON_DATA, _CurrentPolygon);
@@ -2399,7 +2433,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
             if (bursts.size() > 0) {
                 Intent intent = new Intent(this, AcquireAndCalculateGpsActivity.class);
                 intent.putExtra(Consts.Codes.Data.POINT_DATA, TtUtils.Points.clonePoint(_CurrentPoint));
-                intent.putExtra(Consts.Codes.Data.METADATA_DATA, _MetaData.get(_CurrentPoint.getMetadataCN()));
+                intent.putExtra(Consts.Codes.Data.METADATA_DATA, getMetadata().get(_CurrentPoint.getMetadataCN()));
                 intent.putExtra(AcquireAndCalculateGpsActivity.CALCULATE_ONLY_MODE, true);
 
                 try {
@@ -2420,7 +2454,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                         Intent intent = new Intent(getBaseContext(), AcquireAndCalculateGpsActivity.class);
                         intent.putExtra(Consts.Codes.Data.POINT_DATA, new GpsPoint(_CurrentPoint));
                         intent.putExtra(Consts.Codes.Data.POLYGON_DATA, _CurrentPolygon);
-                        intent.putExtra(Consts.Codes.Data.METADATA_DATA, _MetaData.get(_CurrentPoint.getMetadataCN()));
+                        intent.putExtra(Consts.Codes.Data.METADATA_DATA, getMetadata().get(_CurrentPoint.getMetadataCN()));
                         intent.putExtra(AcquireAndCalculateGpsActivity.CALCULATE_ONLY_MODE, false);
 
                         startActivityForResult(intent, Consts.Codes.Activites.ACQUIRE);
@@ -2499,7 +2533,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
     }
 
     public void btnPointInfo(View view) {
-        PointEditorDialog dialog = PointEditorDialog.newInstance(_CurrentPoint.getCN(), _CurrentPoint.getPID(), _CurrentPoint.getMetadataCN(), _MetaData);
+        PointEditorDialog dialog = PointEditorDialog.newInstance(_CurrentPoint.getCN(), _CurrentPoint.getPID(), _CurrentPoint.getMetadataCN(), getMetadata());
 
         dialog.setEditPointListener(new PointEditorDialog.PointEditorListener() {
             @Override
@@ -2682,6 +2716,11 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
     }
 
     @Override
+    public void rangeFinderConnecting() {
+
+    }
+
+    @Override
     public void rangeFinderServiceStarted() {
 
     }
@@ -2705,9 +2744,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
     }
 
     public void unregister(String pointCN) {
-        if (listeners.containsKey(pointCN)) {
-            listeners.remove(pointCN);
-        }
+        listeners.remove(pointCN);
     }
 
     private class PointsPagerAdapter extends FragmentStatePagerAdapterEx {

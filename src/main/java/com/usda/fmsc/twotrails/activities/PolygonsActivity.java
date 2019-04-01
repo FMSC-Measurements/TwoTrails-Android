@@ -35,7 +35,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.usda.fmsc.utilities.StringEx;
 import com.usda.fmsc.utilities.Tuple;
-import com.usda.fmsc.utilities.kml.Point;
 
 public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
     private HashMap<String, Listener> listeners;
@@ -54,7 +53,16 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
 
     private ConcurrentHashMap<String, Tuple<Integer, ArrayList<PointD>>> drawPoints = new ConcurrentHashMap<>();
     private ConcurrentHashMap<String, Boolean> hasDrawPoints = new ConcurrentHashMap<>();
-    private HashMap<String, TtMetadata> metadata;
+
+    private List<TtPolygon> getPolygons() {
+        if (_Polygons == null) {
+            _Polygons = TtAppCtx.getDAL().getPolygons();
+            if (mSectionsPagerAdapter != null)
+                mSectionsPagerAdapter.notifyDataSetChanged();
+        }
+
+        return _Polygons;
+    }
 
     private ComplexOnPageChangeListener onPageChangeArrayListener = new ComplexOnPageChangeListener() {
         @Override
@@ -93,9 +101,7 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
 
         listeners = new HashMap<>();
 
-        metadata = TtAppCtx.getDAL().getMetadataMap();
-        _Polygons = TtAppCtx.getDAL().getPolygons();
-        if (_Polygons.size() > 0) {
+        if (getPolygons().size() > 0) {
             _CurrentIndex = 0;
             _CurrentPolygon = getPolyAtIndex(_CurrentIndex);
         }
@@ -176,7 +182,7 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
                                                 ignorePolyChange = true;
 
                                                 moveToPolygon(_CurrentIndex);
-                                            } else if (_Polygons.size() > 1) {
+                                            } else if (getPolygons().size() > 1) {
                                                 _deleteIndex = _CurrentIndex;
                                                 _deletePolygon = _CurrentPolygon;
 
@@ -225,8 +231,8 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
     }
 
     private TtPolygon getPolyAtIndex(int index) {
-        if (index > -1 && index < _Polygons.size()) {
-            return new TtPolygon(_Polygons.get(index));
+        if (index > -1 && index < getPolygons().size()) {
+            return new TtPolygon(getPolygons().get(index));
         }
 
         return null;
@@ -239,7 +245,7 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
         if (result == PolygonAdjuster.AdjustResult.SUCCESSFUL) {
             final int index = _CurrentIndex;
 
-            _Polygons = TtAppCtx.getDAL().getPolygons();
+            _Polygons = null;
 
             runOnUiThread(new Runnable() {
                 @Override
@@ -249,7 +255,7 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
                 }
             });
 
-            for (TtPolygon poly : _Polygons)
+            for (TtPolygon poly : getPolygons())
                 onPolygonPointsUpdated(poly);
         }
     }
@@ -258,7 +264,7 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
     private void savePolygon() {
         if (_PolygonUpdated && _CurrentPolygon != null) {
             TtAppCtx.getDAL().updatePolygon(_CurrentPolygon);
-            _Polygons.set(_CurrentIndex, _CurrentPolygon);
+            getPolygons().set(_CurrentIndex, _CurrentPolygon);
             _PolygonUpdated = false;
         }
     }
@@ -294,7 +300,7 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
                 }
 
                 if (index > INVALID_INDEX) {
-                    _Polygons.remove(index);
+                    getPolygons().remove(index);
                     mSectionsPagerAdapter.notifyDataSetChanged();
                 } else {
                     _deleteIndex = INVALID_INDEX;
@@ -327,10 +333,10 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
 
         addedPoly = newPolygon.getCN();
 
-        _Polygons.add(newPolygon);
+        getPolygons().add(newPolygon);
         mSectionsPagerAdapter.notifyDataSetChanged();
 
-        moveToPolygon(_Polygons.size() - 1);
+        moveToPolygon(getPolygons().size() - 1);
 
         updateButtons();
 
@@ -348,7 +354,7 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
                     _CurrentPolygon = getPolyAtIndex(_CurrentIndex);
-                    onPolygonUpdate();
+                    onPolygonUpdated();
                     updateButtons();
                     setPolygonUpdated(false);
                     lockPolygon(false);
@@ -369,7 +375,7 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
 
     private void moveToPolygon(int index, boolean smoothScroll) {
         if (index != _CurrentIndex) {
-            if (index > INVALID_INDEX && index < _Polygons.size()) {
+            if (index > INVALID_INDEX && index < getPolygons().size()) {
                 mViewPager.setCurrentItem(index, smoothScroll);
                 _CurrentPolygon = getPolygonAtIndex(index);
                 _CurrentIndex = index;
@@ -385,8 +391,8 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
     public TtPolygon getPolygonAtIndex(int index) {
         TtPolygon poly = null;
 
-        if (index > INVALID_INDEX && index < _Polygons.size()) {
-            poly = new TtPolygon(_Polygons.get(index));
+        if (index > INVALID_INDEX && index < getPolygons().size()) {
+            poly = new TtPolygon(getPolygons().get(index));
         }
 
         return poly;
@@ -396,7 +402,7 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
     //region Update UI
     private void updateButtons() {
         if (menuCreated) {
-            if (_Polygons.size() > 0)
+            if (getPolygons().size() > 0)
                 AndroidUtils.UI.enableMenuItem(miAdjust);
             else
                 AndroidUtils.UI.disableMenuItem(miAdjust);
@@ -417,7 +423,7 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
 
             _PolyLocked = true;
             onLockChange();
-        } else if (_Polygons.size() > 0) {
+        } else if (getPolygons().size() > 0) {
             if (menuCreated) {
                 miLock.setTitle(R.string.str_lock);
                 miLock.setIcon(R.drawable.ic_action_lock_open_white_36dp);
@@ -456,7 +462,7 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
         }
     }
 
-    private void onPolygonUpdate() {
+    private void onPolygonUpdated() {
         _PolygonUpdated = true;
 
         if (!_PolyLocked) {
@@ -464,19 +470,31 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
         }
 
         if (listeners.containsKey(_CurrentPolygon.getCN())) {
-            listeners.get(_CurrentPolygon.getCN()).onPolygonUpdated(_CurrentPolygon);
+            Listener listener = listeners.get(_CurrentPolygon.getCN());
+            if (listener != null)
+                listener.onPolygonPointsUpdated(_CurrentPolygon);
+            else
+                TtAppCtx.getReport().writeError("Null Listener", "PolygonsActivity:onPolygonUpdate");
         }
     }
 
-    private void onPolygonUpdate(TtPolygon poly) {
+    private void onPolygonUpdated(TtPolygon poly) {
         if (listeners.containsKey(poly.getCN())) {
-            listeners.get(poly.getCN()).onPolygonUpdated(poly);
+            Listener listener = listeners.get(poly.getCN());
+            if (listener != null)
+                listener.onPolygonPointsUpdated(poly);
+            else
+                TtAppCtx.getReport().writeError("Null Listener", "PolygonsActivity:onPolygonUpdate(cn)");
         }
     }
 
     private void onPolygonPointsUpdated(TtPolygon poly) {
         if (listeners.containsKey(poly.getCN())) {
-            listeners.get(poly.getCN()).onPolygonPointsUpdated(poly);
+            Listener listener = listeners.get(poly.getCN());
+            if (listener != null)
+                listener.onPolygonPointsUpdated(poly);
+            else
+                TtAppCtx.getReport().writeError("Null Listener", "PolygonsActivity:onPolygonPointsUpdated");
         }
     }
 
@@ -495,7 +513,7 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
     }
 
     public TtPolygon getPolygon(String cn) {
-        for (TtPolygon polygon : _Polygons) {
+        for (TtPolygon polygon : getPolygons()) {
             if (polygon.getCN().equals(cn)) {
                 return new TtPolygon(polygon);
             }
@@ -508,7 +526,7 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
         boolean hdpk = hasDrawPoints.containsKey(poly.getCN());
         Tuple<Integer, ArrayList<PointD>> dpk = hdpk ? drawPoints.get(poly.getCN()) : null;
 
-        if (!reset && hdpk && (dpk.Item1 == width || width == 0)) {
+        if (!reset && hdpk && dpk != null && (dpk.Item1 == width || width == 0)) {
             return dpk.Item2;
         } else if (!hdpk || reset) {
             if (width > 0) {
@@ -522,12 +540,16 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
                                 new Thread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        int zone = metadata.get(Consts.EmptyGuid).getZone();
+                                        HashMap<String, TtMetadata> metadata = TtAppCtx.getDAL().getMetadataMap();
+                                        TtMetadata defMeta = metadata.get(Consts.EmptyGuid);
+                                        if (defMeta != null) {
+                                            drawPoints.put(poly.getCN(), new Tuple<>(width, TtUtils.UI.generateStaticPolyPoints(points, metadata, defMeta.getZone(), (int)(width * 0.9))));
+                                            hasDrawPoints.put(poly.getCN(), true);
 
-                                        drawPoints.put(poly.getCN(), new Tuple<>(width, TtUtils.UI.generateStaticPolyPoints(points, metadata, zone, (int)(width * 0.9))));
-                                        hasDrawPoints.put(poly.getCN(), true);
-
-                                        onPolygonUpdate(poly);
+                                            onPolygonUpdated(poly);
+                                        } else {
+                                            TtAppCtx.getReport().writeError("No default Metadata", "PolygonsActivity:getDrawPoints");
+                                        }
                                     }
                                 }).start();
                             }
@@ -557,21 +579,19 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
     }
 
     public void unregister(String polyCN) {
-        if (listeners.containsKey(polyCN)) {
-            listeners.remove(polyCN);
-        }
+        listeners.remove(polyCN);
     }
 
 
     public class SectionsPagerAdapter extends FragmentStatePagerAdapterEx {
 
-        public SectionsPagerAdapter(FragmentManager fm) {
+        private SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
         }
 
         @Override
         public Fragment getItem(int position) {
-            String polyCN = _Polygons.get(position).getCN();
+            String polyCN = getPolygons().get(position).getCN();
 
             boolean addCard = !StringEx.isEmpty(addedPoly) && addedPoly.equals(polyCN);
 
@@ -584,13 +604,13 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
 
         @Override
         public int getCount() {
-            return _Polygons.size();
+            return getPolygons().size();
         }
 
         @Override
         public CharSequence getPageTitle(int position) {
             try {
-                return _Polygons.get(position).getName();
+                return getPolygons().get(position).getName();
             } catch (Exception e) {
                 e.printStackTrace();
             }
