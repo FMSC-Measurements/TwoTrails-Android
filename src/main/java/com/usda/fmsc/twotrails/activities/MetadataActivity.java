@@ -56,7 +56,7 @@ public class MetadataActivity extends CustomToolbarActivity {
 
     private MenuItem miLock, miReset, miDelete;
 
-    private List<TtMetadata> _Metadata2;
+    private List<TtMetadata> _Metadata;
     private TtMetadata _CurrentMetadata, _deleteMeta;
     private int _CurrentIndex = INVALID_INDEX, _deleteIndex = INVALID_INDEX;
     private boolean _MetadataUpdated, adjust, _MetaLocked = true, menuCreated = false, gotNmea;
@@ -64,16 +64,22 @@ public class MetadataActivity extends CustomToolbarActivity {
     private String addedMeta = null;
 
     private List<TtMetadata> getMetadata() {
-        if (_Metadata2 == null || _Metadata2.size() < 1) {
-            _Metadata2 = TtAppCtx.getDAL().getMetadata();
-            if (mSectionsPagerAdapter != null)
-                mSectionsPagerAdapter.notifyDataSetChanged();
+        if (_Metadata == null || _Metadata.size() < 1) {
+            _Metadata = TtAppCtx.getDAL().getMetadata();
+            if (mSectionsPagerAdapter != null) {
+                new Handler(getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mSectionsPagerAdapter.notifyDataSetChanged();
+                    }
+                });
+            }
         }
 
-        return _Metadata2;
+        return _Metadata;
     }
 
-    private boolean isMetdataUpdated() {
+    private boolean isMetadataUpdated() {
         return _MetadataUpdated;
     }
 
@@ -250,7 +256,7 @@ public class MetadataActivity extends CustomToolbarActivity {
 
     //region Save Delete Create Reset
     private void saveMetadata() {
-        if (isMetdataUpdated() && _CurrentMetadata != null) {
+        if (isMetadataUpdated() && _CurrentMetadata != null) {
             TtAppCtx.getDAL().updateMetadata(_CurrentMetadata);
             getMetadata().set(_CurrentIndex, _CurrentMetadata);
             setMetadataUpdated(false, false);
@@ -327,7 +333,7 @@ public class MetadataActivity extends CustomToolbarActivity {
     }
 
     private void resetMetadata() {
-        if (isMetdataUpdated()) {
+        if (isMetadataUpdated()) {
             AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 
             dialog.setTitle(String.format("Reset Metadata %s", _CurrentMetadata.getName()));
@@ -409,7 +415,7 @@ public class MetadataActivity extends CustomToolbarActivity {
                     AndroidUtils.UI.disableMenuItem(miDelete);
                 }
 
-                if (isMetdataUpdated()) {
+                if (isMetadataUpdated()) {
                     AndroidUtils.UI.enableMenuItem(miReset);
                 } else {
                     AndroidUtils.UI.disableMenuItem(miReset);
