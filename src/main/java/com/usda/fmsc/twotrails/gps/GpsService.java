@@ -382,7 +382,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
     }
 
     public boolean isExternalGpsUsed() {
-        return btConn != null;
+        return _deviceUUID != null;// && btConn != null;
     }
 
     public GpsProvider getGpsProvider() {

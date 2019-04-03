@@ -1039,7 +1039,12 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
             _Points = TtAppCtx.getDAL().getPointsInPolygon(_CurrentPolygon.getCN());
 
-            pointSectionsPagerAdapter.notifyDataSetChanged();
+            new Handler(getMainLooper()).post(new Runnable() {
+                @Override
+                public void run() {
+                    pointSectionsPagerAdapter.notifyDataSetChanged();
+                }
+            });
 
             int numberOfPoints = _Points.size();
 
@@ -1185,7 +1190,12 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
                 if (index > INVALID_INDEX) {
                     _Points.remove(index);
-                    pointSectionsPagerAdapter.notifyDataSetChanged();
+                    new Handler(getMainLooper()).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            pointSectionsPagerAdapter.notifyDataSetChanged();
+                        }
+                    });
                 } else {
                     _deleteIndex = INVALID_INDEX;
                     _deletePoint = null;
@@ -1247,8 +1257,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
                     createPoint(op);
 
-                    BasePointFragment fragment = (BasePointFragment) pointSectionsPagerAdapter.getFragments().get(_CurrentIndex);
-                    fragment.showCard();
+                    ((BasePointFragment) pointSectionsPagerAdapter.getFragments().get(_CurrentIndex)).showCard();
                 }
 
                 @Override
@@ -1332,9 +1341,15 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
         try {
             addedPoint = newPoint.getCN();
-            pointSectionsPagerAdapter.notifyDataSetChanged();
+            new Handler(getMainLooper()).post(new Runnable() {
+                @Override
+                public void run() {
+                    pointSectionsPagerAdapter.notifyDataSetChanged();
+                }
+            });
             moveToPoint(_CurrentIndex);
         } catch (Exception e) {
+            TtAppCtx.getReport().writeError(e.getMessage(), "PointsActivity:createPoint(OpType)", e.getStackTrace());
             e.printStackTrace();
         }
 
@@ -1611,7 +1626,12 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                     return;
                 }
 
-                pointSectionsPagerAdapter.notifyDataSetChanged();
+                new Handler(getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        pointSectionsPagerAdapter.notifyDataSetChanged();
+                    }
+                });
 
                 int pointSize = _Points.size();
                 if (pointSize > 0) {
@@ -2622,8 +2642,13 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                         promptToFillTravDataFromRF(rfData);
                     }
                 }
-            } else {
-                Toast.makeText(PointsActivity.this, "Point is Locked. Unlock to edit.", Toast.LENGTH_LONG).show();
+            } else if (_CurrentPoint.getOp() == OpType.SideShot) {
+                createPoint(OpType.SideShot);
+                updateCurrentPointFromRangeFinderData(rfData, true, true);
+                lockPoint(true);
+                Toast.makeText(PointsActivity.this, "Created SideShot from RF Data.", Toast.LENGTH_LONG).show();
+
+                //Toast.makeText(PointsActivity.this, "Point is Locked. Unlock to edit.", Toast.LENGTH_LONG).show();
             }
         } else {
             Toast.makeText(PointsActivity.this, "Range Finder did not supply Slope and/or Distance", Toast.LENGTH_LONG).show();
@@ -2647,7 +2672,8 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                                 autoSetAzFwd = true;
                             }
 
-                            updateTravPointFromRangeFinder(rfData, true, true);
+                            updateCurrentPointFromRangeFinderData(rfData, true, true);
+                            Toast.makeText(PointsActivity.this, "RF Data Applied", Toast.LENGTH_LONG).show();
                         }
                     }, 2)
                     .setNegativeButton("Back", new DontAskAgainDialog.OnClickListener() {
@@ -2658,7 +2684,8 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                                 autoSetAz = true;
                                 autoSetAzFwd = false;
                             }
-                            updateTravPointFromRangeFinder(rfData, true, false);
+                            updateCurrentPointFromRangeFinderData(rfData, true, false);
+                            Toast.makeText(PointsActivity.this, "RF Data Applied", Toast.LENGTH_LONG).show();
                         }
                     }, 1)
                     .setNeutralButton("No Az", new DontAskAgainDialog.OnClickListener() {
@@ -2668,31 +2695,32 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                                 autoSetTrav = false;
                                 autoSetAz = false;
                             }
-                            updateTravPointFromRangeFinder(rfData, false, false);
+                            updateCurrentPointFromRangeFinderData(rfData, false, false);
+                            Toast.makeText(PointsActivity.this, "RF Data Applied", Toast.LENGTH_LONG).show();
                         }
                     })
                     .show();
         } else {
-            updateTravPointFromRangeFinder(rfData, autoSetAz, autoSetAzFwd);
+            updateCurrentPointFromRangeFinderData(rfData, autoSetAz, autoSetAzFwd);
         }
     }
 
-    private void updateTravPointFromRangeFinder(TtRangeFinderData rfData, boolean useCompassData, boolean useFwdDir) {
-        TravPoint trav = ((TravPoint)_CurrentPoint);
+    private void updateCurrentPointFromRangeFinderData(TtRangeFinderData rfData, boolean useCompassData, boolean useFwdDir) {
+        if (_CurrentPoint != null && _CurrentPoint.getOp() == OpType.SideShot) {
+            TravPoint trav = ((TravPoint)_CurrentPoint);
 
-        trav.setSlopeAngle(TtUtils.Convert.angle(rfData.getInclination(), Slope.Percent, rfData.getIncType()));
-        trav.setSlopeDistance(TtUtils.Convert.distance(rfData.getSlopeDist(), Dist.Meters, rfData.getSlopeDistType()));
+            trav.setSlopeAngle(TtUtils.Convert.angle(rfData.getInclination(), Slope.Percent, rfData.getIncType()));
+            trav.setSlopeDistance(TtUtils.Convert.distance(rfData.getSlopeDist(), Dist.Meters, rfData.getSlopeDistType()));
 
-        if (useCompassData && rfData.hasCompassData()) {
-            if (useFwdDir)
-                trav.setFwdAz(TtUtils.Convert.angle(rfData.getAzimuth(), Slope.Degrees, rfData.getAzType()));
-            else
-                trav.setBkAz(TtUtils.Convert.angle(rfData.getAzimuth(), Slope.Degrees, rfData.getAzType()));
+            if (useCompassData && rfData.hasCompassData()) {
+                if (useFwdDir)
+                    trav.setFwdAz(TtUtils.Convert.angle(rfData.getAzimuth(), Slope.Degrees, rfData.getAzType()));
+                else
+                    trav.setBkAz(TtUtils.Convert.angle(rfData.getAzimuth(), Slope.Degrees, rfData.getAzType()));
+            }
+
+            onPointUpdate();
         }
-
-        Toast.makeText(PointsActivity.this, "RF Data Applied", Toast.LENGTH_LONG).show();
-
-        onPointUpdate();
     }
 
     @Override
@@ -2702,7 +2730,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
     @Override
     public void rfInvalidStringReceived(String rfString) {
-        Toast.makeText(this, "Invalid Range Finder data recieved", Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "Invalid Range Finder data received", Toast.LENGTH_LONG).show();
     }
 
     @Override

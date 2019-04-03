@@ -57,8 +57,14 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
     private List<TtPolygon> getPolygons() {
         if (_Polygons == null) {
             _Polygons = TtAppCtx.getDAL().getPolygons();
-            if (mSectionsPagerAdapter != null)
-                mSectionsPagerAdapter.notifyDataSetChanged();
+            if (mSectionsPagerAdapter != null) {
+                new Handler(getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mSectionsPagerAdapter.notifyDataSetChanged();
+                    }
+                });
+            }
         }
 
         return _Polygons;
