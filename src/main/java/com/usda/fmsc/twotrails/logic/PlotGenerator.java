@@ -3,7 +3,7 @@ package com.usda.fmsc.twotrails.logic;
 import android.os.AsyncTask;
 
 import com.usda.fmsc.twotrails.Consts;
-import com.usda.fmsc.twotrails.TwoTrailApp;
+import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
 import com.usda.fmsc.twotrails.data.TwoTrailsSchema;
 import com.usda.fmsc.twotrails.objects.PointD;
@@ -56,7 +56,7 @@ public class PlotGenerator extends AsyncTask<PlotGenerator.PlotParams, Void, TtP
 
         TtPolygon poly = new TtPolygon();
         poly.setName(pp.PolyName);
-        poly.setPointStartIndex(TwoTrailApp.getContext().getDAL().getItemCount(TwoTrailsSchema.PolygonSchema.TableName) * 1000 + 1010);
+        poly.setPointStartIndex(TwoTrailsApp.getInstance().getDAL().getItemCount(TwoTrailsSchema.PolygonSchema.TableName) * 1000 + 1010);
         poly.setIncrementBy(1);
         poly.setAccuracy(Consts.Default_Point_Accuracy);
 

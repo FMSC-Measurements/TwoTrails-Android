@@ -30,7 +30,7 @@
     <uses-permission android:name="com.usda.fmsc.twotrails.permission.MAPS_RECEIVE" />
 
     <application
-        android:name=".TwoTrailApp"
+        android:name=".TwoTrailsApp"
         android:allowBackup="true"
         android:allowClearUserData="true"
         android:fullBackupContent="true"

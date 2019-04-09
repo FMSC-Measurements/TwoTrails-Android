@@ -12,7 +12,6 @@ import java.util.List;
 import com.usda.fmsc.android.utilities.ParcelTools;
 import com.usda.fmsc.geospatial.EastWest;
 import com.usda.fmsc.geospatial.GeoPosition;
-import com.usda.fmsc.geospatial.GnssType;
 import com.usda.fmsc.geospatial.NorthSouth;
 import com.usda.fmsc.geospatial.UomElevation;
 import com.usda.fmsc.geospatial.nmea.INmeaBurst;
@@ -21,9 +20,8 @@ import com.usda.fmsc.geospatial.nmea.sentences.GGASentence;
 import com.usda.fmsc.geospatial.nmea.sentences.GSASentence;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.geospatial.utm.UTMTools;
-import com.usda.fmsc.twotrails.TwoTrailApp;
+import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.objects.TtObject;
-import com.usda.fmsc.twotrails.utilities.TtUtils;
 import com.usda.fmsc.utilities.ParseEx;
 import com.usda.fmsc.utilities.StringEx;
 
@@ -242,7 +240,7 @@ public class TtNmeaBurst extends TtObject implements Parcelable {
 
             dest.writeString(getSatellitesInViewString());
         } catch (Exception e) {
-            TwoTrailApp.getContext().getReport().writeError(e.getMessage(), "TtNmeaBurst:writeToParcel");
+            TwoTrailsApp.getInstance().getReport().writeError(e.getMessage(), "TtNmeaBurst:writeToParcel");
             throw e;
         }
     }

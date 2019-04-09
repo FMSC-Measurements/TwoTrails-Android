@@ -22,7 +22,7 @@ import com.usda.fmsc.android.listeners.SimpleTextWatcher;
 import com.usda.fmsc.android.utilities.PostDelayHandler;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.TwoTrailApp;
+import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.activities.GetMapExtentsActivity;
 import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
 import com.usda.fmsc.twotrails.ui.CheckMarkAnimatedView;
@@ -87,7 +87,7 @@ public class NewArcMapDialog extends DialogFragment {
             defaultUri = bundle.getString(DEFAULT_URI, StringEx.Empty);
 
             if (mode == CreateMode.OFFLINE_FROM_OFFLINE_URL || mode == CreateMode.OFFLINE_FROM_ONLINE_URL && defaultUri != null)
-                defaultUri = TwoTrailApp.getContext().getArcGISTools().getOfflineUrlFromOnlineUrl(defaultUri);
+                defaultUri = TwoTrailsApp.getInstance().getArcGISTools().getOfflineUrlFromOnlineUrl(defaultUri);
         }
     }
 
@@ -139,7 +139,7 @@ public class NewArcMapDialog extends DialogFragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         if (aLayer == null) {
-                            aLayer = TwoTrailApp.getContext().getArcGISTools().createMapLayer(
+                            aLayer = TwoTrailsApp.getInstance().getArcGISTools().createMapLayer(
                                     txtName.getText().toString(),
                                     txtDesc.getText().toString(),
                                     txtLoc.getText().toString(),
@@ -154,7 +154,7 @@ public class NewArcMapDialog extends DialogFragment {
                         }
 
                         if (mode == CreateMode.NEW_ONLINE || mode == CreateMode.OFFLINE_FROM_FILE) {
-                            TwoTrailApp.getContext().getArcGISTools().addMapLayer(aLayer);
+                            TwoTrailsApp.getInstance().getArcGISTools().addMapLayer(aLayer);
                         } else {
                             Intent intent = new Intent(getContext(), GetMapExtentsActivity.class);
 
@@ -241,7 +241,7 @@ public class NewArcMapDialog extends DialogFragment {
             }
 
             if (mode == CreateMode.OFFLINE_FROM_ONLINE_URL || mode == CreateMode.OFFLINE_FROM_OFFLINE_URL) {
-                url = TwoTrailApp.getContext().getArcGISTools().getOfflineUrlFromOnlineUrl(url);
+                url = TwoTrailsApp.getInstance().getArcGISTools().getOfflineUrlFromOnlineUrl(url);
             }
 
             final String fUrl = url;
@@ -249,7 +249,7 @@ public class NewArcMapDialog extends DialogFragment {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    TwoTrailApp.getContext().getArcGISTools().getLayerFromUrl(fUrl, getContext(), new ArcGISTools.IGetArcMapLayerListener() {
+                    TwoTrailsApp.getInstance().getArcGISTools().getLayerFromUrl(fUrl, getContext(), new ArcGISTools.IGetArcMapLayerListener() {
                         @Override
                         public void onComplete(ArcGisMapLayer layer) {
                             if (txtDesc.getText().length() < 1 && layer.getDescription().length() > 0) {

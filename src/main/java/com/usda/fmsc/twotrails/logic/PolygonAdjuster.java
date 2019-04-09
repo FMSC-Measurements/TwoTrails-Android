@@ -1,6 +1,6 @@
 package com.usda.fmsc.twotrails.logic;
 
-import com.usda.fmsc.twotrails.TwoTrailApp;
+import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
 import com.usda.fmsc.twotrails.data.TwoTrailsSchema;
 import com.usda.fmsc.twotrails.objects.points.QuondamPoint;
@@ -90,7 +90,7 @@ public class PolygonAdjuster {
                             result = AdjustResult.ERROR;
                         }
                     } catch (Exception ex) {
-                        TwoTrailApp.getContext().getReport().writeError(ex.getMessage(), "PolygonAdjuster:adjust");
+                        TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "PolygonAdjuster:adjust");
                         result = AdjustResult.ERROR;
                     } finally {
                         _processing = false;
@@ -195,7 +195,7 @@ public class PolygonAdjuster {
                 calculateAreaAndPerimeter(dal);
             }
         } catch (Exception ex) {
-            TwoTrailApp.getContext().getReport().writeError(ex.getMessage(), "PolygonAdjuster:adjust");
+            TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "PolygonAdjuster:adjust");
             return false;
         }
 
@@ -238,7 +238,7 @@ public class PolygonAdjuster {
 
                     dal.updatePolygon(poly);
                 } catch (Exception ex) {
-                    TwoTrailApp.getContext().getReport().writeError(ex.getMessage(), "SegmentFactory:CalculateAreaAndPerimeter");
+                    TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "SegmentFactory:CalculateAreaAndPerimeter");
                 }
             }
         }

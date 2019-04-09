@@ -11,7 +11,7 @@ import android.widget.Toast;
 import com.usda.fmsc.android.widget.multiselection.MultiSelector;
 import com.usda.fmsc.android.widget.multiselection.SelectableHolder;
 import com.usda.fmsc.android.widget.RecyclerViewEx;
-import com.usda.fmsc.twotrails.TwoTrailApp;
+import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.utilities.gpx.GpxBaseTrack;
 import com.usda.fmsc.utilities.gpx.GpxDocument;
 import com.usda.fmsc.utilities.StringEx;
@@ -168,7 +168,7 @@ public class ImportGpxFragment extends BaseImportFragment {
         for (GpxTracksAdapter.GpxBaseTrackHolder holder : polyParams) {
             params.add(new GPXImportTask.GPXPolyParams(
                     holder.getName(), null, null, null, null,
-                    tracks.get(holder.getAdapterPosition()), TwoTrailApp.getContext().getMetadataSettings().getDefaultMetadata()));
+                    tracks.get(holder.getAdapterPosition()), TwoTrailsApp.getInstance().getMetadataSettings().getDefaultMetadata()));
         }
 
         return params;

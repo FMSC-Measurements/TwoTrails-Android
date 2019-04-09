@@ -10,7 +10,7 @@ import com.usda.fmsc.geospatial.UomElevation;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.MapSettings;
 import com.usda.fmsc.twotrails.ProjectSettings;
-import com.usda.fmsc.twotrails.TwoTrailApp;
+import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
 import com.usda.fmsc.twotrails.objects.DataActionType;
 import com.usda.fmsc.twotrails.objects.TtUserAction;
@@ -47,7 +47,7 @@ import com.usda.fmsc.utilities.StringEx;
 
 @SuppressWarnings({"UnusedReturnValue", "unused", "WeakerAccess"})
 public class DataAccessLayer extends IDataLayer {
-    private TwoTrailApp TtAppCtx;
+    private TwoTrailsApp TtAppCtx;
 
     public String getFilePath() {
         return _FilePath;
@@ -74,7 +74,7 @@ public class DataAccessLayer extends IDataLayer {
 
 
     //region Constructors / Open / Close
-    public DataAccessLayer(String filePath, TwoTrailApp contex) {
+    public DataAccessLayer(String filePath, TwoTrailsApp contex) {
         TtAppCtx = contex;
 
         _FilePath = filePath;

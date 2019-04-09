@@ -14,8 +14,7 @@ import android.widget.Toast;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.dialogs.InputDialog;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.TwoTrailApp;
-import com.usda.fmsc.twotrails.utilities.ArcGISTools;
+import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 public class SettingsLogic {
@@ -28,8 +27,8 @@ public class SettingsLogic {
         alert.setPositiveButton("Reset", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                TwoTrailApp.getContext().getDeviceSettings().reset();
-                TwoTrailApp.getContext().getArcGISTools().reset();
+                TwoTrailsApp.getInstance().getDeviceSettings().reset();
+                TwoTrailsApp.getInstance().getArcGISTools().reset();
             }
         });
 
@@ -47,7 +46,7 @@ public class SettingsLogic {
         alert.setPositiveButton("Clear", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                TwoTrailApp.getContext().getReport().clearReport();
+                TwoTrailsApp.getInstance().getReport().clearReport();
                 Toast.makeText(context, "Log Cleared", Toast.LENGTH_SHORT).show();
             }
         });
@@ -60,12 +59,12 @@ public class SettingsLogic {
     public static void exportReport(final Activity activity) {
         AlertDialog.Builder dialog = new AlertDialog.Builder(activity);
 
-        if (TwoTrailApp.getContext().getDAL() != null) {
+        if (TwoTrailsApp.getInstance().getDAL() != null) {
             dialog.setMessage("Would you like to include the current project into the report?")
                     .setPositiveButton(R.string.str_yes, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            onExportReportComplete(TtUtils.exportReport(TwoTrailApp.getContext().getDAL()), activity);
+                            onExportReportComplete(TtUtils.exportReport(TwoTrailsApp.getInstance().getDAL()), activity);
                         }
                     })
                     .setNegativeButton(R.string.str_no, new DialogInterface.OnClickListener() {
@@ -117,12 +116,12 @@ public class SettingsLogic {
             public void onClick(DialogInterface dialog, int which) {
                 switch (idialog.getText().toLowerCase()) {
                     case "dev": {
-                        TwoTrailApp.getContext().getDeviceSettings().enabledDevelopterOptions(true);
+                        TwoTrailsApp.getInstance().getDeviceSettings().enabledDevelopterOptions(true);
                         Toast.makeText(context, "Developer Mode Enabled", Toast.LENGTH_LONG).show();
                         break;
                     }
                     case "disable dev": {
-                        TwoTrailApp.getContext().getDeviceSettings().enabledDevelopterOptions(false);
+                        TwoTrailsApp.getInstance().getDeviceSettings().enabledDevelopterOptions(false);
                         Toast.makeText(context, "Developer Mode Disabled", Toast.LENGTH_LONG).show();
                         break;
                     }

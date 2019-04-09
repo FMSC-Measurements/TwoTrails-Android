@@ -23,7 +23,7 @@ import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.utilities.WebRequest;
 import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.TwoTrailApp;
+import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
 import com.usda.fmsc.utilities.Encryption;
 import com.usda.fmsc.utilities.FileUtils;
@@ -44,7 +44,7 @@ import java.util.List;
 public class ArcGISTools {
     private static ArcGISTools _ArcGISTools;
 
-    private TwoTrailApp TtAppCtx;
+    private TwoTrailsApp TtAppCtx;
     
     private SpatialReference LatLonSpatialReference = SpatialReference.create(4326);
 
@@ -62,7 +62,7 @@ public class ArcGISTools {
 
 
 
-    public ArcGISTools(TwoTrailApp context) {
+    public ArcGISTools(TwoTrailsApp context) {
         TtAppCtx = context;
         
         mapLayers = new HashMap<>();

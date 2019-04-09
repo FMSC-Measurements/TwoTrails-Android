@@ -21,7 +21,7 @@ import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.TwoTrailApp;
+import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.objects.map.GoogleMapsPolygonGrahpic;
 import com.usda.fmsc.twotrails.objects.map.GoogleMapsTrailGraphic;
@@ -31,7 +31,6 @@ import com.usda.fmsc.twotrails.objects.map.PolygonGraphicManager;
 import com.usda.fmsc.twotrails.objects.map.TrailGraphicManager;
 import com.usda.fmsc.twotrails.units.GoogleMapType;
 import com.usda.fmsc.twotrails.units.MapType;
-import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -121,7 +120,7 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
         map = googleMap;
 
         //use external GPS if available
-        TwoTrailApp TtAppCtx = TwoTrailApp.getContext();
+        TwoTrailsApp TtAppCtx = TwoTrailsApp.getInstance();
 
         if (TtAppCtx.getDeviceSettings().isGpsConfigured() && TtAppCtx.getDeviceSettings().getGpsExternal()) {
             GpsService.GpsBinder binder = TtAppCtx.getGps();
@@ -174,7 +173,7 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
                     ));
                 }
             } catch (Exception e) {
-                TwoTrailApp.getContext().getReport().writeError("ManagedSupportMapFragment:onMapReady", e.getMessage(), e.getStackTrace());
+                TwoTrailsApp.getInstance().getReport().writeError("ManagedSupportMapFragment:onMapReady", e.getMessage(), e.getStackTrace());
             }
         }
 
@@ -247,7 +246,7 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
         {
             moveToLocation(CameraUpdateFactory.newLatLng(new LatLng(lat, lon)), animate);
         } catch (Exception ex) {
-            TwoTrailApp.getContext().getReport().writeError(ex.getMessage(), "ManagedSupportMapFragment:moveToLocation(f,f,b)", ex.getStackTrace());
+            TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "ManagedSupportMapFragment:moveToLocation(f,f,b)", ex.getStackTrace());
         }
     }
 
@@ -259,7 +258,7 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
                     zoomLevel
             ), animate);
         } catch (Exception ex) {
-            TwoTrailApp.getContext().getReport().writeError(ex.getMessage(), "ManagedSupportMapFragment:moveToLocation(f,f,f,b)", ex.getStackTrace());
+            TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "ManagedSupportMapFragment:moveToLocation(f,f,f,b)", ex.getStackTrace());
         }
     }
 
@@ -274,7 +273,7 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
                     padding
             ), animate);
         } catch (Exception ex) {
-            TwoTrailApp.getContext().getReport().writeError(ex.getMessage(), "ManagedSupportMapFragment:moveToLocation(e,i,b)", ex.getStackTrace());
+            TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "ManagedSupportMapFragment:moveToLocation(e,i,b)", ex.getStackTrace());
         }
     }
 

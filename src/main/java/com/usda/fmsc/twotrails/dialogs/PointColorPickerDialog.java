@@ -20,7 +20,7 @@ import com.larswerkman.holocolorpicker.ValueBar;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.twotrails.MapSettings;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.TwoTrailApp;
+import com.usda.fmsc.twotrails.TwoTrailsApp;
 
 import java.util.Arrays;
 
@@ -159,7 +159,7 @@ public class PointColorPickerDialog extends DialogFragment {
 
                     @Override
                     public void onClick(View view) {
-                        MapSettings ms = TwoTrailApp.getContext().getMapSettings();
+                        MapSettings ms = TwoTrailsApp.getInstance().getMapSettings();
 
                         updateColor(0, ms.getDefaultAdjBndColor());
                         updateColor(1, ms.getDefaultAdjNavColor());

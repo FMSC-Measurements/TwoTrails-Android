@@ -55,7 +55,7 @@ import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.geospatial.utm.UTMTools;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.TwoTrailApp;
+import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.activities.SettingsActivity;
 import com.usda.fmsc.twotrails.adapters.PointDetailsAdapter;
 import com.usda.fmsc.twotrails.adapters.PolyMarkerMapRvAdapter;
@@ -78,7 +78,6 @@ import com.usda.fmsc.twotrails.units.GoogleMapType;
 import com.usda.fmsc.twotrails.units.MapTracking;
 import com.usda.fmsc.twotrails.units.MapType;
 import com.usda.fmsc.twotrails.utilities.AppUnits;
-import com.usda.fmsc.twotrails.utilities.ArcGISTools;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 import com.usda.fmsc.utilities.StringEx;
 
@@ -116,7 +115,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     private static final String SELECT_MAP = "selectMap";
 
     //region Vars
-    protected TwoTrailApp TtAppCtx;
+    protected TwoTrailsApp TtAppCtx;
 
     private MapType mapType = MapType.None;
     private int mapId;

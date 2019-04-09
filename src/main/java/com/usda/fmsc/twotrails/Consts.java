@@ -145,6 +145,7 @@ public class Consts {
             public static final String MAP_DATA = "MapData";
             public static final String TTIMAGE = "TtImage";
             public static final String ORIENTATION = "Orientation";
+            public static final String CRASH = "AppCrash";
         }
 
         public static class Requests {

@@ -805,7 +805,6 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                             card.setVisibilityListener(new AnimationCardFragment.VisibilityListener() {
                                 @Override
                                 public void onHidden() {
-
                                     new Handler().post(new Runnable() {
                                         public void run() {
                                             if (_CurrentIndex == 0 && _Points.size() < 2) {
@@ -1232,130 +1231,134 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                 } else if (op == OpType.Quondam) {
                     Toast.makeText(PointsActivity.this, "Quondam must have a Parent Point selected", Toast.LENGTH_SHORT).show();
                 }
+            } else if (_CurrentPoint.isGpsType() && op.isTravType()) {
+                Toast.makeText(PointsActivity.this,
+                        StringEx.format("A %s cannot be the first point in a polygon. You must have a valid GPS Type point before it.", op.toString()),
+                        Toast.LENGTH_LONG).show();
+            } else {
+                _deletePoint = _CurrentPoint;
 
-                return;
-            }
+                final BasePointFragment fragment = (BasePointFragment) pointSectionsPagerAdapter.getFragments().get(_CurrentIndex);
 
-            BasePointFragment fragment = (BasePointFragment) pointSectionsPagerAdapter.getFragments().get(_CurrentIndex);
+                fragment.setVisibilityListener(new BasePointFragment.VisibilityListener() {
+                    @Override
+                    public void onHidden() {
 
-            fragment.setVisibilityListener(new BasePointFragment.VisibilityListener() {
-                @Override
-                public void onHidden() {
+                        if (deletePoint(_deletePoint, INVALID_INDEX)) {
+                            _Points.remove(_CurrentIndex);
+                            _CurrentIndex--;
 
-                    if (deletePoint(_deletePoint, INVALID_INDEX)) {
-                        _Points.remove(_CurrentIndex);
-                        _CurrentIndex--;
+                            if (_CurrentIndex > INVALID_INDEX) {
+                                _CurrentPoint = getPointAtIndex(_CurrentIndex);
+                            } else {
+                                _CurrentPoint = null;
+                            }
 
-                        if (_CurrentIndex > INVALID_INDEX) {
-                            _CurrentPoint = getPointAtIndex(_CurrentIndex);
+                            pointSectionsPagerAdapter.notifyDataSetChanged();
                         } else {
-                            _CurrentPoint = null;
+                            throw new RuntimeException("Unable to delete point.");
                         }
-                    } else {
-                        throw new RuntimeException("Unable to delete point.");
+
+                        createPoint(op);
+
+                        if (_CurrentIndex < _Points.size() && _CurrentIndex > INVALID_INDEX) {
+                            BasePointFragment frag = ((BasePointFragment) pointSectionsPagerAdapter.getFragments().get(_CurrentIndex));
+                            if (frag != null) {
+                                frag.showCard();
+                            }
+                        }
                     }
 
-                    createPoint(op);
+                    @Override
+                    public void onVisible() {
 
-                    ((BasePointFragment) pointSectionsPagerAdapter.getFragments().get(_CurrentIndex)).showCard();
-                }
-
-                @Override
-                public void onVisible() {
-
-                }
-            });
-            fragment.hideCard();
-
-            return;
+                    }
+                });
+                fragment.hideCard();
+            }
         } else {
             savePoint();
             saveMedia();
-        }
 
-        if (op.isTravType() && _CurrentIndex < 0) {
-            Toast.makeText(PointsActivity.this,
-                    StringEx.format("A %s cannot be the first point in a polygon. Take a GPS Type point first.", op.toString()),
-                    Toast.LENGTH_SHORT).show();
-            return;
-        }
+            if (op.isTravType() && _CurrentIndex < 0) {
+                Toast.makeText(PointsActivity.this,
+                        StringEx.format("A %s cannot be the first point in a polygon. Take a GPS Type point first.", op.toString()),
+                        Toast.LENGTH_LONG).show();
+                return;
+            }
 
-        TtPoint newPoint =  TtUtils.Points.createNewPointByOpType(op);
-        newPoint.setCN(java.util.UUID.randomUUID().toString());
+            TtPoint newPoint = TtUtils.Points.createNewPointByOpType(op);
+            newPoint.setCN(java.util.UUID.randomUUID().toString());
 
-        if (_CurrentPoint != null) {
-            if (op != OpType.WayPoint) {
-                if (_CurrentPoint.getOp() == OpType.WayPoint) {
-                    boolean onBnd = true;
-                    for (int i = _CurrentIndex - 1; i > -1; i--) {
-                        TtPoint p = _Points.get(i);
-                        if (p.getOp() != OpType.WayPoint) {
-                            onBnd = p.isOnBnd();
-                            break;
+            if (_CurrentPoint != null) {
+                if (op != OpType.WayPoint) {
+                    if (_CurrentPoint.getOp() == OpType.WayPoint) {
+                        boolean onBnd = true;
+                        for (int i = _CurrentIndex - 1; i > -1; i--) {
+                            TtPoint p = _Points.get(i);
+                            if (p.getOp() != OpType.WayPoint) {
+                                onBnd = p.isOnBnd();
+                                break;
+                            }
                         }
+
+                        newPoint.setOnBnd(onBnd);
+                    } else {
+                        newPoint.setOnBnd(_CurrentPoint.isOnBnd());
                     }
-
-                    newPoint.setOnBnd(onBnd);
                 } else {
-                    newPoint.setOnBnd(_CurrentPoint.isOnBnd());
+                    newPoint.setOnBnd(false);
                 }
             } else {
-                newPoint.setOnBnd(false);
+                newPoint.setOnBnd(true);
             }
-        } else {
-            newPoint.setOnBnd(true);
-        }
 
-        newPoint.setPolyCN(_CurrentPolygon.getCN());
-        newPoint.setPolyName(_CurrentPolygon.getName());
+            newPoint.setPolyCN(_CurrentPolygon.getCN());
+            newPoint.setPolyName(_CurrentPolygon.getName());
 
-        newPoint.setGroupCN(Consts.EmptyGuid);
-        newPoint.setGroupName(Consts.Defaults.MainGroupName);
+            newPoint.setGroupCN(Consts.EmptyGuid);
+            newPoint.setGroupName(Consts.Defaults.MainGroupName);
 
-        if (_CurrentMetadata != null) {
-            newPoint.setMetadataCN(_CurrentMetadata.getCN());
-        } else {
-            newPoint.setMetadataCN(Consts.EmptyGuid);
-        }
+            if (_CurrentMetadata != null) {
+                newPoint.setMetadataCN(_CurrentMetadata.getCN());
+            } else {
+                newPoint.setMetadataCN(Consts.EmptyGuid);
+            }
 
-        if (_Points.size() > 0 && _CurrentIndex < _Points.size() - 1) {
-            //insert
-            newPoint.setPID(PointNamer.nameInsertPoint(_Points.get(_CurrentIndex)));
-            _CurrentIndex++;
-            _Points.add(_CurrentIndex, newPoint);
-
-            updatePointIndexes(_CurrentIndex);
-        } else {
-            //add
-            if (_Points.size() > 0) {
-                newPoint.setPID(PointNamer.namePoint(_Points.get(_CurrentIndex), _CurrentPolygon));
+            if (_Points.size() > 0 && _CurrentIndex < _Points.size() - 1) {
+                //insert
+                newPoint.setPID(PointNamer.nameInsertPoint(_Points.get(_CurrentIndex)));
                 _CurrentIndex++;
+                _Points.add(_CurrentIndex, newPoint);
+
+                updatePointIndexes(_CurrentIndex);
             } else {
-                newPoint.setPID(PointNamer.nameFirstPoint(_CurrentPolygon));
-                _CurrentIndex = 0;
-            }
-            _Points.add(newPoint);
-        }
-
-        newPoint.setIndex(_CurrentIndex);
-
-        try {
-            addedPoint = newPoint.getCN();
-            new Handler(getMainLooper()).post(new Runnable() {
-                @Override
-                public void run() {
-                    pointSectionsPagerAdapter.notifyDataSetChanged();
+                //add
+                if (_Points.size() > 0) {
+                    newPoint.setPID(PointNamer.namePoint(_Points.get(_CurrentIndex), _CurrentPolygon));
+                    _CurrentIndex++;
+                } else {
+                    newPoint.setPID(PointNamer.nameFirstPoint(_CurrentPolygon));
+                    _CurrentIndex = 0;
                 }
-            });
-            moveToPoint(_CurrentIndex);
-        } catch (Exception e) {
-            TtAppCtx.getReport().writeError(e.getMessage(), "PointsActivity:createPoint(OpType)", e.getStackTrace());
-            e.printStackTrace();
-        }
+                _Points.add(newPoint);
+            }
 
-        AndroidUtils.UI.enableMenuItem(miLock);
-        lockPoint(false);
-        adjust = true;
+            newPoint.setIndex(_CurrentIndex);
+
+            try {
+                addedPoint = newPoint.getCN();
+                pointSectionsPagerAdapter.notifyDataSetChanged();
+                moveToPoint(_CurrentIndex);
+            } catch (Exception e) {
+                TtAppCtx.getReport().writeError(e.getMessage(), "PointsActivity:createPoint(OpType)", e.getStackTrace());
+                e.printStackTrace();
+            }
+
+            AndroidUtils.UI.enableMenuItem(miLock);
+            lockPoint(false);
+            adjust = true;
+        }
     }
 
     private void updatePointIndexes(final int startIndex) {

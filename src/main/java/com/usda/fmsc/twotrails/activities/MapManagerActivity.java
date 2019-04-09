@@ -28,7 +28,6 @@ import com.usda.fmsc.android.widget.SheetFab;
 import com.usda.fmsc.android.widget.layoutmanagers.LinearLayoutManagerWithSmoothScroller;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.TwoTrailApp;
 import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.dialogs.NewArcMapDialog;
 import com.usda.fmsc.twotrails.dialogs.SelectMapTypeDialog;
@@ -97,7 +96,7 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
             });
         }
 
-        maps = new ArrayList<>(TtAppCtx.getContext().getArcGISTools().getMapLayers());
+        maps = new ArrayList<>(TtAppCtx.getInstance().getArcGISTools().getMapLayers());
         visibleMaps = new ArrayList<>();
 
         Collections.sort(maps);

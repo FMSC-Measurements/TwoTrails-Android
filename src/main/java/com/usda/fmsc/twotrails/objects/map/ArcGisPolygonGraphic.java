@@ -13,13 +13,12 @@ import com.esri.core.symbol.SimpleMarkerSymbol;
 import com.esri.core.symbol.Symbol;
 import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.geospatial.GeoPosition;
-import com.usda.fmsc.twotrails.TwoTrailApp;
+import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.units.OpType;
-import com.usda.fmsc.twotrails.utilities.ArcGISTools;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.util.HashMap;
@@ -99,10 +98,10 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
             metadata = meta.get(point.getMetadataCN());
 
             adjPos = TtUtils.Points.getLatLonFromPoint(point, true, metadata);
-            adjLL = TwoTrailApp.getContext().getArcGISTools().latLngToMapSpatial(adjPos.getLatitudeSignedDecimal(), adjPos.getLongitudeSignedDecimal(), map);
+            adjLL = TwoTrailsApp.getInstance().getArcGISTools().latLngToMapSpatial(adjPos.getLatitudeSignedDecimal(), adjPos.getLongitudeSignedDecimal(), map);
 
             unAdjPos = TtUtils.Points.getLatLonFromPoint(point, false, metadata);
-            unadjLL = TwoTrailApp.getContext().getArcGISTools().latLngToMapSpatial(unAdjPos.getLatitudeSignedDecimal(), unAdjPos.getLongitudeSignedDecimal(), map);
+            unadjLL = TwoTrailsApp.getInstance().getArcGISTools().latLngToMapSpatial(unAdjPos.getLatitudeSignedDecimal(), unAdjPos.getLongitudeSignedDecimal(), map);
 
             adjmk = new Graphic(adjLL, adjMkOpts);
             unadjmk = new Graphic(adjLL, unAdjMkOpts);

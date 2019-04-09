@@ -8,11 +8,11 @@ import android.preference.PreferenceFragment;
 
 import com.usda.fmsc.twotrails.ProjectSettings;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.TwoTrailApp;
+import com.usda.fmsc.twotrails.TwoTrailsApp;
 
 
 public class ProjectFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
-    private TwoTrailApp TtAppCtx;
+    private TwoTrailsApp TtAppCtx;
 
     public static ProjectFragment newInstance() {
         return new ProjectFragment();
@@ -22,7 +22,7 @@ public class ProjectFragment extends PreferenceFragment implements SharedPrefere
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        TtAppCtx = TwoTrailApp.getContext();
+        TtAppCtx = TwoTrailsApp.getInstance();
 
         addPreferencesFromResource(R.xml.project_settings);
 

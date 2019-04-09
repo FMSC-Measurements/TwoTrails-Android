@@ -15,12 +15,11 @@ import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.TwoTrailApp;
+import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.fragments.map.ArcGisMapFragment;
 import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
-import com.usda.fmsc.twotrails.utilities.ArcGISTools;
 import com.usda.fmsc.twotrails.utilities.DownloadOfflineArcGISMapTask;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 import com.usda.fmsc.utilities.FileUtils;
@@ -32,7 +31,7 @@ import java.io.File;
 public class GetMapExtentsActivity extends AppCompatActivity implements GpsService.Listener {
     public static final String MAP_LAYER = "MapLayer";
 
-    private TwoTrailApp TtAppCtx;
+    private TwoTrailsApp TtAppCtx;
 
     private ArcGisMapFragment fragment;
     private ArcGisMapLayer agml = null;
@@ -52,7 +51,7 @@ public class GetMapExtentsActivity extends AppCompatActivity implements GpsServi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        TtAppCtx = TwoTrailApp.getContext();
+        TtAppCtx = TwoTrailsApp.getInstance();
 
         setContentView(R.layout.activity_get_map_extents);
 

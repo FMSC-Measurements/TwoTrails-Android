@@ -14,12 +14,12 @@ import android.widget.Toast;
 
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.TwoTrailApp;
+import com.usda.fmsc.twotrails.TwoTrailsApp;
 
 public abstract class CustomToolbarActivity extends AppCompatActivity {
     private final String DEFAULT_EXIT_WARNING = "Press again to exit.";
 
-    protected TwoTrailApp TtAppCtx;
+    protected TwoTrailsApp TtAppCtx;
 
     private Toolbar toolbar;
     private boolean exit, useExitWarning;
@@ -147,8 +147,8 @@ public abstract class CustomToolbarActivity extends AppCompatActivity {
     }
 
 
-    public TwoTrailApp getTtAppContext() {
-        return TtAppCtx != null ? TtAppCtx : (TtAppCtx = (TwoTrailApp)getApplicationContext());
+    public TwoTrailsApp getTtAppContext() {
+        return TtAppCtx != null ? TtAppCtx : (TtAppCtx = (TwoTrailsApp)getApplicationContext());
     }
 
 }

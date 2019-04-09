@@ -10,7 +10,7 @@ import android.view.View;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
-import com.usda.fmsc.twotrails.TwoTrailApp;
+import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.objects.media.TtImage;
 import com.usda.fmsc.twotrails.objects.media.TtMedia;
 import com.usda.fmsc.twotrails.units.MediaType;
@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MediaAccessLayer extends IDataLayer {
-    private TwoTrailApp TtAppCtx;
+    private TwoTrailsApp TtAppCtx;
 
     public String getFilePath() {
         return _FilePath;
@@ -51,7 +51,7 @@ public class MediaAccessLayer extends IDataLayer {
     private File _dbFile;
 
     //region Constructors / Open / Close
-    public MediaAccessLayer(String filePath, TwoTrailApp context) {
+    public MediaAccessLayer(String filePath, TwoTrailsApp context) {
         TtAppCtx = context;
         _FilePath = filePath;
 

@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -15,6 +16,7 @@ import android.preference.Preference;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
@@ -28,7 +30,7 @@ import com.usda.fmsc.android.preferences.SwitchCompatPreference;
 import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.DeviceSettings;
-import com.usda.fmsc.twotrails.TwoTrailApp;
+import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.activities.SettingsActivity;
 import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.devices.TtBluetoothManager;
@@ -50,7 +52,7 @@ import org.joda.time.DateTime;
 public class DeviceSettingsFragment extends PreferenceFragment {
     public static final String CURRENT_PAGE = "CurrentPage";
 
-    private TwoTrailApp TtAppCtx;
+    private TwoTrailsApp TtAppCtx;
 
     private Preference prefGpsCheck, prefRFCheck;
     private SwitchCompatPreference swtUseExGpsDev;
@@ -75,7 +77,7 @@ public class DeviceSettingsFragment extends PreferenceFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        TtAppCtx = TwoTrailApp.getContext();
+        TtAppCtx = TwoTrailsApp.getInstance();
 
         Bundle bundle = getArguments();
 
@@ -191,8 +193,8 @@ public class DeviceSettingsFragment extends PreferenceFragment {
                     deviceIDs.add(String.format("%s,%s", btd.getAddress(), btd.getName()));
                 }
 
-                lstPref.setEntries(deviceNames.toArray(new String[deviceNames.size()]));
-                lstPref.setEntryValues(deviceIDs.toArray(new String[deviceIDs.size()]));
+                lstPref.setEntries(deviceNames.toArray(new String[0]));
+                lstPref.setEntryValues(deviceIDs.toArray(new String[0]));
             }
         } catch (Exception e) {
             //
@@ -209,6 +211,15 @@ public class DeviceSettingsFragment extends PreferenceFragment {
         }
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == Consts.Codes.Requests.LOCATION) {
+            swtUseExGpsDev.setChecked(false);
+            switchToInternal();
+        }
+    }
 
     //region GPSCheck
     Preference.OnPreferenceClickListener gpsCheckListener = new Preference.OnPreferenceClickListener() {
@@ -732,9 +743,18 @@ public class DeviceSettingsFragment extends PreferenceFragment {
 
     private boolean switchToInternal() {
         if (!TtAppCtx.getGps().isInternalGpsEnabled()) {
+            new AlertDialog.Builder(getActivity())
+                    .setMessage("Location services must be turned on in order to use the GPS.")
+                    .setPositiveButton("Location Services", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            startActivityForResult(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), Consts.Codes.Requests.LOCATION);
+                        }
+                    })
+                    .setNeutralButton(R.string.str_cancel, null)
+                    .show();
 
-            //DialogFragmentEx
-            AndroidUtils.App.requestLocationPermission(getActivity(), Consts.Codes.Services.REQUEST_GPS_SERVICE);
+            //AndroidUtils.App.requestLocationPermission(getActivity(), Consts.Codes.Services.REQUEST_GPS_SERVICE);
         } else {
             TtAppCtx.getGps().stopGps();
             TtAppCtx.getGps().setGpsProvider(null);

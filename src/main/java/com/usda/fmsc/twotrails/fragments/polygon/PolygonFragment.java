@@ -15,7 +15,7 @@ import android.widget.TextView;
 
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.listeners.SimpleTextWatcher;
-import com.usda.fmsc.twotrails.TwoTrailApp;
+import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.activities.PolygonsActivity;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.fragments.AnimationCardFragment;
@@ -112,7 +112,7 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
                 });
             }
 
-            if (TwoTrailApp.getContext().getDAL().getBoundaryPointsCountInPoly(_Polygon.getCN()) < 3) {
+            if (TwoTrailsApp.getInstance().getDAL().getBoundaryPointsCountInPoly(_Polygon.getCN()) < 3) {
                 View polyLayImage = view.findViewById(R.id.polyLayImage);
 
                 if (polyLayImage != null) {

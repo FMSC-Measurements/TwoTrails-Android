@@ -3,7 +3,7 @@ package com.usda.fmsc.twotrails.utilities;
 import android.os.AsyncTask;
 
 import com.usda.fmsc.geospatial.utm.UTMTools;
-import com.usda.fmsc.twotrails.TwoTrailApp;
+import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.data.MediaAccessLayer;
 import com.usda.fmsc.twotrails.objects.media.TtImage;
 import com.usda.fmsc.twotrails.units.Dist;
@@ -244,7 +244,7 @@ public class Export {
             //endregion
         } catch (Exception ex) {
             pointsFilename = null;
-            TwoTrailApp.getContext().getReport().writeError(ex.getMessage(), "Export:points", ex.getStackTrace());
+            TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "Export:points", ex.getStackTrace());
         }
 
         return pointsFilename;
@@ -288,7 +288,7 @@ public class Export {
             printer.close();
         } catch (Exception ex) {
             polysFilename = null;
-            TwoTrailApp.getContext().getReport().writeError(ex.getMessage(), "Export:polygons", ex.getStackTrace());
+            TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "Export:polygons", ex.getStackTrace());
         }
 
         return polysFilename;
@@ -342,7 +342,7 @@ public class Export {
             writer.close();
         } catch (Exception ex) {
             metaFilename = null;
-            TwoTrailApp.getContext().getReport().writeError(ex.getMessage(), "Export:metadata", ex.getStackTrace());
+            TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "Export:metadata", ex.getStackTrace());
         }
 
         return metaFilename;
@@ -383,7 +383,7 @@ public class Export {
             writer.close();
         } catch (Exception ex) {
             projFilename = null;
-            TwoTrailApp.getContext().getReport().writeError(ex.getMessage(), "Export:metadata", ex.getStackTrace());
+            TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "Export:metadata", ex.getStackTrace());
         }
 
         return projFilename;
@@ -478,7 +478,7 @@ public class Export {
             //endregion
         } catch (Exception ex) {
             nmeaFilename = null;
-            TwoTrailApp.getContext().getReport().writeError(ex.getMessage(), "Export:nmea", ex.getStackTrace());
+            TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "Export:nmea", ex.getStackTrace());
         }
 
         return nmeaFilename;
@@ -584,7 +584,7 @@ public class Export {
             GpxWriter.createFile(doc, gpxPath);
         } catch (IOException e) {
             gpxPath = null;
-            TwoTrailApp.getContext().getReport().writeError(e.getMessage(), "Export:gpx");
+            TwoTrailsApp.getInstance().getReport().writeError(e.getMessage(), "Export:gpx");
         }
 
         return gpxPath;
@@ -1111,7 +1111,7 @@ public class Export {
             KmlWriter.createFile(doc, kmlPath);
         } catch (IOException e) {
             kmlPath = null;
-            TwoTrailApp.getContext().getReport().writeError(e.getMessage(), "Export:kml");
+            TwoTrailsApp.getInstance().getReport().writeError(e.getMessage(), "Export:kml");
         }
 
         return kmlPath;
@@ -1147,7 +1147,7 @@ public class Export {
                 return kmzPath;
             }
         } catch (Exception e) {
-            TwoTrailApp.getContext().getReport().writeError(e.getMessage(), "Export:kmz");
+            TwoTrailsApp.getInstance().getReport().writeError(e.getMessage(), "Export:kmz");
         }
 
         return kmzPath;
@@ -1164,7 +1164,7 @@ public class Export {
             writer.close();
         } catch (Exception ex) {
             summaryName = null;
-            TwoTrailApp.getContext().getReport().writeError(ex.getMessage(), "Export:summary", ex.getStackTrace());
+            TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "Export:summary", ex.getStackTrace());
         }
 
         return summaryName;
@@ -1210,7 +1210,7 @@ public class Export {
             printer.close();
         } catch (Exception ex) {
             imagesFileName = null;
-            TwoTrailApp.getContext().getReport().writeError(ex.getMessage(), "Export:imageInfo", ex.getStackTrace());
+            TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "Export:imageInfo", ex.getStackTrace());
         }
 
         return imagesFileName;
@@ -1253,7 +1253,7 @@ public class Export {
 
                 return expPath;
         } catch (Exception e) {
-            TwoTrailApp.getContext().getReport().writeError(e.getMessage(), "Export:kmz");
+            TwoTrailsApp.getInstance().getReport().writeError(e.getMessage(), "Export:kmz");
         }
 
         return null;
@@ -1347,7 +1347,7 @@ public class Export {
                     }
                 }
             } catch (Exception ex) {
-                TwoTrailApp.getContext().getReport().writeError(ex.getMessage(), "Export:ExportTask", ex.getStackTrace());
+                TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "Export:ExportTask", ex.getStackTrace());
                 return new ExportResult(ExportResultCode.ExportFailure, "Unknown failure");
             }
 
