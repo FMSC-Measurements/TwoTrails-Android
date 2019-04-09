@@ -96,24 +96,31 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
 
         if (getIntent().getBooleanExtra(Consts.Codes.Data.CRASH, false)) {
-
             AndroidUtils.Device.isInternetAvailable(new AndroidUtils.Device.InternetAvailableCallback() {
                 @Override
-                public void onCheckInternet(boolean internetAvailable) {
-                    if (internetAvailable) {
-                        new AlertDialog.Builder(MainActivity.this)
-                            .setMessage("TwoTrails experienced a crash. Would you like to send an error report to the developer team to help prevent future crashes?")
-                            .setPositiveButton("Send", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
+                public void onCheckInternet(final boolean internetAvailable) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (internetAvailable) {
+                                new AlertDialog.Builder(MainActivity.this)
+                                        .setMessage("TwoTrails experienced a crash. Would you like to send an error report to the developer team to help prevent future crashes?")
+                                        .setPositiveButton("Send", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
 
-                                }
-                            })
-                            .setNeutralButton("Don't Send", null)
-                            .show();
-                    } else {
-                        Toast.makeText(MainActivity.this, "TwoTrails restarted after fatal crash", Toast.LENGTH_LONG).show();
-                    }
+                                            }
+                                        })
+                                        .setNeutralButton("Don't Send", null)
+                                        .show();
+                            } else {
+                                new AlertDialog.Builder(MainActivity.this)
+                                        .setMessage("TwoTrails experienced a crash. You can send a crash log to the development team from inside the settings menu.")
+                                        .setPositiveButton(R.string.str_ok, null)
+                                        .show();
+                            }
+                        }
+                    });
                 }
             });
         }
@@ -129,8 +136,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
                     new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, android.Manifest.permission.READ_EXTERNAL_STORAGE},
                     Consts.Codes.Requests.CREATE_FILE, "TwoTrails needs storage permissions in order to Open and Create files.");
         }
-
-        if (!askLocation && !AndroidUtils.App.requestPermission(MainActivity.this,
+        else if (!askLocation && !AndroidUtils.App.requestPermission(MainActivity.this,
                 new String[] { Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION},
                 Consts.Codes.Requests.LOCATION, "TwoTrails needs location permissions in order to create collect location information.")) {
             askLocation = true;
@@ -260,6 +266,12 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
                     if (tmpFile != null)
                         createFile(tmpFile);
+
+                    if (!askLocation && !AndroidUtils.App.requestPermission(MainActivity.this,
+                            new String[] { Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION},
+                            Consts.Codes.Requests.LOCATION, "TwoTrails needs location permissions in order to create collect location information.")) {
+                        askLocation = true;
+                    }
                     break;
                 case Consts.Codes.Requests.OPEN_FILE:
                     if (!TtAppCtx.areFoldersInitiated())

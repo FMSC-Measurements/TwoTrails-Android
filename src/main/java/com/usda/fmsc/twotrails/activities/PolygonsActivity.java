@@ -3,6 +3,7 @@ package com.usda.fmsc.twotrails.activities;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
@@ -177,24 +178,21 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
                             card.setVisibilityListener(new AnimationCardFragment.VisibilityListener() {
                                 @Override
                                 public void onHidden() {
-
                                     new Handler().post(new Runnable() {
                                         public void run() {
                                             if (_CurrentIndex > 0) {
                                                 _deleteIndex = _CurrentIndex;
                                                 _deletePolygon = _CurrentPolygon;
 
-                                                _CurrentIndex--;
                                                 ignorePolyChange = true;
 
-                                                moveToPolygon(_CurrentIndex);
-                                            } else if (getPolygons().size() > 1) {
+                                                moveToPolygon(_CurrentIndex - 1);
+                                            } else if (getPolygons().size() > 0) {
                                                 _deleteIndex = _CurrentIndex;
                                                 _deletePolygon = _CurrentPolygon;
 
-                                                _CurrentIndex++;
                                                 ignorePolyChange = true;
-                                                moveToPolygon(_CurrentIndex);
+                                                moveToPolygon(_CurrentIndex + 1);
                                             } else {
                                                 deletePolygon(_CurrentPolygon, _CurrentIndex);
                                                 lockPolygon(true);
@@ -457,6 +455,19 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
             } else {
                 AndroidUtils.UI.disableMenuItem(miReset);
             }
+        }
+    }
+
+    private void onPolygonsUpdated() {
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mSectionsPagerAdapter.notifyDataSetChanged();
+                }
+            });
+        } else {
+            mSectionsPagerAdapter.notifyDataSetChanged();
         }
     }
     //endregion
