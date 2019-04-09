@@ -422,7 +422,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
         listeners = new HashMap<>();
 
-        final TtPolygon[] polyArray = getPolygons().values().toArray(new TtPolygon[getPolygons().size()]);
+        final TtPolygon[] polyArray = getPolygons().values().toArray(new TtPolygon[0]);
         Arrays.sort(polyArray);
 
         _Points = new ArrayList<>();
@@ -1038,12 +1038,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
             _Points = TtAppCtx.getDAL().getPointsInPolygon(_CurrentPolygon.getCN());
 
-            new Handler(getMainLooper()).post(new Runnable() {
-                @Override
-                public void run() {
-                    pointSectionsPagerAdapter.notifyDataSetChanged();
-                }
-            });
+            onPointsChanged();
 
             int numberOfPoints = _Points.size();
 
@@ -1189,12 +1184,8 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
                 if (index > INVALID_INDEX) {
                     _Points.remove(index);
-                    new Handler(getMainLooper()).post(new Runnable() {
-                        @Override
-                        public void run() {
-                            pointSectionsPagerAdapter.notifyDataSetChanged();
-                        }
-                    });
+
+                    onPointsChanged();
                 } else {
                     _deleteIndex = INVALID_INDEX;
                     _deletePoint = null;
@@ -1254,7 +1245,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                                 _CurrentPoint = null;
                             }
 
-                            pointSectionsPagerAdapter.notifyDataSetChanged();
+                            onPointsChanged();
                         } else {
                             throw new RuntimeException("Unable to delete point.");
                         }
@@ -1348,7 +1339,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
             try {
                 addedPoint = newPoint.getCN();
-                pointSectionsPagerAdapter.notifyDataSetChanged();
+                onPointsChanged();
                 moveToPoint(_CurrentIndex);
             } catch (Exception e) {
                 TtAppCtx.getReport().writeError(e.getMessage(), "PointsActivity:createPoint(OpType)", e.getStackTrace());
@@ -1629,12 +1620,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                     return;
                 }
 
-                new Handler(getMainLooper()).post(new Runnable() {
-                    @Override
-                    public void run() {
-                        pointSectionsPagerAdapter.notifyDataSetChanged();
-                    }
-                });
+                onPointsChanged();
 
                 int pointSize = _Points.size();
                 if (pointSize > 0) {
@@ -2096,6 +2082,20 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         _MediaUpdated = updated;
 
         pmbMedia.setItemEnabled(R.id.ctx_menu_reset, _MediaUpdated);
+    }
+
+
+    private void onPointsChanged() {
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    pointSectionsPagerAdapter.notifyDataSetChanged();
+                }
+            });
+        } else {
+            pointSectionsPagerAdapter.notifyDataSetChanged();
+        }
     }
     //endregion
 

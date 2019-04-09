@@ -303,6 +303,33 @@ public class TwoTrailsApp extends Application {
         }
     };
 
+    private Thread.UncaughtExceptionHandler exceptionHandler = new Thread.UncaughtExceptionHandler() {
+        @Override
+        public void uncaughtException(Thread errorThread, Throwable exception) {
+            if (!areFoldersInitiated()) {
+                initFolders();
+                _Report.changeDirectory(TtUtils.getTtFileDir());
+            }
+
+            _Report.writeError(exception.getMessage(), errorThread.getName(), exception.getStackTrace());
+
+            if (gpsServiceBinder != null) {
+                gpsServiceBinder.stopService();
+            }
+
+            Intent intent = new Intent(_AppContext, MainActivity.class);
+            intent.putExtra(Consts.Codes.Data.CRASH, true);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    | Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    | Intent.FLAG_ACTIVITY_NEW_TASK);
+            PendingIntent pendingIntent = PendingIntent.getActivity(getInstance().getBaseContext(), 0, intent, PendingIntent.FLAG_ONE_SHOT);
+            AlarmManager mgr = (AlarmManager) getInstance().getBaseContext().getSystemService(Context.ALARM_SERVICE);
+            mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 100, pendingIntent);
+            _CurrentActivity.finish();
+            System.exit(2);
+        }
+    };
+
     private Runnable delayAndSearchForGps = new Runnable() {
         @Override
         public void run() {
@@ -313,6 +340,7 @@ public class TwoTrailsApp extends Application {
         }
     };
 
+    //region SearchForGps
     Runnable searchForGps = new Runnable() {
         @Override
         public void run() {
@@ -358,7 +386,7 @@ public class TwoTrailsApp extends Application {
             }
         }
     };
-
+    //endregion
 
     //region Get/Set
     public boolean areFoldersInitiated() {
@@ -459,46 +487,7 @@ public class TwoTrailsApp extends Application {
 
         _AppContext = this;
 
-        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-            @Override
-            public void uncaughtException(Thread errorThread, Throwable exception) {
-                if (!areFoldersInitiated()) {
-                    initFolders();
-                    _Report.changeDirectory(TtUtils.getTtFileDir());
-                }
-
-                _Report.writeError(exception.getMessage(), errorThread.getName(), exception.getStackTrace());
-
-//                new Thread() {
-//                    @Override
-//                    public void run() {
-//                        Looper.prepare();
-//                        Toast.makeText(getInstance(),"Fatal Error. Check Log for details.", Toast.LENGTH_LONG).show();
-//                        Looper.loop();
-//                    }
-//                }.start();
-//                try
-//                {
-//                    Thread.sleep(4000); // Let the Toast display before app will get shutdown
-//                }
-//                catch (InterruptedException e) {
-//                    //
-//                } catch (Throwable throwable) {
-//                    throwable.printStackTrace();
-//                }
-
-                Intent intent = new Intent(_AppContext, MainActivity.class);
-                intent.putExtra(Consts.Codes.Data.CRASH, true);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
-                        | Intent.FLAG_ACTIVITY_CLEAR_TASK
-                        | Intent.FLAG_ACTIVITY_NEW_TASK);
-                PendingIntent pendingIntent = PendingIntent.getActivity(getInstance().getBaseContext(), 0, intent, PendingIntent.FLAG_ONE_SHOT);
-                AlarmManager mgr = (AlarmManager) getInstance().getBaseContext().getSystemService(Context.ALARM_SERVICE);
-                mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 100, pendingIntent);
-                _CurrentActivity.finish();
-                System.exit(2);
-            }
-        });
+        Thread.setDefaultUncaughtExceptionHandler(exceptionHandler);
 
         if (initFolders()) {
             _Report.writeEvent(StringEx.format("TwoTrails Started (%s)", AndroidUtils.App.getVersionName(this)));
