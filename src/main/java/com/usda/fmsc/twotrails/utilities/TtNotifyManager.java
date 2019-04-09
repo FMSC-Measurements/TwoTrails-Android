@@ -10,12 +10,12 @@ import android.util.SparseArray;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.TwoTrailApp;
+import com.usda.fmsc.twotrails.TwoTrailsApp;
 
 public class TtNotifyManager {
     private int GPS_NOTIFICATION_ID = 123;
 
-    private TwoTrailApp TtAppCtx;
+    private TwoTrailsApp TtAppCtx;
     
     private NotificationManager _NotificationManager;
     private NotificationCompat.Builder _GpsBuilder;
@@ -24,7 +24,7 @@ public class TtNotifyManager {
     private boolean isExternal;
     private SparseArray<NotificationCompat.Builder> _DownloadingNotifs;
 
-    public TtNotifyManager(TwoTrailApp context) {
+    public TtNotifyManager(TwoTrailsApp context) {
         TtAppCtx = context;
 
         _NotificationManager = (NotificationManager) TtAppCtx.getSystemService(Context.NOTIFICATION_SERVICE);

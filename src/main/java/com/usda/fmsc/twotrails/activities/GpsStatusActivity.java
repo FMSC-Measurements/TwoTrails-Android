@@ -125,74 +125,78 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if (burst.hasPosition()) {
-                    UTMCoords coords = zone != null ? burst.getUTM(zone) : burst.getTrueUTM();
+                try {
+                    if (burst.hasPosition()) {
+                        UTMCoords coords = zone != null ? burst.getUTM(zone) : burst.getTrueUTM();
 
-                    tvLat.setText(String.format("%.4f", burst.getLatitude()));
-                    tvLon.setText(String.format("%.4f", burst.getLongitude()));
+                        tvLat.setText(String.format("%.4f", burst.getLatitude()));
+                        tvLon.setText(String.format("%.4f", burst.getLongitude()));
 
-                    tvUtmX.setText(String.format("%.3f", coords.getX()));
-                    tvUtmY.setText(String.format("%.3f", coords.getY()));
+                        tvUtmX.setText(String.format("%.3f", coords.getX()));
+                        tvUtmY.setText(String.format("%.3f", coords.getY()));
 
-                    if (zone == null) {
-                        tvZone.setText(StringEx.toString(coords.getZone()));
+                        if (zone == null) {
+                            tvZone.setText(StringEx.toString(coords.getZone()));
+                        } else {
+                            tvZone.setText(StringEx.toString(zone));
+                        }
+
+                        if (burst.hasElevation()) {
+                            tvElev.setText(String.format("%.2f", burst.getElevation()));
+                        } else {
+                            tvElev.setText(nVal);
+                        }
                     } else {
-                        tvZone.setText(StringEx.toString(zone));
-                    }
-
-                    if (burst.hasElevation()) {
-                        tvElev.setText(String.format("%.2f", burst.getElevation()));
-                    } else {
+                        tvLat.setText(nVal);
+                        tvLon.setText(nVal);
+                        tvUtmX.setText(nVal);
+                        tvUtmY.setText(nVal);
                         tvElev.setText(nVal);
-                    }
-                } else {
-                    tvLat.setText(nVal);
-                    tvLon.setText(nVal);
-                    tvUtmX.setText(nVal);
-                    tvUtmY.setText(nVal);
-                    tvElev.setText(nVal);
 
-                    if (zone == null) {
-                        tvZone.setText(nVal);
+                        if (zone == null) {
+                            tvZone.setText(nVal);
+                        } else {
+                            tvZone.setText(StringEx.toString(zone));
+                        }
+                    }
+
+                    if (burst.isValid(NmeaIDs.SentenceID.RMC) && burst.getMagVarDir() != null) {
+                        tvDec.setText(String.format("%.2f %s", burst.getMagVar(), burst.getMagVarDir().toStringAbv()));
                     } else {
-                        tvZone.setText(StringEx.toString(zone));
+                        tvDec.setText(nVal);
                     }
+
+                    if (burst.isValid(NmeaIDs.SentenceID.GGA)) {
+                        tvGpsMode.setText(burst.getFixQuality().toStringX());
+                    } else {
+                        tvGpsMode.setText(GGASentence.GpsFixType.NoFix.toString());
+                    }
+
+                    if (burst.isValid(NmeaIDs.SentenceID.GSA)) {
+                        tvGpsStatus.setText(burst.getFix().toString());
+                        tvPdop.setText(String.format("%.2f", burst.getPDOP()));
+                        tvHdop.setText(String.format("%.2f", burst.getHDOP()));
+                    } else {
+                        tvGpsStatus.setText(nVal);
+                        tvHdop.setText(nVal);
+                        tvPdop.setText(nVal);
+                    }
+
+                    if (burst.isValid(NmeaIDs.SentenceID.GSV)) {
+
+                        tvSat.setText(String.format("%d/%d/%d",
+                                burst.isValid(NmeaIDs.SentenceID.GSA) ? burst.getUsedSatellitesCount() : 0,
+                                burst.isValid(NmeaIDs.SentenceID.GGA) ? burst.getTrackedSatellitesCount() : 0,
+                                burst.getSatellitesInViewCount()));
+                    } else {
+                        tvSat.setText(nVal);
+                    }
+
+                    skyView.update(burst);
+                    statusView.update(burst);
+                } catch (Exception e) {
+                    TtAppCtx.getReport().writeError("GpsStatusActivity:setNmeaData", e.getMessage(), e.getStackTrace());
                 }
-
-                if (burst.isValid(NmeaIDs.SentenceID.RMC) && burst.getMagVarDir() != null) {
-                    tvDec.setText(String.format("%.2f %s", burst.getMagVar(), burst.getMagVarDir().toStringAbv()));
-                } else {
-                    tvDec.setText(nVal);
-                }
-
-                if (burst.isValid(NmeaIDs.SentenceID.GGA)) {
-                    tvGpsMode.setText(burst.getFixQuality().toStringX());
-                } else {
-                    tvGpsMode.setText(GGASentence.GpsFixType.NoFix.toString());
-                }
-
-                if (burst.isValid(NmeaIDs.SentenceID.GSA)) {
-                    tvGpsStatus.setText(burst.getFix().toString());
-                    tvPdop.setText(String.format("%.2f", burst.getPDOP()));
-                    tvHdop.setText(String.format("%.2f", burst.getHDOP()));
-                } else {
-                    tvGpsStatus.setText(nVal);
-                    tvHdop.setText(nVal);
-                    tvPdop.setText(nVal);
-                }
-
-                if (burst.isValid(NmeaIDs.SentenceID.GSV)) {
-
-                    tvSat.setText(String.format("%d/%d/%d",
-                            burst.isValid(NmeaIDs.SentenceID.GSA) ? burst.getUsedSatellitesCount() : 0,
-                            burst.isValid(NmeaIDs.SentenceID.GGA) ? burst.getTrackedSatellitesCount() : 0,
-                            burst.getSatellitesInViewCount()));
-                } else {
-                    tvSat.setText(nVal);
-                }
-
-                skyView.update(burst);
-                statusView.update(burst);
             }
         });
     }

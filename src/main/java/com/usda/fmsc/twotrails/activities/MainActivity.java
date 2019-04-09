@@ -49,13 +49,14 @@ import java.util.ArrayList;
 public class MainActivity extends TtAjusterCustomToolbarActivity {
     private View progressLayout;
 
+    private TabsPagerAdapter mTabsPagerAdapter;
     private MainFileFragment mFragFile;
     private MainDataFragment mFragData;
     private MainToolsFragment mFragTools;
 
     private ViewPager mViewPager;
 
-    private boolean _fileOpen = false, exitOnAdjusted, askLocation;
+    private boolean _fileOpen = false, exitOnAdjusted, askLocation, viewCreated = false;
 
     private String tmpFile;
 
@@ -73,7 +74,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
         setUseExitWarning(true);
 
-        TabsPagerAdapter mTabsPagerAdapter = new TabsPagerAdapter(getSupportFragmentManager());
+        mTabsPagerAdapter = new TabsPagerAdapter(getSupportFragmentManager());
 
         mFragFile = MainFileFragment.newInstance();
         mFragData = MainDataFragment.newInstance();
@@ -91,6 +92,30 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
         TabLayout tabLayout = findViewById(R.id.mainTabs);
         if (tabLayout != null) {
             tabLayout.setupWithViewPager(mViewPager);
+        }
+
+
+        if (getIntent().getBooleanExtra(Consts.Codes.Data.CRASH, false)) {
+
+            AndroidUtils.Device.isInternetAvailable(new AndroidUtils.Device.InternetAvailableCallback() {
+                @Override
+                public void onCheckInternet(boolean internetAvailable) {
+                    if (internetAvailable) {
+                        new AlertDialog.Builder(MainActivity.this)
+                            .setMessage("TwoTrails experienced a crash. Would you like to send an error report to the developer team to help prevent future crashes?")
+                            .setPositiveButton("Send", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+
+                                }
+                            })
+                            .setNeutralButton("Don't Send", null)
+                            .show();
+                    } else {
+                        Toast.makeText(MainActivity.this, "TwoTrails restarted after fatal crash", Toast.LENGTH_LONG).show();
+                    }
+                }
+            });
         }
     }
 
@@ -134,6 +159,8 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
                 }
             }
         }
+
+        viewCreated = true;
     }
 
     @Override
@@ -235,7 +262,8 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
                         createFile(tmpFile);
                     break;
                 case Consts.Codes.Requests.OPEN_FILE:
-                    TtAppCtx.initFolders();
+                    if (!TtAppCtx.areFoldersInitiated())
+                        TtAppCtx.initFolders();
 
                     if (tmpFile != null)
                         openFile(tmpFile);
@@ -248,6 +276,22 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
             if (requestCode == Consts.Codes.Requests.LOCATION) {
                 new AlertDialog.Builder(MainActivity.this)
                         .setMessage("TwoTrails requires Location Services in order to work.")
+                        .setPositiveButton(R.string.str_ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                finish();
+                            }
+                        })
+                        .setOnCancelListener(new DialogInterface.OnCancelListener() {
+                            @Override
+                            public void onCancel(DialogInterface dialog) {
+                                finish();
+                            }
+                        })
+                        .show();
+            } else if (requestCode == Consts.Codes.Requests.CREATE_FILE) {
+                new AlertDialog.Builder(MainActivity.this)
+                        .setMessage("TwoTrails requires Storage Permission in order to work.")
                         .setPositiveButton(R.string.str_ok, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
@@ -470,6 +514,34 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     }
 
     private void updateAppInfo() {
+//        if (viewCreated) {
+//            boolean updatePagerAdapter = false;
+//            if (!mFragFile.isViewCreated()) {
+//                mFragFile = MainFileFragment.newInstance();
+//                updatePagerAdapter = true;
+//            }
+//
+//            if (!mFragData.isViewCreated()) {
+//                mFragData = MainDataFragment.newInstance();
+//                mTabsPagerAdapter.notifyDataSetChanged();
+//                updatePagerAdapter = true;
+//            }
+//
+//            if (!mFragTools.isViewCreated()) {
+//                mFragTools = MainToolsFragment.newInstance();
+//                mTabsPagerAdapter.notifyDataSetChanged();
+//                updatePagerAdapter = true;
+//            }
+//
+//            if (updatePagerAdapter) {
+//                mTabsPagerAdapter.notifyDataSetChanged();
+//
+//                if (mViewPager != null) {
+//                    mViewPager.setAdapter(mTabsPagerAdapter);
+//                }
+//            }
+//        }
+
         boolean enable = false;
         if(TtAppCtx.getDAL() != null) {
             TtAppCtx.getProjectSettings().updateRecentProjects(
@@ -842,7 +914,9 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     }
 
     public void btnTest(View view) {
-        startActivity(new Intent(this, TestActivity.class));
+
+        throw  new RuntimeException("Crash on purpose");
+        //startActivity(new Intent(this, TestActivity.class));
     }
     //endregion
     //endregion

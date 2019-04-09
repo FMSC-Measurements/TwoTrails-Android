@@ -6,7 +6,7 @@ import com.usda.fmsc.geospatial.UomElevation;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.geospatial.utm.UTMTools;
 import com.usda.fmsc.twotrails.Consts;
-import com.usda.fmsc.twotrails.TwoTrailApp;
+import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.units.Dist;
 import com.usda.fmsc.twotrails.units.OpType;
 import com.usda.fmsc.twotrails.units.Slope;
@@ -28,7 +28,6 @@ import com.usda.fmsc.utilities.gpx.GpxRoute;
 import com.usda.fmsc.utilities.gpx.GpxTrack;
 import com.usda.fmsc.utilities.gpx.GpxTrackSeg;
 import com.usda.fmsc.utilities.kml.Coordinates;
-import com.usda.fmsc.utilities.kml.Polygon;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -314,7 +313,7 @@ public class Import {
                         temp = record.get(fGroupName);
 
                         if (temp.equals(Consts.Defaults.MainGroupName)) {
-                            tempGroup = TwoTrailApp.getContext().getDAL().getGroupByCN(Consts.EmptyGuid);
+                            tempGroup = TwoTrailsApp.getInstance().getDAL().getGroupByCN(Consts.EmptyGuid);
                         } else if (!groupNameToCN.containsKey(temp)) {
                             tempGroup = new TtGroup(temp);
                             groupNameToCN.put(tempGroup.getName(), tempGroup.getCN());
@@ -323,7 +322,7 @@ public class Import {
                             tempGroup = groups.get(groupNameToCN.get(temp));
                         }
                     } else if (tempGroup == null) {
-                        tempGroup = TwoTrailApp.getContext().getDAL().getGroupByCN(Consts.EmptyGuid);
+                        tempGroup = TwoTrailsApp.getInstance().getDAL().getGroupByCN(Consts.EmptyGuid);
                     }
 
                     point.setGroupCN(tempGroup.getCN());
@@ -419,7 +418,7 @@ public class Import {
                     return new ImportResult(ImportResultCode.Cancelled);
                 }
             } catch (Exception ex) {
-                TwoTrailApp.getContext().getReport().writeError(ex.getMessage(), "Import:TextImportTask", ex.getStackTrace());
+                TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "Import:TextImportTask", ex.getStackTrace());
                 return new ImportResult(ImportResultCode.ImportFailure, "Data error");
             }
         }
@@ -774,7 +773,7 @@ public class Import {
                     return new ImportResult(ImportResultCode.Cancelled);
                 }
             } catch (Exception ex) {
-                TwoTrailApp.getContext().getReport().writeError(ex.getMessage(), "Import:GPXImportTask", ex.getStackTrace());
+                TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "Import:GPXImportTask", ex.getStackTrace());
                 return new ImportResult(ImportResultCode.ImportFailure, "Data error");
             }
         }
@@ -948,7 +947,7 @@ public class Import {
                     return new ImportResult(ImportResultCode.Cancelled);
                 }
             } catch (Exception ex) {
-                TwoTrailApp.getContext().getReport().writeError(ex.getMessage(), "Import:GPXImportTask", ex.getStackTrace());
+                TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "Import:GPXImportTask", ex.getStackTrace());
                 return new ImportResult(ImportResultCode.ImportFailure, "Data error");
             }
         }

@@ -1,7 +1,9 @@
 package com.usda.fmsc.twotrails;
 
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.Application;
+import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -38,8 +40,8 @@ import com.usda.fmsc.utilities.StringEx;
 
 import java.io.File;
 
-public class TwoTrailApp extends Application {
-    private static TwoTrailApp _AppContext;
+public class TwoTrailsApp extends Application {
+    private static TwoTrailsApp _AppContext;
 
     private DataAccessLayer _DAL;
     private MediaAccessLayer _MAL;
@@ -467,22 +469,33 @@ public class TwoTrailApp extends Application {
 
                 _Report.writeError(exception.getMessage(), errorThread.getName(), exception.getStackTrace());
 
+//                new Thread() {
+//                    @Override
+//                    public void run() {
+//                        Looper.prepare();
+//                        Toast.makeText(getInstance(),"Fatal Error. Check Log for details.", Toast.LENGTH_LONG).show();
+//                        Looper.loop();
+//                    }
+//                }.start();
+//                try
+//                {
+//                    Thread.sleep(4000); // Let the Toast display before app will get shutdown
+//                }
+//                catch (InterruptedException e) {
+//                    //
+//                } catch (Throwable throwable) {
+//                    throwable.printStackTrace();
+//                }
 
-                new Thread() {
-                    @Override
-                    public void run() {
-                        Looper.prepare();
-                        Toast.makeText(_AppContext,"Fatal Error. Check Log for details.", Toast.LENGTH_LONG).show();
-                        Looper.loop();
-                    }
-                }.start();
-                try
-                {
-                    Thread.sleep(4000); // Let the Toast display before app will get shutdown
-                }
-                catch (InterruptedException e) {
-                    //
-                }
+                Intent intent = new Intent(_AppContext, MainActivity.class);
+                intent.putExtra(Consts.Codes.Data.CRASH, true);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+                        | Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        | Intent.FLAG_ACTIVITY_NEW_TASK);
+                PendingIntent pendingIntent = PendingIntent.getActivity(getInstance().getBaseContext(), 0, intent, PendingIntent.FLAG_ONE_SHOT);
+                AlarmManager mgr = (AlarmManager) getInstance().getBaseContext().getSystemService(Context.ALARM_SERVICE);
+                mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 100, pendingIntent);
+                _CurrentActivity.finish();
                 System.exit(2);
             }
         });
@@ -563,9 +576,11 @@ public class TwoTrailApp extends Application {
     }
 
 
-    public static TwoTrailApp getContext() {
+    public static synchronized TwoTrailsApp getInstance() {
         return _AppContext;
     }
+
+
 
 
 //    @Override

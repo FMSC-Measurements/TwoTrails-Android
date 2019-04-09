@@ -15,6 +15,10 @@ public class MainDataFragment extends Fragment {
 
     private boolean enabled = false, viewExists = false;
 
+    public boolean isViewCreated() {
+        return viewExists;
+    }
+
     public static MainDataFragment newInstance() {
         return new MainDataFragment();
     }

@@ -15,9 +15,9 @@ public class MapSettings {
     private HashMap<String, PolygonGraphicOptions> _PolyGraphicOptions = new HashMap<>();
     private PolygonGraphicOptions _MasterPolyGraphicOptions;
 
-    private TwoTrailApp _Context;
+    private TwoTrailsApp _Context;
 
-    public MapSettings(TwoTrailApp context) {
+    public MapSettings(TwoTrailsApp context) {
         _Context = context;
     }
 

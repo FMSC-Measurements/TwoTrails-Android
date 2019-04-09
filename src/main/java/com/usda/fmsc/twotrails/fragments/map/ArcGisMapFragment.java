@@ -33,7 +33,7 @@ import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.TwoTrailApp;
+import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
 import com.usda.fmsc.twotrails.objects.map.ArcGisPolygonGraphic;
@@ -54,7 +54,7 @@ import java.util.ArrayList;
 public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, GpsService.Listener, OnStatusChangedListener, OnZoomListener, OnPanListener {
     private static final String START_ARC_OPTIONS = "StartupArcOptions";
     
-    private TwoTrailApp TtAppCtx;
+    private TwoTrailsApp TtAppCtx;
 
     private static final int TOLERANCE = 30;
 
@@ -115,7 +115,7 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        TtAppCtx = TwoTrailApp.getContext();
+        TtAppCtx = TwoTrailsApp.getInstance();
 
         inflater = LayoutInflater.from(getContext());
 
@@ -131,8 +131,8 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
             startUpMapOptions = new MapOptions(0, Consts.Location.USA_BOUNDS);
         }
 
-        if (TwoTrailApp.getContext().getDeviceSettings().isGpsConfigured()) {
-            binder = TwoTrailApp.getContext().getGps();
+        if (TwoTrailsApp.getInstance().getDeviceSettings().isGpsConfigured()) {
+            binder = TwoTrailsApp.getInstance().getGps();
             binder.addListener(this);
         }
     }
@@ -502,7 +502,7 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
 
             if (mmListener.shouldStartGps()) {
                 if (binder == null)
-                    binder = TwoTrailApp.getContext().getGps();
+                    binder = TwoTrailsApp.getInstance().getGps();
                 binder.startGps();
             }
         }

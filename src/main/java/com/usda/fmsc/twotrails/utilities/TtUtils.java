@@ -34,7 +34,7 @@ import com.usda.fmsc.android.utilities.DeviceOrientationEx;
 import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.twotrails.BuildConfig;
 import com.usda.fmsc.twotrails.Consts;
-import com.usda.fmsc.twotrails.TwoTrailApp;
+import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.activities.GetDirectionActivity;
 import com.usda.fmsc.twotrails.activities.TtCameraActivity;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
@@ -997,7 +997,7 @@ public class TtUtils {
             return null;
         }
 
-        public static ArrayList<TtImage> getPicturesFromImageIntent(TwoTrailApp context, Intent intent, String pointCN) {
+        public static ArrayList<TtImage> getPicturesFromImageIntent(TwoTrailsApp context, Intent intent, String pointCN) {
             String[] filePathColumn = { MediaStore.Images.Media.DATA };
             ArrayList<TtImage> pictures = new ArrayList<>();
 
@@ -1580,7 +1580,7 @@ public class TtUtils {
 
                 return options;
             } catch (Exception ex) {
-                TwoTrailApp.getContext().getReport().writeError(ex.getMessage(), "TtUtils:createMarkerOptions");
+                TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "TtUtils:createMarkerOptions");
                 throw ex;
             }
         }
@@ -1832,7 +1832,7 @@ public class TtUtils {
                                 StringEx.format("\n\nComment: %s", point.getComment()) :
                                 StringEx.Empty);
             } catch (Exception ex) {
-                TwoTrailApp.getContext().getReport().writeError(ex.getMessage(), "TtUtils:getInfoWindowSnippet");
+                TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "TtUtils:getInfoWindowSnippet");
                 return null;
             }
         }
@@ -1886,9 +1886,9 @@ public class TtUtils {
         boolean exported;
 
         if (dal != null) {
-            exported = FileUtils.zipFiles(filename, TwoTrailApp.getContext().getReport().getFilePath(), dal.getFilePath());
+            exported = FileUtils.zipFiles(filename, TwoTrailsApp.getInstance().getReport().getFilePath(), dal.getFilePath());
         } else {
-            exported = FileUtils.zipFiles(filename, TwoTrailApp.getContext().getReport().getFilePath());
+            exported = FileUtils.zipFiles(filename, TwoTrailsApp.getInstance().getReport().getFilePath());
         }
 
         return exported ? filename : null;

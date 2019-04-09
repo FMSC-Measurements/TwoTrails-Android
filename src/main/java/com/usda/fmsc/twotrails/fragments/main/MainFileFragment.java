@@ -9,7 +9,7 @@ import android.widget.Button;
 import android.widget.TableLayout;
 import android.widget.TextView;
 
-import com.usda.fmsc.twotrails.TwoTrailApp;
+import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
 import com.usda.fmsc.twotrails.data.TwoTrailsSchema;
 import com.usda.fmsc.twotrails.R;
@@ -27,6 +27,10 @@ public class MainFileFragment extends Fragment {
     private View viewCleanDb;
 
     boolean enabled = false, viewExists = false;
+
+    public boolean isViewCreated() {
+        return viewExists;
+    }
 
     public static MainFileFragment newInstance() {
         return new MainFileFragment();
@@ -84,7 +88,7 @@ public class MainFileFragment extends Fragment {
 
             tblInfo.setVisibility(enable ? View.VISIBLE : View.INVISIBLE);
 
-            if (TwoTrailApp.getContext().getDeviceSettings().isDeveloperOptionsEnabled()) {
+            if (TwoTrailsApp.getInstance().getDeviceSettings().isDeveloperOptionsEnabled()) {
                 viewCleanDb.setVisibility(View.VISIBLE);
             } else {
                 viewCleanDb.setVisibility(View.GONE);

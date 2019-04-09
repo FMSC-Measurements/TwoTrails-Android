@@ -24,9 +24,8 @@ import com.usda.fmsc.geospatial.nmea.NmeaIDs;
 import com.usda.fmsc.geospatial.nmea.NmeaParser;
 import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
 import com.usda.fmsc.twotrails.DeviceSettings;
-import com.usda.fmsc.twotrails.TwoTrailApp;
+import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.devices.BluetoothConnection;
-import com.usda.fmsc.twotrails.devices.TtBluetoothManager;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 import com.usda.fmsc.utilities.StringEx;
 
@@ -42,7 +41,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
     public final int GPS_UPDATE_INTERVAL = 1000;    //in milliseconds
     public final int GPS_MINIMUM_DISTANCE = 0;      //in meters
 
-    private TwoTrailApp TtAppCtx;
+    private TwoTrailsApp TtAppCtx;
 
     private OnLocationChangedListener gmapListener;
 
@@ -93,7 +92,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
     public void onCreate() {
         super.onCreate();
 
-        TtAppCtx = (TwoTrailApp) getApplicationContext();
+        TtAppCtx = (TwoTrailsApp) getApplicationContext();
 
         gpsSyncer = new GpsSyncer();
 
