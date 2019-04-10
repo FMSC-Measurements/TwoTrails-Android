@@ -146,14 +146,14 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
 
     private boolean showCompass, mapMoved = true, showMyPos, polysCreated, mapHasMaxExtents;
     private MapTracking mapTracking = MapTracking.FOLLOW;
-    private Integer zone;
+    private Integer zone = null;
 
     private float currentDirection;
     private float[] mGravity, mGeomagnetic;
 
     private HashMap<String, ArrayList<TtPoint>> polyPoints = new HashMap<>();
-    private HashMap<String, TtPolygon> _Polygons2 = new HashMap<>();
-    private HashMap<String, TtMetadata> _Metadata2;
+    private HashMap<String, TtPolygon> _Polygons = new HashMap<>();
+    private HashMap<String, TtMetadata> _Metadata;
 
     private Extent completeBnds, trackedPoly;
 
@@ -165,19 +165,19 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     //region get/set
     
     protected HashMap<String, TtMetadata> getMetadata() {
-        if (_Metadata2 == null || _Metadata2.size() == 0) {
-            _Metadata2 = TtAppCtx.getDAL().getMetadataMap();
+        if (_Metadata == null || _Metadata.size() == 0) {
+            _Metadata = TtAppCtx.getDAL().getMetadataMap();
         }
 
-        return _Metadata2;
+        return _Metadata;
     }
 
     protected HashMap<String, TtPolygon> getPolygons() {
-        if (_Polygons2 == null || _Polygons2.size() == 0) {
-            _Polygons2 = TtAppCtx.getDAL().getPolygonsMap();
+        if (_Polygons == null || _Polygons.size() == 0) {
+            _Polygons = TtAppCtx.getDAL().getPolygonsMap();
         }
 
-        return _Polygons2;
+        return _Polygons;
     }
     //endregion
 
@@ -1739,7 +1739,16 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         return lastPosition;
     }
 
-    protected final Integer getZone() {
+    protected final int getZone() {
+        if (zone == null) {
+            TtMetadata defMeta = getMetadata().get(Consts.EmptyGuid);
+            if (defMeta != null) {
+                zone = defMeta.getZone();
+            } else {
+                throw new RuntimeException("No default Metadata");
+            }
+        }
+
         return zone;
     }
 
