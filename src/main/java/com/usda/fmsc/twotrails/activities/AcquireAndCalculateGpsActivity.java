@@ -15,6 +15,7 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.listeners.SimpleTextWatcher;
@@ -233,7 +234,7 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
                     }
 
                     if (valid) {
-                        txtDop.setTextColor(AndroidUtils.UI.getColor(getBaseContext(), R.color.abc_primary_text_material_light));
+                        txtDop.setTextColor(AndroidUtils.UI.getColor(getBaseContext(), R.color.black_1000));
                         calculate();
                     } else {
                         txtDop.setTextColor(AndroidUtils.UI.getColor(getBaseContext(), android.R.color.holo_red_dark));
@@ -598,7 +599,8 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
                 //endregion
             }
         } catch (Exception e) {
-            TtAppCtx.getReport().writeError(e.getMessage(), "CalculateGpsActivityOld:calculate", e.getStackTrace());
+            TtAppCtx.getReport().writeError(e.getMessage(), "AcquireAndCalculateGpsActivity:calculate", e.getStackTrace());
+            Toast.makeText(AcquireAndCalculateGpsActivity.this, "Error Calculating Error", Toast.LENGTH_LONG).show();
         }
     }
 
