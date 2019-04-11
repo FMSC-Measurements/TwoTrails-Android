@@ -309,6 +309,11 @@ public class DeviceSettingsFragment extends PreferenceFragment {
                         }
 
                         @Override
+                        public void nmeaBurstValidityChanged(boolean burstsAreValid) {
+
+                        }
+
+                        @Override
                         public void gpsStarted() {
                             if (gps.isExternalGpsUsed()) {
                                 getActivity().runOnUiThread(new Runnable() {
@@ -390,6 +395,7 @@ public class DeviceSettingsFragment extends PreferenceFragment {
                     Runnable runGPS = new Runnable() {
                         @Override
                         public void run() {
+                            gps.stopGps();
                             gps.setGpsProvider(TtAppCtx.getDeviceSettings().getGpsDeviceID());
 
                             switch (gps.startGps()) {

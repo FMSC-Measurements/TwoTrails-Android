@@ -297,6 +297,11 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
     }
 
     @Override
+    public void nmeaBurstValidityChanged(boolean burstsAreValid) {
+
+    }
+
+    @Override
     public void gpsStarted() {
 
     }

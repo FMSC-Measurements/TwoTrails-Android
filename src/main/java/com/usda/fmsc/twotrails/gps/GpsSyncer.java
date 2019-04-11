@@ -1,6 +1,8 @@
 package com.usda.fmsc.twotrails.gps;
 
 public class GpsSyncer {
+    private final int SENTENCE_COLLECTION_AMOUNT = 25;
+
     private boolean gpsSynced = false, syncing = false, discarding = false;
     private long timeStart;
     private byte collectCount;
@@ -35,7 +37,7 @@ public class GpsSyncer {
 
                 collectCount++;
 
-                if (collectCount > 20) {
+                if (collectCount > SENTENCE_COLLECTION_AMOUNT) {
                     discarding = true;
                 }
 

@@ -1059,6 +1059,12 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         //
     }
 
+
+    @Override
+    public void nmeaBurstValidityChanged(boolean burstsValid) {
+
+    }
+
     @Override
     public void gpsStarted() {
 

@@ -140,6 +140,11 @@ public class CheckNmeaDialog extends DialogFragment implements GpsService.Listen
     }
 
     @Override
+    public void nmeaBurstValidityChanged(boolean burstsAreValid) {
+
+    }
+
+    @Override
     public void gpsStarted() {
 
     }

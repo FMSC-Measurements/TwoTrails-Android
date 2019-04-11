@@ -88,6 +88,11 @@ public class TwoTrailsApp extends Application {
                 }
 
                 @Override
+                public void nmeaBurstValidityChanged(boolean burstsAreValid) {
+                    
+                }
+
+                @Override
                 public void gpsStarted() {
                     if (silentConnectToExternalGps && getGps().isExternalGpsUsed()) {
                         silentConnectToExternalGps = false;

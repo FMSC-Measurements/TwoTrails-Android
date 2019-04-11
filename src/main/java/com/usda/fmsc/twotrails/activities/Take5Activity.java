@@ -844,23 +844,31 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
         }
     }
 
-    private boolean savePoint(TtPoint point) {
-        if (point != null) {
-            if (point == _CurrentPoint) {
+    private boolean savePoint(TtPoint sPoint) {
+        if (sPoint != null) {
+            if (sPoint == _CurrentPoint) {
                 if (!saved) {
-                    TtAppCtx.getDAL().insertPoint(point);
+                    TtAppCtx.getDAL().insertPoint(sPoint);
                     TtAppCtx.getDAL().insertNmeaBursts(_Bursts);
+
+                    if (sPoint.getIndex() < _Points.size()) { //update all the points after inserted point
+                        for (int i = sPoint.getIndex() + 1; i <_Points.size(); i++) {
+                            TtPoint point = TtUtils.Points.clonePoint(_Points.get(i));
+                            point.setIndex(i);
+                            TtAppCtx.getDAL().updatePoint(point, _Points.get(i));
+                        }
+                    }
 
                     _Bursts = new ArrayList<>();
                     _UsedBursts = new ArrayList<>();
                 } else if (updated) {
-                    TtAppCtx.getDAL().updatePoint(point, point);
+                    TtAppCtx.getDAL().updatePoint(sPoint, sPoint);
                 }
 
                 saved = true;
                 updated = false;
             } else {
-                TtAppCtx.getDAL().updatePoint(point, point);
+                TtAppCtx.getDAL().updatePoint(sPoint, sPoint);
             }
         }
 
@@ -970,21 +978,20 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
         return true;
     }
 
-    private void addTake5(Take5Point point) {
-        TtPoint temp = _CurrentPoint;
-        _CurrentPoint = point;
+    private void addTake5(Take5Point t5point) {
+        TtPoint prevPoint = _CurrentPoint;
+        _CurrentPoint = t5point;
 
-        if (savePoint(point)) {
-            point.adjustPoint(); //temp for map
+        if (savePoint(t5point)) {
+            t5point.adjustPoint(); //temp for map
 
             hideCancel();
             hideCommitSS();
 
             lockLastPoint(true);
 
-            _PrevPoint = _CurrentPoint;
-            _CurrentPoint = point;
-            _Points.add(point);
+            _PrevPoint = prevPoint;
+            _Points.add(t5point.getIndex(), t5point);
 
             ignoreScroll = true;
 
@@ -996,7 +1003,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
             fabT5.setEnabled(true);
             fabSS.setEnabled(true);
 
-            addPosition(point, true);
+            addPosition(t5point, true);
 
             if (useVib) {
                 AndroidUtils.Device.vibrate(this, Consts.Notifications.VIB_POINT_CREATED);
@@ -1006,7 +1013,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                 AndroidUtils.Device.playSound(this, R.raw.ring);
             }
         } else {
-            _CurrentPoint = temp;
+            _CurrentPoint = prevPoint;
             Toast.makeText(this, "Point failed to save", Toast.LENGTH_SHORT).show();
         }
     }
