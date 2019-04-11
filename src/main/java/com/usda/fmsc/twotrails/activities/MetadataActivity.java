@@ -603,6 +603,9 @@ public class MetadataActivity extends CustomToolbarActivity {
                                     }
 
                                     @Override
+                                    public void nmeaBurstValidityChanged(boolean burstsValid) { }
+
+                                    @Override
                                     public void gpsStarted() {
 
                                     }

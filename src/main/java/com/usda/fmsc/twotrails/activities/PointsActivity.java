@@ -156,7 +156,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
 
     public HashMap<String, TtPolygon> getPolygons() {
-        if (_Polygons == null) {
+        if (_Polygons == null && TtAppCtx.getDAL() != null) {
             _Polygons = TtAppCtx.getDAL().getPolygonsMap();
         }
 
@@ -414,7 +414,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         setContentView(R.layout.activity_points);
 
         ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null){
+        if (actionBar != null) {
             actionBar.setDisplayShowTitleEnabled(false);
         }
 
@@ -681,7 +681,9 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
             TtAppCtx.getRF().startRangeFinder();
         }
 
-        TtAppCtx.getRF().addListener(this);
+        if (TtAppCtx.getRF() != null) {
+            TtAppCtx.getRF().addListener(this);
+        }
     }
 
     @Override
@@ -697,11 +699,14 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         savePoint();
         saveMedia();
 
-        TtAppCtx.getRF().addListener(this);
+        if (TtAppCtx.getRF() != null) {
+            TtAppCtx.getRF().removeListener(this);
 
-        if (!TtAppCtx.getDeviceSettings().isRangeFinderAlwaysOn()) {
-            TtAppCtx.getRF().stopRangeFinder();
+            if (!TtAppCtx.getDeviceSettings().isRangeFinderAlwaysOn()) {
+                TtAppCtx.getRF().stopRangeFinder();
+            }
         }
+
 
         if (adjust) {
             PolygonAdjuster.adjust(TtAppCtx.getDAL(), true);
@@ -1000,7 +1005,9 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                     TtAppCtx.getRF().startRangeFinder();
                 }
 
-                TtAppCtx.getRF().addListener(this);
+                if (TtAppCtx.getRF() != null) {
+                    TtAppCtx.getRF().addListener(this);
+                }
             }
         }
     }
@@ -1016,25 +1023,25 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
     private void addInsertPointsResult(int resultCode, Intent data) {
         if (resultCode == Consts.Codes.Results.POINT_CREATED) {
-            Bundle bundle = data.getExtras();
-            int created = 1;
+//            Bundle bundle = data.getExtras();
+//            int created = 1;
+//
+//            if (bundle != null && bundle.containsKey(Consts.Codes.Data.NUMBER_OF_CREATED_POINTS)) {
+//                created = bundle.getInt(Consts.Codes.Data.NUMBER_OF_CREATED_POINTS);
+//            }
 
-            if (bundle != null && bundle.containsKey(Consts.Codes.Data.NUMBER_OF_CREATED_POINTS)) {
-                created = bundle.getInt(Consts.Codes.Data.NUMBER_OF_CREATED_POINTS);
-            }
-
-            if (_CurrentIndex < _Points.size() - 1) {
-                ArrayList<TtPoint> updatePoints = new ArrayList<>();
-                TtPoint tmpPoint;
-
-                for (int i = _CurrentIndex + 1; i < _Points.size(); i++) {
-                    tmpPoint = _Points.get(i);
-                    tmpPoint.setIndex(tmpPoint.getIndex() + created);
-                    updatePoints.add(tmpPoint);
-                }
-
-                TtAppCtx.getDAL().updatePoints(updatePoints);
-            }
+//            if (_CurrentIndex < _Points.size() - 1) {
+//                ArrayList<TtPoint> updatePoints = new ArrayList<>();
+//                TtPoint tmpPoint;
+//
+//                for (int i = _CurrentIndex + 1; i < _Points.size(); i++) {
+//                    tmpPoint = _Points.get(i);
+//                    tmpPoint.setIndex(tmpPoint.getIndex() + created);
+//                    updatePoints.add(tmpPoint);
+//                }
+//
+//                TtAppCtx.getDAL().updatePoints(updatePoints);
+//            }
 
             _Points = TtAppCtx.getDAL().getPointsInPolygon(_CurrentPolygon.getCN());
 

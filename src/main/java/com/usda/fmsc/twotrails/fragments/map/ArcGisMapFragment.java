@@ -652,6 +652,11 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
     }
 
     @Override
+    public void nmeaBurstValidityChanged(boolean burstsAreValid) {
+
+    }
+
+    @Override
     public void gpsStarted() {
 
     }

@@ -22,6 +22,7 @@ import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.geospatial.nmea.NmeaBurstEx;
 import com.usda.fmsc.geospatial.nmea.NmeaIDs;
 import com.usda.fmsc.geospatial.nmea.NmeaParser;
+import com.usda.fmsc.geospatial.nmea.exceptions.ExcessiveStringException;
 import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
 import com.usda.fmsc.twotrails.DeviceSettings;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
@@ -45,7 +46,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
 
     private OnLocationChangedListener gmapListener;
 
-    private boolean postAllNmeaStrings = true, logging, logBurstDetails;
+    private boolean postAllNmeaStrings = true, logging, logBurstDetails, receivingValidBursts;
     private GeoPosition lastPosition;
 
     private ArrayList<Listener> listeners = new ArrayList<>();
@@ -209,6 +210,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
         }
 
         logging = false;
+        receivingValidBursts = false;
 
         if (logPrintWriter != null) {
             logPrintWriter.flush();
@@ -220,6 +222,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
         } else {
             status = GpsDeviceStatus.GpsAlreadyStopped;
         }
+
 
         TtAppCtx.getTtNotifyManager().setGpsOff();
 
@@ -236,6 +239,11 @@ public class GpsService extends Service implements LocationListener, LocationSou
                     locManager.addNmeaListener(this);
                     locManager.registerGnssStatusCallback(mGnssStatusCallback);
                     locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_UPDATE_INTERVAL, GPS_MINIMUM_DISTANCE, this);
+
+                    if (TtAppCtx.getReport() != null) {
+                        TtAppCtx.getReport().writeEvent("Internal GPS started");
+                    }
+
                     return GpsDeviceStatus.InternalGpsStarted;
                 } else {
                     return GpsDeviceStatus.InternalGpsNeedsPermissions;
@@ -362,8 +370,14 @@ public class GpsService extends Service implements LocationListener, LocationSou
     public void setGpsProvider(String deviceUUID) throws RuntimeException {
         if (isGpsRunning())
             throw new RuntimeException("GPS must be stopped before setting provider.");
-        else
+        else {
             _deviceUUID = deviceUUID;
+
+            if (TtAppCtx.getReport() != null) {
+                TtAppCtx.getReport().writeEvent("GPS changed to: " +
+                        (_deviceUUID == null ? "Internal" : TtAppCtx.getDeviceSettings().getGpsDeviceName() + " (" + _deviceUUID + ")"));
+            }
+        }
     }
 
     public boolean isGpsRunning() {
@@ -398,6 +412,9 @@ public class GpsService extends Service implements LocationListener, LocationSou
     @Override
     public void connectionStarted() {
         postGpsStart();
+        if (TtAppCtx.getReport() != null) {
+            TtAppCtx.getReport().writeEvent("External GPS connection started");
+        }
     }
 
     @Override
@@ -407,6 +424,10 @@ public class GpsService extends Service implements LocationListener, LocationSou
         if (btConn != null) {
             btConn.unregister(this);
             btConn = null;
+        }
+
+        if (TtAppCtx.getReport() != null) {
+            TtAppCtx.getReport().writeError("External GPS lost connection", "GpsService:connectionLost");
         }
 
         postError(GpsError.LostDeviceConnection);
@@ -461,7 +482,13 @@ public class GpsService extends Service implements LocationListener, LocationSou
             boolean parsed = false;
 
             if (gpsSyncer.isSynced() || gpsSyncer.sync(nmeaString)) {
-                parsed = parser.parse(nmeaString);
+                try {
+                    parsed = parser.parse(nmeaString);
+                } catch (ExcessiveStringException e) {
+                    gpsSyncer.reset();
+                    parser.reset();
+                    postNmeaBurstValidityChanged(false);
+                }
             }
 
             if (postAllNmeaStrings || parsed) {
@@ -482,6 +509,11 @@ public class GpsService extends Service implements LocationListener, LocationSou
     @Override
     public void onBurstReceived(INmeaBurst burst) {
         postINmeaBurst(burst);
+
+        if (!receivingValidBursts) {
+            receivingValidBursts = true;
+            postNmeaBurstValidityChanged(true);
+        }
 
         if (burst.hasPosition()) {
             lastPosition = burst.getPosition();
@@ -565,6 +597,21 @@ public class GpsService extends Service implements LocationListener, LocationSou
                     }
                 });
 
+            } catch (Exception ex) {
+                //
+            }
+        }
+    }
+
+    private void postNmeaBurstValidityChanged(final boolean receivingValidBursts) {
+        for (final Listener listener : listeners) {
+            try {
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        listener.nmeaBurstValidityChanged(receivingValidBursts);
+                    }
+                });
             } catch (Exception ex) {
                 //
             }
@@ -700,7 +747,6 @@ public class GpsService extends Service implements LocationListener, LocationSou
         External
     }
 
-
     public class GpsBinder extends Binder implements Controller {
 
         public GpsService getService() {
@@ -762,6 +808,11 @@ public class GpsService extends Service implements LocationListener, LocationSou
         }
 
         @Override
+        public boolean areGpsBurstsValid() {
+            return GpsService.this.receivingValidBursts;
+        }
+
+        @Override
         public GpsProvider getGpsProvider() {
             return GpsService.this.getGpsProvider();
         }
@@ -800,6 +851,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
         void nmeaBurstReceived(INmeaBurst INmeaBurst);
         void nmeaStringReceived(String nmeaString);
         void nmeaSentenceReceived(NmeaSentence nmeaSentence);
+        void nmeaBurstValidityChanged(boolean burstsAreValid);
 
         void gpsStarted();
         void gpsStopped();
@@ -829,6 +881,8 @@ public class GpsService extends Service implements LocationListener, LocationSou
 
         boolean isExternalGpsUsed();
 
+        boolean areGpsBurstsValid();
+
         GpsProvider getGpsProvider();
 
         void postAllNmeaStrings(boolean allStrings);
@@ -839,5 +893,4 @@ public class GpsService extends Service implements LocationListener, LocationSou
 
         boolean isLogging();
     }
-
 }

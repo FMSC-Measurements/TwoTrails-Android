@@ -308,6 +308,11 @@ public class GetMapExtentsActivity extends AppCompatActivity implements GpsServi
     }
 
     @Override
+    public void nmeaBurstValidityChanged(boolean burstsAreValid) {
+
+    }
+
+    @Override
     public void gpsStarted() {
 
     }

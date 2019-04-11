@@ -63,6 +63,11 @@ public class GpsInfoControl implements GpsService.Listener {
     }
 
     @Override
+    public void nmeaBurstValidityChanged(boolean burstsAreValid) {
+
+    }
+
+    @Override
     public void gpsStarted() {
 
     }
