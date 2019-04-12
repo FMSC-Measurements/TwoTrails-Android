@@ -1562,7 +1562,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         } else {
             ArrayList<TtPoint> points = polyPoints.get(fromPoly.getCN());
 
-            if (points.size() > 0) {
+            if (points != null && points.size() > 0) {
                 AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
 
                 dialogBuilder.setTitle(String.format("From Point in %s", fromPoly.getName()));
@@ -1647,7 +1647,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
 
         ArrayList<TtPoint> points = polyPoints.get(toPoly.getCN());
 
-        if (points.size() > 0) {
+        if (points != null && points.size() > 0) {
             AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
 
             dialogBuilder.setTitle(String.format("To Point in %s", toPoly.getName()));
@@ -1731,10 +1731,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
 
 
     private ArrayList<TtPolygon> getSortedPolys() {
-        ArrayList<TtPolygon> polys = new ArrayList<>();
-        for (TtPolygon poly : getPolygonsToMap()) {
-            polys.add(poly);
-        }
+        ArrayList<TtPolygon> polys = new ArrayList<>(getPolygonsToMap());
 
         Collections.sort(polys);
 

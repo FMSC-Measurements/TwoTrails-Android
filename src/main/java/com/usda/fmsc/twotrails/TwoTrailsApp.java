@@ -38,6 +38,8 @@ import com.usda.fmsc.twotrails.utilities.TtUtils;
 import com.usda.fmsc.utilities.FileUtils;
 import com.usda.fmsc.utilities.StringEx;
 
+import org.joda.time.DateTime;
+
 import java.io.File;
 
 public class TwoTrailsApp extends Application {
@@ -311,25 +313,62 @@ public class TwoTrailsApp extends Application {
     private Thread.UncaughtExceptionHandler exceptionHandler = new Thread.UncaughtExceptionHandler() {
         @Override
         public void uncaughtException(Thread errorThread, Throwable exception) {
-            if (!areFoldersInitiated()) {
-                initFolders();
-                _Report.changeDirectory(TtUtils.getTtFileDir());
+            boolean restart = true;
+
+            try {
+                if (!areFoldersInitiated()) {
+                    initFolders();
+                    _Report.changeDirectory(TtUtils.getTtFileDir());
+                }
+
+                _Report.writeError(exception.getMessage(), errorThread.getName(), exception.getStackTrace());
+
+                if (gpsServiceBinder != null) {
+                    gpsServiceBinder.stopService();
+                }
+            } catch (Exception e) {
+                Log.e(Consts.LOG_TAG, "Error in App:uncaughtException");
             }
 
-            _Report.writeError(exception.getMessage(), errorThread.getName(), exception.getStackTrace());
+            try {
+                DateTime lastCrash = getDeviceSettings().getLastCrashTime();
+                DateTime currentCrash = DateTime.now();
+                getDeviceSettings().setLastCrashTime(currentCrash);
 
-            if (gpsServiceBinder != null) {
-                gpsServiceBinder.stopService();
+                if (lastCrash != null && lastCrash.isAfter(currentCrash.minusMinutes(1))) {
+                    restart = false;
+                }
+            } catch (Exception ex) {
+                restart = false;
             }
 
-            Intent intent = new Intent(_AppContext, MainActivity.class);
-            intent.putExtra(Consts.Codes.Data.CRASH, true);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
-                    | Intent.FLAG_ACTIVITY_CLEAR_TASK
-                    | Intent.FLAG_ACTIVITY_NEW_TASK);
-            PendingIntent pendingIntent = PendingIntent.getActivity(getInstance().getBaseContext(), 0, intent, PendingIntent.FLAG_ONE_SHOT);
-            AlarmManager mgr = (AlarmManager) getInstance().getBaseContext().getSystemService(Context.ALARM_SERVICE);
-            mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 100, pendingIntent);
+            if (restart) {
+                Intent intent = new Intent(_AppContext, MainActivity.class);
+                intent.putExtra(Consts.Codes.Data.CRASH, true);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+                        | Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        | Intent.FLAG_ACTIVITY_NEW_TASK);
+                PendingIntent pendingIntent = PendingIntent.getActivity(getInstance().getBaseContext(), 0, intent, PendingIntent.FLAG_ONE_SHOT);
+                AlarmManager mgr = (AlarmManager) getInstance().getBaseContext().getSystemService(Context.ALARM_SERVICE);
+                mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 100, pendingIntent);
+            } else {
+                try
+                {
+                    new Thread() {
+                        @Override
+                        public void run() {
+                            Looper.prepare();
+                            Toast.makeText(getInstance(),"TwoTrails crashed twice in the past minute. Check Log for details and contact development team if needed.", Toast.LENGTH_LONG).show();
+                            Looper.loop();
+                        }
+                    }.start();
+                    Thread.sleep(4000); // Let the Toast display before app will get shutdown
+                }
+                catch (Exception e) {
+                    //
+                }
+            }
+
             _CurrentActivity.finish();
             System.exit(2);
         }
@@ -573,8 +612,6 @@ public class TwoTrailsApp extends Application {
     public static synchronized TwoTrailsApp getInstance() {
         return _AppContext;
     }
-
-
 
 
 //    @Override
