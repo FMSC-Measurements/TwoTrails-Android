@@ -2,7 +2,6 @@ package com.usda.fmsc.twotrails;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Build;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -14,14 +13,18 @@ import com.usda.fmsc.twotrails.units.MapTracking;
 import com.usda.fmsc.twotrails.units.MapType;
 import com.usda.fmsc.utilities.StringEx;
 
+import org.joda.time.DateTime;
+
 import java.util.ArrayList;
 import java.util.Collection;
 
+@SuppressWarnings({"WeakerAccess", "unused"})
 public class DeviceSettings extends Settings {
 
     //region Preference Names
     private static final String SETTINGS_CREATED = "SettingsCreated";
     private static final String DEVELOPER_OPTIONS = "DeveloperOptions";
+    private static final String LAST_CRASH_TIME = "LastCrashTime";
 
     public static final String DROP_ZERO = "DropZero";
     public static final String ROUND_POINTS = "RoundPoints";
@@ -197,6 +200,8 @@ public class DeviceSettings extends Settings {
 
         editor.putBoolean(DEVELOPER_OPTIONS, false);
 
+        editor.putString(LAST_CRASH_TIME, StringEx.Empty);
+
         editor.putBoolean(DROP_ZERO, DEFAULT_DROP_ZERO);
         editor.putBoolean(ROUND_POINTS, DEFAULT_ROUND_POINTS);
 
@@ -245,13 +250,9 @@ public class DeviceSettings extends Settings {
         editor.putInt(AUTO_INTERNALIZE_EXPORT, DEFAULT_AUTO_INTERNALIZE_EXPORT);
         editor.putBoolean(AUTO_INTERNALIZE_EXPORT_ASK, DEFAULT_AUTO_INTERNALIZE_EXPORT_ASK);
 
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT_WATCH) {
-            editor.putInt(USE_TTCAMERA, 2);
-            editor.putBoolean(USE_TTCAMERA_ASK, true);
-        } else {
-            editor.putInt(USE_TTCAMERA, 1);
-            editor.putBoolean(USE_TTCAMERA_ASK, false);
-        }
+        editor.putInt(USE_TTCAMERA, 2);
+        editor.putBoolean(USE_TTCAMERA_ASK, true);
+
 
         editor.putBoolean(AUTO_OPEN_LAST_PROJECT, DEFAULT_AUTO_OPEN_LAST_PROJECT);
 
@@ -749,6 +750,18 @@ public class DeviceSettings extends Settings {
     }
 
 
+    public DateTime getLastCrashTime() {
+        String time = getString(LAST_CRASH_TIME);
+        if (!StringEx.isEmpty(time))
+            return DateTime.parse(time);
+        return null;
+    }
+
+    public void setLastCrashTime(DateTime crashTime) {
+        setString(LAST_CRASH_TIME, crashTime.toString());
+    }
+
+
     public boolean getDropZeros() {
         return getBool(DROP_ZERO, true);
     }
@@ -909,7 +922,8 @@ public class DeviceSettings extends Settings {
     }
 
     public int getUseTtCamera() {
-        return getInt(USE_TTCAMERA, Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT_WATCH ? 2 : 1);
+        return getInt(USE_TTCAMERA, 2);
+        //return getInt(USE_TTCAMERA, Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT_WATCH ? 2 : 1);
     }
 
     public void setUseTtCamera(int value) {

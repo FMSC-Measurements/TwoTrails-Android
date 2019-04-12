@@ -52,8 +52,8 @@ import org.joda.time.DateTime;
 
 public class Export {
     public static String points(DataAccessLayer dal, String dir) {
-        String pointsFilename = String.format("%s/points.csv", dir);
-        String groupsFilename = String.format("%s/groups.csv", dir);
+        String pointsFilename = String.format("%s/Points.csv", dir);
+        String groupsFilename = String.format("%s/Groups.csv", dir);
 
         try {
             HashMap<String, TtMetadata> metadata = dal.getMetadataMap();
@@ -251,7 +251,7 @@ public class Export {
     }
 
     public static String polygons(DataAccessLayer dal, String dir) {
-        String polysFilename = String.format("%s/polygons.csv", dir);
+        String polysFilename = String.format("%s/Polygons.csv", dir);
 
         try {
             CSVPrinter printer = new CSVPrinter(new FileWriter(polysFilename), CSVFormat.DEFAULT);
@@ -295,7 +295,7 @@ public class Export {
     }
 
     public static String metadata(DataAccessLayer dal, String dir) {
-        String metaFilename = String.format("%s/metadata.csv", dir);
+        String metaFilename = String.format("%s/Metadata.csv", dir);
 
         try {
             CSVPrinter writer = new CSVPrinter(new FileWriter(metaFilename), CSVFormat.DEFAULT);
@@ -349,7 +349,7 @@ public class Export {
     }
 
     public static String project(DataAccessLayer dal, String dir) {
-        String projFilename = String.format("%s/project.csv", dir);
+        String projFilename = String.format("%s/Project.csv", dir);
 
         try {
             CSVPrinter writer = new CSVPrinter(new FileWriter(projFilename), CSVFormat.DEFAULT);
@@ -390,7 +390,7 @@ public class Export {
     }
 
     public static String nmea(DataAccessLayer dal, String dir) {
-        String nmeaFilename = String.format("%s/nmea.csv", dir);
+        String nmeaFilename = String.format("%s/TtNmea.csv", dir);
         try {
             //region NMEA Headers
             CSVPrinter writer = new CSVPrinter(new FileWriter(nmeaFilename), CSVFormat.DEFAULT);
