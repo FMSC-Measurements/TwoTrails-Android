@@ -272,7 +272,7 @@ public class DeviceSettingsFragment extends PreferenceFragment {
 
                                             dialog.setPositiveButton("Default", setMetaListener, 1);
 
-                                            if (TtAppCtx.getDAL() != null)
+                                            if (TtAppCtx.hasDAL())
                                                 dialog.setNegativeButton("All", setMetaListener, 2);
 
                                             dialog.setNeutralButton("None", null, 0);

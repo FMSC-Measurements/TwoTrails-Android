@@ -59,7 +59,7 @@ public class SettingsLogic {
     public static void exportReport(final Activity activity) {
         AlertDialog.Builder dialog = new AlertDialog.Builder(activity);
 
-        if (TwoTrailsApp.getInstance().getDAL() != null) {
+        if (TwoTrailsApp.getInstance().hasDAL()) {
             dialog.setMessage("Would you like to include the current project into the report?")
                     .setPositiveButton(R.string.str_yes, new DialogInterface.OnClickListener() {
                         @Override

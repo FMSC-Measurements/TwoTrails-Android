@@ -53,6 +53,7 @@ public class DeviceSettings extends Settings {
     public static final String GPS_FILTER_DOP_VALUE = "GpsFilterDopValue";
     public static final String GPS_FILTER_FIX_TYPE = "GpsFilterFixType";
     public static final String GPS_FILTER_FIX = "GpsFilterFix";
+    public static final String GPS_FILTER_FIX_USE = "GpsFilterFixUse";
 
     public static final String TAKE5_FILTER_DOP_TYPE = "Take5FilterDopType";
     public static final String TAKE5_FILTER_DOP_VALUE = "Take5FilterDopValue";
@@ -121,6 +122,7 @@ public class DeviceSettings extends Settings {
     public final GGASentence.GpsFixType DEFAULT_GPS_FIX_TYPE = GGASentence.GpsFixType.GPS;
     public final GSASentence.Fix DEFAULT_GPS_FIX = GSASentence.Fix._3D;
     public final int DEFAULT_GPS_DOP_VALUE = 20;
+    public final boolean DEFAULT_GPS_FIX_USE = true;
 
     public final DopType DEFAULT_TAKE5_DOP_TYPE = DopType.HDOP;
     public final GGASentence.GpsFixType DEFAULT_TAKE5_FIX_TYPE = GGASentence.GpsFixType.GPS;
@@ -212,6 +214,7 @@ public class DeviceSettings extends Settings {
         editor.putInt(GPS_FILTER_DOP_VALUE, DEFAULT_GPS_DOP_VALUE);
         editor.putInt(GPS_FILTER_FIX_TYPE, DEFAULT_GPS_FIX_TYPE.getValue());
         editor.putInt(GPS_FILTER_FIX, DEFAULT_GPS_FIX.getValue());
+        editor.putBoolean(GPS_FILTER_FIX_USE, DEFAULT_GPS_FIX_USE);
 
         editor.putInt(AUTO_FILL_FROM_RANGE_FINDER, DEFAULT_AUTO_FILL_FROM_RANGE_FINDER);
         editor.putBoolean(AUTO_FILL_FROM_RANGE_FINDER_ASK, DEFAULT_AUTO_FILL_FROM_RANGE_FINDER_ASK);
@@ -419,6 +422,14 @@ public class DeviceSettings extends Settings {
         setInt(GPS_FILTER_FIX, value.getValue());
     }
 
+
+    public boolean getGpsFilterFixUse() {
+        return getBool(GPS_FILTER_FIX_USE, true);
+    }
+
+    public void setGpsFilterFixUse(boolean value) {
+        setBool(GPS_FILTER_FIX_USE, value);
+    }
 
     public DopType getTake5FilterDopType() {
         return DopType.parse(getInt(TAKE5_FILTER_DOP_TYPE, DEFAULT_TAKE5_DOP_TYPE.getValue()));

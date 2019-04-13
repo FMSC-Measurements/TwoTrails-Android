@@ -164,18 +164,12 @@
         <activity
             android:name=".activities.PointsActivity"
             android:label="@string/title_activity_points"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".activities.AcquireGpsActivityOld"
-            android:label="@string/title_activity_acquire_gps"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".activities.CalculateGpsActivityOld"
-            android:label="@string/title_activity_calculate_gps"
+            android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait" />
         <activity
             android:name=".activities.Take5Activity"
             android:label="@string/title_activity_take5"
+            android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait" />
         <activity
             android:name=".activities.WalkActivity"
@@ -184,14 +178,17 @@
         <activity
             android:name=".activities.PolygonsActivity"
             android:label="@string/title_activity_polygons"
+            android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait" />
         <activity
             android:name=".activities.MetadataActivity"
             android:label="@string/title_activity_metadata"
+            android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait" />
         <activity
             android:name=".activities.ProjectActivity"
             android:label="@string/title_activity_project"
+            android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait" />
         <activity
             android:name=".activities.TableViewActivity"
@@ -208,6 +205,7 @@
         <activity
             android:name=".activities.PlotGridActivity"
             android:label="@string/title_activity_plot_grid"
+            android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait" />
         <activity
             android:name=".activities.GpsLoggerActivity"
@@ -216,10 +214,12 @@
         <activity
             android:name=".activities.ExportActivity"
             android:label="@string/title_activity_export"
+            android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait" />
         <activity
             android:name=".activities.ImportActivity"
             android:label="@string/title_activity_import"
+            android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait" />
         <!--<activity-->
             <!--android:name="com.nononsenseapps.filepicker.FilePickerActivity"-->
@@ -237,7 +237,8 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".activities.MapManagerActivity"
-            android:label="@string/title_activity_offline_map_manager" />
+            android:label="@string/title_activity_offline_map_manager"
+            android:windowSoftInputMode="adjustPan" />
         <activity
             android:name=".activities.GetMapExtentsActivity"
             android:label="@string/title_activity_get_map_extents"
@@ -248,15 +249,19 @@
         <activity
             android:name=".activities.MapDetailsActivity"
             android:label="@string/title_activity_edit_arc_map"
+            android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait" />
         <activity
             android:name=".activities.ArcGisLoginActivity"
             android:label="@string/title_activity_arc_gis_login"
+            android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait" />
         <activity
             android:name=".activities.TtCameraActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".activities.AcquireAndCalculateGpsActivity" />
+        <activity
+            android:name=".activities.AcquireAndCalculateGpsActivity"
+            android:windowSoftInputMode="adjustPan"/>
         <activity
             android:name=".activities.GetDirectionActivity"
             android:label="@string/title_activity_get_direction"

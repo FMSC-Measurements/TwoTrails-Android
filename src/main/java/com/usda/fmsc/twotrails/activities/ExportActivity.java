@@ -193,7 +193,7 @@ public class ExportActivity extends CustomToolbarActivity {
 
     private void startExport(final String directory, boolean checkExternalMedia) {
         if (checkExternalMedia && chkPc.isChecked()) {
-            final MediaAccessLayer mal = TtAppCtx.getOrCreateMAL();
+            final MediaAccessLayer mal = TtAppCtx.getMAL();
             if (mal != null && mal.hasExternalImages()) {
                 if (TtAppCtx.getDeviceSettings().getAutoInternalizeExportAsk()) {
                     new DontAskAgainDialog(this,
@@ -415,7 +415,7 @@ public class ExportActivity extends CustomToolbarActivity {
             exportTask.execute(
                     new Export.ExportTask.ExportParams(
                             TtAppCtx.getDAL(),
-                            TtAppCtx.hasMAL() ? TtAppCtx.getOrCreateMAL() : null,
+                            TtAppCtx.hasMAL() ? TtAppCtx.getMAL() : null,
                             directory,
                             chkPoints.isChecked(),
                             chkPolys.isChecked(),

@@ -63,136 +63,140 @@ public class Take5PointsEditRvAdapter extends RecyclerViewEx.BaseAdapterEx {
                 return new SideShotViewHolderEx(inflater.inflate(R.layout.card_take5_sideshot, parent, false));
             case 6:
                 return new Take5ViewHolderEx(inflater.inflate(R.layout.card_take5_take5, parent, false));
+            default:
+                return new NonSupportedViewHolder(inflater.inflate(R.layout.content_empty_match_width, parent, false));
         }
 
-        return null;
+        //return null;
     }
 
     @Override
     public void onBindViewHolderEx(ViewHolderEx holder, int position) {
         final TtPoint point = points.get(position);
 
-        final PointViewHolderEx pvh = (PointViewHolderEx)holder;
+        if (point.getOp() == OpType.Take5 || point.getOp() == OpType.SideShot) {
+            final PointViewHolderEx pvh = (PointViewHolderEx)holder;
 
-        pvh.tvPID.setText(StringEx.toString(point.getPID()));
-        pvh.txtCmt.addTextChangedListener(new SimpleTextWatcher() {
-            @Override
-            public void afterTextChanged(Editable s) {
-                point.setComment(s.toString());
-                activity.updatePoint(point);
-            }
-        });
+            pvh.tvPID.setText(StringEx.toString(point.getPID()));
+            pvh.txtCmt.addTextChangedListener(new SimpleTextWatcher() {
+                @Override
+                public void afterTextChanged(Editable s) {
+                    point.setComment(s.toString());
+                    activity.updatePoint(point);
+                }
+            });
 
-        pvh.ibBnd.setImageDrawable(point.isOnBnd() ? dOnBnd : dOffBnd);
-        pvh.ibBnd.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                boolean onBnd = !point.isOnBnd();
+            pvh.ibBnd.setImageDrawable(point.isOnBnd() ? dOnBnd : dOffBnd);
+            pvh.ibBnd.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    boolean onBnd = !point.isOnBnd();
 
-                pvh.ibBnd.setImageDrawable(onBnd ? dOnBnd : dOffBnd);
-                point.setOnBnd(onBnd);
-                activity.updatePoint(point);
-            }
-        });
+                    pvh.ibBnd.setImageDrawable(onBnd ? dOnBnd : dOffBnd);
+                    point.setOnBnd(onBnd);
+                    activity.updatePoint(point);
+                }
+            });
 
-        switch (point.getOp()) {
-            case Take5: {
-                Take5ViewHolderEx t5Holder = (Take5ViewHolderEx)holder;
-                Take5Point t5 = (Take5Point)point;
+            switch (point.getOp()) {
+                case Take5: {
+                    Take5ViewHolderEx t5Holder = (Take5ViewHolderEx)holder;
+                    Take5Point t5 = (Take5Point)point;
 
-                t5Holder.tvX.setText(StringEx.toString(t5.getUnAdjX(), 3));
-                t5Holder.tvY.setText(StringEx.toString(t5.getUnAdjY(), 3));
-                t5Holder.tvElev.setText(StringEx.toString(t5.getUnAdjZ(), 3));
-                t5Holder.tvElevType.setText(metadata.getElevation().toString());
-                break;
-            }
-            case SideShot: {
-                final SideShotViewHolderEx ssHolder = (SideShotViewHolderEx)holder;
-                final SideShotPoint ssp = (SideShotPoint)point;
+                    t5Holder.tvX.setText(StringEx.toString(t5.getUnAdjX(), 3));
+                    t5Holder.tvY.setText(StringEx.toString(t5.getUnAdjY(), 3));
+                    t5Holder.tvElev.setText(StringEx.toString(t5.getUnAdjZ(), 3));
+                    t5Holder.tvElevType.setText(metadata.getElevation().toString());
+                    break;
+                }
+                case SideShot: {
+                    final SideShotViewHolderEx ssHolder = (SideShotViewHolderEx)holder;
+                    final SideShotPoint ssp = (SideShotPoint)point;
 
-                ssHolder.txtFwdAz.setText(StringEx.toString(ssp.getFwdAz()));
-                ssHolder.txtBkAz.setText(StringEx.toString(ssp.getBkAz()));
-                ssHolder.tvMagDec.setText(StringEx.toString(metadata.getMagDec()));
+                    ssHolder.txtFwdAz.setText(StringEx.toString(ssp.getFwdAz()));
+                    ssHolder.txtBkAz.setText(StringEx.toString(ssp.getBkAz()));
+                    ssHolder.tvMagDec.setText(StringEx.toString(metadata.getMagDec()));
 
-                ssHolder.txtSlpDist.setText(StringEx.toString(
-                        TtUtils.Convert.distance(
-                                ssp.getSlopeDistance(),
-                                metadata.getDistance(),
-                                Dist.Meters)
-                ));
+                    ssHolder.txtSlpDist.setText(StringEx.toString(
+                            TtUtils.Convert.distance(
+                                    ssp.getSlopeDistance(),
+                                    metadata.getDistance(),
+                                    Dist.Meters)
+                    ));
 
 
-                ssHolder.txtSlpAng.setText(StringEx.toString(
-                        TtUtils.Convert.angle(
-                                ssp.getSlopeAngle(),
-                                metadata.getSlope(),
-                                Slope.Percent
-                        )
-                ));
+                    ssHolder.txtSlpAng.setText(StringEx.toString(
+                            TtUtils.Convert.angle(
+                                    ssp.getSlopeAngle(),
+                                    metadata.getSlope(),
+                                    Slope.Percent
+                            )
+                    ));
 
-                ssHolder.txtFwdAz.addTextChangedListener(new SimpleTextWatcher() {
-                    @Override
-                    public void afterTextChanged(Editable s) {
-                        if (s.length() > 0) {
-                            ssp.setFwdAz(ParseEx.parseDouble(s.toString()));
-                        } else {
-                            ssp.setFwdAz(null);
+                    ssHolder.txtFwdAz.addTextChangedListener(new SimpleTextWatcher() {
+                        @Override
+                        public void afterTextChanged(Editable s) {
+                            if (s.length() > 0) {
+                                ssp.setFwdAz(ParseEx.parseDouble(s.toString()));
+                            } else {
+                                ssp.setFwdAz(null);
+                            }
+
+                            activity.updatePoint(ssp);
+                            ssHolder.calcAzError(ssp);
                         }
+                    });
 
-                        activity.updatePoint(ssp);
-                        ssHolder.calcAzError(ssp);
-                    }
-                });
+                    ssHolder.txtBkAz.addTextChangedListener(new SimpleTextWatcher() {
+                        @Override
+                        public void afterTextChanged(Editable s) {
+                            if (s.length() > 0) {
+                                ssp.setBkAz(ParseEx.parseDouble(s.toString()));
+                            } else {
+                                ssp.setBkAz(null);
+                            }
 
-                ssHolder.txtBkAz.addTextChangedListener(new SimpleTextWatcher() {
-                    @Override
-                    public void afterTextChanged(Editable s) {
-                        if (s.length() > 0) {
-                            ssp.setBkAz(ParseEx.parseDouble(s.toString()));
-                        } else {
-                            ssp.setBkAz(null);
+                            activity.updatePoint(ssp);
+                            ssHolder.calcAzError(ssp);
                         }
+                    });
 
-                        activity.updatePoint(ssp);
-                        ssHolder.calcAzError(ssp);
-                    }
-                });
+                    ssHolder.txtSlpAng.addTextChangedListener(new SimpleTextWatcher() {
+                        @Override
+                        public void afterTextChanged(Editable s) {
+                            if (s.length() > 0) {
+                                ssp.setSlopeAngle(TtUtils.Convert.angle(
+                                        ParseEx.parseDouble(s.toString()),
+                                        Slope.Percent,
+                                        metadata.getSlope()
+                                ));
+                            } else {
+                                ssp.setSlopeAngle(0);
+                            }
 
-                ssHolder.txtSlpAng.addTextChangedListener(new SimpleTextWatcher() {
-                    @Override
-                    public void afterTextChanged(Editable s) {
-                        if (s.length() > 0) {
-                            ssp.setSlopeAngle(TtUtils.Convert.angle(
-                                    ParseEx.parseDouble(s.toString()),
-                                    Slope.Percent,
-                                    metadata.getSlope()
-                            ));
-                        } else {
-                            ssp.setSlopeAngle(0);
+                            activity.updatePoint(ssp);
                         }
+                    });
 
-                        activity.updatePoint(ssp);
-                    }
-                });
+                    ssHolder.txtSlpDist.addTextChangedListener(new SimpleTextWatcher() {
 
-                ssHolder.txtSlpDist.addTextChangedListener(new SimpleTextWatcher() {
+                        @Override
+                        public void afterTextChanged(Editable s) {
+                            if (s.length() > 0) {
+                                ssp.setSlopeDistance(TtUtils.Convert.distance(ParseEx.parseDouble(s.toString()), Dist.Meters, metadata.getDistance()));
+                            } else {
+                                ssp.setSlopeDistance(0);
+                            }
 
-                    @Override
-                    public void afterTextChanged(Editable s) {
-                        if (s.length() > 0) {
-                            ssp.setSlopeDistance(TtUtils.Convert.distance(ParseEx.parseDouble(s.toString()), Dist.Meters, metadata.getDistance()));
-                        } else {
-                            ssp.setSlopeDistance(0);
+                            activity.updatePoint(ssp);
                         }
-
-                        activity.updatePoint(ssp);
-                    }
-                });
-                break;
+                    });
+                    break;
+                }
             }
+
+            pvh.setLocked(position < points.size() - 1);
         }
-
-        pvh.setLocked(position < points.size() - 1);
     }
 
     @Override
@@ -207,7 +211,6 @@ public class Take5PointsEditRvAdapter extends RecyclerViewEx.BaseAdapterEx {
 
 
     public class PointViewHolderEx extends ViewHolderEx {
-        public AlphaAnimation anim;
         public boolean hidden;
 
         public android.support.v7.widget.CardView parent;
@@ -229,6 +232,13 @@ public class Take5PointsEditRvAdapter extends RecyclerViewEx.BaseAdapterEx {
         public void setLocked(boolean lock) {
             ibBnd.setEnabled(!lock);
             txtCmt.setEnabled(!lock);
+        }
+    }
+
+    public class NonSupportedViewHolder extends ViewHolderEx {
+
+        public NonSupportedViewHolder(View itemView) {
+            super(itemView);
         }
     }
 

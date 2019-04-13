@@ -156,7 +156,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
 
     public HashMap<String, TtPolygon> getPolygons() {
-        if (_Polygons == null && TtAppCtx.getDAL() != null) {
+        if (_Polygons == null && TtAppCtx.hasDAL()) {
             _Polygons = TtAppCtx.getDAL().getPolygonsMap();
         }
 
@@ -1414,7 +1414,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
     private void saveMedia() {
         if (_MediaUpdated && _CurrentMedia != null) {
-            if (!TtAppCtx.getOrCreateMAL().updateMedia(_CurrentMedia)) {
+            if (!TtAppCtx.getMAL().updateMedia(_CurrentMedia)) {
                 Toast.makeText(PointsActivity.this,
                         StringEx.format("Unable to save %s", _CurrentMedia.getMediaType().toString()),
                         Toast.LENGTH_LONG
@@ -1429,7 +1429,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         List<TtMedia> mediaList = rvMediaAdapter.getItems();
         int index = mediaList.indexOf(media);
 
-        TtAppCtx.getOrCreateMAL().deleteMedia(media);
+        TtAppCtx.getMAL().deleteMedia(media);
 
         if (delete) {
             File file = new File(media.getFilePath());
@@ -1460,7 +1460,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
     private void addImage(final TtImage picture) {
         if (picture != null) {
-            if (TtAppCtx.getOrCreateMAL().insertMedia(picture)) {
+            if (TtAppCtx.getMAL().insertMedia(picture)) {
                 mediaSelectionIndex = TtUtils.Media.getMediaIndex(picture, rvMediaAdapter.getItems());
                 loadImageToList(picture);
             } else {
@@ -1476,7 +1476,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
             Collections.sort(pictures, TtUtils.Media.PictureTimeComparator);
 
             for (int i = 0; i <pictures.size(); i++) {
-                if (!TtAppCtx.getOrCreateMAL().insertMedia(pictures.get(i))) {
+                if (!TtAppCtx.getMAL().insertMedia(pictures.get(i))) {
                     pictures.remove(i--);
                     error++;
                 }
@@ -1933,7 +1933,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                         mediaCount = 0;
                         mediaSelectionIndex = INVALID_INDEX;
 
-                        ArrayList<TtImage> pictures = TtAppCtx.getOrCreateMAL().getImagesInPoint(point.getCN());
+                        ArrayList<TtImage> pictures = TtAppCtx.getMAL().getImagesInPoint(point.getCN());
 
                         if (pictures != null) {
                             Collections.sort(pictures, TtUtils.Media.PictureTimeComparator);
@@ -1951,7 +1951,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                             setCurrentMedia(null);
                         }
                     } else {
-                        mediaCount = TtAppCtx.getOrCreateMAL().getItemsCount(
+                        mediaCount = TtAppCtx.getMAL().getItemsCount(
                                 TwoTrailsMediaSchema.Media.TableName,
                                 TwoTrailsMediaSchema.Media.PointCN,
                                 point.getCN());
@@ -1971,7 +1971,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
     private void loadImageToList(final TtImage picture) {
         mediaCount++;
 
-        TtAppCtx.getOrCreateMAL().loadImage(picture, new MediaAccessLayer.SimpleMalListener() {
+        TtAppCtx.getMAL().loadImage(picture, new MediaAccessLayer.SimpleMalListener() {
             @Override
             public void imageLoaded(TtImage image, View view, Bitmap bitmap) {
                 addImageToList(picture, true, bitmap);

@@ -142,7 +142,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
 
     private TtPolygon fromPoly, toPoly;
     private TtPoint fromPoint, toPoint;
-    private boolean fromMyLoc = true;
+    private boolean fromMyLoc = true, receivingNmea;
 
     private boolean showCompass, mapMoved = true, showMyPos, polysCreated, mapHasMaxExtents;
     private MapTracking mapTracking = MapTracking.FOLLOW;
@@ -1030,6 +1030,8 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         } else {
             onNmeaBurstReceived(nmeaBurst);
         }
+
+        receivingNmea = true;
     }
 
     protected void onNmeaBurstReceived(INmeaBurst nmeaBurst) {
@@ -1041,6 +1043,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         switch (error) {
             case LostDeviceConnection:
                 Toast.makeText(BaseMapActivity.this, "Lost GPS Connection", Toast.LENGTH_LONG).show();
+                receivingNmea = false;
                 break;
             case NoExternalGpsSocket:
                 break;
@@ -1062,7 +1065,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
 
     @Override
     public void nmeaBurstValidityChanged(boolean burstsValid) {
-
+        receivingNmea = burstsValid;
     }
 
     @Override
@@ -1083,6 +1086,11 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     @Override
     public void gpsServiceStopped() {
 
+    }
+
+
+    protected boolean isReceivingNmea() {
+        return receivingNmea;
     }
     //endregion
 

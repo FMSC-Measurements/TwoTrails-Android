@@ -8,11 +8,13 @@ public class FilterOptions {
     public int DopValue;
     public GGASentence.GpsFixType FixType;
     public GSASentence.Fix Fix;
+    public boolean FilterFix;
 
     public FilterOptions() {
         this.DopType = com.usda.fmsc.twotrails.units.DopType.HDOP;
         DopValue = 20;
         this.FixType = GGASentence.GpsFixType.GPS;
         this.Fix = GSASentence.Fix._3D;
+        this.FilterFix = true;
     }
 }
