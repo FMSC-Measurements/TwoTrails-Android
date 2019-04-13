@@ -493,6 +493,8 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
                             super.onAnimationEnd(animator);
                             gpsExtraVisible = false;
                             animating = false;
+
+                            onEndHideExtraGpsStatus();
                         }
                     });
 
@@ -507,6 +509,10 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
         }
     }
 
+    protected void onEndHideExtraGpsStatus() {
+
+    }
+
     protected void showExtraGpsStatus() {
         if (!animating && !gpsExtraVisible) {
             ViewAnimator.expandView(viewGpsInfoLaySatInfo, new ViewAnimator.SimpleAnimatorListener() {
@@ -515,11 +521,17 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
                     super.onAnimationEnd(animator);
                     gpsExtraVisible = true;
                     animating = false;
+
+                    onEndShowExtraGpsStatus();
                 }
             });
 
             animating = true;
         }
+    }
+
+    protected void onEndShowExtraGpsStatus() {
+
     }
 
     protected boolean isGpsExtraInfoVisible() {

@@ -162,6 +162,7 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
         options.DopType = ds.getGpsFilterDopType();
         options.DopValue = ds.getGpsFilterDopValue();
         options.FixType = ds.getGpsFilterFixType();
+        options.FilterFix = ds.getGpsFilterFixUse();
 
         btnCreate = findViewById(R.id.calcBtnCreate);
 
@@ -721,7 +722,9 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
 
     private void setSpinnerFixOption(FilterOptions opts) {
         int val = opts.Fix.getValue();
-        if (val > 1) {
+        if (!opts.FilterFix) {
+            val = 0;
+        } else if (val > 1) {
             val = opts.FixType.getValue();
 
             if (val == 1) {
@@ -741,7 +744,9 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
     }
 
     private void setSettingsFixOptions(int spinnerIndex) {
-        if (spinnerIndex < 3) {
+        if (spinnerIndex == 0) {
+            options.FilterFix = false;
+        } else if (spinnerIndex < 3) {
             options.Fix = GSASentence.Fix.parse(spinnerIndex);
 
             options.FixType = spinnerIndex == 2 ? GGASentence.GpsFixType.GPS : GGASentence.GpsFixType.NoFix;
@@ -757,6 +762,7 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
             }
         }
 
+        TtAppCtx.getDeviceSettings().setGpsFilterFixUse(options.FilterFix);
         TtAppCtx.getDeviceSettings().setGpsFilterFix(options.Fix);
         TtAppCtx.getDeviceSettings().setGpsFilterFixType(options.FixType);
     }

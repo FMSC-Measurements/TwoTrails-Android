@@ -44,7 +44,7 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gps_status);
 
-        if (TtAppCtx.getDAL() != null) {
+        if (TtAppCtx.hasDAL()) {
             TtMetadata metadata = TtAppCtx.getDAL().getDefaultMetadata();
 
             if (metadata != null) {

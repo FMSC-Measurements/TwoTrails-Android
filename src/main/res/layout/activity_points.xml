@@ -28,8 +28,6 @@
                 android:enabled="false"
                 android:orientation="horizontal"
                 android:paddingEnd="8dp"
-                android:paddingRight="8dp"
-                android:paddingLeft="0dp"
                 android:paddingStart="0dp">
 
                 <android.support.v7.widget.AppCompatSpinner
@@ -81,7 +79,6 @@
         android:layout_height="wrap_content"
         android:layout_margin="@null"
         android:layout_marginEnd="@dimen/fab_margin"
-        android:layout_marginRight="@dimen/fab_margin"
         android:layout_marginBottom="86dp"
         android:src="@drawable/ic_ttpoint_gps_white_mini"
         app:layout_anchor="@id/pointsViewPager"
@@ -130,7 +127,6 @@
                     android:text="@string/op_gps"
                     android:layout_width="match_parent"
                     android:drawableStart="@drawable/ic_ttpoint_gps_primary"
-                    android:drawableLeft="@drawable/ic_ttpoint_gps_primary"
                     android:onClick="btnPointNewGpsClick"
                     style="@style/pointsTvOptionStyle"/>
 
@@ -138,7 +134,6 @@
                     android:text="@string/op_take5"
                     android:layout_width="match_parent"
                     android:drawableStart="@drawable/ic_ttpoint_take5_primary"
-                    android:drawableLeft="@drawable/ic_ttpoint_take5_primary"
                     android:onClick="btnPointNewTake5Click"
                     style="@style/pointsTvOptionStyle"/>
 
@@ -146,7 +141,6 @@
                     android:text="@string/op_trav"
                     android:layout_width="match_parent"
                     android:drawableStart="@drawable/ic_ttpoint_traverse_primary"
-                    android:drawableLeft="@drawable/ic_ttpoint_traverse_primary"
                     android:onClick="btnPointNewTravclick"
                     style="@style/pointsTvOptionStyle"/>
 
@@ -154,7 +148,6 @@
                     android:text="@string/op_ss"
                     android:layout_width="match_parent"
                     android:drawableStart="@drawable/ic_ttpoint_sideshot_primary"
-                    android:drawableLeft="@drawable/ic_ttpoint_sideshot_primary"
                     android:onClick="btnPointNewSideShotClick"
                     style="@style/pointsTvOptionStyle"/>
 
@@ -162,7 +155,6 @@
                     android:text="@string/op_qndm"
                     android:layout_width="match_parent"
                     android:drawableStart="@drawable/ic_ttpoint_quondam_primary"
-                    android:drawableLeft="@drawable/ic_ttpoint_quondam_primary"
                     android:onClick="btnPointNewQuondamClick"
                     style="@style/pointsTvOptionStyle"/>
 
@@ -170,7 +162,6 @@
                     android:text="@string/op_walk"
                     android:layout_width="match_parent"
                     android:drawableStart="@drawable/ic_ttpoint_walk_primary"
-                    android:drawableLeft="@drawable/ic_ttpoint_walk_primary"
                     android:onClick="btnPointNewWalkClick"
                     style="@style/pointsTvOptionStyle"/>
 
@@ -178,7 +169,6 @@
                     android:text="@string/op_way"
                     android:layout_width="match_parent"
                     android:drawableStart="@drawable/ic_ttpoint_way_primary"
-                    android:drawableLeft="@drawable/ic_ttpoint_way_primary"
                     android:onClick="btnPointNewWayClick"
                     style="@style/pointsTvOptionStyle"/>
             </LinearLayout>

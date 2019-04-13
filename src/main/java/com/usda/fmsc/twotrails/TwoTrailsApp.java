@@ -45,6 +45,7 @@ import java.io.File;
 public class TwoTrailsApp extends Application {
     private static TwoTrailsApp _AppContext;
 
+    private String _DALFile;
     private DataAccessLayer _DAL;
     private MediaAccessLayer _MAL;
 
@@ -306,6 +307,10 @@ public class TwoTrailsApp extends Application {
                     _Report.writeEvent("TwoTrails Stopped");
                     _Report.closeReport();
                 }
+
+                _DAL = null;
+                _DALFile = null;
+                _MAL = null;
             }
         }
     };
@@ -480,43 +485,51 @@ public class TwoTrailsApp extends Application {
     }
 
     public DataAccessLayer getDAL() {
-        return _DAL;
+        if (hasDAL())
+            return _DAL;
+
+        if (_DALFile != null) {
+            setDAL(new DataAccessLayer(_DALFile, getInstance()));
+            return _DAL;
+        }
+
+        throw new RuntimeException("DAL not set");
     }
 
     public void setDAL(DataAccessLayer dal) {
         _DAL = dal;
+        _MAL = null;
 
         if (dal != null) {
+            _DALFile = dal.getFilePath();
+            getReport().writeEvent(StringEx.format("DAL Loaded: %s", _DALFile));
             getMapSettings().reset();
+        } else {
+            getReport().writeEvent("DAL Unloaded");
         }
     }
-
 
     public MediaAccessLayer getMAL() {
-        return _MAL;
-    }
-
-    public MediaAccessLayer getOrCreateMAL() {
-        if (_MAL == null && _DAL != null)
-        {
-            _MAL = new MediaAccessLayer(getMALFilename(), this);
+        if (_MAL == null && hasDAL()) {
+            _MAL = new MediaAccessLayer(getMALFilename(getDAL()), this);
+            getReport().writeEvent(StringEx.format("MAL Loaded: %s", _MAL.getFilePath()));
         }
 
         return _MAL;
     }
 
-    private String getMALFilename() {
-        if (_DAL != null) {
-            String filename = _DAL.getFilePath();
+    private String getMALFilename(DataAccessLayer dal) {
+        if (dal != null) {
+            String filename = dal.getFilePath();
 
             return filename.substring(0, filename.length() - 3) + "ttmpx";
         }
 
-        throw new RuntimeException("DAL does not exist.");
+        throw new NullPointerException("DAL does not exist");
     }
 
     public boolean hasMAL() {
-        return _MAL != null || FileUtils.fileExists(getMALFilename());
+        return _MAL != null || (hasDAL() && FileUtils.fileExists(getMALFilename(_DAL)));
     }
 
     public void setMAL(MediaAccessLayer mal) {

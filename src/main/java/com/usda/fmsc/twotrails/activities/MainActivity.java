@@ -514,12 +514,12 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     }
 
     private void closeFile() {
-        if (TtAppCtx.getDAL() != null) {
+        if (TtAppCtx.hasDAL()) {
             TtAppCtx.getDAL().close();
             TtAppCtx.setDAL(null);
         }
 
-        if (TtAppCtx.getMAL() != null) {
+        if (TtAppCtx.hasMAL()) {
             TtAppCtx.getMAL().close();
             TtAppCtx.setMAL(null);
         }
@@ -555,7 +555,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 //        }
 
         boolean enable = false;
-        if(TtAppCtx.getDAL() != null) {
+        if(TtAppCtx.hasDAL()) {
             TtAppCtx.getProjectSettings().updateRecentProjects(
                     new RecentProject(TtAppCtx.getDAL().getProjectID(), TtAppCtx.getDAL().getFilePath()));
             
