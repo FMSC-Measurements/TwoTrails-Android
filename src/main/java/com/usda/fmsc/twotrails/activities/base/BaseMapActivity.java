@@ -95,7 +95,7 @@ import static android.support.v4.widget.DrawerLayout.LOCK_MODE_LOCKED_OPEN;
 import static android.support.v4.widget.DrawerLayout.LOCK_MODE_UNDEFINED;
 import static android.support.v4.widget.DrawerLayout.LOCK_MODE_UNLOCKED;
 
-
+@SuppressWarnings({"unused", "SameParameterValue"})
 public abstract class BaseMapActivity extends CustomToolbarActivity implements IMultiMapFragment.MultiMapListener, GpsService.Listener,
         SensorEventListener, PolyMarkerMapRvAdapter.Listener {
 
@@ -482,9 +482,13 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
                 miShowMyPos.setChecked(showMyPos);
 
                 if (getShowMyPos()) {
-                    startGps();
+                    if (!TtAppCtx.getGps().isGpsRunning()) {
+                        startGps();
+                    }
                 } else {
-                    stopGps();
+                    if (!TtAppCtx.getDeviceSettings().isGpsAlwaysOn()) {
+                        stopGps();
+                    }
                 }
 
                 setLocationEnabled(getShowMyPos());
@@ -784,16 +788,16 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         if (!polysCreated) {
             setupGraphicManagers();
             polysCreated = true;
+        }
 
-            if (getMapTracking() == MapTracking.POLY_BOUNDS && getTrackedPoly() != null) {
-                moveToLocation(getTrackedPoly(), Consts.Location.PADDING, true);
-            } else if (getMapTracking() == MapTracking.FOLLOW && getLastPosition() != null) {
-                moveToLocation(getLastPosition(), Consts.Location.ZOOM_CLOSE, true);
-            } else if (getCompleteBounds() != null) {
-                moveToLocation(getCompleteBounds(), Consts.Location.PADDING, true);
-            } else {
-                moveToLocation(Consts.Location.USA_BOUNDS, Consts.Location.PADDING, true);
-            }
+        if (getMapTracking() == MapTracking.POLY_BOUNDS && getTrackedPoly() != null) {
+            moveToLocation(getTrackedPoly(), Consts.Location.PADDING, true);
+        } else if (getMapTracking() == MapTracking.FOLLOW && getLastPosition() != null) {
+            moveToLocation(getLastPosition(), Consts.Location.ZOOM_CLOSE, true);
+        } else if (getCompleteBounds() != null) {
+            moveToLocation(getCompleteBounds(), Consts.Location.PADDING, true);
+        } else {
+            moveToLocation(Consts.Location.USA_BOUNDS, Consts.Location.PADDING, true);
         }
 
         setupPolygonOptionsUI();

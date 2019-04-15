@@ -767,6 +767,10 @@ public class DeviceSettingsFragment extends PreferenceFragment {
 
             TtAppCtx.getDeviceSettings().setGpsConfigured(true);
             exGpsCat.setEnabled(false);
+
+            if (TtAppCtx.getDeviceSettings().isGpsAlwaysOn()) {
+                TtAppCtx.getGps().startGps();
+            }
             return true;
         }
 
