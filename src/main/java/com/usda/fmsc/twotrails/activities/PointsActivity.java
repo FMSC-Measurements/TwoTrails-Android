@@ -156,8 +156,8 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
 
     public HashMap<String, TtPolygon> getPolygons() {
-        if (_Polygons == null && TtAppCtx.hasDAL()) {
-            _Polygons = TtAppCtx.getDAL().getPolygonsMap();
+        if (_Polygons == null && getTtAppCtx().hasDAL()) {
+            _Polygons = getTtAppCtx().getDAL().getPolygonsMap();
         }
 
         return _Polygons;
@@ -165,7 +165,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
     public HashMap<String, TtMetadata> getMetadata() {
         if (_Metadata == null || _Metadata.size() == 0) {
-            _Metadata = TtAppCtx.getDAL().getMetadataMap();
+            _Metadata = getTtAppCtx().getDAL().getMetadataMap();
         }
 
         return _Metadata;
@@ -214,7 +214,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                     }
                 }
 
-                if (!_deletePoint.getPolyCN().equals(_CurrentPolygon.getCN()) || overrideHalfTrav || (!halfFinishedTrav && TtAppCtx.getDeviceSettings().getDropZeros())) {
+                if (!_deletePoint.getPolyCN().equals(_CurrentPolygon.getCN()) || overrideHalfTrav || (!halfFinishedTrav && getTtAppCtx().getDeviceSettings().getDropZeros())) {
                     deleteWithoutMoving();
                 } else {
                     AlertDialog.Builder dialog = new AlertDialog.Builder(PointsActivity.this);
@@ -353,11 +353,11 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                 }
                 case R.id.ctx_menu_capture: {
                     if (AndroidUtils.Device.isFullOrientationAvailable(PointsActivity.this)) {
-                        if (TtAppCtx.getDeviceSettings().getUseTtCameraAsk()) {
+                        if (getTtAppCtx().getDeviceSettings().getUseTtCameraAsk()) {
                             DontAskAgainDialog dialog = new DontAskAgainDialog(PointsActivity.this,
                                     DeviceSettings.USE_TTCAMERA_ASK,
                                     DeviceSettings.USE_TTCAMERA,
-                                    TtAppCtx.getDeviceSettings().getPrefs());
+                                    getTtAppCtx().getDeviceSettings().getPrefs());
 
                             dialog.setMessage(PointsActivity.this.getString(R.string.points_camera_diag))
                                     .setPositiveButton("TwoTrails", new DontAskAgainDialog.OnClickListener() {
@@ -375,7 +375,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                                     .setNeutralButton(getString(R.string.str_cancel), null, 0)
                                     .show();
                         } else {
-                            captureImageUri = TtUtils.Media.captureImage(PointsActivity.this, TtAppCtx.getDeviceSettings().getUseTtCamera() == 2, _CurrentPoint);
+                            captureImageUri = TtUtils.Media.captureImage(PointsActivity.this, getTtAppCtx().getDeviceSettings().getUseTtCamera() == 2, _CurrentPoint);
                         }
                     } else {
                         captureImageUri = TtUtils.Media.captureImage(PointsActivity.this, false, _CurrentPoint);
@@ -409,7 +409,10 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        TtAppCtx = getTtAppContext();
+        if (!getTtAppCtx().hasDAL()) {
+            setResult(Consts.Codes.Results.NO_DAL);
+            finish();
+        }
 
         setContentView(R.layout.activity_points);
 
@@ -499,7 +502,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         if (spinnerPoly != null) {
             spinnerPoly.setAdapter(polyAdapter);
 
-            String lastPolyCN = TtAppCtx.getProjectSettings().getLastEditedPolyCN();
+            String lastPolyCN = getTtAppCtx().getProjectSettings().getLastEditedPolyCN();
             if (getPolygons().containsKey(lastPolyCN)) {
                 TtPolygon tmp;
                 boolean lastSet = false;
@@ -677,12 +680,22 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         }
         //endregion
 
-        if (TtAppCtx.getDeviceSettings().isRangeFinderConfigured()) {
-            TtAppCtx.getRF().startRangeFinder();
+        if (getTtAppCtx().getDeviceSettings().isRangeFinderConfigured()) {
+            getTtAppCtx().getRF().startRangeFinder();
         }
 
-        if (TtAppCtx.getRF() != null) {
-            TtAppCtx.getRF().addListener(this);
+        if (getTtAppCtx().getRF() != null) {
+            getTtAppCtx().getRF().addListener(this);
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (!getTtAppCtx().hasDAL()) {
+            setResult(Consts.Codes.Results.NO_DAL);
+            finish();
         }
     }
 
@@ -699,17 +712,17 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         savePoint();
         saveMedia();
 
-        if (TtAppCtx.getRF() != null) {
-            TtAppCtx.getRF().removeListener(this);
+        if (getTtAppCtx().getRF() != null) {
+            getTtAppCtx().getRF().removeListener(this);
 
-            if (!TtAppCtx.getDeviceSettings().isRangeFinderAlwaysOn()) {
-                TtAppCtx.getRF().stopRangeFinder();
+            if (!getTtAppCtx().getDeviceSettings().isRangeFinderAlwaysOn()) {
+                getTtAppCtx().getRF().stopRangeFinder();
             }
         }
 
 
         if (adjust) {
-            PolygonAdjuster.adjust(TtAppCtx.getDAL(), true);
+            PolygonAdjuster.adjust(getTtAppCtx().getDAL(), true);
         }
     }
 
@@ -948,7 +961,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
             }
             case Consts.Codes.Requests.ADD_IMAGES: {
                 if (data != null) {
-                    List<TtImage> images = TtUtils.Media.getPicturesFromImageIntent(TtAppCtx, data, _CurrentPoint.getCN());
+                    List<TtImage> images = TtUtils.Media.getPicturesFromImageIntent(getTtAppCtx(), data, _CurrentPoint.getCN());
 
                     if (images.size() == 1) {
                         TtUtils.Media.askAndUpdateImageOrientation(PointsActivity.this, null);
@@ -1001,12 +1014,12 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                 break;
             }
             case Consts.Codes.Activites.SETTINGS: {
-                if (TtAppCtx.getDeviceSettings().isRangeFinderConfigured()) {
-                    TtAppCtx.getRF().startRangeFinder();
+                if (getTtAppCtx().getDeviceSettings().isRangeFinderConfigured()) {
+                    getTtAppCtx().getRF().startRangeFinder();
                 }
 
-                if (TtAppCtx.getRF() != null) {
-                    TtAppCtx.getRF().addListener(this);
+                if (getTtAppCtx().getRF() != null) {
+                    getTtAppCtx().getRF().addListener(this);
                 }
             }
         }
@@ -1040,10 +1053,10 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 //                    updatePoints.add(tmpPoint);
 //                }
 //
-//                TtAppCtx.getDAL().updatePoints(updatePoints);
+//                getTtAppCtx().getDAL().updatePoints(updatePoints);
 //            }
 
-            _Points = TtAppCtx.getDAL().getPointsInPolygon(_CurrentPolygon.getCN());
+            _Points = getTtAppCtx().getDAL().getPointsInPolygon(_CurrentPolygon.getCN());
 
             onPointsChanged();
 
@@ -1082,10 +1095,10 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                             return true;
                         }
 
-                        TtAppCtx.getDAL().updatePoint(_CurrentPoint, _Points.get(_CurrentIndex));
+                        getTtAppCtx().getDAL().updatePoint(_CurrentPoint, _Points.get(_CurrentIndex));
                         updated = true;
                     } else {
-                        TtAppCtx.getDAL().insertPoint(_CurrentPoint);
+                        getTtAppCtx().getDAL().insertPoint(_CurrentPoint);
                     }
 
                     if (_CurrentPoint.getOp() == OpType.Quondam) {
@@ -1164,7 +1177,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
             if (point != null) {
                 overrideHalfTrav = false;
 
-                TtAppCtx.getDAL().deletePointSafe(point);
+                getTtAppCtx().getDAL().deletePointSafe(point);
 
                 if (point.getOp() == OpType.Quondam) {
                     QuondamPoint qp = (QuondamPoint) point;
@@ -1179,7 +1192,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
                 if (point.hasQuondamLinks()) {
                     for (String qndmCN : point.getLinkedPoints()) {
-                        TtPoint convertedPoint = TtAppCtx.getDAL().getPointByCN(qndmCN);
+                        TtPoint convertedPoint = getTtAppCtx().getDAL().getPointByCN(qndmCN);
 
                         for (int i = 0; i < _Points.size(); i++) {
                             if (_Points.get(i).getCN().equals(qndmCN)) {
@@ -1203,7 +1216,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                 adjust = true;
             }
         } catch (Exception e) {
-            TtAppCtx.getReport().writeError(e.getMessage(), "PointsActivity:deletePoint");
+            getTtAppCtx().getReport().writeError(e.getMessage(), "PointsActivity:deletePoint");
             return false;
         }
 
@@ -1349,7 +1362,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                 onPointsChanged();
                 moveToPoint(_CurrentIndex);
             } catch (Exception e) {
-                TtAppCtx.getReport().writeError(e.getMessage(), "PointsActivity:createPoint(OpType)", e.getStackTrace());
+                getTtAppCtx().getReport().writeError(e.getMessage(), "PointsActivity:createPoint(OpType)", e.getStackTrace());
                 e.printStackTrace();
             }
 
@@ -1385,7 +1398,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                 }
 
                 if (tmpPoints.size() > 0) {
-                    TtAppCtx.getDAL().updatePoints(tmpPoints);
+                    getTtAppCtx().getDAL().updatePoints(tmpPoints);
                 }
             }
         }).start();
@@ -1414,7 +1427,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
     private void saveMedia() {
         if (_MediaUpdated && _CurrentMedia != null) {
-            if (!TtAppCtx.getMAL().updateMedia(_CurrentMedia)) {
+            if (!getTtAppCtx().getMAL().updateMedia(_CurrentMedia)) {
                 Toast.makeText(PointsActivity.this,
                         StringEx.format("Unable to save %s", _CurrentMedia.getMediaType().toString()),
                         Toast.LENGTH_LONG
@@ -1429,7 +1442,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         List<TtMedia> mediaList = rvMediaAdapter.getItems();
         int index = mediaList.indexOf(media);
 
-        TtAppCtx.getMAL().deleteMedia(media);
+        getTtAppCtx().getMAL().deleteMedia(media);
 
         if (delete) {
             File file = new File(media.getFilePath());
@@ -1460,7 +1473,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
     private void addImage(final TtImage picture) {
         if (picture != null) {
-            if (TtAppCtx.getMAL().insertMedia(picture)) {
+            if (getTtAppCtx().getMAL().insertMedia(picture)) {
                 mediaSelectionIndex = TtUtils.Media.getMediaIndex(picture, rvMediaAdapter.getItems());
                 loadImageToList(picture);
             } else {
@@ -1476,7 +1489,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
             Collections.sort(pictures, TtUtils.Media.PictureTimeComparator);
 
             for (int i = 0; i <pictures.size(); i++) {
-                if (!TtAppCtx.getMAL().insertMedia(pictures.get(i))) {
+                if (!getTtAppCtx().getMAL().insertMedia(pictures.get(i))) {
                     pictures.remove(i--);
                     error++;
                 }
@@ -1619,7 +1632,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                 _CurrentPolygon = polygon;
                 _CurrentPoint = null;
                 _CurrentIndex = INVALID_INDEX;
-                _Points = TtAppCtx.getDAL().getPointsInPolygon(_CurrentPolygon.getCN());
+                _Points = getTtAppCtx().getDAL().getPointsInPolygon(_CurrentPolygon.getCN());
 
                 if (_Points == null) {
                     Toast.makeText(this, "DATA ERROR", Toast.LENGTH_SHORT).show();
@@ -1647,7 +1660,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                     }
                 }
 
-                TtAppCtx.getProjectSettings().setLastEditedPolyCN(polygon.getCN());
+                getTtAppCtx().getProjectSettings().setLastEditedPolyCN(polygon.getCN());
 
                 autoSetTrav = false;
             }
@@ -1658,7 +1671,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
         final ArrayList<TtPoint> points = new ArrayList<>();
         for (String cn : point.getLinkedPoints()) {
-            points.add(TtAppCtx.getDAL().getPointByCN(cn));
+            points.add(getTtAppCtx().getDAL().getPointByCN(cn));
         }
 
         if (points.size() > 0) {
@@ -1928,12 +1941,12 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
             mediaLoaded = false;
 
             if (point != null) {
-                if (TtAppCtx.hasMAL()) {
+                if (getTtAppCtx().hasMAL()) {
                     if (loadMedia) {
                         mediaCount = 0;
                         mediaSelectionIndex = INVALID_INDEX;
 
-                        ArrayList<TtImage> pictures = TtAppCtx.getMAL().getImagesInPoint(point.getCN());
+                        ArrayList<TtImage> pictures = getTtAppCtx().getMAL().getImagesInPoint(point.getCN());
 
                         if (pictures != null) {
                             Collections.sort(pictures, TtUtils.Media.PictureTimeComparator);
@@ -1951,7 +1964,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                             setCurrentMedia(null);
                         }
                     } else {
-                        mediaCount = TtAppCtx.getMAL().getItemsCount(
+                        mediaCount = getTtAppCtx().getMAL().getItemsCount(
                                 TwoTrailsMediaSchema.Media.TableName,
                                 TwoTrailsMediaSchema.Media.PointCN,
                                 point.getCN());
@@ -1971,7 +1984,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
     private void loadImageToList(final TtImage picture) {
         mediaCount++;
 
-        TtAppCtx.getMAL().loadImage(picture, new MediaAccessLayer.SimpleMalListener() {
+        getTtAppCtx().getMAL().loadImage(picture, new MediaAccessLayer.SimpleMalListener() {
             @Override
             public void imageLoaded(TtImage image, View view, Bitmap bitmap) {
                 addImageToList(picture, true, bitmap);
@@ -2114,7 +2127,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
             if (listener != null) {
                 listener.onLockChange(_PointLocked);
             } else {
-                TtAppCtx.getReport().writeError("Listener is null", "PointsActivity:onLockChange:point");
+                getTtAppCtx().getReport().writeError("Listener is null", "PointsActivity:onLockChange:point");
             }
         }
 
@@ -2123,7 +2136,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
             if (listener != null) {
                 listener.onLockChange(_PointLocked);
             } else {
-                TtAppCtx.getReport().writeError("Listener is null", "PointsActivity:onLockChange:media");
+                getTtAppCtx().getReport().writeError("Listener is null", "PointsActivity:onLockChange:media");
             }
         }
     }
@@ -2135,7 +2148,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         if (listener != null) {
             listener.onPointUpdated(_CurrentPoint);
         } else {
-            TtAppCtx.getReport().writeError("Listener is null", "PointsActivity:onPointUpdate");
+            getTtAppCtx().getReport().writeError("Listener is null", "PointsActivity:onPointUpdate");
         }
     }
 
@@ -2145,7 +2158,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
             if (listener != null) {
                 listener.onPointUpdated(point);
             } else {
-                TtAppCtx.getReport().writeError("Listener is null", "PointsActivity:onPointUpdate(point)");
+                getTtAppCtx().getReport().writeError("Listener is null", "PointsActivity:onPointUpdate(point)");
             }
         }
     }
@@ -2158,7 +2171,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
             if (listener != null) {
                 listener.onMediaUpdated(_CurrentMedia);
             } else {
-                TtAppCtx.getReport().writeError("Listener is null", "PointsActivity:onMediaUpdate");
+                getTtAppCtx().getReport().writeError("Listener is null", "PointsActivity:onMediaUpdate");
             }
         }
     }
@@ -2169,7 +2182,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
             if (listener != null) {
                 listener.onMediaUpdated(media);
             } else {
-                TtAppCtx.getReport().writeError("Listener is null", "PointsActivity:onMediaUpdate(media)");
+                getTtAppCtx().getReport().writeError("Listener is null", "PointsActivity:onMediaUpdate(media)");
             }
         }
     }
@@ -2198,7 +2211,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         if (getMetadata().containsKey(cn)) {
             return getMetadata().get(cn);
         } else {
-            TtAppCtx.getReport().writeError("Metadata not found", "PointsActivity:getMetadata");
+            getTtAppCtx().getReport().writeError("Metadata not found", "PointsActivity:getMetadata");
             throw new RuntimeException("Metadata not found");
         }
     }
@@ -2231,10 +2244,10 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
     //region Acquire Calculate
     private void acquireGpsPoint(final TtPoint point, final ArrayList<TtNmeaBurst> bursts) {
-        if (!TtAppCtx.getDeviceSettings().isGpsConfigured()) {
+        if (!getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
             configGps();
-        } else if (TtAppCtx.getDAL().needsAdjusting()) {
-            PolygonAdjuster.adjust(TtAppCtx.getDAL(), false, new PolygonAdjuster.Listener() {
+        } else if (getTtAppCtx().getDAL().needsAdjusting()) {
+            PolygonAdjuster.adjust(getTtAppCtx().getDAL(), false, new PolygonAdjuster.Listener() {
                 @Override
                 public void adjusterStarted() {
                     runOnUiThread(new Runnable() {
@@ -2285,10 +2298,14 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
     }
 
     private void startAcquireGpsActivity(TtPoint point, ArrayList<TtNmeaBurst> bursts) {
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(Consts.Codes.Data.POINT_DATA, TtUtils.Points.clonePoint(point));
+        bundle.putParcelable(Consts.Codes.Data.POLYGON_DATA, _CurrentPolygon);
+        bundle.putParcelable(Consts.Codes.Data.METADATA_DATA, getMetadata().get(point.getMetadataCN()));
+
+
         Intent intent = new Intent(this, AcquireAndCalculateGpsActivity.class);
-        intent.putExtra(Consts.Codes.Data.POINT_DATA, TtUtils.Points.clonePoint(point));
-        intent.putExtra(Consts.Codes.Data.POLYGON_DATA, _CurrentPolygon);
-        intent.putExtra(Consts.Codes.Data.METADATA_DATA, getMetadata().get(point.getMetadataCN()));
+        intent.putExtra(Consts.Codes.Data.POINT_PACKAGE, bundle);
 
         if (bursts != null && bursts.size() > 0) {
             try {
@@ -2303,10 +2320,10 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
 
     private void acquireT5Points(final TtPoint point) {
-        if (!TtAppCtx.getDeviceSettings().isGpsConfigured()) {
+        if (!getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
             configGps();
-        } else if (TtAppCtx.getDAL().needsAdjusting()) {
-            PolygonAdjuster.adjust(TtAppCtx.getDAL(), false, new PolygonAdjuster.Listener() {
+        } else if (getTtAppCtx().getDAL().needsAdjusting()) {
+            PolygonAdjuster.adjust(getTtAppCtx().getDAL(), false, new PolygonAdjuster.Listener() {
                 @Override
                 public void adjusterStarted() {
                     runOnUiThread(new Runnable() {
@@ -2357,22 +2374,26 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
     }
 
     private void startTake5Activity(TtPoint currentPoint) {
-        if (!TtAppCtx.getDeviceSettings().isGpsConfigured()) {
+        if (!getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
             configGps();
         } else {
             Intent intent = new Intent(this, Take5Activity.class);
 
+            Bundle bundle = new Bundle();
+
             if (currentPoint != null) {
-                intent.putExtra(Consts.Codes.Data.POINT_DATA, TtUtils.Points.clonePoint(currentPoint));
+                bundle.putParcelable(Consts.Codes.Data.POINT_DATA, TtUtils.Points.clonePoint(currentPoint));
             }
 
             if (_CurrentMetadata != null) {
-                intent.putExtra(Consts.Codes.Data.METADATA_DATA, _CurrentMetadata);
+                bundle.putParcelable(Consts.Codes.Data.METADATA_DATA, _CurrentMetadata);
             } else {
-                intent.putExtra(Consts.Codes.Data.METADATA_DATA, getMetadata().get(Consts.EmptyGuid));
+                bundle.putParcelable(Consts.Codes.Data.METADATA_DATA, getMetadata().get(Consts.EmptyGuid));
             }
 
-            intent.putExtra(Consts.Codes.Data.POLYGON_DATA, _CurrentPolygon);
+            bundle.putParcelable(Consts.Codes.Data.POLYGON_DATA, _CurrentPolygon);
+
+            intent.putExtra(Consts.Codes.Data.POINT_PACKAGE, bundle);
 
             startActivityForResult(intent, Consts.Codes.Activites.TAKE5);
         }
@@ -2380,10 +2401,10 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
 
     private void acquireWalkPoints(final TtPoint point) {
-        if (!TtAppCtx.getDeviceSettings().isGpsConfigured()) {
+        if (!getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
             configGps();
-        } else if (TtAppCtx.getDAL().needsAdjusting()) {
-            PolygonAdjuster.adjust(TtAppCtx.getDAL(), false, new PolygonAdjuster.Listener() {
+        } else if (getTtAppCtx().getDAL().needsAdjusting()) {
+            PolygonAdjuster.adjust(getTtAppCtx().getDAL(), false, new PolygonAdjuster.Listener() {
                 @Override
                 public void adjusterStarted() {
                     runOnUiThread(new Runnable() {
@@ -2434,7 +2455,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
     }
 
     private void startWalkActivity(TtPoint currentPoint) {
-        if (!TtAppCtx.getDeviceSettings().isGpsConfigured()) {
+        if (!getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
             configGps();
         } else {
             Intent intent = new Intent(this, WalkActivity.class);
@@ -2458,12 +2479,17 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
     private void calculateGpsPoint() {
         if (_CurrentPoint != null && _CurrentPoint.isGpsType()) {
-            ArrayList<TtNmeaBurst> bursts = TtAppCtx.getDAL().getNmeaBurstsByPointCN(_CurrentPoint.getCN());
+            ArrayList<TtNmeaBurst> bursts = getTtAppCtx().getDAL().getNmeaBurstsByPointCN(_CurrentPoint.getCN());
 
             if (bursts.size() > 0) {
                 Intent intent = new Intent(this, AcquireAndCalculateGpsActivity.class);
-                intent.putExtra(Consts.Codes.Data.POINT_DATA, TtUtils.Points.clonePoint(_CurrentPoint));
-                intent.putExtra(Consts.Codes.Data.METADATA_DATA, getMetadata().get(_CurrentPoint.getMetadataCN()));
+
+                Bundle bundle = new Bundle();
+                bundle.putParcelable(Consts.Codes.Data.POINT_DATA, TtUtils.Points.clonePoint(_CurrentPoint));
+                bundle.putParcelable(Consts.Codes.Data.POLYGON_DATA, _CurrentPolygon);
+                bundle.putParcelable(Consts.Codes.Data.METADATA_DATA, getMetadata().get(_CurrentPoint.getMetadataCN()));
+
+                intent.putExtra(Consts.Codes.Data.POINT_PACKAGE, bundle);
                 intent.putExtra(AcquireAndCalculateGpsActivity.CALCULATE_ONLY_MODE, true);
 
                 try {
@@ -2507,7 +2533,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                 case GPS:
                 case WayPoint: {
                     //region GPS
-                    if (TtAppCtx.getDeviceSettings().isGpsConfigured()) {
+                    if (getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
                         if (TtUtils.Points.pointHasValue(_CurrentPoint)) {
                             AlertDialog.Builder dialog = new AlertDialog.Builder(PointsActivity.this);
 
@@ -2516,7 +2542,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                             dialog.setPositiveButton(R.string.points_aqr_diag_add, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    ArrayList<TtNmeaBurst> bursts = TtAppCtx.getDAL().getNmeaBurstsByPointCN(_CurrentPoint.getCN());
+                                    ArrayList<TtNmeaBurst> bursts = getTtAppCtx().getDAL().getNmeaBurstsByPointCN(_CurrentPoint.getCN());
                                     acquireGpsPoint(_CurrentPoint, bursts);
                                 }
                             });
@@ -2531,7 +2557,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                                     dialogA.setPositiveButton(R.string.str_delete, new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialog, int which) {
-                                            TtAppCtx.getDAL().deleteNmeaByPointCN(_CurrentPoint.getCN());
+                                            getTtAppCtx().getDAL().deleteNmeaByPointCN(_CurrentPoint.getCN());
                                             acquireGpsPoint(_CurrentPoint, null);
                                         }
                                     });
@@ -2670,7 +2696,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
             final DontAskAgainDialog dialog = new DontAskAgainDialog(PointsActivity.this,
                     DeviceSettings.AUTO_FILL_FROM_RANGE_FINDER_ASK,
                     DeviceSettings.AUTO_FILL_FROM_RANGE_FINDER,
-                    TtAppCtx.getDeviceSettings().getPrefs());
+                    getTtAppCtx().getDeviceSettings().getPrefs());
 
             dialog.setMessage(StringEx.format("Would You like to set the compass value to Forward or Backwards?"))
                     .setPositiveButton("Fwd", new DontAskAgainDialog.OnClickListener() {

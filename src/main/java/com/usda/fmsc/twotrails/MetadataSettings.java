@@ -1,6 +1,7 @@
 package com.usda.fmsc.twotrails;
 
 import android.content.Context;
+import android.util.JsonWriter;
 
 import com.usda.fmsc.geospatial.UomElevation;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
@@ -9,6 +10,8 @@ import com.usda.fmsc.twotrails.units.DeclinationType;
 import com.usda.fmsc.twotrails.units.Dist;
 import com.usda.fmsc.twotrails.units.Slope;
 import com.usda.fmsc.utilities.StringEx;
+
+import java.io.IOException;
 
 public class MetadataSettings extends Settings {
     private static final String META_NAME = "Name";
@@ -27,6 +30,9 @@ public class MetadataSettings extends Settings {
 
     public MetadataSettings(Context context) {
         super(context);
+    }
+
+    public void writeToFile(JsonWriter js) throws IOException {
     }
 
 

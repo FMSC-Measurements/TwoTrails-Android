@@ -96,7 +96,7 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
             });
         }
 
-        maps = new ArrayList<>(TtAppCtx.getInstance().getArcGISTools().getMapLayers());
+        maps = new ArrayList<>(getTtAppCtx().getInstance().getArcGISTools().getMapLayers());
         visibleMaps = new ArrayList<>();
 
         Collections.sort(maps);
@@ -127,12 +127,12 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
 
         fabSheet = new SheetFab<>(fabMenu, sheetView, overlay, bc, fc);
 
-        TtAppCtx.getArcGISTools().addListener(this);
+        getTtAppCtx().getArcGISTools().addListener(this);
     }
 
     @Override
     protected void onDestroy() {
-        TtAppCtx.getArcGISTools().removeListener(this);
+        getTtAppCtx().getArcGISTools().removeListener(this);
         super.onDestroy();
     }
 
@@ -219,7 +219,7 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
             case R.id.mmMenuLogin: {
                 Intent intent = new Intent(getBaseContext(), ArcGisLoginActivity.class);
 
-                UserCredentials credentials = TtAppCtx.getArcGISTools().getCredentials(MapManagerActivity.this);
+                UserCredentials credentials = getTtAppCtx().getArcGISTools().getCredentials(MapManagerActivity.this);
                 final String oldUn = credentials != null ? credentials.getUserName() : StringEx.Empty;
 
                 if (!StringEx.isEmpty(oldUn)) {
@@ -266,14 +266,14 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
     }
 
     private boolean checkCredentials() {
-        if (TtAppCtx.getArcGISTools().hasValidCredentials(MapManagerActivity.this)) {
+        if (getTtAppCtx().getArcGISTools().hasValidCredentials(MapManagerActivity.this)) {
             return true;
         } else {
             String message;
             boolean updateCredentials = false;
 
-            if (TtAppCtx.getArcGISTools().hasCredentials(MapManagerActivity.this)) {
-                if (TtAppCtx.getArcGISTools().areCredentialsOutOfDate(MapManagerActivity.this)) {
+            if (getTtAppCtx().getArcGISTools().hasCredentials(MapManagerActivity.this)) {
+                if (getTtAppCtx().getArcGISTools().areCredentialsOutOfDate(MapManagerActivity.this)) {
                     message = "Your credentials are out of date. Would you like to update them now?";
                     updateCredentials = true;
                 } else {
@@ -283,7 +283,7 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
                 message = "You need credentials before creating an offline map. Would you like to add them now?";
             }
 
-            UserCredentials credentials = TtAppCtx.getArcGISTools().getCredentials(MapManagerActivity.this);
+            UserCredentials credentials = getTtAppCtx().getArcGISTools().getCredentials(MapManagerActivity.this);
             final String oldUn = updateCredentials && credentials != null ? credentials.getUserName() : StringEx.Empty;
 
             new AlertDialog.Builder(this)
@@ -319,7 +319,7 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
                                     .setOnMapSelectedListener(new SelectMapTypeDialog.OnMapSelectedListener() {
                                         @Override
                                         public void mapSelected(MapType mapType, int mapId) {
-                                            ArcGisMapLayer layer = TtAppCtx.getArcGISTools().getMapLayer(mapId);
+                                            ArcGisMapLayer layer = getTtAppCtx().getArcGISTools().getMapLayer(mapId);
 
                                             if (!layer.isOnline() && StringEx.isEmpty(layer.getUrl())) {
                                                 new AlertDialog.Builder(getBaseContext())
@@ -416,7 +416,7 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
                                     .setPositiveButton(R.string.str_rename, new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialog, int which) {
-                                            TtAppCtx.getArcGISTools().updateMapLayer(layer);
+                                            getTtAppCtx().getArcGISTools().updateMapLayer(layer);
                                             layer.setName(id.getText());
                                             tvName.setText(id.getText());
                                         }
@@ -431,7 +431,7 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
                                         .setPositiveButton(R.string.str_delete, new DialogInterface.OnClickListener() {
                                             @Override
                                             public void onClick(DialogInterface dialog, int which) {
-                                                TtAppCtx.getArcGISTools().deleteMapLayer(MapManagerActivity.this, layer.getId(), true, new IListener() {
+                                                getTtAppCtx().getArcGISTools().deleteMapLayer(MapManagerActivity.this, layer.getId(), true, new IListener() {
                                                     @Override
                                                     public void onEventTriggerd(Object o) {
                                                         removeMap(layer, false);

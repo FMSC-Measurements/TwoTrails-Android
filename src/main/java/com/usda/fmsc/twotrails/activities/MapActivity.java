@@ -50,8 +50,8 @@ public class MapActivity extends BaseMapActivity {
         fabMyPos.setVisibility(myPosBtn && getLastPosition() != null ? View.VISIBLE : View.GONE);
         setDisplayLocInfoVisible();
 
-        if (TtAppCtx.getDeviceSettings().isGpsConfigured() && shouldStartGps()) {
-            TtAppCtx.getGps().startGps();
+        if (getTtAppCtx().getDeviceSettings().isGpsConfigured() && shouldStartGps()) {
+            getTtAppCtx().getGps().startGps();
         }
 
         created = true;
@@ -83,9 +83,9 @@ public class MapActivity extends BaseMapActivity {
     protected void getSettings() {
         super.getSettings();
 
-        myPosBtn = TtAppCtx.getDeviceSettings().getMapMyPosBtns();
-        dispLoc = TtAppCtx.getDeviceSettings().getMapDisplayGpsLocation();
-        locUtm = TtAppCtx.getDeviceSettings().getMapUseUtmNav();
+        myPosBtn = getTtAppCtx().getDeviceSettings().getMapMyPosBtns();
+        dispLoc = getTtAppCtx().getDeviceSettings().getMapDisplayGpsLocation();
+        locUtm = getTtAppCtx().getDeviceSettings().getMapUseUtmNav();
 
 
         if (created) {
@@ -133,7 +133,7 @@ public class MapActivity extends BaseMapActivity {
         GeoPosition lastPosition = getLastPosition();
 
         if (lastPosition == null) {
-            lastPosition = TtAppCtx.getGps().getLastPosition();
+            lastPosition = getTtAppCtx().getGps().getLastPosition();
         }
 
         if (lastPosition != null) {

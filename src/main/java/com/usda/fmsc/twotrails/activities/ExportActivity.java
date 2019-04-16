@@ -193,13 +193,13 @@ public class ExportActivity extends CustomToolbarActivity {
 
     private void startExport(final String directory, boolean checkExternalMedia) {
         if (checkExternalMedia && chkPc.isChecked()) {
-            final MediaAccessLayer mal = TtAppCtx.getMAL();
+            final MediaAccessLayer mal = getTtAppCtx().getMAL();
             if (mal != null && mal.hasExternalImages()) {
-                if (TtAppCtx.getDeviceSettings().getAutoInternalizeExportAsk()) {
+                if (getTtAppCtx().getDeviceSettings().getAutoInternalizeExportAsk()) {
                     new DontAskAgainDialog(this,
                             DeviceSettings.AUTO_INTERNALIZE_EXPORT_ASK,
                             DeviceSettings.AUTO_INTERNALIZE_EXPORT,
-                            TtAppCtx.getDeviceSettings().getPrefs())
+                            getTtAppCtx().getDeviceSettings().getPrefs())
 
                     .setMessage("There are Images that are saved outside of the media database. Would you like to include them to simplify image transfer?")
 
@@ -220,7 +220,7 @@ public class ExportActivity extends CustomToolbarActivity {
 
                     .show();
                 } else {
-                    if (TtAppCtx.getDeviceSettings().getAutoInternalizeExport() > 0) {
+                    if (getTtAppCtx().getDeviceSettings().getAutoInternalizeExport() > 0) {
                         progCircle.show();
                         internalizeImages(mal, directory);
                     } else {
@@ -232,14 +232,14 @@ public class ExportActivity extends CustomToolbarActivity {
             }
         }
 
-        final File dir = new File(String.format("%s/%s/", directory, TtAppCtx.getDAL().getProjectID()));
+        final File dir = new File(String.format("%s/%s/", directory, getTtAppCtx().getDAL().getProjectID()));
 
         if (dir.exists()) {
-            if (TtAppCtx.getDeviceSettings().getAutoOverwriteExportAsk()) {
+            if (getTtAppCtx().getDeviceSettings().getAutoOverwriteExportAsk()) {
                 new DontAskAgainDialog(this,
                         DeviceSettings.AUTO_OVERWRITE_EXPORT_ASK,
                         DeviceSettings.AUTO_OVERWRITE_EXPORT,
-                        TtAppCtx.getDeviceSettings().getPrefs())
+                        getTtAppCtx().getDeviceSettings().getPrefs())
 
                 .setMessage("There is already a folder that that contains a previous export. Would you like to change the directory or overwrite it?")
 
@@ -261,7 +261,7 @@ public class ExportActivity extends CustomToolbarActivity {
 
                 .show();
             } else {
-                if (TtAppCtx.getDeviceSettings().getAutoOverwriteExport() == 2) {
+                if (getTtAppCtx().getDeviceSettings().getAutoOverwriteExport() == 2) {
                     export(dir);
                 } else {
                     selectDirectory(directory);
@@ -406,7 +406,7 @@ public class ExportActivity extends CustomToolbarActivity {
                     case InvalidParams:
                         progCircle.hide();
                         Toast.makeText(getBaseContext(), "Export error, See log for details", Toast.LENGTH_SHORT).show();
-                        TtAppCtx.getReport().writeError("ExportActivity", result.getMessage());
+                        getTtAppCtx().getReport().writeError("ExportActivity", result.getMessage());
                         break;
                 }
                 }
@@ -414,8 +414,8 @@ public class ExportActivity extends CustomToolbarActivity {
 
             exportTask.execute(
                     new Export.ExportTask.ExportParams(
-                            TtAppCtx.getDAL(),
-                            TtAppCtx.hasMAL() ? TtAppCtx.getMAL() : null,
+                            getTtAppCtx().getDAL(),
+                            getTtAppCtx().hasMAL() ? getTtAppCtx().getMAL() : null,
                             directory,
                             chkPoints.isChecked(),
                             chkPolys.isChecked(),

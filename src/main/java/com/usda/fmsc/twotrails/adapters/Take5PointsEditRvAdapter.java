@@ -5,7 +5,6 @@ import android.text.Editable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AlphaAnimation;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -64,7 +63,7 @@ public class Take5PointsEditRvAdapter extends RecyclerViewEx.BaseAdapterEx {
             case 6:
                 return new Take5ViewHolderEx(inflater.inflate(R.layout.card_take5_take5, parent, false));
             default:
-                return new NonSupportedViewHolder(inflater.inflate(R.layout.content_empty_match_width, parent, false));
+                return new EmptyViewHolder(inflater.inflate(R.layout.content_empty_match_width, parent, false));
         }
 
         //return null;
@@ -235,9 +234,9 @@ public class Take5PointsEditRvAdapter extends RecyclerViewEx.BaseAdapterEx {
         }
     }
 
-    public class NonSupportedViewHolder extends ViewHolderEx {
+    public class EmptyViewHolder extends ViewHolderEx {
 
-        public NonSupportedViewHolder(View itemView) {
+        public EmptyViewHolder(View itemView) {
             super(itemView);
         }
     }

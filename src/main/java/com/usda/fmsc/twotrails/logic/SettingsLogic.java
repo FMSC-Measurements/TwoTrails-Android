@@ -80,7 +80,7 @@ public class SettingsLogic {
         }
     }
 
-    static Snackbar snackbar;
+    private static Snackbar snackbar;
     private static void onExportReportComplete(String filepath, final Activity activity) {
         if (filepath != null) {
             snackbar = Snackbar.make(activity.findViewById(android.R.id.content), "Report Exported", Snackbar.LENGTH_LONG)

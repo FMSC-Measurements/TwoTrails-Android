@@ -48,6 +48,7 @@ import java.util.regex.Pattern;
 
 public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
     public static final String CALCULATE_ONLY_MODE = "CalculateOnlyMode";
+    private static final String nVal = "*";
 
     private static final Pattern pattern = Pattern.compile("[a-zA-Z]");
 
@@ -107,8 +108,11 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
                 setUseExitWarning(true);
                 setUseLostConnectionWarning(true);
 
-                _Point = intent.getParcelableExtra(Consts.Codes.Data.POINT_DATA);
-                _Metadata = intent.getParcelableExtra(Consts.Codes.Data.METADATA_DATA);
+                if (intent.hasExtra(Consts.Codes.Data.POINT_PACKAGE)) {
+                    Bundle bundle = intent.getBundleExtra(Consts.Codes.Data.POINT_PACKAGE);
+                    _Point = bundle.getParcelable(Consts.Codes.Data.POINT_DATA);
+                    _Metadata = bundle.getParcelable(Consts.Codes.Data.METADATA_DATA);
+                }
 
                 setZone(_Metadata.getZone());
 
@@ -121,7 +125,7 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
 
                 _FilteredBursts = new ArrayList<>();
             } catch (Exception e) {
-                TtAppCtx.getReport().writeError(e.getMessage(), "AcquireAndCalculateGpsActivity:onCreate", e.getStackTrace());
+                getTtAppCtx().getReport().writeError(e.getMessage(), "AcquireAndCalculateGpsActivity:onCreate", e.getStackTrace());
                 setResult(Consts.Codes.Results.ERROR);
             }
         } else {
@@ -156,7 +160,7 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
             btnCalc.setBackgroundColor(AndroidUtils.UI.getColor(this, R.color.primaryLighter));
         }
 
-        DeviceSettings ds = TtAppCtx.getDeviceSettings();
+        DeviceSettings ds = getTtAppCtx().getDeviceSettings();
 
         options.Fix = ds.getGpsFilterFix();
         options.DopType = ds.getGpsFilterDopType();
@@ -263,7 +267,7 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
                 @Override
                 public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                     options.DopType = DopType.parse(i);
-                    TtAppCtx.getDeviceSettings().setGpsFilterDopType(options.DopType);
+                    getTtAppCtx().getDeviceSettings().setGpsFilterDopType(options.DopType);
                     calculate();
                 }
 
@@ -276,7 +280,7 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
             spFix.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                    setSettingsFixOptions(i);
+                    onSpnSettingsFixOptionsItemSelected(i);
                     calculate();
                 }
 
@@ -296,7 +300,7 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
 
                 if (value != null) {
                     options.DopValue = value;
-                    TtAppCtx.getDeviceSettings().setGpsFilterDopValue(value);
+                    getTtAppCtx().getDeviceSettings().setGpsFilterDopValue(value);
                     txtDop.setTextColor(AndroidUtils.UI.getColor(getBaseContext(), R.color.black_1000));
                     calculate();
                 } else {
@@ -329,282 +333,6 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
         calculate();
     }
 
-
-    private void setCalculated(boolean calculated) {
-        this.calculated = calculated;
-
-        btnCreate.setEnabled(calculated);
-        btnCreate.setAlpha(calculated ? Consts.ENABLED_ALPHA : Consts.DISABLED_ALPHA);
-    }
-
-    private void calculate() {
-        try {
-            int groupSize;
-
-            _FilteredBursts.clear();
-
-            TtNmeaBurst tmpBurst;
-            for (int i = 0; i < _Bursts.size(); i++) {
-                tmpBurst = _Bursts.get(i);
-                tmpBurst.setUsed(false);
-
-                if (i > rangeStart && i < rangeEnd && TtUtils.NMEA.isBurstUsable(tmpBurst, options)) {
-                    _FilteredBursts.add(tmpBurst);
-                }
-            }
-
-            if (manualGroupSize == null) {
-                double d = _FilteredBursts.size() / 3.0;
-                int i = (int)d;
-
-                if ((d-i) > 0.666) {
-                    groupSize = i + 1;
-                } else {
-                    groupSize = i;
-                }
-
-                if (groupSize < 5) {
-                    groupSize = 5;
-                }
-            } else {
-                groupSize = manualGroupSize;
-            }
-
-
-            ArrayList<TtNmeaBurst> usedBursts = new ArrayList<>();
-
-            double x = 0, y = 0, xF = 0, yF = 0, zF = 0;
-            double dRMSEx = 0, dRMSEy = 0, dRMSEr, dRMSExf = 0, dRMSEyf = 0, dRMSErf;
-
-            int count = 0, countF;
-            int zone = getZone();
-
-            String nVal = "*";
-            if (_FilteredBursts.size() > 0) {
-                //region Group 1
-                for (int i = 0; i < _FilteredBursts.size() && i < groupSize; i++) {
-                    tmpBurst = _FilteredBursts.get(i);
-                    x += tmpBurst.getX(zone);
-                    y += tmpBurst.getY(zone);
-                    count++;
-
-                    if (chkG1.isChecked()) {
-                        xF += tmpBurst.getX(zone);
-                        yF += tmpBurst.getY(zone);
-                        zF += tmpBurst.getElevation();
-                        usedBursts.add(tmpBurst);
-                    }
-                }
-
-                x /= count;
-                y /= count;
-
-                for (int i = 0; i < _FilteredBursts.size() && i < groupSize; i++) {
-                    tmpBurst = _FilteredBursts.get(i);
-                    dRMSEx += Math.pow(tmpBurst.getX(zone) - x, 2);
-                    dRMSEy += Math.pow(tmpBurst.getY(zone) - y, 2);
-                }
-
-                dRMSEx = Math.sqrt(dRMSEx / count);
-                dRMSEy = Math.sqrt(dRMSEy / count);
-                dRMSEr = Math.sqrt(Math.pow(dRMSEx, 2) + Math.pow(dRMSEy, 2)) * Consts.RMSEr95_Coeff;
-
-
-                tvUtmX1.setText(StringEx.toString(x, 2));
-                tvUtmY1.setText(StringEx.toString(y, 2));
-                tvNssda1.setText(StringEx.toString(dRMSEr, 2));
-                chkG1.setEnabled(true);
-                chkG1.setText(StringEx.format("(%d)", count));
-                //endregion
-
-                //region Group 2
-                if (_FilteredBursts.size() > groupSize) {
-                    x = y = count = 0;
-                    dRMSEx = dRMSEy = 0;
-
-                    for (int i = groupSize; i < _FilteredBursts.size() && i < groupSize * 2; i++) {
-                        tmpBurst = _FilteredBursts.get(i);
-                        x += tmpBurst.getX(zone);
-                        y += tmpBurst.getY(zone);
-                        count++;
-
-                        if (chkG2.isChecked()) {
-                            xF += tmpBurst.getX(zone);
-                            yF += tmpBurst.getY(zone);
-                            zF += tmpBurst.getElevation();
-                            usedBursts.add(tmpBurst);
-                        }
-                    }
-
-                    x /= count;
-                    y /= count;
-
-                    for (int i = groupSize; i < _FilteredBursts.size() && i < groupSize * 2; i++) {
-                        tmpBurst = _FilteredBursts.get(i);
-                        dRMSEx += Math.pow(tmpBurst.getX(zone) - x, 2);
-                        dRMSEy += Math.pow(tmpBurst.getY(zone) - y, 2);
-                    }
-
-                    dRMSEx = Math.sqrt(dRMSEx / count);
-                    dRMSEy = Math.sqrt(dRMSEy / count);
-                    dRMSEr = Math.sqrt(Math.pow(dRMSEx, 2) + Math.pow(dRMSEy, 2)) * Consts.RMSEr95_Coeff;
-
-                    tvUtmX2.setText(StringEx.toString(x, 2));
-                    tvUtmY2.setText(StringEx.toString(y, 2));
-                    tvNssda2.setText(StringEx.toString(dRMSEr, 2));
-
-
-                    if (!chkG2.isEnabled()) {
-                        chkG2.setChecked(true);
-                    }
-
-                    chkG2.setEnabled(true);
-                    chkG2.setText(String.format("(%d)", count));
-                } else {
-                    tvUtmX2.setText(nVal);
-                    tvUtmY2.setText(nVal);
-                    tvNssda2.setText(nVal);
-                    chkG2.setChecked(false);
-                    chkG2.setEnabled(false);
-                    chkG2.setText("(0)");
-                }
-                //endregion
-
-                //region Group 3
-                if (_FilteredBursts.size() > groupSize * 2) {
-                    x = y = count = 0;
-                    dRMSEx = dRMSEy = 0;
-
-                    for (int i = groupSize * 2; i < _FilteredBursts.size(); i++) {
-                        tmpBurst = _FilteredBursts.get(i);
-                        x += tmpBurst.getX(zone);
-                        y += tmpBurst.getY(zone);
-                        count++;
-
-                        if (chkG3.isChecked()) {
-                            xF += tmpBurst.getX(zone);
-                            yF += tmpBurst.getY(zone);
-                            zF += tmpBurst.getElevation();
-                            usedBursts.add(tmpBurst);
-                        }
-                    }
-
-                    x /= count;
-                    y /= count;
-
-                    for (int i = groupSize * 2; i < _FilteredBursts.size() && i < groupSize * 3; i++) {
-                        tmpBurst = _FilteredBursts.get(i);
-                        dRMSEx += Math.pow(tmpBurst.getX(zone) - x, 2);
-                        dRMSEy += Math.pow(tmpBurst.getY(zone) - y, 2);
-                    }
-
-                    dRMSEx = Math.sqrt(dRMSEx / count);
-                    dRMSEy = Math.sqrt(dRMSEy / count);
-                    dRMSEr = Math.sqrt(Math.pow(dRMSEx, 2) + Math.pow(dRMSEy, 2)) * Consts.RMSEr95_Coeff;
-
-                    tvUtmX3.setText(StringEx.toString(x, 2));
-                    tvUtmY3.setText(StringEx.toString(y, 2));
-                    tvNssda3.setText(StringEx.toString(dRMSEr, 2));
-
-                    if (!chkG3.isEnabled()) {
-                        chkG3.setChecked(true);
-                    }
-
-                    chkG3.setEnabled(true);
-                    chkG3.setText(String.format("(%d)", count));
-                } else {
-                    tvUtmX3.setText(nVal);
-                    tvUtmY3.setText(nVal);
-                    tvNssda3.setText(nVal);
-                    chkG3.setChecked(false);
-                    chkG3.setEnabled(false);
-                    chkG3.setText("(0)");
-                }
-                //endregion
-
-                //region Real Point
-                countF = usedBursts.size();
-
-                if (countF > 0) {
-                    xF /= countF;
-                    yF /= countF;
-                    zF /= countF;
-
-                    ArrayList<GeoPosition> positions = new ArrayList<>(countF);
-
-                    for (int i = 0; i < countF; i++) {
-                        tmpBurst = usedBursts.get(i);
-                        tmpBurst.setUsed(true);
-
-                        dRMSExf += Math.pow(tmpBurst.getX(zone) - xF, 2);
-                        dRMSEyf += Math.pow(tmpBurst.getY(zone) - yF, 2);
-
-                        positions.add(tmpBurst.getPosition());
-                    }
-
-                    dRMSExf = Math.sqrt(dRMSExf / countF);
-                    dRMSEyf = Math.sqrt(dRMSEyf / countF);
-                    dRMSErf = Math.sqrt(Math.pow(dRMSExf, 2) + Math.pow(dRMSEyf, 2)) * Consts.RMSEr95_Coeff;
-
-                    GeoPosition position = GeoTools.getMidPioint(positions);
-
-                    _Point.setLatitude(position.getLatitudeSignedDecimal());
-                    _Point.setLongitude(position.getLongitudeSignedDecimal());
-                    _Point.setElevation(TtUtils.Convert.distance(zF, UomElevation.Meters, _Metadata.getElevation()));
-                    _Point.setUnAdjX(xF);
-                    _Point.setUnAdjY(yF);
-                    _Point.setUnAdjZ(_Point.getElevation());
-                    _Point.setRMSEr(dRMSErf);
-
-                    tvUtmXF.setText(StringEx.toString(xF, 3));
-                    tvUtmYF.setText(StringEx.toString(yF, 3));
-                    tvNssdaF.setText(StringEx.toString(dRMSErf, 2));
-
-                    setCalculated(true);
-                } else {
-                    tvUtmXF.setText(nVal);
-                    tvUtmYF.setText(nVal);
-                    tvNssdaF.setText(nVal);
-                    setCalculated(false);
-                }
-
-                nmeaPointsView.update(_Bursts, zone, xF, yF);
-                //endregion
-            } else {
-                //region reset
-                tvUtmX1.setText(nVal);
-                tvUtmY1.setText(nVal);
-                tvNssda1.setText(nVal);
-                chkG1.setEnabled(false);
-                chkG2.setText("(0)");
-
-                tvUtmX2.setText(nVal);
-                tvUtmY2.setText(nVal);
-                tvNssda2.setText(nVal);
-                chkG2.setEnabled(false);
-                chkG1.setText("(0)");
-
-                tvUtmX3.setText(nVal);
-                tvUtmY3.setText(nVal);
-                tvNssda3.setText(nVal);
-                chkG3.setEnabled(false);
-                chkG3.setText("(0)");
-
-                tvUtmXF.setText(nVal);
-                tvUtmYF.setText(nVal);
-                tvNssdaF.setText(nVal);
-
-                setCalculated(false);
-
-                nmeaPointsView.update(null, 0, 0, 0);
-                //endregion
-            }
-        } catch (Exception e) {
-            TtAppCtx.getReport().writeError(e.getMessage(), "AcquireAndCalculateGpsActivity:calculate", e.getStackTrace());
-            Toast.makeText(AcquireAndCalculateGpsActivity.this, "Error Calculating Error", Toast.LENGTH_LONG).show();
-        }
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -619,7 +347,6 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
             }
         }
     }
-
 
     @Override
     public void onBackPressed() {
@@ -651,6 +378,288 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
         super.onMapReady();
         setMapGesturesEnabled(true);
     }
+
+
+    private void setCalculated(boolean calculated) {
+        this.calculated = calculated;
+
+        btnCreate.setEnabled(calculated);
+        btnCreate.setAlpha(calculated ? Consts.ENABLED_ALPHA : Consts.DISABLED_ALPHA);
+    }
+
+    private void calculate() {
+        if (_Bursts.size() > 0) {
+            try {
+                int groupSize;
+
+                _FilteredBursts.clear();
+
+                TtNmeaBurst tmpBurst;
+                for (int i = 0; i < _Bursts.size(); i++) {
+                    tmpBurst = _Bursts.get(i);
+                    tmpBurst.setUsed(false);
+
+                    if (i > rangeStart && i < rangeEnd && TtUtils.NMEA.isBurstUsable(tmpBurst, options)) {
+                        _FilteredBursts.add(tmpBurst);
+                    }
+                }
+
+                if (manualGroupSize == null) {
+                    double d = _FilteredBursts.size() / 3.0;
+                    int i = (int)d;
+
+                    if ((d-i) > 0.666) {
+                        groupSize = i + 1;
+                    } else {
+                        groupSize = i;
+                    }
+
+                    if (groupSize < 5) {
+                        groupSize = 5;
+                    }
+                } else {
+                    groupSize = manualGroupSize;
+                }
+
+
+                ArrayList<TtNmeaBurst> usedBursts = new ArrayList<>();
+
+                double x = 0, y = 0, xF = 0, yF = 0, zF = 0;
+                double dRMSEx = 0, dRMSEy = 0, dRMSEr, dRMSExf = 0, dRMSEyf = 0, dRMSErf;
+
+                int count = 0, countF;
+                int zone = getZone();
+
+                if (_FilteredBursts.size() > 0) {
+                    //region Group 1
+                    for (int i = 0; i < _FilteredBursts.size() && i < groupSize; i++) {
+                        tmpBurst = _FilteredBursts.get(i);
+                        x += tmpBurst.getX(zone);
+                        y += tmpBurst.getY(zone);
+                        count++;
+
+                        if (chkG1.isChecked()) {
+                            xF += tmpBurst.getX(zone);
+                            yF += tmpBurst.getY(zone);
+                            zF += tmpBurst.getElevation();
+                            usedBursts.add(tmpBurst);
+                        }
+                    }
+
+                    x /= count;
+                    y /= count;
+
+                    for (int i = 0; i < _FilteredBursts.size() && i < groupSize; i++) {
+                        tmpBurst = _FilteredBursts.get(i);
+                        dRMSEx += Math.pow(tmpBurst.getX(zone) - x, 2);
+                        dRMSEy += Math.pow(tmpBurst.getY(zone) - y, 2);
+                    }
+
+                    dRMSEx = Math.sqrt(dRMSEx / count);
+                    dRMSEy = Math.sqrt(dRMSEy / count);
+                    dRMSEr = Math.sqrt(Math.pow(dRMSEx, 2) + Math.pow(dRMSEy, 2)) * Consts.RMSEr95_Coeff;
+
+
+                    tvUtmX1.setText(StringEx.toString(x, 2));
+                    tvUtmY1.setText(StringEx.toString(y, 2));
+                    tvNssda1.setText(StringEx.toString(dRMSEr, 2));
+                    chkG1.setEnabled(true);
+                    chkG1.setText(StringEx.format("(%d)", count));
+                    //endregion
+
+                    //region Group 2
+                    if (_FilteredBursts.size() > groupSize) {
+                        x = y = count = 0;
+                        dRMSEx = dRMSEy = 0;
+
+                        for (int i = groupSize; i < _FilteredBursts.size() && i < groupSize * 2; i++) {
+                            tmpBurst = _FilteredBursts.get(i);
+                            x += tmpBurst.getX(zone);
+                            y += tmpBurst.getY(zone);
+                            count++;
+
+                            if (chkG2.isChecked()) {
+                                xF += tmpBurst.getX(zone);
+                                yF += tmpBurst.getY(zone);
+                                zF += tmpBurst.getElevation();
+                                usedBursts.add(tmpBurst);
+                            }
+                        }
+
+                        x /= count;
+                        y /= count;
+
+                        for (int i = groupSize; i < _FilteredBursts.size() && i < groupSize * 2; i++) {
+                            tmpBurst = _FilteredBursts.get(i);
+                            dRMSEx += Math.pow(tmpBurst.getX(zone) - x, 2);
+                            dRMSEy += Math.pow(tmpBurst.getY(zone) - y, 2);
+                        }
+
+                        dRMSEx = Math.sqrt(dRMSEx / count);
+                        dRMSEy = Math.sqrt(dRMSEy / count);
+                        dRMSEr = Math.sqrt(Math.pow(dRMSEx, 2) + Math.pow(dRMSEy, 2)) * Consts.RMSEr95_Coeff;
+
+                        tvUtmX2.setText(StringEx.toString(x, 2));
+                        tvUtmY2.setText(StringEx.toString(y, 2));
+                        tvNssda2.setText(StringEx.toString(dRMSEr, 2));
+
+
+                        if (!chkG2.isEnabled()) {
+                            chkG2.setChecked(true);
+                        }
+
+                        chkG2.setEnabled(true);
+                        chkG2.setText(StringEx.format("(%d)", count));
+                    } else {
+                        tvUtmX2.setText(nVal);
+                        tvUtmY2.setText(nVal);
+                        tvNssda2.setText(nVal);
+                        chkG2.setChecked(false);
+                        chkG2.setEnabled(false);
+                        chkG2.setText("(0)");
+                    }
+                    //endregion
+
+                    //region Group 3
+                    if (_FilteredBursts.size() > groupSize * 2) {
+                        x = y = count = 0;
+                        dRMSEx = dRMSEy = 0;
+
+                        for (int i = groupSize * 2; i < _FilteredBursts.size(); i++) {
+                            tmpBurst = _FilteredBursts.get(i);
+                            x += tmpBurst.getX(zone);
+                            y += tmpBurst.getY(zone);
+                            count++;
+
+                            if (chkG3.isChecked()) {
+                                xF += tmpBurst.getX(zone);
+                                yF += tmpBurst.getY(zone);
+                                zF += tmpBurst.getElevation();
+                                usedBursts.add(tmpBurst);
+                            }
+                        }
+
+                        x /= count;
+                        y /= count;
+
+                        for (int i = groupSize * 2; i < _FilteredBursts.size() && i < groupSize * 3; i++) {
+                            tmpBurst = _FilteredBursts.get(i);
+                            dRMSEx += Math.pow(tmpBurst.getX(zone) - x, 2);
+                            dRMSEy += Math.pow(tmpBurst.getY(zone) - y, 2);
+                        }
+
+                        dRMSEx = Math.sqrt(dRMSEx / count);
+                        dRMSEy = Math.sqrt(dRMSEy / count);
+                        dRMSEr = Math.sqrt(Math.pow(dRMSEx, 2) + Math.pow(dRMSEy, 2)) * Consts.RMSEr95_Coeff;
+
+                        tvUtmX3.setText(StringEx.toString(x, 2));
+                        tvUtmY3.setText(StringEx.toString(y, 2));
+                        tvNssda3.setText(StringEx.toString(dRMSEr, 2));
+
+                        if (!chkG3.isEnabled()) {
+                            chkG3.setChecked(true);
+                        }
+
+                        chkG3.setEnabled(true);
+                        chkG3.setText(StringEx.format("(%d)", count));
+                    } else {
+                        tvUtmX3.setText(nVal);
+                        tvUtmY3.setText(nVal);
+                        tvNssda3.setText(nVal);
+                        chkG3.setChecked(false);
+                        chkG3.setEnabled(false);
+                        chkG3.setText("(0)");
+                    }
+                    //endregion
+
+                    //region Real Point
+                    countF = usedBursts.size();
+
+                    if (countF > 0) {
+                        xF /= countF;
+                        yF /= countF;
+                        zF /= countF;
+
+                        ArrayList<GeoPosition> positions = new ArrayList<>(countF);
+
+                        for (int i = 0; i < countF; i++) {
+                            tmpBurst = usedBursts.get(i);
+                            tmpBurst.setUsed(true);
+
+                            dRMSExf += Math.pow(tmpBurst.getX(zone) - xF, 2);
+                            dRMSEyf += Math.pow(tmpBurst.getY(zone) - yF, 2);
+
+                            positions.add(tmpBurst.getPosition());
+                        }
+
+                        dRMSExf = Math.sqrt(dRMSExf / countF);
+                        dRMSEyf = Math.sqrt(dRMSEyf / countF);
+                        dRMSErf = Math.sqrt(Math.pow(dRMSExf, 2) + Math.pow(dRMSEyf, 2)) * Consts.RMSEr95_Coeff;
+
+                        GeoPosition position = GeoTools.getMidPioint(positions);
+
+                        _Point.setLatitude(position.getLatitudeSignedDecimal());
+                        _Point.setLongitude(position.getLongitudeSignedDecimal());
+                        _Point.setElevation(TtUtils.Convert.distance(zF, UomElevation.Meters, _Metadata.getElevation()));
+                        _Point.setUnAdjX(xF);
+                        _Point.setUnAdjY(yF);
+                        _Point.setUnAdjZ(_Point.getElevation());
+                        _Point.setRMSEr(dRMSErf);
+
+                        tvUtmXF.setText(StringEx.toString(xF, 3));
+                        tvUtmYF.setText(StringEx.toString(yF, 3));
+                        tvNssdaF.setText(StringEx.toString(dRMSErf, 2));
+
+                        setCalculated(true);
+                    } else {
+                        tvUtmXF.setText(nVal);
+                        tvUtmYF.setText(nVal);
+                        tvNssdaF.setText(nVal);
+                        setCalculated(false);
+                    }
+
+                    nmeaPointsView.update(_Bursts, zone, xF, yF);
+                    //endregion
+                } else {
+                    resetValues();
+                }
+            } catch (Exception e) {
+                getTtAppCtx().getReport().writeError(e.getMessage(), "AcquireAndCalculateGpsActivity:calculate", e.getStackTrace());
+                Toast.makeText(AcquireAndCalculateGpsActivity.this, "Error Calculating Error", Toast.LENGTH_LONG).show();
+            }
+        } else {
+            resetValues();
+        }
+    }
+
+    private void resetValues() {
+        tvUtmX1.setText(nVal);
+        tvUtmY1.setText(nVal);
+        tvNssda1.setText(nVal);
+        chkG1.setEnabled(false);
+        chkG2.setText("(0)");
+
+        tvUtmX2.setText(nVal);
+        tvUtmY2.setText(nVal);
+        tvNssda2.setText(nVal);
+        chkG2.setEnabled(false);
+        chkG1.setText("(0)");
+
+        tvUtmX3.setText(nVal);
+        tvUtmY3.setText(nVal);
+        tvNssda3.setText(nVal);
+        chkG3.setEnabled(false);
+        chkG3.setText("(0)");
+
+        tvUtmXF.setText(nVal);
+        tvUtmYF.setText(nVal);
+        tvNssdaF.setText(nVal);
+
+        setCalculated(false);
+
+        nmeaPointsView.update(null, 0, 0, 0);
+    }
+
 
     @Override
     protected void startLogging() {
@@ -743,31 +752,47 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
         spFix.setSelection(val);
     }
 
-    private void setSettingsFixOptions(int spinnerIndex) {
+    //region Controls
+    private void onSpnSettingsFixOptionsItemSelected(int spinnerIndex) {
         if (spinnerIndex == 0) {
             options.FilterFix = false;
-        } else if (spinnerIndex < 3) {
-            options.Fix = GSASentence.Fix.parse(spinnerIndex);
-
-            options.FixType = spinnerIndex == 2 ? GGASentence.GpsFixType.GPS : GGASentence.GpsFixType.NoFix;
         } else {
-            options.Fix = GSASentence.Fix._3D;
+            options.FilterFix = true;
 
-            switch (spinnerIndex) {
-                case 3: options.FixType = GGASentence.GpsFixType.DGPS; break;
-                case 4: options.FixType = GGASentence.GpsFixType.PPS; break;
-                case 5: options.FixType = GGASentence.GpsFixType.FloatRTK; break;
-                case 6: options.FixType = GGASentence.GpsFixType.RTK; break;
-                default: options.FixType = GGASentence.GpsFixType.NoFix; break;
+            if (spinnerIndex < 3) {
+                options.Fix = GSASentence.Fix.parse(spinnerIndex);
+
+                options.FixType = spinnerIndex == 2 ? GGASentence.GpsFixType.GPS : GGASentence.GpsFixType.NoFix;
+            } else {
+                options.Fix = GSASentence.Fix._3D;
+
+                switch (spinnerIndex) {
+                    case 3:
+                        options.FixType = GGASentence.GpsFixType.DGPS;
+                        break;
+                    case 4:
+                        options.FixType = GGASentence.GpsFixType.PPS;
+                        break;
+                    case 5:
+                        options.FixType = GGASentence.GpsFixType.FloatRTK;
+                        break;
+                    case 6:
+                        options.FixType = GGASentence.GpsFixType.RTK;
+                        break;
+                    default:
+                        options.FixType = GGASentence.GpsFixType.NoFix;
+                        break;
+                }
             }
         }
 
-        TtAppCtx.getDeviceSettings().setGpsFilterFixUse(options.FilterFix);
-        TtAppCtx.getDeviceSettings().setGpsFilterFix(options.Fix);
-        TtAppCtx.getDeviceSettings().setGpsFilterFixType(options.FixType);
+        getTtAppCtx().getDeviceSettings().setGpsFilterFixUse(options.FilterFix);
+        getTtAppCtx().getDeviceSettings().setGpsFilterFix(options.Fix);
+        getTtAppCtx().getDeviceSettings().setGpsFilterFixType(options.FixType);
+
+        calculate();
     }
 
-    //region Controls
     public void btnCancelClick(View view) {
         setResult(RESULT_CANCELED);
         finish();
@@ -795,7 +820,7 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
     public void btnCreateClick(View view) {
         if (calculated) {
 
-            TtAppCtx.getDAL().insertNmeaBursts(_Bursts);
+            getTtAppCtx().getDAL().insertNmeaBursts(_Bursts);
 
             setResult(Consts.Codes.Results.POINT_CREATED, new Intent().putExtra(Consts.Codes.Data.POINT_DATA, _Point));
             finish();
@@ -814,7 +839,7 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
         GeoPosition lastPosition = getLastPosition();
 
         if (lastPosition == null) {
-            lastPosition = TtAppCtx.getGps().getLastPosition();
+            lastPosition = getTtAppCtx().getGps().getLastPosition();
         }
 
         if (lastPosition != null) {

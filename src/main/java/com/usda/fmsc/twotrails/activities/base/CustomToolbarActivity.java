@@ -19,7 +19,7 @@ import com.usda.fmsc.twotrails.TwoTrailsApp;
 public abstract class CustomToolbarActivity extends AppCompatActivity {
     private final String DEFAULT_EXIT_WARNING = "Press again to exit.";
 
-    protected TwoTrailsApp TtAppCtx;
+    private TwoTrailsApp TtAppCtx;
 
     private Toolbar toolbar;
     private boolean exit, useExitWarning;
@@ -32,8 +32,6 @@ public abstract class CustomToolbarActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        TtAppCtx = getTtAppContext();
     }
 
     @Override
@@ -147,7 +145,7 @@ public abstract class CustomToolbarActivity extends AppCompatActivity {
     }
 
 
-    public TwoTrailsApp getTtAppContext() {
+    public TwoTrailsApp getTtAppCtx() {
         return TtAppCtx != null ? TtAppCtx : (TtAppCtx = (TwoTrailsApp)getApplicationContext());
     }
 

@@ -19,6 +19,7 @@ import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
+import android.util.JsonWriter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
@@ -34,8 +35,10 @@ import com.usda.fmsc.android.utilities.DeviceOrientationEx;
 import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.twotrails.BuildConfig;
 import com.usda.fmsc.twotrails.Consts;
+import com.usda.fmsc.twotrails.DeviceSettings;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.activities.GetDirectionActivity;
+import com.usda.fmsc.twotrails.activities.MainActivity;
 import com.usda.fmsc.twotrails.activities.TtCameraActivity;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
 import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment;
@@ -62,7 +65,9 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -86,8 +91,6 @@ import com.usda.fmsc.utilities.StringEx;
 
 @SuppressWarnings({"WeakerAccess", "UnusedReturnValue", "unused", "SameParameterValue"})
 public class TtUtils {
-    //public static TtReport TtReport = new TtReport();
-
     public static class Convert {
 
         //region Coeff
@@ -1239,7 +1242,7 @@ public class TtUtils {
                 else if (fixType == 5)
                     fixType = 4;
 
-                if (nmeaBurst.getFix().getValue() >= options.Fix.getValue() && nmeaBurst.getFixQuality().getValue() >= fixType &&
+                if ((!options.FilterFix || nmeaBurst.getFix().getValue() >= options.Fix.getValue() && nmeaBurst.getFixQuality().getValue() >= fixType) &&
                         (options.DopType == DopType.HDOP && nmeaBurst.getHDOP() <= options.DopValue) ||
                         (options.DopType == DopType.PDOP && nmeaBurst.getPDOP() <= options.DopValue)) {
                     valid = true;
@@ -1878,22 +1881,89 @@ public class TtUtils {
     }
 
     public static String exportReport(DataAccessLayer dal) {
-        String filename = StringEx.format("%s%sTwoTrailsReport_%s.zip",
+        String exportFile = StringEx.format("%s%sTwoTrailsReport_%s.zip",
                 TtUtils.getTtLogFileDir(),
                 File.separator,
                 DateTime.now().toString());
 
-        boolean exported;
+        List<String> files = new ArrayList<>();
+        files.add(TwoTrailsApp.getInstance().getReport().getFilePath());
 
-        if (dal != null) {
-            exported = FileUtils.zipFiles(filename, TwoTrailsApp.getInstance().getReport().getFilePath(), dal.getFilePath());
-        } else {
-            exported = FileUtils.zipFiles(filename, TwoTrailsApp.getInstance().getReport().getFilePath());
+        if (generateSettingsFile()) {
+            files.add(getSettingsFilePath());
         }
 
-        return exported ? filename : null;
+        if (dal != null) {
+            files.add(dal.getFilePath());
+        }
+
+        String zipFile = FileUtils.zipFiles(exportFile, files.toArray(new String[0])) ? exportFile : null;
+
+        if (FileUtils.fileExists(getSettingsFilePath())) {
+            FileUtils.delete(getSettingsFilePath());
+        }
+
+        return zipFile;
     }
 
+    public static boolean generateSettingsFile() {
+        try {
+            TwoTrailsApp app = TwoTrailsApp.getInstance();
+            String sp = getSettingsFilePath();
+
+            FileWriter fw = new FileWriter(sp, false);
+            JsonWriter js = new JsonWriter(fw);
+            js.setIndent("    ");
+
+            js.beginObject()
+                    .name("DeviceSettings")
+                    .beginObject();
+                    app.getDeviceSettings().writeToFile(js);
+                    js.endObject()
+                    .name("MetadataSetting")
+                    .beginObject();
+                    app.getMetadataSettings().writeToFile(js);
+                    js.endObject()
+                    .name("ProjectSetting")
+                    .beginObject();
+                    app.getProjectSettings().writeToFile(js);
+                    js.endObject()
+            .endObject().flush();
+            js.close();
+        } catch (Exception e) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public static void SendEmailToDev(Activity activity) {
+        String reportPath;
+        TwoTrailsApp app = TwoTrailsApp.getInstance();
+        if (app.hasDAL()) {
+            reportPath = TtUtils.exportReport(app.getDAL());
+        } else {
+            reportPath = TtUtils.exportReport(null);
+        }
+
+        if (reportPath != null) {
+            try {
+                Intent intent = new Intent(Intent.ACTION_SEND);
+                intent.setType("text/plain");
+                intent.putExtra(Intent.EXTRA_EMAIL, new String[] {app.getString(R.string.dev_email_addr)});
+                intent.putExtra(Intent.EXTRA_SUBJECT, "TwoTrails Error Report");
+                intent.putExtra(Intent.EXTRA_TEXT, "I have experienced a crash in TwoTrails Android and would like report it to the development team. \n\nIssue: \n\nWhat happened before the crash: ");
+
+                intent.putExtra(Intent.EXTRA_STREAM, AndroidUtils.Files.getUri(activity, BuildConfig.APPLICATION_ID, reportPath));
+
+                activity.startActivityForResult(Intent.createChooser(intent, "Send Error Report to Dev.."), Consts.Codes.Activites.SEND_EMAIL_TO_DEV);
+            } catch (Exception e) {
+                Toast.makeText(activity, "Error Sending Email.", Toast.LENGTH_LONG).show();
+            }
+        } else {
+            Toast.makeText(activity, "Unable to generate report.", Toast.LENGTH_LONG).show();
+        }
+    }
 
 
     public static String getApplicationVersion(Application context) {
@@ -1971,11 +2041,17 @@ public class TtUtils {
         return getTtFileDir();
     }
 
-    public static String getLogFileName() {
+    public static String getLogFilePath() {
         return String.format("%s%sTtGpsLog_%s.txt",
                 getTtLogFileDir(),
                 File.separator,
                 DateTime.now().toString());
+    }
+
+    public static String getSettingsFilePath() {
+        return String.format("%s%sTwoTrailsSettings.txt",
+                getTtLogFileDir(),
+                File.separator);
     }
     //endregion
 }

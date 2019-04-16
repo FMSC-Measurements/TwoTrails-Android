@@ -241,39 +241,50 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
 
     @Override
     public void moveToLocation(float lat, float lon, boolean animate) {
-
-        try
-        {
-            moveToLocation(CameraUpdateFactory.newLatLng(new LatLng(lat, lon)), animate);
-        } catch (Exception ex) {
-            TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "ManagedSupportMapFragment:moveToLocation(f,f,b)", ex.getStackTrace());
+        if (map != null) {
+            try
+            {
+                moveToLocation(CameraUpdateFactory.newLatLng(new LatLng(lat, lon)), animate);
+            } catch (Exception ex) {
+                TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "ManagedSupportMapFragment:moveToLocation(f,f,b)", ex.getStackTrace());
+            }
+        } else {
+            TwoTrailsApp.getInstance().getReport().writeWarn("Map not ready", "ManagedSupportMapFragment:moveToLocation(f,f,b)");
         }
     }
 
     @Override
     public void moveToLocation(float lat, float lon, float zoomLevel, boolean animate) {
-        try {
-            moveToLocation(CameraUpdateFactory.newLatLngZoom(
-                    new LatLng(lat, lon),
-                    zoomLevel
-            ), animate);
-        } catch (Exception ex) {
-            TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "ManagedSupportMapFragment:moveToLocation(f,f,f,b)", ex.getStackTrace());
+        if (map != null) {
+            try {
+                moveToLocation(CameraUpdateFactory.newLatLngZoom(
+                        new LatLng(lat, lon),
+                        zoomLevel
+                ), animate);
+            } catch (Exception ex) {
+                TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "ManagedSupportMapFragment:moveToLocation(f,f,f,b)", ex.getStackTrace());
+            }
+        } else {
+            TwoTrailsApp.getInstance().getReport().writeWarn("Map not ready", "ManagedSupportMapFragment:moveToLocation(f,f,f,b)");
         }
     }
 
     @Override
     public void moveToLocation(Extent extents, int padding, boolean animate) {
-        try {
-            moveToLocation(CameraUpdateFactory.newLatLngBounds(
-                    new LatLngBounds(
-                            new LatLng(extents.getSouth(), extents.getWest()),
-                            new LatLng(extents.getNorth(), extents.getEast())
-                    ),
-                    padding
-            ), animate);
-        } catch (Exception ex) {
-            TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "ManagedSupportMapFragment:moveToLocation(e,i,b)", ex.getStackTrace());
+        if (map != null) {
+            try {
+                moveToLocation(CameraUpdateFactory.newLatLngBounds(
+                        new LatLngBounds(
+                                new LatLng(extents.getSouth(), extents.getWest()),
+                                new LatLng(extents.getNorth(), extents.getEast())
+                        ),
+                        padding
+                ), animate);
+            } catch (Exception ex) {
+                TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "ManagedSupportMapFragment:moveToLocation(e,i,b)", ex.getStackTrace());
+            }
+        } else {
+            TwoTrailsApp.getInstance().getReport().writeWarn("Map not ready", "ManagedSupportMapFragment:moveToLocation(e,i,b)");
         }
     }
 

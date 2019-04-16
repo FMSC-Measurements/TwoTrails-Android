@@ -194,11 +194,11 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                 }
                 case R.id.ctx_menu_capture: {
                     if (AndroidUtils.Device.isFullOrientationAvailable(Take5Activity.this)) {
-                        if (TtAppCtx.getDeviceSettings().getUseTtCameraAsk()) {
+                        if (getTtAppCtx().getDeviceSettings().getUseTtCameraAsk()) {
                             DontAskAgainDialog dialog = new DontAskAgainDialog(Take5Activity.this,
                                     DeviceSettings.USE_TTCAMERA_ASK,
                                     DeviceSettings.USE_TTCAMERA,
-                                    TtAppCtx.getDeviceSettings().getPrefs());
+                                    getTtAppCtx().getDeviceSettings().getPrefs());
 
                             dialog.setMessage(Take5Activity.this.getString(R.string.points_camera_diag))
                                     .setPositiveButton("TwoTrails", new DontAskAgainDialog.OnClickListener() {
@@ -216,7 +216,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                                     .setNeutralButton(getString(R.string.str_cancel), null, 0)
                                     .show();
                         } else {
-                            captureImageUri = TtUtils.Media.captureImage(Take5Activity.this, TtAppCtx.getDeviceSettings().getUseTtCamera() == 2, _CurrentPoint);
+                            captureImageUri = TtUtils.Media.captureImage(Take5Activity.this, getTtAppCtx().getDeviceSettings().getUseTtCamera() == 2, _CurrentPoint);
                         }
                     } else {
                         captureImageUri = TtUtils.Media.captureImage(Take5Activity.this, false, _CurrentPoint);
@@ -284,7 +284,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
     //region Scroller
     private RecyclerView.OnScrollListener scrollListener = new RecyclerView.OnScrollListener() {
         @Override
-        public void onScrollStateChanged(final RecyclerView recyclerView, int newState) {
+        public void onScrollStateChanged(@NonNull final RecyclerView recyclerView, int newState) {
             if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                 if (!ignoreScroll && !handling) {
                     if (enableCardFading) {
@@ -400,13 +400,22 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                 _Bursts = new ArrayList<>();
 
                 try {
-                    if (intent.getExtras().containsKey(Consts.Codes.Data.POINT_DATA)) {
-                        _CurrentPoint = intent.getParcelableExtra(Consts.Codes.Data.POINT_DATA);
-                        onBnd = _CurrentPoint.isOnBnd();
-                    }
+                    if (intent.hasExtra(Consts.Codes.Data.POINT_PACKAGE)) {
+                        Bundle bundle = intent.getBundleExtra(Consts.Codes.Data.POINT_PACKAGE);
 
-                    _Metadata = intent.getParcelableExtra(Consts.Codes.Data.METADATA_DATA);
-                    _Polygon = getPolygon();
+                        if (bundle.containsKey(Consts.Codes.Data.POINT_DATA)) {
+                            _CurrentPoint = bundle.getParcelable(Consts.Codes.Data.POINT_DATA);
+
+                            if (_CurrentPoint != null) {
+                                onBnd = _CurrentPoint.isOnBnd();
+                            } else {
+                                onBnd = true;
+                            }
+                        }
+
+                        _Metadata = bundle.getParcelable(Consts.Codes.Data.METADATA_DATA);
+                        _Polygon = bundle.getParcelable(Consts.Codes.Data.POLYGON_DATA);
+                    }
 
                     if (_Metadata == null) {
                         cancelResult = Consts.Codes.Results.NO_METDATA_DATA;
@@ -417,13 +426,13 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                             cancelResult = Consts.Codes.Results.NO_POLYGON_DATA;
                         } else {
                             _Points = new ArrayList<>(
-                                TtAppCtx.getDAL().getPointsInPolygon(_Polygon.getCN())
+                                getTtAppCtx().getDAL().getPointsInPolygon(_Polygon.getCN())
                                     .subList(0, _CurrentPoint.getIndex() + 1));
                         }
                     }
                 } catch (Exception e) {
                     cancelResult = Consts.Codes.Results.ERROR;
-                    TtAppCtx.getReport().writeError("Take5Activity:onCreate", e.getMessage(), e.getStackTrace());
+                    getTtAppCtx().getReport().writeError("Take5Activity:onCreate", e.getMessage(), e.getStackTrace());
                 }
             } else {
                 cancelResult = Consts.Codes.Results.NO_POINT_DATA;
@@ -455,7 +464,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
             }
 
             _Group = new TtGroup(TtGroup.GroupType.Take5);
-            TtAppCtx.getDAL().insertGroup(_Group);
+            getTtAppCtx().getDAL().insertGroup(_Group);
 
             fabT5 = findViewById(R.id.take5FabT5);
             fabSS = findViewById(R.id.take5FabSideShot);
@@ -601,15 +610,15 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
     protected void getSettings() {
         super.getSettings();
 
-        options.Fix = TtAppCtx.getDeviceSettings().getTake5FilterFix();
-        options.FixType = TtAppCtx.getDeviceSettings().getTake5FilterFixType();
-        options.DopType = TtAppCtx.getDeviceSettings().getTake5FilterDopType();
-        options.DopValue = TtAppCtx.getDeviceSettings().getTake5FilterDopValue();
-        increment = TtAppCtx.getDeviceSettings().getTake5Increment();
-        takeAmount = TtAppCtx.getDeviceSettings().getTake5NmeaAmount();
+        options.Fix = getTtAppCtx().getDeviceSettings().getTake5FilterFix();
+        options.FixType = getTtAppCtx().getDeviceSettings().getTake5FilterFixType();
+        options.DopType = getTtAppCtx().getDeviceSettings().getTake5FilterDopType();
+        options.DopValue = getTtAppCtx().getDeviceSettings().getTake5FilterDopValue();
+        increment = getTtAppCtx().getDeviceSettings().getTake5Increment();
+        takeAmount = getTtAppCtx().getDeviceSettings().getTake5NmeaAmount();
 
-        useVib = TtAppCtx.getDeviceSettings().getTake5VibrateOnCreate();
-        useRing = TtAppCtx.getDeviceSettings().getTake5RingOnCreate();
+        useVib = getTtAppCtx().getDeviceSettings().getTake5VibrateOnCreate();
+        useRing = getTtAppCtx().getDeviceSettings().getTake5RingOnCreate();
     }
 
     @Override
@@ -723,14 +732,14 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
             case Consts.Codes.Activites.SETTINGS: {
-                TtAppCtx.getGps().startGps();
+                getTtAppCtx().getGps().startGps();
 
                 getSettings();
                 break;
             }
             case Consts.Codes.Requests.ADD_IMAGES: {
                 if (data != null) {
-                    List<TtImage> images = TtUtils.Media.getPicturesFromImageIntent(TtAppCtx, data, _CurrentPoint.getCN());
+                    List<TtImage> images = TtUtils.Media.getPicturesFromImageIntent(getTtAppCtx(), data, _CurrentPoint.getCN());
 
                     if (images.size() == 1) {
                         TtUtils.Media.askAndUpdateImageOrientation(Take5Activity.this, null);
@@ -846,7 +855,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                 setResult(Consts.Codes.Results.POINT_CREATED, new Intent().putExtra(Consts.Codes.Data.NUMBER_OF_CREATED_POINTS, _Points.size()));
             } else {
                 if (_Group != null) {
-                    TtAppCtx.getDAL().deleteGroup(_Group.getCN());
+                    getTtAppCtx().getDAL().deleteGroup(_Group.getCN());
                 }
 
                 setResult(RESULT_CANCELED);
@@ -865,7 +874,9 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
 
             return true;
         } else if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
-            moveToLocation(getLastPosition(), Consts.Location.ZOOM_CLOSE, true);
+            if (hasPosition()) {
+                moveToLocation(getLastPosition(), Consts.Location.ZOOM_CLOSE, true);
+            }
             return true;
         }
 
@@ -902,27 +913,27 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
         if (sPoint != null) {
             if (sPoint == _CurrentPoint) {
                 if (!saved) {
-                    TtAppCtx.getDAL().insertPoint(sPoint);
-                    TtAppCtx.getDAL().insertNmeaBursts(_Bursts);
+                    getTtAppCtx().getDAL().insertPoint(sPoint);
+                    getTtAppCtx().getDAL().insertNmeaBursts(_Bursts);
 
                     if (sPoint.getIndex() < _Points.size()) { //update all the points after inserted point
                         for (int i = sPoint.getIndex() + 1; i <_Points.size(); i++) {
                             TtPoint point = TtUtils.Points.clonePoint(_Points.get(i));
                             point.setIndex(i);
-                            TtAppCtx.getDAL().updatePoint(point, _Points.get(i));
+                            getTtAppCtx().getDAL().updatePoint(point, _Points.get(i));
                         }
                     }
 
                     _Bursts = new ArrayList<>();
                     _UsedBursts = new ArrayList<>();
                 } else if (updated) {
-                    TtAppCtx.getDAL().updatePoint(sPoint, sPoint);
+                    getTtAppCtx().getDAL().updatePoint(sPoint, sPoint);
                 }
 
                 saved = true;
                 updated = false;
             } else {
-                TtAppCtx.getDAL().updatePoint(sPoint, sPoint);
+                getTtAppCtx().getDAL().updatePoint(sPoint, sPoint);
             }
         }
 
@@ -1050,7 +1061,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
 
             ignoreScroll = true;
 
-            //TtAppCtx.getTtNotifyManager().showPointAquired();
+            //getTtAppCtx().getTtNotifyManager().showPointAquired();
 
             t5pAdapter.notifyItemInserted(_Points.size() - 1);
 
@@ -1135,10 +1146,10 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
 
     private void lockLastPoint(boolean lock) {
         if (_Points.size() > 0) {
-            Take5PointsEditRvAdapter.PointViewHolderEx holder = (Take5PointsEditRvAdapter.PointViewHolderEx) rvPoints.findViewHolderForAdapterPosition(_Points.size() - 1);
+            RecyclerView.ViewHolder holder = rvPoints.findViewHolderForAdapterPosition(_Points.size() - 1);
 
-            if (holder != null) {
-                holder.setLocked(lock);
+            if (holder instanceof Take5PointsEditRvAdapter.PointViewHolderEx) {
+                ((Take5PointsEditRvAdapter.PointViewHolderEx)holder).setLocked(lock);
             }
         }
     }
@@ -1450,7 +1461,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
     //region Media
     private void saveMedia() {
         if (_MediaUpdated && _CurrentMedia != null) {
-            if (!TtAppCtx.getMAL().updateMedia(_CurrentMedia)) {
+            if (!getTtAppCtx().getMAL().updateMedia(_CurrentMedia)) {
                 Toast.makeText(Take5Activity.this,
                         String.format("Unable to save %s", _CurrentMedia.getMediaType().toString()),
                         Toast.LENGTH_LONG
@@ -1465,7 +1476,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
         List<TtMedia> mediaList = rvMediaAdapter.getItems();
         int index = mediaList.indexOf(media);
 
-        TtAppCtx.getMAL().deleteMedia(media);
+        getTtAppCtx().getMAL().deleteMedia(media);
 
         if (delete) {
             File file = new File(media.getFilePath());
@@ -1496,7 +1507,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
 
     private void addImage(final TtImage picture) {
         if (picture != null) {
-            if (TtAppCtx.getMAL().insertMedia(picture)) {
+            if (getTtAppCtx().getMAL().insertMedia(picture)) {
                 mediaSelectionIndex = TtUtils.Media.getMediaIndex(picture, rvMediaAdapter.getItems());
                 loadImageToList(picture);
             } else {
@@ -1512,7 +1523,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
             Collections.sort(pictures, TtUtils.Media.PictureTimeComparator);
 
             for (int i = 0; i <pictures.size(); i++) {
-                if (!TtAppCtx.getMAL().insertMedia(pictures.get(i))) {
+                if (!getTtAppCtx().getMAL().insertMedia(pictures.get(i))) {
                     pictures.remove(i--);
                     error++;
                 }
@@ -1558,12 +1569,12 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
             mediaLoaded = false;
 
             if (point != null) {
-                if (TtAppCtx.hasMAL()) {
+                if (getTtAppCtx().hasMAL()) {
                     if (loadPoints) {
                         mediaCount = 0;
                         mediaSelectionIndex = INVALID_INDEX;
 
-                        ArrayList<TtImage> pictures = TtAppCtx.getMAL().getImagesInPoint(point.getCN());
+                        ArrayList<TtImage> pictures = getTtAppCtx().getMAL().getImagesInPoint(point.getCN());
 
                         Collections.sort(pictures, TtUtils.Media.PictureTimeComparator);
                         for (final TtImage p : pictures) {
@@ -1573,7 +1584,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                         if (mediaCount > 0)
                             mediaSelectionIndex = 0;
                     } else {
-                        mediaCount = TtAppCtx.getMAL().getItemsCount(
+                        mediaCount = getTtAppCtx().getMAL().getItemsCount(
                                 TwoTrailsMediaSchema.Media.TableName,
                                 TwoTrailsMediaSchema.Media.PointCN,
                                 point.getCN());
@@ -1592,7 +1603,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
     private void loadImageToList(final TtImage picture) {
         mediaCount++;
 
-        TtAppCtx.getMAL().loadImage(picture, new MediaAccessLayer.SimpleMalListener() {
+        getTtAppCtx().getMAL().loadImage(picture, new MediaAccessLayer.SimpleMalListener() {
             @Override
             public void imageLoaded(TtImage image, View view, Bitmap bitmap) {
                 addImageToList(picture, true, bitmap);
