@@ -57,7 +57,7 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
 
     private List<TtPolygon> getPolygons() {
         if (_Polygons == null) {
-            _Polygons = TtAppCtx.getDAL().getPolygons();
+            _Polygons = getTtAppCtx().getDAL().getPolygons();
             if (mSectionsPagerAdapter != null) {
                 new Handler(getMainLooper()).post(new Runnable() {
                     @Override
@@ -138,7 +138,7 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
         savePolygon();
 
         if (adjust) {
-            PolygonAdjuster.adjust(TtAppCtx.getDAL(), true);
+            PolygonAdjuster.adjust(getTtAppCtx().getDAL(), true);
         }
     }
 
@@ -222,7 +222,7 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
                 break;
             }
             case R.id.polyMenuAdjust: {
-                PolygonAdjuster.adjust(TtAppCtx.getDAL());
+                PolygonAdjuster.adjust(getTtAppCtx().getDAL());
                 break;
             }
             case android.R.id.home: {
@@ -267,7 +267,7 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
     //region Save Delete Create Reset
     private void savePolygon() {
         if (_PolygonUpdated && _CurrentPolygon != null) {
-            TtAppCtx.getDAL().updatePolygon(_CurrentPolygon);
+            getTtAppCtx().getDAL().updatePolygon(_CurrentPolygon);
             getPolygons().set(_CurrentIndex, _CurrentPolygon);
             _PolygonUpdated = false;
         }
@@ -296,8 +296,8 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
     private boolean deletePolygon(TtPolygon polygon, int index) {
         try {
             if (polygon != null) {
-                if (TtAppCtx.getDAL().deletePointsInPolygon(polygon.getCN())) {
-                    TtAppCtx.getDAL().deletePolygon(polygon.getCN());
+                if (getTtAppCtx().getDAL().deletePointsInPolygon(polygon.getCN())) {
+                    getTtAppCtx().getDAL().deletePolygon(polygon.getCN());
                     mSectionsPagerAdapter.notifyDataSetChanged();
                 } else {
                     return false;
@@ -318,7 +318,7 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
                 adjust = true;
             }
         } catch (Exception e) {
-            TtAppCtx.getReport().writeError(e.getMessage(), "PolygonsActivity:deletePolygon");
+            getTtAppCtx().getReport().writeError(e.getMessage(), "PolygonsActivity:deletePolygon");
             return false;
         }
 
@@ -328,12 +328,12 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
     private void createPolygon() {
         savePolygon();
 
-        int polyCount = TtAppCtx.getDAL().getItemCount(TwoTrailsSchema.PolygonSchema.TableName);
+        int polyCount = getTtAppCtx().getDAL().getItemCount(TwoTrailsSchema.PolygonSchema.TableName);
 
         TtPolygon newPolygon = new TtPolygon(polyCount * 1000 + 1010);
         newPolygon.setName(String.format("Poly %d", polyCount + 1));
         newPolygon.setAccuracy(Consts.Default_Point_Accuracy);
-        TtAppCtx.getDAL().insertPolygon(newPolygon);
+        getTtAppCtx().getDAL().insertPolygon(newPolygon);
 
         addedPoly = newPolygon.getCN();
 
@@ -491,7 +491,7 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
             if (listener != null)
                 listener.onPolygonPointsUpdated(_CurrentPolygon);
             else
-                TtAppCtx.getReport().writeError("Null Listener", "PolygonsActivity:onPolygonUpdate");
+                getTtAppCtx().getReport().writeError("Null Listener", "PolygonsActivity:onPolygonUpdate");
         }
     }
 
@@ -501,7 +501,7 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
             if (listener != null)
                 listener.onPolygonPointsUpdated(poly);
             else
-                TtAppCtx.getReport().writeError("Null Listener", "PolygonsActivity:onPolygonUpdate(cn)");
+                getTtAppCtx().getReport().writeError("Null Listener", "PolygonsActivity:onPolygonUpdate(cn)");
         }
     }
 
@@ -511,7 +511,7 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
             if (listener != null)
                 listener.onPolygonPointsUpdated(poly);
             else
-                TtAppCtx.getReport().writeError("Null Listener", "PolygonsActivity:onPolygonPointsUpdated");
+                getTtAppCtx().getReport().writeError("Null Listener", "PolygonsActivity:onPolygonPointsUpdated");
         }
     }
 
@@ -536,6 +536,8 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
             }
         }
 
+        getTtAppCtx().getReport().writeError("Polygon '" + cn + "' Not Found", "PolygonActivity:getPolygon(cn)");
+
         return null;
     }
     
@@ -550,14 +552,14 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        if (TtAppCtx.getDAL().getBoundaryPointsCountInPoly(poly.getCN()) > 2) {
-                            final List<TtPoint> points = TtAppCtx.getDAL().getBoundaryPointsInPoly(poly.getCN());
+                        if (getTtAppCtx().getDAL().getBoundaryPointsCountInPoly(poly.getCN()) > 2) {
+                            final List<TtPoint> points = getTtAppCtx().getDAL().getBoundaryPointsInPoly(poly.getCN());
 
                             if (points != null && points.size() > 2) {
                                 new Thread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        HashMap<String, TtMetadata> metadata = TtAppCtx.getDAL().getMetadataMap();
+                                        HashMap<String, TtMetadata> metadata = getTtAppCtx().getDAL().getMetadataMap();
                                         TtMetadata defMeta = metadata.get(Consts.EmptyGuid);
                                         if (defMeta != null) {
                                             drawPoints.put(poly.getCN(), new Tuple<>(width, TtUtils.UI.generateStaticPolyPoints(points, metadata, defMeta.getZone(), (int)(width * 0.9))));
@@ -565,7 +567,7 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
 
                                             onPolygonUpdated(poly);
                                         } else {
-                                            TtAppCtx.getReport().writeError("No default Metadata", "PolygonsActivity:getDrawPoints");
+                                            getTtAppCtx().getReport().writeError("No default Metadata", "PolygonsActivity:getDrawPoints");
                                         }
                                     }
                                 }).start();

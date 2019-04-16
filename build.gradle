@@ -41,6 +41,7 @@ android {
 
         resValue "string", "arcgis_client_id", project.property("TwoTrails.ArcGIS.ClientID")
         resValue "string", "arcgis_client_secret", project.property("TwoTrails.ArcGIS.ClientSecret")
+        resValue "string", "dev_email_addr", project.property("TwoTrails.Dev.EmailAddress")
     }
 
     signingConfigs {

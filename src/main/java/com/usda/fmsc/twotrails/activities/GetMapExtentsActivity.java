@@ -44,7 +44,6 @@ public class GetMapExtentsActivity extends AppCompatActivity implements GpsServi
     private boolean estimating, estimateReceived;
 
     private GeoPosition position;
-    private GpsService.GpsBinder binder;
 
 
     @Override
@@ -89,7 +88,7 @@ public class GetMapExtentsActivity extends AppCompatActivity implements GpsServi
                             public void run() {
                                 new AlertDialog.Builder(GetMapExtentsActivity.this)
                                         .setTitle("Map Service Info")
-                                        .setMessage(String.format("Map Name: %s\nMin Scale: 1:%.4f\nMax Scale: 1:%.4f\nMax Export Tiles: %d\nMax Record Count: %d\n\nURL: %s\n\nDescription: %s",
+                                        .setMessage(StringEx.format("Map Name: %s\nMin Scale: 1:%.4f\nMax Scale: 1:%.4f\nMax Export Tiles: %d\nMax Record Count: %d\n\nURL: %s\n\nDescription: %s",
                                             msi.getMapName(),
                                             msi.getMinScale(), msi.getMaxScale(),
                                             msi.getMaxExportTilesCount(),
@@ -158,12 +157,12 @@ public class GetMapExtentsActivity extends AppCompatActivity implements GpsServi
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (binder != null) {
-            if (binder.isGpsRunning() && !TtAppCtx.getDeviceSettings().isGpsAlwaysOn()) {
-                binder.stopGps();
+        if (TtAppCtx.getGps() != null) {
+            if (TtAppCtx.getGps().isGpsRunning() && !TtAppCtx.getDeviceSettings().isGpsAlwaysOn()) {
+                TtAppCtx.getGps().stopGps();
             }
 
-            binder.removeListener(this);
+            TtAppCtx.getGps().removeListener(this);
         }
     }
 
@@ -246,7 +245,7 @@ public class GetMapExtentsActivity extends AppCompatActivity implements GpsServi
                 public void run() {
                     if (bytes != null && bytes > 0) {
                         estimateDialog = new AlertDialog.Builder(GetMapExtentsActivity.this)
-                                .setMessage(String.format("Estimated map size: %d Mb", bytes / 1000000))
+                                .setMessage(StringEx.format("Estimated map size: %d Mb", bytes / 1000000))
                                 .setPositiveButton("Download", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {

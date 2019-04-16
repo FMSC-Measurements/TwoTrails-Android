@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
@@ -20,8 +21,11 @@ import java.util.List;
 public class NmeaPointsView extends View {
     private static final DecimalFormat df = new DecimalFormat("#.###");
 
-    private PointF center;
+    private PointF _Center;
     private final ArrayList<PointF> nmeaPoints = new ArrayList<>(), nmeaPointsUsed = new ArrayList<>();
+    private final ArrayList<TtNmeaBurst>_NmeaBursts = new ArrayList<>();
+    private int _Zone;
+    private double _XC, _YC;
 
     private int xpad = 0, ypad = 0;
     private double shortSideAdjust, axis = 1;
@@ -56,31 +60,44 @@ public class NmeaPointsView extends View {
     }
 
 
-
     public void update(List<TtNmeaBurst> bursts, int zone, double xc, double yc) {
+        if (bursts != null) {
+            _NmeaBursts.clear();
+            _NmeaBursts.addAll(bursts);
+
+            _Zone = zone;
+            _XC = xc;
+            _YC = yc;
+
+            update();
+        }
+    }
+
+    private void update() {
         nmeaPoints.clear();
         nmeaPointsUsed.clear();
-        center = null;
+        _Center = null;
 
-        if (bursts != null) {
+        if (_NmeaBursts.size() > 0) {
             double xmin, xmax, ymin, ymax;
-            xmin = xmax = bursts.get(0).getX(zone);
-            ymin = ymax = bursts.get(0).getY(zone);
+            xmin = xmax = _NmeaBursts.get(0).getX(_Zone);
+            ymin = ymax = _NmeaBursts.get(0).getY(_Zone);
 
-            for (TtNmeaBurst burst : bursts) {
-                double x = burst.getX(zone);
+            for (TtNmeaBurst burst : _NmeaBursts) {
+                double x = burst.getX(_Zone);
                 if (x < xmin)
                     xmin = x;
 
                 if (x > xmax)
                     xmax = x;
 
-                double y = burst.getY(zone);
+                double y = burst.getY(_Zone);
                 if (y < ymin)
                     ymin = y;
 
                 if (y > ymax)
                     ymax = y;
+
             }
 
             double xaxis = xmax - xmin, yaxis = ymax - ymin, xoffset = 0, yoffset = 0;
@@ -117,10 +134,10 @@ public class NmeaPointsView extends View {
 
             PointF point;
 
-            for (TtNmeaBurst burst : bursts ) {
+            for (TtNmeaBurst burst : _NmeaBursts) {
                 point = new PointF(
-                        (float)((burst.getX(zone) - xmin + xoffset) / axis * shortSideAdjust + xpad),
-                        (float)((burst.getY(zone) - ymin + yoffset) / axis * shortSideAdjust + ypad)
+                        (float)((burst.getX(_Zone) - xmin + xoffset) / axis * shortSideAdjust + xpad),
+                        (float)((burst.getY(_Zone) - ymin + yoffset) / axis * shortSideAdjust + ypad)
                 );
 
                 if (burst.isUsed()) {
@@ -130,10 +147,12 @@ public class NmeaPointsView extends View {
                 }
             }
 
-            center = new PointF(
-                    (float)((xc - xmin) / axis * shortSideAdjust + xpad + xoffset),
-                    (float)((yc - ymin) / axis * shortSideAdjust + ypad + yoffset)
-            );
+            if (_XC != xmin && _YC != ymin) {
+                _Center = new PointF(
+                        (float) ((_XC - xmin) / axis * shortSideAdjust + xpad + xoffset),
+                        (float) ((_YC - ymin) / axis * shortSideAdjust + ypad + yoffset)
+                );
+            }
         }
 
         invalidate();
@@ -144,33 +163,39 @@ public class NmeaPointsView extends View {
         super.onDraw(canvas);
 
         for (PointF point : nmeaPoints) {
-            canvas.drawCircle(point.x, point.y, pointRadius, paintNmea);
+            if (!Double.isNaN(point.x) && !Double.isNaN(point.y)) {
+                canvas.drawCircle(point.x, point.y, pointRadius, paintNmea);
+            }
         }
 
         for (PointF point : nmeaPointsUsed) {
-            canvas.drawCircle(point.x, point.y, pointRadius, paintNmeaUsed);
+            if (!Double.isNaN(point.x) && !Double.isNaN(point.y)) {
+                canvas.drawCircle(point.x, point.y, pointRadius, paintNmeaUsed);
+            }
         }
 
-        if (center != null) {
-            canvas.drawCircle(center.x, center.y, pointRadius, paintCenter);
-
-            canvas.drawLine(
-                    bpad,
-                    bpad,
-                    (float)(ml / axis * shortSideAdjust) - bpad,
-                    bpad,
-                    paintDist
-            );
-
-            canvas.drawText(String.format("%s (meters)", df.format(ml)), bpad, bpad - 10, paintDist);
+        if (_Center == null || Double.isInfinite(_Center.x) || Double.isInfinite(_Center.y)) {
+            _Center = new PointF(getWidth() / 2f, getHeight() / 2f);
         }
+
+        canvas.drawCircle(_Center.x, _Center.y, pointRadius, paintCenter);
+
+        canvas.drawLine(
+                bpad,
+                bpad,
+                (float)(ml / axis * shortSideAdjust) - bpad,
+                bpad,
+                paintDist
+        );
+
+        canvas.drawText(String.format("%s (meters)", df.format(ml)), bpad, bpad - 10, paintDist);
     }
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
 
-        center = new PointF(w / 2, h / 2);
+        _Center = new PointF(w / 2f, h / 2f);
 
         int shortSide;
 
@@ -186,5 +211,9 @@ public class NmeaPointsView extends View {
 
         shortSideAdjust = shortSide * 0.9;
         bpad = (float) (shortSide * 0.1);
+
+        if (_NmeaBursts.size() > 0) {
+            update();
+        }
     }
 }

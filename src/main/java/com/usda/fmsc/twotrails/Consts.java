@@ -103,6 +103,7 @@ public class Consts {
             public static final int MAP_DETAILS = 1019;
             public static final int ARC_GIS_LOGIN = 1020;
             public static final int TTCAMERA = 1021;
+            public static final int SEND_EMAIL_TO_DEV = 1022;
         }
 
         public static class Dialogs {
@@ -127,6 +128,7 @@ public class Consts {
             public static final int GPS_NOT_FOUND = 2013;
             public static final int GPS_NOT_CONFIGURED = 2014;
             public static final int ORIENTATION_UPDATED = 2015;
+            public static final int NO_DAL = 2016;
 
         }
 
@@ -146,6 +148,7 @@ public class Consts {
             public static final String TTIMAGE = "TtImage";
             public static final String ORIENTATION = "Orientation";
             public static final String CRASH = "AppCrash";
+            public static final String POINT_PACKAGE = "PointPackage";
         }
 
         public static class Requests {

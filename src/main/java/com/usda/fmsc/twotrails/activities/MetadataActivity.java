@@ -65,7 +65,7 @@ public class MetadataActivity extends CustomToolbarActivity {
 
     private List<TtMetadata> getMetadata() {
         if (_Metadata == null || _Metadata.size() < 1) {
-            _Metadata = TtAppCtx.getDAL().getMetadata();
+            _Metadata = getTtAppCtx().getDAL().getMetadata();
             if (mSectionsPagerAdapter != null) {
                 new Handler(getMainLooper()).post(new Runnable() {
                     @Override
@@ -127,7 +127,7 @@ public class MetadataActivity extends CustomToolbarActivity {
             _CurrentIndex = 0;
             _CurrentMetadata = getMetaAtIndex(_CurrentIndex);
         } else {
-            TtAppCtx.getReport().writeError("No Metadata, Invalid Project File.", "MetadataActivity");
+            getTtAppCtx().getReport().writeError("No Metadata, Invalid Project File.", "MetadataActivity");
             Toast.makeText(MetadataActivity.this, "Metadata not found, Invalid Project File.", Toast.LENGTH_LONG).show();
             finish();
         }
@@ -156,7 +156,7 @@ public class MetadataActivity extends CustomToolbarActivity {
         saveMetadata();
 
         if (adjust) {
-            PolygonAdjuster.adjust(TtAppCtx.getDAL(), true);
+            PolygonAdjuster.adjust(getTtAppCtx().getDAL(), true);
         }
     }
 
@@ -241,7 +241,7 @@ public class MetadataActivity extends CustomToolbarActivity {
                 break;
             }
             case R.id.metaMenuDefault: {
-                TtAppCtx.getMetadataSettings().setDefaultMetadata(_CurrentMetadata);
+                getTtAppCtx().getMetadataSettings().setDefaultMetadata(_CurrentMetadata);
                 Toast.makeText(this, String.format("%s saved as default.", _CurrentMetadata.getName()), Toast.LENGTH_SHORT).show();
                 break;
             }
@@ -257,7 +257,7 @@ public class MetadataActivity extends CustomToolbarActivity {
     //region Save Delete Create Reset
     private void saveMetadata() {
         if (isMetadataUpdated() && _CurrentMetadata != null) {
-            TtAppCtx.getDAL().updateMetadata(_CurrentMetadata);
+            getTtAppCtx().getDAL().updateMetadata(_CurrentMetadata);
             getMetadata().set(_CurrentIndex, _CurrentMetadata);
             setMetadataUpdated(false, false);
         }
@@ -286,7 +286,7 @@ public class MetadataActivity extends CustomToolbarActivity {
     private boolean deleteMetadata(TtMetadata metadata, int index) {
         try {
             if (metadata != null) {
-                if (TtAppCtx.getDAL().deleteMetadataSafe(metadata.getCN())) {
+                if (getTtAppCtx().getDAL().deleteMetadataSafe(metadata.getCN())) {
                     mSectionsPagerAdapter.notifyDataSetChanged();
                 } else {
                     return false;
@@ -305,7 +305,7 @@ public class MetadataActivity extends CustomToolbarActivity {
                 adjust = true;
             }
         } catch (Exception e) {
-            TtAppCtx.getReport().writeError(e.getMessage(), "PolygonsActivity:deletePolygon");
+            getTtAppCtx().getReport().writeError(e.getMessage(), "PolygonsActivity:deletePolygon");
             return false;
         }
 
@@ -315,12 +315,12 @@ public class MetadataActivity extends CustomToolbarActivity {
     private void createMetadata() {
         saveMetadata();
 
-        int metaCount = TtAppCtx.getDAL().getItemCount(TwoTrailsSchema.MetadataSchema.TableName);
+        int metaCount = getTtAppCtx().getDAL().getItemCount(TwoTrailsSchema.MetadataSchema.TableName);
 
-        TtMetadata newMetadata = TtAppCtx.getMetadataSettings().getDefaultMetadata();
+        TtMetadata newMetadata = getTtAppCtx().getMetadataSettings().getDefaultMetadata();
         newMetadata.setCN(java.util.UUID.randomUUID().toString());
         newMetadata.setName(StringEx.format("Meta %d", metaCount + 1));
-        TtAppCtx.getDAL().insertMetadata(newMetadata);
+        getTtAppCtx().getDAL().insertMetadata(newMetadata);
 
         addedMeta = newMetadata.getCN();
 
@@ -456,7 +456,7 @@ public class MetadataActivity extends CustomToolbarActivity {
             if (listener != null)
                 listener.onMetadataUpdated(_CurrentMetadata);
             else
-                TtAppCtx.getReport().writeError("Null Listener", "MetadataActivity:onMetadataUpdate");
+                getTtAppCtx().getReport().writeError("Null Listener", "MetadataActivity:onMetadataUpdate");
         }
     }
 
@@ -467,7 +467,7 @@ public class MetadataActivity extends CustomToolbarActivity {
             }
         }
 
-        TtAppCtx.getReport().writeError("Metadata '" + cn + "' Not Found", "MetadataActivity:getMetadata(cn)");
+        getTtAppCtx().getReport().writeError("Metadata '" + cn + "' Not Found", "MetadataActivity:getMetadata(cn)");
 
         return null;
     }
@@ -525,17 +525,17 @@ public class MetadataActivity extends CustomToolbarActivity {
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
-                                ArrayList<TtPoint> points = TtAppCtx.getDAL().getGpsTypePointsWithMeta(_CurrentMetadata.getCN());
+                                ArrayList<TtPoint> points = getTtAppCtx().getDAL().getGpsTypePointsWithMeta(_CurrentMetadata.getCN());
                                 progressDialog.setMax(points.size() * 2);
 
                                 if (points.size() > 0) {
                                     for (int i = 0; i < points.size(); i++) {
-                                        points.set(i, TtUtils.Points.reCalculateGps(points.get(i), zone, TtAppCtx.getDAL(), null));
+                                        points.set(i, TtUtils.Points.reCalculateGps(points.get(i), zone, getTtAppCtx().getDAL(), null));
 
                                         progressDialog.setProgress(i);
                                     }
 
-                                    TtAppCtx.getDAL().updatePoints(points);
+                                    getTtAppCtx().getDAL().updatePoints(points);
 
                                     progressDialog.setProgress(points.size() * 2);
                                 }
@@ -571,16 +571,16 @@ public class MetadataActivity extends CustomToolbarActivity {
                         @Override
                         public void onClick(View view) {
 
-                            if (TtAppCtx.getDeviceSettings().isGpsConfigured()) {
+                            if (getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
                                 gotNmea = false;
 
-                                TtAppCtx.getGps().startGps();
+                                getTtAppCtx().getGps().startGps();
 
                                 listener = new GpsService.Listener() {
                                     @Override
                                     public void nmeaBurstReceived(INmeaBurst nmeaBurst) {
-                                        if (!TtAppCtx.getDeviceSettings().isGpsAlwaysOn()) {
-                                            TtAppCtx.getGps().stopGps();
+                                        if (!getTtAppCtx().getDeviceSettings().isGpsAlwaysOn()) {
+                                            getTtAppCtx().getGps().stopGps();
                                         }
 
                                         inputDialog.getInput().setText(StringEx.toString(nmeaBurst.getTrueUTM().getZone()));
@@ -588,7 +588,7 @@ public class MetadataActivity extends CustomToolbarActivity {
                                         gotNmea = true;
 
                                         if (listener != null) {
-                                            TtAppCtx.getGps().addListener(listener);
+                                            getTtAppCtx().getGps().addListener(listener);
                                         }
                                     }
 
@@ -627,17 +627,17 @@ public class MetadataActivity extends CustomToolbarActivity {
 
                                     @Override
                                     public void gpsError(GpsService.GpsError error) {
-                                        if (!TtAppCtx.getDeviceSettings().isGpsAlwaysOn()) {
-                                            TtAppCtx.getGps().stopGps();
+                                        if (!getTtAppCtx().getDeviceSettings().isGpsAlwaysOn()) {
+                                            getTtAppCtx().getGps().stopGps();
                                         }
 
                                         if (listener != null) {
-                                            TtAppCtx.getGps().addListener(listener);
+                                            getTtAppCtx().getGps().addListener(listener);
                                         }
                                     }
                                 };
 
-                                TtAppCtx.getGps().addListener(listener);
+                                getTtAppCtx().getGps().addListener(listener);
 
                                 final Handler mHandler = new Handler();
 
@@ -646,8 +646,8 @@ public class MetadataActivity extends CustomToolbarActivity {
                                         try {
                                             Thread.sleep(10000);
 
-                                            if (!TtAppCtx.getDeviceSettings().isGpsAlwaysOn()) {
-                                                TtAppCtx.getGps().stopGps();
+                                            if (!getTtAppCtx().getDeviceSettings().isGpsAlwaysOn()) {
+                                                getTtAppCtx().getGps().stopGps();
                                             }
 
                                             if (!gotNmea) {

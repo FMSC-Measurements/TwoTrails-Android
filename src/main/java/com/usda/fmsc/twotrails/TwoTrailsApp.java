@@ -128,28 +128,32 @@ public class TwoTrailsApp extends Application {
                 @Override
                 public void gpsError(GpsService.GpsError error) {
                     if (_CurrentActivity instanceof MainActivity) {
-                        String msg = null;
-                        switch (error) {
-                            case LostDeviceConnection:
-                                msg = "Lost connection to external GPS";
-                                delayAndSearchForGps.run();
-                                break;
-                            case DeviceConnectionEnded:
-                                break;
-                            case NoExternalGpsSocket:
-                                msg = "Error creating connection to external GPS.";
-                                break;
-                            case FailedToConnect:
-                                msg = "Failed to connected to external GPS.";
-                                delayAndSearchForGps.run();
-                                break;
-                            case Unknown:
-                                break;
+                        if (!silentConnectToExternalGps) {
+                            String msg = null;
+                            switch (error) {
+                                case LostDeviceConnection:
+                                    msg = "Lost connection to external GPS";
+                                    delayAndSearchForGps.run();
+                                    break;
+                                case DeviceConnectionEnded:
+                                    break;
+                                case NoExternalGpsSocket:
+                                    msg = "Error creating connection to external GPS.";
+                                    break;
+                                case FailedToConnect:
+                                    msg = "Failed to connected to external GPS.";
+                                    delayAndSearchForGps.run();
+                                    break;
+                                case Unknown:
+                                    break;
+                            }
+
+                            if (msg != null) {
+                                Toast.makeText(_CurrentActivity, msg, Toast.LENGTH_LONG).show();
+                            }
                         }
 
-                        if (msg != null) {
-                            Toast.makeText(_CurrentActivity, msg, Toast.LENGTH_LONG).show();
-                        }
+                        silentConnectToExternalGps = false;
                     }
                 }
             });
@@ -315,6 +319,7 @@ public class TwoTrailsApp extends Application {
         }
     };
 
+    //region UncaughtExceptionHandler
     private Thread.UncaughtExceptionHandler exceptionHandler = new Thread.UncaughtExceptionHandler() {
         @Override
         public void uncaughtException(Thread errorThread, Throwable exception) {
@@ -378,6 +383,7 @@ public class TwoTrailsApp extends Application {
             System.exit(2);
         }
     };
+    //endregion
 
     private Runnable delayAndSearchForGps = new Runnable() {
         @Override

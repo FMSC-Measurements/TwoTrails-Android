@@ -219,7 +219,7 @@ public class TableViewActivity extends CustomToolbarActivity {
     private void setupTable() {
         _Polygons = new ArrayList<>();
         _Points = new ArrayList<>();
-        _Metadata = TtAppCtx.getDAL().getMetadataMap();
+        _Metadata = getTtAppCtx().getDAL().getMetadataMap();
         _MetaNames = new HashMap<>();
 
         _PolygonFilter = new HashMap<>();
@@ -233,11 +233,11 @@ public class TableViewActivity extends CustomToolbarActivity {
             _MetaNames.put(meta.getCN(), meta.getName());
         }
 
-        for (TtPolygon poly : TtAppCtx.getDAL().getPolygons()) {
+        for (TtPolygon poly : getTtAppCtx().getDAL().getPolygons()) {
             _Polygons.add(poly);
             _PolygonFilter.put(poly.getCN(), true);
 
-            _Points.addAll(TtAppCtx.getDAL().getPointsInPolygon(poly.getCN()));
+            _Points.addAll(getTtAppCtx().getDAL().getPointsInPolygon(poly.getCN()));
         }
 
         _DisplayedPoints = new ArrayList<>();

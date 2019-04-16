@@ -1,6 +1,7 @@
 package com.usda.fmsc.twotrails;
 
 import android.content.Context;
+import android.util.JsonWriter;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -9,6 +10,7 @@ import com.usda.fmsc.twotrails.objects.RecentProject;
 import com.usda.fmsc.utilities.FileUtils;
 import com.usda.fmsc.utilities.StringEx;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +27,9 @@ public class ProjectSettings extends Settings {
 
     public ProjectSettings(Context context) {
         super(context);
+    }
+
+    public void writeToFile(JsonWriter js) throws IOException {
     }
 
 

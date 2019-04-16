@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
@@ -17,6 +18,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -49,14 +51,13 @@ import java.util.ArrayList;
 public class MainActivity extends TtAjusterCustomToolbarActivity {
     private View progressLayout;
 
-    private TabsPagerAdapter mTabsPagerAdapter;
     private MainFileFragment mFragFile;
     private MainDataFragment mFragData;
     private MainToolsFragment mFragTools;
 
     private ViewPager mViewPager;
 
-    private boolean _fileOpen = false, exitOnAdjusted, askLocation, viewCreated = false;
+    private boolean _fileOpen = false, exitOnAdjusted, askLocation;
 
     private String tmpFile;
 
@@ -74,7 +75,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
         setUseExitWarning(true);
 
-        mTabsPagerAdapter = new TabsPagerAdapter(getSupportFragmentManager());
+        TabsPagerAdapter mTabsPagerAdapter = new TabsPagerAdapter(getSupportFragmentManager());
 
         mFragFile = MainFileFragment.newInstance();
         mFragData = MainDataFragment.newInstance();
@@ -108,7 +109,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
                                         .setPositiveButton("Send", new DialogInterface.OnClickListener() {
                                             @Override
                                             public void onClick(DialogInterface dialog, int which) {
-
+                                                TtUtils.SendEmailToDev(MainActivity.this);
                                             }
                                         })
                                         .setNeutralButton("Don't Send", null)
@@ -146,7 +147,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
             progressLayout.setVisibility(View.GONE);
         }
 
-        if (TtAppCtx.areFoldersInitiated()) {
+        if (getTtAppCtx().areFoldersInitiated()) {
             final Intent intent = getIntent();
             final String action = intent.getAction();
 
@@ -158,15 +159,13 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
                 }
             }
 
-            if (!TtAppCtx.hasDAL() && TtAppCtx.getDeviceSettings().getAutoOpenLastProject()) {
-                ArrayList<RecentProject> recentProjects = TtAppCtx.getProjectSettings().getRecentProjects();
+            if (!getTtAppCtx().hasDAL() && getTtAppCtx().getDeviceSettings().getAutoOpenLastProject()) {
+                ArrayList<RecentProject> recentProjects = getTtAppCtx().getProjectSettings().getRecentProjects();
                 if (recentProjects.size() > 0) {
                     openFile(recentProjects.get(0).File);
                 }
             }
         }
-
-        viewCreated = true;
     }
 
     @Override
@@ -261,8 +260,8 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
                     startActivity(new Intent(this, MapActivity.class));
                     break;
                 case Consts.Codes.Requests.CREATE_FILE:
-                    if (!TtAppCtx.areFoldersInitiated())
-                        TtAppCtx.initFolders();
+                    if (!getTtAppCtx().areFoldersInitiated())
+                        getTtAppCtx().initFolders();
 
                     if (tmpFile != null)
                         createFile(tmpFile);
@@ -274,14 +273,14 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
                     }
                     break;
                 case Consts.Codes.Requests.OPEN_FILE:
-                    if (!TtAppCtx.areFoldersInitiated())
-                        TtAppCtx.initFolders();
+                    if (!getTtAppCtx().areFoldersInitiated())
+                        getTtAppCtx().initFolders();
 
                     if (tmpFile != null)
                         openFile(tmpFile);
                     break;
                 case  Consts.Codes.Requests.LOCATION:
-                    TtAppCtx.startGpsService();
+                    getTtAppCtx().startGpsService();
                     break;
             }
         } else {
@@ -398,6 +397,18 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
                 updateAppInfo();
                 break;
             }
+            case Consts.Codes.Activites.SEND_EMAIL_TO_DEV: {
+                Toast.makeText(MainActivity.this, "Thank You for your feedback.", Toast.LENGTH_LONG).show();
+                break;
+            }
+        }
+
+        if (resultCode == Consts.Codes.Results.NO_DAL) {
+            if (getTtAppCtx().getReport() != null) {
+                getTtAppCtx().getReport().writeError("DAL not found", "requestCode:" + requestCode);
+            } else {
+                Log.e(Consts.LOG_TAG, "DAL not found");
+            }
         }
     }
 
@@ -425,10 +436,10 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
                 if (!FileUtils.fileExists(filePath)) {
                     createFile(filePath);
                 } else {
-                    TtAppCtx.setDAL(new DataAccessLayer(filePath, TtAppCtx));
+                    getTtAppCtx().setDAL(new DataAccessLayer(filePath, getTtAppCtx()));
 
-                    if (TtAppCtx.getDAL().getVersion().toIntVersion() < TwoTrailsSchema.SchemaVersion.toIntVersion()) {
-                        switch (DataAccessUpgrader.UpgradeDAL(TtAppCtx.getDAL())) {
+                    if (getTtAppCtx().getDAL().getVersion().toIntVersion() < TwoTrailsSchema.SchemaVersion.toIntVersion()) {
+                        switch (DataAccessUpgrader.UpgradeDAL(getTtAppCtx().getDAL())) {
                             case Successful:
                             case Failed:
                                 runOnUiThread(new Runnable() {
@@ -449,8 +460,8 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
                             }
                         }
                     } else {
-                        if (TtAppCtx.getDAL().needsAdjusting())
-                            PolygonAdjuster.adjust(TtAppCtx.getDAL());
+                        if (getTtAppCtx().getDAL().needsAdjusting())
+                            PolygonAdjuster.adjust(getTtAppCtx().getDAL());
 
                         runOnUiThread(new Runnable() {
                             @Override
@@ -463,7 +474,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
                     }
                 }
             } catch (Exception e) {
-                TtAppCtx.getReport().writeError(e.getMessage(), "MainActivity:openFile");
+                getTtAppCtx().getReport().writeError(e.getMessage(), "MainActivity:openFile");
 
                 runOnUiThread(new Runnable() {
                     @Override
@@ -498,14 +509,14 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
         }
 
         try {
-            TtAppCtx.setDAL(new DataAccessLayer(filePath, TtAppCtx));
+            getTtAppCtx().setDAL(new DataAccessLayer(filePath, getTtAppCtx()));
 
-            TtAppCtx.getProjectSettings().initProjectSettings(TtAppCtx.getDAL());
+            getTtAppCtx().getProjectSettings().initProjectSettings(getTtAppCtx().getDAL());
 
             startActivityForResult(new Intent(this, ProjectActivity.class), UPDATE_INFO_AND_GOTO_DATA_TAB);
 
         } catch (Exception e) {
-            TtAppCtx.getReport().writeError("MainActivity:CreateFile", e.getMessage(), e.getStackTrace());
+            getTtAppCtx().getReport().writeError("MainActivity:CreateFile", e.getMessage(), e.getStackTrace());
             e.printStackTrace();
             toastMessage = "Project creation failed";
         }
@@ -514,14 +525,14 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     }
 
     private void closeFile() {
-        if (TtAppCtx.hasDAL()) {
-            TtAppCtx.getDAL().close();
-            TtAppCtx.setDAL(null);
+        if (getTtAppCtx().hasDAL()) {
+            getTtAppCtx().getDAL().close();
+            getTtAppCtx().setDAL(null);
         }
 
-        if (TtAppCtx.hasMAL()) {
-            TtAppCtx.getMAL().close();
-            TtAppCtx.setMAL(null);
+        if (getTtAppCtx().hasMAL()) {
+            getTtAppCtx().getMAL().close();
+            getTtAppCtx().setMAL(null);
         }
     }
 
@@ -555,14 +566,14 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 //        }
 
         boolean enable = false;
-        if(TtAppCtx.hasDAL()) {
-            TtAppCtx.getProjectSettings().updateRecentProjects(
-                    new RecentProject(TtAppCtx.getDAL().getProjectID(), TtAppCtx.getDAL().getFilePath()));
+        if(getTtAppCtx().hasDAL()) {
+            getTtAppCtx().getProjectSettings().updateRecentProjects(
+                    new RecentProject(getTtAppCtx().getDAL().getProjectID(), getTtAppCtx().getDAL().getFilePath()));
             
-            setTitle("TwoTrails - " + TtAppCtx.getDAL().getProjectID());
+            setTitle("TwoTrails - " + getTtAppCtx().getDAL().getProjectID());
             enable = true;
 
-            mFragFile.updateInfo(TtAppCtx.getDAL());
+            mFragFile.updateInfo(getTtAppCtx().getDAL());
         } else {
             setTitle(R.string.app_name);
         }
@@ -578,7 +589,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     }
 
     private void duplicateFile(final String fileName) {
-        if (TtAppCtx.getDAL().duplicate(fileName)) {
+        if (getTtAppCtx().getDAL().duplicate(fileName)) {
             View view = findViewById(R.id.parent);
             if (view != null) {
                 Snackbar snackbar = Snackbar.make(view, "File duplicated", Snackbar.LENGTH_LONG).setAction("Open", new View.OnClickListener() {
@@ -661,7 +672,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
             .setPositiveButton(R.string.str_yes, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    PolygonAdjuster.adjust(TtAppCtx.getDAL(), true, MainActivity.this);
+                    PolygonAdjuster.adjust(getTtAppCtx().getDAL(), true, MainActivity.this);
                 }
             })
             .setNeutralButton(R.string.str_no, null)
@@ -695,7 +706,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
         builderSingle.setTitle("Recently Opened");
 
-        ArrayList<RecentProject> recentProjects = TtAppCtx.getProjectSettings().getRecentProjects();
+        ArrayList<RecentProject> recentProjects = getTtAppCtx().getProjectSettings().getRecentProjects();
 
         if (recentProjects.size() > 0) {
             final RecentProjectAdapter adapter = new RecentProjectAdapter(MainActivity.this, recentProjects);
@@ -739,7 +750,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
         } else {
             AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 
-            String filepath = TtAppCtx.getDAL().getFilePath();
+            String filepath = getTtAppCtx().getDAL().getFilePath();
 
             String dupFile = String.format("%s_bk%s", filepath.substring(0, filepath.length() - 4), Consts.FILE_EXTENSION);
             int inc = 2;
@@ -781,7 +792,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
                         pd.show();
 
-                        TtAppCtx.getDAL().clean();
+                        getTtAppCtx().getDAL().clean();
 
                         pd.cancel();
                     }
@@ -792,7 +803,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
     //region Data
     public void btnPointsClick(View view) {
-        if (TtAppCtx.getDAL().hasPolygons()) {
+        if (getTtAppCtx().getDAL().hasPolygons()) {
             startActivityForResult(new Intent(this, PointsActivity.class), UPDATE_INFO);
         } else {
             Toast.makeText(this, "No Polygons in Project", Toast.LENGTH_SHORT).show();
@@ -812,7 +823,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     }
 
     public void btnPointTableClick(View view) {
-        if (TtAppCtx.getDAL().getItemCount(TwoTrailsSchema.PointSchema.TableName) > 0) {
+        if (getTtAppCtx().getDAL().getItemCount(TwoTrailsSchema.PointSchema.TableName) > 0) {
             startActivityForResult(new Intent(this, TableViewActivity.class), UPDATE_INFO);
         } else {
             Toast.makeText(this, "No Points in Project", Toast.LENGTH_SHORT).show();
@@ -823,7 +834,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     //region Tools
     public void btnMapClick(View view) {
         if (AndroidUtils.App.requestNetworkPermission(this, Consts.Codes.Requests.INTERNET)) {
-            if (TtAppCtx.getDAL().needsAdjusting()) {
+            if (getTtAppCtx().getDAL().needsAdjusting()) {
                 askToAdjust();
             } else {
                 startActivity(new Intent(this, MapActivity.class));
@@ -835,12 +846,12 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
         final String gEarth = "com.google.earth";
 
         if (AndroidUtils.App.isPackageInstalled(MainActivity.this, gEarth)) {
-            if (TtAppCtx.getDAL().needsAdjusting()) {
+            if (getTtAppCtx().getDAL().needsAdjusting()) {
                 askToAdjust();
             } else {
                 progressLayout.setVisibility(View.VISIBLE);
 
-                String kmlPath = Export.kml(TtAppCtx.getDAL(), TtUtils.getTtFileDir());
+                String kmlPath = Export.kml(getTtAppCtx().getDAL(), TtUtils.getTtFileDir());
 
                 progressLayout.setVisibility(View.GONE);
 
@@ -872,8 +883,8 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     }
 
     public void btnHAIDClick(View view) {
-        if (TtAppCtx.getDAL().hasPolygons()) {
-            if (TtAppCtx.getDAL().needsAdjusting()) {
+        if (getTtAppCtx().getDAL().hasPolygons()) {
+            if (getTtAppCtx().getDAL().needsAdjusting()) {
                 askToAdjust();
             } else {
                 startActivity(new Intent(this, HaidActivity.class));
@@ -884,8 +895,8 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     }
 
     public void btnExportClick(View view) {
-        if (TtAppCtx.getDAL().hasPolygons()) {
-            if (TtAppCtx.getDAL().needsAdjusting()) {
+        if (getTtAppCtx().getDAL().hasPolygons()) {
+            if (getTtAppCtx().getDAL().needsAdjusting()) {
                 askToAdjust();
             } else {
                 startActivity(new Intent(this, ExportActivity.class));
@@ -896,7 +907,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     }
 
     public void btnPlotGridClick(View view) {
-        if(TtAppCtx.getDAL().hasPolygons()) {
+        if(getTtAppCtx().getDAL().hasPolygons()) {
             startActivityForResult(new Intent(this, PlotGridActivity.class), UPDATE_INFO);
         } else {
             Toast.makeText(this, "No Polygons in Project", Toast.LENGTH_SHORT).show();
@@ -905,7 +916,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
     public void btnMultiEdit(View view) {
         /*
-        if(TtAppCtx.getDAL().hasPolygons()) {
+        if(getTtAppCtx().getDAL().hasPolygons()) {
             startActivityForResult(new Intent(this, MultiEditActivity.class), UPDATE_INFO);
         } else {
             Toast.makeText(this, "No Polygons in Project", Toast.LENGTH_SHORT).show();

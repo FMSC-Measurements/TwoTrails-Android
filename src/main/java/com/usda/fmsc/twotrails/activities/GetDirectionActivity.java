@@ -42,7 +42,7 @@ public class GetDirectionActivity extends CustomToolbarActivity implements Camer
                     _Orientation = intent.getParcelableExtra(Consts.Codes.Data.ORIENTATION);
                 }
             } catch (Exception e) {
-                TtAppCtx.getReport().writeError(e.getMessage(), "GetDirectionActivity:onCreate");
+                getTtAppCtx().getReport().writeError(e.getMessage(), "GetDirectionActivity:onCreate");
             }
         }
 

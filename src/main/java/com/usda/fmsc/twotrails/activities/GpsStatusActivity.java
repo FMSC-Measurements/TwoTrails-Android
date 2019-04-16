@@ -44,18 +44,18 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gps_status);
 
-        if (TtAppCtx.hasDAL()) {
-            TtMetadata metadata = TtAppCtx.getDAL().getDefaultMetadata();
+        if (getTtAppCtx().hasDAL()) {
+            TtMetadata metadata = getTtAppCtx().getDAL().getDefaultMetadata();
 
             if (metadata != null) {
                 zone = metadata.getZone();
             }
         }
 
-        binder = TtAppCtx.getGps();
+        binder = getTtAppCtx().getGps();
         binder.addListener(this);
 
-        if (TtAppCtx.getDeviceSettings().isGpsConfigured()) {
+        if (getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
             binder.startGps();
         }
     }
@@ -64,7 +64,7 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
     protected void onDestroy() {
         super.onDestroy();
 
-        if (!TtAppCtx.getDeviceSettings().isGpsAlwaysOn()) {
+        if (!getTtAppCtx().getDeviceSettings().isGpsAlwaysOn()) {
             binder.stopGps();
         }
     }
@@ -115,7 +115,7 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == Consts.Codes.Activites.SETTINGS) {
-            if (TtAppCtx.getDeviceSettings().isGpsConfigured()) {
+            if (getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
                 binder.startGps();
             }
         }
@@ -195,7 +195,7 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
                     skyView.update(burst);
                     statusView.update(burst);
                 } catch (Exception e) {
-                    TtAppCtx.getReport().writeError("GpsStatusActivity:setNmeaData", e.getMessage(), e.getStackTrace());
+                    getTtAppCtx().getReport().writeError("GpsStatusActivity:setNmeaData", e.getMessage(), e.getStackTrace());
                 }
             }
         });

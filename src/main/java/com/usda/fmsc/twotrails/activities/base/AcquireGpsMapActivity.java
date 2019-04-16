@@ -161,15 +161,15 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
     private void setupTrailMode(TtPolygon poly) {
         _Polygon = poly;
 
-        ArrayList<TtPoint> points = TtAppCtx.getDAL().getPointsInPolygon(poly.getCN());
+        ArrayList<TtPoint> points = getTtAppCtx().getDAL().getPointsInPolygon(poly.getCN());
 
-        PolygonGraphicOptions pgo = TtAppCtx.getMapSettings().getPolyGraphicOptions(poly.getCN());
+        PolygonGraphicOptions pgo = getTtAppCtx().getMapSettings().getPolyGraphicOptions(poly.getCN());
 
         trailGraphicManager = new TrailGraphicManager(poly, points, getMetadata(),
                 new TrailGraphicOptions(
                         pgo.getUnAdjNavColor(),
                         pgo.getAdjPtsColor(),
-                        TtAppCtx.getDeviceSettings().getMapUnAdjLineWidth()
+                        getTtAppCtx().getDeviceSettings().getMapUnAdjLineWidth()
                 )
         );
     }
@@ -363,7 +363,7 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
                         statusView.update(burst);
                     }
                 } catch (Exception e) {
-                    TtAppCtx.getReport().writeError("AcquireGpsMapActivity:setNmeaData", e.getMessage(), e.getStackTrace());
+                    getTtAppCtx().getReport().writeError("AcquireGpsMapActivity:setNmeaData", e.getMessage(), e.getStackTrace());
                 }
             }
         });
@@ -416,7 +416,7 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
                     dialog.setPositiveButton("Connect", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            GpsService.GpsDeviceStatus status = getTtAppContext().getGps().startGps();
+                            GpsService.GpsDeviceStatus status = getTtAppCtx().getGps().startGps();
 
                             if (status != GpsService.GpsDeviceStatus.ExternalGpsStarted &&
                                     status != GpsService.GpsDeviceStatus.InternalGpsStarted) {

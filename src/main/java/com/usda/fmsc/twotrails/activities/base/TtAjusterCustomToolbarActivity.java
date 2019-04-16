@@ -110,7 +110,7 @@ public abstract class TtAjusterCustomToolbarActivity extends CustomToolbarActivi
                         adAdjust.start();
                         isAdjusting = true;
                     } catch (Exception ex) {
-                        TtAppCtx.getReport().writeError(ex.getMessage(), "adjusterStarted");
+                        getTtAppCtx().getReport().writeError(ex.getMessage(), "adjusterStarted");
                     }
                 } else {
                     pd.show();

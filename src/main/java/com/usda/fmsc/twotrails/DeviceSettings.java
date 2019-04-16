@@ -2,6 +2,7 @@ package com.usda.fmsc.twotrails;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.JsonWriter;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -15,6 +16,7 @@ import com.usda.fmsc.utilities.StringEx;
 
 import org.joda.time.DateTime;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -93,7 +95,7 @@ public class DeviceSettings extends Settings {
     public static final String USE_TTCAMERA_ASK = "UseTtCameraAsk";
 
     public static final String AUTO_OPEN_LAST_PROJECT = "AutoOpenLastProject";
-    public static final String LAST_OPENED_PROJECT = "AutoOpenLastProject";
+    //public static final String LAST_OPENED_PROJECT = "AutoOpenLastProject";
 
     public static final String MAP_TRACKING_OPTION = "MapTrackingOption";
     public static final String MAP_COMPASS_ENABLED = "MapCompassEnabled";
@@ -279,6 +281,129 @@ public class DeviceSettings extends Settings {
         editor.putBoolean(SETTINGS_CREATED, true);
 
         editor.commit();
+    }
+
+
+    public void writeToFile(JsonWriter js) throws IOException {
+        js.name(DEVELOPER_OPTIONS).value(isDeveloperOptionsEnabled());
+        js.name(LAST_CRASH_TIME).value(getLastCrashTime().toString());
+
+        js.name(DROP_ZERO).value(getDropZeros());
+        js.name(ROUND_POINTS).value(getRoundPoints());
+        js.name(KEEP_SCREEN_ON).value(getKeepScreenOn());
+
+        js.name(GPS_EXTERNAL).value(getGpsExternal());
+        js.name(GPS_ALWAYS_ON).value(isGpsAlwaysOn());
+        js.name(LOG_ALL_GPS).value(getLogAllGPS());
+        js.name(GPS_CONFIGURED).value(isGpsConfigured());
+        js.name(GPS_LOG_BURST_DETAILS).value(getGpsLogBurstDetails());
+
+        js.name(RANGE_FINDER_ALWAYS_ON).value(isRangeFinderAlwaysOn());
+        //js.name(LOG_ALL_RANGE_FINDER).value();
+        js.name(RANGE_FINDER_CONFIGURED).value(isRangeFinderConfigured());
+        //js.name(RANGE_FINDER_LOG_BURST_DETAILS).value();
+
+        js.name(GPS_DEVICE_ID).value(getGpsDeviceID());
+        js.name(GPS_DEVICE_NAME).value(getGpsDeviceName());
+        js.name(RANGE_FINDER_DEVICE_ID).value(getRangeFinderDeviceID());
+        js.name(RANGE_FINDER_DEVICE_NAME).value(getRangeFinderDeviceName());
+
+        js.name(AUTO_FILL_FROM_RANGE_FINDER).value(getAutoFillFromRangeFinder());
+        js.name(AUTO_FILL_FROM_RANGE_FINDER_ASK).value(isAutoFillFromRangeFinderAsk());
+
+        js.name(GPS_FILTER_DOP_TYPE).value(getGpsFilterDopType().toString());
+        js.name(GPS_FILTER_DOP_VALUE).value(getGpsFilterDopValue());
+        js.name(GPS_FILTER_FIX_TYPE).value(getGpsFilterFixType().toString());
+        js.name(GPS_FILTER_FIX).value(getGpsFilterFix().toString());
+        js.name(GPS_FILTER_FIX_USE).value(getGpsFilterFixUse());
+
+        js.name(TAKE5_FILTER_DOP_TYPE).value(getTake5FilterDopType().toString());
+        js.name(TAKE5_FILTER_DOP_VALUE).value(getTake5FilterDopValue());
+        js.name(TAKE5_FILTER_FIX_TYPE).value(getTake5FilterFixType().toString());
+        js.name(TAKE5_FILTER_FIX).value(getTake5FilterFix().toString());
+        js.name(TAKE5_NMEA_AMOUNT).value(getTake5IngoreFirstNmeaAmount());
+        js.name(TAKE5_IGNORE_FIRST_NMEA).value(getTake5IngoreFirstNmea());
+        js.name(TAKE5_IGNORE_FIRST_NMEA_AMOUNT).value(getTake5IngoreFirstNmeaAmount());
+        js.name(TAKE5_FAIL_AMOUNT).value(getTake5FailAmount());
+        js.name(TAKE5_INCREMENT).value(getTake5Increment());
+        js.name(TAKE5_VIBRATE_ON_CREATE).value(getTake5VibrateOnCreate());
+        js.name(TAKE5_RING_ON_CREATE).value(getTake5RingOnCreate());
+
+        js.name(WALK_FILTER_DOP_TYPE).value(getWalkFilterDopType().toString());
+        js.name(WALK_FILTER_DOP_VALUE).value(getWalkFilterDopValue());
+        js.name(WALK_FILTER_FIX_TYPE).value(getWalkFilterFixType().toString());
+        js.name(WALK_FILTER_FIX).value(getWalkFilterFix().toString());
+        js.name(WALK_FILTER_ACCURACY).value(getWalkFilterAccuracy());
+        js.name(WALK_FILTER_FREQUENCY).value(getWalkFilterFrequency());
+        js.name(WALK_INCREMENT).value(getWalkIncrement());
+        js.name(WALK_VIBRATE_ON_CREATE).value(getWalkVibrateOnCreate());
+        js.name(WALK_RING_ON_CREATE).value(getWalkRingOnCreate());
+        js.name(WALK_SHOW_ALL_POINTS_ON_MAP).value(getWalkShowAllPointsOnMap());
+
+        js.name(AUTO_UPDATE_INDEX).value(getAutoUpdateIndex());
+        js.name(AUTO_SET_GPS_NAME_TO_META).value(getAutoSetGpsNameToMeta());
+        js.name(AUTO_SET_GPS_NAME_TO_META_ASK).value(getAutoSetGpsNameToMetaAsk());
+        js.name(AUTO_UPDATE_WALK_ONBND).value(getAutoUpdateWalkOnBnd());
+        js.name(AUTO_UPDATE_WALK_ONBND_ASK).value(getAutoUpdateWalkOnBndAsk());
+        js.name(AUTO_OVERWRITE_PLOTGRID).value(getAutoOverwritePlotGrid());
+        js.name(AUTO_OVERWRITE_PLOTGRID_ASK).value(getAutoOverwritePlotGridAsk());
+        js.name(AUTO_OVERWRITE_EXPORT).value(getAutoOverwriteExport());
+        js.name(AUTO_OVERWRITE_EXPORT_ASK).value(getAutoOverwriteExportAsk());
+        js.name(AUTO_INTERNALIZE_EXPORT).value(getAutoInternalizeExport());
+        js.name(AUTO_INTERNALIZE_EXPORT_ASK).value(getAutoInternalizeExportAsk());
+
+        js.name(USE_TTCAMERA).value(getUseTtCamera());
+        js.name(USE_TTCAMERA_ASK).value(getUseTtCameraAsk());
+
+        js.name(AUTO_OPEN_LAST_PROJECT).value(getAutoOpenLastProject());
+        //js.name(LAST_OPENED_PROJECT).value(getLastOpenedProject());
+
+        js.name(MAP_TRACKING_OPTION).value(getMapTrackingOption().toString());
+        js.name(MAP_COMPASS_ENABLED).value(getMapCompassEnabled());
+        js.name(MAP_MYPOS_BUTTON).value(getMapMyPosBtns());
+        js.name(MAP_MIN_DIST).value(getMapMinDist());
+        js.name(MAP_SHOW_MY_POS).value(getMapShowMyPos());
+        js.name(MAP_DISPLAY_GPS_LOCATION).value(getMapDisplayGpsLocation());
+        js.name(MAP_USE_UTM_NAV).value(getMapUseUtmNav());
+        js.name(MAP_TYPE).value(getMapType().toString());
+        js.name(MAP_ID).value(getMapId());
+        js.name(MAP_ADJ_LINE_WIDTH).value(getMapAdjLineWidth());
+        js.name(MAP_UNADJ_LINE_WIDTH).value(getMapUnAdjLineWidth());
+
+        js.name(ARC_GIS_MAPS);
+        js.beginArray();
+        for (ArcGisMapLayer layer : getArcGisMayLayers()) {
+            js.beginObject();
+            js.name("ID").value(layer.getId());
+            js.name("Name").value(layer.getName());
+            js.name("Description").value(layer.getDescription());
+            js.name("Location").value(layer.getLocation());
+            js.name("URL").value(layer.getUrl());
+            js.name("FilePath").value(layer.getFilePath());
+            js.name("HasValidFile").value(layer.hasValidFile());
+            js.name("Online").value(layer.isOnline());
+            js.name("MinScale").value(layer.getMinScale());
+            js.name("MaxScale").value(layer.getMaxScale());
+
+            js.name("DetailLevels");
+            js.beginArray();
+            for (ArcGisMapLayer.DetailLevel dl : layer.getLevelsOfDetail()) {
+                js.name("Resolution").value(dl.getResolution());
+                js.name("Level").value(dl.getLevel());
+                js.name("Scale").value(dl.getScale());
+                js.name("DescribeContents").value(dl.describeContents());
+            }
+            js.endArray();
+
+            js.endObject();
+        }
+        js.endArray();
+
+        js.name(ARC_GIS_MAP_ID_COUNTER).value(getArcGisIdCounter());
+
+        js.name(ARC_CREDENTIALS).value(getArcCredentials());
+
+        js.name(MEDIA_COPY_TO_PROJECT).value(getMediaCopyToProject());
     }
 
 
@@ -886,13 +1011,13 @@ public class DeviceSettings extends Settings {
 
 
 
-    public String getLastOpenedProject() {
-        return getString(LAST_OPENED_PROJECT);
-    }
-
-    public void setLastOpenedProject(String value) {
-        setString(LAST_OPENED_PROJECT, value);
-    }
+//    public String getLastOpenedProject() {
+//        return getString(LAST_OPENED_PROJECT);
+//    }
+//
+//    public void setLastOpenedProject(String value) {
+//        setString(LAST_OPENED_PROJECT, value);
+//    }
 
 
     public boolean getAutoOpenLastProject() {

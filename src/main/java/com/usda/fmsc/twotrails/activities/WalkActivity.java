@@ -87,13 +87,22 @@ public class WalkActivity extends AcquireGpsMapActivity {
             Intent intent = getIntent();
             if (intent != null && intent.getExtras() != null) {
                 try {
-                    if (intent.getExtras().containsKey(Consts.Codes.Data.POINT_DATA)) {
-                        _PrevPoint = intent.getParcelableExtra(Consts.Codes.Data.POINT_DATA);
-                        onBnd = _PrevPoint.isOnBnd();
-                    }
+                    if (intent.hasExtra(Consts.Codes.Data.POINT_PACKAGE)) {
+                        Bundle bundle = intent.getBundleExtra(Consts.Codes.Data.POINT_PACKAGE);
 
-                    _Metadata = intent.getParcelableExtra(Consts.Codes.Data.METADATA_DATA);
-                    _Polygon = getPolygon();
+                        if (bundle.containsKey(Consts.Codes.Data.POINT_DATA)) {
+                            _PrevPoint = bundle.getParcelable(Consts.Codes.Data.POINT_DATA);
+
+                            if (_PrevPoint != null) {
+                                onBnd = _PrevPoint.isOnBnd();
+                            } else {
+                                onBnd = true;
+                            }
+                        }
+
+                        _Metadata = bundle.getParcelable(Consts.Codes.Data.METADATA_DATA);
+                        _Polygon = bundle.getParcelable(Consts.Codes.Data.POLYGON_DATA);
+                    }
 
                     if (_Metadata == null) {
                         cancelResult = Consts.Codes.Results.NO_METDATA_DATA;
@@ -127,7 +136,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
             }
 
             _Group = new TtGroup(TtGroup.GroupType.Walk);
-            TtAppCtx.getDAL().insertGroup(_Group);
+            getTtAppCtx().getDAL().insertGroup(_Group);
 
             fabWalk = findViewById(R.id.walkFabWalk);
             walkCardView = findViewById(R.id.walkCardWalk);
@@ -177,16 +186,16 @@ public class WalkActivity extends AcquireGpsMapActivity {
     protected void getSettings() {
         super.getSettings();
 
-        options.Fix = TtAppCtx.getDeviceSettings().getWalkFilterFix();
-        options.FixType = TtAppCtx.getDeviceSettings().getWalkFilterFixType();
-        options.DopType = TtAppCtx.getDeviceSettings().getWalkFilterDopType();
-        options.DopValue = TtAppCtx.getDeviceSettings().getWalkFilterDopValue();
-        increment = TtAppCtx.getDeviceSettings().getWalkIncrement();
-        frequency = TtAppCtx.getDeviceSettings().getWalkFilterFrequency() * 1000;  //to milliseconds
-        minWalkDist = TtAppCtx.getDeviceSettings().getWalkFilterAccuracy();
+        options.Fix = getTtAppCtx().getDeviceSettings().getWalkFilterFix();
+        options.FixType = getTtAppCtx().getDeviceSettings().getWalkFilterFixType();
+        options.DopType = getTtAppCtx().getDeviceSettings().getWalkFilterDopType();
+        options.DopValue = getTtAppCtx().getDeviceSettings().getWalkFilterDopValue();
+        increment = getTtAppCtx().getDeviceSettings().getWalkIncrement();
+        frequency = getTtAppCtx().getDeviceSettings().getWalkFilterFrequency() * 1000;  //to milliseconds
+        minWalkDist = getTtAppCtx().getDeviceSettings().getWalkFilterAccuracy();
 
-        useVib = TtAppCtx.getDeviceSettings().getWalkVibrateOnCreate();
-        useRing = TtAppCtx.getDeviceSettings().getWalkRingOnCreate();
+        useVib = getTtAppCtx().getDeviceSettings().getWalkVibrateOnCreate();
+        useRing = getTtAppCtx().getDeviceSettings().getWalkRingOnCreate();
     }
 
     @Override
@@ -266,7 +275,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
 
         switch (requestCode) {
             case Consts.Codes.Activites.SETTINGS: {
-                TtAppCtx.getGps().startGps();
+                getTtAppCtx().getGps().startGps();
                 getSettings();
                 break;
             }
@@ -284,7 +293,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
     @Override
     public void finish() {
         if (updated) {
-            TtAppCtx.getDAL().updatePoint(_CurrentPoint);
+            getTtAppCtx().getDAL().updatePoint(_CurrentPoint);
         }
 
         if (pointsCreated > 0) {
@@ -292,7 +301,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
                     new Intent().putExtra(Consts.Codes.Data.NUMBER_OF_CREATED_POINTS, pointsCreated));
         } else {
             if (_Group != null) {
-                TtAppCtx.getDAL().deleteGroup(_Group.getCN());
+                getTtAppCtx().getDAL().deleteGroup(_Group.getCN());
             }
 
             setResult(RESULT_CANCELED);
@@ -313,20 +322,20 @@ public class WalkActivity extends AcquireGpsMapActivity {
                 String name = dialog.getText();
 
                 _Group.setName(name);
-                TtAppCtx.getDAL().updateGroup(_Group);
+                getTtAppCtx().getDAL().updateGroup(_Group);
 
                 if (_CurrentPoint != null) {
                     _CurrentPoint.setGroupName(name);
                     updated = true;
 
-                    List<TtPoint> points = TtAppCtx.getDAL().getPointsInGroup(_Group.getCN());
+                    List<TtPoint> points = getTtAppCtx().getDAL().getPointsInGroup(_Group.getCN());
 
                     if (points.size() > 0) {
                         for (TtPoint p : points) {
                             p.setGroupName(name);
                         }
 
-                        TtAppCtx.getDAL().updatePoints(points);
+                        getTtAppCtx().getDAL().updatePoints(points);
                     }
                 }
             }
@@ -348,7 +357,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
 
     private void createPoint(INmeaBurst nmeaBurst, UTMCoords utmCoords) {
         if (updated) {
-            TtAppCtx.getDAL().updatePoint(_CurrentPoint);
+            getTtAppCtx().getDAL().updatePoint(_CurrentPoint);
             updated = false;
         }
 
@@ -382,14 +391,14 @@ public class WalkActivity extends AcquireGpsMapActivity {
         _CurrentPoint.setAndCalc(utmCoords.getX(), utmCoords.getY(), burst.getElevation(), _Polygon);
 
         try {
-            TtAppCtx.getDAL().insertPoint(_CurrentPoint);
-            TtAppCtx.getDAL().insertNmeaBurst(burst);
+            getTtAppCtx().getDAL().insertPoint(_CurrentPoint);
+            getTtAppCtx().getDAL().insertNmeaBurst(burst);
             pointsCreated++;
 
             lastPointCreationTime = System.currentTimeMillis();
             onPointCreated();
         } catch (Exception e) {
-            TtAppCtx.getReport().writeError(e.getMessage(), "WalkActivity:createPoint");
+            getTtAppCtx().getReport().writeError(e.getMessage(), "WalkActivity:createPoint");
             AndroidUtils.Device.vibrate(this, Consts.Notifications.VIB_ERROR);
             stopLogging();
         }
@@ -477,7 +486,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
             }
         }
 
-        TtAppCtx.getTtNotifyManager().showPointAquired();
+        getTtAppCtx().getTtNotifyManager().showPointAquired();
 
         addPosition(_CurrentPoint, getLastPosition() != null);
     }
@@ -517,7 +526,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
 
         setStartWalkingDrawable(true);
 
-        TtAppCtx.getTtNotifyManager().startWalking();
+        getTtAppCtx().getTtNotifyManager().startWalking();
     }
 
     @Override
@@ -536,7 +545,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
 
         setStartWalkingDrawable(false);
 
-        TtAppCtx.getTtNotifyManager().stopWalking();
+        getTtAppCtx().getTtNotifyManager().stopWalking();
     }
 
     @Override

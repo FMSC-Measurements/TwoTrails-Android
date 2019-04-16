@@ -52,10 +52,10 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
         if (lvNmea != null) {
             lvNmea.setFadingEdgeLength(0);
 
-            binder = TtAppCtx.getGps();
+            binder = getTtAppCtx().getGps();
             binder.addListener(this);
 
-            if (TtAppCtx.getDeviceSettings().isGpsConfigured()) {
+            if (getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
                 binder.startGps();
             }
 
@@ -81,7 +81,7 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
 
     @Override
     public void onBackPressed() {
-        final GpsService.GpsBinder binder = TtAppCtx.getGps();
+        final GpsService.GpsBinder binder = getTtAppCtx().getGps();
         final Activity activity = this;
 
         if (binder.isLogging()) {
@@ -100,7 +100,7 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
             alert.setNegativeButton("Stop", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
-                    if (!TtAppCtx.getDeviceSettings().isGpsAlwaysOn()) {
+                    if (!getTtAppCtx().getDeviceSettings().isGpsAlwaysOn()) {
                         binder.stopGps();
                     }
                     activity.onBackPressed();
@@ -109,7 +109,7 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
 
             alert.setNeutralButton(R.string.str_cancel, null);
         } else {
-            if (!TtAppCtx.getDeviceSettings().isGpsAlwaysOn()) {
+            if (!getTtAppCtx().getDeviceSettings().isGpsAlwaysOn()) {
                 binder.stopGps();
             }
             super.onBackPressed();
@@ -132,7 +132,7 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
                     item.setChecked(false);
 
                     if (logging) {
-                        TtAppCtx.getGps().stopLogging();
+                        getTtAppCtx().getGps().stopLogging();
                         logging = false;
                     }
                 } else {
@@ -140,7 +140,7 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
                         item.setChecked(true);
 
                         if (logging) {
-                            TtAppCtx.getGps().startLogging(TtUtils.getLogFileName());
+                            getTtAppCtx().getGps().startLogging(TtUtils.getLogFilePath());
                         }
                     }
                 }
@@ -166,7 +166,7 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == Consts.Codes.Activites.SETTINGS) {
-            if (TtAppCtx.getDeviceSettings().isGpsConfigured()) {
+            if (getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
                 binder.startGps();
             }
         }
@@ -240,7 +240,7 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
         logging = !logging;
 
         if (logging) {
-            if (TtAppCtx.getDeviceSettings().isGpsConfigured()) {
+            if (getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
                 if (!binder.isGpsRunning()) {
                     Toast.makeText(GpsLoggerActivity.this, "GPS is not Receiving", Toast.LENGTH_SHORT).show();
                     return;
@@ -249,7 +249,7 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
                 btnLog.setText(R.string.aqr_log_pause);
 
                 if (miCheckLtf.isChecked()) {
-                    binder.startLogging(TtUtils.getLogFileName());
+                    binder.startLogging(TtUtils.getLogFilePath());
                 }
             } else {
                 logging = false;

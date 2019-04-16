@@ -118,4 +118,10 @@ public class TtReport {
         Log.i(Consts.LOG_TAG, eStr);
         inst.writeToReport(eStr);
     }
+
+    public void writeWarn(String msg, String codePage) {
+        String error = String.format("WARN[%s][%s]: %s", new Date(), codePage, msg);
+        Log.w(Consts.LOG_TAG, error);
+        inst.writeToReport(error);
+    }
 }

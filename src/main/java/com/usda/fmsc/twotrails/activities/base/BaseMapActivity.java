@@ -55,7 +55,6 @@ import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.geospatial.utm.UTMTools;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.activities.SettingsActivity;
 import com.usda.fmsc.twotrails.adapters.PointDetailsAdapter;
 import com.usda.fmsc.twotrails.adapters.PolyMarkerMapRvAdapter;
@@ -115,8 +114,6 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     private static final String SELECT_MAP = "selectMap";
 
     //region Vars
-    protected TwoTrailsApp TtAppCtx;
-
     private MapType mapType = MapType.None;
     private int mapId;
     private Fragment mapFragment;
@@ -144,7 +141,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     private TtPoint fromPoint, toPoint;
     private boolean fromMyLoc = true, receivingNmea;
 
-    private boolean showCompass, mapMoved = true, showMyPos, polysCreated, mapHasMaxExtents;
+    private boolean showCompass, mapMoved = true, showMyPos, polysCreated, mapHasMaxExtents, mapReady;
     private MapTracking mapTracking = MapTracking.FOLLOW;
     private Integer zone = null;
 
@@ -166,7 +163,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     
     protected HashMap<String, TtMetadata> getMetadata() {
         if (_Metadata == null || _Metadata.size() == 0) {
-            _Metadata = TtAppCtx.getDAL().getMetadataMap();
+            _Metadata = getTtAppCtx().getDAL().getMetadataMap();
         }
 
         return _Metadata;
@@ -174,7 +171,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
 
     protected HashMap<String, TtPolygon> getPolygons() {
         if (_Polygons == null || _Polygons.size() == 0) {
-            _Polygons = TtAppCtx.getDAL().getPolygonsMap();
+            _Polygons = getTtAppCtx().getDAL().getPolygonsMap();
         }
 
         return _Polygons;
@@ -185,14 +182,12 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        TtAppCtx = getTtAppContext();
-
         if (savedInstanceState != null && savedInstanceState.containsKey(FRAGMENT) && savedInstanceState.containsKey(MAP_TYPE)) {
             mapType = MapType.parse(savedInstanceState.getInt(MAP_TYPE));
             mapFragment = getSupportFragmentManager().getFragment(savedInstanceState, FRAGMENT);
         } else {
-            mapType = TtAppCtx.getDeviceSettings().getMapType();
-            mapId = TtAppCtx.getDeviceSettings().getMapId();
+            mapType = getTtAppCtx().getDeviceSettings().getMapType();
+            mapId = getTtAppCtx().getDeviceSettings().getMapId();
 
             AndroidUtils.Device.isInternetAvailable(new AndroidUtils.Device.InternetAvailableCallback() {
                 @Override
@@ -216,10 +211,10 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
                                     }
                                     break;
                                 case ArcGIS:
-                                    ArcGisMapLayer agml = TtAppCtx.getArcGISTools().getMapLayer(mapId);
+                                    ArcGisMapLayer agml = getTtAppCtx().getArcGISTools().getMapLayer(mapId);
                                     if (agml == null) {
                                         mapId = 0;
-                                        agml = TtAppCtx.getArcGISTools().getMapLayer(mapId);
+                                        agml = getTtAppCtx().getArcGISTools().getMapLayer(mapId);
                                     }
 
                                     if (agml.isOnline() && !internetAvailable) {
@@ -235,7 +230,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
             });
         }
 
-        if (TtAppCtx.getDeviceSettings().getKeepScreenOn()) {
+        if (getTtAppCtx().getDeviceSettings().getKeepScreenOn()) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }
 
@@ -246,7 +241,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         setCompassEnabled(getShowCompass());
         setLocationEnabled(getShowMyPos());
 
-        TtAppCtx.getGps().addListener(this);
+        getTtAppCtx().getGps().addListener(this);
 
         if (AndroidUtils.Device.isFullOrientationAvailable(this)) {
             mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
@@ -325,13 +320,13 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if (TtAppCtx.getArcGISTools().offlineMapsAvailable()) {
+                if (getTtAppCtx().getArcGISTools().offlineMapsAvailable()) {
                     new AlertDialog.Builder(BaseMapActivity.this)
                             .setMessage("There is no internet connection. Would you like to use an offline map?")
                             .setPositiveButton(R.string.str_yes, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    SelectMapTypeDialog.newInstance(new ArrayList<>(TtAppCtx.getArcGISTools().getMapLayers()),
+                                    SelectMapTypeDialog.newInstance(new ArrayList<>(getTtAppCtx().getArcGISTools().getMapLayers()),
                                             SelectMapTypeDialog.SelectMapMode.ARC_OFFLINE)
                                             .setOnMapSelectedListener(new SelectMapTypeDialog.OnMapSelectedListener() {
                                                 @Override
@@ -456,7 +451,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
 
         miShowMyPos = menu.findItem(R.id.mapMenuShowMyPos);
         if (miShowMyPos != null) {
-            miShowMyPos.setChecked(TtAppCtx.getDeviceSettings().getMapShowMyPos());
+            miShowMyPos.setChecked(getTtAppCtx().getDeviceSettings().getMapShowMyPos());
         }
 
         miMapMaxBounds = menu.findItem(R.id.mmMenuMoveToMaxBounds);
@@ -478,15 +473,15 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         switch (item.getItemId()) {
             case R.id.mapMenuShowMyPos: {
                 showMyPos = !showMyPos;
-                TtAppCtx.getDeviceSettings().setMapShowMyPos(showMyPos);
+                getTtAppCtx().getDeviceSettings().setMapShowMyPos(showMyPos);
                 miShowMyPos.setChecked(showMyPos);
 
                 if (getShowMyPos()) {
-                    if (!TtAppCtx.getGps().isGpsRunning()) {
+                    if (!getTtAppCtx().getGps().isGpsRunning()) {
                         startGps();
                     }
                 } else {
-                    if (!TtAppCtx.getDeviceSettings().isGpsAlwaysOn()) {
+                    if (!getTtAppCtx().getDeviceSettings().isGpsAlwaysOn()) {
                         stopGps();
                     }
                 }
@@ -545,7 +540,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
                             public void onClick(DialogInterface dialog, int which) {
                                 PolygonGraphicManager pmm = getPolyGraphicManagers().get(which);
                                 trackedPoly = pmm.getExtents();
-                                TtAppCtx.getProjectSettings().setTrackedPolyCN(pmm.getPolygonCN());
+                                getTtAppCtx().getProjectSettings().setTrackedPolyCN(pmm.getPolygonCN());
                                 mapMoved = true;
                                 moveToLocation(pmm.getExtents(), Consts.Location.PADDING, true);
                             }
@@ -559,7 +554,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
                     } else {
                         PolygonGraphicManager pmm = getPolyGraphicManagers().get(0);
                         trackedPoly = pmm.getExtents();
-                        TtAppCtx.getProjectSettings().setTrackedPolyCN(pmm.getPolygonCN());
+                        getTtAppCtx().getProjectSettings().setTrackedPolyCN(pmm.getPolygonCN());
                         mapMoved = true;
                         moveToLocation(pmm.getExtents(), Consts.Location.PADDING, true);
                     }
@@ -604,10 +599,10 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
             }
         }
 
-        if (TtAppCtx.getDeviceSettings().getGpsExternal()) {
-            if (TtAppCtx.getDeviceSettings().isGpsConfigured())
+        if (getTtAppCtx().getDeviceSettings().getGpsExternal()) {
+            if (getTtAppCtx().getDeviceSettings().isGpsConfigured())
             {
-                if (!TtAppCtx.getGps().isGpsRunning()) {
+                if (!getTtAppCtx().getGps().isGpsRunning()) {
                     Toast.makeText(BaseMapActivity.this, "GPS is not Receiving", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -622,7 +617,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     protected void onDestroy() {
         super.onDestroy();
 
-        TtAppCtx.getGps().removeListener(this);
+        getTtAppCtx().getGps().removeListener(this);
     }
 
     @Override
@@ -707,7 +702,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     }
 
     protected void selectMapType(SelectMapTypeDialog.SelectMapMode mode) {
-        SelectMapTypeDialog dialog = SelectMapTypeDialog.newInstance(new ArrayList<>(TtAppCtx.getArcGISTools().getMapLayers()), mode);
+        SelectMapTypeDialog dialog = SelectMapTypeDialog.newInstance(new ArrayList<>(getTtAppCtx().getArcGISTools().getMapLayers()), mode);
 
         dialog.setOnMapSelectedListener(new SelectMapTypeDialog.OnMapSelectedListener() {
             @Override
@@ -736,8 +731,8 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
             getSupportFragmentManager().beginTransaction().replace(R.id.mapContainer, mapFragment).commit();
         }
 
-        TtAppCtx.getDeviceSettings().setMapType(mapType);
-        TtAppCtx.getDeviceSettings().setMapId(mapId);
+        getTtAppCtx().getDeviceSettings().setMapType(mapType);
+        getTtAppCtx().getDeviceSettings().setMapId(mapId);
     }
 
 
@@ -776,6 +771,8 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     //region Map Events
     @Override
     public void onMapReady() {
+        mapReady = true;
+
         if (mmFrag != null) {
             for (PolygonGraphicManager pgm : polyGraphicManagers) {
                 mmFrag.addPolygon(pgm, null);
@@ -792,7 +789,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
 
         if (getMapTracking() == MapTracking.POLY_BOUNDS && getTrackedPoly() != null) {
             moveToLocation(getTrackedPoly(), Consts.Location.PADDING, true);
-        } else if (getMapTracking() == MapTracking.FOLLOW && getLastPosition() != null) {
+        } else if (getMapTracking() == MapTracking.FOLLOW && hasPosition()) {
             moveToLocation(getLastPosition(), Consts.Location.ZOOM_CLOSE, true);
         } else if (getCompleteBounds() != null) {
             moveToLocation(getCompleteBounds(), Consts.Location.PADDING, true);
@@ -810,7 +807,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
 
     @Override
     public void onMapLocationChanged() {
-        //TtAppCtx.getDeviceSettings().setLastViewedExtents();
+        //getTtAppCtx().getDeviceSettings().setLastViewedExtents();
     }
 
     @Override
@@ -847,7 +844,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
                         .setPositiveButton("Adjust Polygons", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                PolygonAdjuster.adjust(TtAppCtx.getDAL());
+                                PolygonAdjuster.adjust(getTtAppCtx().getDAL());
                                 finish();
                             }
                         })
@@ -910,9 +907,9 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
 
     //region Settings
     private void getMapSettings() {
-        mapTracking = TtAppCtx.getDeviceSettings().getMapTrackingOption();
-        showCompass = TtAppCtx.getDeviceSettings().getMapCompassEnabled();
-        showMyPos = TtAppCtx.getDeviceSettings().getMapShowMyPos();
+        mapTracking = getTtAppCtx().getDeviceSettings().getMapTrackingOption();
+        showCompass = getTtAppCtx().getDeviceSettings().getMapCompassEnabled();
+        showMyPos = getTtAppCtx().getDeviceSettings().getMapShowMyPos();
 
         if (miResetBounds != null) {
             miResetBounds.setVisible(getMapTracking() != MapTracking.FOLLOW);
@@ -965,7 +962,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         if (followPosition) {
             mapTracking = MapTracking.FOLLOW;
         } else {
-            mapTracking = TtAppCtx.getDeviceSettings().getMapTrackingOption();
+            mapTracking = getTtAppCtx().getDeviceSettings().getMapTrackingOption();
         }
     }
 
@@ -983,8 +980,10 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     }
 
     protected void onFirstPositionReceived(GeoPosition position) {
-        moveToLocation(position, Consts.Location.ZOOM_CLOSE, true);
-        mapMoved = false;
+        if (mapReady) {
+            moveToLocation(position, Consts.Location.ZOOM_CLOSE, true);
+            mapMoved = false;
+        }
     }
 
     private void updateMapView(GeoPosition position) {
@@ -1201,7 +1200,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         ArrayList<TtPoint> points;
         for (TtPolygon polygon : getSortedPolys()) {
             if (!polyPoints.containsKey(polygon.getCN())) {
-                points = TtAppCtx.getDAL().getPointsInPolygon(polygon.getCN());
+                points = getTtAppCtx().getDAL().getPointsInPolygon(polygon.getCN());
                 polyPoints.put(polygon.getCN(), points);
             } else {
                 points = polyPoints.get(polygon.getCN());
@@ -1211,9 +1210,9 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
                     polygon,
                     points,
                     getMetadata(),
-                    TtAppCtx.getMapSettings().getPolyGraphicOptions(polygon.getCN()));
+                    getTtAppCtx().getMapSettings().getPolyGraphicOptions(polygon.getCN()));
 
-            addPolygonGraphic(polygonGraphicManager, TtAppCtx.getMapSettings().getPolyDrawOptions(polygon.getCN()));
+            addPolygonGraphic(polygonGraphicManager, getTtAppCtx().getMapSettings().getPolyDrawOptions(polygon.getCN()));
 
             if (trackedPolyCN != null && polygon.getCN().equals(trackedPolyCN)) {
                 trackedPoly = polygonGraphicManager.getExtents();
@@ -1486,14 +1485,14 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         if (tcb != null) {
             if (vis && invis) {
                 tcb.setCheckedStateNoEvent(MultiStateTouchCheckBox.CheckedState.PartialChecked);
-                TtAppCtx.getMapSettings().getMasterPolyDrawOptions().setValue(code, true);
+                getTtAppCtx().getMapSettings().getMasterPolyDrawOptions().setValue(code, true);
             } else {
                 if (vis) {
                     tcb.setCheckedStateNoEvent(MultiStateTouchCheckBox.CheckedState.Checked);
-                    TtAppCtx.getMapSettings().getMasterPolyDrawOptions().setValue(code, true);
+                    getTtAppCtx().getMapSettings().getMasterPolyDrawOptions().setValue(code, true);
                 } else {
                     tcb.setCheckedStateNoEvent(MultiStateTouchCheckBox.CheckedState.NotChecked);
-                    TtAppCtx.getMapSettings().getMasterPolyDrawOptions().setValue(code, false);
+                    getTtAppCtx().getMapSettings().getMasterPolyDrawOptions().setValue(code, false);
                 }
             }
         }
@@ -1753,6 +1752,10 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     protected GeoPosition getLastPosition() {
         return lastPosition;
     }
+    
+    protected boolean hasPosition() {
+        return lastPosition != null;
+    }
 
     protected final int getZone() {
         if (zone == null) {
@@ -1778,7 +1781,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
 
     protected final void startGps() {
         if (shouldStartGps()) {
-            TtAppCtx.getGps().startGps();
+            getTtAppCtx().getGps().startGps();
         }
     }
 
@@ -1788,7 +1791,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
 
     protected final void stopGps() {
         if (shouldStopGps()) {
-            TtAppCtx.getGps().stopGps();
+            getTtAppCtx().getGps().stopGps();
         }
     }
 
@@ -1801,7 +1804,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     }
 
     protected String getTrackedPolyCN() {
-        return TtAppCtx.getProjectSettings().getTrackedPolyCN();
+        return getTtAppCtx().getProjectSettings().getTrackedPolyCN();
     }
 
     protected Extent getTrackedPoly() {

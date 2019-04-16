@@ -7,7 +7,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.twotrails.activities.MetadataActivity;
@@ -15,7 +14,6 @@ import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.fragments.AnimationCardFragment;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
-import com.usda.fmsc.twotrails.utilities.TtUtils;
 import com.usda.fmsc.utilities.StringEx;
 
 
@@ -105,7 +103,7 @@ public class MetadataFragment extends AnimationCardFragment implements MetadataA
                 if (_MetaCN != null) {
                     _Metadata = this.activity.getMetadata(_MetaCN);
                 } else {
-                    this.activity.getTtAppContext().getReport().writeError("Unable to get Metadata", "MetadataFragment");
+                    this.activity.getTtAppCtx().getReport().writeError("Unable to get Metadata", "MetadataFragment");
                 }
 
                 this.activity.register(_MetaCN, this);
