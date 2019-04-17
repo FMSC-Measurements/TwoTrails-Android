@@ -66,6 +66,8 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        Intent startIntent = getIntent();
+
         setContentView(R.layout.activity_main);
 
         ActionBar actionBar = getSupportActionBar();
@@ -96,7 +98,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
         }
 
 
-        if (getIntent().getBooleanExtra(Consts.Codes.Data.CRASH, false)) {
+        if (startIntent != null && startIntent.hasExtra(Consts.Codes.Data.CRASH)) {
             AndroidUtils.Device.isInternetAvailable(new AndroidUtils.Device.InternetAvailableCallback() {
                 @Override
                 public void onCheckInternet(final boolean internetAvailable) {

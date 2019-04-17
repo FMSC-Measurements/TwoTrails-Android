@@ -10,6 +10,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Date;
+import java.util.logging.Handler;
 
 import com.usda.fmsc.utilities.StringEx;
 
@@ -23,17 +24,9 @@ public class TtReport {
     public TtReport() {}
 
     private synchronized void changeFilePathString(String path) {
-        filePath = path;
-
         closeFile();
-
+        filePath = path;
         openFile(path);
-
-        try {
-            logWriter = new PrintWriter(new FileOutputStream(logFile, true));
-        } catch (FileNotFoundException e) {
-            Log.e(Consts.LOG_TAG, "changeFilePathString-logWriter:\n" + e.getMessage());
-        }
     }
 
     public void changeDirectory(String path) {
@@ -69,12 +62,25 @@ public class TtReport {
                 }
             }
         }
+
+        if (logFile != null && logWriter == null) {
+            try {
+                logWriter = new PrintWriter(new FileOutputStream(logFile, true));
+            } catch (FileNotFoundException e) {
+                Log.e(Consts.LOG_TAG, "changeFilePathString-logWriter:\n" + e.getMessage());
+            }
+        }
     }
 
     private synchronized void closeFile() {
         if (logWriter != null) {
             logWriter.flush();
             logWriter.close();
+            logWriter = null;
+        }
+
+        if (logFile != null) {
+            logFile = null;
         }
     }
 
@@ -122,6 +128,12 @@ public class TtReport {
     public void writeWarn(String msg, String codePage) {
         String error = String.format("WARN[%s][%s]: %s", new Date(), codePage, msg);
         Log.w(Consts.LOG_TAG, error);
+        inst.writeToReport(error);
+    }
+
+    public void writeDebug(String msg, String codePage) {
+        String error = String.format("DBG[%s][%s]: %s", new Date(), codePage, msg);
+        Log.d(Consts.LOG_TAG, error);
         inst.writeToReport(error);
     }
 }

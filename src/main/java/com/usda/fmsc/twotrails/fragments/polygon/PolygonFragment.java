@@ -318,7 +318,7 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
 
     @Override
     public void onPolygonPointsUpdated(TtPolygon polygon) {
-        List<PointD> polyPoints = activity.getDrawPoints(_Polygon, spv.getWidth(), true);
+        List<PointD> polyPoints = activity.getDrawPoints(_Polygon, spv.getWidth(), false);
 
         if (polyPoints != null)
             spv.render(polyPoints);
@@ -345,7 +345,7 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
         tvAreaAc.setText(StringEx.toStringRound(TtUtils.Convert.metersSquaredToAcres(_Polygon.getArea()), 4));
         tvAreaHa.setText(StringEx.toStringRound(TtUtils.Convert.metersSquaredToHa(_Polygon.getArea()), 4));
 
-        List<PointD> polyPoints = activity.getDrawPoints(_Polygon, spv.getWidth(), false);
+        List<PointD> polyPoints = activity.getDrawPoints(_Polygon, spv.getWidth(), true);
 
         if (polyPoints != null)
             spv.render(polyPoints);

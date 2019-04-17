@@ -26,6 +26,7 @@ public class DeviceSettings extends Settings {
     //region Preference Names
     private static final String SETTINGS_CREATED = "SettingsCreated";
     private static final String DEVELOPER_OPTIONS = "DeveloperOptions";
+    private static final String DEBUG_MODE = "DebugMode";
     private static final String LAST_CRASH_TIME = "LastCrashTime";
 
     public static final String DROP_ZERO = "DropZero";
@@ -203,6 +204,7 @@ public class DeviceSettings extends Settings {
         SharedPreferences.Editor editor = getEditor();
 
         editor.putBoolean(DEVELOPER_OPTIONS, false);
+        editor.putBoolean(DEBUG_MODE, false);
 
         editor.putString(LAST_CRASH_TIME, StringEx.Empty);
 
@@ -883,8 +885,19 @@ public class DeviceSettings extends Settings {
 
     public void enabledDevelopterOptions(boolean value) {
         setBool(DEVELOPER_OPTIONS, value);
+
+        if (value) {
+            setBool(DEBUG_MODE, true);
+        }
     }
 
+    public boolean isDebugMode() {
+        return getBool(DEBUG_MODE, false);
+    }
+
+    public void enabledDebugMode(boolean value) {
+        setBool(DEBUG_MODE, value);
+    }
 
     public DateTime getLastCrashTime() {
         String time = getString(LAST_CRASH_TIME);
