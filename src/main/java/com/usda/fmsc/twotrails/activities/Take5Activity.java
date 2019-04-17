@@ -9,7 +9,6 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.view.GravityCompat;
@@ -27,7 +26,6 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -90,9 +88,8 @@ import com.usda.fmsc.geospatial.GeoTools;
 
 import jp.wasabeef.recyclerview.animators.BaseItemAnimator;
 import jp.wasabeef.recyclerview.animators.FadeInAnimator;
-import jp.wasabeef.recyclerview.animators.SlideInUpAnimator;
 
-@SuppressLint("RestrictedApi")
+@SuppressLint({"RestrictedApi", "unused"})
 public class Take5Activity extends AcquireGpsMapActivity implements PointMediaController {
     private static final boolean enableCardFading = true;
 
@@ -109,7 +106,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
     private TextView tvProg;
     private MenuItem miMode, miMoveToEnd, miHideGpsInfo, miCenterPosition;
 
-    private ArrayList<TtPoint> _Points;
+    private List<TtPoint> _Points;
     private ArrayList<TtNmeaBurst> _Bursts, _UsedBursts;
     private TtPoint _PrevPoint, _CurrentPoint;
     private Take5Point _AddTake5;
@@ -425,9 +422,11 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                         if (_Polygon == null) {
                             cancelResult = Consts.Codes.Results.NO_POLYGON_DATA;
                         } else {
-                            _Points = new ArrayList<>(
-                                getTtAppCtx().getDAL().getPointsInPolygon(_Polygon.getCN())
-                                    .subList(0, _CurrentPoint.getIndex() + 1));
+                            _Points = getTtAppCtx().getDAL().getPointsInPolygon(_Polygon.getCN());
+
+                            if (_Points.size() > 0 && _CurrentPoint != null) {
+                                _Points = _Points.subList(0, _CurrentPoint.getIndex() + 1);
+                            }
                         }
                     }
                 } catch (Exception e) {
@@ -1071,7 +1070,11 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
             fabT5.setEnabled(true);
             fabSS.setEnabled(true);
 
-            addPosition(t5point, true);
+            if (isTrailModeEnabled()) {
+                addPosition(t5point, true);
+            } else {
+                getTtAppCtx().getReport().writeWarn("TrailMode is disabled.", "Take5Activity:addTake5");
+            }
 
             if (useVib) {
                 AndroidUtils.Device.vibrate(this, Consts.Notifications.VIB_POINT_CREATED);

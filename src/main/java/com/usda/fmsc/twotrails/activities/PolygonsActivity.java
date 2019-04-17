@@ -565,7 +565,7 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
                                             drawPoints.put(poly.getCN(), new Tuple<>(width, TtUtils.UI.generateStaticPolyPoints(points, metadata, defMeta.getZone(), (int)(width * 0.9))));
                                             hasDrawPoints.put(poly.getCN(), true);
 
-                                            onPolygonUpdated(poly);
+                                            onPolygonPointsUpdated(poly);
                                         } else {
                                             getTtAppCtx().getReport().writeError("No default Metadata", "PolygonsActivity:getDrawPoints");
                                         }

@@ -181,8 +181,10 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
         }
 
         // Release MapView resources
-        mMapView.recycle();
-        mMapView = null;
+        if (mMapView != null) {
+            mMapView.recycle();
+            mMapView = null;
+        }
     }
 
     @Override

@@ -115,7 +115,8 @@ public class SettingsLogic {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 switch (idialog.getText().toLowerCase()) {
-                    case "dev": {
+                    case "dev":
+                    case "developer": {
                         TwoTrailsApp.getInstance().getDeviceSettings().enabledDevelopterOptions(true);
                         Toast.makeText(context, "Developer Mode Enabled", Toast.LENGTH_LONG).show();
                         break;
@@ -123,6 +124,17 @@ public class SettingsLogic {
                     case "disable dev": {
                         TwoTrailsApp.getInstance().getDeviceSettings().enabledDevelopterOptions(false);
                         Toast.makeText(context, "Developer Mode Disabled", Toast.LENGTH_LONG).show();
+                        break;
+                    }
+                    case "dbg":
+                    case "debug" : {
+                        TwoTrailsApp.getInstance().getDeviceSettings().enabledDebugMode(true);
+                        Toast.makeText(context, "Debug Mode Enabled", Toast.LENGTH_LONG).show();
+                        break;
+                    }
+                    case "disable debug" : {
+                        TwoTrailsApp.getInstance().getDeviceSettings().enabledDebugMode(false);
+                        Toast.makeText(context, "Debug Mode Disabled", Toast.LENGTH_LONG).show();
                         break;
                     }
                 }

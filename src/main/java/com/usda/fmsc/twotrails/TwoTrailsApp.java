@@ -69,6 +69,7 @@ public class TwoTrailsApp extends Application {
     private RangeFinderService.RangeFinderBinder rfServiceBinder;
     private Activity _CurrentActivity;
 
+
     private ServiceConnection gpsServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -224,37 +225,6 @@ public class TwoTrailsApp extends Application {
         }
     };
 
-    //The BroadcastReceiver that listens for bluetooth broadcasts
-    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-
-            if (BluetoothDevice.ACTION_ACL_CONNECTED.equals(action)) {
-                if (!getGps().isGpsRunning() && getDeviceSettings().isGpsConfigured()) {
-                    if (device.getAddress().equals(getDeviceSettings().getGpsDeviceID())) {
-                        silentConnectToExternalGps = true;
-                        new Handler().postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                getGps().startGps();
-                            }
-                        }, 1000);
-                    }
-                }
-            } //else if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action)) {
-            //   delayAndSearchForGps.run();
-            //} else if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                //Device found
-//            } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
-//                //Done searching
-//            } else if (BluetoothDevice.ACTION_ACL_DISCONNECT_REQUESTED.equals(action)) {
-//                //Device is about to disconnect
-//            }
-        }
-    };
-
     private AppLifecycle.Listener appLifecycleListener = new AppLifecycle.Listener() {
         @Override
         public void onBecameForeground(Activity activity) {
@@ -268,12 +238,20 @@ public class TwoTrailsApp extends Application {
 
         @Override
         public void onCreated(Activity activity) {
-            Log.d(Consts.LOG_TAG, "Created: (" + activity.getClass().getSimpleName() + ")" + activity.getClass().getName());
+            if (getDeviceSettings().isDebugMode()) {
+                getReport().writeDebug("Created: (" + activity.getClass().getSimpleName() + ")" + activity.getClass().getName(), "TtApp");
+            } else {
+                Log.d(Consts.LOG_TAG, "Created: (" + activity.getClass().getSimpleName() + ")" + activity.getClass().getName());
+            }
         }
 
         @Override
         public void onResume(Activity activity) {
-            Log.d(Consts.LOG_TAG, "Resume: (" + activity.getClass().getSimpleName() + ")" + activity.getClass().getName());
+            if (getDeviceSettings().isDebugMode()) {
+                getReport().writeDebug("Resume: (" + activity.getClass().getSimpleName() + ")" + activity.getClass().getName(), "TtApp");
+            } else {
+                Log.d(Consts.LOG_TAG, "Resume: (" + activity.getClass().getSimpleName() + ")" + activity.getClass().getName());
+            }
 
             _CurrentActivity = activity;
 
@@ -292,7 +270,11 @@ public class TwoTrailsApp extends Application {
 
         @Override
         public void onDestroyed(Activity activity) {
-            Log.d(Consts.LOG_TAG, "Destroyed: (" + activity.getClass().getSimpleName() + ")" + activity.getClass().getName());
+            if (getDeviceSettings().isDebugMode()) {
+                getReport().writeDebug("Destroyed: (" + activity.getClass().getSimpleName() + ")" + activity.getClass().getName(), "TtApp");
+            } else {
+                Log.d(Consts.LOG_TAG, "Destroyed: (" + activity.getClass().getSimpleName() + ")" + activity.getClass().getName());
+            }
 
             if (activity instanceof MainActivity) {
                 if (gpsServiceBinder != null) {
@@ -319,6 +301,39 @@ public class TwoTrailsApp extends Application {
         }
     };
 
+    //region Bluetooth Broadcast Receiver
+    //The BroadcastReceiver that listens for bluetooth broadcasts
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+
+            if (BluetoothDevice.ACTION_ACL_CONNECTED.equals(action)) {
+                if (!getGps().isGpsRunning() && getDeviceSettings().isGpsConfigured()) {
+                    if (device.getAddress().equals(getDeviceSettings().getGpsDeviceID())) {
+                        silentConnectToExternalGps = true;
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                getGps().startGps();
+                            }
+                        }, 1000);
+                    }
+                }
+            } //else if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action)) {
+            //   delayAndSearchForGps.run();
+            //} else if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+            //Device found
+//            } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
+//                //Done searching
+//            } else if (BluetoothDevice.ACTION_ACL_DISCONNECT_REQUESTED.equals(action)) {
+//                //Device is about to disconnect
+//            }
+        }
+    };
+    //endregion
+
     //region UncaughtExceptionHandler
     private Thread.UncaughtExceptionHandler exceptionHandler = new Thread.UncaughtExceptionHandler() {
         @Override
@@ -337,7 +352,7 @@ public class TwoTrailsApp extends Application {
                     gpsServiceBinder.stopService();
                 }
             } catch (Exception e) {
-                Log.e(Consts.LOG_TAG, "Error in App:uncaughtException");
+                Log.e(Consts.LOG_TAG, "Error in TwoTrailsApp:uncaughtException");
             }
 
             try {
@@ -352,18 +367,18 @@ public class TwoTrailsApp extends Application {
                 restart = false;
             }
 
-            if (restart) {
-                Intent intent = new Intent(_AppContext, MainActivity.class);
-                intent.putExtra(Consts.Codes.Data.CRASH, true);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
-                        | Intent.FLAG_ACTIVITY_CLEAR_TASK
-                        | Intent.FLAG_ACTIVITY_NEW_TASK);
-                PendingIntent pendingIntent = PendingIntent.getActivity(getInstance().getBaseContext(), 0, intent, PendingIntent.FLAG_ONE_SHOT);
-                AlarmManager mgr = (AlarmManager) getInstance().getBaseContext().getSystemService(Context.ALARM_SERVICE);
-                mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 100, pendingIntent);
-            } else {
-                try
-                {
+            try
+            {
+                if (restart) {
+                    Intent intent = new Intent(_AppContext, MainActivity.class);
+                    intent.putExtra(Consts.Codes.Data.CRASH_NO_RESET, true);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+                            | Intent.FLAG_ACTIVITY_CLEAR_TASK
+                            | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    PendingIntent pendingIntent = PendingIntent.getActivity(getInstance().getBaseContext(), 0, intent, PendingIntent.FLAG_ONE_SHOT);
+                    AlarmManager mgr = (AlarmManager) getInstance().getBaseContext().getSystemService(Context.ALARM_SERVICE);
+                    mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 1000, pendingIntent);
+                } else {
                     new Thread() {
                         @Override
                         public void run() {
@@ -372,19 +387,24 @@ public class TwoTrailsApp extends Application {
                             Looper.loop();
                         }
                     }.start();
+
                     Thread.sleep(4000); // Let the Toast display before app will get shutdown
                 }
-                catch (Exception e) {
-                    //
-                }
+
+                getReport().closeReport();
+            }
+            catch (Exception e) {
+                //
             }
 
-            _CurrentActivity.finish();
+            _CurrentActivity.finishAndRemoveTask();
+            //_CurrentActivity.finish();
             System.exit(2);
         }
     };
     //endregion
 
+    //region SearchForGps
     private Runnable delayAndSearchForGps = new Runnable() {
         @Override
         public void run() {
@@ -395,7 +415,6 @@ public class TwoTrailsApp extends Application {
         }
     };
 
-    //region SearchForGps
     Runnable searchForGps = new Runnable() {
         @Override
         public void run() {

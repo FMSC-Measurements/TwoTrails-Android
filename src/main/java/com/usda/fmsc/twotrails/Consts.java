@@ -148,6 +148,7 @@ public class Consts {
             public static final String TTIMAGE = "TtImage";
             public static final String ORIENTATION = "Orientation";
             public static final String CRASH = "AppCrash";
+            public static final String CRASH_NO_RESET = "AppCrashNoReset";
             public static final String POINT_PACKAGE = "PointPackage";
         }
 
