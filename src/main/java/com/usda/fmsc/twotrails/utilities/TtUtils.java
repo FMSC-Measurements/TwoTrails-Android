@@ -1937,13 +1937,20 @@ public class TtUtils {
         return true;
     }
 
+
     public static void SendEmailToDev(Activity activity) {
-        String reportPath;
+        SendEmailToDev(activity, null);
+    }
+
+    public static void SendEmailToDev(Activity activity, String reportPath) {
         TwoTrailsApp app = TwoTrailsApp.getInstance();
-        if (app.hasDAL()) {
-            reportPath = TtUtils.exportReport(app.getDAL());
-        } else {
-            reportPath = TtUtils.exportReport(null);
+
+        if (reportPath == null) {
+            if (app.hasDAL()) {
+                reportPath = TtUtils.exportReport(app.getDAL());
+            } else {
+                reportPath = TtUtils.exportReport(null);
+            }
         }
 
         if (reportPath != null) {
