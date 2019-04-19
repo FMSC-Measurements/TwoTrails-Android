@@ -3,6 +3,7 @@ package com.usda.fmsc.twotrails.data;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.utilities.FileUtils;
 
+@SuppressWarnings("WeakerAccess")
 public class DataAccessUpgrader {
     public static UpgradeResult UpgradeDAL(DataAccessLayer dal) {
         FileUtils.copyFile(dal.getFilePath(), dal.getFilePath()  + ".old");

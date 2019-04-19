@@ -25,6 +25,7 @@ public class DataActionType {
     public static final int ConvertPoints       = 1 << 20;
     public static final int ModifiedDataDictionary  = 1 << 21;
     public static final int DataImported        = 1 << 22;
+    public static final int ProjectUpgraded        = 1 << 23;
             
 
     private int value;

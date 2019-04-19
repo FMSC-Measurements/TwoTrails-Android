@@ -256,13 +256,13 @@ public class TwoTrailsApp extends Application {
             _CurrentActivity = activity;
 
             if (activity instanceof MainActivity) {
-                if (!AndroidUtils.App.isServiceRunning(_AppContext, GpsService.class)) {
+                if (!AndroidUtils.App.isServiceRunning(_AppContext, GpsService.class) || gpsServiceBinder == null) {
                     startGpsService();
                 } else if (getDeviceSettings().isGpsConfigured() && !scanningForGps) {
                     gpsServiceBinder.startGps();
                 }
 
-                if (!AndroidUtils.App.isServiceRunning(_AppContext, RangeFinderService.class)) {
+                if (!AndroidUtils.App.isServiceRunning(_AppContext, RangeFinderService.class) || rfServiceBinder == null) {
                     startRangefinderService();
                 }
             }
@@ -371,7 +371,7 @@ public class TwoTrailsApp extends Application {
             {
                 if (restart) {
                     Intent intent = new Intent(_AppContext, MainActivity.class);
-                    intent.putExtra(Consts.Codes.Data.CRASH_NO_RESET, true);
+                    intent.putExtra(Consts.Codes.Data.CRASH, true);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
                             | Intent.FLAG_ACTIVITY_CLEAR_TASK
                             | Intent.FLAG_ACTIVITY_NEW_TASK);

@@ -1,5 +1,6 @@
 package com.usda.fmsc.twotrails.data;
 
+@SuppressWarnings("WeakerAccess")
 public class TwoTrailsSchema {
     //Old Schema Versions
     public static final TtVersion OSV_2_0_1 = new TtVersion(2, 0, 1);
@@ -7,7 +8,7 @@ public class TwoTrailsSchema {
     public static final TtVersion OSV_2_0_3 = new TtVersion(2, 0, 3);
 
     //Schema Version
-    public static final TtVersion SchemaVersion = OSV_2_0_2;
+    public static final TtVersion SchemaVersion = OSV_2_0_3;
 
 
     public static class SharedSchema {
@@ -537,5 +538,6 @@ public class TwoTrailsSchema {
     //endregion
 
 
-    public static final String UPGRADE_OSV_2_0_3 = "UPDATE " + TtNmeaSchema.TableName + " SET " + TtNmeaSchema.Fix + " = " + TtNmeaSchema.Fix + " + 1;";
+    //public static final String UPGRADE_OSV_2_0_3 = "UPDATE " + TtNmeaSchema.TableName + " SET " + TtNmeaSchema.Fix + " = " + TtNmeaSchema.Fix + " + 1; " +
+    public static final String UPGRADE_OSV_2_0_3 =         "UPDATE " + ProjectInfoSchema.TableName + " SET " + ProjectInfoSchema.TtDbSchemaVersion + " = '" + OSV_2_0_3 + "';";
 }

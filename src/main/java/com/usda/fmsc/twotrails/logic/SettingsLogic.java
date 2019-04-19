@@ -3,12 +3,7 @@ package com.usda.fmsc.twotrails.logic;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.graphics.Color;
-import android.net.Uri;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
-import android.view.View;
 import android.widget.Toast;
 
 import com.usda.fmsc.android.AndroidUtils;
@@ -16,6 +11,7 @@ import com.usda.fmsc.android.dialogs.InputDialog;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
+import com.usda.fmsc.utilities.FileUtils;
 
 public class SettingsLogic {
     public static void reset(final Context context) {
@@ -64,44 +60,69 @@ public class SettingsLogic {
                     .setPositiveButton(R.string.str_yes, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            onExportReportComplete(TtUtils.exportReport(TwoTrailsApp.getInstance().getDAL()), activity);
+                            onExportReportComplete(activity, TtUtils.exportReport(TwoTrailsApp.getInstance().getDAL()));
                         }
                     })
                     .setNegativeButton(R.string.str_no, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            onExportReportComplete(TtUtils.exportReport(null), activity);
+                            onExportReportComplete(activity, TtUtils.exportReport(null));
                         }
                     })
                     .setNeutralButton(R.string.str_cancel, null)
                     .show();
         } else {
-            onExportReportComplete(TtUtils.exportReport(null), activity);
+            onExportReportComplete(activity, TtUtils.exportReport(null));
         }
     }
 
-    private static Snackbar snackbar;
-    private static void onExportReportComplete(String filepath, final Activity activity) {
+//    private static Snackbar snackbar;
+    private static void onExportReportComplete(final Activity activity, final String filepath) {
         if (filepath != null) {
-            snackbar = Snackbar.make(activity.findViewById(android.R.id.content), "Report Exported", Snackbar.LENGTH_LONG)
-                    .setAction("View", new View.OnClickListener() {
-
+            AndroidUtils.Device.isInternetAvailable(new AndroidUtils.Device.InternetAvailableCallback() {
+                @Override
+                public void onCheckInternet(final boolean internetAvailable) {
+                    activity.runOnUiThread(new Runnable() {
                         @Override
-                        public void onClick(View v) {
-                            Intent intent = new Intent(Intent.ACTION_VIEW);
-                            intent.setDataAndType(Uri.parse(TtUtils.getTtFileDir()), "resource/folder");
-
-                            if (snackbar != null)
-                                snackbar.dismiss();
-
-                            activity.startActivity(Intent.createChooser(intent, "Open folder"));
+                        public void run() {
+                            if (internetAvailable) {
+                                new AlertDialog.Builder(activity)
+                                        .setMessage("Would you like to send the report to the developer team to help prevent future crashes?")
+                                        .setPositiveButton("Send", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                TtUtils.SendEmailToDev(activity, filepath);
+                                            }
+                                        })
+                                        .setNeutralButton("Don't Send", null)
+                                        .show();
+                            } else {
+                                Toast.makeText(activity, "Report Exported to Documents/TwoTrailsFiles/" + FileUtils.getFileName(filepath), Toast.LENGTH_LONG).show();
+                            }
                         }
-                    })
-                    .setActionTextColor(AndroidUtils.UI.getColor(activity, R.color.primaryLighter));
+                    });
+                }
+            });
 
-            AndroidUtils.UI.setSnackbarTextColor(snackbar, Color.WHITE);
-
-            snackbar.show();
+//            snackbar = Snackbar.make(activity.findViewById(android.R.id.content), "Report Exported", Snackbar.LENGTH_LONG)
+//                    .setAction("View", new View.OnClickListener() {
+//
+//                        @Override
+//                        public void onClick(View v) {
+//                            Intent intent = new Intent(Intent.ACTION_VIEW);
+//                            intent.setDataAndType(Uri.parse(TtUtils.getTtFileDir()), "resource/folder");
+//
+//                            if (snackbar != null)
+//                                snackbar.dismiss();
+//
+//                            activity.startActivity(Intent.createChooser(intent, "Open folder"));
+//                        }
+//                    })
+//                    .setActionTextColor(AndroidUtils.UI.getColor(activity, R.color.primaryLighter));
+//
+//            AndroidUtils.UI.setSnackbarTextColor(snackbar, Color.WHITE);
+//
+//            snackbar.show();
         } else {
             Toast.makeText(activity, "Report failed to export", Toast.LENGTH_LONG).show();
         }

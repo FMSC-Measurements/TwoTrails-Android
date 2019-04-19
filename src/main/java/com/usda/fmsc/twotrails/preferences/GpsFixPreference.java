@@ -2,6 +2,7 @@ package com.usda.fmsc.twotrails.preferences;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.util.AttributeSet;
 
 import com.usda.fmsc.android.preferences.EnumPreference;
@@ -46,5 +47,21 @@ public class GpsFixPreference extends EnumPreference {
     @Override
     protected int[] getItemValues() {
         return itemValues;
+    }
+
+    @Override
+    public void setValue(int value) {
+        getSharedPreferences().edit().putInt(getKey(), value).apply();
+        setSummary(itemNames[value - 1]); // types start at 1
+    }
+
+    @Override
+    protected void onSetInitialValue(boolean restorePersistedValue, Object defaultValue) {
+        int value = 0;
+
+        if (restorePersistedValue) {
+            value = defaultValue != null ? (int) defaultValue : getSharedPreferences().getInt(getKey(), 0);
+            setValue(value);
+        }
     }
 }

@@ -63,7 +63,12 @@ public class DataAccessLayer extends IDataLayer {
 
     public File getDBFile() { return _dbFile; }
 
-    public TtVersion getVersion() { return _DalVersion; }
+    public TtVersion getVersion() {
+        if (_DalVersion == null)
+            _DalVersion = new TtVersion(getTtDbVersion());
+
+        return _DalVersion;
+    }
 
 
     private TtVersion _DalVersion;
@@ -2753,18 +2758,24 @@ public class DataAccessLayer extends IDataLayer {
         try {
             _db.beginTransaction();
 
-            if (upgrade.Version.toIntVersion() < TwoTrailsSchema.OSV_2_0_3.toIntVersion()) {
-                _db.execSQL(TwoTrailsSchema.UPGRADE_OSV_2_0_3);
+            int dbVersion = getVersion().toIntVersion();
+
+            if (dbVersion < upgrade.Version.toIntVersion()) {
+                _db.execSQL(upgrade.SQL);
             }
 
             _db.setTransactionSuccessful();
-            success = true;
 
-            _Activity.updateAction(DataActionType.InsertedGroups);
+            _Activity.updateAction(DataActionType.ProjectUpgraded, "Upgrade " + getVersion().toString() + " -> " + upgrade.Version.toString());
+            insertUserActivity(_Activity);
+            _Activity = createUserActivty();
+
+            success = true;
         } catch (Exception ex) {
             TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:Upgrade");
         } finally {
             _db.endTransaction();
+            _DalVersion = null;
         }
 
         return success;

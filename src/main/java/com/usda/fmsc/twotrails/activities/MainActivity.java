@@ -46,6 +46,7 @@ import com.usda.fmsc.utilities.StringEx;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Set;
 
 
 public class MainActivity extends TtAjusterCustomToolbarActivity {
@@ -65,8 +66,6 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        Intent startIntent = getIntent();
 
         setContentView(R.layout.activity_main);
 
@@ -95,37 +94,6 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
         TabLayout tabLayout = findViewById(R.id.mainTabs);
         if (tabLayout != null) {
             tabLayout.setupWithViewPager(mViewPager);
-        }
-
-
-        if (startIntent != null && startIntent.hasExtra(Consts.Codes.Data.CRASH)) {
-            AndroidUtils.Device.isInternetAvailable(new AndroidUtils.Device.InternetAvailableCallback() {
-                @Override
-                public void onCheckInternet(final boolean internetAvailable) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (internetAvailable) {
-                                new AlertDialog.Builder(MainActivity.this)
-                                        .setMessage("TwoTrails experienced a crash. Would you like to send an error report to the developer team to help prevent future crashes?")
-                                        .setPositiveButton("Send", new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int which) {
-                                                TtUtils.SendEmailToDev(MainActivity.this);
-                                            }
-                                        })
-                                        .setNeutralButton("Don't Send", null)
-                                        .show();
-                            } else {
-                                new AlertDialog.Builder(MainActivity.this)
-                                        .setMessage("TwoTrails experienced a crash. You can send a crash log to the development team from inside the settings menu.")
-                                        .setPositiveButton(R.string.str_ok, null)
-                                        .show();
-                            }
-                        }
-                    });
-                }
-            });
         }
     }
 
@@ -168,14 +136,47 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
                 }
             }
         }
+
+
+        Intent startIntent = getIntent();
+
+        if (startIntent != null && startIntent.hasExtra(Consts.Codes.Data.CRASH)) {
+            AndroidUtils.Device.isInternetAvailable(new AndroidUtils.Device.InternetAvailableCallback() {
+                @Override
+                public void onCheckInternet(final boolean internetAvailable) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (internetAvailable) {
+                                new AlertDialog.Builder(MainActivity.this)
+                                        .setMessage("TwoTrails experienced a crash. Would you like to send an error report to the developer team to help prevent future crashes?")
+                                        .setPositiveButton("Send", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                TtUtils.SendEmailToDev(MainActivity.this);
+                                            }
+                                        })
+                                        .setNeutralButton("Don't Send", null)
+                                        .show();
+                            } else {
+                                new AlertDialog.Builder(MainActivity.this)
+                                        .setMessage("TwoTrails experienced a crash. You can send a crash log to the development team from inside the settings menu.")
+                                        .setPositiveButton(R.string.str_ok, null)
+                                        .show();
+                            }
+                        }
+                    });
+                }
+            });
+        }
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        closeFile();
-        finishAndRemoveTask();
-    }
+//    @Override
+//    protected void onDestroy() {
+//        super.onDestroy();
+//        //closeFile();
+//        //finishAndRemoveTask();
+//    }
 
     @Override
     public boolean onCreateOptionsMenuEx(Menu menu) {
@@ -216,7 +217,6 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
         * if calculating ask to wait
         *   if yes, return
         *   if no cancel calc and finish*/
-
         if (isAboutToExit() && PolygonAdjuster.isProcessing()) {
             new AlertDialog.Builder(MainActivity.this)
                     .setMessage("Polygons are currently adjusting. Would you like to wait for them to finish?")
@@ -224,7 +224,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             if (!PolygonAdjuster.isProcessing()) {
-                                finish();
+                                finishAndRemoveTask();
                             } else {
                                 exitOnAdjusted = true;
                             }
@@ -233,7 +233,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
                     .setNegativeButton(R.string.str_exit, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            finish();
+                            finishAndRemoveTask();
                         }
                     })
                     .setNeutralButton(R.string.str_cancel, null)
@@ -244,11 +244,17 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
     }
 
     @Override
+    public void finishAndRemoveTask() {
+        closeFile();
+        super.finishAndRemoveTask();
+    }
+
+    @Override
     protected void onAdjusterStopped(PolygonAdjuster.AdjustResult result) {
         super.onAdjusterStopped(result);
 
         if (exitOnAdjusted) {
-            finish();
+            finishAndRemoveTask();
         }
     }
 
@@ -292,13 +298,13 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
                         .setPositiveButton(R.string.str_ok, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                finish();
+                                AndroidUtils.App.requestLocationPermission(MainActivity.this, Consts.Codes.Requests.LOCATION);
                             }
                         })
                         .setOnCancelListener(new DialogInterface.OnCancelListener() {
                             @Override
                             public void onCancel(DialogInterface dialog) {
-                                finish();
+                                finishAndRemoveTask();
                             }
                         })
                         .show();
@@ -308,13 +314,13 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
                         .setPositiveButton(R.string.str_ok, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                finish();
+                                AndroidUtils.App.requestStoragePermission(MainActivity.this, Consts.Codes.Requests.STORAGE);
                             }
                         })
                         .setOnCancelListener(new DialogInterface.OnCancelListener() {
                             @Override
                             public void onCancel(DialogInterface dialog) {
-                                finish();
+                                finishAndRemoveTask();
                             }
                         })
                         .show();
@@ -443,6 +449,7 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
                     if (getTtAppCtx().getDAL().getVersion().toIntVersion() < TwoTrailsSchema.SchemaVersion.toIntVersion()) {
                         switch (DataAccessUpgrader.UpgradeDAL(getTtAppCtx().getDAL())) {
                             case Successful:
+                                openFile(filePath); break;
                             case Failed:
                                 runOnUiThread(new Runnable() {
                                     @Override
