@@ -264,20 +264,17 @@ public class MetadataActivity extends CustomToolbarActivity {
     }
 
     private void deleteWithoutMoving() {
-        if (deleteMetadata(_deleteMeta, _deleteIndex)) {
-            if (_deleteIndex < _CurrentIndex)
-                _CurrentIndex--;
+        int deletedIndex = _deleteIndex;
 
-            if (_deleteIndex > 0) {
-                moveToMetadata(_CurrentIndex);
-            } else {
-                moveToMetadata(_CurrentIndex, false);
+        if (deleteMetadata(_deleteMeta, _deleteIndex)) {
+            lockMetadata(true);
+
+            if (deletedIndex < _CurrentIndex && _CurrentIndex > 0) {
+                moveToMetadata(_CurrentIndex - 1);
             }
 
             _deleteIndex = INVALID_INDEX;
             _deleteMeta = null;
-
-            lockMetadata(true);
         } else {
             Toast.makeText(this, "Error deleting metadata.", Toast.LENGTH_SHORT).show();
         }
