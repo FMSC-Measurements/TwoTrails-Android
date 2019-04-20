@@ -115,7 +115,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
     private TtGroup _Group;
 
     private int increment, takeAmount, nmeaCount = 0;
-    private boolean saved = true, updated, onBnd = true, createSSVisible = true, cancelVisible, commitSSVisible,
+    private boolean saved = true, updated, onBnd = true, createSSVisible, cancelVisible, commitSSVisible,
             ignoreScroll, useRing, useVib, mapViewMode, killAcquire, cameraSupported, gpsInfoHidden,
             centerPosition = false, _Locked;
 
@@ -426,6 +426,10 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
 
                             if (_Points.size() > 0 && _CurrentPoint != null) {
                                 _Points = _Points.subList(0, _CurrentPoint.getIndex() + 1);
+
+                                if (_CurrentPoint.getIndex() > 0) {
+                                    _PrevPoint = _Points.get(_CurrentPoint.getIndex() - 1);
+                                }
                             }
                         }
                     }
@@ -834,6 +838,13 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                     onStopCardMovement();
                 }
             }, 250);
+        } else {
+            rvPoints.setVisibility(View.VISIBLE);
+        }
+
+        if (_PrevPoint != null && !createSSVisible) {
+            fabSS.setVisibility(View.VISIBLE);
+            createSSVisible = true;
         }
     }
 
@@ -1063,6 +1074,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
             //getTtAppCtx().getTtNotifyManager().showPointAquired();
 
             t5pAdapter.notifyItemInserted(_Points.size() - 1);
+            t5pAdapter.notifyDataSetChanged();
 
             onStartCardMovement(false);
             rvPoints.smoothScrollToPosition(_Points.size() - 1);
@@ -1082,6 +1094,10 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
 
             if (useRing) {
                 AndroidUtils.Device.playSound(this, R.raw.ring);
+            }
+
+            if (!createSSVisible) {
+                showCreateSS();
             }
         } else {
             _CurrentPoint = prevPoint;

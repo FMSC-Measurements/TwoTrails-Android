@@ -180,22 +180,23 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
                                 public void onHidden() {
                                     new Handler().post(new Runnable() {
                                         public void run() {
-                                            if (_CurrentIndex > 0) {
+                                            if (_CurrentIndex == 0 && getPolygons().size() < 2) { //only 1 point in poly
+                                                deletePolygon(_CurrentPolygon, _CurrentIndex);
+
+                                                _CurrentPolygon = null;
+                                                _CurrentIndex = INVALID_INDEX;
+                                                lockPolygon(true);
+                                                AndroidUtils.UI.disableMenuItem(miLock);
+                                            } else if (_CurrentIndex < getPolygons().size() - 1) { //point is not at the end
                                                 _deleteIndex = _CurrentIndex;
                                                 _deletePolygon = _CurrentPolygon;
 
-                                                ignorePolyChange = true;
+                                                moveToPolygon(_CurrentIndex + 1);
+                                            } else if (_CurrentIndex == getPolygons().size() - 1) { //point it at the end
+                                                _deleteIndex = _CurrentIndex;
+                                                _deletePolygon = _CurrentPolygon;
 
                                                 moveToPolygon(_CurrentIndex - 1);
-                                            } else if (getPolygons().size() > 0) {
-                                                _deleteIndex = _CurrentIndex;
-                                                _deletePolygon = _CurrentPolygon;
-
-                                                ignorePolyChange = true;
-                                                moveToPolygon(_CurrentIndex + 1);
-                                            } else {
-                                                deletePolygon(_CurrentPolygon, _CurrentIndex);
-                                                lockPolygon(true);
                                             }
                                         }
                                     });
@@ -274,20 +275,17 @@ public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
     }
 
     private void deleteWithoutMoving() {
-        if (deletePolygon(_deletePolygon, _deleteIndex)) {
-            if (_deleteIndex < _CurrentIndex)
-                _CurrentIndex--;
+        int deletedIndex = _deleteIndex;
 
-            if (_deleteIndex > 0) {
-                moveToPolygon(_CurrentIndex);
-            } else {
-                moveToPolygon(_CurrentIndex, false);
+        if (deletePolygon(_deletePolygon, _deleteIndex)) {
+            lockPolygon(true);
+
+            if (deletedIndex < _CurrentIndex && _CurrentIndex > 0) {
+                moveToPolygon(_CurrentIndex - 1);
             }
 
             _deleteIndex = INVALID_INDEX;
             _deletePolygon = null;
-
-            lockPolygon(true);
         } else {
             Toast.makeText(this, "Error deleting polygon.", Toast.LENGTH_SHORT).show();
         }

@@ -697,6 +697,9 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
             setResult(Consts.Codes.Results.NO_DAL);
             finish();
         }
+
+        _deletePoint = null;
+        _deleteIndex = INVALID_INDEX;
     }
 
     @Override
@@ -721,7 +724,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         }
 
 
-        if (adjust) {
+        if (adjust && getTtAppCtx().hasDAL()) {
             PolygonAdjuster.adjust(getTtAppCtx().getDAL(), true);
         }
     }
@@ -825,28 +828,24 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                                 public void onHidden() {
                                     new Handler().post(new Runnable() {
                                         public void run() {
-                                            if (_CurrentIndex == 0 && _Points.size() < 2) {
+                                            if (_CurrentIndex == 0 && _Points.size() < 2) { //only 1 point in poly
                                                 deletePoint(_CurrentPoint, _CurrentIndex);
 
-                                                if (_Points.size() < 1) {
-                                                    _CurrentPoint = null;
-                                                    _CurrentIndex = INVALID_INDEX;
-                                                    lockPoint(true);
-                                                    AndroidUtils.UI.disableMenuItem(miLock);
-                                                    hideAqr();
-                                                }
-                                            } else {
+                                                _CurrentPoint = null;
+                                                _CurrentIndex = INVALID_INDEX;
+                                                lockPoint(true);
+                                                AndroidUtils.UI.disableMenuItem(miLock);
+                                                hideAqr();
+                                            } else if (_CurrentIndex < _Points.size() - 1) { //point is not at the end
                                                 _deleteIndex = _CurrentIndex;
                                                 _deletePoint = _CurrentPoint;
 
-                                                if (_CurrentIndex > 0) {
-                                                    _CurrentIndex--;
-                                                } else {
-                                                    _CurrentIndex++;
-                                                }
+                                                moveToPoint(_CurrentIndex + 1);
+                                            } else if (_CurrentIndex == _Points.size() - 1) { //point it at the end
+                                                _deleteIndex = _CurrentIndex;
+                                                _deletePoint = _CurrentPoint;
 
-                                                ignorePointChange = true;
-                                                moveToPoint(_CurrentIndex);
+                                                moveToPoint(_CurrentIndex - 1);
                                             }
                                         }
                                     });
@@ -1080,9 +1079,6 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         if (_CurrentPoint != null) {
             boolean phv = TtUtils.Points.pointHasValue(_CurrentPoint);
 
-            _deleteIndex = INVALID_INDEX;
-            _deletePoint = null;
-
             if (_PointUpdated && phv) {
                 try {
                     boolean updated = false;
@@ -1149,24 +1145,17 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
     }
 
     private void deleteWithoutMoving() {
-        boolean samePoly = _deletePoint.getPolyCN().equals(_CurrentPolygon.getCN());
+        int deletedIndex = _deleteIndex;
 
         if (deletePoint(_deletePoint, _deleteIndex)) {
-            if (samePoly) {
-                if (_deleteIndex < _CurrentIndex)
-                    _CurrentIndex--;
+            lockPoint(true);
 
-                if (_deleteIndex > 0) {
-                    moveToPoint(_CurrentIndex);
-                } else {
-                    moveToPoint(_CurrentIndex, false);
-                }
-
-                _deleteIndex = INVALID_INDEX;
-                _deletePoint = null;
-
-                lockPoint(true);
+            if (deletedIndex < _CurrentIndex && _CurrentIndex > 0) {
+                moveToPoint(_CurrentIndex - 1);
             }
+
+            _deleteIndex = INVALID_INDEX;
+            _deletePoint = null;
         } else {
             Toast.makeText(this, "Error deleting point.", Toast.LENGTH_SHORT).show();
         }
@@ -1204,6 +1193,14 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
                 if (index > INVALID_INDEX) {
                     _Points.remove(index);
+
+                    ArrayList<TtPoint> update = new ArrayList<>();
+                    for (int i = index; i < _Points.size(); i++) {
+                        TtPoint riPoint = _Points.get(i);
+                        riPoint.setIndex(i);
+                        update.add(riPoint);
+                    }
+                    getTtAppCtx().getDAL().updatePoints(update);
 
                     onPointsChanged();
                 } else {
@@ -1359,6 +1356,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
             try {
                 addedPoint = newPoint.getCN();
+                ignorePointChange = true;
                 onPointsChanged();
                 moveToPoint(_CurrentIndex);
             } catch (Exception e) {
@@ -1605,10 +1603,10 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
     private void moveToPoint(int index, boolean smoothScroll) {
         if (index > INVALID_INDEX && index < _Points.size()) {
-            pointViewPager.setCurrentItem(index, smoothScroll);
             _CurrentPoint = getPointAtIndex(index);
             _CurrentMetadata = getMetadata().get(_CurrentPoint.getMetadataCN());
             _CurrentIndex = index;
+            pointViewPager.setCurrentItem(index, smoothScroll);
         } else {
             _CurrentPoint = null;
             _CurrentMetadata = null;
