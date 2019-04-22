@@ -272,13 +272,9 @@ public class WalkActivity extends AcquireGpsMapActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
-        switch (requestCode) {
-            case Consts.Codes.Activites.SETTINGS: {
-                getTtAppCtx().getGps().startGps();
-                getSettings();
-                break;
-            }
+        if (requestCode == Consts.Codes.Activites.SETTINGS) {
+            getTtAppCtx().getGps().startGps();
+            getSettings();
         }
 
         super.onActivityResult(requestCode, resultCode, data);
