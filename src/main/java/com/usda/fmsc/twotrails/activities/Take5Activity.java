@@ -422,6 +422,10 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                         if (_Polygon == null) {
                             cancelResult = Consts.Codes.Results.NO_POLYGON_DATA;
                         } else {
+                            if (!isTrailModeEnabled()) {
+                                enabledTrailMode(_Polygon);
+                            }
+
                             _Points = getTtAppCtx().getDAL().getPointsInPolygon(_Polygon.getCN());
 
                             if (_Points.size() > 0 && _CurrentPoint != null) {

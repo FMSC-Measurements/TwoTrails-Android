@@ -111,6 +111,10 @@ public class WalkActivity extends AcquireGpsMapActivity {
 
                         if (_Polygon == null) {
                             cancelResult = Consts.Codes.Results.NO_POLYGON_DATA;
+                        } else {
+                            if (!isTrailModeEnabled()) {
+                                enabledTrailMode(_Polygon);
+                            }
                         }
                     }
                 } catch (Exception e) {

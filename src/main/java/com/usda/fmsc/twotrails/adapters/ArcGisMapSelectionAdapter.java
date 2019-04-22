@@ -2,6 +2,7 @@ package com.usda.fmsc.twotrails.adapters;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -56,59 +57,62 @@ public class ArcGisMapSelectionAdapter extends ArrayAdapter<ArcGisMapLayer> {
         return maps.size();
     }
 
+    @NonNull
     @Override
-    public View getView(final int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, @NonNull ViewGroup parent) {
         final ArcGisMapLayer map = getItem(position);
 
-        MapViewHolder holder;
+        if (map != null) {
+            MapViewHolder holder;
 
-        if (convertView == null) {
-            convertView = inflater.inflate(R.layout.content_map_header, null);
+            if (convertView == null) {
+                convertView = inflater.inflate(R.layout.content_map_header, null);
 
-            holder = new MapViewHolder(convertView);
-            convertView.setTag(holder);
+                holder = new MapViewHolder(convertView);
+                convertView.setTag(holder);
 
-            final View fview = convertView;
-            convertView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (selectedView != null) {
-                        selectedView.setSelected(false);
+                final View fview = convertView;
+                convertView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (selectedView != null) {
+                            selectedView.setSelected(false);
+                        }
+
+                        fview.setSelected(true);
+                        selectedView = fview;
+                        selectedIndex = position;
+
+                        if (listener != null) {
+                            listener.onArcGisMapSelected(map);
+                        }
                     }
+                });
 
-                    fview.setSelected(true);
-                    selectedView = fview;
-                    selectedIndex = position;
+                convertView.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View v) {
 
-                    if (listener != null) {
-                        listener.onArcGisMapSelected(map);
+                        new AlertDialog.Builder(getContext())
+                            .setTitle(map.getName())
+                            .setMessage(map.getDescription())
+                            .setPositiveButton(R.string.str_ok, null)
+                            .show();
+                        return true;
                     }
-                }
-            });
+                });
+            } else {
+                holder = (MapViewHolder)convertView.getTag();
+            }
 
-            convertView.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
+            holder.ivStatusIcon.setImageDrawable(map.isOnline() ? dOnline : dOffline);
+            holder.tvName.setText(map.getName());
+            holder.ofmbMenu.setVisibility(View.INVISIBLE);
+            holder.ofmbMenu.setEnabled(false);
 
-                    new AlertDialog.Builder(getContext())
-                        .setTitle(map.getName())
-                        .setMessage(map.getDescription())
-                        .setPositiveButton(R.string.str_ok, null)
-                        .show();
-                    return true;
-                }
-            });
-        } else {
-            holder = (MapViewHolder)convertView.getTag();
-        }
-
-        holder.ivStatusIcon.setImageDrawable(map.isOnline() ? dOnline : dOffline);
-        holder.tvName.setText(map.getName());
-        holder.ofmbMenu.setVisibility(View.INVISIBLE);
-        holder.ofmbMenu.setEnabled(false);
-
-        if (position == selectedIndex) {
-            convertView.setSelected(true);
+            if (position == selectedIndex) {
+                convertView.setSelected(true);
+            }
         }
 
         return  convertView;
@@ -141,7 +145,7 @@ public class ArcGisMapSelectionAdapter extends ArrayAdapter<ArcGisMapLayer> {
         PopupMenuButton ofmbMenu;
         TextView tvName;
 
-        public MapViewHolder(View view) {
+        private MapViewHolder(View view) {
             ivStatusIcon = view.findViewById(R.id.mhIcon);
             ofmbMenu = view.findViewById(R.id.mhMenu);
             tvName = view.findViewById(R.id.mhName);
