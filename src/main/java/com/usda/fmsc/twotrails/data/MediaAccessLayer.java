@@ -36,7 +36,7 @@ public class MediaAccessLayer extends IDataLayer {
     private String _FileName;
     public String getFileName() {
         if (_FileName == null) {
-            _FileName = FileUtils.getFileNameWoType(_FilePath);
+            _FileName = FileUtils.getFileNameWoExt(_FilePath);
         }
         return _FileName;
     }

@@ -114,6 +114,17 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
                     _Metadata = bundle.getParcelable(Consts.Codes.Data.METADATA_DATA);
                 }
 
+                if (_Point == null) {
+                    setResult(Consts.Codes.Results.NO_POINT_DATA);
+                    finish();
+                    return;
+                }
+                if (_Metadata == null) {
+                    setResult(Consts.Codes.Results.NO_METDATA_DATA);
+                    finish();
+                    return;
+                }
+
                 setZone(_Metadata.getZone());
 
                 if (intent.getExtras().containsKey(Consts.Codes.Data.ADDITIVE_NMEA_DATA)) {
@@ -338,12 +349,9 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == Consts.Codes.Activites.CALCULATE) {
-            switch (resultCode) {
-                case Consts.Codes.Results.POINT_CREATED: {
-                    setResult(Consts.Codes.Results.POINT_CREATED, data);
-                    finish();
-                    break;
-                }
+            if (resultCode == Consts.Codes.Results.POINT_CREATED) {
+                setResult(Consts.Codes.Results.POINT_CREATED, data);
+                finish();
             }
         }
     }

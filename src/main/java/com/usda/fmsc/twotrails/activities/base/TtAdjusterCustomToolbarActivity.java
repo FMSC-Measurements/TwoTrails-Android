@@ -12,9 +12,8 @@ import android.widget.Toast;
 
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.logic.PolygonAdjuster;
-import com.usda.fmsc.twotrails.utilities.TtUtils;
 
-public abstract class TtAjusterCustomToolbarActivity extends CustomToolbarActivity implements PolygonAdjuster.Listener {
+public abstract class TtAdjusterCustomToolbarActivity extends CustomToolbarActivity implements PolygonAdjuster.Listener {
     private ProgressDialog pd;
     private MenuItem miAdjust;
     private AnimationDrawable adAdjust;

@@ -35,10 +35,8 @@ import com.usda.fmsc.android.utilities.DeviceOrientationEx;
 import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.twotrails.BuildConfig;
 import com.usda.fmsc.twotrails.Consts;
-import com.usda.fmsc.twotrails.DeviceSettings;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.activities.GetDirectionActivity;
-import com.usda.fmsc.twotrails.activities.MainActivity;
 import com.usda.fmsc.twotrails.activities.TtCameraActivity;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
 import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment;
@@ -67,7 +65,6 @@ import org.joda.time.format.DateTimeFormat;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -1116,7 +1113,7 @@ public class TtUtils {
                     if (time == null)
                         time = new DateTime(new File(filePath).lastModified());
 
-                    String name = FileUtils.getFileNameWoType(filePath);
+                    String name = FileUtils.getFileNameWoExt(filePath);
 
                     if (type == PictureType.Panorama) {
                         return new TtPanorama(name, filePath, time, pointCN, true);

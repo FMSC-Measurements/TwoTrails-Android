@@ -128,6 +128,7 @@
     <string name="str_mag_dec">Mag Dec</string>
     <string name="str_img_info">Media Info</string>
     <string name="str_uom">UOM</string>
+    <string name="str_rand">Random</string>
 
     <string name="zero">0</string>
     <string name="str_x">X</string>

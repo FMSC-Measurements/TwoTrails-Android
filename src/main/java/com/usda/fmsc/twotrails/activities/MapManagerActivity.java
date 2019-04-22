@@ -62,49 +62,44 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
 
         setContentView(R.layout.activity_map_manager);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            getWindow().getSharedElementReenterTransition().addListener(new Transition.TransitionListener() {
-                @Override
-                public void onTransitionStart(Transition transition) {
+        getWindow().getSharedElementReenterTransition().addListener(new Transition.TransitionListener() {
+            @Override
+            public void onTransitionStart(Transition transition) {
 
+            }
+
+            @Override
+            public void onTransitionEnd(Transition transition) {
+                inDetails = false;
+
+                if (notifyAdapter > -1) {
+                    adapter.notifyItemRemoved(notifyAdapter);
+                    notifyAdapter = -1;
                 }
+            }
 
-                @Override
-                public void onTransitionEnd(Transition transition) {
-                    inDetails = false;
+            @Override
+            public void onTransitionCancel(Transition transition) {
 
-                    if (notifyAdapter > -1) {
-                        adapter.notifyItemRemoved(notifyAdapter);
-                        notifyAdapter = -1;
-                    }
-                }
+            }
 
-                @Override
-                public void onTransitionCancel(Transition transition) {
+            @Override
+            public void onTransitionPause(Transition transition) {
 
-                }
+            }
 
-                @Override
-                public void onTransitionPause(Transition transition) {
+            @Override
+            public void onTransitionResume(Transition transition) {
 
-                }
+            }
+        });
 
-                @Override
-                public void onTransitionResume(Transition transition) {
-
-                }
-            });
-        }
-
-        maps = new ArrayList<>(getTtAppCtx().getInstance().getArcGISTools().getMapLayers());
+        maps = new ArrayList<>(getTtAppCtx().getArcGISTools().getMapLayers());
         visibleMaps = new ArrayList<>();
 
         Collections.sort(maps);
 
-        for (ArcGisMapLayer layer : maps) {
-            visibleMaps.add(layer);
-        }
-
+        visibleMaps.addAll(maps);
 
         RecyclerViewEx rvMaps = findViewById(R.id.mmRvMaps);
 
@@ -179,11 +174,15 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
 
         for (int i = 0; i < maps.size(); i++) {
             if (!mr && maps.get(i).getId() == layer.getId()) {
-                maps.remove(i);
                 mr = true;
             }
 
             if (!vmr && visibleMaps.get(i).getId() == layer.getId()) {
+                vmr = true;
+            }
+
+            if (vmr && mr) {
+                maps.remove(i);
                 visibleMaps.remove(i);
 
                 if (!inDetails || !fromMapDetails)
@@ -191,10 +190,6 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
                 else
                     notifyAdapter = i;
 
-                vmr = true;
-            }
-
-            if (vmr && mr) {
                 break;
             }
         }
@@ -361,7 +356,7 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
         private Drawable dOffline, dOnline, dOfflineInvalid;
         private LayoutInflater inflater;
 
-        public ArcGisMapAdapter(Context context) {
+        private ArcGisMapAdapter(Context context) {
             super(context);
 
             inflater = LayoutInflater.from(context);
@@ -385,13 +380,13 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
             return visibleMaps.size();
         }
 
-        class MapViewHolder extends RecyclerViewEx.ViewHolderEx {
+        private class MapViewHolder extends RecyclerViewEx.ViewHolderEx {
             ImageView ivStatusIcon;
             PopupMenuButton ofmbMenu;
             TextView tvName;
             View lay;
 
-            public MapViewHolder(View view) {
+            private MapViewHolder(View view) {
                 super(view);
 
                 ivStatusIcon = view.findViewById(R.id.mhIcon);
@@ -400,7 +395,7 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
                 lay = view.findViewById(R.id.lay1);
             }
 
-            public void bind(final ArcGisMapLayer layer) {
+            private void bind(final ArcGisMapLayer layer) {
                 ivStatusIcon.setImageDrawable(layer.isOnline() ? dOnline :
                         layer.hasValidFile() ? dOffline : dOfflineInvalid);
                 tvName.setText(layer.getName());

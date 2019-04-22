@@ -8,7 +8,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
@@ -29,7 +28,7 @@ import com.usda.fmsc.android.dialogs.InputDialog;
 import com.usda.fmsc.twotrails.BuildConfig;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.activities.base.TtAjusterCustomToolbarActivity;
+import com.usda.fmsc.twotrails.activities.base.TtAdjusterCustomToolbarActivity;
 import com.usda.fmsc.twotrails.adapters.RecentProjectAdapter;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
 import com.usda.fmsc.twotrails.data.DataAccessUpgrader;
@@ -46,10 +45,9 @@ import com.usda.fmsc.utilities.StringEx;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Set;
 
 
-public class MainActivity extends TtAjusterCustomToolbarActivity {
+public class MainActivity extends TtAdjusterCustomToolbarActivity {
     private View progressLayout;
 
     private MainFileFragment mFragFile;
@@ -761,12 +759,12 @@ public class MainActivity extends TtAjusterCustomToolbarActivity {
 
             String filepath = getTtAppCtx().getDAL().getFilePath();
 
-            String dupFile = String.format("%s_bk%s", filepath.substring(0, filepath.length() - 4), Consts.FILE_EXTENSION);
+            String dupFile = String.format("%s_bk%s", FileUtils.getFilePathWoExt(filepath), Consts.FILE_EXTENSION);
             int inc = 2;
 
             while (true) {
                 if (FileUtils.fileExists(dupFile)) {
-                    dupFile = StringEx.format("%s_bk%d%s", filepath.substring(0, filepath.length() - 4), inc, Consts.FILE_EXTENSION);
+                    dupFile = StringEx.format("%s_bk%d%s", FileUtils.getFilePathWoExt(filepath), inc, Consts.FILE_EXTENSION);
                     inc++;
                     continue;
                 }

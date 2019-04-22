@@ -56,7 +56,7 @@ public class DataAccessLayer extends IDataLayer {
     private String _FileName;
     public String getFileName() {
         if (_FileName == null) {
-            _FileName = FileUtils.getFileNameWoType(_FilePath);
+            _FileName = FileUtils.getFileNameWoExt(_FilePath);
         }
         return _FileName;
     }
@@ -2269,15 +2269,15 @@ public class DataAccessLayer extends IDataLayer {
 
             cvs.put(TwoTrailsSchema.ProjectInfoSchema.CreatedTtVersion, version);
 
-            cvs.put(TwoTrailsSchema.ProjectInfoSchema.Region, ps.getRegion());
+            cvs.put(TwoTrailsSchema.ProjectInfoSchema.Region, StringEx.Empty);
 
             cvs.put(TwoTrailsSchema.ProjectInfoSchema.ID, getFileName());
 
             cvs.put(TwoTrailsSchema.ProjectInfoSchema.DeviceID, TtUtils.getDeviceName());
 
-            cvs.put(TwoTrailsSchema.ProjectInfoSchema.Forest, ps.getForest());
+            cvs.put(TwoTrailsSchema.ProjectInfoSchema.Forest, StringEx.Empty);
 
-            cvs.put(TwoTrailsSchema.ProjectInfoSchema.District, ps.getDistrict());
+            cvs.put(TwoTrailsSchema.ProjectInfoSchema.District, StringEx.Empty);
 
             cvs.put(TwoTrailsSchema.ProjectInfoSchema.Description, StringEx.Empty);
 

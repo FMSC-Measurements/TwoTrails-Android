@@ -203,8 +203,11 @@ public class PlotGridActivity extends CustomToolbarActivity {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                     if (selectedPoly != null) {
-                        if (position > 0) {
-                            pointSelected(polyPoints.get(selectedPoly.getCN()).get(position - 1));
+                        if (position > 0 && polyPoints.containsKey(selectedPoly.getCN())) {
+                            List<TtPoint> points = polyPoints.get(selectedPoly.getCN());
+                            if (points != null){
+                                pointSelected(points.get(position - 1));
+                            }
                         } else {
                             pointSelected(null);
                         }
@@ -242,10 +245,8 @@ public class PlotGridActivity extends CustomToolbarActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home: {
-                finish();
-            }
+        if (item.getItemId() == android.R.id.home) {
+            finish();
         }
 
         return super.onOptionsItemSelected(item);
@@ -361,28 +362,32 @@ public class PlotGridActivity extends CustomToolbarActivity {
 
         List<TtPoint> points = polyPoints.get(selectedPoly.getCN());
 
-        PlotGenerator.PlotParams params = new PlotGenerator.PlotParams(
-                polyName,
-                startPoint != null ? startPoint : points.get(random.nextInt(points.size() - 1)),
-                points,
-                selectedDist,
-                gridX,
-                gridY,
-                angle,
-                metadata.get(Consts.EmptyGuid),
-                inside,
-                sample
-        );
+        if (points != null) {
+            PlotGenerator.PlotParams params = new PlotGenerator.PlotParams(
+                    polyName,
+                    startPoint != null ? startPoint : points.get(random.nextInt(points.size() - 1)),
+                    points,
+                    selectedDist,
+                    gridX,
+                    gridY,
+                    angle,
+                    metadata.get(Consts.EmptyGuid),
+                    inside,
+                    sample
+            );
 
-        if (sample) {
-            params.setSamplePercent(spnSampleType.getSelectedItemPosition() > 0);
-            params.setSampleValue(ParseEx.parseInteger(txtSubSample.getText().toString()));
+            if (sample) {
+                params.setSamplePercent(spnSampleType.getSelectedItemPosition() > 0);
+                params.setSampleValue(ParseEx.parseInteger(txtSubSample.getText().toString()));
+            }
+
+            generator = new PlotGenerator(getTtAppCtx().getDAL(), metadata, plotGenListener);
+            generator.execute(params);
+            layControls.setEnabled(false);
+            progressBar.setVisibility(View.VISIBLE);
+        } else {
+            Toast.makeText(PlotGridActivity.this, "No Points in selected polygon.", Toast.LENGTH_LONG).show();
         }
-
-        generator = new PlotGenerator(getTtAppCtx().getDAL(), metadata, plotGenListener);
-        generator.execute(params);
-        layControls.setEnabled(false);
-        progressBar.setVisibility(View.VISIBLE);
     }
 
 
@@ -489,12 +494,11 @@ public class PlotGridActivity extends CustomToolbarActivity {
 
             if (value < 1) {
                 txtSubSample.requestFocus();
-
-                if (percent && value > 100) {
-                    Toast.makeText(this, "Sample requires a percentage between 1 and 100", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(this, "Sample requires a value greater than 0", Toast.LENGTH_SHORT).show();
-                }
+                Toast.makeText(this, "Sample requires a value greater than 0", Toast.LENGTH_SHORT).show();
+                return false;
+            } else if (percent && value > 100) {
+                txtSubSample.requestFocus();
+                Toast.makeText(this, "Sample requires a percentage between 1 and 100", Toast.LENGTH_SHORT).show();
                 return false;
             }
         }
@@ -520,7 +524,7 @@ public class PlotGridActivity extends CustomToolbarActivity {
         private boolean showPolygon = false;
         private int itemView;
 
-        public PointDetailsSkip1SpinnerAdapter(List<TtPoint> points, Context context, AppUnits.IconColor iconColor, int itemView) {
+        private PointDetailsSkip1SpinnerAdapter(List<TtPoint> points, Context context, AppUnits.IconColor iconColor, int itemView) {
             this.points = points;
             this.context = context;
             this.itemView = itemView;
@@ -562,7 +566,7 @@ public class PlotGridActivity extends CustomToolbarActivity {
 
                 mViewHolder.text.setText(String.format("%d", point.getPID()));
             } else {
-                mViewHolder.text.setText("Random");
+                mViewHolder.text.setText(R.string.str_rand);
             }
 
             return convertView;
@@ -592,7 +596,7 @@ public class PlotGridActivity extends CustomToolbarActivity {
                         showPolygon ? " - " + point.getPolyName() : StringEx.Empty));
             } else {
                 mViewHolder.image.setVisibility(View.INVISIBLE);
-                mViewHolder.text.setText("Random");
+                mViewHolder.text.setText(R.string.str_rand);
             }
 
             return convertView;
