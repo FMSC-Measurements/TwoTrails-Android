@@ -548,7 +548,7 @@ public class TableViewActivity extends CustomToolbarActivity {
 
         int pidHeaderSize, cellHeight;
 
-        public PointsTableAdapter(Context context) {
+        private PointsTableAdapter(Context context) {
             this.context = context;
             inflater = LayoutInflater.from(context);
             pidHeaderSize = AndroidUtils.Convert.dpToPx(context, 50);
@@ -627,6 +627,14 @@ public class TableViewActivity extends CustomToolbarActivity {
             return (row > -1 && row < _DisplayedPoints.size()) ? Integer.toString(_DisplayedPoints.get(row).getPID()) : "PID";
         }
 
+        private TtMetadata getMetadata(String cn) {
+            if (_Metadata.containsKey(cn)) {
+                return _Metadata.get(cn);
+            }
+
+            throw new RuntimeException("Metadata NotFound");
+        }
+
         private String getValue(int row, int columnKey) {
             TtPoint point = _DisplayedPoints.get(row);
 
@@ -650,7 +658,7 @@ public class TableViewActivity extends CustomToolbarActivity {
                     return StringEx.toString(point.getAdjY(), 4);
                 case 8:
                     return (point.getAdjZ() != null) ? StringEx.toString(
-                            TtUtils.Convert.distance(point.getAdjZ(), TtUtils.Convert.elevationToDistance(_Metadata.get(point.getMetadataCN()).getElevation()), Dist.Meters),
+                            TtUtils.Convert.distance(point.getAdjZ(), TtUtils.Convert.elevationToDistance(getMetadata(point.getMetadataCN()).getElevation()), Dist.Meters),
                             4) : StringEx.Empty;
                 case 9:
                     return StringEx.toString(point.getUnAdjX(), 4);
@@ -658,7 +666,7 @@ public class TableViewActivity extends CustomToolbarActivity {
                     return StringEx.toString(point.getUnAdjY(), 4);
                 case 11:
                     return StringEx.toString(
-                            TtUtils.Convert.distance(point.getUnAdjZ(), TtUtils.Convert.elevationToDistance(_Metadata.get(point.getMetadataCN()).getElevation()), Dist.Meters),
+                            TtUtils.Convert.distance(point.getUnAdjZ(), TtUtils.Convert.elevationToDistance(getMetadata(point.getMetadataCN()).getElevation()), Dist.Meters),
                             4);
                 case 12:
                     return StringEx.toString(point.getAccuracy(), 2);
@@ -676,15 +684,15 @@ public class TableViewActivity extends CustomToolbarActivity {
                     return (point instanceof TravPoint) ? StringEx.toString(((TravPoint)point).getBkAz(), 2) : StringEx.Empty;
                 case 19:
                     return (point instanceof TravPoint) ? StringEx.toString(
-                            TtUtils.Convert.distance(((TravPoint)point).getHorizontalDistance(), _Metadata.get(point.getMetadataCN()).getDistance(), Dist.Meters),
+                            TtUtils.Convert.distance(((TravPoint)point).getHorizontalDistance(), getMetadata(point.getMetadataCN()).getDistance(), Dist.Meters),
                             3) : StringEx.Empty;
                 case 20:
                     return (point instanceof TravPoint) ? StringEx.toString(
-                            TtUtils.Convert.distance(((TravPoint)point).getSlopeDistance(), _Metadata.get(point.getMetadataCN()).getDistance(), Dist.Meters),
+                            TtUtils.Convert.distance(((TravPoint)point).getSlopeDistance(), getMetadata(point.getMetadataCN()).getDistance(), Dist.Meters),
                             3) : StringEx.Empty;
                 case 21:
                     return (point instanceof TravPoint) ? StringEx.toString(
-                            TtUtils.Convert.angle(((TravPoint)point).getSlopeAngle(), _Metadata.get(point.getMetadataCN()).getSlope(), Slope.Percent),
+                            TtUtils.Convert.angle(((TravPoint)point).getSlopeAngle(), getMetadata(point.getMetadataCN()).getSlope(), Slope.Percent),
                             3) : StringEx.Empty;
                 case 22:
                     if (point instanceof QuondamPoint) {
@@ -725,14 +733,14 @@ public class TableViewActivity extends CustomToolbarActivity {
                     return StringEx.toString(point.getAdjY());
                 case 8:
                     return (point.getAdjZ() != null) ? StringEx.toString(
-                            TtUtils.Convert.distance(point.getAdjZ(), _Metadata.get(point.getMetadataCN()).getDistance(), Dist.Meters)) : StringEx.Empty;
+                            TtUtils.Convert.distance(point.getAdjZ(), getMetadata(point.getMetadataCN()).getDistance(), Dist.Meters)) : StringEx.Empty;
                 case 9:
                     return StringEx.toString(point.getUnAdjX());
                 case 10:
                     return StringEx.toString(point.getUnAdjY());
                 case 11:
                     return StringEx.toString(
-                            TtUtils.Convert.distance(point.getUnAdjZ(), _Metadata.get(point.getMetadataCN()).getDistance(), Dist.Meters));
+                            TtUtils.Convert.distance(point.getUnAdjZ(), getMetadata(point.getMetadataCN()).getDistance(), Dist.Meters));
                 case 12:
                     return StringEx.toString(point.getAccuracy());
                 case 13:
@@ -749,13 +757,13 @@ public class TableViewActivity extends CustomToolbarActivity {
                     return (point instanceof TravPoint) ? StringEx.toString(((TravPoint)point).getBkAz()) : StringEx.Empty;
                 case 19:
                     return (point instanceof TravPoint) ? StringEx.toString(
-                            TtUtils.Convert.distance(((TravPoint)point).getHorizontalDistance(), _Metadata.get(point.getMetadataCN()).getDistance(), Dist.Meters)) : StringEx.Empty;
+                            TtUtils.Convert.distance(((TravPoint)point).getHorizontalDistance(), getMetadata(point.getMetadataCN()).getDistance(), Dist.Meters)) : StringEx.Empty;
                 case 20:
                     return (point instanceof TravPoint) ? StringEx.toString(
-                            TtUtils.Convert.distance(((TravPoint)point).getSlopeDistance(), _Metadata.get(point.getMetadataCN()).getDistance(), Dist.Meters)) : StringEx.Empty;
+                            TtUtils.Convert.distance(((TravPoint)point).getSlopeDistance(), getMetadata(point.getMetadataCN()).getDistance(), Dist.Meters)) : StringEx.Empty;
                 case 21:
                     return (point instanceof TravPoint) ? StringEx.toString(
-                            TtUtils.Convert.angle(((TravPoint)point).getSlopeAngle(), _Metadata.get(point.getMetadataCN()).getSlope(), Slope.Percent)) : StringEx.Empty;
+                            TtUtils.Convert.angle(((TravPoint)point).getSlopeAngle(), getMetadata(point.getMetadataCN()).getSlope(), Slope.Percent)) : StringEx.Empty;
                 case 22:
                     if (point instanceof QuondamPoint) {
                         QuondamPoint qp = ((QuondamPoint)point);
@@ -804,7 +812,7 @@ public class TableViewActivity extends CustomToolbarActivity {
     }
 
     public static class ViewOptions {
-        public boolean OpType, Index, Polygon,
+        private boolean OpType, Index, Polygon,
                 DateTime, OnBound, Metadata, AdjX, AdjY, AdjZ,
                 UnAdjX, UnAdjY, UnAdjZ, Accuracy, ManAcc, Latitude, Longitude,
                 Elevation, FwdAz, BkAz, HorizDist, SlopeDist,
@@ -866,7 +874,7 @@ public class TableViewActivity extends CustomToolbarActivity {
             };
         }
 
-        public void setOption(int position, boolean value) {
+        private void setOption(int position, boolean value) {
             switch (position) {
                 case 0:
                     OpType = value;
