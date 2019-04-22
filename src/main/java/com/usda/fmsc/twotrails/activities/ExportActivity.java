@@ -33,7 +33,6 @@ import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.io.File;
 import java.util.List;
-import java.util.TimerTask;
 
 public class ExportActivity extends CustomToolbarActivity {
     private MultiStateTouchCheckBox chkAll, chkPoints, chkPolys, chkMeta, chkProj, chkNmea, chkKmz, chkGpx, chkSum, chkImgInfo, chkPc;
@@ -96,10 +95,8 @@ public class ExportActivity extends CustomToolbarActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home: {
-                finish();
-            }
+        if (item.getItemId() == android.R.id.home) {
+            finish();
         }
 
         return super.onOptionsItemSelected(item);
@@ -116,7 +113,7 @@ public class ExportActivity extends CustomToolbarActivity {
             if (directoryUri != null) {
                 DocumentFile dir = DocumentFile.fromTreeUri(this, directoryUri);
 
-                if (dir.isDirectory()) {
+                if (dir != null && dir.isDirectory()) {
                     startExport(dir.getUri().getPath(), true);
                     noDir = false;
                 }

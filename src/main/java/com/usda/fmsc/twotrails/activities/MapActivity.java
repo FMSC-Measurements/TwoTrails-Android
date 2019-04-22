@@ -60,11 +60,8 @@ public class MapActivity extends BaseMapActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.mapMenuWhereIs: {
-                fabMyPos.hide();
-                break;
-            }
+        if (item.getItemId() == R.id.mapMenuWhereIs) {
+            fabMyPos.hide();
         }
 
         return super.onOptionsItemSelected(item);

@@ -1113,13 +1113,13 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         }
 
         if (mGravity != null && mGeomagnetic != null && currentLocation != null && targetLocation != null) {
-            float R[] = new float[9];
-            float I[] = new float[9];
+            float[] R = new float[9];
+            float[] I = new float[9];
 
             boolean success = SensorManager.getRotationMatrix(R, I, mGravity, mGeomagnetic);
 
             if (success) {
-                float orientation[] = new float[9];
+                float[] orientation = new float[9];
                 SensorManager.getOrientation(R, orientation);
 
                 float azimuth = Double.valueOf(Math.toDegrees(orientation[0])).floatValue();
@@ -1724,7 +1724,12 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
                 double distInFt = TtUtils.Convert.toFeetTenths(distInMt, Dist.Meters);
 
                 double azimuth = TtUtils.Math.azimuthOfPoint(currPos.getX(), currPos.getY(), toPoint.getUnAdjX(), toPoint.getUnAdjY());
-                double azMag = azimuth - getMetadata().get(toPoint.getMetadataCN()).getMagDec();
+
+                TtMetadata meta = getMetadata().get(toPoint.getMetadataCN());
+                if (meta == null)
+                    throw new RuntimeException("Metadata not found");
+
+                double azMag = azimuth - meta.getMagDec();
 
                 tvNavDistFt.setText(StringEx.toString(distInFt, 2));
                 tvNavDistMt.setText(StringEx.toString(distInMt, 2));

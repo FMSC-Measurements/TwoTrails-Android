@@ -262,44 +262,35 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
 
     @Override
     public void gpsError(GpsService.GpsError error) {
-        switch (error) {
-            case LostDeviceConnection: {
-                AndroidUtils.Device.vibrate(this, Consts.Notifications.VIB_PATTERN_GPS_LOST_CONNECTED);
+        if (error == GpsService.GpsError.LostDeviceConnection) {
+            AndroidUtils.Device.vibrate(this, Consts.Notifications.VIB_PATTERN_GPS_LOST_CONNECTED);
+            AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+            final Activity activity = this;
+            dialog.setTitle("GPS Connection Lost");
+            dialog.setMessage("The GPS bluetooth connection has been broken. Would you like to try and reestablish the connection?");
+            dialog.setPositiveButton("Connect", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    GpsService.GpsDeviceStatus status = binder.startGps();
 
-                AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-
-                final Activity activity = this;
-
-                dialog.setTitle("GPS Connection Lost");
-                dialog.setMessage("The GPS bluetooth connection has been broken. Would you like to try and reestablith the connection?");
-
-                dialog.setPositiveButton("Connect", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        GpsService.GpsDeviceStatus status = binder.startGps();
-
-                        if (status != GpsService.GpsDeviceStatus.ExternalGpsStarted &&
-                                status != GpsService.GpsDeviceStatus.InternalGpsStarted) {
-                            Toast.makeText(GpsStatusActivity.this, "Unabled to conenct to GPS.", Toast.LENGTH_SHORT).show();
-                            activity.setResult(RESULT_CANCELED);
-                            activity.finish();
-                        } else {
-                            AndroidUtils.Device.vibrate(getApplicationContext(), Consts.Notifications.VIB_PATTERN_GPS_CONNECTED);
-                        }
-                    }
-                });
-
-                dialog.setNegativeButton(R.string.str_exit, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
+                    if (status != GpsService.GpsDeviceStatus.ExternalGpsStarted &&
+                            status != GpsService.GpsDeviceStatus.InternalGpsStarted) {
+                        Toast.makeText(GpsStatusActivity.this, "Unabled to conenct to GPS.", Toast.LENGTH_SHORT).show();
                         activity.setResult(RESULT_CANCELED);
                         activity.finish();
+                    } else {
+                        AndroidUtils.Device.vibrate(getApplicationContext(), Consts.Notifications.VIB_PATTERN_GPS_CONNECTED);
                     }
-                });
-
-                dialog.show();
-                break;
-            }
+                }
+            });
+            dialog.setNegativeButton(R.string.str_exit, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    activity.setResult(RESULT_CANCELED);
+                    activity.finish();
+                }
+            });
+            dialog.show();
         }
     }
 

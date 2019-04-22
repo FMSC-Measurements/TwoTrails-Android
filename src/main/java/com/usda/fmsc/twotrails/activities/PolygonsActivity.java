@@ -17,7 +17,7 @@ import com.usda.fmsc.android.adapters.FragmentStatePagerAdapterEx;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.listeners.ComplexOnPageChangeListener;
 import com.usda.fmsc.twotrails.Consts;
-import com.usda.fmsc.twotrails.activities.base.TtAjusterCustomToolbarActivity;
+import com.usda.fmsc.twotrails.activities.base.TtAdjusterCustomToolbarActivity;
 import com.usda.fmsc.twotrails.data.TwoTrailsSchema;
 import com.usda.fmsc.twotrails.fragments.AnimationCardFragment;
 import com.usda.fmsc.twotrails.fragments.polygon.PolygonFragment;
@@ -37,7 +37,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.usda.fmsc.utilities.StringEx;
 import com.usda.fmsc.utilities.Tuple;
 
-public class PolygonsActivity extends TtAjusterCustomToolbarActivity {
+public class PolygonsActivity extends TtAdjusterCustomToolbarActivity {
     private HashMap<String, Listener> listeners;
 
     private MenuItem miLock, miReset, miDelete, miAdjust;

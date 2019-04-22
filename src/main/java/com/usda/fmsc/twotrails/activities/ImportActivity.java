@@ -181,12 +181,11 @@ public class ImportActivity extends CustomToolbarActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        switch (requestCode) {
-            case Consts.Codes.Requests.OPEN_FILE: {
-                if (data != null) {
-                    updateFileName(data.getData().getPath());
-                }
-                break;
+        if (requestCode == Consts.Codes.Requests.OPEN_FILE) {
+            if (data != null && data.getData() != null && data.getData().getPath() != null) {
+                updateFileName(data.getData().getPath());
+            } else {
+                Toast.makeText(ImportActivity.this, "Unable to update file name.", Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -249,12 +248,8 @@ public class ImportActivity extends CustomToolbarActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
-        switch (item.getItemId()) {
-            case android.R.id.home: {
-                super.onBackPressed();
-                break;
-            }
+        if (item.getItemId() == android.R.id.home) {
+            super.onBackPressed();
         }
 
         return super.onOptionsItemSelected(item);

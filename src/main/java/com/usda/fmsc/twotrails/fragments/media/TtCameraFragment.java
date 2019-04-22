@@ -100,7 +100,7 @@ public class TtCameraFragment extends CameraFragment {
     protected void onImageSaved(String filePath) {
         super.onImageSaved(filePath);
 
-        String name = FileUtils.getFileNameWoType(filePath);
+        String name = FileUtils.getFileNameWoExt(filePath);
 
         PictureType type  = PictureType.Regular;
 

@@ -66,14 +66,12 @@
                 <TextView
                     android:text="@string/str_online_map"
                     android:drawableStart="@drawable/ic_online_primary_36"
-                    android:drawableLeft="@drawable/ic_online_primary_36"
                     android:onClick="btnMmAddOnlineClick"
                     style="@style/pointsTvOptionStyle"/>
 
                 <TextView
                     android:text="@string/str_offline_map"
                     android:drawableStart="@drawable/ic_offline_primary_36"
-                    android:drawableLeft="@drawable/ic_offline_primary_36"
                     android:onClick="btnMmAddOfflineClick"
                     style="@style/pointsTvOptionStyle"/>
             </LinearLayout>
