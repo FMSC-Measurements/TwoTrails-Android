@@ -79,10 +79,10 @@ public class GpxTracksAdapter extends RecyclerViewEx.AdapterEx<SimpleMultiSelect
 
 
     public abstract class GpxBaseTrackHolder extends SimpleMultiSelectorBindingHolder implements MultiStateTouchCheckBox.OnCheckedStateChangeListener {
-        protected MultiStateTouchCheckBox mcb;
-        protected TextView tvName, tvPointCount;
+        private MultiStateTouchCheckBox mcb;
+        private TextView tvName, tvPointCount;
 
-        protected GpxBaseTrack track;
+        private GpxBaseTrack track;
 
         protected boolean selected;
 

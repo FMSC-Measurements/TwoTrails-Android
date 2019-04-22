@@ -75,18 +75,26 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
             Intent intent = getIntent();
 
             if (intent != null) {
-                if (intent.hasExtra(Consts.Codes.Data.POLYGON_DATA))
+                if (intent.hasExtra(Consts.Codes.Data.POLYGON_DATA)) {
                     _Polygon = intent.getParcelableExtra(Consts.Codes.Data.POLYGON_DATA);
+                }
 
-                    if (_Polygon == null) {
-                        trailModeEnabled = false;
-                    }
+//                else if (intent.hasExtra(Consts.Codes.Data.POINT_PACKAGE)) {
+//                    Bundle bundle = intent.getExtras();
+//                    if (bundle != null && bundle.containsKey(Consts.Codes.Data.POLYGON_DATA)) {
+//                        _Polygon = bundle.getParcelable(Consts.Codes.Data.POLYGON_DATA);
+//                    }
+//                }
 
-                    super.onCreate(savedInstanceState);
+                if (_Polygon == null) {
+                    trailModeEnabled = false;
+                }
 
-                    if (trailModeEnabled) {
-                        setupTrailMode(_Polygon);
-                    }
+                super.onCreate(savedInstanceState);
+
+                if (trailModeEnabled) {
+                    setupTrailMode(_Polygon);
+                }
             } else {
                 canceling = true;
             }

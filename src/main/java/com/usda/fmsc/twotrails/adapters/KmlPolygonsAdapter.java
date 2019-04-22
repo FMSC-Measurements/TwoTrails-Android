@@ -64,8 +64,8 @@ public class KmlPolygonsAdapter extends RecyclerViewEx.AdapterEx<SimpleMultiSele
 
 
     public class KmlPolygonHolder extends SimpleMultiSelectorBindingHolder implements MultiStateTouchCheckBox.OnCheckedStateChangeListener {
-        protected MultiStateTouchCheckBox mcb;
-        protected TextView tvName, tvPointCount;
+        private MultiStateTouchCheckBox mcb;
+        private TextView tvName, tvPointCount;
 
         protected Polygon polygon;
 

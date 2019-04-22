@@ -1,6 +1,7 @@
 package com.usda.fmsc.twotrails.adapters;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,8 +35,9 @@ public class CheckablePolygonAdapter extends ArrayAdapter<TtPolygon> {
         inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
+    @NonNull
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(int position, View convertView, @NonNull ViewGroup parent) {
         ViewHolder holder;
         final Tuple<TtPolygon, Boolean> polygon = _Polygons.get(position);
 
@@ -74,10 +76,10 @@ public class CheckablePolygonAdapter extends ArrayAdapter<TtPolygon> {
 
 
     private static class ViewHolder {
-        public CheckBox checkBox;
-        public TextView textView;
+        private CheckBox checkBox;
+        private TextView textView;
 
-        public ViewHolder(View view) {
+        private ViewHolder(View view) {
             checkBox = view.findViewById(R.id.checkBox1);
             textView = view.findViewById(R.id.text1);
         }

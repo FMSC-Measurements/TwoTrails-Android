@@ -144,7 +144,7 @@ public class GoogleMapSelectionAdapter extends BaseAdapter {
         PopupMenuButton ofmbMenu;
         ImageView ivMhIcon;
 
-        public MapViewHolder(View view) {
+        private MapViewHolder(View view) {
             tvName = view.findViewById(R.id.mhName);
             ofmbMenu = view.findViewById(R.id.mhMenu);
             ivMhIcon = view.findViewById(R.id.mhIcon);
