@@ -21,14 +21,19 @@ import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.fragments.AnimationCardFragment;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.objects.PointD;
+import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
+import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.ui.StaticPolygonView;
 import com.usda.fmsc.twotrails.units.Dist;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import com.usda.fmsc.utilities.ParseEx;
 import com.usda.fmsc.utilities.StringEx;
+import com.usda.fmsc.utilities.Tuple;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class PolygonFragment extends AnimationCardFragment implements PolygonsActivity.Listener {
@@ -97,6 +102,7 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
 
         scrollView = view.findViewById(R.id.polyFragScrollView);
         spv = view.findViewById(R.id.polySPView);
+        spv.setFrag(this);
 
         viewPreFocus = view.findViewById(R.id.preFocusView);
 
@@ -105,8 +111,9 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
                 view.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                     @Override
                     public void onGlobalLayout() {
-                        if (activity != null)
-                            activity.getDrawPoints(_Polygon, spv.getWidth(), false);
+//                        if (activity != null)
+//                            activity.getDrawPoints(_Polygon, spv.getWidth(), false);
+                        onPolygonPointsUpdated();
                         view.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                     }
                 });
@@ -317,13 +324,27 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
     }
 
     @Override
-    public void onPolygonPointsUpdated(TtPolygon polygon) {
-        List<PointD> polyPoints = activity.getDrawPoints(_Polygon, spv.getWidth(), false);
+    public void onPolygonPointsUpdated() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if (_Polygon != null) {
+                    TwoTrailsApp TtAppCtx = TwoTrailsApp.getInstance();
+                    if (TwoTrailsApp.getInstance().getDAL().getBoundaryPointsCountInPoly(_PolyCN) > 2) {
+                        final ArrayList<TtPoint> points = TtAppCtx.getDAL().getBoundaryPointsInPoly(_Polygon.getCN());
 
-        if (polyPoints != null)
-            spv.render(polyPoints);
+                        if (points != null && points.size() > 2) {
+                            HashMap<String, TtMetadata> metadata = TtAppCtx.getDAL().getMetadataMap();
+                            TtMetadata defMeta = metadata.get(Consts.EmptyGuid);
+                            if (defMeta != null) {
+                                spv.render(TtUtils.UI.generateStaticPolyPoints(points, metadata, defMeta.getZone(), (int)(spv.getWidth() * 0.9)));
+                            }
+                        }
+                    }
+                }
+            }
+        }).start();
     }
-
 
     private void setViews() {
         settingView = true;
@@ -344,11 +365,6 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
 
         tvAreaAc.setText(StringEx.toStringRound(TtUtils.Convert.metersSquaredToAcres(_Polygon.getArea()), 4));
         tvAreaHa.setText(StringEx.toStringRound(TtUtils.Convert.metersSquaredToHa(_Polygon.getArea()), 4));
-
-        List<PointD> polyPoints = activity.getDrawPoints(_Polygon, spv.getWidth(), true);
-
-        if (polyPoints != null)
-            spv.render(polyPoints);
 
         settingView = false;
     }

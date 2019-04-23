@@ -52,9 +52,6 @@ public class PolygonsActivity extends TtAdjusterCustomToolbarActivity {
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private ViewPager mViewPager;
 
-    private ConcurrentHashMap<String, Tuple<Integer, ArrayList<PointD>>> drawPoints = new ConcurrentHashMap<>();
-    private ConcurrentHashMap<String, Boolean> hasDrawPoints = new ConcurrentHashMap<>();
-
     private List<TtPolygon> getPolygons() {
         if (_Polygons == null) {
             _Polygons = getTtAppCtx().getDAL().getPolygons();
@@ -487,7 +484,7 @@ public class PolygonsActivity extends TtAdjusterCustomToolbarActivity {
         if (listeners.containsKey(_CurrentPolygon.getCN())) {
             Listener listener = listeners.get(_CurrentPolygon.getCN());
             if (listener != null)
-                listener.onPolygonPointsUpdated(_CurrentPolygon);
+                listener.onPolygonUpdated(_CurrentPolygon);
             else
                 getTtAppCtx().getReport().writeError("Null Listener", "PolygonsActivity:onPolygonUpdate");
         }
@@ -497,7 +494,7 @@ public class PolygonsActivity extends TtAdjusterCustomToolbarActivity {
         if (listeners.containsKey(poly.getCN())) {
             Listener listener = listeners.get(poly.getCN());
             if (listener != null)
-                listener.onPolygonPointsUpdated(poly);
+                listener.onPolygonUpdated(poly);
             else
                 getTtAppCtx().getReport().writeError("Null Listener", "PolygonsActivity:onPolygonUpdate(cn)");
         }
@@ -507,7 +504,7 @@ public class PolygonsActivity extends TtAdjusterCustomToolbarActivity {
         if (listeners.containsKey(poly.getCN())) {
             Listener listener = listeners.get(poly.getCN());
             if (listener != null)
-                listener.onPolygonPointsUpdated(poly);
+                listener.onPolygonPointsUpdated();
             else
                 getTtAppCtx().getReport().writeError("Null Listener", "PolygonsActivity:onPolygonPointsUpdated");
         }
@@ -535,48 +532,6 @@ public class PolygonsActivity extends TtAdjusterCustomToolbarActivity {
         }
 
         getTtAppCtx().getReport().writeError("Polygon '" + cn + "' Not Found", "PolygonActivity:getPolygon(cn)");
-
-        return null;
-    }
-    
-    public ArrayList<PointD> getDrawPoints(final TtPolygon poly, final int width, boolean reset) {
-        boolean hdpk = hasDrawPoints.containsKey(poly.getCN());
-        Tuple<Integer, ArrayList<PointD>> dpk = hdpk ? drawPoints.get(poly.getCN()) : null;
-
-        if (!reset && hdpk && dpk != null && (dpk.Item1 == width || width == 0)) {
-            return dpk.Item2;
-        } else if (!hdpk || reset) {
-            if (width > 0) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (getTtAppCtx().getDAL().getBoundaryPointsCountInPoly(poly.getCN()) > 2) {
-                            final List<TtPoint> points = getTtAppCtx().getDAL().getBoundaryPointsInPoly(poly.getCN());
-
-                            if (points != null && points.size() > 2) {
-                                new Thread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        HashMap<String, TtMetadata> metadata = getTtAppCtx().getDAL().getMetadataMap();
-                                        TtMetadata defMeta = metadata.get(Consts.EmptyGuid);
-                                        if (defMeta != null) {
-                                            drawPoints.put(poly.getCN(), new Tuple<>(width, TtUtils.UI.generateStaticPolyPoints(points, metadata, defMeta.getZone(), (int)(width * 0.9))));
-                                            hasDrawPoints.put(poly.getCN(), true);
-
-                                            onPolygonPointsUpdated(poly);
-                                        } else {
-                                            getTtAppCtx().getReport().writeError("No default Metadata", "PolygonsActivity:getDrawPoints");
-                                        }
-                                    }
-                                }).start();
-                            }
-                        } else {
-                            hasDrawPoints.put(poly.getCN(), false);
-                        }
-                    }
-                }).start();
-            }
-        }
 
         return null;
     }
@@ -649,6 +604,6 @@ public class PolygonsActivity extends TtAdjusterCustomToolbarActivity {
     public interface Listener {
         void onLockChange(boolean locked);
         void onPolygonUpdated(TtPolygon polygon);
-        void onPolygonPointsUpdated(TtPolygon polygon);
+        void onPolygonPointsUpdated();
     }
 }

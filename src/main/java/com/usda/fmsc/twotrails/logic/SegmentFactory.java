@@ -158,19 +158,20 @@ public class SegmentFactory {
                 case SideShot: {
                     if (seg.getPointCount() == 1) { //Only the parent point for this sideshot so far
                         seg.addPoint(current);
-                        points.remove(current); // don't remove the parent point, may be needed again
+                        points.remove(current); // don't remove the prev point, may be needed again to calculate next point
                         finished = true;
+                    } else if (prev.getOp() == OpType.Traverse) {
+                        seg.addPoint(current);
+                        points.remove(current); // don't remove the prev point, may be needed again to calculate next point
                     } else { // skip this point
                         savePrev = true;
                         index++;
                     }
                     break;
                 }
-                case Quondam:
-                {
-
-                    break;
-                }
+//                case Quondam: {
+//                    break;
+//                }
             }
         }
 

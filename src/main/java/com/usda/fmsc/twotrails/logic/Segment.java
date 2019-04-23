@@ -94,7 +94,7 @@ public class Segment {
     }
 
     public boolean adjustTraverse() {
-        double lastX, lastY, lastZ, currX, currY, currZ, deltaX, deltaY, deltaZ, deltaDistance, leg_length,
+        double lastX, lastY, lastZ, currX, currY, currZ, deltaX, deltaY, deltaZ, leg_length,
                 adj_perimeter, deltaX_Correction, deltaY_Correction, deltaZ_Correction, adjX, adjY, adjZ;
 
         int size = points.size();
@@ -121,7 +121,6 @@ public class Segment {
         }
 
         //deltaDistance = trav closure error
-        deltaDistance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
         deltaX_Correction = deltaX / adj_perimeter;
         deltaY_Correction = deltaY / adj_perimeter;
         deltaZ_Correction = deltaZ / adj_perimeter;
@@ -131,52 +130,55 @@ public class Segment {
         //Loop through the points and apply the correction
         lastX = tmpPoint.getUnAdjX();
         lastY = tmpPoint.getUnAdjY();
-        lastZ = tmpPoint.getUnAdjZ();
         leg_length = 0;
 
 
-        double accuracy = tmpPoint.getAccuracy();// TtUtils.getPointAcc(tmpPoint, polys);
-        double accuracyEnd = points.get(points.size() - 1).getAccuracy();// TtUtils.getPointAcc(points.get(points.size() - 1), polys);
+        double accuracy = tmpPoint.getAccuracy();
+        double accuracyEnd = points.get(points.size() - 1).getAccuracy();
         double accuracyIncrement = (accuracyEnd - accuracy) / (points.size() - 1);
-
 
         TtPoint currPoint;
         for (int i = 0; i < size; i++) {
             currPoint = points.get(i);
 
-            if (i == size - 1 && currPoint.getOp() == OpType.Quondam)
+            if (i == size - 1 && currPoint.getOp() == OpType.Quondam) //should be GPS type
                 break;
 
             if (currPoint.isGpsType()) {
                 if (!currPoint.isAdjusted())
                     currPoint.adjustPoint();
-                continue;
+            } else if (currPoint.getOp() == OpType.SideShot) {
+                for (int j = i - 1; j > -1; j++) {
+                    TtPoint pPoint = points.get(j);
+                    if (pPoint.getOp() != OpType.SideShot) {
+                        ((SideShotPoint)currPoint).adjustPoint(pPoint);
+                        break;
+                    }
+                }
+            } else {
+                currX = currPoint.getUnAdjX();
+                currY = currPoint.getUnAdjY();
+                currZ = currPoint.getUnAdjZ();
+
+                leg_length += Math.sqrt(Math.pow(currX - lastX, 2) + Math.pow(currY - lastY, 2)); // add lastZ for 3D length "+ Math.pow(currZ - lastZ, 2")
+                adjX = leg_length * deltaX_Correction + currX;
+                adjY = leg_length * deltaY_Correction + currY;
+                adjZ = leg_length * deltaZ_Correction + currZ;
+
+                currPoint.setAdjX(adjX);
+                currPoint.setAdjY(adjY);
+                currPoint.setAdjZ(adjZ);
+
+                accuracy += accuracyIncrement;
+
+                if (currPoint.isTravType()) {
+                    (currPoint).setAccuracy(accuracy);
+                    ((TravPoint) currPoint).setAdjusted();
+                }
+
+                lastX = currX;
+                lastY = currY;
             }
-
-            currX = currPoint.getUnAdjX();
-            currY = currPoint.getUnAdjY();
-            currZ = currPoint.getUnAdjZ();
-
-            leg_length += Math.sqrt(Math.pow(currX - lastX, 2) + Math.pow(currY - lastY, 2)); // add lastZ for 3D length "+ Math.pow(currZ - lastZ, 2")
-            adjX = leg_length * deltaX_Correction + currX;
-            adjY = leg_length * deltaY_Correction + currY;
-            adjZ = leg_length * deltaZ_Correction + currZ;
-
-            currPoint.setAdjX(adjX);
-            currPoint.setAdjY(adjY);
-            currPoint.setAdjZ(adjZ);
-
-            accuracy += accuracyIncrement;
-
-            if (currPoint.isTravType())
-            {
-                (currPoint).setAccuracy(accuracy);
-                ((TravPoint)currPoint).setAdjusted();
-            }
-
-            lastX = currX;
-            lastY = currY;
-            lastZ = currZ;
         }
 
         return true;
@@ -202,7 +204,7 @@ public class Segment {
         for (int i = 1; i < points.size(); i++) {
             currPoint = points.get(i);
 
-            if (currPoint.getOp() == OpType.Traverse) {
+            if (currPoint.getOp() == OpType.Traverse) { //only add the travs
                 currX = currPoint.getUnAdjX();
                 currY = currPoint.getUnAdjY();
 
@@ -319,7 +321,7 @@ public class Segment {
 
     @Override
     public String toString() {
-        if (points != null && points.size() == 0) {
+        if (points != null && points.size() > 0) {
             TtPoint tmpPoint = points.get(0);
 
             if (points.size() == 1)

@@ -1,6 +1,5 @@
 package com.usda.fmsc.twotrails.ui;
 
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -9,13 +8,10 @@ import android.util.AttributeSet;
 import android.view.View;
 
 import com.usda.fmsc.android.AndroidUtils;
-import com.usda.fmsc.twotrails.Consts;
+import com.usda.fmsc.twotrails.fragments.polygon.PolygonFragment;
 import com.usda.fmsc.twotrails.objects.PointD;
-import com.usda.fmsc.twotrails.objects.TtMetadata;
-import com.usda.fmsc.twotrails.objects.points.TtPoint;
-import com.usda.fmsc.twotrails.utilities.TtUtils;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 
 public class StaticPolygonView extends View {
@@ -80,14 +76,13 @@ public class StaticPolygonView extends View {
         }
     }
 
-    public void render(List<PointD> points) {
-        StaticPolygonView.this.points = points;
+    PolygonFragment frag;
+    public void setFrag(PolygonFragment frag) {
+        this.frag = frag;
+    }
 
-        ((Activity)getContext()).runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                StaticPolygonView.this.invalidate();
-            }
-        });
+    public void render(List<PointD> points) {
+        this.points = points;
+        this.invalidate();
     }
 }
