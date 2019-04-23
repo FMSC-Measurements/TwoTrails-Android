@@ -56,7 +56,7 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
 
     private ViewPager mViewPager;
 
-    private boolean _fileOpen = false, exitOnAdjusted, askLocation;
+    private boolean _fileOpen = false, exitOnAdjusted, askLocation, showedCrashed;
 
     private String tmpFile;
 
@@ -138,7 +138,7 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
 
         Intent startIntent = getIntent();
 
-        if (startIntent != null && startIntent.hasExtra(Consts.Codes.Data.CRASH)) {
+        if (!showedCrashed && startIntent != null && startIntent.hasExtra(Consts.Codes.Data.CRASH)) {
             AndroidUtils.Device.isInternetAvailable(new AndroidUtils.Device.InternetAvailableCallback() {
                 @Override
                 public void onCheckInternet(final boolean internetAvailable) {
@@ -156,11 +156,13 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
                                         })
                                         .setNeutralButton("Don't Send", null)
                                         .show();
+                                showedCrashed = true;
                             } else {
                                 new AlertDialog.Builder(MainActivity.this)
                                         .setMessage("TwoTrails experienced a crash. You can send a crash log to the development team from inside the settings menu.")
                                         .setPositiveButton(R.string.str_ok, null)
                                         .show();
+                                showedCrashed = true;
                             }
                         }
                     });
