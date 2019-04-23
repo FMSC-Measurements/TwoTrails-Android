@@ -521,6 +521,10 @@ public class Export {
                     GpxPoint adjpoint = null, unAdjpoint = null;
                     tmpMeta = meta.get(point.getMetadataCN());
 
+                    if (tmpMeta == null) {
+                        throw new RuntimeException("Metadata not found");
+                    }
+
                     if (point instanceof GpsPoint) {
                         GpsPoint gps = (GpsPoint)point;
 
