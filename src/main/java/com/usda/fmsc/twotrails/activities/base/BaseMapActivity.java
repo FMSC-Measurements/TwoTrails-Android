@@ -131,7 +131,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     private Sensor accelerometer, magnetometer;
 
     private ActionBarDrawerToggle drawerToggle;
-    private MenuItem miResetBounds, miShowMyPos, miTrackedPoly, miMapMaxBounds;
+    private MenuItem miResetBounds, miShowMyPos, miTrackedPoly, miMapMaxBounds, miZoomToPoly;
     private SlidingUpPanelLayout slidingLayout;
     private TextView tvNavPid, tvNavPoly, tvNavDistMt, tvNavDistFt, tvNavAzTrue, tvNavAzMag;
     private ImageView ivArrow;
@@ -452,6 +452,11 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         miShowMyPos = menu.findItem(R.id.mapMenuShowMyPos);
         if (miShowMyPos != null) {
             miShowMyPos.setChecked(getTtAppCtx().getDeviceSettings().getMapShowMyPos());
+        }
+
+        miZoomToPoly = menu.findItem(R.id.mapMenuZoomToPoly);
+        if (miZoomToPoly != null) {
+            miZoomToPoly.setVisible(getPolygons().size() > 0);
         }
 
         miMapMaxBounds = menu.findItem(R.id.mmMenuMoveToMaxBounds);

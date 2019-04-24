@@ -352,52 +352,55 @@ public class ExportActivity extends CustomToolbarActivity {
                 @Override
                 public void onTaskFinish(Export.ExportResult result) {
                 switch (result.getCode()) {
-                    case Success:
-                        MediaScannerConnection.scanFile(ExportActivity.this, new String[] { directory.getAbsolutePath() }, null, null);
+                    case Success: {
+                        MediaScannerConnection.scanFile(ExportActivity.this, new String[]{directory.getAbsolutePath()}, null, null);
 
                         progCircle.beginFinalAnimation();
-                        View view = findViewById(R.id.parent);
-                        if (view != null) {
-                            snackbar = Snackbar.make(view, "Files Exported", Snackbar.LENGTH_INDEFINITE).setAction("View", new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                                    intent.setType("file/*");
-                                    intent.setDataAndType(
-                                            AndroidUtils.Files.getUri(ExportActivity.this, BuildConfig.APPLICATION_ID, directory),
-                                            "resource/folder");
 
-                                    if (snackbar != null)
-                                        snackbar.dismiss();
-
-                                    if (intent.resolveActivityInfo(getPackageManager(), 0) != null) {
-                                        startActivity(Intent.createChooser(intent, "View Folder"));
-                                    } else {
-                                        Toast.makeText(ExportActivity.this, "No compatible File Explorers found", Toast.LENGTH_LONG).show();
-                                    }
-                                }
-                            })
-                            .setActionTextColor(AndroidUtils.UI.getColor(getBaseContext(), R.color.primaryLighter));
-
-                            AndroidUtils.UI.setSnackbarTextColor(snackbar, Color.WHITE);
-
-                            snackbar.show();
-
-                            new Thread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    try {
-                                        Thread.sleep(5000);
-                                    } catch (Exception ex) {
-                                        //
-                                    }
-
-                                    if(snackbar != null)
-                                        snackbar.dismiss();
-                                }
-                            }).start();
-                        }
+                        Toast.makeText(ExportActivity.this, "Files Exported", Toast.LENGTH_LONG).show();
+//                        View view = findViewById(R.id.parent);
+//                        if (view != null) {
+//                            snackbar = Snackbar.make(view, "Files Exported", Snackbar.LENGTH_INDEFINITE).setAction("View", new View.OnClickListener() {
+//                                @Override
+//                                public void onClick(View v) {
+//                                    Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+//                                    intent.setType("file/*");
+//                                    intent.setDataAndType(
+//                                            AndroidUtils.Files.getUri(ExportActivity.this, BuildConfig.APPLICATION_ID, directory),
+//                                            "resource/folder");
+//
+//                                    if (snackbar != null)
+//                                        snackbar.dismiss();
+//
+//                                    if (intent.resolveActivityInfo(getPackageManager(), 0) != null) {
+//                                        startActivity(Intent.createChooser(intent, "View Folder"));
+//                                    } else {
+//                                        Toast.makeText(ExportActivity.this, "No compatible File Explorers found", Toast.LENGTH_LONG).show();
+//                                    }
+//                                }
+//                            })
+//                                    .setActionTextColor(AndroidUtils.UI.getColor(getBaseContext(), R.color.primaryLighter));
+//
+//                            AndroidUtils.UI.setSnackbarTextColor(snackbar, Color.WHITE);
+//
+//                            snackbar.show();
+//
+//                            new Thread(new Runnable() {
+//                                @Override
+//                                public void run() {
+//                                    try {
+//                                        Thread.sleep(5000);
+//                                    } catch (Exception ex) {
+//                                        //
+//                                    }
+//
+//                                    if (snackbar != null)
+//                                        snackbar.dismiss();
+//                                }
+//                            }).start();
+//                        }
                         break;
+                    }
                     case Cancelled:
                         break;
                     case ExportFailure:

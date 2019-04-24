@@ -238,7 +238,8 @@
         <activity
             android:name=".activities.MapManagerActivity"
             android:label="@string/title_activity_offline_map_manager"
-            android:windowSoftInputMode="adjustPan" />
+            android:windowSoftInputMode="adjustPan"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".activities.GetMapExtentsActivity"
             android:label="@string/title_activity_get_map_extents"
@@ -261,7 +262,8 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".activities.AcquireAndCalculateGpsActivity"
-            android:windowSoftInputMode="adjustPan"/>
+            android:windowSoftInputMode="adjustPan"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".activities.GetDirectionActivity"
             android:label="@string/title_activity_get_direction"
