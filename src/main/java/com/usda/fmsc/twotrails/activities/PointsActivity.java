@@ -712,8 +712,16 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        savePoint();
-        saveMedia();
+
+        if (getTtAppCtx().hasDAL()) {
+            savePoint();
+            saveMedia();
+
+            if (adjust) {
+                PolygonAdjuster.adjust(getTtAppCtx().getDAL(), true);
+            }
+        }
+
 
         if (getTtAppCtx().getRF() != null) {
             getTtAppCtx().getRF().removeListener(this);
@@ -724,9 +732,6 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         }
 
 
-        if (adjust && getTtAppCtx().hasDAL()) {
-            PolygonAdjuster.adjust(getTtAppCtx().getDAL(), true);
-        }
     }
 
     @Override
