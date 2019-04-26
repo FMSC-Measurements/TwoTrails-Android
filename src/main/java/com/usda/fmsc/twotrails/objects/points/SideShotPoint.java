@@ -32,6 +32,12 @@ public class SideShotPoint extends TravPoint {
     }
 
 
+    @Override
+    public boolean adjustPoint(TtPoint source) {
+        setAccuracy(source.getAccuracy());
+        return super.adjustPoint(source);
+    }
+
     public OpType getOp() {
         return OpType.SideShot;
     }

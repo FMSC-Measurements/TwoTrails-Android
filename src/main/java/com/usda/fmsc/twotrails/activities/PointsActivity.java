@@ -67,6 +67,7 @@ import com.usda.fmsc.twotrails.fragments.points.QuondamPointFragment;
 import com.usda.fmsc.twotrails.fragments.points.TraversePointFragment;
 import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
 import com.usda.fmsc.twotrails.R;
+import com.usda.fmsc.twotrails.logic.AdjustingException;
 import com.usda.fmsc.twotrails.logic.PointNamer;
 import com.usda.fmsc.twotrails.logic.PolygonAdjuster;
 import com.usda.fmsc.twotrails.objects.media.TtMedia;
@@ -2262,7 +2263,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                 }
 
                 @Override
-                public void adjusterStopped(final PolygonAdjuster.AdjustResult result) {
+                public void adjusterStopped(final PolygonAdjuster.AdjustResult result, AdjustingException.AdjustingError error) {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -2338,7 +2339,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                 }
 
                 @Override
-                public void adjusterStopped(final PolygonAdjuster.AdjustResult result) {
+                public void adjusterStopped(final PolygonAdjuster.AdjustResult result, AdjustingException.AdjustingError error) {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -2419,7 +2420,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                 }
 
                 @Override
-                public void adjusterStopped(final PolygonAdjuster.AdjustResult result) {
+                public void adjusterStopped(final PolygonAdjuster.AdjustResult result, AdjustingException.AdjustingError error) {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {

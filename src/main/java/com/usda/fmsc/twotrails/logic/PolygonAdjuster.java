@@ -73,6 +73,8 @@ public class PolygonAdjuster {
                     AdjustResult result = AdjustResult.ADJUSTING;
                     boolean success = false;
 
+                    AdjustingException.AdjustingError error = AdjustingException.AdjustingError.None;
+
                     try {
                         if (_Listener != null)
                             _Listener.adjusterStarted();
@@ -89,8 +91,12 @@ public class PolygonAdjuster {
                         } else {
                             result = AdjustResult.ERROR;
                         }
+                    } catch (AdjustingException ex) {
+                        TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "PolygonAdjuster:adjust", ex.getStackTrace());
+                        result = AdjustResult.ERROR;
+                        error = ex.getErrorType();
                     } catch (Exception ex) {
-                        TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "PolygonAdjuster:adjust");
+                        TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "PolygonAdjuster:adjust", ex.getStackTrace());
                         result = AdjustResult.ERROR;
                     } finally {
                         _processing = false;
@@ -100,7 +106,7 @@ public class PolygonAdjuster {
                                 result = AdjustResult.CANCELED;
                             }
 
-                            _Listener.adjusterStopped(result);
+                            _Listener.adjusterStopped(result, error);
                         }
                     }
                 }
@@ -131,72 +137,67 @@ public class PolygonAdjuster {
         dal.updatePoints(savePoints, savePoints);
     }
 
-    private static boolean adjustPoints(DataAccessLayer dal) {
+    private static boolean adjustPoints(DataAccessLayer dal) throws AdjustingException {
         long startTime = System.currentTimeMillis();
         boolean slowTimeTriggered = false;
 
-        try {
-            SegmentFactory sf = new SegmentFactory(dal);
+        SegmentFactory sf = new SegmentFactory(dal);
 
-            if(sf.hasNext()) {
-                SegmentList sl = new SegmentList();
-                ArrayList<Segment> adjusted = new ArrayList<>();
+        if(sf.hasNext()) {
+            SegmentList sl = new SegmentList();
+            ArrayList<Segment> adjusted = new ArrayList<>();
 
-                while (sf.hasNext()) {
-                    sl.addSegment(sf.next());
-                }
+            while (sf.hasNext()) {
+                sl.addSegment(sf.next());
+            }
 
-                Segment seg;
-                while (sl.hasNext()) {
-                    if(_cancelToken)
-                        return false;
-
-                    seg = sl.next();
-
-                    if (seg.calculate()) {
-                        seg.adjust();
-                        adjusted.add(seg);
-                    } else {
-                        seg.setWeight(seg.getWeight() - 1);
-                        sl.addSegment(seg);
-                    }
-
-                    if (!slowTimeTriggered && System.currentTimeMillis() - startTime > ADJUSTING_SLOW_TIME) {
-
-                        if (_Listener != null) {
-                            _Listener.adjusterRunningSlow();
-                        }
-
-                        slowTimeTriggered = true;
-                    }
-                }
-
-                if (_cancelToken)
+            Segment seg;
+            while (sl.hasNext()) {
+                if(_cancelToken)
                     return false;
 
-                TtPoint p;
-                Hashtable<String, TtPoint> pointsTable = new Hashtable<>();
+                seg = sl.next();
 
-                for (int s = 0; s < adjusted.size(); s++)
-                {
-                    for (int i = 0; i < adjusted.get(s).getPointCount(); i++)
-                    {
-                        p = adjusted.get(s).get(i);
-
-                        if (!pointsTable.containsKey(p.getCN()))
-                            pointsTable.put(p.getCN(), p);
-                    }
+                if (seg.calculate()) {
+                    seg.adjust();
+                    adjusted.add(seg);
+                } else {
+                    seg.setWeight(seg.getWeight() - 1);
+                    sl.addSegment(seg);
                 }
 
-                ArrayList<TtPoint> points = new ArrayList<>(pointsTable.values());
+                if (!slowTimeTriggered && System.currentTimeMillis() - startTime > ADJUSTING_SLOW_TIME) {
 
-                dal.updatePoints(points);
+                    if (_Listener != null) {
+                        _Listener.adjusterRunningSlow();
+                    }
 
-                calculateAreaAndPerimeter(dal);
+                    slowTimeTriggered = true;
+                }
             }
-        } catch (Exception ex) {
-            TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "PolygonAdjuster:adjust");
-            return false;
+
+            if (_cancelToken)
+                return false;
+
+            TtPoint p;
+            Hashtable<String, TtPoint> pointsTable = new Hashtable<>();
+
+            for (int s = 0; s < adjusted.size(); s++)
+            {
+                for (int i = 0; i < adjusted.get(s).getPointCount(); i++)
+                {
+                    p = adjusted.get(s).get(i);
+
+                    if (!pointsTable.containsKey(p.getCN()))
+                        pointsTable.put(p.getCN(), p);
+                }
+            }
+
+            ArrayList<TtPoint> points = new ArrayList<>(pointsTable.values());
+
+            dal.updatePoints(points);
+
+            calculateAreaAndPerimeter(dal);
         }
 
         return true;
@@ -266,7 +267,9 @@ public class PolygonAdjuster {
 
     public interface Listener {
         void adjusterStarted();
-        void adjusterStopped(final AdjustResult result);
+        void adjusterStopped(final AdjustResult result, final AdjustingException.AdjustingError error);
         void adjusterRunningSlow();
     }
+
+
 }
