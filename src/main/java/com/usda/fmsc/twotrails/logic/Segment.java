@@ -59,7 +59,7 @@ public class Segment {
     }
 
 
-    public boolean adjust() {
+    public boolean adjust() throws AdjustingException {
         int len = points.size();
 
         if (len == 0) {
@@ -79,7 +79,11 @@ public class Segment {
 
             if (endPoint.getOp() == OpType.SideShot) {
                 if (!endPoint.isAdjusted()) {
-                    adjusted = adjustSideShot(startPoint, (SideShotPoint)points.get(1));
+                    try {
+                        adjusted = ((SideShotPoint)points.get(1)).adjustPoint(startPoint);
+                    } catch (Exception e) {
+                        throw new AdjustingException(AdjustingException.AdjustingError.Sideshot, e.getCause());
+                    }
                 }
             } else if (len > 2 && points.get(1).getOp() == OpType.Traverse) {
                 adjusted = adjustTraverse();
@@ -93,100 +97,99 @@ public class Segment {
         return adjusted;
     }
 
-    public boolean adjustTraverse() {
-        double lastX, lastY, lastZ, currX, currY, currZ, deltaX, deltaY, deltaZ, leg_length,
-                adj_perimeter, deltaX_Correction, deltaY_Correction, deltaZ_Correction, adjX, adjY, adjZ;
+    public boolean adjustTraverse() throws AdjustingException {
+        try {
+            double lastX, lastY, lastZ, currX, currY, currZ, deltaX, deltaY, deltaZ, leg_length,
+                    adj_perimeter, deltaX_Correction, deltaY_Correction, deltaZ_Correction, adjX, adjY, adjZ;
 
-        int size = points.size();
-        TtPoint tmpPoint = points.get(size -1);
+            int size = points.size();
+            TtPoint tmpPoint = points.get(size -1);
 
-        //X,Y of the final point of the travers, should be the closing point if it exists
-        lastX = tmpPoint.getUnAdjX(); //GPS Coords at the end of the traverse
-        lastY = tmpPoint.getUnAdjY();
-        lastZ = tmpPoint.getUnAdjZ();
+            //X,Y of the final point of the travers, should be the closing point if it exists
+            lastX = tmpPoint.getUnAdjX(); //GPS Coords at the end of the traverse
+            lastY = tmpPoint.getUnAdjY();
+            lastZ = tmpPoint.getUnAdjZ();
 
-        adj_perimeter = getAdjustmentPerimeter();
+            adj_perimeter = getAdjustmentPerimeter();
 
-        //No adjustment if there isn't a closing point
-        if (tmpPoint.getOp() == OpType.Traverse) {
-            deltaX = 0;
-            deltaY = 0;
-            deltaZ = 0;
-        } else {
-            tmpPoint = points.get(size - 2);
-
-            deltaX = lastX - tmpPoint.getUnAdjX();
-            deltaY = lastY - tmpPoint.getUnAdjY();
-            deltaZ = lastZ - tmpPoint.getUnAdjZ();
-        }
-
-        //deltaDistance = trav closure error
-        deltaX_Correction = deltaX / adj_perimeter;
-        deltaY_Correction = deltaY / adj_perimeter;
-        deltaZ_Correction = deltaZ / adj_perimeter;
-
-        tmpPoint = points.get(0);
-
-        //Loop through the points and apply the correction
-        lastX = tmpPoint.getUnAdjX();
-        lastY = tmpPoint.getUnAdjY();
-        leg_length = 0;
-
-
-        double accuracy = tmpPoint.getAccuracy();
-        double accuracyEnd = points.get(points.size() - 1).getAccuracy();
-        double accuracyIncrement = (accuracyEnd - accuracy) / (points.size() - 1);
-
-        TtPoint currPoint;
-        for (int i = 0; i < size; i++) {
-            currPoint = points.get(i);
-
-            if (i == size - 1 && currPoint.getOp() == OpType.Quondam) //should be GPS type
-                break;
-
-            if (currPoint.isGpsType()) {
-                if (!currPoint.isAdjusted())
-                    currPoint.adjustPoint();
-            } else if (currPoint.getOp() == OpType.SideShot) {
-                for (int j = i - 1; j > -1; j++) {
-                    TtPoint pPoint = points.get(j);
-                    if (pPoint.getOp() != OpType.SideShot) {
-                        ((SideShotPoint)currPoint).adjustPoint(pPoint);
-                        break;
-                    }
-                }
+            //No adjustment if there isn't a closing point
+            if (tmpPoint.getOp() == OpType.Traverse) {
+                deltaX = 0;
+                deltaY = 0;
+                deltaZ = 0;
             } else {
-                currX = currPoint.getUnAdjX();
-                currY = currPoint.getUnAdjY();
-                currZ = currPoint.getUnAdjZ();
+                tmpPoint = points.get(size - 2);
 
-                leg_length += Math.sqrt(Math.pow(currX - lastX, 2) + Math.pow(currY - lastY, 2)); // add lastZ for 3D length "+ Math.pow(currZ - lastZ, 2")
-                adjX = leg_length * deltaX_Correction + currX;
-                adjY = leg_length * deltaY_Correction + currY;
-                adjZ = leg_length * deltaZ_Correction + currZ;
-
-                currPoint.setAdjX(adjX);
-                currPoint.setAdjY(adjY);
-                currPoint.setAdjZ(adjZ);
-
-                accuracy += accuracyIncrement;
-
-                if (currPoint.isTravType()) {
-                    (currPoint).setAccuracy(accuracy);
-                    ((TravPoint) currPoint).setAdjusted();
-                }
-
-                lastX = currX;
-                lastY = currY;
+                deltaX = lastX - tmpPoint.getUnAdjX();
+                deltaY = lastY - tmpPoint.getUnAdjY();
+                deltaZ = lastZ - tmpPoint.getUnAdjZ();
             }
+
+            //deltaDistance = trav closure error
+            deltaX_Correction = deltaX / adj_perimeter;
+            deltaY_Correction = deltaY / adj_perimeter;
+            deltaZ_Correction = deltaZ / adj_perimeter;
+
+            tmpPoint = points.get(0);
+
+            //Loop through the points and apply the correction
+            lastX = tmpPoint.getUnAdjX();
+            lastY = tmpPoint.getUnAdjY();
+            leg_length = 0;
+
+
+            double accuracy = tmpPoint.getAccuracy();
+            double accuracyEnd = points.get(points.size() - 1).getAccuracy();
+            double accuracyIncrement = (accuracyEnd - accuracy) / (points.size() - 1);
+
+            TtPoint currPoint;
+            for (int i = 0; i < size; i++) {
+                currPoint = points.get(i);
+
+                if (i == size - 1 && currPoint.getOp() == OpType.Quondam) //should be GPS type
+                    break;
+
+                if (currPoint.isGpsType()) {
+                    if (!currPoint.isAdjusted())
+                        currPoint.adjustPoint();
+                } else if (currPoint.getOp() == OpType.SideShot) {
+                    for (int j = i - 1; j > -1; j++) {
+                        TtPoint pPoint = points.get(j);
+                        if (pPoint.getOp() != OpType.SideShot) {
+                            ((SideShotPoint)currPoint).adjustPoint(pPoint);
+                            break;
+                        }
+                    }
+                } else {
+                    currX = currPoint.getUnAdjX();
+                    currY = currPoint.getUnAdjY();
+                    currZ = currPoint.getUnAdjZ();
+
+                    leg_length += Math.sqrt(Math.pow(currX - lastX, 2) + Math.pow(currY - lastY, 2)); // add lastZ for 3D length "+ Math.pow(currZ - lastZ, 2")
+                    adjX = leg_length * deltaX_Correction + currX;
+                    adjY = leg_length * deltaY_Correction + currY;
+                    adjZ = leg_length * deltaZ_Correction + currZ;
+
+                    currPoint.setAdjX(adjX);
+                    currPoint.setAdjY(adjY);
+                    currPoint.setAdjZ(adjZ);
+
+                    accuracy += accuracyIncrement;
+
+                    if (currPoint.isTravType()) {
+                        (currPoint).setAccuracy(accuracy);
+                        ((TravPoint) currPoint).setAdjusted();
+                    }
+
+                    lastX = currX;
+                    lastY = currY;
+                }
+            }
+        } catch (Exception e) {
+            throw new AdjustingException(AdjustingException.AdjustingError.Traverse, e.getCause());
         }
 
         return true;
-    }
-
-    public boolean adjustSideShot(TtPoint prevPoint, SideShotPoint ss) {
-        ss.setAccuracy(prevPoint.getAccuracy());
-        return ss.adjustPoint(prevPoint);
     }
 
     public double getAdjustmentPerimeter() {

@@ -80,15 +80,15 @@ public class ExportActivity extends CustomToolbarActivity {
             }
         });
 
-        if (fabExport != null) {
-            fabExport.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    startExport(true);
-                    return true;
-                }
-            });
-        }
+//        if (fabExport != null) {
+//            fabExport.setOnLongClickListener(new View.OnLongClickListener() {
+//                @Override
+//                public boolean onLongClick(View v) {
+//                    startExport(true);
+//                    return true;
+//                }
+//            });
+//        }
 
         chkPc.setCheckedState(MultiStateTouchCheckBox.CheckedState.Checked);
     }
@@ -180,7 +180,8 @@ public class ExportActivity extends CustomToolbarActivity {
                 Toast.makeText(this, "No options selected for export", Toast.LENGTH_SHORT).show();
             } else {
                 if (selectdir) {
-                    selectDirectory(TtUtils.getTtFileDir());
+                    //selectDirectory(TtUtils.getTtFileDir());
+                    Toast.makeText(ExportActivity.this, "Unsupported Action", Toast.LENGTH_LONG).show();
                 } else {
                     startExport(TtUtils.getTtFileDir(), true);
                 }
@@ -247,12 +248,12 @@ public class ExportActivity extends CustomToolbarActivity {
                     }
                 }, 2)
 
-                .setNeutralButton("Change", new DontAskAgainDialog.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i, Object value) {
-                        selectDirectory(dir.getAbsolutePath());
-                    }
-                }, 1)
+//                .setNeutralButton("Change", new DontAskAgainDialog.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialogInterface, int i, Object value) {
+//                        selectDirectory(dir.getAbsolutePath());
+//                    }
+//                }, 1)
 
                 .setNegativeButton("Cancel", null, null)
 
@@ -261,7 +262,8 @@ public class ExportActivity extends CustomToolbarActivity {
                 if (getTtAppCtx().getDeviceSettings().getAutoOverwriteExport() == 2) {
                     export(dir);
                 } else {
-                    selectDirectory(directory);
+                    //selectDirectory(directory);
+                    Toast.makeText(ExportActivity.this, "Unsupported Action", Toast.LENGTH_LONG).show();
                 }
             }
         } else {
@@ -330,17 +332,17 @@ public class ExportActivity extends CustomToolbarActivity {
     }
 
 
-    private void selectDirectory(String initDir) {
-        new FilePicker.Builder(this, new OnSelectFileListener() {
-            @Override
-            public void onSelect(File file) {
-                startExport(file.getPath(), true);
-            }
-        })
-        .hideFiles(true)
-        .directory(initDir)
-        .show();
-    }
+//    private void selectDirectory(String initDir) {
+//        new FilePicker.Builder(this, new OnSelectFileListener() {
+//            @Override
+//            public void onSelect(File file) {
+//                startExport(file.getPath(), true);
+//            }
+//        })
+//        .hideFiles(true)
+//        .directory(initDir)
+//        .show();
+//    }
 
     private void export(final File directory) {
         if (exportTask == null || exportTask.getStatus() == AsyncTask.Status.FINISHED) {

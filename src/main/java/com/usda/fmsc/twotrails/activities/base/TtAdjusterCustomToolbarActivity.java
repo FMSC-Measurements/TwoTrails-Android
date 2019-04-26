@@ -11,6 +11,7 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.usda.fmsc.twotrails.R;
+import com.usda.fmsc.twotrails.logic.AdjustingException;
 import com.usda.fmsc.twotrails.logic.PolygonAdjuster;
 
 public abstract class TtAdjusterCustomToolbarActivity extends CustomToolbarActivity implements PolygonAdjuster.Listener {
@@ -119,7 +120,7 @@ public abstract class TtAdjusterCustomToolbarActivity extends CustomToolbarActiv
     }
 
     @Override
-    public final void adjusterStopped(final PolygonAdjuster.AdjustResult result){
+    public final void adjusterStopped(final PolygonAdjuster.AdjustResult result, final AdjustingException.AdjustingError error){
         final Context ctx = this;
 
         this.runOnUiThread(new Runnable() {
@@ -137,9 +138,26 @@ public abstract class TtAdjusterCustomToolbarActivity extends CustomToolbarActiv
                 CharSequence text = null;
 
                 switch (result) {
-                    case ERROR:
-                        text = "Polygons Failed to Adjust";
+                    case ERROR: {
+                        switch (error) {
+                            default:
+                            case None:
+                            case Unknown:
+                                text = "Polygons Failed to Adjust";
+                                break;
+                            case Traverse:
+                                text = "Polygons Failed to Adjust due to a Traverse error";
+                                break;
+                            case Sideshot:
+                                text = "Polygons Failed to Adjust due to a Sideshot error";
+                            case Gps:
+                                text = "Polygons Failed to Adjust due to a GPS error";
+                            case Quondam:
+                                text = "Polygons Failed to Adjust due to a Quondam error";
+                        }
+
                         break;
+                    }
                     case CANCELED:
                         text = "Adjusting Canceled";
                         break;

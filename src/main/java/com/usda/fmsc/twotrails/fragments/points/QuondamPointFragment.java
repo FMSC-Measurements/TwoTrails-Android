@@ -158,11 +158,15 @@ public class QuondamPointFragment extends BasePointFragment {
         });
 
         if (_Quondam != null) {
-            for (int i = 0; i < _Polygons.size(); i++) {
-                if (_Quondam.getPolyCN().equals(_Polygons.get(i).getCN())) {
-                    selectedPolyIndex = i;
-                    setViews();
-                    break;
+            if (_Quondam.hasParent()) {
+                setViews();
+            } else {
+                for (int i = 0; i < _Polygons.size(); i++) {
+                    if (_Quondam.getPolyCN().equals(_Polygons.get(i).getCN())) {
+                        selectedPolyIndex = i;
+                        setViews();
+                        break;
+                    }
                 }
             }
         }
@@ -184,8 +188,9 @@ public class QuondamPointFragment extends BasePointFragment {
             int i = 0;
             for (TtPolygon polygon : _Polygons) {
                 if (_Quondam.getParentPoint().getPolyCN().equals(polygon.getCN())) {
-                    lvPolys.setSelection(i);
-                    polysAdapter.setSelected(i);
+                    selectedPolyIndex = i;
+                    lvPolys.setSelection(selectedPolyIndex);
+                    polysAdapter.setSelected(selectedPolyIndex);
 
                     int j = 0;
 

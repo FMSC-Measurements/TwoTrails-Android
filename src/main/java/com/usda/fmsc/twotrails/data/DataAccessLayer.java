@@ -2667,11 +2667,12 @@ public class DataAccessLayer extends IDataLayer {
     }
 
     public boolean needsAdjusting() {
-        String countQuery = String.format("SELECT COUNT (*) FROM %s where %s = NULL OR %s = NULL OR %s = NULL",
+        String countQuery = String.format("SELECT COUNT (*) FROM %s where %s IS NULL OR %s IS NULL OR %s IS NULL OR %s IS NULL",
                 TwoTrailsSchema.PointSchema.TableName,
                 TwoTrailsSchema.PointSchema.AdjX,
                 TwoTrailsSchema.PointSchema.AdjY,
-                TwoTrailsSchema.PointSchema.AdjZ);
+                TwoTrailsSchema.PointSchema.AdjZ,
+                TwoTrailsSchema.PointSchema.Accuracy);
 
         Cursor cursor = _db.rawQuery(countQuery, null);
 
