@@ -140,22 +140,28 @@ public class SettingsLogic {
                     case "developer": {
                         TwoTrailsApp.getInstance().getDeviceSettings().enabledDevelopterOptions(true);
                         Toast.makeText(context, "Developer Mode Enabled", Toast.LENGTH_LONG).show();
+                        TwoTrailsApp.getInstance().getReport().writeDebug("Developer Mode: Enabled", "SettingsLogic:enterCode");
                         break;
                     }
-                    case "disable dev": {
+                    case "disable dev":
+                    case "disable developer": {
                         TwoTrailsApp.getInstance().getDeviceSettings().enabledDevelopterOptions(false);
                         Toast.makeText(context, "Developer Mode Disabled", Toast.LENGTH_LONG).show();
+                        TwoTrailsApp.getInstance().getReport().writeDebug("Developer Mode: Disabled", "SettingsLogic:enterCode");
                         break;
                     }
                     case "dbg":
                     case "debug" : {
                         TwoTrailsApp.getInstance().getDeviceSettings().enabledDebugMode(true);
                         Toast.makeText(context, "Debug Mode Enabled", Toast.LENGTH_LONG).show();
+                        TwoTrailsApp.getInstance().getReport().writeDebug("Debug Mode: Enabled", "SettingsLogic:enterCode");
                         break;
                     }
+                    case "disable dbg":
                     case "disable debug" : {
                         TwoTrailsApp.getInstance().getDeviceSettings().enabledDebugMode(false);
                         Toast.makeText(context, "Debug Mode Disabled", Toast.LENGTH_LONG).show();
+                        TwoTrailsApp.getInstance().getReport().writeDebug("Debug Mode: Disabled", "SettingsLogic:enterCode");
                         break;
                     }
                 }

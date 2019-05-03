@@ -151,7 +151,7 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
                                         .setPositiveButton("Send", new DialogInterface.OnClickListener() {
                                             @Override
                                             public void onClick(DialogInterface dialog, int which) {
-                                                TtUtils.SendEmailToDev(MainActivity.this);
+                                                TtUtils.SendCrashEmailToDev(MainActivity.this);
                                             }
                                         })
                                         .setNeutralButton("Don't Send", null)

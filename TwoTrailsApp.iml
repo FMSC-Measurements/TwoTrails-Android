@@ -204,5 +204,11 @@
     <orderEntry type="module" module-name="Utilities" />
     <orderEntry type="module" module-name="GeoSpatial" />
     <orderEntry type="module" module-name="AndroidEx" />
+    <orderEntry type="module" module-name="Utilities" />
+    <orderEntry type="module" module-name="GeoSpatial" />
+    <orderEntry type="module" module-name="AndroidEx" />
+    <orderEntry type="module" module-name="Utilities" />
+    <orderEntry type="module" module-name="GeoSpatial" />
+    <orderEntry type="module" module-name="AndroidEx" />
   </component>
 </module>
