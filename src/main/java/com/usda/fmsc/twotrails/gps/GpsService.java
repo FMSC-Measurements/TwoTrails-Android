@@ -334,7 +334,9 @@ public class GpsService extends Service implements LocationListener, LocationSou
 
             logging = true;
         } catch (Exception e) {
-            e.printStackTrace();
+            if (TtAppCtx.getReport() != null) {
+                TtAppCtx.getReport().writeError(e.getMessage(), "GpsService:startLogging", e.getStackTrace());
+            }
         }
     }
 

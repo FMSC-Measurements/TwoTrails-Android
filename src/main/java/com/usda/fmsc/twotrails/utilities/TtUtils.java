@@ -720,7 +720,7 @@ public class TtUtils {
                 location.setLatitude(gps.getLatitude());
                 location.setLongitude(gps.getLongitude());
                 location.setAltitude(gps.getElevation());
-            } else {
+            } else if (metadata.containsKey(point.getMetadataCN())) {
                 double utmx, utmy;
 
                 if (adjusted) {
@@ -824,7 +824,7 @@ public class TtUtils {
                         }
 
 
-                        Double x, y, z, q, utmXA, utmYA;
+                        double x, y, z, q, utmXA, utmYA;
                         x = y = z = q = utmXA = utmYA = 0.0;
                         UTMCoords coords;
 
@@ -872,7 +872,7 @@ public class TtUtils {
 
 
                         lon = java.lang.Math.atan2(y, x);
-                        Double hyp = java.lang.Math.sqrt(java.lang.Math.pow(x, 2) + java.lang.Math.pow(y, 2));
+                        double hyp = java.lang.Math.sqrt(java.lang.Math.pow(x, 2) + java.lang.Math.pow(y, 2));
                         lat = java.lang.Math.atan2(q, hyp);
 
                         lat = lat * 180.0 / java.lang.Math.PI;
@@ -1894,6 +1894,17 @@ public class TtUtils {
             files.add(dal.getFilePath());
         }
 
+        File gpsFile = null;
+        for (File file : new File(TtUtils.getTtLogFileDir()).listFiles()) {
+            if (file.getName().startsWith("TtGpsLog")) {
+                gpsFile = file;
+            }
+        }
+
+        if (gpsFile != null) {
+            files.add(gpsFile.getPath());
+        }
+
         String zipFile = FileUtils.zipFiles(exportFile, files.toArray(new String[0])) ? exportFile : null;
 
         if (FileUtils.fileExists(getSettingsFilePath())) {
@@ -1928,6 +1939,9 @@ public class TtUtils {
             .endObject().flush();
             js.close();
         } catch (Exception e) {
+            if (TwoTrailsApp.getInstance().getReport() != null) {
+                TwoTrailsApp.getInstance().getReport().writeError(e.getMessage(), "TtUtils:generateSettingsFile", e.getStackTrace());
+            }
             return false;
         }
 
@@ -1935,14 +1949,17 @@ public class TtUtils {
     }
 
 
-    public static void SendEmailToDev(Activity activity) {
+    public static void SendCrashEmailToDev(Activity activity) {
         SendEmailToDev(activity, null);
     }
 
     public static void SendEmailToDev(Activity activity, String reportPath) {
         TwoTrailsApp app = TwoTrailsApp.getInstance();
 
+        boolean isCrash = false;
+
         if (reportPath == null) {
+            isCrash = true;
             if (app.hasDAL()) {
                 reportPath = TtUtils.exportReport(app.getDAL());
             } else {
@@ -1955,12 +1972,18 @@ public class TtUtils {
                 Intent intent = new Intent(Intent.ACTION_SEND);
                 intent.setType("text/plain");
                 intent.putExtra(Intent.EXTRA_EMAIL, new String[] {app.getString(R.string.dev_email_addr)});
-                intent.putExtra(Intent.EXTRA_SUBJECT, "TwoTrails Error Report");
-                intent.putExtra(Intent.EXTRA_TEXT, "I have experienced a crash in TwoTrails Android and would like report it to the development team. \n\nIssue: \n\nWhat happened before the crash: ");
-
                 intent.putExtra(Intent.EXTRA_STREAM, AndroidUtils.Files.getUri(activity, BuildConfig.APPLICATION_ID, reportPath));
 
-                activity.startActivityForResult(Intent.createChooser(intent, "Send Error Report to Dev.."), Consts.Codes.Activites.SEND_EMAIL_TO_DEV);
+                if (isCrash) {
+                    intent.putExtra(Intent.EXTRA_SUBJECT, "TwoTrails Error Report");
+                    intent.putExtra(Intent.EXTRA_TEXT, "I have experienced a crash in TwoTrails Android and would like report it to the development team. \n\nIssue: \n\nWhat happened before the crash: ");
+                    activity.startActivityForResult(Intent.createChooser(intent, "Send Error Report to Dev.."), Consts.Codes.Activites.SEND_EMAIL_TO_DEV);
+                } else {
+                    intent.putExtra(Intent.EXTRA_SUBJECT, "TwoTrails Report");
+                    intent.putExtra(Intent.EXTRA_TEXT, "I am experiencing issues in TwoTrails Android and would like report it to the development team. \n\nNotes: ");
+                    activity.startActivityForResult(Intent.createChooser(intent, "Send Report to Dev.."), Consts.Codes.Activites.SEND_EMAIL_TO_DEV);
+                }
+
             } catch (Exception e) {
                 Toast.makeText(activity, "Error Sending Email.", Toast.LENGTH_LONG).show();
             }
@@ -2045,7 +2068,7 @@ public class TtUtils {
         return getTtFileDir();
     }
 
-    public static String getLogFilePath() {
+    public static String getGpsLogFilePath() {
         return String.format("%s%sTtGpsLog_%s.txt",
                 getTtLogFileDir(),
                 File.separator,
