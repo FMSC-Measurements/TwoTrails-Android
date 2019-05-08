@@ -66,9 +66,6 @@ public class CheckNmeaDialog extends DialogFragment implements GpsService.Listen
 
         binder = TwoTrailsApp.getInstance().getGps();
 
-        postAllStrings = binder.postsAllNmeaStrings();
-        binder.postAllNmeaStrings(true);
-
         binder.addListener(this);
         binder.startGps();
     }
@@ -82,7 +79,6 @@ public class CheckNmeaDialog extends DialogFragment implements GpsService.Listen
                 binder.stopGps();
             }
 
-            binder.postAllNmeaStrings(postAllStrings);
             binder.removeListener(this);
         }
     }
