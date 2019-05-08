@@ -46,7 +46,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
 
     private OnLocationChangedListener gmapListener;
 
-    private boolean postAllNmeaStrings = true, logging, logBurstDetails, receivingValidBursts;
+    private boolean logging, logBurstDetails, receivingValidBursts;
     private GeoPosition lastPosition;
 
     private ArrayList<Listener> listeners = new ArrayList<>();
@@ -481,20 +481,16 @@ public class GpsService extends Service implements LocationListener, LocationSou
         if (nmeaString != null) {
             nmeaString = nmeaString.trim();
 
-            boolean parsed = false;
+            postNmeaString(nmeaString);
 
             if (gpsSyncer.isSynced() || gpsSyncer.sync(nmeaString)) {
                 try {
-                    parsed = parser.parse(nmeaString);
+                    parser.parse(nmeaString);
                 } catch (ExcessiveStringException e) {
                     gpsSyncer.reset();
                     parser.reset();
                     postNmeaBurstValidityChanged(false);
                 }
-            }
-
-            if (postAllNmeaStrings || parsed) {
-                postNmeaString(nmeaString);
             }
 
             if (logging) {
@@ -820,15 +816,6 @@ public class GpsService extends Service implements LocationListener, LocationSou
         }
 
         @Override
-        public void postAllNmeaStrings(boolean postAllStrings) {
-            GpsService.this.postAllNmeaStrings = postAllStrings;
-        }
-
-        public boolean postsAllNmeaStrings() {
-            return GpsService.this.postAllNmeaStrings;
-        }
-
-        @Override
         public void startLogging(String fileName) {
             GpsService.this.startLogging(fileName);
         }
@@ -886,8 +873,6 @@ public class GpsService extends Service implements LocationListener, LocationSou
         boolean areGpsBurstsValid();
 
         GpsProvider getGpsProvider();
-
-        void postAllNmeaStrings(boolean allStrings);
 
         void startLogging(String fileName);
 
