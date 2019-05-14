@@ -330,15 +330,18 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
             public void run() {
                 if (_Polygon != null) {
                     TwoTrailsApp TtAppCtx = TwoTrailsApp.getInstance();
-                    if (TwoTrailsApp.getInstance().getDAL().getBoundaryPointsCountInPoly(_PolyCN) > 2) {
-                        final ArrayList<TtPoint> points = TtAppCtx.getDAL().getBoundaryPointsInPoly(_Polygon.getCN());
+                    final ArrayList<TtPoint> points = TtAppCtx.getDAL().getBoundaryPointsInPoly(_Polygon.getCN());
 
-                        if (points != null && points.size() > 2) {
-                            HashMap<String, TtMetadata> metadata = TtAppCtx.getDAL().getMetadataMap();
-                            TtMetadata defMeta = metadata.get(Consts.EmptyGuid);
-                            if (defMeta != null) {
-                                spv.render(TtUtils.UI.generateStaticPolyPoints(points, metadata, defMeta.getZone(), (int)(spv.getWidth() * 0.9)));
-                            }
+                    if (points != null && points.size() > 2) {
+                        final HashMap<String, TtMetadata> metadata = TtAppCtx.getDAL().getMetadataMap();
+                        final TtMetadata defMeta = metadata.get(Consts.EmptyGuid);
+                        if (defMeta != null) {
+                            activity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    spv.render(TtUtils.UI.generateStaticPolyPoints(points, metadata, defMeta.getZone(), (int)(spv.getWidth() * 0.9)));
+                                }
+                            });
                         }
                     }
                 }

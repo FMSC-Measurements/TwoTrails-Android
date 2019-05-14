@@ -1915,6 +1915,8 @@ public class TtUtils {
     }
 
     public static boolean generateSettingsFile() {
+        int generated = 0;
+
         try {
             TwoTrailsApp app = TwoTrailsApp.getInstance();
             String sp = getSettingsFilePath();
@@ -1923,29 +1925,57 @@ public class TtUtils {
             JsonWriter js = new JsonWriter(fw);
             js.setIndent("    ");
 
-            js.beginObject()
-                    .name("DeviceSettings")
-                    .beginObject();
-                    app.getDeviceSettings().writeToFile(js);
-                    js.endObject()
-                    .name("MetadataSetting")
-                    .beginObject();
-                    app.getMetadataSettings().writeToFile(js);
-                    js.endObject()
-                    .name("ProjectSetting")
-                    .beginObject();
-                    app.getProjectSettings().writeToFile(js);
-                    js.endObject()
-            .endObject().flush();
+            try {
+                js.beginObject()
+                .name("DeviceSettings")
+                .beginObject();
+                app.getDeviceSettings().writeToFile(js);
+                js.endObject();
+
+                generated += 1;
+            } catch (IOException e) {
+                if (TwoTrailsApp.getInstance().getReport() != null) {
+                    TwoTrailsApp.getInstance().getReport().writeError(e.getMessage(), "TtUtils:generateSettingsFile:DeviceSettings", e.getStackTrace());
+                }
+            }
+
+            try {
+                js.name("MetadataSettings")
+                .beginObject();
+                app.getMetadataSettings().writeToFile(js);
+                js.endObject();
+
+                generated += 1;
+            } catch (IOException e) {
+                if (TwoTrailsApp.getInstance().getReport() != null) {
+                    TwoTrailsApp.getInstance().getReport().writeError(e.getMessage(), "TtUtils:generateSettingsFile:MetadataSettings", e.getStackTrace());
+                }
+            }
+
+            try {
+                js.name("ProjectSettings")
+                .beginObject();
+                app.getProjectSettings().writeToFile(js);
+                js.endObject();
+
+                generated += 1;
+            } catch (IOException e) {
+                if (TwoTrailsApp.getInstance().getReport() != null) {
+                    TwoTrailsApp.getInstance().getReport().writeError(e.getMessage(), "TtUtils:generateSettingsFile:ProjectSettings", e.getStackTrace());
+                }
+            }
+
+            js.endObject().flush();
             js.close();
         } catch (Exception e) {
             if (TwoTrailsApp.getInstance().getReport() != null) {
                 TwoTrailsApp.getInstance().getReport().writeError(e.getMessage(), "TtUtils:generateSettingsFile", e.getStackTrace());
             }
-            return false;
+
+            generated = 0;
         }
 
-        return true;
+        return generated > 0;
     }
 
 

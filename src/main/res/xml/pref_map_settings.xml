@@ -22,6 +22,11 @@
         android:title="Show My Position Button"
         android:key="@string/set_MAP_MY_POS_BUTTON" />
 
+    <com.usda.fmsc.android.preferences.SwitchCompatPreference
+        android:title="Request Offline Map"
+        android:key="@string/set_MAP_CHOOSE_OFFLINE_ASK"
+        android:summary="Ask to choose an offline map if no internet is available"/>
+
     <!--<CheckBoxPreference-->
     <!--android:title="Show Zoom Buttons"-->
     <!--android:key="@string/set_MAP_ZOOM_BUTTONS" />-->

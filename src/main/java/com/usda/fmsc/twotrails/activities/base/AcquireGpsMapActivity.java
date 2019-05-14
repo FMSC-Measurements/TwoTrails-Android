@@ -574,12 +574,12 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
     }
 
     @Override
-    protected void onCreateGraphicManagers() {
+    protected void createPolygonGraphicManagers() {
         if (trailModeEnabled) {
             addTrailGraphic(trailGraphicManager);
         }
 
-        super.onCreateGraphicManagers();
+        super.createPolygonGraphicManagers();
     }
 
     protected TtPolygon getPolygon() {
