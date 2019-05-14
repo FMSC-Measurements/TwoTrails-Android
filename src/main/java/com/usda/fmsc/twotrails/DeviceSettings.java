@@ -111,6 +111,8 @@ public class DeviceSettings extends Settings {
     public static final String ARC_GIS_MAP_ID_COUNTER = "ArcGISMapIdCounter";
     public static final String MAP_ADJ_LINE_WIDTH = "MapAdjLineWidth";
     public static final String MAP_UNADJ_LINE_WIDTH = "MapUnAdjLineWidth";
+    public static final String MAP_CHOOSE_OFFLINE = "MapChooseOffline";
+    public static final String MAP_CHOOSE_OFFLINE_ASK = "MapChooseOfflineAsk";
 
     public static final String ARC_CREDENTIALS = "ArcCredentials";
 
@@ -182,6 +184,8 @@ public class DeviceSettings extends Settings {
     public final int DEFAULT_ARC_GIS_MAP_ID_COUNTER = 0;
     public final int DEFAULT_MAP_ADJ_LINE_WIDTH = 6;
     public final int DEFAULT_MAP_UNADJ_LINE_WIDTH = 16;
+    public final int DEFAULT_MAP_CHOOSE_OFFLINE = 0;
+    public final boolean DEFAULT_MAP_CHOOSE_OFFLINE_ASK = true;
 
     public final boolean DEFAULT_MEDIA_COPY_TO_PROJECT = true;
     //endregion
@@ -275,6 +279,8 @@ public class DeviceSettings extends Settings {
         editor.putInt(ARC_GIS_MAP_ID_COUNTER, DEFAULT_ARC_GIS_MAP_ID_COUNTER);
         editor.putInt(MAP_ADJ_LINE_WIDTH, DEFAULT_MAP_ADJ_LINE_WIDTH);
         editor.putInt(MAP_UNADJ_LINE_WIDTH, DEFAULT_MAP_UNADJ_LINE_WIDTH);
+        editor.putInt(MAP_CHOOSE_OFFLINE, DEFAULT_MAP_CHOOSE_OFFLINE);
+        editor.putBoolean(MAP_CHOOSE_OFFLINE_ASK, DEFAULT_MAP_CHOOSE_OFFLINE_ASK);
 
         editor.putBoolean(MEDIA_COPY_TO_PROJECT, DEFAULT_MEDIA_COPY_TO_PROJECT);
 
@@ -371,6 +377,8 @@ public class DeviceSettings extends Settings {
         js.name(MAP_ID).value(getMapId());
         js.name(MAP_ADJ_LINE_WIDTH).value(getMapAdjLineWidth());
         js.name(MAP_UNADJ_LINE_WIDTH).value(getMapUnAdjLineWidth());
+        js.name(MAP_CHOOSE_OFFLINE).value(getAutoMapChooseOffline());
+        js.name(MAP_CHOOSE_OFFLINE_ASK).value(getAutoMapChooseOfflineAsk());
 
         js.name(ARC_GIS_MAPS);
         js.beginArray();
@@ -850,6 +858,21 @@ public class DeviceSettings extends Settings {
     }
 
 
+    public int getAutoMapChooseOffline() {
+        return getInt(MAP_CHOOSE_OFFLINE, DEFAULT_MAP_CHOOSE_OFFLINE);
+    }
+
+    public void setAutoMapChooseOffline(int value) {
+        setInt(MAP_CHOOSE_OFFLINE, value);
+    }
+
+    public boolean getAutoMapChooseOfflineAsk() {
+        return getBool(MAP_CHOOSE_OFFLINE_ASK, DEFAULT_MAP_CHOOSE_OFFLINE_ASK);
+    }
+
+    public void setAutoMapChooseOfflineAsk(boolean value) {
+        setBool(MAP_CHOOSE_OFFLINE_ASK, value);
+    }
     //region ArcGIS
 
     public int getArcGisIdCounter() {

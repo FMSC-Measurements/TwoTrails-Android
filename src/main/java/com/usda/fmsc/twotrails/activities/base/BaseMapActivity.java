@@ -42,6 +42,7 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.animation.ViewAnimator;
+import com.usda.fmsc.android.dialogs.DontAskAgainDialog;
 import com.usda.fmsc.android.utilities.PostDelayHandler;
 import com.usda.fmsc.android.widget.MultiStateTouchCheckBox;
 import com.usda.fmsc.android.widget.drawables.FadeBitmapProgressDrawable;
@@ -54,6 +55,7 @@ import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.geospatial.utm.UTMTools;
 import com.usda.fmsc.twotrails.Consts;
+import com.usda.fmsc.twotrails.DeviceSettings;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.activities.SettingsActivity;
 import com.usda.fmsc.twotrails.adapters.PointDetailsAdapter;
@@ -320,30 +322,42 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                final Runnable selectMap = new Runnable() {
+                    @Override
+                    public void run() {
+                        SelectMapTypeDialog.newInstance(new ArrayList<>(getTtAppCtx().getArcGISTools().getMapLayers()),
+                                SelectMapTypeDialog.SelectMapMode.ARC_OFFLINE)
+                                .setOnMapSelectedListener(new SelectMapTypeDialog.OnMapSelectedListener() {
+                                    @Override
+                                    public void mapSelected(MapType mapType, int mapId) {
+                                        setMapType(mapType, mapId);
+                                    }
+                                })
+                                .show(getSupportFragmentManager(), SELECT_MAP);
+                    }
+                };
+
                 if (getTtAppCtx().getArcGISTools().offlineMapsAvailable()) {
-                    new AlertDialog.Builder(BaseMapActivity.this)
-                            .setMessage("There is no internet connection. Would you like to use an offline map?")
-                            .setPositiveButton(R.string.str_yes, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    SelectMapTypeDialog.newInstance(new ArrayList<>(getTtAppCtx().getArcGISTools().getMapLayers()),
-                                            SelectMapTypeDialog.SelectMapMode.ARC_OFFLINE)
-                                            .setOnMapSelectedListener(new SelectMapTypeDialog.OnMapSelectedListener() {
-                                                @Override
-                                                public void mapSelected(MapType mapType, int mapId) {
-                                                    setMapType(mapType, mapId);
-                                                }
-                                            })
-                                            .show(getSupportFragmentManager(), SELECT_MAP);
-                                }
-                            })
-                            .setNegativeButton(R.string.str_no, null)
-                            .show();
-                } else {
-                    new AlertDialog.Builder(BaseMapActivity.this)
-                            .setMessage("There is no internet connection and there are no Offline maps are available. No Map can be displayed.")
-                            .setPositiveButton(R.string.str_ok, null)
-                            .show();
+                    if (getTtAppCtx().getDeviceSettings().getAutoMapChooseOfflineAsk()) {
+                        DontAskAgainDialog dialog = new DontAskAgainDialog(BaseMapActivity.this,
+                                DeviceSettings.MAP_CHOOSE_OFFLINE_ASK,
+                                DeviceSettings.MAP_CHOOSE_OFFLINE,
+                                getTtAppCtx().getDeviceSettings().getPrefs());
+
+                        dialog.setMessage("There is no internet connection. Would you like to use an offline map?")
+                                .setPositiveButton(getString(R.string.str_yes), new DontAskAgainDialog.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i, Object value) {
+                                        selectMap.run();
+                                    }
+                                }, 2)
+                                .setNegativeButton(getString(R.string.str_no), null, 1)
+                                .show();
+                    } else if (getTtAppCtx().getDeviceSettings().getAutoMapChooseOffline() == 0) {
+                        selectMap.run();
+                    }
+                } else if (getTtAppCtx().getDeviceSettings().getAutoMapChooseOfflineAsk()) {
+                    Toast.makeText(BaseMapActivity.this, "There is no internet connection and there are no Offline maps are available. No Map can be displayed.",  Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -778,18 +792,18 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     public void onMapReady() {
         mapReady = true;
 
-        if (mmFrag != null) {
-            for (PolygonGraphicManager pgm : polyGraphicManagers) {
-                mmFrag.addPolygon(pgm, null);
-            }
-        }
-
         setCompassEnabled(getShowCompass());
         setLocationEnabled(getShowMyPos());
 
         if (!polysCreated) {
             setupGraphicManagers();
             polysCreated = true;
+        }
+
+        if (mmFrag != null) {
+            for (PolygonGraphicManager pgm : getPolyGraphicManagers()) {
+                mmFrag.addPolygon(pgm, null);
+            }
         }
 
         if (getMapTracking() == MapTracking.POLY_BOUNDS && getTrackedPoly() != null) {
@@ -1169,7 +1183,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
 
     //region Polygon Options
     private void setupGraphicManagers() {
-        onCreateGraphicManagers();
+        createPolygonGraphicManagers();
 
         if (getPolyGraphicManagers().size() > 0) {
             Extent.Builder builder = new Extent.Builder();
@@ -1198,7 +1212,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         setupMasterPolyControl();
     }
 
-    protected void onCreateGraphicManagers() {
+    protected void createPolygonGraphicManagers() {
         PolygonGraphicManager polygonGraphicManager;
         String trackedPolyCN = getTrackedPolyCN();
 

@@ -302,6 +302,8 @@
     <string name="set_MAP_MY_POS_BUTTON">MapMyPosButton</string>
     <string name="set_MAP_SHOW_MY_POS">MapShowMyPos</string>
     <string name="set_MAP_USE_UTM_NAV">MapUseUtmNav</string>
+    <string name="set_MAP_CHOOSE_OFFLINE">MapChooseOffline</string>
+    <string name="set_MAP_CHOOSE_OFFLINE_ASK">MapChooseOfflineAsk</string>
 
 
     <!-- Dialogs -->
