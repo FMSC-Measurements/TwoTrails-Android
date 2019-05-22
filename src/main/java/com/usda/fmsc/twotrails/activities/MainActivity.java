@@ -412,7 +412,7 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
         }
 
         if (resultCode == Consts.Codes.Results.NO_DAL) {
-            if (getTtAppCtx().getReport() != null) {
+            if (getTtAppCtx().hasReport()) {
                 getTtAppCtx().getReport().writeError("DAL not found", "requestCode:" + requestCode);
             } else {
                 Log.e(Consts.LOG_TAG, "DAL not found");
