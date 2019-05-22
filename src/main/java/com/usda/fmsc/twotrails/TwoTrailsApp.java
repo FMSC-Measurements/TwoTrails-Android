@@ -498,6 +498,10 @@ public class TwoTrailsApp extends Application {
         return _ArcGISTools != null ? _ArcGISTools : (_ArcGISTools = new ArcGISTools(this));
     }
 
+    public boolean hasReport() {
+        return _Report != null;
+    }
+
     public TtReport getReport() {
         if (!_FoldersInitiated)
             initFolders();

@@ -240,7 +240,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
                     locManager.registerGnssStatusCallback(mGnssStatusCallback);
                     locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_UPDATE_INTERVAL, GPS_MINIMUM_DISTANCE, this);
 
-                    if (TtAppCtx.getReport() != null) {
+                    if (TtAppCtx.hasReport()) {
                         TtAppCtx.getReport().writeEvent("Internal GPS started");
                     }
 
@@ -334,7 +334,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
 
             logging = true;
         } catch (Exception e) {
-            if (TtAppCtx.getReport() != null) {
+            if (TtAppCtx.hasReport()) {
                 TtAppCtx.getReport().writeError(e.getMessage(), "GpsService:startLogging", e.getStackTrace());
             }
         }
@@ -375,7 +375,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
         else {
             _deviceUUID = deviceUUID;
 
-            if (TtAppCtx.getReport() != null) {
+            if (TtAppCtx.hasReport()) {
                 TtAppCtx.getReport().writeEvent("GPS changed to: " +
                         (_deviceUUID == null ? "Internal" : TtAppCtx.getDeviceSettings().getGpsDeviceName() + " (" + _deviceUUID + ")"));
             }
@@ -414,7 +414,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
     @Override
     public void connectionStarted() {
         postGpsStart();
-        if (TtAppCtx.getReport() != null) {
+        if (TtAppCtx.hasReport()) {
             TtAppCtx.getReport().writeEvent("External GPS connection started");
         }
     }
@@ -428,7 +428,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
             btConn = null;
         }
 
-        if (TtAppCtx.getReport() != null) {
+        if (TtAppCtx.hasReport()) {
             TtAppCtx.getReport().writeError("External GPS lost connection", "GpsService:connectionLost");
         }
 

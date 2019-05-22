@@ -133,7 +133,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     private Sensor accelerometer, magnetometer;
 
     private ActionBarDrawerToggle drawerToggle;
-    private MenuItem miResetBounds, miShowMyPos, miTrackedPoly, miMapMaxBounds, miZoomToPoly;
+    private MenuItem miResetBounds, miShowMyPos, miTrackedPoly, miMapMaxBounds;
     private SlidingUpPanelLayout slidingLayout;
     private TextView tvNavPid, tvNavPoly, tvNavDistMt, tvNavDistFt, tvNavAzTrue, tvNavAzMag;
     private ImageView ivArrow;
@@ -391,6 +391,8 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
                     baseMapDrawer.addDrawerListener(drawerToggle);
                 }
             }
+        } else {
+            getTtAppCtx().getReport().writeDebug("View not created", "BaseMapActivity:setContentView");
         }
 
         if (getMapRightDrawerLayoutId() != 0) {
@@ -468,7 +470,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
             miShowMyPos.setChecked(getTtAppCtx().getDeviceSettings().getMapShowMyPos());
         }
 
-        miZoomToPoly = menu.findItem(R.id.mapMenuZoomToPoly);
+        MenuItem miZoomToPoly = menu.findItem(R.id.mapMenuZoomToPoly);
         if (miZoomToPoly != null) {
             miZoomToPoly.setVisible(getPolygons().size() > 0);
         }
@@ -660,6 +662,11 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
                     break;
                 }
             }
+        } else {
+            if (getTtAppCtx().hasReport()) {
+                getTtAppCtx().getReport().writeDebug("SlidingLayout not initialized", "BaseMapActivity:onBackPressed");
+            }
+            super.onBackPressed();
         }
     }
 
