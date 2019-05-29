@@ -576,7 +576,7 @@ public class TwoTrailsApp extends Application {
         Thread.setDefaultUncaughtExceptionHandler(exceptionHandler);
 
         if (initFolders()) {
-            _Report.writeEvent(StringEx.format("TwoTrails Started (%s)", AndroidUtils.App.getVersionName(this)));
+            _Report.writeEvent(StringEx.format("TwoTrails Started (%s)", AndroidUtils.App.getAppVersion(this)));
         }
 
         ArcGISRuntime.setClientId(this.getString(R.string.arcgis_client_id));

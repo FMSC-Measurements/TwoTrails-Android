@@ -2262,7 +2262,7 @@ public class DataAccessLayer extends IDataLayer {
             cvs.put(TwoTrailsSchema.ProjectInfoSchema.TtDbSchemaVersion,
                     TwoTrailsSchema.SchemaVersion.toString());
 
-            String version = TtUtils.getApplicationVersion(TtAppCtx);
+            String version = String.format("ANDROID: %s", TtUtils.getApplicationVersion(TtAppCtx));
             ProjectSettings ps = TtAppCtx.getProjectSettings();
 
             cvs.put(TwoTrailsSchema.ProjectInfoSchema.TtVersion, version);

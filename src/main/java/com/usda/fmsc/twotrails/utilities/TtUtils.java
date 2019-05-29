@@ -2026,13 +2026,12 @@ public class TtUtils {
     public static String getApplicationVersion(Application context) {
         try {
             PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
-
-            return String.format("ANDROID: %s", pInfo.versionName);
+            return String.format("%s-%s", pInfo.versionName.substring(0, pInfo.versionName.indexOf('-')), pInfo.versionCode);
         } catch (Exception ex) {
             //
         }
 
-        return "ANDROID: ???";
+        return "???";
     }
 
     //region Files
