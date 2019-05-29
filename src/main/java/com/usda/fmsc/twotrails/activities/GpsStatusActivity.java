@@ -275,7 +275,7 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
 
                     if (status != GpsService.GpsDeviceStatus.ExternalGpsStarted &&
                             status != GpsService.GpsDeviceStatus.InternalGpsStarted) {
-                        Toast.makeText(GpsStatusActivity.this, "Unabled to conenct to GPS.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(GpsStatusActivity.this, "Unable to connect to GPS.", Toast.LENGTH_SHORT).show();
                         activity.setResult(RESULT_CANCELED);
                         activity.finish();
                     } else {

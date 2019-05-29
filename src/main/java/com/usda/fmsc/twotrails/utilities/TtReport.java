@@ -9,12 +9,14 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.logging.Handler;
+import java.util.Locale;
 
 import com.usda.fmsc.utilities.StringEx;
 
 public class TtReport {
+    private static final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS Z", Locale.ENGLISH);
     private static final String _fileName = "TwoTrailsLog.txt";
     private static TtReport inst = new TtReport();
     private static PrintWriter logWriter;
@@ -98,7 +100,7 @@ public class TtReport {
     }
 
     public void writeError(String msg, String codePage) {
-        String error = String.format("ERR[%s][%s]: %s", new Date(), codePage, msg);
+        String error = String.format("ERR[%s][%s]: %s", df.format(new Date()), codePage, msg);
         Log.e(Consts.LOG_TAG, error);
         inst.writeToReport(error);
     }
@@ -120,19 +122,19 @@ public class TtReport {
     }
 
     public void writeEvent(String event) {
-        String eStr = String.format("EVT[%s]: %s", new Date(), event);
+        String eStr = String.format("EVT[%s]: %s", df.format(new Date()), event);
         Log.i(Consts.LOG_TAG, eStr);
         inst.writeToReport(eStr);
     }
 
     public void writeWarn(String msg, String codePage) {
-        String error = String.format("WARN[%s][%s]: %s", new Date(), codePage, msg);
+        String error = String.format("WARN[%s][%s]: %s", df.format(new Date()), codePage, msg);
         Log.w(Consts.LOG_TAG, error);
         inst.writeToReport(error);
     }
 
     public void writeDebug(String msg, String codePage) {
-        String error = String.format("DBG[%s][%s]: %s", new Date(), codePage, msg);
+        String error = String.format("DBG[%s][%s]: %s", df.format(new Date()), codePage, msg);
         Log.d(Consts.LOG_TAG, error);
         inst.writeToReport(error);
     }

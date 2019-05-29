@@ -336,12 +336,16 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
                         final HashMap<String, TtMetadata> metadata = TtAppCtx.getDAL().getMetadataMap();
                         final TtMetadata defMeta = metadata.get(Consts.EmptyGuid);
                         if (defMeta != null) {
-                            activity.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    spv.render(TtUtils.UI.generateStaticPolyPoints(points, metadata, defMeta.getZone(), (int)(spv.getWidth() * 0.9)));
-                                }
-                            });
+                            if (activity != null) {
+                                activity.runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        spv.render(TtUtils.UI.generateStaticPolyPoints(points, metadata, defMeta.getZone(), (int)(spv.getWidth() * 0.9)));
+                                    }
+                                });
+                            } else {
+                                TtAppCtx.getReport().writeWarn("Activity is null", "PolygonFragment:onPolygonPointsUpdated");
+                            }
                         }
                     }
                 }

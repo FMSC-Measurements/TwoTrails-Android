@@ -113,7 +113,6 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
                 _MarkerData.put(Integer.toHexString(_AdjBndPts.addGraphic(adjmk)), adjMd);
                 _MarkerData.put(Integer.toHexString(_UnadjBndPts.addGraphic(unadjmk)), unadjMd);
 
-
                 if (adjBndPO == null) {
                     adjBndPO = new Polygon();
                     unadjBndPO = new Polygon();
