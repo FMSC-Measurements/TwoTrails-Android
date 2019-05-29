@@ -186,7 +186,6 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
         switch (item.getItemId()) {
             case R.id.mainMenuSettings:
                 startActivityForResult(new Intent(this, SettingsActivity.class), Consts.Codes.Activites.SETTINGS);
@@ -202,7 +201,7 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
             case R.id.mainMenuAbout:
                 new AlertDialog.Builder(MainActivity.this)
                         .setTitle(R.string.app_name)
-                        .setMessage(String.format("App: %s\nData: %s", AndroidUtils.App.getVersionName(MainActivity.this), TwoTrailsSchema.SchemaVersion))
+                        .setMessage(String.format("App: %s\nData: %s", TtUtils.getApplicationVersion(getTtAppCtx()), TwoTrailsSchema.SchemaVersion))
                         .show();
                 break;
         }
