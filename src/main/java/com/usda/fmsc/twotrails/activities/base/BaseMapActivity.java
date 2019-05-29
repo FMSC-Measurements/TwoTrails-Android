@@ -38,6 +38,7 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import com.usda.fmsc.android.AndroidUtils;
@@ -317,50 +318,55 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         //use empty google map while user decides
         mapFragment = createMapFragment(MapType.Google, getMapOptions(MapType.Google, GoogleMapType.MAP_TYPE_NONE.getValue()));
         mmFrag = (IMultiMapFragment)mapFragment;
-        getSupportFragmentManager().beginTransaction().add(R.id.mapContainer, mapFragment).commit();
+        if (mapFragment != null) {
+            getSupportFragmentManager().beginTransaction().add(R.id.mapContainer, mapFragment).commit();
 
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                final Runnable selectMap = new Runnable() {
-                    @Override
-                    public void run() {
-                        SelectMapTypeDialog.newInstance(new ArrayList<>(getTtAppCtx().getArcGISTools().getMapLayers()),
-                                SelectMapTypeDialog.SelectMapMode.ARC_OFFLINE)
-                                .setOnMapSelectedListener(new SelectMapTypeDialog.OnMapSelectedListener() {
-                                    @Override
-                                    public void mapSelected(MapType mapType, int mapId) {
-                                        setMapType(mapType, mapId);
-                                    }
-                                })
-                                .show(getSupportFragmentManager(), SELECT_MAP);
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    final Runnable selectMap = new Runnable() {
+                        @Override
+                        public void run() {
+                            SelectMapTypeDialog.newInstance(new ArrayList<>(getTtAppCtx().getArcGISTools().getMapLayers()),
+                                    SelectMapTypeDialog.SelectMapMode.ARC_OFFLINE)
+                                    .setOnMapSelectedListener(new SelectMapTypeDialog.OnMapSelectedListener() {
+                                        @Override
+                                        public void mapSelected(MapType mapType, int mapId) {
+                                            setMapType(mapType, mapId);
+                                        }
+                                    })
+                                    .show(getSupportFragmentManager(), SELECT_MAP);
+                        }
+                    };
+
+                    if (getTtAppCtx().getArcGISTools().offlineMapsAvailable()) {
+                        if (getTtAppCtx().getDeviceSettings().getAutoMapChooseOfflineAsk()) {
+                            DontAskAgainDialog dialog = new DontAskAgainDialog(BaseMapActivity.this,
+                                    DeviceSettings.MAP_CHOOSE_OFFLINE_ASK,
+                                    DeviceSettings.MAP_CHOOSE_OFFLINE,
+                                    getTtAppCtx().getDeviceSettings().getPrefs());
+
+                            dialog.setMessage("There is no internet connection. Would you like to use an offline map?")
+                                    .setPositiveButton(getString(R.string.str_yes), new DontAskAgainDialog.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int i, Object value) {
+                                            selectMap.run();
+                                        }
+                                    }, 2)
+                                    .setNegativeButton(getString(R.string.str_no), null, 1)
+                                    .show();
+                        } else if (getTtAppCtx().getDeviceSettings().getAutoMapChooseOffline() == 0) {
+                            selectMap.run();
+                        }
+                    } else if (getTtAppCtx().getDeviceSettings().getAutoMapChooseOfflineAsk()) {
+                        Toast.makeText(BaseMapActivity.this, "There is no internet connection and there are no Offline maps available. No Map can be displayed.",  Toast.LENGTH_LONG).show();
                     }
-                };
-
-                if (getTtAppCtx().getArcGISTools().offlineMapsAvailable()) {
-                    if (getTtAppCtx().getDeviceSettings().getAutoMapChooseOfflineAsk()) {
-                        DontAskAgainDialog dialog = new DontAskAgainDialog(BaseMapActivity.this,
-                                DeviceSettings.MAP_CHOOSE_OFFLINE_ASK,
-                                DeviceSettings.MAP_CHOOSE_OFFLINE,
-                                getTtAppCtx().getDeviceSettings().getPrefs());
-
-                        dialog.setMessage("There is no internet connection. Would you like to use an offline map?")
-                                .setPositiveButton(getString(R.string.str_yes), new DontAskAgainDialog.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialogInterface, int i, Object value) {
-                                        selectMap.run();
-                                    }
-                                }, 2)
-                                .setNegativeButton(getString(R.string.str_no), null, 1)
-                                .show();
-                    } else if (getTtAppCtx().getDeviceSettings().getAutoMapChooseOffline() == 0) {
-                        selectMap.run();
-                    }
-                } else if (getTtAppCtx().getDeviceSettings().getAutoMapChooseOfflineAsk()) {
-                    Toast.makeText(BaseMapActivity.this, "There is no internet connection and there are no Offline maps are available. No Map can be displayed.",  Toast.LENGTH_SHORT).show();
                 }
-            }
-        });
+            });
+        } else {
+            getTtAppCtx().getReport().writeWarn("Unable to create mapFragment", "BaseMapActivity:requestOfflineMap");
+            Toast.makeText(BaseMapActivity.this, "Unable to create Map", Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override
@@ -636,9 +642,9 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
-
         getTtAppCtx().getGps().removeListener(this);
+
+        super.onDestroy();
     }
 
     @Override
@@ -744,21 +750,27 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         if (this.mapType == mapType) {
             if (mmFrag != null) {
                 mmFrag.setMap(mapId);
+
+                getTtAppCtx().getDeviceSettings().setMapId(mapId);
             } else {
-                throw new NullPointerException("MapFragment is null");
+                getTtAppCtx().getReport().writeError("MapFragment is null", "BaseMapActivity:setMapType");
+                Toast.makeText(getTtAppCtx(), "Error setting map type.", Toast.LENGTH_LONG).show();
+                finish();
             }
         } else {
-            if (mapType == MapType.Google && AndroidUtils.App.checkPlayServices(this, Consts.Codes.Services.REQUEST_GOOGLE_PLAY_SERVICES) != 0) {
-                throw new RuntimeException("Play Services not available");
+            if (mapType == MapType.Google && AndroidUtils.App.checkPlayServices(this, Consts.Codes.Services.REQUEST_GOOGLE_PLAY_SERVICES) != ConnectionResult.SUCCESS) {
+                getTtAppCtx().getReport().writeError("Google Play Services not available", "BaseMapActivity:setMapType");
+                Toast.makeText(getTtAppCtx(), "Google Play Services not available.", Toast.LENGTH_LONG).show();
+                finish();
+            } else {
+                mapFragment = createMapFragment(mapType, getMapOptions(mapType, mapId));
+                mmFrag = (IMultiMapFragment) mapFragment;
+                getSupportFragmentManager().beginTransaction().replace(R.id.mapContainer, mapFragment).commit();
+
+                getTtAppCtx().getDeviceSettings().setMapType(mapType);
+                getTtAppCtx().getDeviceSettings().setMapId(mapId);
             }
-
-            mapFragment = createMapFragment(mapType, getMapOptions(mapType, mapId));
-            mmFrag = (IMultiMapFragment)mapFragment;
-            getSupportFragmentManager().beginTransaction().replace(R.id.mapContainer, mapFragment).commit();
         }
-
-        getTtAppCtx().getDeviceSettings().setMapType(mapType);
-        getTtAppCtx().getDeviceSettings().setMapId(mapId);
     }
 
 
