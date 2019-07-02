@@ -775,11 +775,19 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
 
 
     protected void moveToLocation(Position position, boolean animate) {
-        moveToLocation((float) position.getLatitudeSignedDecimal(), (float) position.getLongitudeSignedDecimal(), animate);
+        if (position != null) {
+            moveToLocation((float) position.getLatitudeSignedDecimal(), (float) position.getLongitudeSignedDecimal(), animate);
+        } else {
+            getTtAppCtx().getReport().writeWarn("Null Position", "BaseMapActivity:moveToLocation(p,b)");
+        }
     }
 
     protected void moveToLocation(Position position, float zoomLevel, boolean animate) {
-        moveToLocation((float) position.getLatitudeSignedDecimal(), (float) position.getLongitudeSignedDecimal(), zoomLevel, animate);
+        if (position != null) {
+            moveToLocation((float) position.getLatitudeSignedDecimal(), (float) position.getLongitudeSignedDecimal(), zoomLevel, animate);
+        } else {
+            getTtAppCtx().getReport().writeWarn("Null Position", "BaseMapActivity:moveToLocation(p,f,b)", Thread.currentThread().getStackTrace());
+        }
     }
 
     protected void moveToLocation(float lat, float lon) {
@@ -800,7 +808,13 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
 
     protected void moveToLocation(Extent extents, int padding, boolean animate) {
         if (mapFragment != null) {
-            mmFrag.moveToLocation(extents, padding, animate);
+            if (extents != null) {
+                mmFrag.moveToLocation(extents, padding, animate);
+            } else {
+                getTtAppCtx().getReport().writeWarn("Null Extents", "BaseMapActivity:moveToLocation(e,i,b)", Thread.currentThread().getStackTrace());
+            }
+        } else {
+            getTtAppCtx().getReport().writeWarn("Null MapFragment", "BaseMapActivity:moveToLocation(e,i,b)", Thread.currentThread().getStackTrace());
         }
     }
     //endregion

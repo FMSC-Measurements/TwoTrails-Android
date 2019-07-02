@@ -885,7 +885,6 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
             if (validateSideShot()) {
                 setupTake5();
             }
-
             return true;
         } else if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
             if (hasPosition()) {
@@ -911,7 +910,8 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
 
     //region Update/Save/Validate/Setup Points
     public void updatePoint(TtPoint point) {
-        if (_CurrentPoint == point) {
+        if (_CurrentPoint.getCN().equals(point.getCN())) {
+            _CurrentPoint = point;
             updated = true;
 
             if (onBnd != point.isOnBnd()) {
