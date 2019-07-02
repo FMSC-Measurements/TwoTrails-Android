@@ -107,18 +107,7 @@ public class TtReport {
 
     public void writeError(String msg, String codePage, StackTraceElement[] stack) {
         writeError(msg, codePage);
-
-        String error = String.format("Stack Trace: %n");
-        Log.d(Consts.LOG_TAG, error);
-        inst.writeToReport(error);
-
-        if (stack != null) {
-            for (StackTraceElement ste : stack) {
-                error = String.format("%-5s%s", StringEx.Empty, ste.toString());
-                Log.d(Consts.LOG_TAG, error);
-                inst.writeToReport(error);
-            }
-        }
+        writeStackTrace(stack);
     }
 
     public void writeEvent(String event) {
@@ -133,9 +122,28 @@ public class TtReport {
         inst.writeToReport(error);
     }
 
+    public void writeWarn(String msg, String codePage, StackTraceElement[] stack) {
+        writeWarn(msg, codePage);
+        writeStackTrace(stack);
+    }
+
     public void writeDebug(String msg, String codePage) {
         String error = String.format("DBG[%s][%s]: %s", df.format(new Date()), codePage, msg);
         Log.d(Consts.LOG_TAG, error);
         inst.writeToReport(error);
+    }
+
+    private void writeStackTrace(StackTraceElement[] stack) {
+        String msg = "Stack Trace:";
+        Log.d(Consts.LOG_TAG, msg);
+        inst.writeToReport(msg);
+
+        if (stack != null) {
+            for (StackTraceElement ste : stack) {
+                msg = String.format("%-5s%s", StringEx.Empty, ste.toString());
+                Log.d(Consts.LOG_TAG, msg);
+                inst.writeToReport(msg);
+            }
+        }
     }
 }

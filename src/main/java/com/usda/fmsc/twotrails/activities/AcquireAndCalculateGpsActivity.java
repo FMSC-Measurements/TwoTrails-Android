@@ -608,10 +608,10 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
 
                         _Point.setLatitude(position.getLatitudeSignedDecimal());
                         _Point.setLongitude(position.getLongitudeSignedDecimal());
-                        _Point.setElevation(TtUtils.Convert.distance(zF, UomElevation.Meters, _Metadata.getElevation()));
+                        _Point.setElevation(position.getElevation());
                         _Point.setUnAdjX(xF);
                         _Point.setUnAdjY(yF);
-                        _Point.setUnAdjZ(_Point.getElevation());
+                        _Point.setUnAdjZ(zF);
                         _Point.setRMSEr(dRMSErf);
 
                         tvUtmXF.setText(StringEx.toString(xF, 3));
