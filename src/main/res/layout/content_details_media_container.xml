@@ -77,13 +77,13 @@
             android:layout_height="100dp"
             android:layout_alignParentBottom="true"/>
 
-        <android.support.v4.view.ViewPager
+        <androidx.viewpager.widget.ViewPager
             android:id="@+id/pmdViewPager"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_alignParentTop="true"
             android:layout_above="@id/lay1">
 
-        </android.support.v4.view.ViewPager>
+        </androidx.viewpager.widget.ViewPager>
     </RelativeLayout>
 </RelativeLayout>

@@ -1,8 +1,8 @@
 package com.usda.fmsc.twotrails.activities;
 
 import android.os.Bundle;
-import android.support.annotation.ColorInt;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.ColorInt;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.twotrails.R;

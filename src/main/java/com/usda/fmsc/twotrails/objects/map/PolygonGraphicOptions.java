@@ -1,7 +1,7 @@
 package com.usda.fmsc.twotrails.objects.map;
 
-import android.support.annotation.ColorInt;
-import android.support.annotation.Size;
+import androidx.annotation.ColorInt;
+import androidx.annotation.Size;
 
 import java.util.ArrayList;
 

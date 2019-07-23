@@ -6,7 +6,7 @@
     android:orientation="vertical"
     tools:context="com.usda.fmsc.twotrails.activities.AcquireGpsActivityOld">
 
-    <android.support.v7.widget.Toolbar
+    <androidx.appcompat.widget.Toolbar
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
@@ -74,7 +74,7 @@
                 android:textColor="@android:color/white"
                 android:gravity="end"/>
         </RelativeLayout>
-    </android.support.v7.widget.Toolbar>
+    </androidx.appcompat.widget.Toolbar>
 
     <View
         style="@style/ToolbarShadowViewElevation"
@@ -118,7 +118,7 @@
         android:layout_height="wrap_content"
         android:layout_above="@id/buttonBar">
 
-        <android.support.v7.widget.CardView
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@android:color/white"
@@ -133,6 +133,6 @@
                 layout="@layout/control_gps_info"
                 android:layout_height="wrap_content"
                 android:layout_width="match_parent"/>
-        </android.support.v7.widget.CardView>
+        </androidx.cardview.widget.CardView>
     </RelativeLayout>
 </RelativeLayout>

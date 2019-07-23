@@ -6,8 +6,8 @@ import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
-import android.support.annotation.XmlRes;
-import android.support.v7.app.ActionBar;
+import androidx.annotation.XmlRes;
+import androidx.appcompat.app.ActionBar;
 import android.view.MenuItem;
 
 import com.usda.fmsc.twotrails.R;

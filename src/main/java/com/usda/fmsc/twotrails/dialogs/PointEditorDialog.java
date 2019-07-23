@@ -5,9 +5,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.support.annotation.NonNull;
-import android.support.v4.app.DialogFragment;
-import android.support.v7.app.AlertDialog;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.DialogFragment;
+import androidx.appcompat.app.AlertDialog;
 import android.text.Editable;
 import android.text.InputType;
 import android.view.LayoutInflater;
@@ -23,7 +23,6 @@ import com.usda.fmsc.twotrails.adapters.MetadataDetailsAdapter;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 

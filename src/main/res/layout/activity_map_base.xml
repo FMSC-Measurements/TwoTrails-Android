@@ -4,7 +4,7 @@
               android:layout_height="match_parent"
               tools:context="com.usda.fmsc.twotrails.activities.base.BaseMapActivity">
 
-    <android.support.v4.widget.DrawerLayout
+    <androidx.drawerlayout.widget.DrawerLayout
         android:id="@+id/mapDrawer"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -23,7 +23,7 @@
             sothree:umanoInitialState="hidden">
 
             <!-- MAIN CONTENT -->
-            <android.support.design.widget.CoordinatorLayout
+            <androidx.coordinatorlayout.widget.CoordinatorLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
@@ -36,7 +36,7 @@
                     android:id="@+id/contentContainer"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"/>
-            </android.support.design.widget.CoordinatorLayout>
+            </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
 
             <!-- SLIDING LAYOUT -->
@@ -58,7 +58,7 @@
                      android:layout_height="wrap_content"
                      android:layout_alignParentTop="true"/>
 
-            <android.support.v7.widget.RecyclerView
+            <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/mapRvPolyOptions"
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
@@ -73,5 +73,5 @@
             android:id="@+id/mapRightDrawer"
             android:layout_gravity="end"
             android:layout_marginEnd="-64dp"/>
-    </android.support.v4.widget.DrawerLayout>
+    </androidx.drawerlayout.widget.DrawerLayout>
 </LinearLayout>

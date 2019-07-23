@@ -4,10 +4,10 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.view.ViewPager;
-import android.support.v7.app.AlertDialog;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.viewpager.widget.ViewPager;
+import androidx.appcompat.app.AlertDialog;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,19 +23,13 @@ import com.usda.fmsc.twotrails.fragments.AnimationCardFragment;
 import com.usda.fmsc.twotrails.fragments.polygon.PolygonFragment;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.logic.PolygonAdjuster;
-import com.usda.fmsc.twotrails.objects.PointD;
-import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
-import com.usda.fmsc.twotrails.objects.points.TtPoint;
-import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 
 import com.usda.fmsc.utilities.StringEx;
-import com.usda.fmsc.utilities.Tuple;
 
 public class PolygonsActivity extends TtAdjusterCustomToolbarActivity {
     private HashMap<String, Listener> listeners;

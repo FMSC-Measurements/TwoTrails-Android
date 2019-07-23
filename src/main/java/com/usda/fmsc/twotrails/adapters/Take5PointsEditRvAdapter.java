@@ -10,6 +10,8 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.cardview.widget.CardView;
+
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.listeners.SimpleTextWatcher;
 import com.usda.fmsc.android.widget.RecyclerViewEx;
@@ -212,7 +214,7 @@ public class Take5PointsEditRvAdapter extends RecyclerViewEx.BaseAdapterEx {
     public class PointViewHolderEx extends ViewHolderEx {
         public boolean hidden;
 
-        public android.support.v7.widget.CardView parent;
+        public CardView parent;
         public TextView tvPID;
         public EditText txtCmt;
         public ImageButton ibBnd;

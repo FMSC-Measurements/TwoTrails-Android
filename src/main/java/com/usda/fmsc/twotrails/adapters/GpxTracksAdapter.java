@@ -5,10 +5,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.usda.fmsc.android.widget.multiselection.SimpleMultiSelectorBindingHolder;
+import com.usda.fmsc.android.widget.MultiSelectRecyclerView;
 import com.usda.fmsc.android.widget.multiselection.MultiSelector;
 import com.usda.fmsc.android.widget.MultiStateTouchCheckBox;
-import com.usda.fmsc.android.widget.RecyclerViewEx;
 import com.usda.fmsc.utilities.gpx.GpxBaseTrack;
 import com.usda.fmsc.utilities.gpx.GpxRoute;
 import com.usda.fmsc.utilities.gpx.GpxTrack;
@@ -18,19 +17,15 @@ import com.usda.fmsc.twotrails.R;
 
 import java.util.List;
 
-public class GpxTracksAdapter extends RecyclerViewEx.AdapterEx<SimpleMultiSelectorBindingHolder> {
+public class GpxTracksAdapter extends MultiSelectRecyclerView.MSAdapter<MultiSelectRecyclerView.MSViewHolder> {
     private static final int TRACK = 1, ROUTE = 2;
 
     private List<GpxBaseTrack> tracks;
 
-    private MultiSelector mSelector;
 
-
-    public GpxTracksAdapter(Context context, List<GpxBaseTrack> tracks, MultiSelector selector) {
-        super(context);
+    public GpxTracksAdapter(Context context, List<GpxBaseTrack> tracks, MultiSelector multiSelector) {
+        super(context, multiSelector);
         this.tracks = tracks;
-
-        mSelector = selector;
     }
 
 
@@ -47,29 +42,29 @@ public class GpxTracksAdapter extends RecyclerViewEx.AdapterEx<SimpleMultiSelect
     }
 
     @Override
-    public SimpleMultiSelectorBindingHolder onCreateViewHolderEx(ViewGroup parent, int viewType) {
+    public MultiSelectRecyclerView.MSViewHolder onCreateViewHolderEx(ViewGroup parent, int viewType) {
         if (viewType == TRACK)
-            return new GpxTrackHolder(inflater.inflate(R.layout.content_import_item, parent, false));
+            return new GpxTrackHolder(inflater.inflate(R.layout.content_import_item, parent, false), getMultiSelector());
         else if (viewType == ROUTE)
-            return new GpxRouteHolder(inflater.inflate(R.layout.content_import_item, parent, false));
+            return new GpxRouteHolder(inflater.inflate(R.layout.content_import_item, parent, false), getMultiSelector());
         else
             return null;
     }
 
     @Override
-    public void onBindViewHolderEx(SimpleMultiSelectorBindingHolder holder, int position) {
+    public void onBindViewHolderEx(MultiSelectRecyclerView.MSViewHolder holder, int position) {
         GpxBaseTrack track = tracks.get(position);
         ((GpxBaseTrackHolder)holder).bindTrack(track);
     }
 
     @Override
-    public SimpleMultiSelectorBindingHolder onCreateHeaderViewHolder(ViewGroup parent) {
-        return new SimpleMultiSelectorBindingHolder(inflater.inflate(R.layout.rv_header, parent, false), mSelector);
+    public MultiSelectRecyclerView.MSViewHolder onCreateHeaderViewHolder(ViewGroup parent) {
+        return new MultiSelectRecyclerView.MSViewHolder(inflater.inflate(R.layout.rv_header, parent, false), getMultiSelector());
     }
 
     @Override
-    public SimpleMultiSelectorBindingHolder onCreateFooterViewHolder(ViewGroup parent) {
-        return new SimpleMultiSelectorBindingHolder(inflater.inflate(R.layout.content_empty_100dp, parent, false), mSelector);
+    public MultiSelectRecyclerView.MSViewHolder onCreateFooterViewHolder(ViewGroup parent) {
+        return new MultiSelectRecyclerView.MSViewHolder(inflater.inflate(R.layout.content_empty_100dp, parent, false), getMultiSelector());
     }
 
     @Override
@@ -78,17 +73,14 @@ public class GpxTracksAdapter extends RecyclerViewEx.AdapterEx<SimpleMultiSelect
     }
 
 
-    public abstract class GpxBaseTrackHolder extends SimpleMultiSelectorBindingHolder implements MultiStateTouchCheckBox.OnCheckedStateChangeListener {
+    public abstract class GpxBaseTrackHolder extends MultiSelectRecyclerView.MSViewHolder implements MultiStateTouchCheckBox.OnCheckedStateChangeListener {
         private MultiStateTouchCheckBox mcb;
         private TextView tvName, tvPointCount;
 
-        private GpxBaseTrack track;
-
         protected boolean selected;
 
-
-        public GpxBaseTrackHolder(View itemView) {
-            super(itemView, mSelector);
+        public GpxBaseTrackHolder(View itemView, MultiSelector multiSelector) {
+            super(itemView, multiSelector);
 
             mcb = itemView.findViewById(R.id.importContMcbImport);
             tvName = itemView.findViewById(R.id.importContTvName);
@@ -120,15 +112,13 @@ public class GpxTracksAdapter extends RecyclerViewEx.AdapterEx<SimpleMultiSelect
 
 
         public void bindTrack(GpxBaseTrack track) {
-            this.track = track;
-
             tvName.setText(track.getName());
             tvPointCount.setText(StringEx.toString(getPointCount(track)));
         }
 
         @Override
         public void onCheckedStateChanged(View view, boolean isChecked, MultiStateTouchCheckBox.CheckedState state) {
-            mSelector.setSelected(this, isChecked);
+            setSelected(isChecked);
         }
 
         abstract int getPointCount(GpxBaseTrack track);
@@ -140,8 +130,8 @@ public class GpxTracksAdapter extends RecyclerViewEx.AdapterEx<SimpleMultiSelect
     }
 
     public class GpxTrackHolder extends GpxBaseTrackHolder {
-        public GpxTrackHolder(View itemView) {
-            super(itemView);
+        public GpxTrackHolder(View itemView, MultiSelector multiSelector) {
+            super(itemView, multiSelector);
         }
 
         @Override
@@ -159,8 +149,8 @@ public class GpxTracksAdapter extends RecyclerViewEx.AdapterEx<SimpleMultiSelect
     }
 
     public class GpxRouteHolder extends GpxBaseTrackHolder {
-        public GpxRouteHolder(View itemView) {
-            super(itemView);
+        public GpxRouteHolder(View itemView, MultiSelector multiSelector) {
+            super(itemView, multiSelector);
         }
 
         @Override

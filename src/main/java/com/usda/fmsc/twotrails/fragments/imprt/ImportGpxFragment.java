@@ -1,16 +1,16 @@
 package com.usda.fmsc.twotrails.fragments.imprt;
 
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v7.widget.LinearLayoutManager;
+import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.usda.fmsc.android.widget.MultiSelectRecyclerView;
 import com.usda.fmsc.android.widget.multiselection.MultiSelector;
 import com.usda.fmsc.android.widget.multiselection.SelectableHolder;
-import com.usda.fmsc.android.widget.RecyclerViewEx;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.utilities.gpx.GpxBaseTrack;
 import com.usda.fmsc.utilities.gpx.GpxDocument;
@@ -29,7 +29,7 @@ import jp.wasabeef.recyclerview.animators.SlideInUpAnimator;
 public class ImportGpxFragment extends BaseImportFragment {
     private static final String FILENAME = "filename";
 
-    private RecyclerViewEx rvImport;
+    private MultiSelectRecyclerView rvImport;
     private MultiSelector selector = new MultiSelector( new MultiSelector.Listener() {
         @Override
         public void onItemSelectionChange(SelectableHolder holder, boolean isSelected) {
@@ -126,12 +126,7 @@ public class ImportGpxFragment extends BaseImportFragment {
     protected void runImportTask(DataAccessLayer dal) {
         task = new GPXImportTask();
 
-        task.setListener(new Import.ImportTaskListener() {
-            @Override
-            public void onTaskFinish(Import.ImportResult result) {
-                onTaskComplete(result.getCode());
-            }
-        });
+        task.setListener(result -> onTaskComplete(result.getCode()));
 
         selector.getSelectedPositions();
 
@@ -158,7 +153,6 @@ public class ImportGpxFragment extends BaseImportFragment {
             }
             return false;
         }
-
         return true;
     }
 
@@ -192,7 +186,6 @@ public class ImportGpxFragment extends BaseImportFragment {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
         }
     }
 }

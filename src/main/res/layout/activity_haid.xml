@@ -9,7 +9,7 @@
 
     <View style="@style/ToolbarShadowViewElevation" android:layout_below="@id/toolbar"/>
 
-    <android.support.v4.widget.DrawerLayout
+    <androidx.drawerlayout.widget.DrawerLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentBottom="true"
@@ -56,5 +56,5 @@
                 android:dividerHeight="1dp"/>
 
         </LinearLayout>
-    </android.support.v4.widget.DrawerLayout>
+    </androidx.drawerlayout.widget.DrawerLayout>
 </RelativeLayout>

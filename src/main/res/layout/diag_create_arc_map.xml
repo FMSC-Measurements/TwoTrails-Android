@@ -3,7 +3,7 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent">
 
-    <android.support.design.widget.TextInputLayout
+    <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/lay1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -21,7 +21,7 @@
             android:maxLines="1"
             android:ellipsize="end"
             android:inputType="textUri"/>
-    </android.support.design.widget.TextInputLayout>
+    </com.google.android.material.textfield.TextInputLayout>
 
     <RelativeLayout
         android:id="@+id/layUrlStatus"
@@ -55,7 +55,7 @@
             android:contentDescription="@null"/>
     </RelativeLayout>
 
-    <android.support.design.widget.TextInputLayout
+    <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/lay2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -67,9 +67,9 @@
             android:layout_height="wrap_content"
             android:hint="@string/str_name"
             android:maxLines="1" />
-    </android.support.design.widget.TextInputLayout>
+    </com.google.android.material.textfield.TextInputLayout>
 
-    <android.support.design.widget.TextInputLayout
+    <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/lay3"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -81,9 +81,9 @@
             android:layout_height="wrap_content"
             android:hint="@string/str_location"
             android:maxLines="1" />
-    </android.support.design.widget.TextInputLayout>
+    </com.google.android.material.textfield.TextInputLayout>
 
-    <android.support.design.widget.TextInputLayout
+    <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/lay3">
@@ -94,5 +94,5 @@
             android:layout_height="wrap_content"
             android:hint="@string/str_desc"
             android:maxLines="4"/>
-    </android.support.design.widget.TextInputLayout>
+    </com.google.android.material.textfield.TextInputLayout>
 </RelativeLayout>
