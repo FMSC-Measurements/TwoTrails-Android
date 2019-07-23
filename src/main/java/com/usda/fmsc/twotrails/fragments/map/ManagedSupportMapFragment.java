@@ -3,7 +3,6 @@ package com.usda.fmsc.twotrails.fragments.map;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
-import android.view.ViewTreeObserver;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -94,12 +93,9 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
     public void onViewCreated(final View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        view.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                fragWidth = view.getWidth();
-                fragHeight = view.getHeight();
-            }
+        view.getViewTreeObserver().addOnGlobalLayoutListener(() -> {
+            fragWidth = view.getWidth();
+            fragHeight = view.getHeight();
         });
     }
 

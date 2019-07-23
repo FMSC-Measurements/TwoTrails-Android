@@ -161,7 +161,7 @@ public class HaidLogic {
         traversing = false;
     }
 
-    static TtPoint _LastTravPoint = null;
+    private static TtPoint _LastTravPoint = null;
 
     private static String getPointSummary(TtPoint point, boolean fromQuondam, boolean showPoints) {
         StringBuilder sb = new StringBuilder();

@@ -89,12 +89,7 @@ public class PointColorPickerDialog extends DialogFragment {
         picker.addValueBar(valueBar);
         picker.setColor(originalColorOptions[0]);
         picker.setOldCenterColor(originalColorOptions[0]);
-        picker.setOnColorChangedListener(new ColorPicker.OnColorChangedListener() {
-            @Override
-            public void onColorChanged(int color) {
-                updateColor(colorIndex, color);
-            }
-        });
+        picker.setOnColorChangedListener(color -> updateColor(colorIndex, color));
 
         int[] ids = new int[] {
                 R.id.ivPCPAdjBnd,
@@ -121,12 +116,7 @@ public class PointColorPickerDialog extends DialogFragment {
             iv.setBackgroundColor(colorOptions[i]);
 
             final int index = i;
-            iv.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    selectPointType(ivs[index], index);
-                }
-            });
+            iv.setOnClickListener(v -> selectPointType(ivs[index], index));
 
             AndroidUtils.UI.setContentDescToast(iv, descs[i]);
 
@@ -137,12 +127,9 @@ public class PointColorPickerDialog extends DialogFragment {
         
         dialog.setView(view)
         .setTitle(name)
-        .setPositiveButton(R.string.str_ok, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                if (listener != null) {
-                    listener.onUpdated(colorOptions);
-                }
+        .setPositiveButton(R.string.str_ok, (dialog1, which) -> {
+            if (listener != null) {
+                listener.onUpdated(colorOptions);
             }
         })
         .setNegativeButton(R.string.str_reset, null)
@@ -150,27 +137,20 @@ public class PointColorPickerDialog extends DialogFragment {
 
 
         final AlertDialog ad = dialog.create();
-        ad.setOnShowListener(new DialogInterface.OnShowListener() {
-            @Override
-            public void onShow(DialogInterface dialog) {
-                Button button = ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_NEGATIVE);
+        ad.setOnShowListener(dialog12 -> {
+            Button button = ((AlertDialog) dialog12).getButton(AlertDialog.BUTTON_NEGATIVE);
 
-                button.setOnClickListener(new View.OnClickListener() {
+            button.setOnClickListener(view1 -> {
+                MapSettings ms = TwoTrailsApp.getInstance().getMapSettings();
 
-                    @Override
-                    public void onClick(View view) {
-                        MapSettings ms = TwoTrailsApp.getInstance().getMapSettings();
-
-                        updateColor(0, ms.getDefaultAdjBndColor());
-                        updateColor(1, ms.getDefaultAdjNavColor());
-                        updateColor(2, ms.getDefaultUnAdjBndColor());
-                        updateColor(3, ms.getDefaultUnAdjNavColor());
-                        updateColor(4, ms.getDefaultAdjPtsColor());
-                        updateColor(5, ms.getDefaultUnAdjPtsColor());
-                        updateColor(6, ms.getDefaultWayPtsColor());
-                    }
-                });
-            }
+                updateColor(0, ms.getDefaultAdjBndColor());
+                updateColor(1, ms.getDefaultAdjNavColor());
+                updateColor(2, ms.getDefaultUnAdjBndColor());
+                updateColor(3, ms.getDefaultUnAdjNavColor());
+                updateColor(4, ms.getDefaultAdjPtsColor());
+                updateColor(5, ms.getDefaultUnAdjPtsColor());
+                updateColor(6, ms.getDefaultWayPtsColor());
+            });
         });
 
         return ad;
@@ -184,19 +164,16 @@ public class PointColorPickerDialog extends DialogFragment {
         if (d != null) {
             Button negButton = d.getButton(DialogInterface.BUTTON_NEGATIVE);
             if (negButton != null) {
-                negButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        colorOptions = Arrays.copyOf(originalColorOptions, NUMBER_OF_COLORS);
+                negButton.setOnClickListener(v -> {
+                    colorOptions = Arrays.copyOf(originalColorOptions, NUMBER_OF_COLORS);
 
-                        for (int i = 0; i < NUMBER_OF_COLORS; i++) {
-                            ivs[i].setBackgroundColor(colorOptions[i]);
-                        }
+                    for (int i = 0; i < NUMBER_OF_COLORS; i++) {
+                        ivs[i].setBackgroundColor(colorOptions[i]);
+                    }
 
-                        if (picker != null) {
-                            picker.setColor(colorOptions[colorIndex]);
-                            picker.setOldCenterColor(colorOptions[colorIndex]);
-                        }
+                    if (picker != null) {
+                        picker.setColor(colorOptions[colorIndex]);
+                        picker.setOldCenterColor(colorOptions[colorIndex]);
                     }
                 });
             }

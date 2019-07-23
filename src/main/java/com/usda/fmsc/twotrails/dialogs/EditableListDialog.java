@@ -69,13 +69,10 @@ public class EditableListDialog extends DialogFragment {
         adapter.addAll(items);
         listView.setAdapter(adapter);
 
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                selectedItem = items[position];
-                editText.setText(selectedItem);
-                editText.setSelection(selectedItem.length());
-            }
+        listView.setOnItemClickListener((parent, view1, position, id) -> {
+            selectedItem = items[position];
+            editText.setText(selectedItem);
+            editText.setSelection(selectedItem.length());
         });
 
 
@@ -119,7 +116,7 @@ public class EditableListDialog extends DialogFragment {
     }
 
     public void setItems(List<String> items) {
-        this.items = items.toArray(new String[items.size()]);
+        this.items = items.toArray(new String[0]);
     }
 
     public void setItems(String[] items) {

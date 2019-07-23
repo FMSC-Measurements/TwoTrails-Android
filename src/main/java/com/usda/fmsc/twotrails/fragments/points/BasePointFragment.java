@@ -88,38 +88,29 @@ public abstract class BasePointFragment extends AnimationCardFragment implements
         if (_Point.getOp() == OpType.WayPoint) {
             ibBnd.setVisibility(View.INVISIBLE);
         } else {
-            ibBnd.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    boolean onbnd = !_Point.isOnBnd();
+            ibBnd.setOnClickListener(v -> {
+                boolean onbnd = !_Point.isOnBnd();
 
-                    String strBnd = onbnd ? sOnBnd : sOffBnd;
+                String strBnd = onbnd ? sOnBnd : sOffBnd;
 
-                    ibBnd.setImageDrawable(getBndDrawable(onbnd));
-                    ibBnd.setContentDescription(strBnd);
+                ibBnd.setImageDrawable(getBndDrawable(onbnd));
+                ibBnd.setContentDescription(strBnd);
 
-                    _Point.setOnBnd(onbnd);
-                    controller.updatePoint(_Point);
+                _Point.setOnBnd(onbnd);
+                controller.updatePoint(_Point);
 
-                    Toast.makeText(getContext(), strBnd, Toast.LENGTH_SHORT).show();
-                }
+                Toast.makeText(getContext(), strBnd, Toast.LENGTH_SHORT).show();
             });
         }
 
-        ibBnd.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                Toast.makeText(getContext(), _Point.isOnBnd() ? sOnBnd : sOffBnd, Toast.LENGTH_SHORT).show();
-                return true;
-            }
+        ibBnd.setOnLongClickListener(view1 -> {
+            Toast.makeText(getContext(), _Point.isOnBnd() ? sOnBnd : sOffBnd, Toast.LENGTH_SHORT).show();
+            return true;
         });
 
-        ivOp.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                Toast.makeText(getContext(), _Point.getOp().toString(), Toast.LENGTH_SHORT).show();
-                return true;
-            }
+        ivOp.setOnLongClickListener(view12 -> {
+            Toast.makeText(getContext(), _Point.getOp().toString(), Toast.LENGTH_SHORT).show();
+            return true;
         });
 
         txtCmt.setText(_Point.getComment() != null ? _Point.getComment() : StringEx.Empty);

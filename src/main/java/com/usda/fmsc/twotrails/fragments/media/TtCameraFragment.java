@@ -1,6 +1,5 @@
 package com.usda.fmsc.twotrails.fragments.media;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.media.Image;
 import android.os.Bundle;
@@ -18,7 +17,6 @@ import com.usda.fmsc.utilities.StringEx;
 
 import org.joda.time.DateTime;
 
-@TargetApi(21)
 public class TtCameraFragment extends CameraFragment {
     private static final String POINT_CN = "PointCN";
     private static final String SAVE_IMAGE = "SaveImage";
@@ -104,7 +102,7 @@ public class TtCameraFragment extends CameraFragment {
 
         PictureType type  = PictureType.Regular;
 
-        if (width / height > 1 || width / height > 1) {
+        if (width / height > 1.5 || width / height < 0.66) {
             type = PictureType.Panorama;
         }
 

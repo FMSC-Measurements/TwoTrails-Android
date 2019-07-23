@@ -12,6 +12,7 @@ import android.text.Editable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 
@@ -110,31 +111,25 @@ public class LatLonDialog extends DialogFragment {
         final Button btnDD = view.findViewById(R.id.diagLatLonBtnDD);
         final Button btnDMS = view.findViewById(R.id.diagLatLonBtnDMS);
 
-        btnDD.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (dmsVisible) {
-                    ViewAnimator.expandView(layDD);
-                    ViewAnimator.collapseView(layDMS);
+        btnDD.setOnClickListener(v -> {
+            if (dmsVisible) {
+                ViewAnimator.expandView(layDD);
+                ViewAnimator.collapseView(layDMS);
 
-                    btnDD.setBackgroundColor(btnSelectedColor);
-                    btnDMS.setBackgroundColor(btnColor);
-                    dmsVisible = false;
-                }
+                btnDD.setBackgroundColor(btnSelectedColor);
+                btnDMS.setBackgroundColor(btnColor);
+                dmsVisible = false;
             }
         });
 
-        btnDMS.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!dmsVisible) {
-                    ViewAnimator.expandView(layDMS);
-                    ViewAnimator.collapseView(layDD);
+        btnDMS.setOnClickListener(v -> {
+            if (!dmsVisible) {
+                ViewAnimator.expandView(layDMS);
+                ViewAnimator.collapseView(layDD);
 
-                    btnDD.setBackgroundColor(btnColor);
-                    btnDMS.setBackgroundColor(btnSelectedColor);
-                    dmsVisible = true;
-                }
+                btnDD.setBackgroundColor(btnColor);
+                btnDMS.setBackgroundColor(btnSelectedColor);
+                dmsVisible = true;
             }
         });
         
@@ -170,12 +165,9 @@ public class LatLonDialog extends DialogFragment {
 
         dialog.setTitle(String.format("Point %d", pid));
 
-        dialog.setPositiveButton(R.string.str_ok , new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                if (listener != null) {
-                    listener.onEdited(cn, lat, lon);
-                }
+        dialog.setPositiveButton(R.string.str_ok , (dialog1, which) -> {
+            if (listener != null) {
+                listener.onEdited(cn, lat, lon);
             }
         }).setNeutralButton(R.string.str_cancel, null);
 
@@ -184,20 +176,16 @@ public class LatLonDialog extends DialogFragment {
 
         final ViewTreeObserver vto = view.getViewTreeObserver();
         vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-
-            @SuppressLint("NewApi")
-            @SuppressWarnings("deprecation")
             @Override
             public void onGlobalLayout() {
-                int width = d.getWindow().getDecorView().getWidth();
-                int height = d.getWindow().getDecorView().getHeight();
-                d.getWindow().setLayout(width, height);
+                Window w = d.getWindow();
 
-                ViewTreeObserver obs = view.getViewTreeObserver();
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN) {
+                if (w != null) {
+                    View dv = w.getDecorView();
+                    w.setLayout(dv.getWidth(), dv.getHeight());
+
+                    ViewTreeObserver obs = view.getViewTreeObserver();
                     obs.removeOnGlobalLayoutListener(this);
-                } else {
-                    obs.removeGlobalOnLayoutListener(this);
                 }
             }
         });
@@ -221,7 +209,7 @@ public class LatLonDialog extends DialogFragment {
         this.listener = listener;
     }
 
-    SimpleTextWatcher textWatcher = new SimpleTextWatcher() {
+    private SimpleTextWatcher textWatcher = new SimpleTextWatcher() {
         @Override
         public void afterTextChanged(Editable s) {
             calc();

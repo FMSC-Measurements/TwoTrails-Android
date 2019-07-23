@@ -14,7 +14,7 @@ import java.io.File;
 import java.util.ArrayList;
 
 public class RecentProjectAdapter extends BaseAdapter {
-    private ArrayList<RecentProject> projList = new ArrayList<>();
+    private ArrayList<RecentProject> projList;
     private LayoutInflater inflater;
 
 

@@ -6,7 +6,6 @@ import android.text.Editable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
 
@@ -17,17 +16,16 @@ import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.adapters.PointDetailsAdapter;
+import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.objects.points.QuondamPoint;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
-import com.usda.fmsc.twotrails.objects.TtPolygon;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import com.usda.fmsc.twotrails.units.OpType;
 import com.usda.fmsc.twotrails.utilities.AppUnits;
 import com.usda.fmsc.utilities.ParseEx;
 import com.usda.fmsc.utilities.StringEx;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class QuondamPointFragment extends BasePointFragment {
@@ -101,42 +99,36 @@ public class QuondamPointFragment extends BasePointFragment {
         polysAdapter.setNonSelectedColor(nonSelectedColor);
 
         lvPolys.setAdapter(polysAdapter);
-        lvPolys.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int index, long l) {
+        lvPolys.setOnItemClickListener((adapterView, view1, index, l) -> {
 
-                setPoints(index);
+            setPoints(index);
 
-                selectedPolyIndex = index;
+            selectedPolyIndex = index;
 
-                polysAdapter.setSelected(index);
-                lvPolys.invalidateViews();
-            }
+            polysAdapter.setSelected(index);
+            lvPolys.invalidateViews();
         });
 
 
-        lvPoints.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int index, long l) {
-                if (selectedPolyIndex > -1) {
-                    List<TtPoint> points = (ArrayList<TtPoint>) _Points[selectedPolyIndex];
+        lvPoints.setOnItemClickListener((adapterView, view12, index, l) -> {
+            if (selectedPolyIndex > -1) {
+                List<TtPoint> points = (ArrayList<TtPoint>) _Points[selectedPolyIndex];
 
-                    if (points != null && !settingView) {
-                        TtPoint parent = points.get(index);
+                if (points != null && !settingView) {
+                    TtPoint parent = points.get(index);
 
-                        if (parent.getOp() == OpType.Quondam) {
-                            parent = ((QuondamPoint)parent).getParentPoint();
-                        }
-
-                        if (!_Quondam.hasParent() || _Quondam.getParentPID() != parent.getPID()) {
-                            selectedPoint = parent;
-                            _Quondam.setParentPoint(parent);
-                            getPointController().updatePoint(_Quondam);
-                        }
-
-                        pointsAdapter.setSelected(index);
-                        lvPoints.invalidateViews();
+                    if (parent.getOp() == OpType.Quondam) {
+                        parent = ((QuondamPoint)parent).getParentPoint();
                     }
+
+                    if (!_Quondam.hasParent() || _Quondam.getParentPID() != parent.getPID()) {
+                        selectedPoint = parent;
+                        _Quondam.setParentPoint(parent);
+                        getPointController().updatePoint(_Quondam);
+                    }
+
+                    pointsAdapter.setSelected(index);
+                    lvPoints.invalidateViews();
                 }
             }
         });
@@ -244,9 +236,7 @@ public class QuondamPointFragment extends BasePointFragment {
         }
 
         if (points.size() < 1) {
-            for (TtPoint point : (ArrayList<TtPoint>) _Points[index]) {
-                points.add(point);
-            }
+            points.addAll((ArrayList<TtPoint>) _Points[index]);
         }
         pointsAdapter = new PointDetailsAdapter(getActivity(), points, AppUnits.IconColor.Black);
 

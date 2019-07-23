@@ -2,8 +2,8 @@ package com.usda.fmsc.twotrails.fragments.settings;
 
 
 import android.os.Bundle;
-import android.preference.Preference;
 import android.preference.PreferenceFragment;
+
 import androidx.appcompat.app.ActionBar;
 
 import com.usda.fmsc.twotrails.R;
@@ -17,36 +17,24 @@ public class MiscSettingsFragment extends PreferenceFragment {
         addPreferencesFromResource(R.xml.pref_other_settings);
         setHasOptionsMenu(true);
 
-        findPreference(getString(R.string.set_RESET)).setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                SettingsLogic.reset(getActivity());
-                return false;
-            }
+        findPreference(getString(R.string.set_RESET)).setOnPreferenceClickListener(preference -> {
+            SettingsLogic.reset(getActivity());
+            return false;
         });
 
-        findPreference(getString(R.string.set_CLEAR_LOG)).setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                SettingsLogic.clearLog(getActivity());
-                return false;
-            }
+        findPreference(getString(R.string.set_CLEAR_LOG)).setOnPreferenceClickListener(preference -> {
+            SettingsLogic.clearLog(getActivity());
+            return false;
         });
 
-        findPreference(getString(R.string.set_EXPORT_REPORT)).setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                SettingsLogic.exportReport(getActivity());
-                return false;
-            }
+        findPreference(getString(R.string.set_EXPORT_REPORT)).setOnPreferenceClickListener(preference -> {
+            SettingsLogic.exportReport(getActivity());
+            return false;
         });
 
-        findPreference(getString(R.string.set_CODE)).setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                SettingsLogic.enterCode(getActivity());
-                return false;
-            }
+        findPreference(getString(R.string.set_CODE)).setOnPreferenceClickListener(preference -> {
+            SettingsLogic.enterCode(getActivity());
+            return false;
         });
 
         ActionBar actionBar = ((CustomToolbarActivity)getActivity()).getSupportActionBar();

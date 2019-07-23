@@ -34,14 +34,12 @@ public class ExportActivity extends CustomToolbarActivity {
     private FABProgressCircleEx progCircle;
     private Export.ExportTask exportTask;
 
-    private Snackbar snackbar;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_export);
 
-        FloatingActionButton fabExport = findViewById(R.id.exportFabExport);
+        //FloatingActionButton fabExport = findViewById(R.id.exportFabExport);
         progCircle = findViewById(R.id.exportFabExportProgressCircle);
 
         chkAll = findViewById(R.id.exportChkAll);
@@ -56,23 +54,20 @@ public class ExportActivity extends CustomToolbarActivity {
         chkGpx = findViewById(R.id.exportChkGPX);
         chkSum = findViewById(R.id.exportChkSummary);
 
-        chkAll.setOnCheckedStateChangeListener(new MultiStateTouchCheckBox.OnCheckedStateChangeListener() {
-            @Override
-            public void onCheckedStateChanged(View buttonView, boolean isChecked, MultiStateTouchCheckBox.CheckedState state) {
-                MultiStateTouchCheckBox.CheckedState chkeckedState = isChecked ?
-                        MultiStateTouchCheckBox.CheckedState.Checked : MultiStateTouchCheckBox.CheckedState.NotChecked;
+        chkAll.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> {
+            MultiStateTouchCheckBox.CheckedState chkeckedState = isChecked ?
+                    MultiStateTouchCheckBox.CheckedState.Checked : MultiStateTouchCheckBox.CheckedState.NotChecked;
 
-                chkPc.setCheckedStateNoEvent(chkeckedState);
-                chkPoints.setCheckedStateNoEvent(chkeckedState);
-                chkPolys.setCheckedStateNoEvent(chkeckedState);
-                chkMeta.setCheckedStateNoEvent(chkeckedState);
-                chkImgInfo.setCheckedStateNoEvent(chkeckedState);
-                chkProj.setCheckedStateNoEvent(chkeckedState);
-                chkNmea.setCheckedStateNoEvent(chkeckedState);
-                chkKmz.setCheckedStateNoEvent(chkeckedState);
-                chkGpx.setCheckedStateNoEvent(chkeckedState);
-                chkSum.setCheckedStateNoEvent(chkeckedState);
-            }
+            chkPc.setCheckedStateNoEvent(chkeckedState);
+            chkPoints.setCheckedStateNoEvent(chkeckedState);
+            chkPolys.setCheckedStateNoEvent(chkeckedState);
+            chkMeta.setCheckedStateNoEvent(chkeckedState);
+            chkImgInfo.setCheckedStateNoEvent(chkeckedState);
+            chkProj.setCheckedStateNoEvent(chkeckedState);
+            chkNmea.setCheckedStateNoEvent(chkeckedState);
+            chkKmz.setCheckedStateNoEvent(chkeckedState);
+            chkGpx.setCheckedStateNoEvent(chkeckedState);
+            chkSum.setCheckedStateNoEvent(chkeckedState);
         });
 
 //        if (fabExport != null) {
@@ -196,21 +191,11 @@ public class ExportActivity extends CustomToolbarActivity {
 
                     .setMessage("There are Images that are saved outside of the media database. Would you like to include them to simplify image transfer?")
 
-                    .setPositiveButton("Include", new DontAskAgainDialog.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i, Object value) {
-                            progCircle.show();
-                            internalizeImages(mal, directory);
-                        }
+                    .setPositiveButton("Include", (dialogInterface, i, value) -> {
+                        progCircle.show();
+                        internalizeImages(mal, directory);
                     }, 2)
-
-                    .setNegativeButton("Exclude", new DontAskAgainDialog.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i, Object value) {
-                            startExport(directory, false);
-                        }
-                    }, 0)
-
+                    .setNegativeButton("Exclude", (dialogInterface, i, value) -> startExport(directory, false), 0)
                     .show();
                 } else {
                     if (getTtAppCtx().getDeviceSettings().getAutoInternalizeExport() > 0) {
@@ -236,20 +221,13 @@ public class ExportActivity extends CustomToolbarActivity {
 
                 .setMessage("There is already a folder that that contains a previous export. Would you like to change the directory or overwrite it?")
 
-                .setPositiveButton("Overwrite", new DontAskAgainDialog.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i, Object value) {
-                        export(dir);
-                    }
-                }, 2)
-
+                .setPositiveButton("Overwrite", (dialogInterface, i, value) -> export(dir), 2)
 //                .setNeutralButton("Change", new DontAskAgainDialog.OnClickListener() {
 //                    @Override
 //                    public void onClick(DialogInterface dialogInterface, int i, Object value) {
 //                        selectDirectory(dir.getAbsolutePath());
 //                    }
 //                }, 1)
-
                 .setNegativeButton("Cancel", null, null)
 
                 .show();
@@ -268,62 +246,36 @@ public class ExportActivity extends CustomToolbarActivity {
 
 
     private void internalizeImages(final MediaAccessLayer mal, final String directory) {
-        new Thread(new Runnable() {
+        new Thread(() -> mal.internalizeImages(new MediaAccessLayer.SimpleMalListener(){
             @Override
-            public void run() {
-                mal.internalizeImages(new MediaAccessLayer.SimpleMalListener(){
-                    @Override
-                    public void internalizeImagesCompleted(List<TtImage> imagesInternalized, final List<TtImage> failedImages) {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                progCircle.hide();
+            public void internalizeImagesCompleted(List<TtImage> imagesInternalized, final List<TtImage> failedImages) {
+                runOnUiThread(() -> {
+                    progCircle.hide();
 
-                                if (failedImages.size() > 0) {
-                                    new AlertDialog.Builder(ExportActivity.this)
-                                            .setMessage("Some image files were not found. Would you still like to export the database?")
-                                            .setPositiveButton("Export", new DialogInterface.OnClickListener() {
-                                                @Override
-                                                public void onClick(DialogInterface dialog, int which) {
-                                                    runOnUiThread(new Runnable() {
-                                                        @Override
-                                                        public void run() {
-                                                            startExport(directory, false);
-                                                        }
-                                                    });
-                                                }
-                                            })
-                                            .setNeutralButton(R.string.str_cancel, null);
-                                }
-                                else {
-                                    startExport(directory, false);
-                                }
-                            }
-                        });
+                    if (failedImages.size() > 0) {
+                        new AlertDialog.Builder(ExportActivity.this)
+                                .setMessage("Some image files were not found. Would you still like to export the database?")
+                                .setPositiveButton("Export", (dialog, which) -> runOnUiThread(() -> startExport(directory, false)))
+                                .setNeutralButton(R.string.str_cancel, null);
                     }
-
-                    @Override
-                    public void internalizeImagesFailed(List<TtImage> imagesInternalized, List<TtImage> failedImages, String failedReason) {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                progCircle.hide();
-
-                                new AlertDialog.Builder(ExportActivity.this)
-                                        .setMessage("There was an issue internalizing images to the media database. Would you still like to export the database?")
-                                        .setPositiveButton("Export", new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int which) {
-                                                startExport(directory, false);
-                                            }
-                                        })
-                                        .setNeutralButton(R.string.str_cancel, null);
-                            }
-                        });
+                    else {
+                        startExport(directory, false);
                     }
                 });
             }
-        }).start();
+
+            @Override
+            public void internalizeImagesFailed(List<TtImage> imagesInternalized, List<TtImage> failedImages, String failedReason) {
+                runOnUiThread(() -> {
+                    progCircle.hide();
+
+                    new AlertDialog.Builder(ExportActivity.this)
+                            .setMessage("There was an issue internalizing images to the media database. Would you still like to export the database?")
+                            .setPositiveButton("Export", (dialog, which) -> startExport(directory, false))
+                            .setNeutralButton(R.string.str_cancel, null);
+                });
+            }
+        })).start();
     }
 
 
@@ -345,16 +297,14 @@ public class ExportActivity extends CustomToolbarActivity {
 
             exportTask = new Export.ExportTask();
 
-            exportTask.setListener(new Export.ExportTask.Listener() {
-                @Override
-                public void onTaskFinish(Export.ExportResult result) {
-                switch (result.getCode()) {
-                    case Success: {
-                        MediaScannerConnection.scanFile(ExportActivity.this, new String[]{directory.getAbsolutePath()}, null, null);
+            exportTask.setListener(result -> {
+            switch (result.getCode()) {
+                case Success: {
+                    MediaScannerConnection.scanFile(ExportActivity.this, new String[]{directory.getAbsolutePath()}, null, null);
 
-                        progCircle.beginFinalAnimation();
+                    progCircle.beginFinalAnimation();
 
-                        Toast.makeText(ExportActivity.this, "Files Exported", Toast.LENGTH_LONG).show();
+                    Toast.makeText(ExportActivity.this, "Files Exported", Toast.LENGTH_LONG).show();
 //                        View view = findViewById(R.id.parent);
 //                        if (view != null) {
 //                            snackbar = Snackbar.make(view, "Files Exported", Snackbar.LENGTH_INDEFINITE).setAction("View", new View.OnClickListener() {
@@ -396,18 +346,17 @@ public class ExportActivity extends CustomToolbarActivity {
 //                                }
 //                            }).start();
 //                        }
-                        break;
-                    }
-                    case Cancelled:
-                        break;
-                    case ExportFailure:
-                    case InvalidParams:
-                        progCircle.hide();
-                        Toast.makeText(getBaseContext(), "Export error, See log for details", Toast.LENGTH_SHORT).show();
-                        getTtAppCtx().getReport().writeError("ExportActivity", result.getMessage());
-                        break;
+                    break;
                 }
-                }
+                case Cancelled:
+                    break;
+                case ExportFailure:
+                case InvalidParams:
+                    progCircle.hide();
+                    Toast.makeText(getBaseContext(), "Export error, See log for details", Toast.LENGTH_SHORT).show();
+                    getTtAppCtx().getReport().writeError("ExportActivity", result.getMessage());
+                    break;
+            }
             });
 
             exportTask.execute(

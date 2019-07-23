@@ -357,12 +357,7 @@ public class RangeFinderService extends Service implements BluetoothConnection.L
         for(final Listener listener : listeners) {
             try {
                 Handler handler = new Handler(Looper.getMainLooper());
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        listener.rfDataReceived(data);
-                    }
-                });
+                handler.post(() -> listener.rfDataReceived(data));
 
             } catch (Exception ex) {
                 //
@@ -374,14 +369,11 @@ public class RangeFinderService extends Service implements BluetoothConnection.L
         for (final Listener listener : listeners) {
             try {
                 Handler handler = new Handler(Looper.getMainLooper());
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (valid)
-                            listener.rfStringReceived(rfString);
-                        else
-                            listener.rfInvalidStringReceived(rfString);
-                    }
+                handler.post(() -> {
+                    if (valid)
+                        listener.rfStringReceived(rfString);
+                    else
+                        listener.rfInvalidStringReceived(rfString);
                 });
 
             } catch (Exception ex) {
@@ -394,12 +386,7 @@ public class RangeFinderService extends Service implements BluetoothConnection.L
         for (final Listener listener : listeners) {
             try {
                 Handler handler = new Handler(Looper.getMainLooper());
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        listener.rangeFinderStarted();
-                    }
-                });
+                handler.post(listener::rangeFinderStarted);
             } catch (Exception ex) {
                 TtAppCtx.getReport().writeError("RangeFinderService:postStart", ex.getMessage());
             }
@@ -410,12 +397,7 @@ public class RangeFinderService extends Service implements BluetoothConnection.L
         for (final Listener listener : listeners) {
             try {
                 Handler handler = new Handler(Looper.getMainLooper());
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        listener.rangeFinderStopped();
-                    }
-                });
+                handler.post(listener::rangeFinderStopped);
             } catch (Exception ex) {
                 TtAppCtx.getReport().writeError("RangeFinderService:postStop", ex.getMessage());
             }
@@ -426,12 +408,7 @@ public class RangeFinderService extends Service implements BluetoothConnection.L
         for (final Listener listener : listeners) {
             try {
                 Handler handler = new Handler(Looper.getMainLooper());
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        listener.rangeFinderConnecting();
-                    }
-                });
+                handler.post(listener::rangeFinderConnecting);
             } catch (Exception ex) {
                 TtAppCtx.getReport().writeError("RangeFinderService:postStop", ex.getMessage());
             }
@@ -442,12 +419,7 @@ public class RangeFinderService extends Service implements BluetoothConnection.L
         for (final Listener listener : listeners) {
             try {
                 Handler handler = new Handler(Looper.getMainLooper());
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        listener.rangeFinderServiceStarted();
-                    }
-                });
+                handler.post(listener::rangeFinderServiceStarted);
             } catch (Exception ex) {
                 TtAppCtx.getReport().writeError("RangeFinderService:postStart", ex.getMessage());
             }
@@ -458,12 +430,7 @@ public class RangeFinderService extends Service implements BluetoothConnection.L
         for (final Listener listener : listeners) {
             try {
                 Handler handler = new Handler(Looper.getMainLooper());
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        listener.rangeFinderServiceStopped();
-                    }
-                });
+                handler.post(listener::rangeFinderServiceStopped);
             } catch (Exception ex) {
                 TtAppCtx.getReport().writeError("RangeFinderService:postStop", ex.getMessage());
             }
@@ -474,14 +441,11 @@ public class RangeFinderService extends Service implements BluetoothConnection.L
         for (final Listener listener : listeners) {
             try {
                 Handler handler = new Handler(Looper.getMainLooper());
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            listener.rangeFinderError(error);
-                        } catch (Exception e) {
-                            TtAppCtx.getReport().writeError(e.getMessage(), "RangeFinderService:postError");
-                        }
+                handler.post(() -> {
+                    try {
+                        listener.rangeFinderError(error);
+                    } catch (Exception e) {
+                        TtAppCtx.getReport().writeError(e.getMessage(), "RangeFinderService:postError");
                     }
                 });
             } catch (Exception ex) {
@@ -530,9 +494,7 @@ public class RangeFinderService extends Service implements BluetoothConnection.L
         @Override
         public void removeListener(Listener callback) {
             try {
-                if (listeners.contains(callback)) {
-                    listeners.remove(callback);
-                }
+                listeners.remove(callback);
             } catch (Exception e) {
                 TtAppCtx.getReport().writeError(e.getMessage(), "RangeFinderService:removeListener", e.getStackTrace());
             }

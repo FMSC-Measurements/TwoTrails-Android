@@ -1,7 +1,6 @@
 package com.usda.fmsc.twotrails.activities;
 
 import android.annotation.SuppressLint;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -198,18 +197,8 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                                     getTtAppCtx().getDeviceSettings().getPrefs());
 
                             dialog.setMessage(Take5Activity.this.getString(R.string.points_camera_diag))
-                                    .setPositiveButton("TwoTrails", new DontAskAgainDialog.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialogInterface, int i, Object value) {
-                                            captureImageUri = TtUtils.Media.captureImage(Take5Activity.this, true, _CurrentPoint);
-                                        }
-                                    }, 2)
-                                    .setNegativeButton("Android", new DontAskAgainDialog.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialogInterface, int i, Object value) {
-                                            captureImageUri = TtUtils.Media.captureImage(Take5Activity.this, false, _CurrentPoint);
-                                        }
-                                    }, 1)
+                                    .setPositiveButton("TwoTrails", (dialogInterface, i, value) -> captureImageUri = TtUtils.Media.captureImage(Take5Activity.this, true, _CurrentPoint), 2)
+                                    .setNegativeButton("Android", (dialogInterface, i, value) -> captureImageUri = TtUtils.Media.captureImage(Take5Activity.this, false, _CurrentPoint), 1)
                                     .setNeutralButton(getString(R.string.str_cancel), null, 0)
                                     .show();
                         } else {
@@ -237,27 +226,12 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                                         "Would you like to delete %s '%s' from storage or only remove its association with the point?",
                                         _CurrentMedia.getMediaType().toString().toLowerCase(),
                                         _CurrentMedia.getName()))
-                                .setPositiveButton(R.string.str_remove, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        removeMedia(_CurrentMedia, false);
-                                    }
-                                })
-                                .setNegativeButton(R.string.str_delete, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        new AlertDialog.Builder(Take5Activity.this)
-                                                .setMessage(String.format("You are about to delete file '%s'.", _CurrentMedia.getFilePath()))
-                                                .setPositiveButton(R.string.str_delete, new DialogInterface.OnClickListener() {
-                                                    @Override
-                                                    public void onClick(DialogInterface dialog, int which) {
-                                                        removeMedia(_CurrentMedia, true);
-                                                    }
-                                                })
-                                                .setNeutralButton(R.string.str_cancel, null)
-                                                .show();
-                                    }
-                                })
+                                .setPositiveButton(R.string.str_remove, (dialog, which) -> removeMedia(_CurrentMedia, false))
+                                .setNegativeButton(R.string.str_delete, (dialog, which) -> new AlertDialog.Builder(Take5Activity.this)
+                                        .setMessage(String.format("You are about to delete file '%s'.", _CurrentMedia.getFilePath()))
+                                        .setPositiveButton(R.string.str_delete, (dialog1, which1) -> removeMedia(_CurrentMedia, true))
+                                        .setNeutralButton(R.string.str_cancel, null)
+                                        .show())
                                 .setNeutralButton(R.string.str_cancel, null)
                                 .show();
                     }
@@ -288,48 +262,45 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
 
                         handling = true;
 
-                        new Handler().post(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    animFadePartial.cancel();
-                                    layCardInfo.clearAnimation();
+                        new Handler().post(() -> {
+                            try {
+                                animFadePartial.cancel();
+                                layCardInfo.clearAnimation();
 
-                                    animFadePartial = new AlphaAnimation(.3f, 1f);
-                                    animFadePartial.setDuration(250);
-                                    animFadePartial.setFillEnabled(true);
-                                    animFadePartial.setFillAfter(true);
+                                animFadePartial = new AlphaAnimation(.3f, 1f);
+                                animFadePartial.setDuration(250);
+                                animFadePartial.setFillEnabled(true);
+                                animFadePartial.setFillAfter(true);
 
-                                    animFadePartial.setAnimationListener(new Animation.AnimationListener() {
-                                        @Override
-                                        public void onAnimationStart(Animation animation) {
+                                animFadePartial.setAnimationListener(new Animation.AnimationListener() {
+                                    @Override
+                                    public void onAnimationStart(Animation animation) {
 
-                                        }
-
-                                        @Override
-                                        public void onAnimationEnd(Animation animation) {
-                                            layCardInfo.setAlpha(1f);
-                                            layCardInfo.clearAnimation();
-                                        }
-
-                                        @Override
-                                        public void onAnimationRepeat(Animation animation) {
-
-                                        }
-                                    });
-
-                                    while (handling) {
-                                        Thread.sleep(350);
-
-                                        if (recyclerView.getScrollState() == RecyclerView.SCROLL_STATE_IDLE) {
-                                            layCardInfo.startAnimation(animFadePartial);
-                                            invisible = false;
-                                            handling = false;
-                                        }
                                     }
-                                } catch (Exception ex) {
-                                    ex.printStackTrace();
+
+                                    @Override
+                                    public void onAnimationEnd(Animation animation) {
+                                        layCardInfo.setAlpha(1f);
+                                        layCardInfo.clearAnimation();
+                                    }
+
+                                    @Override
+                                    public void onAnimationRepeat(Animation animation) {
+
+                                    }
+                                });
+
+                                while (handling) {
+                                    Thread.sleep(350);
+
+                                    if (recyclerView.getScrollState() == RecyclerView.SCROLL_STATE_IDLE) {
+                                        layCardInfo.startAnimation(animFadePartial);
+                                        invisible = false;
+                                        handling = false;
+                                    }
                                 }
+                            } catch (Exception ex) {
+                                ex.printStackTrace();
                             }
                         });
                     }
@@ -341,31 +312,23 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
             } else if (newState == RecyclerView.SCROLL_STATE_DRAGGING && !ignoreScroll && !invisible) {
                 onStartCardMovement(enableCardFading);
 
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        while (invisible) {
-                            try {
-                                Thread.sleep(100);
+                new Thread(() -> {
+                    while (invisible) {
+                        try {
+                            Thread.sleep(100);
 
-                                int pos = linearLayoutManager.findFirstCompletelyVisibleItemPosition();
+                            int pos = linearLayoutManager.findFirstCompletelyVisibleItemPosition();
 
-                                if (pos < 0) {
-                                    pos = linearLayoutManager.findFirstVisibleItemPosition();
-                                }
-
-                                if (pos > -1 && pos < _Points.size()) {
-                                    final int fpos = pos;
-                                    runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            moveToMapPoint(fpos);
-                                        }
-                                    });
-                                }
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
+                            if (pos < 0) {
+                                pos = linearLayoutManager.findFirstVisibleItemPosition();
                             }
+
+                            if (pos > -1 && pos < _Points.size()) {
+                                final int fpos = pos;
+                                runOnUiThread(() -> moveToMapPoint(fpos));
+                            }
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
                         }
                     }
                 }).start();
@@ -532,12 +495,9 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
             //region Media Layout
             toolbarMedia = findViewById(R.id.toolbarMedia);
             toolbarMedia.setNavigationIcon(AndroidUtils.UI.getDrawable(Take5Activity.this, R.drawable.ic_arrow_back_white_24dp));
-            toolbarMedia.setNavigationOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    setMapDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, GravityCompat.END);
-                    closeMapDrawer(GravityCompat.END);
-                }
+            toolbarMedia.setNavigationOnClickListener(v -> {
+                setMapDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, GravityCompat.END);
+                closeMapDrawer(GravityCompat.END);
             });
 
             pmbMedia = findViewById(R.id.pmdMenu);
@@ -562,7 +522,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
 
             mediaViewPager = findViewById(R.id.pmdViewPager);
             if (mediaViewPager != null) {
-                rvMediaAdapter = new MediaRvAdapter(Take5Activity.this, Collections.synchronizedList(new ArrayList<TtMedia>()), mediaListener,
+                rvMediaAdapter = new MediaRvAdapter(Take5Activity.this, Collections.synchronizedList(new ArrayList<>()), mediaListener,
                         AndroidUtils.Convert.dpToPx(Take5Activity.this, 90), bitmapManager);
 
                 rvMedia.setAdapter(rvMediaAdapter);
@@ -571,24 +531,16 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                 mediaViewPager.setAdapter(mediaPagerAdapter);
                 mediaViewPager.addOnPageChangeListener(onMediaPageChangeListener);
 
-                rvMediaAdapter.setListener(new MediaRvAdapter.MediaChangedListener() {
-                    @Override
-                    public void onNotifyDataSetChanged() {
-                        mediaPagerAdapter.notifyDataSetChanged();
-                    }
-                });
+                rvMediaAdapter.setListener(() -> mediaPagerAdapter.notifyDataSetChanged());
 
                 loadMedia(_CurrentPoint, false);
             }
 
             ImageView ivFullscreen = findViewById(R.id.pmdIvFullscreen);
             if (ivFullscreen != null) {
-                ivFullscreen.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (_CurrentMedia != null && _CurrentMedia.getMediaType() == MediaType.Picture) {
-                            TtUtils.Media.openInImageViewer(Take5Activity.this, _CurrentMedia.getFilePath());
-                        }
+                ivFullscreen.setOnClickListener(v -> {
+                    if (_CurrentMedia != null && _CurrentMedia.getMediaType() == MediaType.Picture) {
+                        TtUtils.Media.openInImageViewer(Take5Activity.this, _CurrentMedia.getFilePath());
                     }
                 });
 
@@ -650,12 +602,9 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                     AlertDialog.Builder dialog = new AlertDialog.Builder(this);
                     dialog.setMessage("The you are currently acquiring a point. Do you want to exit anyway?");
 
-                    dialog.setPositiveButton(R.string.str_yes, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            stopLogging();
-                            finish();
-                        }
+                    dialog.setPositiveButton(R.string.str_yes, (dialog1, which) -> {
+                        stopLogging();
+                        finish();
                     })
                     .setNeutralButton(R.string.str_cancel, null);
 
@@ -833,14 +782,11 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
         super.onResume();
 
         if (_Points != null && _Points.size() > 1) {
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    linearLayoutManager.scrollToPositionWithOffset(_Points.size() - 1, 0);
-                    //rvPoints.scrollToPosition(_Points.size() - 1);
-                    rvPoints.setVisibility(View.VISIBLE);
-                    onStopCardMovement();
-                }
+            new Handler().postDelayed(() -> {
+                linearLayoutManager.scrollToPositionWithOffset(_Points.size() - 1, 0);
+                //rvPoints.scrollToPosition(_Points.size() - 1);
+                rvPoints.setVisibility(View.VISIBLE);
+                onStopCardMovement();
             }, 250);
         } else {
             rvPoints.setVisibility(View.VISIBLE);
@@ -1125,45 +1071,32 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
         super.stopLogging();
 
         if (killAcquire) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    progLay.setVisibility(View.GONE);
-                }
-            });
+            runOnUiThread(() -> progLay.setVisibility(View.GONE));
 
             killAcquire = false;
         } else {
-            pdhHideProgress.post(new Runnable() {
-                @Override
-                public void run() {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Animation a = AnimationUtils.loadAnimation(Take5Activity.this, R.anim.push_down_out);
+            pdhHideProgress.post(() -> runOnUiThread(() -> {
+                Animation a = AnimationUtils.loadAnimation(Take5Activity.this, R.anim.push_down_out);
 
-                            a.setAnimationListener(new Animation.AnimationListener() {
-                                @Override
-                                public void onAnimationStart(Animation animation) {
-                                    progLay.setVisibility(View.GONE);
-                                }
+                a.setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+                        progLay.setVisibility(View.GONE);
+                    }
 
-                                @Override
-                                public void onAnimationEnd(Animation animation) {
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
 
-                                }
+                    }
 
-                                @Override
-                                public void onAnimationRepeat(Animation animation) {
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {
 
-                                }
-                            });
+                    }
+                });
 
-                            progLay.startAnimation(a);
-                        }
-                    });
-                }
-            });
+                progLay.startAnimation(a);
+            }));
         }
     }
 
@@ -1406,12 +1339,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                 _UsedBursts.add(burst);
 
 
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        tvProg.setText(StringEx.toString(++nmeaCount));
-                    }
-                });
+                runOnUiThread(() -> tvProg.setText(StringEx.toString(++nmeaCount)));
 
                 if (_UsedBursts.size() == takeAmount) {
                     stopLogging();
@@ -1571,12 +1499,9 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                     .setTitle(String.format("Reset Media %s", _CurrentMedia.getName()))
                     .setMessage(String.format("This will reset this %s back to its original values.",
                             _CurrentMedia.getMediaType().toString().toLowerCase()))
-                    .setPositiveButton("Reset", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            _CurrentMedia = TtUtils.Media.cloneMedia(_BackupMedia);
-                            setMediaUpdated(false);
-                        }
+                    .setPositiveButton("Reset", (dialogInterface, i) -> {
+                        _CurrentMedia = TtUtils.Media.cloneMedia(_BackupMedia);
+                        setMediaUpdated(false);
                     })
                     .setNeutralButton(getString(R.string.str_cancel), null)
                     .show();
@@ -1659,16 +1584,13 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
 
                 final int order = TtUtils.Media.getMediaIndex(picture, rvMediaAdapter.getItems());
 
-                Take5Activity.this.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        rvMediaAdapter.add(order, picture);
+                Take5Activity.this.runOnUiThread(() -> {
+                    rvMediaAdapter.add(order, picture);
 
-                        //don't bombard the adapter with lots of changes
-                        mediaLoaderDelayedHandler.post(onMediaChanged);
+                    //don't bombard the adapter with lots of changes
+                    mediaLoaderDelayedHandler.post(onMediaChanged);
 
-                        semaphore.release();
-                    }
+                    semaphore.release();
                 });
             } catch (InterruptedException e) {
                 //
@@ -1690,22 +1612,19 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
     private Runnable onMediaChanged = new Runnable() {
         @Override
         public void run() {
-            Take5Activity.this.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if (mediaSelectionIndex > INVALID_INDEX && mediaSelectionIndex < rvMediaAdapter.getItemCountEx()) {
-                        setCurrentMedia(rvMediaAdapter.getItem(mediaSelectionIndex));
-                        rvMediaAdapter.selectItem(mediaSelectionIndex);
-                        mediaViewPager.setCurrentItem(mediaSelectionIndex);
-                        mediaSelectionIndex = INVALID_INDEX;
-                    }
-
-                    mediaLoaded = true;
-
-                    setMediaTitle(isMapDrawerOpen(GravityCompat.END) ? _CurrentMedia.getName() : null);
-                    _Locked = false;
-                    onLockChange();
+            Take5Activity.this.runOnUiThread(() -> {
+                if (mediaSelectionIndex > INVALID_INDEX && mediaSelectionIndex < rvMediaAdapter.getItemCountEx()) {
+                    setCurrentMedia(rvMediaAdapter.getItem(mediaSelectionIndex));
+                    rvMediaAdapter.selectItem(mediaSelectionIndex);
+                    mediaViewPager.setCurrentItem(mediaSelectionIndex);
+                    mediaSelectionIndex = INVALID_INDEX;
                 }
+
+                mediaLoaded = true;
+
+                setMediaTitle(isMapDrawerOpen(GravityCompat.END) ? _CurrentMedia.getName() : null);
+                _Locked = false;
+                onLockChange();
             });
         }
     };

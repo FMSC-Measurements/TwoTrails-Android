@@ -2,7 +2,6 @@ package com.usda.fmsc.twotrails.activities;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import androidx.core.view.ViewCompat;
 import androidx.appcompat.app.AlertDialog;
@@ -144,12 +143,7 @@ public class TableViewActivity extends CustomToolbarActivity {
     protected void onResume() {
         super.onResume();
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                setupTable();
-            }
-        }).start();
+        new Thread(this::setupTable).start();
     }
 
     @Override
@@ -183,28 +177,17 @@ public class TableViewActivity extends CustomToolbarActivity {
 
                 builder.setTitle("Select Columns");
 
-                builder.setMultiChoiceItems(Headers, viewOptions.getOptions(), new DialogInterface.OnMultiChoiceClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-                        viewOptions.setOption(which, isChecked);
-                    }
+                builder.setMultiChoiceItems(Headers, viewOptions.getOptions(), (dialog, which, isChecked) -> viewOptions.setOption(which, isChecked));
+
+                builder.setPositiveButton(R.string.str_ok, (dialog, which) -> {
+                    setupHeaders();
+                    pointsAdapter.notifyDataSetChanged();
                 });
 
-                builder.setPositiveButton(R.string.str_ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        setupHeaders();
-                        pointsAdapter.notifyDataSetChanged();
-                    }
-                });
-
-                builder.setNegativeButton(R.string.menu_table_edit_reset, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        viewOptions = new ViewOptions(true);
-                        setupHeaders();
-                        pointsAdapter.notifyDataSetChanged();
-                    }
+                builder.setNegativeButton(R.string.menu_table_edit_reset, (dialog, which) -> {
+                    viewOptions = new ViewOptions(true);
+                    setupHeaders();
+                    pointsAdapter.notifyDataSetChanged();
                 });
 
                 builder.show();
@@ -246,15 +229,12 @@ public class TableViewActivity extends CustomToolbarActivity {
 
         filterPoints();
 
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                pointsAdapter = new PointsTableAdapter(getBaseContext());
-                ssvPoints.setAdapter(pointsAdapter);
+        runOnUiThread(() -> {
+            pointsAdapter = new PointsTableAdapter(getBaseContext());
+            ssvPoints.setAdapter(pointsAdapter);
 
-                ssvPoints.setVisibility(View.VISIBLE);
-                progressBar.setVisibility(View.INVISIBLE);
-            }
+            ssvPoints.setVisibility(View.VISIBLE);
+            progressBar.setVisibility(View.INVISIBLE);
         });
     }
 
@@ -420,10 +400,7 @@ public class TableViewActivity extends CustomToolbarActivity {
         _DisplayedPoints.clear();
 
         for (TtPoint point : _Points) {
-            if (!_PolygonFilter.get(point.getPolyCN()))
-                continue;
-
-            if (!_OpFilter.get(point.getOp()))
+            if (!_PolygonFilter.get(point.getPolyCN()) || !_OpFilter.get(point.getOp()))
                 continue;
 
             _DisplayedPoints.add(point);
@@ -447,13 +424,10 @@ public class TableViewActivity extends CustomToolbarActivity {
 
         new AlertDialog.Builder(this)
                 .setTitle(R.string.str_polygons)
-                .setMultiChoiceItems(items, selections, new DialogInterface.OnMultiChoiceClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int indexSelected, boolean isChecked) {
-                        _PolygonFilter.put(_Polygons.get(indexSelected).getCN(), isChecked);
-                        filterPoints();
-                        pointsAdapter.notifyDataSetChanged();
-                    }
+                .setMultiChoiceItems(items, selections, (dialog, indexSelected, isChecked) -> {
+                    _PolygonFilter.put(_Polygons.get(indexSelected).getCN(), isChecked);
+                    filterPoints();
+                    pointsAdapter.notifyDataSetChanged();
                 })
                 .setPositiveButton(R.string.str_ok, null)
                 .show();

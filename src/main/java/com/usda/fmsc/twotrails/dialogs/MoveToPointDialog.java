@@ -72,12 +72,9 @@ public class MoveToPointDialog extends DialogFragment {
 
         listView.setAdapter(adapter);
 
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                onItemClick.onItemClick(parent, view, position, id);
-                dismiss();
-            }
+        listView.setOnItemClickListener((parent, view1, position, id) -> {
+            onItemClick.onItemClick(parent, view1, position, id);
+            dismiss();
         });
 
 
@@ -92,24 +89,18 @@ public class MoveToPointDialog extends DialogFragment {
 
         final AlertDialog dialog = builder.create();
 
-        fButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (onFirstClick != null) {
-                    onFirstClick.onClick(dialog, 0);
-                }
-                dismiss();
+        fButton.setOnClickListener(v -> {
+            if (onFirstClick != null) {
+                onFirstClick.onClick(dialog, 0);
             }
+            dismiss();
         });
 
-        lButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (onLastClick != null) {
-                    onLastClick.onClick(dialog, 0);
-                }
-                dismiss();
+        lButton.setOnClickListener(v -> {
+            if (onLastClick != null) {
+                onLastClick.onClick(dialog, 0);
             }
+            dismiss();
         });
 
         return dialog;

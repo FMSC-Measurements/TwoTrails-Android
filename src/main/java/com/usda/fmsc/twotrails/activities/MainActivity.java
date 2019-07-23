@@ -142,28 +142,25 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
             AndroidUtils.Device.isInternetAvailable(new AndroidUtils.Device.InternetAvailableCallback() {
                 @Override
                 public void onCheckInternet(final boolean internetAvailable) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (internetAvailable) {
-                                new AlertDialog.Builder(MainActivity.this)
-                                        .setMessage("TwoTrails experienced a crash. Would you like to send an error report to the developer team to help prevent future crashes?")
-                                        .setPositiveButton("Send", new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int which) {
-                                                TtUtils.SendCrashEmailToDev(MainActivity.this);
-                                            }
-                                        })
-                                        .setNeutralButton("Don't Send", null)
-                                        .show();
-                                showedCrashed = true;
-                            } else {
-                                new AlertDialog.Builder(MainActivity.this)
-                                        .setMessage("TwoTrails experienced a crash. You can send a crash log to the development team from inside the settings menu.")
-                                        .setPositiveButton(R.string.str_ok, null)
-                                        .show();
-                                showedCrashed = true;
-                            }
+                    runOnUiThread(() -> {
+                        if (internetAvailable) {
+                            new AlertDialog.Builder(MainActivity.this)
+                                    .setMessage("TwoTrails experienced a crash. Would you like to send an error report to the developer team to help prevent future crashes?")
+                                    .setPositiveButton("Send", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            TtUtils.SendCrashEmailToDev(MainActivity.this);
+                                        }
+                                    })
+                                    .setNeutralButton("Don't Send", null)
+                                    .show();
+                            showedCrashed = true;
+                        } else {
+                            new AlertDialog.Builder(MainActivity.this)
+                                    .setMessage("TwoTrails experienced a crash. You can send a crash log to the development team from inside the settings menu.")
+                                    .setPositiveButton(R.string.str_ok, null)
+                                    .show();
+                            showedCrashed = true;
                         }
                     });
                 }
@@ -219,22 +216,14 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
         if (isAboutToExit() && PolygonAdjuster.isProcessing()) {
             new AlertDialog.Builder(MainActivity.this)
                     .setMessage("Polygons are currently adjusting. Would you like to wait for them to finish?")
-                    .setPositiveButton("Wait", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            if (!PolygonAdjuster.isProcessing()) {
-                                finishAndRemoveTask();
-                            } else {
-                                exitOnAdjusted = true;
-                            }
-                        }
-                    })
-                    .setNegativeButton(R.string.str_exit, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
+                    .setPositiveButton("Wait", (dialog, which) -> {
+                        if (!PolygonAdjuster.isProcessing()) {
                             finishAndRemoveTask();
+                        } else {
+                            exitOnAdjusted = true;
                         }
                     })
+                    .setNegativeButton(R.string.str_exit, (dialog, which) -> finishAndRemoveTask())
                     .setNeutralButton(R.string.str_cancel, null)
                     .show();
         } else {
@@ -294,34 +283,14 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
             if (requestCode == Consts.Codes.Requests.LOCATION) {
                 new AlertDialog.Builder(MainActivity.this)
                         .setMessage("TwoTrails requires Location Services in order to work.")
-                        .setPositiveButton(R.string.str_ok, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                AndroidUtils.App.requestLocationPermission(MainActivity.this, Consts.Codes.Requests.LOCATION);
-                            }
-                        })
-                        .setOnCancelListener(new DialogInterface.OnCancelListener() {
-                            @Override
-                            public void onCancel(DialogInterface dialog) {
-                                finishAndRemoveTask();
-                            }
-                        })
+                        .setPositiveButton(R.string.str_ok, (dialog, which) -> AndroidUtils.App.requestLocationPermission(MainActivity.this, Consts.Codes.Requests.LOCATION))
+                        .setOnCancelListener(dialog -> finishAndRemoveTask())
                         .show();
             } else if (requestCode == Consts.Codes.Requests.CREATE_FILE) {
                 new AlertDialog.Builder(MainActivity.this)
                         .setMessage("TwoTrails requires Storage Permission in order to work.")
-                        .setPositiveButton(R.string.str_ok, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                AndroidUtils.App.requestStoragePermission(MainActivity.this, Consts.Codes.Requests.STORAGE);
-                            }
-                        })
-                        .setOnCancelListener(new DialogInterface.OnCancelListener() {
-                            @Override
-                            public void onCancel(DialogInterface dialog) {
-                                finishAndRemoveTask();
-                            }
-                        })
+                        .setPositiveButton(R.string.str_ok, (dialog, which) -> AndroidUtils.App.requestStoragePermission(MainActivity.this, Consts.Codes.Requests.STORAGE))
+                        .setOnCancelListener(dialog -> finishAndRemoveTask())
                         .show();
             }
         }
@@ -450,20 +419,10 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
                             case Successful:
                                 openFile(filePath); break;
                             case Failed:
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        Toast.makeText(MainActivity.this, "Upgrade Failed. See Log File for details.", Toast.LENGTH_SHORT).show();
-                                    }
-                                });
+                                runOnUiThread(() -> Toast.makeText(MainActivity.this, "Upgrade Failed. See Log File for details.", Toast.LENGTH_SHORT).show());
                                 break;
                             case VersionUnsupported: {
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        Toast.makeText(MainActivity.this, "This file needs an Upgrade that needs to be done on the PC", Toast.LENGTH_SHORT).show();
-                                    }
-                                });
+                                runOnUiThread(() -> Toast.makeText(MainActivity.this, "This file needs an Upgrade that needs to be done on the PC", Toast.LENGTH_SHORT).show());
                                 break;
                             }
                         }
@@ -471,25 +430,19 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
                         if (getTtAppCtx().getDAL().needsAdjusting())
                             PolygonAdjuster.adjust(getTtAppCtx().getDAL());
 
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                gotoDataTab();
-                                _fileOpen = true;
-                                updateAppInfo();
-                            }
+                        runOnUiThread(() -> {
+                            gotoDataTab();
+                            _fileOpen = true;
+                            updateAppInfo();
                         });
                     }
                 }
             } catch (Exception e) {
                 getTtAppCtx().getReport().writeError(e.getMessage(), "MainActivity:openFile");
 
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        _fileOpen = false;
-                        Toast.makeText(MainActivity.this, "File Failed to Open", Toast.LENGTH_SHORT).show();
-                    }
+                runOnUiThread(() -> {
+                    _fileOpen = false;
+                    Toast.makeText(MainActivity.this, "File Failed to Open", Toast.LENGTH_SHORT).show();
                 });
             }
         }
@@ -626,26 +579,24 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
         final InputDialog inputDialog = new InputDialog(this);
         inputDialog.setTitle("File Name");
 
-        inputDialog.setPositiveButton("Create", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-                String value = inputDialog.getText().trim();
+        inputDialog.setPositiveButton("Create", (dialog, whichButton) -> {
+            String value = inputDialog.getText().trim();
 
-                if (value.length() > 0) {
-                    String filePath = TtUtils.getTtFilePath(value);
+            if (value.length() > 0) {
+                String filePath = TtUtils.getTtFilePath(value);
 
-                    if (FileUtils.fileExists(filePath)) {
-                        OverwriteFileDialog(filePath);
-                    } else {
-                        createFile(filePath);
-                    }
+                if (FileUtils.fileExists(filePath)) {
+                    OverwriteFileDialog(filePath);
                 } else {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(MainActivity.this, "Invalid Filename", Toast.LENGTH_LONG).show();
-                        }
-                    });
+                    createFile(filePath);
                 }
+            } else {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(MainActivity.this, "Invalid Filename", Toast.LENGTH_LONG).show();
+                    }
+                });
             }
         });
 
@@ -659,30 +610,17 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
         alert.setTitle("File Exists");
         alert.setMessage("Do you want to overwrite the file?");
 
-        alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-                createFile(filePath);
-            }
-        });
+        alert.setPositiveButton("Yes", (dialog, whichButton) -> createFile(filePath));
 
         alert.setNegativeButton("No",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        CreateFileDialog();
-                    }
-                });
+                (dialog, which) -> CreateFileDialog());
         alert.show();
     }
 
     private void askToAdjust() {
         new AlertDialog.Builder(MainActivity.this)
         .setMessage("It looks like the data layer needs to be adjusted. Would you like to try and adjust it now?")
-            .setPositiveButton(R.string.str_yes, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    PolygonAdjuster.adjust(getTtAppCtx().getDAL(), true, MainActivity.this);
-                }
-            })
+            .setPositiveButton(R.string.str_yes, (dialog, which) -> PolygonAdjuster.adjust(getTtAppCtx().getDAL(), true, MainActivity.this))
             .setNeutralButton(R.string.str_no, null)
             .show();
     }
@@ -720,27 +658,16 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
             final RecentProjectAdapter adapter = new RecentProjectAdapter(MainActivity.this, recentProjects);
 
             builderSingle.setNegativeButton("Cancel",
-                    new DialogInterface.OnClickListener() {
-
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    });
+                    (dialog, which) -> dialog.dismiss());
 
             builderSingle.setAdapter(adapter,
-                    new DialogInterface.OnClickListener() {
+                    (dialog, which) -> {
+                        RecentProject project = adapter.getItem(which);
 
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-
-                            RecentProject project = adapter.getItem(which);
-
-                            if(FileUtils.fileExists(project.File))
-                                openFile(project.File);
-                            else
-                                Toast.makeText(getApplicationContext(), "File not found", Toast.LENGTH_LONG).show();
-                        }
+                        if(FileUtils.fileExists(project.File))
+                            openFile(project.File);
+                        else
+                            Toast.makeText(getApplicationContext(), "File not found", Toast.LENGTH_LONG).show();
                     });
             builderSingle.show();
         } else {
@@ -776,12 +703,7 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
 
             dialog.setMessage(String.format("Duplicate File to: %s", dupFile.substring(dupFile.lastIndexOf("/") + 1)));
 
-            dialog.setPositiveButton(R.string.main_btn_duplicate, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            duplicateFile(filename);
-                        }
-                    })
+            dialog.setPositiveButton(R.string.main_btn_duplicate, (dialog1, which) -> duplicateFile(filename))
                     .setNeutralButton(R.string.str_cancel, null)
                     .show();
         }
@@ -791,19 +713,16 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
         AlertDialog.Builder dialog = new AlertDialog.Builder(this);
         dialog.setMessage("This operation will remove data that is not properly connected within the database. Points, Polygons, Groups and NMEA may be deleted. "+
                             "It is suggested that you backup your project before continuing.")
-                .setPositiveButton("Clean", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        ProgressDialog pd = new ProgressDialog(getBaseContext());
-                        pd.setTitle("Cleaning..");
-                        pd.setMessage("This operation may take a few minutes.");
+                .setPositiveButton("Clean", (dialog1, which) -> {
+                    ProgressDialog pd = new ProgressDialog(getBaseContext());
+                    pd.setTitle("Cleaning..");
+                    pd.setMessage("This operation may take a few minutes.");
 
-                        pd.show();
+                    pd.show();
 
-                        getTtAppCtx().getDAL().clean();
+                    getTtAppCtx().getDAL().clean();
 
-                        pd.cancel();
-                    }
+                    pd.cancel();
                 })
                 .setNeutralButton(R.string.str_cancel, null);
     }
@@ -879,12 +798,7 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
             AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 
             dialog.setMessage("Google Earth is not installed.")
-            .setPositiveButton("Install", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    AndroidUtils.App.navigateAppStore(MainActivity.this, gEarth);
-                }
-            })
+            .setPositiveButton("Install", (dialog1, which) -> AndroidUtils.App.navigateAppStore(MainActivity.this, gEarth))
             .setNeutralButton(R.string.str_cancel, null)
             .show();
         }
@@ -922,16 +836,6 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
         }
     }
 
-    public void btnMultiEdit(View view) {
-        /*
-        if(getTtAppCtx().getDAL().hasPolygons()) {
-            startActivityForResult(new Intent(this, MultiEditActivity.class), UPDATE_INFO);
-        } else {
-            Toast.makeText(this, "No Polygons in Project", Toast.LENGTH_SHORT).show();
-        }
-        */
-    }
-
     public void btnGpsLoggerClick(View view) {
         startActivity(new Intent(this, GpsLoggerActivity.class));
     }
@@ -946,8 +850,8 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
 
     public void btnTest(View view) {
 
-        throw  new RuntimeException("Crash on purpose");
-        //startActivity(new Intent(this, TestActivity.class));
+        //throw  new RuntimeException("Crash on purpose");
+        startActivity(new Intent(this, TestActivity.class));
     }
     //endregion
     //endregion

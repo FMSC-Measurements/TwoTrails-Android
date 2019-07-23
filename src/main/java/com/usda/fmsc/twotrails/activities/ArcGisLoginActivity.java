@@ -41,26 +41,18 @@ public class ArcGisLoginActivity extends CustomToolbarActivity {
         }
 
         txtPassword = findViewById(R.id.password);
-        txtPassword.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-                if (id == R.id.login || id == EditorInfo.IME_NULL) {
-                    attemptLogin();
-                    return true;
-                }
-                return false;
+        txtPassword.setOnEditorActionListener((textView, id, keyEvent) -> {
+            if (id == R.id.login || id == EditorInfo.IME_NULL) {
+                attemptLogin();
+                return true;
             }
+            return false;
         });
 
         Button btnLogin = findViewById(R.id.sign_in_button);
 
         if (btnLogin != null) {
-            btnLogin.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    attemptLogin();
-                }
-            });
+            btnLogin.setOnClickListener(view -> attemptLogin());
         }
     }
 

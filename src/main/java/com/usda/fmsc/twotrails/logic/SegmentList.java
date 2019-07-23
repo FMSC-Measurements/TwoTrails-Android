@@ -41,23 +41,15 @@ public class SegmentList {
     }
 
 
-    private static Comparator<Segment> segmentComparator = new Comparator<Segment>() {
-        @Override
-        public int compare(Segment a, Segment b) {
-            if (a == null) {
-                if (b == null)
-                    return 0;
-                return 1;
-            } else if (b == null) {
-                return -1;
-            }
-
-            if (a.getWeight() == b.getWeight())
+    private static Comparator<Segment> segmentComparator = (a, b) -> {
+        if (a == null) {
+            if (b == null)
                 return 0;
-            if (a.getWeight() > b.getWeight())
-                return -1;
-            else
-                return 1;
+            return 1;
+        } else if (b == null) {
+            return -1;
         }
+
+        return Integer.compare(b.getWeight(), a.getWeight());
     };
 }

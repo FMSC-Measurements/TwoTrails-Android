@@ -1,6 +1,5 @@
 package com.usda.fmsc.twotrails.activities;
 
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -50,12 +49,7 @@ public class PolygonsActivity extends TtAdjusterCustomToolbarActivity {
         if (_Polygons == null) {
             _Polygons = getTtAppCtx().getDAL().getPolygons();
             if (mSectionsPagerAdapter != null) {
-                new Handler(getMainLooper()).post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mSectionsPagerAdapter.notifyDataSetChanged();
-                    }
-                });
+                new Handler(getMainLooper()).post(() -> mSectionsPagerAdapter.notifyDataSetChanged());
             }
         }
 
@@ -160,47 +154,42 @@ public class PolygonsActivity extends TtAdjusterCustomToolbarActivity {
                     AlertDialog.Builder alert = new AlertDialog.Builder(this);
                     alert.setMessage(String.format("Delete Polygon %s", _CurrentPolygon.getName()));
 
-                    alert.setPositiveButton(R.string.str_delete, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
+                    alert.setPositiveButton(R.string.str_delete, (dialog, which) -> {
 
-                            AnimationCardFragment card = ((AnimationCardFragment) mSectionsPagerAdapter.getFragments().get(_CurrentIndex));
+                        AnimationCardFragment card = ((AnimationCardFragment) mSectionsPagerAdapter.getFragments().get(_CurrentIndex));
 
-                            card.setVisibilityListener(new AnimationCardFragment.VisibilityListener() {
-                                @Override
-                                public void onHidden() {
-                                    new Handler().post(new Runnable() {
-                                        public void run() {
-                                            if (_CurrentIndex == 0 && getPolygons().size() < 2) { //only 1 point in poly
-                                                deletePolygon(_CurrentPolygon, _CurrentIndex);
+                        card.setVisibilityListener(new AnimationCardFragment.VisibilityListener() {
+                            @Override
+                            public void onHidden() {
+                                new Handler().post(() -> {
+                                    if (_CurrentIndex == 0 && getPolygons().size() < 2) { //only 1 point in poly
+                                        deletePolygon(_CurrentPolygon, _CurrentIndex);
 
-                                                _CurrentPolygon = null;
-                                                _CurrentIndex = INVALID_INDEX;
-                                                lockPolygon(true);
-                                                AndroidUtils.UI.disableMenuItem(miLock);
-                                            } else if (_CurrentIndex < getPolygons().size() - 1) { //point is not at the end
-                                                _deleteIndex = _CurrentIndex;
-                                                _deletePolygon = _CurrentPolygon;
+                                        _CurrentPolygon = null;
+                                        _CurrentIndex = INVALID_INDEX;
+                                        lockPolygon(true);
+                                        AndroidUtils.UI.disableMenuItem(miLock);
+                                    } else if (_CurrentIndex < getPolygons().size() - 1) { //point is not at the end
+                                        _deleteIndex = _CurrentIndex;
+                                        _deletePolygon = _CurrentPolygon;
 
-                                                moveToPolygon(_CurrentIndex + 1);
-                                            } else if (_CurrentIndex == getPolygons().size() - 1) { //point it at the end
-                                                _deleteIndex = _CurrentIndex;
-                                                _deletePolygon = _CurrentPolygon;
+                                        moveToPolygon(_CurrentIndex + 1);
+                                    } else if (_CurrentIndex == getPolygons().size() - 1) { //point it at the end
+                                        _deleteIndex = _CurrentIndex;
+                                        _deletePolygon = _CurrentPolygon;
 
-                                                moveToPolygon(_CurrentIndex - 1);
-                                            }
-                                        }
-                                    });
-                                }
+                                        moveToPolygon(_CurrentIndex - 1);
+                                    }
+                                });
+                            }
 
-                                @Override
-                                public void onVisible() {
+                            @Override
+                            public void onVisible() {
 
-                                }
-                            });
+                            }
+                        });
 
-                            card.hideCard();
-                        }
+                        card.hideCard();
                     });
 
                     alert.setNeutralButton(R.string.str_cancel, null);
@@ -243,12 +232,9 @@ public class PolygonsActivity extends TtAdjusterCustomToolbarActivity {
 
             _Polygons = null;
 
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mSectionsPagerAdapter.notifyDataSetChanged();
-                    moveToPolygon(index);
-                }
+            runOnUiThread(() -> {
+                mSectionsPagerAdapter.notifyDataSetChanged();
+                moveToPolygon(index);
             });
 
             for (TtPolygon poly : getPolygons())
@@ -343,15 +329,12 @@ public class PolygonsActivity extends TtAdjusterCustomToolbarActivity {
             dialog.setTitle(String.format("Reset Polygon %s", _CurrentPolygon.getName()));
             dialog.setMessage(getString(R.string.poly_reset_diag));
 
-            dialog.setPositiveButton("Reset", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    _CurrentPolygon = getPolyAtIndex(_CurrentIndex);
-                    onPolygonUpdated();
-                    updateButtons();
-                    setPolygonUpdated(false);
-                    lockPolygon(false);
-                }
+            dialog.setPositiveButton("Reset", (dialogInterface, i) -> {
+                _CurrentPolygon = getPolyAtIndex(_CurrentIndex);
+                onPolygonUpdated();
+                updateButtons();
+                setPolygonUpdated(false);
+                lockPolygon(false);
             });
 
             dialog.setNeutralButton(R.string.str_cancel, null);
@@ -449,12 +432,7 @@ public class PolygonsActivity extends TtAdjusterCustomToolbarActivity {
 
     private void onPolygonsUpdated() {
         if (Looper.myLooper() != Looper.getMainLooper()) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mSectionsPagerAdapter.notifyDataSetChanged();
-                }
-            });
+            runOnUiThread(() -> mSectionsPagerAdapter.notifyDataSetChanged());
         } else {
             mSectionsPagerAdapter.notifyDataSetChanged();
         }

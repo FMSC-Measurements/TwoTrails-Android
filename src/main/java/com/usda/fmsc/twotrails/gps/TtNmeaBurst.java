@@ -77,7 +77,7 @@ public class TtNmeaBurst extends TtObject implements Parcelable {
     private TtNmeaBurst(Parcel source) {
         super(source);
 
-        Integer val = null;
+        Integer val;
 
         this.timeCreated = (DateTime) source.readSerializable();
         this.pointCN = source.readString();

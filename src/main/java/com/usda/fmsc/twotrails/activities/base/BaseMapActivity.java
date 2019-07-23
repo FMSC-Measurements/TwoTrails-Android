@@ -1,7 +1,6 @@
 package com.usda.fmsc.twotrails.activities.base;
 
 import android.app.Activity;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -29,7 +28,6 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -192,45 +190,37 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
             mapType = getTtAppCtx().getDeviceSettings().getMapType();
             mapId = getTtAppCtx().getDeviceSettings().getMapId();
 
-            AndroidUtils.Device.isInternetAvailable(new AndroidUtils.Device.InternetAvailableCallback() {
-                @Override
-                public void onCheckInternet(final boolean internetAvailable) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            switch (mapType) {
-                                case Google:
-                                    if (internetAvailable || mapId == GoogleMapType.MAP_TYPE_NONE.getValue()) {
-                                        // check google play services and setup map
-                                        int code = AndroidUtils.App.checkPlayServices(BaseMapActivity.this, Consts.Codes.Services.REQUEST_GOOGLE_PLAY_SERVICES);
-                                        if (code == 0) {
-                                            startGMap();
-                                        } else {
-                                            String str = GoogleApiAvailability.getInstance().getErrorString(code);
-                                            Toast.makeText(BaseMapActivity.this, str, Toast.LENGTH_LONG).show();
-                                        }
-                                    } else {
-                                        requestOfflineMap();
-                                    }
-                                    break;
-                                case ArcGIS:
-                                    ArcGisMapLayer agml = getTtAppCtx().getArcGISTools().getMapLayer(mapId);
-                                    if (agml == null) {
-                                        mapId = 0;
-                                        agml = getTtAppCtx().getArcGISTools().getMapLayer(mapId);
-                                    }
-
-                                    if (agml.isOnline() && !internetAvailable) {
-                                        requestOfflineMap();
-                                    } else {
-                                        startArcMap();
-                                    }
-                                    break;
+            AndroidUtils.Device.isInternetAvailable(internetAvailable -> runOnUiThread(() -> {
+                switch (mapType) {
+                    case Google:
+                        if (internetAvailable || mapId == GoogleMapType.MAP_TYPE_NONE.getValue()) {
+                            // check google play services and setup map
+                            int code = AndroidUtils.App.checkPlayServices(BaseMapActivity.this, Consts.Codes.Services.REQUEST_GOOGLE_PLAY_SERVICES);
+                            if (code == 0) {
+                                startGMap();
+                            } else {
+                                String str = GoogleApiAvailability.getInstance().getErrorString(code);
+                                Toast.makeText(BaseMapActivity.this, str, Toast.LENGTH_LONG).show();
                             }
+                        } else {
+                            requestOfflineMap();
                         }
-                    });
+                        break;
+                    case ArcGIS:
+                        ArcGisMapLayer agml = getTtAppCtx().getArcGISTools().getMapLayer(mapId);
+                        if (agml == null) {
+                            mapId = 0;
+                            agml = getTtAppCtx().getArcGISTools().getMapLayer(mapId);
+                        }
+
+                        if (agml.isOnline() && !internetAvailable) {
+                            requestOfflineMap();
+                        } else {
+                            startArcMap();
+                        }
+                        break;
                 }
-            });
+            }));
         }
 
         if (getTtAppCtx().getDeviceSettings().getKeepScreenOn()) {
@@ -321,46 +311,28 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         if (mapFragment != null) {
             getSupportFragmentManager().beginTransaction().add(R.id.mapContainer, mapFragment).commit();
 
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    final Runnable selectMap = new Runnable() {
-                        @Override
-                        public void run() {
-                            SelectMapTypeDialog.newInstance(new ArrayList<>(getTtAppCtx().getArcGISTools().getMapLayers()),
-                                    SelectMapTypeDialog.SelectMapMode.ARC_OFFLINE)
-                                    .setOnMapSelectedListener(new SelectMapTypeDialog.OnMapSelectedListener() {
-                                        @Override
-                                        public void mapSelected(MapType mapType, int mapId) {
-                                            setMapType(mapType, mapId);
-                                        }
-                                    })
-                                    .show(getSupportFragmentManager(), SELECT_MAP);
-                        }
-                    };
+            runOnUiThread(() -> {
+                final Runnable selectMap = () -> SelectMapTypeDialog.newInstance(new ArrayList<>(getTtAppCtx().getArcGISTools().getMapLayers()),
+                        SelectMapTypeDialog.SelectMapMode.ARC_OFFLINE)
+                        .setOnMapSelectedListener(this::setMapType)
+                        .show(getSupportFragmentManager(), SELECT_MAP);
 
-                    if (getTtAppCtx().getArcGISTools().offlineMapsAvailable()) {
-                        if (getTtAppCtx().getDeviceSettings().getAutoMapChooseOfflineAsk()) {
-                            DontAskAgainDialog dialog = new DontAskAgainDialog(BaseMapActivity.this,
-                                    DeviceSettings.MAP_CHOOSE_OFFLINE_ASK,
-                                    DeviceSettings.MAP_CHOOSE_OFFLINE,
-                                    getTtAppCtx().getDeviceSettings().getPrefs());
+                if (getTtAppCtx().getArcGISTools().offlineMapsAvailable()) {
+                    if (getTtAppCtx().getDeviceSettings().getAutoMapChooseOfflineAsk()) {
+                        DontAskAgainDialog dialog = new DontAskAgainDialog(BaseMapActivity.this,
+                                DeviceSettings.MAP_CHOOSE_OFFLINE_ASK,
+                                DeviceSettings.MAP_CHOOSE_OFFLINE,
+                                getTtAppCtx().getDeviceSettings().getPrefs());
 
-                            dialog.setMessage("There is no internet connection. Would you like to use an offline map?")
-                                    .setPositiveButton(getString(R.string.str_yes), new DontAskAgainDialog.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialogInterface, int i, Object value) {
-                                            selectMap.run();
-                                        }
-                                    }, 2)
-                                    .setNegativeButton(getString(R.string.str_no), null, 1)
-                                    .show();
-                        } else if (getTtAppCtx().getDeviceSettings().getAutoMapChooseOffline() == 0) {
-                            selectMap.run();
-                        }
-                    } else if (getTtAppCtx().getDeviceSettings().getAutoMapChooseOfflineAsk()) {
-                        Toast.makeText(BaseMapActivity.this, "There is no internet connection and there are no Offline maps available. No Map can be displayed.",  Toast.LENGTH_LONG).show();
+                        dialog.setMessage("There is no internet connection. Would you like to use an offline map?")
+                                .setPositiveButton(getString(R.string.str_yes), (dialogInterface, i, value) -> selectMap.run(), 2)
+                                .setNegativeButton(getString(R.string.str_no), null, 1)
+                                .show();
+                    } else if (getTtAppCtx().getDeviceSettings().getAutoMapChooseOffline() == 0) {
+                        selectMap.run();
                     }
+                } else if (getTtAppCtx().getDeviceSettings().getAutoMapChooseOfflineAsk()) {
+                    Toast.makeText(BaseMapActivity.this, "There is no internet connection and there are no Offline maps available. No Map can be displayed.",  Toast.LENGTH_LONG).show();
                 }
             });
         } else {
@@ -562,15 +534,12 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
 
                         dialogBuilder.setTitle("Track Polygon");
 
-                        dialogBuilder.setItems(polyStrs, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                PolygonGraphicManager pmm = getPolyGraphicManagers().get(which);
-                                trackedPoly = pmm.getExtents();
-                                getTtAppCtx().getProjectSettings().setTrackedPolyCN(pmm.getPolygonCN());
-                                mapMoved = true;
-                                moveToLocation(pmm.getExtents(), Consts.Location.PADDING, true);
-                            }
+                        dialogBuilder.setItems(polyStrs, (dialog, which) -> {
+                            PolygonGraphicManager pmm = getPolyGraphicManagers().get(which);
+                            trackedPoly = pmm.getExtents();
+                            getTtAppCtx().getProjectSettings().setTrackedPolyCN(pmm.getPolygonCN());
+                            mapMoved = true;
+                            moveToLocation(pmm.getExtents(), Consts.Location.PADDING, true);
                         });
 
                         dialogBuilder.setNegativeButton(R.string.str_cancel, null);
@@ -736,12 +705,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     protected void selectMapType(SelectMapTypeDialog.SelectMapMode mode) {
         SelectMapTypeDialog dialog = SelectMapTypeDialog.newInstance(new ArrayList<>(getTtAppCtx().getArcGISTools().getMapLayers()), mode);
 
-        dialog.setOnMapSelectedListener(new SelectMapTypeDialog.OnMapSelectedListener() {
-            @Override
-            public void mapSelected(MapType mapType, int mapId) {
-                setMapType(mapType, mapId);
-            }
-        });
+        dialog.setOnMapSelectedListener(this::setMapType);
 
         dialog.show(getSupportFragmentManager(), SELECT_MAP);
     }
@@ -893,19 +857,11 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
             } catch (NullPointerException e) {
                 new AlertDialog.Builder(this)
                         .setMessage("An error occurred trying to add a polygon. Please try readjusting your Polygons.")
-                        .setPositiveButton("Adjust Polygons", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                PolygonAdjuster.adjust(getTtAppCtx().getDAL());
-                                finish();
-                            }
+                        .setPositiveButton("Adjust Polygons", (dialog, which) -> {
+                            PolygonAdjuster.adjust(getTtAppCtx().getDAL());
+                            finish();
                         })
-                        .setNeutralButton(R.string.str_cancel, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                finish();
-                            }
-                        })
+                        .setNeutralButton(R.string.str_cancel, (dialog, which) -> finish())
                         .show();
             }
         }
@@ -1327,102 +1283,39 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
             onHolderOptionChanged(null, code);
         }
 
-        layHeader.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (masterCardExpanded) {
-                    ViewAnimator.collapseView(layContent);
-                    masterCardExpanded = false;
-                } else {
-                    ViewAnimator.expandView(layContent);
-                    masterCardExpanded = true;
-                }
+        layHeader.setOnClickListener(view -> {
+            if (masterCardExpanded) {
+                ViewAnimator.collapseView(layContent);
+                masterCardExpanded = false;
+            } else {
+                ViewAnimator.expandView(layContent);
+                masterCardExpanded = true;
             }
         });
 
-        tcbPoly.setOnCheckedStateChangeListener(new MultiStateTouchCheckBox.OnCheckedStateChangeListener() {
-            @Override
-            public void onCheckedStateChanged(View buttonView, final boolean isChecked, MultiStateTouchCheckBox.CheckedState state) {
-                updatePolyOptions(PolygonDrawOptions.DrawCode.VISIBLE, isChecked);
-            }
-        });
+        tcbPoly.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolyOptions(PolygonDrawOptions.DrawCode.VISIBLE, isChecked));
 
-        tcbAdjBnd.setOnCheckedStateChangeListener(new MultiStateTouchCheckBox.OnCheckedStateChangeListener() {
-            @Override
-            public void onCheckedStateChanged(View buttonView, boolean isChecked, MultiStateTouchCheckBox.CheckedState state) {
-                updatePolyOptions(PolygonDrawOptions.DrawCode.ADJBND, isChecked);
-            }
-        });
+        tcbAdjBnd.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolyOptions(PolygonDrawOptions.DrawCode.ADJBND, isChecked));
 
-        tcbAdjNav.setOnCheckedStateChangeListener(new MultiStateTouchCheckBox.OnCheckedStateChangeListener() {
-            @Override
-            public void onCheckedStateChanged(View buttonView, boolean isChecked, MultiStateTouchCheckBox.CheckedState state) {
-                updatePolyOptions(PolygonDrawOptions.DrawCode.ADJNAV, isChecked);
-            }
-        });
+        tcbAdjNav.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolyOptions(PolygonDrawOptions.DrawCode.ADJNAV, isChecked));
 
-        tcbUnAdjBnd.setOnCheckedStateChangeListener(new MultiStateTouchCheckBox.OnCheckedStateChangeListener() {
-            @Override
-            public void onCheckedStateChanged(View buttonView, boolean isChecked, MultiStateTouchCheckBox.CheckedState state) {
-                updatePolyOptions(PolygonDrawOptions.DrawCode.UNADJBND, isChecked);
-            }
-        });
+        tcbUnAdjBnd.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolyOptions(PolygonDrawOptions.DrawCode.UNADJBND, isChecked));
 
-        tcbUnAdjNav.setOnCheckedStateChangeListener(new MultiStateTouchCheckBox.OnCheckedStateChangeListener() {
-            @Override
-            public void onCheckedStateChanged(View buttonView, boolean isChecked, MultiStateTouchCheckBox.CheckedState state) {
-                updatePolyOptions(PolygonDrawOptions.DrawCode.UNADJNAV, isChecked);
-            }
-        });
+        tcbUnAdjNav.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolyOptions(PolygonDrawOptions.DrawCode.UNADJNAV, isChecked));
 
-        tcbAdjBndPts.setOnCheckedStateChangeListener(new MultiStateTouchCheckBox.OnCheckedStateChangeListener() {
-            @Override
-            public void onCheckedStateChanged(View buttonView, boolean isChecked, MultiStateTouchCheckBox.CheckedState state) {
-                updatePolyOptions(PolygonDrawOptions.DrawCode.ADJBNDPTS, isChecked);
-            }
-        });
+        tcbAdjBndPts.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolyOptions(PolygonDrawOptions.DrawCode.ADJBNDPTS, isChecked));
 
-        tcbAdjNavPts.setOnCheckedStateChangeListener(new MultiStateTouchCheckBox.OnCheckedStateChangeListener() {
-            @Override
-            public void onCheckedStateChanged(View buttonView, boolean isChecked, MultiStateTouchCheckBox.CheckedState state) {
-                updatePolyOptions(PolygonDrawOptions.DrawCode.ADJNAVPTS, isChecked);
-            }
-        });
+        tcbAdjNavPts.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolyOptions(PolygonDrawOptions.DrawCode.ADJNAVPTS, isChecked));
 
-        tcbUnAdjBndPts.setOnCheckedStateChangeListener(new MultiStateTouchCheckBox.OnCheckedStateChangeListener() {
-            @Override
-            public void onCheckedStateChanged(View buttonView, boolean isChecked, MultiStateTouchCheckBox.CheckedState state) {
-                updatePolyOptions(PolygonDrawOptions.DrawCode.UNADJBNDPTS, isChecked);
-            }
-        });
+        tcbUnAdjBndPts.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolyOptions(PolygonDrawOptions.DrawCode.UNADJBNDPTS, isChecked));
 
-        tcbUnAdjNavPts.setOnCheckedStateChangeListener(new MultiStateTouchCheckBox.OnCheckedStateChangeListener() {
-            @Override
-            public void onCheckedStateChanged(View buttonView, boolean isChecked, MultiStateTouchCheckBox.CheckedState state) {
-                updatePolyOptions(PolygonDrawOptions.DrawCode.UNADJNAVPTS, isChecked);
-            }
-        });
+        tcbUnAdjNavPts.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolyOptions(PolygonDrawOptions.DrawCode.UNADJNAVPTS, isChecked));
 
-        tcbAdjMiscPts.setOnCheckedStateChangeListener(new MultiStateTouchCheckBox.OnCheckedStateChangeListener() {
-            @Override
-            public void onCheckedStateChanged(View buttonView, boolean isChecked, MultiStateTouchCheckBox.CheckedState state) {
-                updatePolyOptions(PolygonDrawOptions.DrawCode.ADJMISCPTS, isChecked);
-            }
-        });
+        tcbAdjMiscPts.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolyOptions(PolygonDrawOptions.DrawCode.ADJMISCPTS, isChecked));
 
-        tcbUnAdjMiscPts.setOnCheckedStateChangeListener(new MultiStateTouchCheckBox.OnCheckedStateChangeListener() {
-            @Override
-            public void onCheckedStateChanged(View buttonView, boolean isChecked, MultiStateTouchCheckBox.CheckedState state) {
-                updatePolyOptions(PolygonDrawOptions.DrawCode.UNADJMISCPTS, isChecked);
-            }
-        });
+        tcbUnAdjMiscPts.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolyOptions(PolygonDrawOptions.DrawCode.UNADJMISCPTS, isChecked));
 
-        tcbWayPts.setOnCheckedStateChangeListener(new MultiStateTouchCheckBox.OnCheckedStateChangeListener() {
-            @Override
-            public void onCheckedStateChanged(View buttonView, boolean isChecked, MultiStateTouchCheckBox.CheckedState state) {
-                updatePolyOptions(PolygonDrawOptions.DrawCode.WAYPTS, isChecked);
-            }
-        });
+        tcbWayPts.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolyOptions(PolygonDrawOptions.DrawCode.WAYPTS, isChecked));
     }
 
     //change master
@@ -1510,14 +1403,11 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
                         visd[xf] = vis;
                         invisd[xf] = invis;
 
-                        postDelayHandlers[xf].post(new Runnable() {
-                            @Override
-                            public void run() {
-                                setMasterPolyCheckBox(mscb, visd[xf], invisd[xf], codef);
-                                dpc[xf] = 0;
-                                visd[xf] = false;
-                                invisd[xf] = false;
-                            }
+                        postDelayHandlers[xf].post(() -> {
+                            setMasterPolyCheckBox(mscb, visd[xf], invisd[xf], codef);
+                            dpc[xf] = 0;
+                            visd[xf] = false;
+                            invisd[xf] = false;
                         });
                     } else {
                         setMasterPolyCheckBox(mscb, visd[xf], invisd[xf], codef);
@@ -1599,14 +1489,11 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
             dialogBuilder.setTitle("From Polygon");
 
 
-            dialogBuilder.setItems(polyStrs, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    fromPoly = polys.get(which);
-                    fromPoint = null;
-                    btnFromPoly.setText(fromPoly.getName());
-                    btnFromPoint.setText(R.string.str_point);
-                }
+            dialogBuilder.setItems(polyStrs, (dialog, which) -> {
+                fromPoly = polys.get(which);
+                fromPoint = null;
+                btnFromPoly.setText(fromPoly.getName());
+                btnFromPoint.setText(R.string.str_point);
             });
 
             dialogBuilder.setNegativeButton(R.string.str_cancel, null);
@@ -1645,16 +1532,13 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
 
                 final AlertDialog dialog = dialogBuilder.create();
 
-                listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                        fromPoint = pda.getItem(i);
-                        if (fromPoint != null) {
-                            btnFromPoint.setText(StringEx.toString(fromPoint.getPID()));
-                        }
-                        calculateDir();
-                        dialog.dismiss();
+                listView.setOnItemClickListener((adapterView, view1, i, l) -> {
+                    fromPoint = pda.getItem(i);
+                    if (fromPoint != null) {
+                        btnFromPoint.setText(StringEx.toString(fromPoint.getPID()));
                     }
+                    calculateDir();
+                    dialog.dismiss();
                 });
 
                 dialog.show();
@@ -1682,14 +1566,11 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
 
             dialogBuilder.setTitle("To Polygon");
 
-            dialogBuilder.setItems(polyStrs, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    toPoly = polys.get(which);
-                    toPoint = null;
-                    btnToPoly.setText(toPoly.getName());
-                    btnToPoint.setText(R.string.str_point);
-                }
+            dialogBuilder.setItems(polyStrs, (dialog, which) -> {
+                toPoly = polys.get(which);
+                toPoint = null;
+                btnToPoly.setText(toPoly.getName());
+                btnToPoint.setText(R.string.str_point);
             });
 
             dialogBuilder.setNegativeButton(R.string.str_cancel, null);
@@ -1730,24 +1611,21 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
 
             final AlertDialog dialog = dialogBuilder.create();
 
-            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                    toPoint = pda.getItem(i);
-                    if (toPoint != null) {
-                        btnToPoint.setText(StringEx.toString(toPoint.getPID()));
-                        tvNavPid.setText(StringEx.toString(toPoint.getPID()));
-                        tvNavPoly.setText(toPoint.getPolyName());
-                    }
-
-                    calculateDir();
-
-                    hideSelectedMarkerInfo();
-
-                    targetLocation = TtUtils.Points.getPointLocation(toPoint, false, getMetadata());
-
-                    dialog.dismiss();
+            listView.setOnItemClickListener((adapterView, view1, i, l) -> {
+                toPoint = pda.getItem(i);
+                if (toPoint != null) {
+                    btnToPoint.setText(StringEx.toString(toPoint.getPID()));
+                    tvNavPid.setText(StringEx.toString(toPoint.getPID()));
+                    tvNavPoly.setText(toPoint.getPolyName());
                 }
+
+                calculateDir();
+
+                hideSelectedMarkerInfo();
+
+                targetLocation = TtUtils.Points.getPointLocation(toPoint, false, getMetadata());
+
+                dialog.dismiss();
             });
 
             dialog.show();

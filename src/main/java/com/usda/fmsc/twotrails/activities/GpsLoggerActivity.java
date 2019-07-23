@@ -90,21 +90,13 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
             alert.setTitle("GPS Logging");
             alert.setMessage("The GPS is currently logging data to a file. Would you like to keep logging in the background?");
 
-            alert.setPositiveButton("Continue", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    activity.onBackPressed();
-                }
-            });
+            alert.setPositiveButton("Continue", (dialogInterface, i) -> activity.onBackPressed());
 
-            alert.setNegativeButton("Stop", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    if (!getTtAppCtx().getDeviceSettings().isGpsAlwaysOn()) {
-                        binder.stopGps();
-                    }
-                    activity.onBackPressed();
+            alert.setNegativeButton("Stop", (dialogInterface, i) -> {
+                if (!getTtAppCtx().getDeviceSettings().isGpsAlwaysOn()) {
+                    binder.stopGps();
                 }
+                activity.onBackPressed();
             });
 
             alert.setNeutralButton(R.string.str_cancel, null);
@@ -125,27 +117,24 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
         miCheckLtf = menu.findItem(R.id.loggerMenuLtf);
         miCheckLtf.setCheckable(true);
 
-        miCheckLtf.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                if (item.isChecked()) {
-                    item.setChecked(false);
+        miCheckLtf.setOnMenuItemClickListener(item -> {
+            if (item.isChecked()) {
+                item.setChecked(false);
+
+                if (logging) {
+                    getTtAppCtx().getGps().stopLogging();
+                    logging = false;
+                }
+            } else {
+                if (AndroidUtils.App.requestStoragePermission(GpsLoggerActivity.this, Consts.Codes.Requests.OPEN_FILE)) {
+                    item.setChecked(true);
 
                     if (logging) {
-                        getTtAppCtx().getGps().stopLogging();
-                        logging = false;
-                    }
-                } else {
-                    if (AndroidUtils.App.requestStoragePermission(GpsLoggerActivity.this, Consts.Codes.Requests.OPEN_FILE)) {
-                        item.setChecked(true);
-
-                        if (logging) {
-                            getTtAppCtx().getGps().startLogging(TtUtils.getGpsLogFilePath());
-                        }
+                        getTtAppCtx().getGps().startLogging(TtUtils.getGpsLogFilePath());
                     }
                 }
-                return true;
             }
+            return true;
         });
 
         return true;
@@ -218,12 +207,7 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
 
         dialog.setMessage("The GPS is currently not configured. Would you like to configure it now?");
 
-        dialog.setPositiveButton("Configure", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                startActivityForResult(new Intent(getBaseContext(), SettingsActivity.class).putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.GPS_SETTINGS_PAGE), Consts.Codes.Activites.SETTINGS);
-            }
-        });
+        dialog.setPositiveButton("Configure", (dialog1, which) -> startActivityForResult(new Intent(getBaseContext(), SettingsActivity.class).putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.GPS_SETTINGS_PAGE), Consts.Codes.Activites.SETTINGS));
 
         dialog.setNeutralButton(R.string.str_cancel, null);
 

@@ -1,13 +1,9 @@
 package com.usda.fmsc.twotrails.dialogs;
 
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.fragment.app.DialogFragment;
-import androidx.appcompat.app.AlertDialog;
 import android.text.Editable;
 import android.util.Patterns;
 import android.view.LayoutInflater;
@@ -16,7 +12,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 
-//import com.nononsenseapps.filepicker.FilePickerActivity;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.DialogFragment;
+
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.listeners.SimpleTextWatcher;
 import com.usda.fmsc.android.utilities.PostDelayHandler;
@@ -31,6 +30,8 @@ import com.usda.fmsc.utilities.FileUtils;
 import com.usda.fmsc.utilities.StringEx;
 
 import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
+
+//import com.nononsenseapps.filepicker.FilePickerActivity;
 
 public class NewArcMapDialog extends DialogFragment {
     private static final String CREATE_MODE = "CreateMode";
@@ -135,35 +136,32 @@ public class NewArcMapDialog extends DialogFragment {
 
         db.setTitle("Create Map")
                 .setView(view)
-                .setPositiveButton(R.string.str_create, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        if (aLayer == null) {
-                            aLayer = TwoTrailsApp.getInstance().getArcGISTools().createMapLayer(
-                                    txtName.getText().toString(),
-                                    txtDesc.getText().toString(),
-                                    txtLoc.getText().toString(),
-                                    mode == CreateMode.OFFLINE_FROM_FILE ? null : txtUri.getText().toString(),
-                                    mode == CreateMode.OFFLINE_FROM_FILE ? txtUri.getText().toString() : null,
-                                    mode == CreateMode.NEW_ONLINE);
-                        } else {
-                            aLayer.setName(txtName.getText().toString());
-                            aLayer.setDescription(txtDesc.getText().toString());
-                            aLayer.setLocation(txtLoc.getText().toString());
-                            aLayer.setUrl(txtUri.getText().toString());
-                        }
+                .setPositiveButton(R.string.str_create, (dialog, which) -> {
+                    if (aLayer == null) {
+                        aLayer = TwoTrailsApp.getInstance().getArcGISTools().createMapLayer(
+                                txtName.getText().toString(),
+                                txtDesc.getText().toString(),
+                                txtLoc.getText().toString(),
+                                mode == CreateMode.OFFLINE_FROM_FILE ? null : txtUri.getText().toString(),
+                                mode == CreateMode.OFFLINE_FROM_FILE ? txtUri.getText().toString() : null,
+                                mode == CreateMode.NEW_ONLINE);
+                    } else {
+                        aLayer.setName(txtName.getText().toString());
+                        aLayer.setDescription(txtDesc.getText().toString());
+                        aLayer.setLocation(txtLoc.getText().toString());
+                        aLayer.setUrl(txtUri.getText().toString());
+                    }
 
-                        if (mode == CreateMode.NEW_ONLINE || mode == CreateMode.OFFLINE_FROM_FILE) {
-                            TwoTrailsApp.getInstance().getArcGISTools().addMapLayer(aLayer);
-                        } else {
-                            Intent intent = new Intent(getContext(), GetMapExtentsActivity.class);
+                    if (mode == CreateMode.NEW_ONLINE || mode == CreateMode.OFFLINE_FROM_FILE) {
+                        TwoTrailsApp.getInstance().getArcGISTools().addMapLayer(aLayer);
+                    } else {
+                        Intent intent = new Intent(getContext(), GetMapExtentsActivity.class);
 
-                            Bundle bundle = new Bundle();
-                            bundle.putParcelable(GetMapExtentsActivity.MAP_LAYER, aLayer);
-                            intent.putExtras(bundle);
+                        Bundle bundle = new Bundle();
+                        bundle.putParcelable(GetMapExtentsActivity.MAP_LAYER, aLayer);
+                        intent.putExtras(bundle);
 
-                            startActivity(intent);
-                        }
+                        startActivity(intent);
                     }
                 })
                 .setNeutralButton(R.string.str_cancel, null);
@@ -199,25 +197,7 @@ public class NewArcMapDialog extends DialogFragment {
             Button btnNeg = d.getButton(Dialog.BUTTON_NEGATIVE);
 
             if (btnNeg != null) {
-                btnNeg.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-//                        Intent i = new Intent(getActivity(), FilePickerActivity.class);
-//
-//                        i.putExtra(FilePickerActivity.EXTRA_ALLOW_MULTIPLE, false);
-//                        i.putExtra(FilePickerActivity.EXTRA_ALLOW_CREATE_DIR, false);
-//                        i.putExtra(FilePickerActivity.EXTRA_MODE, FilePickerActivity.MODE_FILE_AND_DIR);
-//
-//                        i.putExtra(FilePickerActivity.EXTRA_START_PATH, Environment.getExternalStorageDirectory().getPath());
-//
-//                        startActivityForResult(i, Consts.Codes.Dialogs.REQUEST_FILE);
-
-
-                        AndroidUtils.App.openFileIntentFromFragment(NewArcMapDialog.this, Consts.FileExtensions.TPK, Consts.Codes.Dialogs.REQUEST_FILE);
-
-
-                    }
-                });
+                btnNeg.setOnClickListener(v -> AndroidUtils.App.openFileIntentFromFragment(NewArcMapDialog.this, Consts.FileExtensions.TPK, Consts.Codes.Dialogs.REQUEST_FILE));
             }
             validate();
         }
@@ -246,54 +226,43 @@ public class NewArcMapDialog extends DialogFragment {
 
             final String fUrl = url;
 
-            new Thread(new Runnable() {
+            new Thread(() -> TwoTrailsApp.getInstance().getArcGISTools().getLayerFromUrl(fUrl, getContext(), new ArcGISTools.IGetArcMapLayerListener() {
                 @Override
-                public void run() {
-                    TwoTrailsApp.getInstance().getArcGISTools().getLayerFromUrl(fUrl, getContext(), new ArcGISTools.IGetArcMapLayerListener() {
-                        @Override
-                        public void onComplete(ArcGisMapLayer layer) {
-                            if (txtDesc.getText().length() < 1 && layer.getDescription().length() > 0) {
-                                txtDesc.setText(layer.getDescription());
-                            }
+                public void onComplete(ArcGisMapLayer layer) {
+                    if (txtDesc.getText().length() < 1 && layer.getDescription().length() > 0) {
+                        txtDesc.setText(layer.getDescription());
+                    }
 
-                            if (mode == CreateMode.OFFLINE_FROM_ONLINE_URL || mode == CreateMode.OFFLINE_FROM_OFFLINE_URL) {
-                                txtUri.removeTextChangedListener(stwUri);
-                                txtUri.setText(layer.getUrl());
-                                txtUri.addTextChangedListener(stwUri);
-                            }
+                    if (mode == CreateMode.OFFLINE_FROM_ONLINE_URL || mode == CreateMode.OFFLINE_FROM_OFFLINE_URL) {
+                        txtUri.removeTextChangedListener(stwUri);
+                        txtUri.setText(layer.getUrl());
+                        txtUri.addTextChangedListener(stwUri);
+                    }
 
-                            aLayer = layer;
+                    aLayer = layer;
 
-                            validUri = true;
+                    validUri = true;
 
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    chkmkavUrlStatus.reset();
+                    getActivity().runOnUiThread(() -> {
+                        chkmkavUrlStatus.reset();
 
-                                    progressBar.setVisibility(View.INVISIBLE);
-                                    chkmkavUrlStatus.setVisibility(View.VISIBLE);
+                        progressBar.setVisibility(View.INVISIBLE);
+                        chkmkavUrlStatus.setVisibility(View.VISIBLE);
 
-                                    chkmkavUrlStatus.start();
+                        chkmkavUrlStatus.start();
 
-                                    validate();
-                                }
-                            });
-                        }
-
-                        @Override
-                        public void onBadUrl(String error) {
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    progressBar.setVisibility(View.INVISIBLE);
-                                    ivBadUri.setVisibility(View.VISIBLE);
-                                }
-                            });
-                        }
+                        validate();
                     });
                 }
-            }).start();
+
+                @Override
+                public void onBadUrl(String error) {
+                    getActivity().runOnUiThread(() -> {
+                        progressBar.setVisibility(View.INVISIBLE);
+                        ivBadUri.setVisibility(View.VISIBLE);
+                    });
+                }
+            })).start();
         } else {
             progressBar.setVisibility(View.INVISIBLE);
             ivBadUri.setVisibility(View.VISIBLE);
@@ -329,14 +298,11 @@ public class NewArcMapDialog extends DialogFragment {
             if (s.length() > 10) {
                 final String uri = s.toString();
 
-                twDelayHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (mode == CreateMode.OFFLINE_FROM_FILE) {
-                            validateFile(uri);
-                        } else {
-                            validateUrl(uri);
-                        }
+                twDelayHandler.post(() -> {
+                    if (mode == CreateMode.OFFLINE_FROM_FILE) {
+                        validateFile(uri);
+                    } else {
+                        validateUrl(uri);
                     }
                 });
             } else {

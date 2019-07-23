@@ -13,7 +13,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
@@ -101,12 +100,9 @@ public class PlotGridActivity extends CustomToolbarActivity {
         }
 
         private void hideProgress() {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    layControls.setEnabled(true);
-                    progressBar.setVisibility(View.GONE);
-                }
+            runOnUiThread(() -> {
+                layControls.setEnabled(true);
+                progressBar.setVisibility(View.GONE);
             });
         }
     };
@@ -169,12 +165,9 @@ public class PlotGridActivity extends CustomToolbarActivity {
             spnSampleType.setAdapter(sampleTypeAdapter);
 
 
-            chkSubSample.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    spnSampleType.setEnabled(isChecked);
-                    txtSubSample.setEnabled(isChecked);
-                }
+            chkSubSample.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                spnSampleType.setEnabled(isChecked);
+                txtSubSample.setEnabled(isChecked);
             });
 
             spnSampleType.setEnabled(false);
@@ -220,7 +213,7 @@ public class PlotGridActivity extends CustomToolbarActivity {
                 }
             });
 
-            ArrayAdapter<CharSequence> distAdapter = new ArrayAdapter<CharSequence>(this, android.R.layout.simple_spinner_item, EnumEx.getNames(Dist.class));
+            ArrayAdapter<CharSequence> distAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, EnumEx.getNames(Dist.class));
 
             metadata = getTtAppCtx().getDAL().getMetadataMap();
 
@@ -261,12 +254,9 @@ public class PlotGridActivity extends CustomToolbarActivity {
             AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 
             dialog.setMessage("Plots are currently being generated. Do you want to cancel the plots?");
-            dialog.setPositiveButton(R.string.str_yes, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    generator.cancel(true);
-                    activity.onBackPressed();
-                }
+            dialog.setPositiveButton(R.string.str_yes, (dialog1, which) -> {
+                generator.cancel(true);
+                activity.onBackPressed();
             })
             .setNegativeButton(R.string.str_no, null);
 
@@ -320,26 +310,11 @@ public class PlotGridActivity extends CustomToolbarActivity {
 
                     dialog.setMessage(String.format("The polygon name '%s' already exists. Would you like to rename or overwrite it?", polyName));
 
-                    dialog.setPositiveButton("Overwrite", new DontAskAgainDialog.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i, Object value) {
-                                overwritePoly(poly);
-                        }
-                    }, 2);
+                    dialog.setPositiveButton("Overwrite", (dialogInterface, i, value) -> overwritePoly(poly), 2);
 
-                    dialog.setNeutralButton("Rename", new DontAskAgainDialog.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i, Object value) {
-                                renamePlot(polyName);
-                        }
-                    }, 1);
+                    dialog.setNeutralButton("Rename", (dialogInterface, i, value) -> renamePlot(polyName), 1);
 
-                    dialog.setNegativeButton("Cancel", null, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            generating = false;
-                        }
-                    });
+                    dialog.setNegativeButton("Cancel", null, (DialogInterface.OnClickListener) (dialog1, which) -> generating = false);
 
                     dialog.show();
                 } else {
@@ -392,55 +367,36 @@ public class PlotGridActivity extends CustomToolbarActivity {
 
 
     private void renamePlot(final String oldName) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                InputDialog dialog = new InputDialog(getBaseContext());
+        new Thread(() -> {
+            InputDialog dialog = new InputDialog(getBaseContext());
 
-                dialog.setMessage(String.format("Rename PlotGrid %s.", oldName));
+            dialog.setMessage(String.format("Rename PlotGrid %s.", oldName));
 
-                dialog.setPositiveButton(R.string.str_rename, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        generatePoints(((InputDialog) dialog).getText());
-                    }
-                });
+            dialog.setPositiveButton(R.string.str_rename, (dialog1, which) -> generatePoints(((InputDialog) dialog1).getText()));
 
-                dialog.setNeutralButton(R.string.str_cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        generating = false;
-                    }
-                });
-            }
+            dialog.setNeutralButton(R.string.str_cancel, (dialog12, which) -> generating = false);
         }).start();
 
     }
 
     private void overwritePoly(final TtPolygon polygon) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                layControls.setEnabled(false);
-                progressBar.setVisibility(View.VISIBLE);
-            }
+        runOnUiThread(() -> {
+            layControls.setEnabled(false);
+            progressBar.setVisibility(View.VISIBLE);
         });
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                allPolys.remove(polygon);
-                polygons.remove(polygon);
-                polyPoints.remove(polygon.getCN());
+        new Thread(() -> {
+            allPolys.remove(polygon);
+            polygons.remove(polygon);
+            polyPoints.remove(polygon.getCN());
 
-                try {
-                    getTtAppCtx().getDAL().deletePolygon(polygon.getCN());
-                    getTtAppCtx().getDAL().deletePointsInPolygon(polygon.getCN());
-                    generatePoints(polygon.getName());
-                } catch (Exception ex) {
-                    getTtAppCtx().getReport().writeError(ex.getMessage(), "PlotGridActivity:overwritePoly");
-                    Toast.makeText(getBaseContext(), "Overwrite polygon failed.", Toast.LENGTH_SHORT).show();
-                }
+            try {
+                getTtAppCtx().getDAL().deletePolygon(polygon.getCN());
+                getTtAppCtx().getDAL().deletePointsInPolygon(polygon.getCN());
+                generatePoints(polygon.getName());
+            } catch (Exception ex) {
+                getTtAppCtx().getReport().writeError(ex.getMessage(), "PlotGridActivity:overwritePoly");
+                Toast.makeText(getBaseContext(), "Overwrite polygon failed.", Toast.LENGTH_SHORT).show();
             }
         }).start();
     }

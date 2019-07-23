@@ -33,23 +33,23 @@ import java.util.Map;
 public class ImportTextFragment extends BaseImportFragment {
     private static final String FILENAME = "filename";
 
-    SwitchCompat swtAdvanced;
+    private SwitchCompat swtAdvanced;
 
-    TableRow rowCN, rowOp, rowIndex, rowPID, rowTime, rowPoly, rowGroup,
+    private TableRow rowCN, rowOp, rowIndex, rowPID, rowTime, rowPoly, rowGroup,
             rowCmt, rowBnd, rowX, rowY, rowZ, rowManAcc,
             rowLat, rowLon, rowElev, rowRMSEr, rowFwdAz, rowBkAz, rowSlpDist,
             rowSlpDistType, rowSlpAng, rowSlpAngType, rowParentCN;//, rowMeta, rowAcc
 
-    Spinner spnCN, spnOp, spnIndex, spnPID, spnTime, spnPoly, spnGroup,
+    private Spinner spnCN, spnOp, spnIndex, spnPID, spnTime, spnPoly, spnGroup,
             spnCmt, spnBnd, spnX, spnY, spnZ, spnManAcc,
             spnLat, spnLon, spnElev, spnRMSEr, spnFwdAz, spnBkAz, spnSlpDist,
             spnSlpDistType, spnSlpAng, spnSlpAngType, spnParentCN;//, spnMeta, spnAcc
     
-    View divOp, divCN, divManAcc, divLat, divLon, divElev, divRMSEr, divFwdAz,
+    private View divOp, divCN, divManAcc, divLat, divLon, divElev, divRMSEr, divFwdAz,
             divBkAz, divSlpDist, divSlpDistType, divSlpAng, divSlpAngType, divParentCN;
 
 
-    TextImportTask task;
+    private TextImportTask task;
 
     private String[] _Columns;
     private String _FileName;
@@ -209,69 +209,66 @@ public class ImportTextFragment extends BaseImportFragment {
         }
 
 
-        swtAdvanced.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                advImport = isChecked;
+        swtAdvanced.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            advImport = isChecked;
 
-                int visibility = advImport ? View.VISIBLE : View.GONE;
+            int visibility = advImport ? View.VISIBLE : View.GONE;
 
-                rowCN.setVisibility(visibility);
-                rowOp.setVisibility(visibility);
-                //rowIndex.setVisibility(visibility);
-                //rowPID.setVisibility(visibility);
-                //rowTime.setVisibility(visibility);
-                //rowPoly.setVisibility(visibility);
-                //rowGroup.setVisibility(visibility);
-                //rowCmt.setVisibility(visibility);
-                //rowMeta.setVisibility(visibility);
-                //rowBnd.setVisibility(visibility);
-                //rowX.setVisibility(visibility);
-                //rowY.setVisibility(visibility);
-                //rowZ.setVisibility(visibility);
-                //rowAcc.setVisibility(visibility);
-                rowManAcc.setVisibility(visibility);
-                rowLat.setVisibility(visibility);
-                rowLon.setVisibility(visibility);
-                rowElev.setVisibility(visibility);
-                rowRMSEr.setVisibility(visibility);
-                rowFwdAz.setVisibility(visibility);
-                rowBkAz.setVisibility(visibility);
-                rowSlpDist.setVisibility(visibility);
-                rowSlpDistType.setVisibility(visibility);
-                rowSlpAng.setVisibility(visibility);
-                rowSlpAngType.setVisibility(visibility);
-                rowParentCN.setVisibility(visibility);
+            rowCN.setVisibility(visibility);
+            rowOp.setVisibility(visibility);
+            //rowIndex.setVisibility(visibility);
+            //rowPID.setVisibility(visibility);
+            //rowTime.setVisibility(visibility);
+            //rowPoly.setVisibility(visibility);
+            //rowGroup.setVisibility(visibility);
+            //rowCmt.setVisibility(visibility);
+            //rowMeta.setVisibility(visibility);
+            //rowBnd.setVisibility(visibility);
+            //rowX.setVisibility(visibility);
+            //rowY.setVisibility(visibility);
+            //rowZ.setVisibility(visibility);
+            //rowAcc.setVisibility(visibility);
+            rowManAcc.setVisibility(visibility);
+            rowLat.setVisibility(visibility);
+            rowLon.setVisibility(visibility);
+            rowElev.setVisibility(visibility);
+            rowRMSEr.setVisibility(visibility);
+            rowFwdAz.setVisibility(visibility);
+            rowBkAz.setVisibility(visibility);
+            rowSlpDist.setVisibility(visibility);
+            rowSlpDistType.setVisibility(visibility);
+            rowSlpAng.setVisibility(visibility);
+            rowSlpAngType.setVisibility(visibility);
+            rowParentCN.setVisibility(visibility);
 
-                divCN.setVisibility(visibility);
-                divOp.setVisibility(visibility);
-                //divIndex.setVisibility(visibility);
-                //divPID.setVisibility(visibility);
-                //divTime.setVisibility(visibility);
-                //divPoly.setVisibility(visibility);
-                //divGroup.setVisibility(visibility);
-                //divCmt.setVisibility(visibility);
-                //divMeta.setVisibility(visibility);
-                //divBnd.setVisibility(visibility);
-                //divX.setVisibility(visibility);
-                //divY.setVisibility(visibility);
-                //divZ.setVisibility(visibility);
-                //divAcc.setVisibility(visibility);
-                divManAcc.setVisibility(visibility);
-                divLat.setVisibility(visibility);
-                divLon.setVisibility(visibility);
-                divElev.setVisibility(visibility);
-                divRMSEr.setVisibility(visibility);
-                divFwdAz.setVisibility(visibility);
-                divBkAz.setVisibility(visibility);
-                divSlpDist.setVisibility(visibility);
-                divSlpDistType.setVisibility(visibility);
-                divSlpAng.setVisibility(visibility);
-                divSlpAngType.setVisibility(visibility);
-                divParentCN.setVisibility(visibility);
+            divCN.setVisibility(visibility);
+            divOp.setVisibility(visibility);
+            //divIndex.setVisibility(visibility);
+            //divPID.setVisibility(visibility);
+            //divTime.setVisibility(visibility);
+            //divPoly.setVisibility(visibility);
+            //divGroup.setVisibility(visibility);
+            //divCmt.setVisibility(visibility);
+            //divMeta.setVisibility(visibility);
+            //divBnd.setVisibility(visibility);
+            //divX.setVisibility(visibility);
+            //divY.setVisibility(visibility);
+            //divZ.setVisibility(visibility);
+            //divAcc.setVisibility(visibility);
+            divManAcc.setVisibility(visibility);
+            divLat.setVisibility(visibility);
+            divLon.setVisibility(visibility);
+            divElev.setVisibility(visibility);
+            divRMSEr.setVisibility(visibility);
+            divFwdAz.setVisibility(visibility);
+            divBkAz.setVisibility(visibility);
+            divSlpDist.setVisibility(visibility);
+            divSlpDistType.setVisibility(visibility);
+            divSlpAng.setVisibility(visibility);
+            divSlpAngType.setVisibility(visibility);
+            divParentCN.setVisibility(visibility);
 
-                readyToImport(validate());
-            }
+            readyToImport(validate());
         });
 
 
@@ -548,12 +545,9 @@ public class ImportTextFragment extends BaseImportFragment {
     protected void runImportTask(DataAccessLayer dal) {
         task = new TextImportTask();
 
-        task.setListener(new Import.ImportTaskListener() {
-            @Override
-            public void onTaskFinish(Import.ImportResult result) {
-                onTaskComplete(result.getCode());
-                task = null;
-            }
+        task.setListener(result -> {
+            onTaskComplete(result.getCode());
+            task = null;
         });
 
         Map<Import.TextFieldType, Integer> columnMap = getColumnsMap(advImport);

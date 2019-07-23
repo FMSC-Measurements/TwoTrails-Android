@@ -429,13 +429,13 @@ public abstract class TtPoint extends TtObject implements Comparable<TtPoint>, C
             return val;
         else
         {
-            val = Integer.valueOf(p1.getIndex()).compareTo(p2.getIndex());
+            val = Integer.compare(p1.getIndex(), p2.getIndex());
 
             if (val != 0)
                 return val;
             else
             {
-                val = Integer.valueOf(p1.getPID()).compareTo(p2.getPID());
+                val = Integer.compare(p1.getPID(), p2.getPID());
 
                 if (val != 0)
                     return val;

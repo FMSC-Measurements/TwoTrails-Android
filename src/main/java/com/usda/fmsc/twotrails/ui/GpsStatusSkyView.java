@@ -194,7 +194,7 @@ public class GpsStatusSkyView extends GpsStatusView implements SensorEventListen
 
         int shortSide = w < h ? w : h;
 
-        center = new PointF(w / 2, h / 2);
+        center = new PointF(w / 2f, h / 2f);
 
         outerCircleRadius = (int)(shortSide * .45);
         innerCircleRadius = (int)(shortSide * .25);
@@ -222,7 +222,7 @@ public class GpsStatusSkyView extends GpsStatusView implements SensorEventListen
     }
 
     private float elevationToRadius(float elev) {
-        return (outerCircleRadius - (bmSatVis.getWidth() / 2)) * (1.0f - (elev / 90.0f));
+        return (outerCircleRadius - (bmSatVis.getWidth() / 2.0f)) * (1.0f - (elev / 90.0f));
     }
 
 
@@ -239,13 +239,13 @@ public class GpsStatusSkyView extends GpsStatusView implements SensorEventListen
         }
 
         if (!compassLock && mGravity != null && mGeomagnetic != null) {
-            float R[] = new float[9];
-            float I[] = new float[9];
+            float[] R = new float[9];
+            float[] I = new float[9];
 
             boolean success = SensorManager.getRotationMatrix(R, I, mGravity, mGeomagnetic);
 
             if (success) {
-                float orientation[] = new float[9];
+                float[] orientation = new float[9];
                 SensorManager.getOrientation(R, orientation);
 
                 float azimuth = Double.valueOf(Math.toDegrees(orientation[0])).floatValue();

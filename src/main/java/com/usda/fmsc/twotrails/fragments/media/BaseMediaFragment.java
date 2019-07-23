@@ -82,14 +82,11 @@ public abstract class BaseMediaFragment extends Fragment implements PointMediaLi
         AndroidUtils.UI.removeSelectionOnUnfocus(txtCmt);
         //endregion
 
-        tvFile.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                Clipboard.copyText(getContext(), _Media.getFilePath());
-                Toast.makeText(getContext(), "File Path Copied", Toast.LENGTH_LONG).show();
-                AndroidUtils.Device.vibrate(getContext(), 100);
-                return false;
-            }
+        tvFile.setOnLongClickListener(v -> {
+            Clipboard.copyText(getContext(), _Media.getFilePath());
+            Toast.makeText(getContext(), "File Path Copied", Toast.LENGTH_LONG).show();
+            AndroidUtils.Device.vibrate(getContext(), 100);
+            return false;
         });
 
         return view;

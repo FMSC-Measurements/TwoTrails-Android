@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public class CheckNmeaDialog extends DialogFragment implements GpsService.Listener {
-    private boolean postAllStrings;
+    private boolean postAllStrings = false;
 
     private GpsService.GpsBinder binder;
     private ListView lvNmea;
@@ -93,38 +93,35 @@ public class CheckNmeaDialog extends DialogFragment implements GpsService.Listen
         final NmeaIDs.TalkerID tid = NmeaIDs.TalkerID.parse(nmeaString);
         final NmeaIDs.SentenceID sid = NmeaIDs.SentenceID.parse(nmeaString);
 
-        if (lvNmea != null) {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        String tidStr, sidStr;
-                        if (tid == NmeaIDs.TalkerID.Unknown) {
-                            tidStr = String.format("(%s) Unknown", nmeaString.substring(0, nmeaString.indexOf(',')));
-                        } else {
-                            tidStr = String.format("(%s) %s", tid.toStringCode(), tid.toString());
-                        }
-
-                        if (sid == NmeaIDs.SentenceID.Unknown) {
-                            sidStr = nmeaString.substring(2, 5);
-                        } else {
-                            sidStr = sid.toString();
-                        }
-
-                        if (nmeaDetailsMap.containsKey(tidStr)) {
-                            if (nmeaDetailsMap.get(tidStr).addId(sidStr)) {
-                                lvNmea.deferNotifyDataSetChanged();
-                            }
-                        } else {
-                            NmeaDetailsAdapter.NmeaDetails details = new NmeaDetailsAdapter.NmeaDetails(tidStr);
-                            details.addId(sidStr);
-                            nmeaDetails.add(details);
-                            nmeaDetailsMap.put(tidStr, details);
-                            adapter.notifyDataSetChanged();
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
+        if (lvNmea != null && getActivity() != null) {
+            getActivity().runOnUiThread(() -> {
+                try {
+                    String tidStr, sidStr;
+                    if (tid == NmeaIDs.TalkerID.Unknown) {
+                        tidStr = String.format("(%s) Unknown", nmeaString.substring(0, nmeaString.indexOf(',')));
+                    } else {
+                        tidStr = String.format("(%s) %s", tid.toStringCode(), tid.toString());
                     }
+
+                    if (sid == NmeaIDs.SentenceID.Unknown) {
+                        sidStr = nmeaString.substring(2, 5);
+                    } else {
+                        sidStr = sid.toString();
+                    }
+
+                    if (nmeaDetailsMap.containsKey(tidStr)) {
+                        if (nmeaDetailsMap.get(tidStr).addId(sidStr)) {
+                            lvNmea.deferNotifyDataSetChanged();
+                        }
+                    } else {
+                        NmeaDetailsAdapter.NmeaDetails details = new NmeaDetailsAdapter.NmeaDetails(tidStr);
+                        details.addId(sidStr);
+                        nmeaDetails.add(details);
+                        nmeaDetailsMap.put(tidStr, details);
+                        adapter.notifyDataSetChanged();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             });
         }

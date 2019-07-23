@@ -88,15 +88,12 @@ public class Take5PointsEditRvAdapter extends RecyclerViewEx.BaseAdapterEx {
             });
 
             pvh.ibBnd.setImageDrawable(point.isOnBnd() ? dOnBnd : dOffBnd);
-            pvh.ibBnd.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    boolean onBnd = !point.isOnBnd();
+            pvh.ibBnd.setOnClickListener(v -> {
+                boolean onBnd = !point.isOnBnd();
 
-                    pvh.ibBnd.setImageDrawable(onBnd ? dOnBnd : dOffBnd);
-                    point.setOnBnd(onBnd);
-                    activity.updatePoint(point);
-                }
+                pvh.ibBnd.setImageDrawable(onBnd ? dOnBnd : dOffBnd);
+                point.setOnBnd(onBnd);
+                activity.updatePoint(point);
             });
 
             switch (point.getOp()) {

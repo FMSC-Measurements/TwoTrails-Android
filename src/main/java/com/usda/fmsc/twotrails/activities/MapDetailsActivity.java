@@ -1,10 +1,8 @@
 package com.usda.fmsc.twotrails.activities;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.widget.PopupMenu;
 
 import android.view.MenuItem;
 import android.view.View;
@@ -22,7 +20,6 @@ import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
 import com.usda.fmsc.twotrails.utilities.ArcGISTools;
-import com.usda.fmsc.utilities.IListener;
 import com.usda.fmsc.utilities.StringEx;
 
 public class MapDetailsActivity extends CustomToolbarActivity {
@@ -63,23 +60,18 @@ public class MapDetailsActivity extends CustomToolbarActivity {
             ofmb.setItemVisible(R.id.amdMenuUpdatePath, !arcGisMapLayer.isOnline());
             setUpdated(false);
 
-            ofmb.setListener(new PopupMenu.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
+            ofmb.setListener(item -> {
                 switch (item.getItemId()) {
                     case R.id.amdMenuRename: {
                         final InputDialog id = new InputDialog(MapDetailsActivity.this);
 
                         id.setInputText(arcGisMapLayer.getName())
-                        .setPositiveButton(R.string.str_rename, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                String value = id.getText();
+                        .setPositiveButton(R.string.str_rename, (dialog, which) -> {
+                            String value = id.getText();
 
-                                arcGisMapLayer.setName(value);
-                                tvName.setText(value);
-                                setUpdated(true);
-                            }
+                            arcGisMapLayer.setName(value);
+                            tvName.setText(value);
+                            setUpdated(true);
                         })
                         .setNeutralButton(R.string.str_cancel, null)
                         .show();
@@ -104,31 +96,23 @@ public class MapDetailsActivity extends CustomToolbarActivity {
                     case R.id.amdMenuDelete: {
                         new AlertDialog.Builder(MapDetailsActivity.this)
                                 .setMessage("Arc you sure you want to delete this map?")
-                                .setPositiveButton(R.string.str_delete, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        getTtAppCtx().getArcGISTools().deleteMapLayer(MapDetailsActivity.this, arcGisMapLayer.getId(), true, new IListener() {
-                                            @Override
-                                            public void onEventTriggerd(Object o) {
-                                                setUpdated(false);
+                                .setPositiveButton(R.string.str_delete, (dialog, which) ->
+                                        getTtAppCtx().getArcGISTools().deleteMapLayer(MapDetailsActivity.this, arcGisMapLayer.getId(), true, o -> {
+                                            setUpdated(false);
 
-                                                Intent i = new Intent();
-                                                i.putExtra(Consts.Codes.Data.MAP_DATA, arcGisMapLayer);
+                                    Intent i = new Intent();
+                                    i.putExtra(Consts.Codes.Data.MAP_DATA, arcGisMapLayer);
 
-                                                MapDetailsActivity.this.setResult(Consts.Codes.Results.MAP_DELETED, i);
-                                                MapDetailsActivity.this.finish();
-                                            }
-                                        });
-                                    }
-                                })
+                                    MapDetailsActivity.this.setResult(Consts.Codes.Results.MAP_DELETED, i);
+                                    MapDetailsActivity.this.finish();
+                                }))
                                 .setNeutralButton(R.string.str_cancel, null)
                                 .show();
                         break;
                     }
                 }
                 return false;
-                }
-            });
+                });
         }
 
         ElevationTransition.finishTransition(this);
@@ -243,19 +227,13 @@ public class MapDetailsActivity extends CustomToolbarActivity {
             } else {
                 new AlertDialog.Builder(MapDetailsActivity.this)
                         .setMessage(messages[c])
-                        .setPositiveButton(R.string.str_yes, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                overwrites[c] = true;
-                                checkUpdateDetails(c + 1);
-                            }
+                        .setPositiveButton(R.string.str_yes, (dialog, which) -> {
+                            overwrites[c] = true;
+                            checkUpdateDetails(c + 1);
                         })
-                        .setNegativeButton(R.string.str_no, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                overwrites[c] = false;
-                                checkUpdateDetails(c + 1);
-                            }
+                        .setNegativeButton(R.string.str_no, (dialog, which) -> {
+                            overwrites[c] = false;
+                            checkUpdateDetails(c + 1);
                         })
                         .setNeutralButton(R.string.str_cancel, null)
                         .show();

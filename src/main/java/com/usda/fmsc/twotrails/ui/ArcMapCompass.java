@@ -108,7 +108,7 @@ public class ArcMapCompass extends View implements View.OnClickListener {
         if (visible) {
             matrix.reset();
 
-            matrix.postRotate(-this.mAngle, bitmap.getHeight() / 2, bitmap.getWidth() / 2);
+            matrix.postRotate(-this.mAngle, bitmap.getHeight() / 2f, bitmap.getWidth() / 2f);
 
             canvas.drawBitmap(bitmap, matrix, compassPaint);
         }

@@ -26,7 +26,7 @@ public class PositionTimeline implements Parcelable {
 
 
     public PositionTimeline() {
-        this(new ArrayList<FramePosition>());
+        this(new ArrayList<>());
     }
 
     @SuppressWarnings("unchecked")

@@ -100,12 +100,7 @@ public class TwoTrailsApp extends Application {
                 public void gpsStarted() {
                     if (silentConnectToExternalGps && getGps().isExternalGpsUsed()) {
                         silentConnectToExternalGps = false;
-                        _CurrentActivity.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Toast.makeText(_CurrentActivity, "External GPS Connected", Toast.LENGTH_LONG).show();
-                            }
-                        });
+                        _CurrentActivity.runOnUiThread(() -> Toast.makeText(_CurrentActivity, "External GPS Connected", Toast.LENGTH_LONG).show());
                     }
                 }
 
@@ -313,12 +308,7 @@ public class TwoTrailsApp extends Application {
                 if (!getGps().isGpsRunning() && getDeviceSettings().isGpsConfigured()) {
                     if (device.getAddress().equals(getDeviceSettings().getGpsDeviceID())) {
                         silentConnectToExternalGps = true;
-                        new Handler().postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                getGps().startGps();
-                            }
-                        }, 1000);
+                        new Handler().postDelayed(() -> getGps().startGps(), 1000);
                     }
                 }
             } //else if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action)) {
@@ -426,35 +416,27 @@ public class TwoTrailsApp extends Application {
                     adapter.startDiscovery();
                     Log.d(Consts.LOG_TAG, "Scanning for BT devices.");
 
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            adapter.cancelDiscovery();
-                            Log.d(Consts.LOG_TAG, "Stopped scan for BT devices.");
+                    new Handler().postDelayed(() -> {
+                        adapter.cancelDiscovery();
+                        Log.d(Consts.LOG_TAG, "Stopped scan for BT devices.");
 
-                            if (!silentConnectToExternalGps && !getGps().isGpsRunning() && getDeviceSettings().isGpsConfigured()) {
-                                for (BluetoothDevice device : adapter.getBondedDevices()) {
-                                    if (device.getAddress().equals(getDeviceSettings().getGpsDeviceID())) {
-                                        silentConnectToExternalGps = true;
-                                        Log.d(Consts.LOG_TAG, "GPS found, starting reconnect.");
-                                        new Handler().postDelayed(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                getGps().startGps();
-                                            }
-                                        }, 1000);
+                        if (!silentConnectToExternalGps && !getGps().isGpsRunning() && getDeviceSettings().isGpsConfigured()) {
+                            for (BluetoothDevice device : adapter.getBondedDevices()) {
+                                if (device.getAddress().equals(getDeviceSettings().getGpsDeviceID())) {
+                                    silentConnectToExternalGps = true;
+                                    Log.d(Consts.LOG_TAG, "GPS found, starting reconnect.");
+                                    new Handler().postDelayed(() -> getGps().startGps(), 1000);
 
-                                        break;
-                                    }
-                                }
-
-                                if (!silentConnectToExternalGps) {
-                                    new Handler().postDelayed(searchForGps, 15000);
+                                    break;
                                 }
                             }
 
-                            scanningForGps = false;
+                            if (!silentConnectToExternalGps) {
+                                new Handler().postDelayed(searchForGps, 15000);
+                            }
                         }
+
+                        scanningForGps = false;
                     }, 4000);
                 }
             }

@@ -139,12 +139,7 @@ public class ImportKmlFragment extends BaseImportFragment {
     protected void runImportTask(DataAccessLayer dal) {
         task = new Import.KMLImportTask();
 
-        task.setListener(new Import.ImportTaskListener() {
-            @Override
-            public void onTaskFinish(Import.ImportResult result) {
-                onTaskComplete(result.getCode());
-            }
-        });
+        task.setListener(result -> onTaskComplete(result.getCode()));
 
         selector.getSelectedPositions();
 
