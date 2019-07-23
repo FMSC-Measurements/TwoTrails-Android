@@ -1,6 +1,5 @@
 package com.usda.fmsc.twotrails.activities;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -232,27 +231,19 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                                 _deletePoint.getPID()));
                     }
 
-                    dialog.setPositiveButton(getString(R.string.str_delete), new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            deleteWithoutMoving();
-                        }
-                    });
+                    dialog.setPositiveButton(getString(R.string.str_delete), (dialogInterface, i) -> deleteWithoutMoving());
 
-                    dialog.setNegativeButton(getString(R.string.str_edit), new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            ignorePointChange = true;
-                            pointViewPager.setCurrentItem(_deleteIndex);
+                    dialog.setNegativeButton(getString(R.string.str_edit), (dialogInterface, i) -> {
+                        ignorePointChange = true;
+                        pointViewPager.setCurrentItem(_deleteIndex);
 
-                            _CurrentPoint = _deletePoint;
-                            _CurrentIndex = _deleteIndex;
+                        _CurrentPoint = _deletePoint;
+                        _CurrentIndex = _deleteIndex;
 
-                            lockPoint(false);
+                        lockPoint(false);
 
-                            _deleteIndex = INVALID_INDEX;
-                            _deletePoint = null;
-                        }
+                        _deleteIndex = INVALID_INDEX;
+                        _deletePoint = null;
                     });
 
                     dialog.show();
@@ -362,18 +353,8 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                                     getTtAppCtx().getDeviceSettings().getPrefs());
 
                             dialog.setMessage(PointsActivity.this.getString(R.string.points_camera_diag))
-                                    .setPositiveButton("TwoTrails", new DontAskAgainDialog.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialogInterface, int i, Object value) {
-                                            captureImageUri = TtUtils.Media.captureImage(PointsActivity.this, true, _CurrentPoint);
-                                        }
-                                    }, 2)
-                                    .setNegativeButton("Android", new DontAskAgainDialog.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialogInterface, int i, Object value) {
-                                            captureImageUri = TtUtils.Media.captureImage(PointsActivity.this, false, _CurrentPoint);
-                                        }
-                                    }, 1)
+                                    .setPositiveButton("TwoTrails", (dialogInterface, i, value) -> captureImageUri = TtUtils.Media.captureImage(PointsActivity.this, true, _CurrentPoint), 2)
+                                    .setNegativeButton("Android", (dialogInterface, i, value) -> captureImageUri = TtUtils.Media.captureImage(PointsActivity.this, false, _CurrentPoint), 1)
                                     .setNeutralButton(getString(R.string.str_cancel), null, 0)
                                     .show();
                         } else {
@@ -543,37 +524,29 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         slexAqr = findViewById(R.id.pointsSLExAqr);
         if (slexAqr != null) {
             slexAqr.setFab(fabAqr);
-            slexAqr.setFabAnimationEndListener(new SheetLayoutEx.OnFabAnimationEndListener() {
-                @Override
-                public void onFabAnimationEnd() {
-                    acquireGpsPoint(_CurrentPoint, null);
-                }
-            });
+            slexAqr.setFabAnimationEndListener(() -> acquireGpsPoint(_CurrentPoint, null));
         }
 
         slexCreate = findViewById(R.id.pointsSLExCreate);
         if (slexCreate != null) {
             slexCreate.setFab(fabMenu);
-            slexCreate.setFabAnimationEndListener(new SheetLayoutEx.OnFabAnimationEndListener() {
-                @Override
-                public void onFabAnimationEnd() {
+            slexCreate.setFabAnimationEndListener(() -> {
 
-                    TtPoint point = null;
+                TtPoint point = null;
 
-                    if (TtUtils.Points.pointHasValue(_CurrentPoint)) {
-                        point = _CurrentPoint;
-                    } else if (_CurrentIndex > 0) {
-                        point = _Points.get(_CurrentIndex - 1);
-                    }
-
-                    if (createOpType == OpType.Take5) {
-                        acquireT5Points(point);
-                    } else if (createOpType == OpType.Walk) {
-                        acquireWalkPoints(point);
-                    }
-
-                    createOpType = null;
+                if (TtUtils.Points.pointHasValue(_CurrentPoint)) {
+                    point = _CurrentPoint;
+                } else if (_CurrentIndex > 0) {
+                    point = _Points.get(_CurrentIndex - 1);
                 }
+
+                if (createOpType == OpType.Take5) {
+                    acquireT5Points(point);
+                } else if (createOpType == OpType.Walk) {
+                    acquireWalkPoints(point);
+                }
+
+                createOpType = null;
             });
         }
         //endregion
@@ -619,7 +592,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                     scaleOptions.setScaleMode(BitmapManager.ScaleMode.Max);
                     scaleOptions.setSize(bitmapHeight);
 
-                    rvMediaAdapter = new MediaRvAdapter(PointsActivity.this, Collections.synchronizedList(new ArrayList<TtMedia>()), mediaListener,
+                    rvMediaAdapter = new MediaRvAdapter(PointsActivity.this, Collections.synchronizedList(new ArrayList<>()), mediaListener,
                             pmdScroller.getHeight() - AndroidUtils.Convert.dpToPx(PointsActivity.this, 10), bitmapManager);
 
                     rvMedia.setAdapter(rvMediaAdapter);
@@ -631,12 +604,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                     mediaViewPager.setAdapter(mediaPagerAdapter);
                     mediaViewPager.addOnPageChangeListener(onMediaPageChangeListener);
 
-                    rvMediaAdapter.setListener(new MediaRvAdapter.MediaChangedListener() {
-                        @Override
-                        public void onNotifyDataSetChanged() {
-                            mediaPagerAdapter.notifyDataSetChanged();
-                        }
-                    });
+                    rvMediaAdapter.setListener(() -> mediaPagerAdapter.notifyDataSetChanged());
 
                     loadMedia(_CurrentPoint, false);
                 }
@@ -644,22 +612,19 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
             slidingLayout.addPanelSlideListener(panelSlideListener);
 
-            layMDH.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    switch (slidingLayout.getPanelState()) {
+            layMDH.setOnClickListener(v -> {
+                switch (slidingLayout.getPanelState()) {
 
-                        case EXPANDED:
-                        case COLLAPSED:
-                            slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
-                            break;
-                        case ANCHORED:
-                        case HIDDEN:
-                            if (mediaLoaded || mediaCount == 0) {
-                                slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
-                            }
-                            break;
-                    }
+                    case EXPANDED:
+                    case COLLAPSED:
+                        slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
+                        break;
+                    case ANCHORED:
+                    case HIDDEN:
+                        if (mediaLoaded || mediaCount == 0) {
+                            slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+                        }
+                        break;
                 }
             });
         }
@@ -667,14 +632,11 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
         ivFullscreen = findViewById(R.id.pmdIvFullscreen);
         if (ivFullscreen != null) {
-            ivFullscreen.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (_CurrentMedia != null && _CurrentMedia.getMediaType() == MediaType.Picture && _CurrentMedia.isExternal() &&
-                            (slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED ||
-                                    slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.ANCHORED)) {
-                        TtUtils.Media.openInImageViewer(PointsActivity.this, _CurrentMedia.getFilePath());
-                    }
+            ivFullscreen.setOnClickListener(v -> {
+                if (_CurrentMedia != null && _CurrentMedia.getMediaType() == MediaType.Picture && _CurrentMedia.isExternal() &&
+                        (slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED ||
+                                slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.ANCHORED)) {
+                    TtUtils.Media.openInImageViewer(PointsActivity.this, _CurrentMedia.getFilePath());
                 }
             });
 
@@ -781,26 +743,11 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                 if (_Points.size() > 0) {
                     MoveToPointDialog mdialog = new MoveToPointDialog();
 
-                    mdialog.setOnItemClick(new AdapterView.OnItemClickListener() {
-                        @Override
-                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                            moveToPoint(position);
-                        }
-                    });
+                    mdialog.setOnItemClick((parent, view, position, id) -> moveToPoint(position));
 
-                    mdialog.setFirstListener(new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            moveToPoint(0);
-                        }
-                    });
+                    mdialog.setFirstListener((dialog, which) -> moveToPoint(0));
 
-                    mdialog.setLastListener(new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            moveToPoint(_Points.size() - 1);
-                        }
-                    });
+                    mdialog.setLastListener((dialog, which) -> moveToPoint(_Points.size() - 1));
 
                     mdialog.setNegativeButton("Cancel", null);
 
@@ -823,49 +770,44 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                     AlertDialog.Builder alert = new AlertDialog.Builder(this);
                     alert.setMessage(StringEx.format("Delete Point %d", _CurrentPoint.getPID()));
 
-                    alert.setPositiveButton(R.string.str_delete, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            overrideHalfTrav = true;
+                    alert.setPositiveButton(R.string.str_delete, (dialog, which) -> {
+                        overrideHalfTrav = true;
 
-                            AnimationCardFragment card = ((AnimationCardFragment) pointSectionsPagerAdapter.getFragments().get(_CurrentIndex));
+                        AnimationCardFragment card = ((AnimationCardFragment) pointSectionsPagerAdapter.getFragments().get(_CurrentIndex));
 
-                            card.setVisibilityListener(new AnimationCardFragment.VisibilityListener() {
-                                @Override
-                                public void onHidden() {
-                                    new Handler().post(new Runnable() {
-                                        public void run() {
-                                            if (_CurrentIndex == 0 && _Points.size() < 2) { //only 1 point in poly
-                                                deletePoint(_CurrentPoint, _CurrentIndex);
+                        card.setVisibilityListener(new AnimationCardFragment.VisibilityListener() {
+                            @Override
+                            public void onHidden() {
+                                new Handler().post(() -> {
+                                    if (_CurrentIndex == 0 && _Points.size() < 2) { //only 1 point in poly
+                                        deletePoint(_CurrentPoint, _CurrentIndex);
 
-                                                _CurrentPoint = null;
-                                                _CurrentIndex = INVALID_INDEX;
-                                                lockPoint(true);
-                                                AndroidUtils.UI.disableMenuItem(miLock);
-                                                hideAqr();
-                                            } else if (_CurrentIndex < _Points.size() - 1) { //point is not at the end
-                                                _deleteIndex = _CurrentIndex;
-                                                _deletePoint = _CurrentPoint;
+                                        _CurrentPoint = null;
+                                        _CurrentIndex = INVALID_INDEX;
+                                        lockPoint(true);
+                                        AndroidUtils.UI.disableMenuItem(miLock);
+                                        hideAqr();
+                                    } else if (_CurrentIndex < _Points.size() - 1) { //point is not at the end
+                                        _deleteIndex = _CurrentIndex;
+                                        _deletePoint = _CurrentPoint;
 
-                                                moveToPoint(_CurrentIndex + 1);
-                                            } else if (_CurrentIndex == _Points.size() - 1) { //point it at the end
-                                                _deleteIndex = _CurrentIndex;
-                                                _deletePoint = _CurrentPoint;
+                                        moveToPoint(_CurrentIndex + 1);
+                                    } else if (_CurrentIndex == _Points.size() - 1) { //point it at the end
+                                        _deleteIndex = _CurrentIndex;
+                                        _deletePoint = _CurrentPoint;
 
-                                                moveToPoint(_CurrentIndex - 1);
-                                            }
-                                        }
-                                    });
-                                }
+                                        moveToPoint(_CurrentIndex - 1);
+                                    }
+                                });
+                            }
 
-                                @Override
-                                public void onVisible() {
+                            @Override
+                            public void onVisible() {
 
-                                }
-                            });
+                            }
+                        });
 
-                            card.hideCard();
-                        }
+                        card.hideCard();
                     });
 
                     alert.setNeutralButton(R.string.str_cancel, null);
@@ -885,22 +827,19 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
                     LatLonDialog dialog = LatLonDialog.newInstance((GpsPoint)_CurrentPoint);
 
-                    dialog.setOnEditedListener(new LatLonDialog.OnEditedListener() {
-                        @Override
-                        public void onEdited(String cn, Double lat, Double lon) {
-                            if (_CurrentPoint.getCN().equals(cn)) {
-                                UTMCoords coords = UTMTools.convertLatLonSignedDecToUTM(lat, lon, _CurrentMetadata.getZone());
+                    dialog.setOnEditedListener((cn, lat, lon) -> {
+                        if (_CurrentPoint.getCN().equals(cn)) {
+                            UTMCoords coords = UTMTools.convertLatLonSignedDecToUTM(lat, lon, _CurrentMetadata.getZone());
 
-                                GpsPoint point = (GpsPoint)_CurrentPoint;
+                            GpsPoint point = (GpsPoint)_CurrentPoint;
 
-                                point.setLatitude(lat);
-                                point.setLongitude(lon);
+                            point.setLatitude(lat);
+                            point.setLongitude(lon);
 
-                                point.setUnAdjX(coords.getX());
-                                point.setUnAdjY(coords.getY());
+                            point.setUnAdjX(coords.getX());
+                            point.setUnAdjY(coords.getY());
 
-                                onPointUpdate();
-                            }
+                            onPointUpdate();
                         }
                     });
 
@@ -1378,33 +1317,25 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
     }
 
     private void updatePointIndexes(final int startIndex) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                ArrayList<TtPoint> tmpPoints = new ArrayList<>();
+        new Thread(() -> {
+            ArrayList<TtPoint> tmpPoints = new ArrayList<>();
 
-                for (int i = startIndex; i < _Points.size(); i++) {
-                    final TtPoint tmp = _Points.get(i);
+            for (int i = startIndex; i < _Points.size(); i++) {
+                final TtPoint tmp = _Points.get(i);
 
-                    if (tmp.getIndex() != i) {
-                        tmp.setIndex(i);
-                        tmpPoints.add(tmp);
+                if (tmp.getIndex() != i) {
+                    tmp.setIndex(i);
+                    tmpPoints.add(tmp);
 
-                        //update the fragments before and after the current point
-                        if (i > _CurrentIndex - 2 || i < _CurrentIndex + 2) {
-                            new Handler(Looper.getMainLooper()).post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    onPointUpdate(tmp);
-                                }
-                            });
-                        }
+                    //update the fragments before and after the current point
+                    if (i > _CurrentIndex - 2 || i < _CurrentIndex + 2) {
+                        new Handler(Looper.getMainLooper()).post(() -> onPointUpdate(tmp));
                     }
                 }
+            }
 
-                if (tmpPoints.size() > 0) {
-                    getTtAppCtx().getDAL().updatePoints(tmpPoints);
-                }
+            if (tmpPoints.size() > 0) {
+                getTtAppCtx().getDAL().updatePoints(tmpPoints);
             }
         }).start();
     }
@@ -1414,15 +1345,12 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
             new AlertDialog.Builder(this)
             .setTitle(StringEx.format("Reset Point %d", _CurrentPoint.getPID()))
             .setMessage(getString(R.string.points_reset_diag))
-            .setPositiveButton("Reset", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    _CurrentPoint = getPointAtIndex(_CurrentIndex);
-                    onPointUpdate(_CurrentPoint);
-                    updateButtons();
-                    setPointUpdated(false);
-                    lockPoint(false);
-                }
+            .setPositiveButton("Reset", (dialogInterface, i) -> {
+                _CurrentPoint = getPointAtIndex(_CurrentIndex);
+                onPointUpdate(_CurrentPoint);
+                updateButtons();
+                setPointUpdated(false);
+                lockPoint(false);
             })
             .setNeutralButton(getString(R.string.str_cancel), null)
             .show();
@@ -1518,13 +1446,10 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                     .setTitle(StringEx.format("Reset Media %s", _CurrentMedia.getName()))
                     .setMessage(StringEx.format("This will reset this %s back to its original values.",
                             _CurrentMedia.getMediaType().toString().toLowerCase()))
-                    .setPositiveButton("Reset", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            _CurrentMedia = TtUtils.Media.cloneMedia(_BackupMedia);
-                            onMediaUpdate();
-                            setMediaUpdated(false);
-                        }
+                    .setPositiveButton("Reset", (dialogInterface, i) -> {
+                        _CurrentMedia = TtUtils.Media.cloneMedia(_BackupMedia);
+                        onMediaUpdate();
+                        setMediaUpdated(false);
                     })
                     .setNeutralButton(getString(R.string.str_cancel), null)
                     .show();
@@ -1538,27 +1463,12 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                             "Would you like to delete %s '%s' from storage or only remove its association with the point?",
                             _CurrentMedia.getMediaType().toString().toLowerCase(),
                             _CurrentMedia.getName()))
-                    .setPositiveButton(R.string.str_remove, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            removeMedia(_CurrentMedia, false);
-                        }
-                    })
-                    .setNegativeButton(R.string.str_delete, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            new AlertDialog.Builder(PointsActivity.this)
-                                    .setMessage(StringEx.format("You are about to delete file '%s'.", _CurrentMedia.getFilePath()))
-                                    .setPositiveButton(R.string.str_delete, new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            removeMedia(_CurrentMedia, true);
-                                        }
-                                    })
-                                    .setNeutralButton(R.string.str_cancel, null)
-                                    .show();
-                        }
-                    })
+                    .setPositiveButton(R.string.str_remove, (dialog, which) -> removeMedia(_CurrentMedia, false))
+                    .setNegativeButton(R.string.str_delete, (dialog, which) -> new AlertDialog.Builder(PointsActivity.this)
+                            .setMessage(StringEx.format("You are about to delete file '%s'.", _CurrentMedia.getFilePath()))
+                            .setPositiveButton(R.string.str_delete, (dialog1, which1) -> removeMedia(_CurrentMedia, true))
+                            .setNeutralButton(R.string.str_cancel, null)
+                            .show())
                     .setNeutralButton(R.string.str_cancel, null)
                     .show();
         }
@@ -1696,15 +1606,12 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
                 final AlertDialog dialog = dialogBuilder.create();
 
-                listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                        TtPoint point = pda.getItem(i);
-                        if (point != null) {
-                            moveToPoint(point);
-                        }
-                        dialog.dismiss();
+                listView.setOnItemClickListener((adapterView, view, i, l) -> {
+                    TtPoint point1 = pda.getItem(i);
+                    if (point1 != null) {
+                        moveToPoint(point1);
                     }
+                    dialog.dismiss();
                 });
 
                 dialog.show();
@@ -1718,12 +1625,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                     dialog.setMessage(StringEx.format("Move to Quondam %d in polygon %s.",
                             linkedPoint.getPID(), linkedPoly.getName()));
 
-                    dialog.setPositiveButton(R.string.str_move, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            moveToPoint(linkedPoint);
-                        }
-                    });
+                    dialog.setPositiveButton(R.string.str_move, (dialogInterface, i) -> moveToPoint(linkedPoint));
 
                     dialog.setNeutralButton(R.string.str_cancel, null);
 
@@ -2022,16 +1924,13 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
                 final int order = TtUtils.Media.getMediaIndex(picture, rvMediaAdapter.getItems());
 
-                PointsActivity.this.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        rvMediaAdapter.add(order, picture);
+                PointsActivity.this.runOnUiThread(() -> {
+                    rvMediaAdapter.add(order, picture);
 
-                        //don't bombard the adapter with lots of changes
-                        mediaLoaderDelayedHandler.post(onMediaChanged);
+                    //don't bombard the adapter with lots of changes
+                    mediaLoaderDelayedHandler.post(onMediaChanged);
 
-                        semaphore.release();
-                    }
+                    semaphore.release();
                 });
             } catch (InterruptedException e) {
                 //
@@ -2043,21 +1942,18 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
     private Runnable onMediaChanged = new Runnable() {
         @Override
         public void run() {
-            PointsActivity.this.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if (mediaSelectionIndex > INVALID_INDEX && mediaSelectionIndex < rvMediaAdapter.getItemCountEx()) {
-                        setCurrentMedia(rvMediaAdapter.getItem(mediaSelectionIndex));
-                        rvMediaAdapter.selectItem(mediaSelectionIndex);
-                        mediaViewPager.setCurrentItem(mediaSelectionIndex);
-                        mediaSelectionIndex = INVALID_INDEX;
-                    }
-
-                    mediaLoaded = true;
-
-                    setMediaTitle(slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED ?
-                        _CurrentMedia.getName() : null);
+            PointsActivity.this.runOnUiThread(() -> {
+                if (mediaSelectionIndex > INVALID_INDEX && mediaSelectionIndex < rvMediaAdapter.getItemCountEx()) {
+                    setCurrentMedia(rvMediaAdapter.getItem(mediaSelectionIndex));
+                    rvMediaAdapter.selectItem(mediaSelectionIndex);
+                    mediaViewPager.setCurrentItem(mediaSelectionIndex);
+                    mediaSelectionIndex = INVALID_INDEX;
                 }
+
+                mediaLoaded = true;
+
+                setMediaTitle(slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED ?
+                    _CurrentMedia.getName() : null);
             });
         }
     };
@@ -2112,12 +2008,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
     private void onPointsChanged() {
         if (Looper.myLooper() != Looper.getMainLooper()) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    pointSectionsPagerAdapter.notifyDataSetChanged();
-                }
-            });
+            runOnUiThread(() -> pointSectionsPagerAdapter.notifyDataSetChanged());
         } else {
             pointSectionsPagerAdapter.notifyDataSetChanged();
         }
@@ -2233,12 +2124,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
         dialog.setMessage("The GPS is currently not configured. Would you like to configure it now?");
 
-        dialog.setPositiveButton("Configure", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                startActivity(new Intent(getBaseContext(), SettingsActivity.class).putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.GPS_SETTINGS_PAGE));
-            }
-        });
+        dialog.setPositiveButton("Configure", (dialog1, which) -> startActivity(new Intent(getBaseContext(), SettingsActivity.class).putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.GPS_SETTINGS_PAGE)));
 
         dialog.setNeutralButton(R.string.str_cancel, null);
 
@@ -2255,24 +2141,16 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
             PolygonAdjuster.adjust(getTtAppCtx().getDAL(), false, new PolygonAdjuster.Listener() {
                 @Override
                 public void adjusterStarted() {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(PointsActivity.this, "Adjusting Points. Starting Acquire soon.", Toast.LENGTH_SHORT).show();
-                        }
-                    });
+                    runOnUiThread(() -> Toast.makeText(PointsActivity.this, "Adjusting Points. Starting Acquire soon.", Toast.LENGTH_SHORT).show());
                 }
 
                 @Override
                 public void adjusterStopped(final PolygonAdjuster.AdjustResult result, AdjustingException.AdjustingError error) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (result == PolygonAdjuster.AdjustResult.SUCCESSFUL) {
-                                startAcquireGpsActivity(point, bursts);
-                            } else if (result != PolygonAdjuster.AdjustResult.ADJUSTING) {
-                                Toast.makeText(PointsActivity.this, "Adjusting Failed. See error log for details", Toast.LENGTH_LONG).show();
-                            }
+                    runOnUiThread(() -> {
+                        if (result == PolygonAdjuster.AdjustResult.SUCCESSFUL) {
+                            startAcquireGpsActivity(point, bursts);
+                        } else if (result != PolygonAdjuster.AdjustResult.ADJUSTING) {
+                            Toast.makeText(PointsActivity.this, "Adjusting Failed. See error log for details", Toast.LENGTH_LONG).show();
                         }
                     });
                 }
@@ -2286,12 +2164,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                             .setTitle(R.string.diag_slow_adjusting_title)
                             .setMessage(R.string.diag_slow_adjusting)
                             .setPositiveButton("Wait", null)
-                            .setNegativeButton(R.string.str_cancel, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    PolygonAdjuster.cancel();
-                                }
-                            })
+                            .setNegativeButton(R.string.str_cancel, (dialogInterface, i) -> PolygonAdjuster.cancel())
                             .show();
                         }
                     });
@@ -2331,46 +2204,28 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
             PolygonAdjuster.adjust(getTtAppCtx().getDAL(), false, new PolygonAdjuster.Listener() {
                 @Override
                 public void adjusterStarted() {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(PointsActivity.this, "Adjusting Points. Starting Acquire soon.", Toast.LENGTH_SHORT).show();
-                        }
-                    });
+                    runOnUiThread(() -> Toast.makeText(PointsActivity.this, "Adjusting Points. Starting Acquire soon.", Toast.LENGTH_SHORT).show());
                 }
 
                 @Override
                 public void adjusterStopped(final PolygonAdjuster.AdjustResult result, AdjustingException.AdjustingError error) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (result == PolygonAdjuster.AdjustResult.SUCCESSFUL) {
-                                startTake5Activity(point);
-                            } else if (result != PolygonAdjuster.AdjustResult.ADJUSTING) {
-                                Toast.makeText(PointsActivity.this, "Adjusting Failed. See error log for details", Toast.LENGTH_LONG).show();
-                            }
+                    runOnUiThread(() -> {
+                        if (result == PolygonAdjuster.AdjustResult.SUCCESSFUL) {
+                            startTake5Activity(point);
+                        } else if (result != PolygonAdjuster.AdjustResult.ADJUSTING) {
+                            Toast.makeText(PointsActivity.this, "Adjusting Failed. See error log for details", Toast.LENGTH_LONG).show();
                         }
                     });
                 }
 
                 @Override
                 public void adjusterRunningSlow() {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            new AlertDialog.Builder(getBaseContext())
-                                    .setTitle(R.string.diag_slow_adjusting_title)
-                                    .setMessage(R.string.diag_slow_adjusting)
-                                    .setPositiveButton("Wait", null)
-                                    .setNegativeButton(R.string.str_cancel, new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialogInterface, int i) {
-                                            PolygonAdjuster.cancel();
-                                        }
-                                    })
-                                    .show();
-                        }
-                    });
+                    runOnUiThread(() -> new AlertDialog.Builder(getBaseContext())
+                            .setTitle(R.string.diag_slow_adjusting_title)
+                            .setMessage(R.string.diag_slow_adjusting)
+                            .setPositiveButton("Wait", null)
+                            .setNegativeButton(R.string.str_cancel, (dialogInterface, i) -> PolygonAdjuster.cancel())
+                            .show());
                 }
             });
         } else {
@@ -2412,46 +2267,28 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
             PolygonAdjuster.adjust(getTtAppCtx().getDAL(), false, new PolygonAdjuster.Listener() {
                 @Override
                 public void adjusterStarted() {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(PointsActivity.this, "Adjusting Points. Starting Acquire soon.", Toast.LENGTH_SHORT).show();
-                        }
-                    });
+                    runOnUiThread(() -> Toast.makeText(PointsActivity.this, "Adjusting Points. Starting Acquire soon.", Toast.LENGTH_SHORT).show());
                 }
 
                 @Override
                 public void adjusterStopped(final PolygonAdjuster.AdjustResult result, AdjustingException.AdjustingError error) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (result == PolygonAdjuster.AdjustResult.SUCCESSFUL) {
-                                startWalkActivity(point);
-                            } else if (result != PolygonAdjuster.AdjustResult.ADJUSTING) {
-                                Toast.makeText(PointsActivity.this, "Adjusting Failed. See error log for details", Toast.LENGTH_LONG).show();
-                            }
+                    runOnUiThread(() -> {
+                        if (result == PolygonAdjuster.AdjustResult.SUCCESSFUL) {
+                            startWalkActivity(point);
+                        } else if (result != PolygonAdjuster.AdjustResult.ADJUSTING) {
+                            Toast.makeText(PointsActivity.this, "Adjusting Failed. See error log for details", Toast.LENGTH_LONG).show();
                         }
                     });
                 }
 
                 @Override
                 public void adjusterRunningSlow() {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            new AlertDialog.Builder(getBaseContext())
-                                    .setTitle(R.string.diag_slow_adjusting_title)
-                                    .setMessage(R.string.diag_slow_adjusting)
-                                    .setPositiveButton("Wait", null)
-                                    .setNegativeButton(R.string.str_cancel, new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialogInterface, int i) {
-                                            PolygonAdjuster.cancel();
-                                        }
-                                    })
-                                    .show();
-                        }
-                    });
+                    runOnUiThread(() -> new AlertDialog.Builder(getBaseContext())
+                            .setTitle(R.string.diag_slow_adjusting_title)
+                            .setMessage(R.string.diag_slow_adjusting)
+                            .setPositiveButton("Wait", null)
+                            .setNegativeButton(R.string.str_cancel, (dialogInterface, i) -> PolygonAdjuster.cancel())
+                            .show());
                 }
             });
         } else {
@@ -2509,17 +2346,14 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
                 alert.setMessage("This point has no NMEA data associated with it. Would you like to acquire some data?");
 
-                alert.setPositiveButton("Acquire NMEA", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        Intent intent = new Intent(getBaseContext(), AcquireAndCalculateGpsActivity.class);
-                        intent.putExtra(Consts.Codes.Data.POINT_DATA, new GpsPoint(_CurrentPoint));
-                        intent.putExtra(Consts.Codes.Data.POLYGON_DATA, _CurrentPolygon);
-                        intent.putExtra(Consts.Codes.Data.METADATA_DATA, getMetadata().get(_CurrentPoint.getMetadataCN()));
-                        intent.putExtra(AcquireAndCalculateGpsActivity.CALCULATE_ONLY_MODE, false);
+                alert.setPositiveButton("Acquire NMEA", (dialogInterface, i) -> {
+                    Intent intent = new Intent(getBaseContext(), AcquireAndCalculateGpsActivity.class);
+                    intent.putExtra(Consts.Codes.Data.POINT_DATA, new GpsPoint(_CurrentPoint));
+                    intent.putExtra(Consts.Codes.Data.POLYGON_DATA, _CurrentPolygon);
+                    intent.putExtra(Consts.Codes.Data.METADATA_DATA, getMetadata().get(_CurrentPoint.getMetadataCN()));
+                    intent.putExtra(AcquireAndCalculateGpsActivity.CALCULATE_ONLY_MODE, false);
 
-                        startActivityForResult(intent, Consts.Codes.Activites.ACQUIRE);
-                    }
+                    startActivityForResult(intent, Consts.Codes.Activites.ACQUIRE);
                 });
 
                 alert.setNeutralButton(R.string.str_cancel, null);
@@ -2544,33 +2378,24 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
                             dialog.setMessage(R.string.points_aqr_diag_gps_msg);
 
-                            dialog.setPositiveButton(R.string.points_aqr_diag_add, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    ArrayList<TtNmeaBurst> bursts = getTtAppCtx().getDAL().getNmeaBurstsByPointCN(_CurrentPoint.getCN());
-                                    acquireGpsPoint(_CurrentPoint, bursts);
-                                }
+                            dialog.setPositiveButton(R.string.points_aqr_diag_add, (dialog1, which) -> {
+                                ArrayList<TtNmeaBurst> bursts = getTtAppCtx().getDAL().getNmeaBurstsByPointCN(_CurrentPoint.getCN());
+                                acquireGpsPoint(_CurrentPoint, bursts);
                             });
 
-                            dialog.setNegativeButton(R.string.points_aqr_diag_overwrite, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    AlertDialog.Builder dialogA = new AlertDialog.Builder(PointsActivity.this);
+                            dialog.setNegativeButton(R.string.points_aqr_diag_overwrite, (dialog12, which) -> {
+                                AlertDialog.Builder dialogA = new AlertDialog.Builder(PointsActivity.this);
 
-                                    dialogA.setMessage(R.string.points_aqr_diag_del_msg);
+                                dialogA.setMessage(R.string.points_aqr_diag_del_msg);
 
-                                    dialogA.setPositiveButton(R.string.str_delete, new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            getTtAppCtx().getDAL().deleteNmeaByPointCN(_CurrentPoint.getCN());
-                                            acquireGpsPoint(_CurrentPoint, null);
-                                        }
-                                    });
+                                dialogA.setPositiveButton(R.string.str_delete, (dialog121, which1) -> {
+                                    getTtAppCtx().getDAL().deleteNmeaByPointCN(_CurrentPoint.getCN());
+                                    acquireGpsPoint(_CurrentPoint, null);
+                                });
 
-                                    dialogA.setNeutralButton(R.string.str_cancel, null);
+                                dialogA.setNeutralButton(R.string.str_cancel, null);
 
-                                    dialogA.show();
-                                }
+                                dialogA.show();
                             });
 
                             dialog.setNeutralButton(R.string.str_cancel, null);
@@ -2671,12 +2496,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                     if (tp.getFwdAz() != null || tp.getBkAz() != null || tp.getSlopeDistance() > 0) {
                         new AlertDialog.Builder(PointsActivity.this)
                                 .setMessage("This point already has data associated with it. Would you like to overwrite it?")
-                                .setPositiveButton(R.string.str_yes, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        promptToFillTravDataFromRF(rfData);
-                                    }
-                                })
+                                .setPositiveButton(R.string.str_yes, (dialog, which) -> promptToFillTravDataFromRF(rfData))
                                 .setNeutralButton(R.string.str_no, null)
                                 .show();
                     } else {
@@ -2704,41 +2524,32 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                     getTtAppCtx().getDeviceSettings().getPrefs());
 
             dialog.setMessage(StringEx.format("Would You like to set the compass value to Forward or Backwards?"))
-                    .setPositiveButton("Fwd", new DontAskAgainDialog.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i, Object value) {
-                            if (dialog.isDontAskAgainChecked()) {
-                                autoSetTrav = true;
-                                autoSetAz = true;
-                                autoSetAzFwd = true;
-                            }
+                    .setPositiveButton("Fwd", (dialogInterface, i, value) -> {
+                        if (dialog.isDontAskAgainChecked()) {
+                            autoSetTrav = true;
+                            autoSetAz = true;
+                            autoSetAzFwd = true;
+                        }
 
-                            updateCurrentPointFromRangeFinderData(rfData, true, true);
-                            Toast.makeText(PointsActivity.this, "RF Data Applied", Toast.LENGTH_LONG).show();
-                        }
+                        updateCurrentPointFromRangeFinderData(rfData, true, true);
+                        Toast.makeText(PointsActivity.this, "RF Data Applied", Toast.LENGTH_LONG).show();
                     }, 2)
-                    .setNegativeButton("Back", new DontAskAgainDialog.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i, Object value) {
-                            if (dialog.isDontAskAgainChecked()) {
-                                autoSetTrav = true;
-                                autoSetAz = true;
-                                autoSetAzFwd = false;
-                            }
-                            updateCurrentPointFromRangeFinderData(rfData, true, false);
-                            Toast.makeText(PointsActivity.this, "RF Data Applied", Toast.LENGTH_LONG).show();
+                    .setNegativeButton("Back", (dialogInterface, i, value) -> {
+                        if (dialog.isDontAskAgainChecked()) {
+                            autoSetTrav = true;
+                            autoSetAz = true;
+                            autoSetAzFwd = false;
                         }
+                        updateCurrentPointFromRangeFinderData(rfData, true, false);
+                        Toast.makeText(PointsActivity.this, "RF Data Applied", Toast.LENGTH_LONG).show();
                     }, 1)
-                    .setNeutralButton("No Az", new DontAskAgainDialog.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i, Object value) {
-                            if (dialog.isDontAskAgainChecked()) {
-                                autoSetTrav = false;
-                                autoSetAz = false;
-                            }
-                            updateCurrentPointFromRangeFinderData(rfData, false, false);
-                            Toast.makeText(PointsActivity.this, "RF Data Applied", Toast.LENGTH_LONG).show();
+                    .setNeutralButton("No Az", (dialogInterface, i, value) -> {
+                        if (dialog.isDontAskAgainChecked()) {
+                            autoSetTrav = false;
+                            autoSetAz = false;
                         }
+                        updateCurrentPointFromRangeFinderData(rfData, false, false);
+                        Toast.makeText(PointsActivity.this, "RF Data Applied", Toast.LENGTH_LONG).show();
                     })
                     .show();
         } else {

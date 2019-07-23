@@ -7,7 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import com.usda.fmsc.utilities.Tuple;
@@ -53,12 +52,7 @@ public class CheckablePolygonAdapter extends ArrayAdapter<TtPolygon> {
         holder.checkBox.setText(polygon.Item1.getName());
         holder.textView.setText(String.format("(%d)", _PointInPolygonsCount.get(position)));
 
-        holder.checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                polygon.Item2 = isChecked;
-            }
-        });
+        holder.checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> polygon.Item2 = isChecked);
 
         return convertView;
     }

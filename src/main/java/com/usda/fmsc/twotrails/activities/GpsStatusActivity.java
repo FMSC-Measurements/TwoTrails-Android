@@ -122,81 +122,78 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
     }
 
     protected void setNmeaData(final INmeaBurst burst) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    if (burst.hasPosition()) {
-                        UTMCoords coords = zone != null ? burst.getUTM(zone) : burst.getTrueUTM();
+        runOnUiThread(() -> {
+            try {
+                if (burst.hasPosition()) {
+                    UTMCoords coords = zone != null ? burst.getUTM(zone) : burst.getTrueUTM();
 
-                        tvLat.setText(String.format("%.4f", burst.getLatitude()));
-                        tvLon.setText(String.format("%.4f", burst.getLongitude()));
+                    tvLat.setText(String.format("%.4f", burst.getLatitude()));
+                    tvLon.setText(String.format("%.4f", burst.getLongitude()));
 
-                        tvUtmX.setText(String.format("%.3f", coords.getX()));
-                        tvUtmY.setText(String.format("%.3f", coords.getY()));
+                    tvUtmX.setText(String.format("%.3f", coords.getX()));
+                    tvUtmY.setText(String.format("%.3f", coords.getY()));
 
-                        if (zone == null) {
-                            tvZone.setText(StringEx.toString(coords.getZone()));
-                        } else {
-                            tvZone.setText(StringEx.toString(zone));
-                        }
-
-                        if (burst.hasElevation()) {
-                            tvElev.setText(String.format("%.2f", burst.getElevation()));
-                        } else {
-                            tvElev.setText(nVal);
-                        }
+                    if (zone == null) {
+                        tvZone.setText(StringEx.toString(coords.getZone()));
                     } else {
-                        tvLat.setText(nVal);
-                        tvLon.setText(nVal);
-                        tvUtmX.setText(nVal);
-                        tvUtmY.setText(nVal);
+                        tvZone.setText(StringEx.toString(zone));
+                    }
+
+                    if (burst.hasElevation()) {
+                        tvElev.setText(String.format("%.2f", burst.getElevation()));
+                    } else {
                         tvElev.setText(nVal);
-
-                        if (zone == null) {
-                            tvZone.setText(nVal);
-                        } else {
-                            tvZone.setText(StringEx.toString(zone));
-                        }
                     }
+                } else {
+                    tvLat.setText(nVal);
+                    tvLon.setText(nVal);
+                    tvUtmX.setText(nVal);
+                    tvUtmY.setText(nVal);
+                    tvElev.setText(nVal);
 
-                    if (burst.isValid(NmeaIDs.SentenceID.RMC) && burst.getMagVarDir() != null) {
-                        tvDec.setText(String.format("%.2f %s", burst.getMagVar(), burst.getMagVarDir().toStringAbv()));
+                    if (zone == null) {
+                        tvZone.setText(nVal);
                     } else {
-                        tvDec.setText(nVal);
+                        tvZone.setText(StringEx.toString(zone));
                     }
-
-                    if (burst.isValid(NmeaIDs.SentenceID.GGA)) {
-                        tvGpsMode.setText(burst.getFixQuality().toStringX());
-                    } else {
-                        tvGpsMode.setText(GGASentence.GpsFixType.NoFix.toString());
-                    }
-
-                    if (burst.isValid(NmeaIDs.SentenceID.GSA)) {
-                        tvGpsStatus.setText(burst.getFix().toString());
-                        tvPdop.setText(String.format("%.2f", burst.getPDOP()));
-                        tvHdop.setText(String.format("%.2f", burst.getHDOP()));
-                    } else {
-                        tvGpsStatus.setText(nVal);
-                        tvHdop.setText(nVal);
-                        tvPdop.setText(nVal);
-                    }
-
-                    if (burst.isValid(NmeaIDs.SentenceID.GSV)) {
-
-                        tvSat.setText(String.format("%d/%d/%d",
-                                burst.isValid(NmeaIDs.SentenceID.GSA) ? burst.getUsedSatellitesCount() : 0,
-                                burst.isValid(NmeaIDs.SentenceID.GGA) ? burst.getTrackedSatellitesCount() : 0,
-                                burst.getSatellitesInViewCount()));
-                    } else {
-                        tvSat.setText(nVal);
-                    }
-
-                    skyView.update(burst);
-                    statusView.update(burst);
-                } catch (Exception e) {
-                    getTtAppCtx().getReport().writeError("GpsStatusActivity:setNmeaData", e.getMessage(), e.getStackTrace());
                 }
+
+                if (burst.isValid(NmeaIDs.SentenceID.RMC) && burst.getMagVarDir() != null) {
+                    tvDec.setText(String.format("%.2f %s", burst.getMagVar(), burst.getMagVarDir().toStringAbv()));
+                } else {
+                    tvDec.setText(nVal);
+                }
+
+                if (burst.isValid(NmeaIDs.SentenceID.GGA)) {
+                    tvGpsMode.setText(burst.getFixQuality().toStringX());
+                } else {
+                    tvGpsMode.setText(GGASentence.GpsFixType.NoFix.toString());
+                }
+
+                if (burst.isValid(NmeaIDs.SentenceID.GSA)) {
+                    tvGpsStatus.setText(burst.getFix().toString());
+                    tvPdop.setText(String.format("%.2f", burst.getPDOP()));
+                    tvHdop.setText(String.format("%.2f", burst.getHDOP()));
+                } else {
+                    tvGpsStatus.setText(nVal);
+                    tvHdop.setText(nVal);
+                    tvPdop.setText(nVal);
+                }
+
+                if (burst.isValid(NmeaIDs.SentenceID.GSV)) {
+
+                    tvSat.setText(String.format("%d/%d/%d",
+                            burst.isValid(NmeaIDs.SentenceID.GSA) ? burst.getUsedSatellitesCount() : 0,
+                            burst.isValid(NmeaIDs.SentenceID.GGA) ? burst.getTrackedSatellitesCount() : 0,
+                            burst.getSatellitesInViewCount()));
+                } else {
+                    tvSat.setText(nVal);
+                }
+
+                skyView.update(burst);
+                statusView.update(burst);
+            } catch (Exception e) {
+                getTtAppCtx().getReport().writeError("GpsStatusActivity:setNmeaData", e.getMessage(), e.getStackTrace());
             }
         });
     }
@@ -207,12 +204,7 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
 
         dialog.setMessage("The GPS is currently not configured. Would you like to configure it now?");
 
-        dialog.setPositiveButton("Configure", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                startActivityForResult(new Intent(getBaseContext(), SettingsActivity.class).putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.GPS_SETTINGS_PAGE), Consts.Codes.Activites.SETTINGS);
-            }
-        });
+        dialog.setPositiveButton("Configure", (dialog1, which) -> startActivityForResult(new Intent(getBaseContext(), SettingsActivity.class).putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.GPS_SETTINGS_PAGE), Consts.Codes.Activites.SETTINGS));
 
         dialog.setNeutralButton(R.string.str_cancel, null);
 
@@ -268,27 +260,21 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
             final Activity activity = this;
             dialog.setTitle("GPS Connection Lost");
             dialog.setMessage("The GPS bluetooth connection has been broken. Would you like to try and reestablish the connection?");
-            dialog.setPositiveButton("Connect", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    GpsService.GpsDeviceStatus status = binder.startGps();
+            dialog.setPositiveButton("Connect", (dialog1, which) -> {
+                GpsService.GpsDeviceStatus status = binder.startGps();
 
-                    if (status != GpsService.GpsDeviceStatus.ExternalGpsStarted &&
-                            status != GpsService.GpsDeviceStatus.InternalGpsStarted) {
-                        Toast.makeText(GpsStatusActivity.this, "Unable to connect to GPS.", Toast.LENGTH_SHORT).show();
-                        activity.setResult(RESULT_CANCELED);
-                        activity.finish();
-                    } else {
-                        AndroidUtils.Device.vibrate(getApplicationContext(), Consts.Notifications.VIB_PATTERN_GPS_CONNECTED);
-                    }
-                }
-            });
-            dialog.setNegativeButton(R.string.str_exit, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
+                if (status != GpsService.GpsDeviceStatus.ExternalGpsStarted &&
+                        status != GpsService.GpsDeviceStatus.InternalGpsStarted) {
+                    Toast.makeText(GpsStatusActivity.this, "Unable to connect to GPS.", Toast.LENGTH_SHORT).show();
                     activity.setResult(RESULT_CANCELED);
                     activity.finish();
+                } else {
+                    AndroidUtils.Device.vibrate(getApplicationContext(), Consts.Notifications.VIB_PATTERN_GPS_CONNECTED);
                 }
+            });
+            dialog.setNegativeButton(R.string.str_exit, (dialog12, which) -> {
+                activity.setResult(RESULT_CANCELED);
+                activity.finish();
             });
             dialog.show();
         }

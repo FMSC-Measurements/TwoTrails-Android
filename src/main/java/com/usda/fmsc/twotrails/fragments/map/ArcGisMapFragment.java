@@ -296,41 +296,38 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
                 }
 
                 if (currentGisMapLayer.isOnline() && currentGisMapLayer.getNumberOfLevels() < 1) {
-                    AndroidUtils.Device.isInternetAvailable(new AndroidUtils.Device.InternetAvailableCallback() {
-                        @Override
-                        public void onCheckInternet(boolean internetAvailable) {
-                            if (internetAvailable) {
-                                TtAppCtx.getArcGISTools().getLayerFromUrl(agml.getUrl(), getActivity(), new ArcGISTools.IGetArcMapLayerListener() {
-                                    @Override
-                                    public void onComplete(ArcGisMapLayer layer) {
-                                        boolean updated = false;
+                    AndroidUtils.Device.isInternetAvailable(internetAvailable -> {
+                        if (internetAvailable) {
+                            TtAppCtx.getArcGISTools().getLayerFromUrl(agml.getUrl(), getActivity(), new ArcGISTools.IGetArcMapLayerListener() {
+                                @Override
+                                public void onComplete(ArcGisMapLayer layer) {
+                                    boolean updated = false;
 
-                                        if (layer.getLevelsOfDetail() != null) {
-                                            agml.setLevelsOfDetail(layer.getLevelsOfDetail());
-                                            updated = true;
-                                        }
-
-                                        if (agml.getMaxScale() < 0 && layer.getMaxScale() >= 0) {
-                                            agml.setMaxScale(layer.getMaxScale());
-                                            agml.setMinScale(layer.getMinScale());
-                                            updated = true;
-                                        }
-
-                                        if (updated) {
-                                            TtAppCtx.getArcGISTools().updateMapLayer(agml);
-
-                                            if (currentGisMapLayer.getId() == agml.getId()) {
-                                                currentGisMapLayer = agml;
-                                            }
-                                        }
+                                    if (layer.getLevelsOfDetail() != null) {
+                                        agml.setLevelsOfDetail(layer.getLevelsOfDetail());
+                                        updated = true;
                                     }
 
-                                    @Override
-                                    public void onBadUrl(String error) {
-
+                                    if (agml.getMaxScale() < 0 && layer.getMaxScale() >= 0) {
+                                        agml.setMaxScale(layer.getMaxScale());
+                                        agml.setMinScale(layer.getMinScale());
+                                        updated = true;
                                     }
-                                });
-                            }
+
+                                    if (updated) {
+                                        TtAppCtx.getArcGISTools().updateMapLayer(agml);
+
+                                        if (currentGisMapLayer.getId() == agml.getId()) {
+                                            currentGisMapLayer = agml;
+                                        }
+                                    }
+                                }
+
+                                @Override
+                                public void onBadUrl(String error) {
+
+                                }
+                            });
                         }
                     });
                 }

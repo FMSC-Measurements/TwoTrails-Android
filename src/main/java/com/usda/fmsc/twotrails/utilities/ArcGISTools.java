@@ -308,21 +308,21 @@ public class ArcGISTools {
                             }
 
                             if (event != null)
-                                event.onEventTriggerd(null);
+                                event.onEventTriggered(null);
                         }
                     })
                     .setNegativeButton(R.string.str_no, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             if (event != null)
-                                event.onEventTriggerd(null);
+                                event.onEventTriggered(null);
                         }
                     })
                     .show();
 
         } else {
             if (event != null)
-                event.onEventTriggerd(null);
+                event.onEventTriggered(null);
         }
     }
 

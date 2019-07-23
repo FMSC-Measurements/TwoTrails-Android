@@ -564,7 +564,7 @@ public class Export {
                     } else if (point instanceof QuondamPoint) {
                         QuondamPoint qp = (QuondamPoint)point;
 
-                        if (qp.isNavPoint()) {
+                        if (qp.getParentPoint().isNavPoint()) {
                             AdjTrack.getSegments().get(0).addPoint(adjpoint);
                             UnAdjTrack.getSegments().get(0).addPoint(unAdjpoint);
                         }

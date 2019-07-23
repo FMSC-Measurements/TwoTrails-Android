@@ -248,56 +248,43 @@ public class DeviceSettingsFragment extends PreferenceFragment {
 
                             TtAppCtx.getDeviceSettings().setGpsConfigured(true);
 
-                            activity.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    pd.setMessage(activity.getString(R.string.ds_gps_connected));
+                            activity.runOnUiThread(() -> {
+                                pd.setMessage(activity.getString(R.string.ds_gps_connected));
 
-                                    if (TtAppCtx.getDeviceSettings().isGpsAlwaysOn()) {
-                                        prefGpsCheck.setSummary(R.string.ds_gps_connected);
+                                if (TtAppCtx.getDeviceSettings().isGpsAlwaysOn()) {
+                                    prefGpsCheck.setSummary(R.string.ds_gps_connected);
+                                } else {
+                                    prefGpsCheck.setSummary(R.string.ds_dev_configured);
+                                    gps.stopGps();
+                                }
+
+                                if (TtAppCtx.getDeviceSettings().getAutoSetGpsNameToMetaAsk()) {
+                                    if (lastMetaAsk.isBefore(DateTime.now().minusSeconds(10))) {
+                                        DontAskAgainDialog dialog = new DontAskAgainDialog(getActivity(),
+                                                DeviceSettings.AUTO_SET_GPS_NAME_TO_META_ASK,
+                                                DeviceSettings.AUTO_SET_GPS_NAME_TO_META,
+                                                TtAppCtx.getDeviceSettings().getPrefs());
+
+                                        dialog.setMessage("GPS is connected. Do you want to update metadata with the current GPS receiver?");
+
+                                        dialog.setPositiveButton("Default", setMetaListener, 1);
+
+                                        if (TtAppCtx.hasDAL())
+                                            dialog.setNegativeButton("All", setMetaListener, 2);
+
+                                        dialog.setNeutralButton("None", null, 0);
+
+                                        dialog.show();
+
+                                        lastMetaAsk = DateTime.now();
+
+                                        pd.hide();
                                     } else {
-                                        prefGpsCheck.setSummary(R.string.ds_dev_configured);
-                                        gps.stopGps();
+                                        new Handler().postDelayed(pd::hide, 1000);
                                     }
-
-                                    if (TtAppCtx.getDeviceSettings().getAutoSetGpsNameToMetaAsk()) {
-                                        if (lastMetaAsk.isBefore(DateTime.now().minusSeconds(10))) {
-                                            DontAskAgainDialog dialog = new DontAskAgainDialog(getActivity(),
-                                                    DeviceSettings.AUTO_SET_GPS_NAME_TO_META_ASK,
-                                                    DeviceSettings.AUTO_SET_GPS_NAME_TO_META,
-                                                    TtAppCtx.getDeviceSettings().getPrefs());
-
-                                            dialog.setMessage("GPS is connected. Do you want to update metadata with the current GPS receiver?");
-
-                                            dialog.setPositiveButton("Default", setMetaListener, 1);
-
-                                            if (TtAppCtx.hasDAL())
-                                                dialog.setNegativeButton("All", setMetaListener, 2);
-
-                                            dialog.setNeutralButton("None", null, 0);
-
-                                            dialog.show();
-
-                                            lastMetaAsk = DateTime.now();
-
-                                            pd.hide();
-                                        } else {
-                                            new Handler().postDelayed(new Runnable() {
-                                                @Override
-                                                public void run() {
-                                                    pd.hide();
-                                                }
-                                            }, 1000);
-                                        }
-                                    } else {
-                                        setMetaListener.onClick(null, 0, TtAppCtx.getDeviceSettings().getAutoSetGpsNameToMeta());
-                                        new Handler().postDelayed(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                pd.hide();
-                                            }
-                                        }, 1000);
-                                    }
+                                } else {
+                                    setMetaListener.onClick(null, 0, TtAppCtx.getDeviceSettings().getAutoSetGpsNameToMeta());
+                                    new Handler().postDelayed(pd::hide, 1000);
                                 }
                             });
                         }
@@ -315,12 +302,7 @@ public class DeviceSettingsFragment extends PreferenceFragment {
                         @Override
                         public void gpsStarted() {
                             if (gps.isExternalGpsUsed()) {
-                                getActivity().runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        pd.setMessage("External GPS Connected. Listening for data.");
-                                    }
-                                });
+                                getActivity().runOnUiThread(() -> pd.setMessage("External GPS Connected. Listening for data."));
                             }
                         }
 
@@ -357,12 +339,7 @@ public class DeviceSettingsFragment extends PreferenceFragment {
                                 default: message = "An Unknown GPS error as occurred"; break;
                             }
 
-                            activity.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    pd.hide();
-                                }
-                            });
+                            activity.runOnUiThread(pd::hide);
 
                             Toast.makeText(activity, message, Toast.LENGTH_SHORT).show();
                         }
@@ -370,107 +347,69 @@ public class DeviceSettingsFragment extends PreferenceFragment {
 
                     gps.addListener(listener);
 
-                    final Runnable hideDialog = new Runnable() {
-                        @Override
-                        public void run() {
-                            activity.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    pd.hide();
-                                }
-                            });
-                        }
-                    };
+                    final Runnable hideDialog = () -> activity.runOnUiThread(pd::hide);
 
                     pd.setMessage(getString(R.string.ds_gps_connecting));
 
-                    pd.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                        @Override
-                        public void onDismiss(DialogInterface dialog) {
-                            gps.stopGps();
-                        }
-                    });
+                    pd.setOnDismissListener(dialog -> gps.stopGps());
 
-                    Runnable runGPS = new Runnable() {
-                        @Override
-                        public void run() {
-                            gps.stopGps();
-                            gps.setGpsProvider(TtAppCtx.getDeviceSettings().getGpsDeviceID());
+                    Runnable runGPS = () -> {
+                        gps.stopGps();
+                        gps.setGpsProvider(TtAppCtx.getDeviceSettings().getGpsDeviceID());
 
-                            switch (gps.startGps()) {
-                                case InternalGpsStarted: {
-                                    activity.runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            pd.setMessage("Internal GPS started. Listening for data.");
-                                        }
-                                    });
-                                    break;
-                                }
-                                case InternalGpsNotEnabled: {
-                                    hideDialog.run();
-                                    Toast.makeText(activity, "The internal GPS is not enabled.", Toast.LENGTH_LONG).show();
-                                    break;
-                                }
-                                case InternalGpsNeedsPermissions: {
-                                    hideDialog.run();
-                                    Toast.makeText(activity, "The GpsService needs location permissions to use the internal GPS.", Toast.LENGTH_LONG).show();
-                                    break;
-                                }
-                                case InternalGpsError: {
-                                    hideDialog.run();
-                                    Toast.makeText(activity, "The was an error starting the Internal GPS.", Toast.LENGTH_LONG).show();
-                                    break;
-                                }
-                                case ExternalGpsStarted: {
-                                    activity.runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            pd.setMessage("External GPS started. Listening for data.");
-                                        }
-                                    });
-                                    break;
-                                }
-                                case ExternalGpsConnecting: {
-                                    activity.runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            pd.setMessage("Connecting to external GPS.");
-                                        }
-                                    });
-                                    break;
-                                }
-                                case ExternalGpsNotFound: {
-                                    hideDialog.run();
-                                    Toast.makeText(activity, "The external bluetooth GPS was not found.", Toast.LENGTH_LONG).show();
-                                    break;
-                                }
-                                case ExternalGpsNotConnected: {
-                                    hideDialog.run();
-                                    Toast.makeText(activity, "The external bluetooth GPS is not connected.", Toast.LENGTH_LONG).show();
-                                    break;
-                                }
-                                case ExternalGpsError: {
-                                    hideDialog.run();
-                                    Toast.makeText(activity,"External GPS error.", Toast.LENGTH_LONG).show();
-                                    break;
-                                }
-                                case GpsAlreadyStarted: {
-                                    hideDialog.run();
-                                    Toast.makeText(activity,"GPS started. Listening for data.", Toast.LENGTH_LONG).show();
-                                    break;
-                                }
-                                default: hideDialog.run();
-                                    break;
+                        switch (gps.startGps()) {
+                            case InternalGpsStarted: {
+                                activity.runOnUiThread(() -> pd.setMessage("Internal GPS started. Listening for data."));
+                                break;
                             }
-
-                            activity.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    pd.show();
-                                }
-                            });
+                            case InternalGpsNotEnabled: {
+                                hideDialog.run();
+                                Toast.makeText(activity, "The internal GPS is not enabled.", Toast.LENGTH_LONG).show();
+                                break;
+                            }
+                            case InternalGpsNeedsPermissions: {
+                                hideDialog.run();
+                                Toast.makeText(activity, "The GpsService needs location permissions to use the internal GPS.", Toast.LENGTH_LONG).show();
+                                break;
+                            }
+                            case InternalGpsError: {
+                                hideDialog.run();
+                                Toast.makeText(activity, "The was an error starting the Internal GPS.", Toast.LENGTH_LONG).show();
+                                break;
+                            }
+                            case ExternalGpsStarted: {
+                                activity.runOnUiThread(() -> pd.setMessage("External GPS started. Listening for data."));
+                                break;
+                            }
+                            case ExternalGpsConnecting: {
+                                activity.runOnUiThread(() -> pd.setMessage("Connecting to external GPS."));
+                                break;
+                            }
+                            case ExternalGpsNotFound: {
+                                hideDialog.run();
+                                Toast.makeText(activity, "The external bluetooth GPS was not found.", Toast.LENGTH_LONG).show();
+                                break;
+                            }
+                            case ExternalGpsNotConnected: {
+                                hideDialog.run();
+                                Toast.makeText(activity, "The external bluetooth GPS is not connected.", Toast.LENGTH_LONG).show();
+                                break;
+                            }
+                            case ExternalGpsError: {
+                                hideDialog.run();
+                                Toast.makeText(activity,"External GPS error.", Toast.LENGTH_LONG).show();
+                                break;
+                            }
+                            case GpsAlreadyStarted: {
+                                hideDialog.run();
+                                Toast.makeText(activity,"GPS started. Listening for data.", Toast.LENGTH_LONG).show();
+                                break;
+                            }
+                            default: hideDialog.run();
+                                break;
                         }
+
+                        activity.runOnUiThread(pd::show);
                     };
 
                     if (gps.isGpsRunning()) {
@@ -519,26 +458,18 @@ public class DeviceSettingsFragment extends PreferenceFragment {
 
                                 TtAppCtx.getDeviceSettings().setRangeFinderConfigured(true);
 
-                                activity.runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        pd.setMessage(activity.getString(R.string.ds_rf_connected));
+                                activity.runOnUiThread(() -> {
+                                    pd.setMessage(activity.getString(R.string.ds_rf_connected));
 
-                                        if (TtAppCtx.getDeviceSettings().isRangeFinderAlwaysOn()) {
-                                            prefRFCheck.setSummary(R.string.ds_rf_connected);
-                                        } else {
-                                            prefRFCheck.setSummary(R.string.ds_dev_configured);
-                                            rf.stopRangeFinder();
-                                        }
+                                    if (TtAppCtx.getDeviceSettings().isRangeFinderAlwaysOn()) {
+                                        prefRFCheck.setSummary(R.string.ds_rf_connected);
+                                    } else {
+                                        prefRFCheck.setSummary(R.string.ds_dev_configured);
+                                        rf.stopRangeFinder();
                                     }
                                 });
 
-                                new Handler().postDelayed(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        pd.hide();
-                                    }
-                                }, 1000);
+                                new Handler().postDelayed(pd::hide, 1000);
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
@@ -551,12 +482,7 @@ public class DeviceSettingsFragment extends PreferenceFragment {
 
                         @Override
                         public void rangeFinderStarted() {
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    pd.setMessage("RangeFinder Connected. Listening for data.");
-                                }
-                            });
+                            getActivity().runOnUiThread(() -> pd.setMessage("RangeFinder Connected. Listening for data."));
                         }
 
                         @Override
@@ -595,12 +521,7 @@ public class DeviceSettingsFragment extends PreferenceFragment {
                                 default: message = "An unknown RangeFinder error as occurred"; break;
                             }
 
-                            activity.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    pd.hide();
-                                }
-                            });
+                            activity.runOnUiThread(pd::hide);
 
                             Toast.makeText(activity, message, Toast.LENGTH_SHORT).show();
                         }
@@ -608,64 +529,36 @@ public class DeviceSettingsFragment extends PreferenceFragment {
 
                     rf.addListener(listener);
 
-                    final Runnable hideDialog = new Runnable() {
-                        @Override
-                        public void run() {
-                            activity.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    pd.hide();
-                                }
-                            });
-                        }
-                    };
+                    final Runnable hideDialog = () -> activity.runOnUiThread(pd::hide);
 
                     pd.setMessage(getString(R.string.ds_rf_connecting));
 
-                    pd.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                        @Override
-                        public void onDismiss(DialogInterface dialog) {
-                            rf.stopRangeFinder();
-                        }
-                    });
+                    pd.setOnDismissListener(dialog -> rf.stopRangeFinder());
 
-                    Runnable runRF = new Runnable() {
-                        @Override
-                        public void run() {
-                            rf.setRangeFinderProvider(TtAppCtx.getDeviceSettings().getRangeFinderDeviceID());
+                    Runnable runRF = () -> {
+                        rf.setRangeFinderProvider(TtAppCtx.getDeviceSettings().getRangeFinderDeviceID());
 
-                            switch (rf.startRangeFinder()) {
-                                case RangeFinderStarted:
-                                case RangeFinderAlreadyStarted:
-                                    activity.runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            pd.setMessage("RangeFinder started. Listening for Data.");
-                                        }
-                                    });
-                                    break;
-                                case RangeFinderConnecting: {
-                                    activity.runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            pd.setMessage("Connecting to RangeFinder.");
-                                        }
-                                    });
-                                    break;
-                                }
-                                case RangeFinderError: {
-                                    hideDialog.run();
-                                    Toast.makeText(activity,"RangeFinder error.", Toast.LENGTH_LONG).show();
-                                    break;
-                                }
-                                case RangeFinderNotFound: {
-                                    hideDialog.run();
-                                    Toast.makeText(activity, "The external bluetooth RangeFinder was not found.", Toast.LENGTH_LONG).show();
-                                    break;
-                                }
-                                default: hideDialog.run();
-                                    break;
+                        switch (rf.startRangeFinder()) {
+                            case RangeFinderStarted:
+                            case RangeFinderAlreadyStarted:
+                                activity.runOnUiThread(() -> pd.setMessage("RangeFinder started. Listening for Data."));
+                                break;
+                            case RangeFinderConnecting: {
+                                activity.runOnUiThread(() -> pd.setMessage("Connecting to RangeFinder."));
+                                break;
                             }
+                            case RangeFinderError: {
+                                hideDialog.run();
+                                Toast.makeText(activity,"RangeFinder error.", Toast.LENGTH_LONG).show();
+                                break;
+                            }
+                            case RangeFinderNotFound: {
+                                hideDialog.run();
+                                Toast.makeText(activity, "The external bluetooth RangeFinder was not found.", Toast.LENGTH_LONG).show();
+                                break;
+                            }
+                            default: hideDialog.run();
+                                break;
                         }
                     };
 
@@ -750,12 +643,7 @@ public class DeviceSettingsFragment extends PreferenceFragment {
         if (!TtAppCtx.getGps().isInternalGpsEnabled()) {
             new AlertDialog.Builder(getActivity())
                     .setMessage("Location services must be turned on in order to use the GPS.")
-                    .setPositiveButton("Location Services", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            startActivityForResult(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), Consts.Codes.Requests.LOCATION);
-                        }
-                    })
+                    .setPositiveButton("Location Services", (dialog, which) -> startActivityForResult(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), Consts.Codes.Requests.LOCATION))
                     .setNeutralButton(R.string.str_cancel, null)
                     .show();
 

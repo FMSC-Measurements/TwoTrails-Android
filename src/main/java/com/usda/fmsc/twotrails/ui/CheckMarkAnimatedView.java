@@ -43,12 +43,9 @@ public class CheckMarkAnimatedView extends View {
     public void start() {
         ValueAnimator va = ValueAnimator.ofFloat(0, 1).setDuration(500);
         va.setInterpolator(new LinearInterpolator());
-        va.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                progress = (float) animation.getAnimatedValue(); // 0f ~ 1f
-                invalidate();
-            }
+        va.addUpdateListener(animation -> {
+            progress = (float) animation.getAnimatedValue(); // 0f ~ 1f
+            invalidate();
         });
         va.start();
     }

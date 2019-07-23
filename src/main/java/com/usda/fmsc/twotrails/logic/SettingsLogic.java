@@ -2,7 +2,6 @@ package com.usda.fmsc.twotrails.logic;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
 import androidx.appcompat.app.AlertDialog;
 import android.widget.Toast;
 
@@ -20,12 +19,9 @@ public class SettingsLogic {
         alert.setTitle("Reset Settings");
         alert.setMessage("Do you want to reset all the settings in TwoTrails?");
 
-        alert.setPositiveButton("Reset", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                TwoTrailsApp.getInstance().getDeviceSettings().reset();
-                TwoTrailsApp.getInstance().getArcGISTools().reset();
-            }
+        alert.setPositiveButton("Reset", (dialogInterface, i) -> {
+            TwoTrailsApp.getInstance().getDeviceSettings().reset();
+            TwoTrailsApp.getInstance().getArcGISTools().reset();
         });
 
         alert.setNeutralButton(R.string.str_cancel, null);
@@ -39,12 +35,9 @@ public class SettingsLogic {
         alert.setTitle("Clear Log File");
         alert.setMessage("Do you want clear the log file?");
 
-        alert.setPositiveButton("Clear", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                TwoTrailsApp.getInstance().getReport().clearReport();
-                Toast.makeText(context, "Log Cleared", Toast.LENGTH_SHORT).show();
-            }
+        alert.setPositiveButton("Clear", (dialogInterface, i) -> {
+            TwoTrailsApp.getInstance().getReport().clearReport();
+            Toast.makeText(context, "Log Cleared", Toast.LENGTH_SHORT).show();
         });
 
         alert.setNeutralButton(R.string.str_cancel, null);
@@ -57,18 +50,8 @@ public class SettingsLogic {
 
         if (TwoTrailsApp.getInstance().hasDAL()) {
             dialog.setMessage("Would you like to include the current project into the report?")
-                    .setPositiveButton(R.string.str_yes, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            onExportReportComplete(activity, TtUtils.exportReport(TwoTrailsApp.getInstance().getDAL()));
-                        }
-                    })
-                    .setNegativeButton(R.string.str_no, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            onExportReportComplete(activity, TtUtils.exportReport(null));
-                        }
-                    })
+                    .setPositiveButton(R.string.str_yes, (dialog1, which) -> onExportReportComplete(activity, TtUtils.exportReport(TwoTrailsApp.getInstance().getDAL())))
+                    .setNegativeButton(R.string.str_no, (dialog12, which) -> onExportReportComplete(activity, TtUtils.exportReport(null)))
                     .setNeutralButton(R.string.str_cancel, null)
                     .show();
         } else {
@@ -79,30 +62,17 @@ public class SettingsLogic {
 //    private static Snackbar snackbar;
     private static void onExportReportComplete(final Activity activity, final String filepath) {
         if (filepath != null) {
-            AndroidUtils.Device.isInternetAvailable(new AndroidUtils.Device.InternetAvailableCallback() {
-                @Override
-                public void onCheckInternet(final boolean internetAvailable) {
-                    activity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (internetAvailable) {
-                                new AlertDialog.Builder(activity)
-                                        .setMessage("Would you like to send the report to the developer team to help prevent future crashes?")
-                                        .setPositiveButton("Send", new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int which) {
-                                                TtUtils.SendEmailToDev(activity, filepath);
-                                            }
-                                        })
-                                        .setNeutralButton("Don't Send", null)
-                                        .show();
-                            } else {
-                                Toast.makeText(activity, "Report Exported to Documents/TwoTrailsFiles/" + FileUtils.getFileName(filepath), Toast.LENGTH_LONG).show();
-                            }
-                        }
-                    });
+            AndroidUtils.Device.isInternetAvailable(internetAvailable -> activity.runOnUiThread(() -> {
+                if (internetAvailable) {
+                    new AlertDialog.Builder(activity)
+                            .setMessage("Would you like to send the report to the developer team to help prevent future crashes?")
+                            .setPositiveButton("Send", (dialog, which) -> TtUtils.SendEmailToDev(activity, filepath))
+                            .setNeutralButton("Don't Send", null)
+                            .show();
+                } else {
+                    Toast.makeText(activity, "Report Exported to Documents/TwoTrailsFiles/" + FileUtils.getFileName(filepath), Toast.LENGTH_LONG).show();
                 }
-            });
+            }));
 
 //            snackbar = Snackbar.make(activity.findViewById(android.R.id.content), "Report Exported", Snackbar.LENGTH_LONG)
 //                    .setAction("View", new View.OnClickListener() {
@@ -132,41 +102,38 @@ public class SettingsLogic {
     public static void enterCode(final Context context) {
         final InputDialog idialog = new InputDialog(context);
 
-        idialog.setPositiveButton(R.string.str_ok, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                switch (idialog.getText().toLowerCase()) {
-                    case "dev":
-                    case "developer": {
-                        TwoTrailsApp.getInstance().getDeviceSettings().enabledDevelopterOptions(true);
-                        Toast.makeText(context, "Developer Mode Enabled", Toast.LENGTH_LONG).show();
-                        TwoTrailsApp.getInstance().getReport().writeDebug("Developer Mode: Enabled", "SettingsLogic:enterCode");
-                        break;
-                    }
-                    case "disable dev":
-                    case "disable developer": {
-                        TwoTrailsApp.getInstance().getDeviceSettings().enabledDevelopterOptions(false);
-                        Toast.makeText(context, "Developer Mode Disabled", Toast.LENGTH_LONG).show();
-                        TwoTrailsApp.getInstance().getReport().writeDebug("Developer Mode: Disabled", "SettingsLogic:enterCode");
-                        break;
-                    }
-                    case "dbg":
-                    case "debug" : {
-                        TwoTrailsApp.getInstance().getDeviceSettings().enabledDebugMode(true);
-                        Toast.makeText(context, "Debug Mode Enabled", Toast.LENGTH_LONG).show();
-                        TwoTrailsApp.getInstance().getReport().writeDebug("Debug Mode: Enabled", "SettingsLogic:enterCode");
-                        break;
-                    }
-                    case "disable dbg":
-                    case "disable debug" : {
-                        TwoTrailsApp.getInstance().getDeviceSettings().enabledDebugMode(false);
-                        Toast.makeText(context, "Debug Mode Disabled", Toast.LENGTH_LONG).show();
-                        TwoTrailsApp.getInstance().getReport().writeDebug("Debug Mode: Disabled", "SettingsLogic:enterCode");
-                        break;
-                    }
+        idialog.setPositiveButton(R.string.str_ok, (dialog, which) -> {
+            switch (idialog.getText().toLowerCase()) {
+                case "dev":
+                case "developer": {
+                    TwoTrailsApp.getInstance().getDeviceSettings().enabledDevelopterOptions(true);
+                    Toast.makeText(context, "Developer Mode Enabled", Toast.LENGTH_LONG).show();
+                    TwoTrailsApp.getInstance().getReport().writeDebug("Developer Mode: Enabled", "SettingsLogic:enterCode");
+                    break;
                 }
-
+                case "disable dev":
+                case "disable developer": {
+                    TwoTrailsApp.getInstance().getDeviceSettings().enabledDevelopterOptions(false);
+                    Toast.makeText(context, "Developer Mode Disabled", Toast.LENGTH_LONG).show();
+                    TwoTrailsApp.getInstance().getReport().writeDebug("Developer Mode: Disabled", "SettingsLogic:enterCode");
+                    break;
+                }
+                case "dbg":
+                case "debug" : {
+                    TwoTrailsApp.getInstance().getDeviceSettings().enabledDebugMode(true);
+                    Toast.makeText(context, "Debug Mode Enabled", Toast.LENGTH_LONG).show();
+                    TwoTrailsApp.getInstance().getReport().writeDebug("Debug Mode: Enabled", "SettingsLogic:enterCode");
+                    break;
+                }
+                case "disable dbg":
+                case "disable debug" : {
+                    TwoTrailsApp.getInstance().getDeviceSettings().enabledDebugMode(false);
+                    Toast.makeText(context, "Debug Mode Disabled", Toast.LENGTH_LONG).show();
+                    TwoTrailsApp.getInstance().getReport().writeDebug("Debug Mode: Disabled", "SettingsLogic:enterCode");
+                    break;
+                }
             }
+
         })
         .setNeutralButton(R.string.str_cancel, null)
         .show();

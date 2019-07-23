@@ -20,7 +20,7 @@ public class NmeaDetailsAdapter extends ArrayAdapter<NmeaDetailsAdapter.NmeaDeta
 
 
     public NmeaDetailsAdapter(Context context) {
-        this(context, new ArrayList<NmeaDetails>());
+        this(context, new ArrayList<>());
     }
 
     public NmeaDetailsAdapter(Context context, List<NmeaDetails> nmeaDetails) {

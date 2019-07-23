@@ -1,7 +1,6 @@
 package com.usda.fmsc.twotrails.activities;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
@@ -169,16 +168,13 @@ public class WalkActivity extends AcquireGpsMapActivity {
             dWalk = AndroidUtils.UI.getDrawable(this, R.drawable.ic_ttpoint_walk_white);
             dPause = AndroidUtils.UI.getDrawable(this, R.drawable.ic_media_pause_dark);
 
-            ibBnd.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (_CurrentPoint != null) {
-                        onBnd = !_CurrentPoint.isOnBnd();
+            ibBnd.setOnClickListener(v -> {
+                if (_CurrentPoint != null) {
+                    onBnd = !_CurrentPoint.isOnBnd();
 
-                        ibBnd.setImageDrawable(onBnd ? dOnBnd : dOffBnd);
-                        _CurrentPoint.setOnBnd(onBnd);
-                        updated = true;
-                    }
+                    ibBnd.setImageDrawable(onBnd ? dOnBnd : dOffBnd);
+                    _CurrentPoint.setOnBnd(onBnd);
+                    updated = true;
                 }
             });
 
@@ -227,12 +223,9 @@ public class WalkActivity extends AcquireGpsMapActivity {
                     AlertDialog.Builder dialog = new AlertDialog.Builder(this);
                     dialog.setMessage("The you are currently acquiring a point. Do you want to exit anyway?");
 
-                    dialog.setPositiveButton(R.string.str_yes, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            stopLogging();
-                            finish();
-                        }
+                    dialog.setPositiveButton(R.string.str_yes, (dialog1, which) -> {
+                        stopLogging();
+                        finish();
                     })
                     .setNeutralButton(R.string.str_cancel, null);
 
@@ -316,27 +309,24 @@ public class WalkActivity extends AcquireGpsMapActivity {
         dialog.setTitle(String.format("Rename Group (%s)", _Group.getName()));
         dialog.setInputText(_Group.getName());
 
-        dialog.setPositiveButton("Rename", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                String name = dialog.getText();
+        dialog.setPositiveButton("Rename", (dialogInterface, i) -> {
+            String name = dialog.getText();
 
-                _Group.setName(name);
-                getTtAppCtx().getDAL().updateGroup(_Group);
+            _Group.setName(name);
+            getTtAppCtx().getDAL().updateGroup(_Group);
 
-                if (_CurrentPoint != null) {
-                    _CurrentPoint.setGroupName(name);
-                    updated = true;
+            if (_CurrentPoint != null) {
+                _CurrentPoint.setGroupName(name);
+                updated = true;
 
-                    List<TtPoint> points = getTtAppCtx().getDAL().getPointsInGroup(_Group.getCN());
+                List<TtPoint> points = getTtAppCtx().getDAL().getPointsInGroup(_Group.getCN());
 
-                    if (points.size() > 0) {
-                        for (TtPoint p : points) {
-                            p.setGroupName(name);
-                        }
-
-                        getTtAppCtx().getDAL().updatePoints(points);
+                if (points.size() > 0) {
+                    for (TtPoint p : points) {
+                        p.setGroupName(name);
                     }
+
+                    getTtAppCtx().getDAL().updatePoints(points);
                 }
             }
         })

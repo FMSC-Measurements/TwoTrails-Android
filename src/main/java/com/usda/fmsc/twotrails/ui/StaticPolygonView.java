@@ -11,7 +11,6 @@ import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.twotrails.fragments.polygon.PolygonFragment;
 import com.usda.fmsc.twotrails.objects.PointD;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class StaticPolygonView extends View {

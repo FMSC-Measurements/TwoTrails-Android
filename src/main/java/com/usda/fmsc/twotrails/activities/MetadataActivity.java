@@ -67,12 +67,7 @@ public class MetadataActivity extends CustomToolbarActivity {
         if (_Metadata == null || _Metadata.size() < 1) {
             _Metadata = getTtAppCtx().getDAL().getMetadata();
             if (mSectionsPagerAdapter != null) {
-                new Handler(getMainLooper()).post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mSectionsPagerAdapter.notifyDataSetChanged();
-                    }
-                });
+                new Handler(getMainLooper()).post(() -> mSectionsPagerAdapter.notifyDataSetChanged());
             }
         }
 
@@ -186,48 +181,43 @@ public class MetadataActivity extends CustomToolbarActivity {
                     AlertDialog.Builder alert = new AlertDialog.Builder(this);
                     alert.setTitle(String.format("Delete Metadata %s", _CurrentMetadata.getName()));
 
-                    alert.setPositiveButton(R.string.str_delete, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
+                    alert.setPositiveButton(R.string.str_delete, (dialog, which) -> {
 
-                            AnimationCardFragment card = ((AnimationCardFragment) mSectionsPagerAdapter.getFragments().get(_CurrentIndex));
+                        AnimationCardFragment card = ((AnimationCardFragment) mSectionsPagerAdapter.getFragments().get(_CurrentIndex));
 
-                            card.setVisibilityListener(new AnimationCardFragment.VisibilityListener() {
-                                @Override
-                                public void onHidden() {
+                        card.setVisibilityListener(new AnimationCardFragment.VisibilityListener() {
+                            @Override
+                            public void onHidden() {
 
-                                    new Handler().post(new Runnable() {
-                                        public void run() {
-                                            if (_CurrentIndex > 0) {
-                                                _deleteIndex = _CurrentIndex;
-                                                _deleteMeta = _CurrentMetadata;
+                                new Handler().post(() -> {
+                                    if (_CurrentIndex > 0) {
+                                        _deleteIndex = _CurrentIndex;
+                                        _deleteMeta = _CurrentMetadata;
 
-                                                _CurrentIndex--;
-                                                ignoreMetaChange = true;
+                                        _CurrentIndex--;
+                                        ignoreMetaChange = true;
 
-                                                moveToMetadata(_CurrentIndex);
-                                            } else if (getMetadata().size() > 1) {
-                                                _deleteIndex = _CurrentIndex;
-                                                _deleteMeta = _CurrentMetadata;
+                                        moveToMetadata(_CurrentIndex);
+                                    } else if (getMetadata().size() > 1) {
+                                        _deleteIndex = _CurrentIndex;
+                                        _deleteMeta = _CurrentMetadata;
 
-                                                _CurrentIndex++;
-                                                ignoreMetaChange = true;
-                                                moveToMetadata(_CurrentIndex);
-                                            } else {
-                                                deleteMetadata(_deleteMeta, _CurrentIndex);
-                                            }
-                                        }
-                                    });
-                                }
+                                        _CurrentIndex++;
+                                        ignoreMetaChange = true;
+                                        moveToMetadata(_CurrentIndex);
+                                    } else {
+                                        deleteMetadata(_deleteMeta, _CurrentIndex);
+                                    }
+                                });
+                            }
 
-                                @Override
-                                public void onVisible() {
+                            @Override
+                            public void onVisible() {
 
-                                }
-                            });
+                            }
+                        });
 
-                            card.hideCard();
-                        }
+                        card.hideCard();
                     });
 
                     alert.setNeutralButton(R.string.str_cancel, null);
@@ -336,15 +326,12 @@ public class MetadataActivity extends CustomToolbarActivity {
             dialog.setTitle(String.format("Reset Metadata %s", _CurrentMetadata.getName()));
             dialog.setMessage(getString(R.string.meta_reset_diag));
 
-            dialog.setPositiveButton("Reset", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    _CurrentMetadata = getMetaAtIndex(_CurrentIndex);
-                    onMetadataUpdate();
-                    updateButtons();
-                    setMetadataUpdated(false, true);
-                    lockMetadata(false);
-                }
+            dialog.setPositiveButton("Reset", (dialogInterface, i) -> {
+                _CurrentMetadata = getMetaAtIndex(_CurrentIndex);
+                onMetadataUpdate();
+                updateButtons();
+                setMetadataUpdated(false, true);
+                lockMetadata(false);
             });
 
             dialog.setNeutralButton(R.string.str_cancel, null);
@@ -484,13 +471,10 @@ public class MetadataActivity extends CustomToolbarActivity {
             inputDialog.setTitle("Name");
             inputDialog.setInputText(_CurrentMetadata.getName());
 
-            inputDialog.setPositiveButton(R.string.str_ok, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    String name = inputDialog.getText();
-                    _CurrentMetadata.setName(name);
-                    onMetadataUpdate();
-                }
+            inputDialog.setPositiveButton(R.string.str_ok, (dialog, which) -> {
+                String name = inputDialog.getText();
+                _CurrentMetadata.setName(name);
+                onMetadataUpdate();
             });
 
             inputDialog.setNeutralButton(R.string.str_cancel, null);
@@ -508,45 +492,39 @@ public class MetadataActivity extends CustomToolbarActivity {
             inputDialog.setTitle(R.string.str_zone);
             inputDialog.setInputText(StringEx.toString(_CurrentMetadata.getZone()));
 
-            inputDialog.setPositiveButton(R.string.str_ok, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    final Integer zone = inputDialog.getInt();
+            inputDialog.setPositiveButton(R.string.str_ok, (dialog, which) -> {
+                final Integer zone = inputDialog.getInt();
 
-                    if (zone != null && zone >= 0) {
-                        final ProgressDialog progressDialog = new ProgressDialog(MetadataActivity.this);
-                        progressDialog.setMessage("Recalculating Positions");
-                        progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-                        progressDialog.show();
+                if (zone != null && zone >= 0) {
+                    final ProgressDialog progressDialog = new ProgressDialog(MetadataActivity.this);
+                    progressDialog.setMessage("Recalculating Positions");
+                    progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                    progressDialog.show();
 
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                ArrayList<TtPoint> points = getTtAppCtx().getDAL().getGpsTypePointsWithMeta(_CurrentMetadata.getCN());
-                                progressDialog.setMax(points.size() * 2);
+                    new Thread(() -> {
+                        ArrayList<TtPoint> points = getTtAppCtx().getDAL().getGpsTypePointsWithMeta(_CurrentMetadata.getCN());
+                        progressDialog.setMax(points.size() * 2);
 
-                                if (points.size() > 0) {
-                                    for (int i = 0; i < points.size(); i++) {
-                                        points.set(i, TtUtils.Points.reCalculateGps(points.get(i), zone, getTtAppCtx().getDAL(), null));
+                        if (points.size() > 0) {
+                            for (int i = 0; i < points.size(); i++) {
+                                points.set(i, TtUtils.Points.reCalculateGps(points.get(i), zone, getTtAppCtx().getDAL(), null));
 
-                                        progressDialog.setProgress(i);
-                                    }
-
-                                    getTtAppCtx().getDAL().updatePoints(points);
-
-                                    progressDialog.setProgress(points.size() * 2);
-                                }
-
-                                progressDialog.dismiss();
+                                progressDialog.setProgress(i);
                             }
-                        }).start();
 
-                        _CurrentMetadata.setZone(zone);
-                        onMetadataUpdate();
-                        adjust = true;
-                    } else {
-                        Toast.makeText(mContext, R.string.str_invalid, Toast.LENGTH_SHORT).show();
-                    }
+                            getTtAppCtx().getDAL().updatePoints(points);
+
+                            progressDialog.setProgress(points.size() * 2);
+                        }
+
+                        progressDialog.dismiss();
+                    }).start();
+
+                    _CurrentMetadata.setZone(zone);
+                    onMetadataUpdate();
+                    adjust = true;
+                } else {
+                    Toast.makeText(mContext, R.string.str_invalid, Toast.LENGTH_SHORT).show();
                 }
             });
 
@@ -557,135 +535,117 @@ public class MetadataActivity extends CustomToolbarActivity {
             final AlertDialog ndialog = inputDialog.create();
 
             //override after onshow so the get zone btn doesn't close the dialog
-            ndialog.setOnShowListener(new DialogInterface.OnShowListener() {
-                @Override
-                public void onShow(DialogInterface dialogInterface) {
-                    InputMethodManager imm = (InputMethodManager) inputDialog.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.showSoftInput(inputDialog.getInput(), InputMethodManager.SHOW_IMPLICIT);
-                    inputDialog.getInput().setSelection(inputDialog.getInput().length());
+            ndialog.setOnShowListener(dialogInterface -> {
+                InputMethodManager imm = (InputMethodManager) inputDialog.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.showSoftInput(inputDialog.getInput(), InputMethodManager.SHOW_IMPLICIT);
+                inputDialog.getInput().setSelection(inputDialog.getInput().length());
 
-                    ndialog.getButton(DialogInterface.BUTTON_NEUTRAL).setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
+                ndialog.getButton(DialogInterface.BUTTON_NEUTRAL).setOnClickListener(view1 -> {
 
-                            if (getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
-                                gotNmea = false;
+                    if (getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
+                        gotNmea = false;
 
-                                getTtAppCtx().getGps().startGps();
+                        getTtAppCtx().getGps().startGps();
 
-                                listener = new GpsService.Listener() {
-                                    @Override
-                                    public void nmeaBurstReceived(INmeaBurst nmeaBurst) {
-                                        if (!getTtAppCtx().getDeviceSettings().isGpsAlwaysOn()) {
-                                            getTtAppCtx().getGps().stopGps();
-                                        }
+                        listener = new GpsService.Listener() {
+                            @Override
+                            public void nmeaBurstReceived(INmeaBurst nmeaBurst) {
+                                if (!getTtAppCtx().getDeviceSettings().isGpsAlwaysOn()) {
+                                    getTtAppCtx().getGps().stopGps();
+                                }
 
-                                        inputDialog.getInput().setText(StringEx.toString(nmeaBurst.getTrueUTM().getZone()));
+                                inputDialog.getInput().setText(StringEx.toString(nmeaBurst.getTrueUTM().getZone()));
 
-                                        gotNmea = true;
+                                gotNmea = true;
 
-                                        if (listener != null) {
-                                            getTtAppCtx().getGps().addListener(listener);
-                                        }
-                                    }
-
-                                    @Override
-                                    public void nmeaStringReceived(String nmeaString) {
-
-                                    }
-
-                                    @Override
-                                    public void nmeaSentenceReceived(NmeaSentence nmeaSentence) {
-                                        //
-                                    }
-
-                                    @Override
-                                    public void nmeaBurstValidityChanged(boolean burstsValid) { }
-
-                                    @Override
-                                    public void gpsStarted() {
-
-                                    }
-
-                                    @Override
-                                    public void gpsStopped() {
-
-                                    }
-
-                                    @Override
-                                    public void gpsServiceStarted() {
-
-                                    }
-
-                                    @Override
-                                    public void gpsServiceStopped() {
-
-                                    }
-
-                                    @Override
-                                    public void gpsError(GpsService.GpsError error) {
-                                        if (!getTtAppCtx().getDeviceSettings().isGpsAlwaysOn()) {
-                                            getTtAppCtx().getGps().stopGps();
-                                        }
-
-                                        if (listener != null) {
-                                            getTtAppCtx().getGps().addListener(listener);
-                                        }
-                                    }
-                                };
-
-                                getTtAppCtx().getGps().addListener(listener);
-
-                                final Handler mHandler = new Handler();
-
-                                final Runnable notifyIfFail = new Runnable() {
-                                    public void run() {
-                                        try {
-                                            Thread.sleep(10000);
-
-                                            if (!getTtAppCtx().getDeviceSettings().isGpsAlwaysOn()) {
-                                                getTtAppCtx().getGps().stopGps();
-                                            }
-
-                                            if (!gotNmea) {
-                                                Toast.makeText(mContext, "GPS timed out.", Toast.LENGTH_SHORT).show();
-                                            }
-
-                                        } catch (InterruptedException e) {
-                                            e.printStackTrace();
-                                        }
-                                    }
-                                };
-
-                                new Thread() {
-                                    public void run() {
-                                        mHandler.post(notifyIfFail);
-                                    }
-                                }.start();
-                            } else {
-                                AlertDialog.Builder dialog = new AlertDialog.Builder(mContext);
-
-                                dialog.setTitle("GPS not Configured");
-                                dialog.setMessage("Would you like to configure the GPS now?");
-
-                                dialog.setPositiveButton(R.string.str_yes, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialogInterface, int i) {
-                                        startActivity(new Intent(mContext, SettingsActivity.class).putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.GPS_SETTINGS_PAGE));
-                                    }
-                                });
-
-                                dialog.setNegativeButton(R.string.str_no, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialogInterface, int i) {
-                                        ndialog.show();
-                                    }
-                                });
-                                dialog.show();
+                                if (listener != null) {
+                                    getTtAppCtx().getGps().addListener(listener);
+                                }
                             }
-                        }
-                    });
-                }
+
+                            @Override
+                            public void nmeaStringReceived(String nmeaString) {
+
+                            }
+
+                            @Override
+                            public void nmeaSentenceReceived(NmeaSentence nmeaSentence) {
+                                //
+                            }
+
+                            @Override
+                            public void nmeaBurstValidityChanged(boolean burstsValid) { }
+
+                            @Override
+                            public void gpsStarted() {
+
+                            }
+
+                            @Override
+                            public void gpsStopped() {
+
+                            }
+
+                            @Override
+                            public void gpsServiceStarted() {
+
+                            }
+
+                            @Override
+                            public void gpsServiceStopped() {
+
+                            }
+
+                            @Override
+                            public void gpsError(GpsService.GpsError error) {
+                                if (!getTtAppCtx().getDeviceSettings().isGpsAlwaysOn()) {
+                                    getTtAppCtx().getGps().stopGps();
+                                }
+
+                                if (listener != null) {
+                                    getTtAppCtx().getGps().addListener(listener);
+                                }
+                            }
+                        };
+
+                        getTtAppCtx().getGps().addListener(listener);
+
+                        final Handler mHandler = new Handler();
+
+                        final Runnable notifyIfFail = () -> {
+                            try {
+                                Thread.sleep(10000);
+
+                                if (!getTtAppCtx().getDeviceSettings().isGpsAlwaysOn()) {
+                                    getTtAppCtx().getGps().stopGps();
+                                }
+
+                                if (!gotNmea) {
+                                    Toast.makeText(mContext, "GPS timed out.", Toast.LENGTH_SHORT).show();
+                                }
+
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        };
+
+                        new Thread() {
+                            public void run() {
+                                mHandler.post(notifyIfFail);
+                            }
+                        }.start();
+                    } else {
+                        AlertDialog.Builder dialog = new AlertDialog.Builder(mContext);
+
+                        dialog.setTitle("GPS not Configured");
+                        dialog.setMessage("Would you like to configure the GPS now?");
+
+                        dialog.setPositiveButton(R.string.str_yes, (dialogInterface1, i) -> startActivity(new Intent(mContext, SettingsActivity.class).putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.GPS_SETTINGS_PAGE)));
+
+                        dialog.setNegativeButton(R.string.str_no, (dialogInterface1, i) -> ndialog.show());
+                        dialog.show();
+                    }
+                });
             });
 
             ndialog.show();
@@ -699,18 +659,15 @@ public class MetadataActivity extends CustomToolbarActivity {
             inputDialog.setTitle(R.string.str_mag_dec);
             inputDialog.setInputText(StringEx.toString(_CurrentMetadata.getMagDec()));
 
-            inputDialog.setPositiveButton(R.string.str_ok, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    Double acc = inputDialog.getDouble();
+            inputDialog.setPositiveButton(R.string.str_ok, (dialog, which) -> {
+                Double acc = inputDialog.getDouble();
 
-                    if (acc != null) {
-                        _CurrentMetadata.setMagDec(acc);
-                        onMetadataUpdate();
-                        adjust = true;
-                    } else {
-                        Toast.makeText(getBaseContext(), R.string.str_invalid, Toast.LENGTH_SHORT).show();
-                    }
+                if (acc != null) {
+                    _CurrentMetadata.setMagDec(acc);
+                    onMetadataUpdate();
+                    adjust = true;
+                } else {
+                    Toast.makeText(getBaseContext(), R.string.str_invalid, Toast.LENGTH_SHORT).show();
                 }
             });
 
@@ -727,12 +684,9 @@ public class MetadataActivity extends CustomToolbarActivity {
 
             edialog.setTitle(R.string.meta_dec_type);
 
-            edialog.setOnClickListener(new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    _CurrentMetadata.setDecType(edialog.getSelectedItem());
-                    onMetadataUpdate();
-                }
+            edialog.setOnClickListener((dialog, which) -> {
+                _CurrentMetadata.setDecType(edialog.getSelectedItem());
+                onMetadataUpdate();
             });
 
             edialog.show();
@@ -746,12 +700,9 @@ public class MetadataActivity extends CustomToolbarActivity {
 
             edialog.setTitle(R.string.meta_datum);
 
-            edialog.setOnClickListener(new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    _CurrentMetadata.setDatum(edialog.getSelectedItem());
-                    onMetadataUpdate();
-                }
+            edialog.setOnClickListener((dialog, which) -> {
+                _CurrentMetadata.setDatum(edialog.getSelectedItem());
+                onMetadataUpdate();
             });
 
             edialog.show();
@@ -765,12 +716,9 @@ public class MetadataActivity extends CustomToolbarActivity {
 
             edialog.setTitle(R.string.str_dist);
 
-            edialog.setOnClickListener(new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    _CurrentMetadata.setDistance(edialog.getSelectedItem());
-                    onMetadataUpdate();
-                }
+            edialog.setOnClickListener((dialog, which) -> {
+                _CurrentMetadata.setDistance(edialog.getSelectedItem());
+                onMetadataUpdate();
             });
 
             edialog.show();
@@ -784,12 +732,9 @@ public class MetadataActivity extends CustomToolbarActivity {
 
             edialog.setTitle(R.string.str_elev);
 
-            edialog.setOnClickListener(new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    _CurrentMetadata.setElevation(edialog.getSelectedItem());
-                    onMetadataUpdate();
-                }
+            edialog.setOnClickListener((dialog, which) -> {
+                _CurrentMetadata.setElevation(edialog.getSelectedItem());
+                onMetadataUpdate();
             });
 
             edialog.show();
@@ -803,12 +748,9 @@ public class MetadataActivity extends CustomToolbarActivity {
 
             edialog.setTitle(R.string.meta_slope);
 
-            edialog.setOnClickListener(new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    _CurrentMetadata.setSlope(edialog.getSelectedItem());
-                    onMetadataUpdate();
-                }
+            edialog.setOnClickListener((dialog, which) -> {
+                _CurrentMetadata.setSlope(edialog.getSelectedItem());
+                onMetadataUpdate();
             });
 
             edialog.show();
@@ -822,12 +764,9 @@ public class MetadataActivity extends CustomToolbarActivity {
             edialog.setDefaultValue(_CurrentMetadata.getGpsReceiver());
 
             edialog.setTitle(getString(R.string.meta_gps_rec));
-            edialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    _CurrentMetadata.setGpsReceiver(edialog.getSelectedItem());
-                    onMetadataUpdate();
-                }
+            edialog.setPositiveButton("OK", (dialog, which) -> {
+                _CurrentMetadata.setGpsReceiver(edialog.getSelectedItem());
+                onMetadataUpdate();
             });
             edialog.setNegativeButton("Cancel", null);
 
@@ -842,12 +781,9 @@ public class MetadataActivity extends CustomToolbarActivity {
             edialog.setDefaultValue(_CurrentMetadata.getRangeFinder());
 
             edialog.setTitle(getString(R.string.meta_range_finder));
-            edialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    _CurrentMetadata.setRangeFinder(edialog.getSelectedItem());
-                    onMetadataUpdate();
-                }
+            edialog.setPositiveButton("OK", (dialog, which) -> {
+                _CurrentMetadata.setRangeFinder(edialog.getSelectedItem());
+                onMetadataUpdate();
             });
             edialog.setNegativeButton("Cancel", null);
 
@@ -862,13 +798,10 @@ public class MetadataActivity extends CustomToolbarActivity {
             inputDialog.setTitle(R.string.meta_compass);
             inputDialog.setInputText(_CurrentMetadata.getCompass());
 
-            inputDialog.setPositiveButton(R.string.str_ok, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    String compass = inputDialog.getText();
-                    _CurrentMetadata.setCompass(compass);
-                    onMetadataUpdate();
-                }
+            inputDialog.setPositiveButton(R.string.str_ok, (dialog, which) -> {
+                String compass = inputDialog.getText();
+                _CurrentMetadata.setCompass(compass);
+                onMetadataUpdate();
             });
 
             inputDialog.setNeutralButton(R.string.str_cancel, null);
@@ -884,13 +817,10 @@ public class MetadataActivity extends CustomToolbarActivity {
             inputDialog.setTitle(R.string.meta_crew);
             inputDialog.setInputText(_CurrentMetadata.getCrew());
 
-            inputDialog.setPositiveButton(R.string.str_ok, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    String crew = inputDialog.getText();
-                    _CurrentMetadata.setCrew(crew);
-                    onMetadataUpdate();
-                }
+            inputDialog.setPositiveButton(R.string.str_ok, (dialog, which) -> {
+                String crew = inputDialog.getText();
+                _CurrentMetadata.setCrew(crew);
+                onMetadataUpdate();
             });
 
             inputDialog.setNeutralButton(R.string.str_cancel, null);
@@ -906,13 +836,10 @@ public class MetadataActivity extends CustomToolbarActivity {
             inputDialog.setTitle(R.string.str_cmt);
             inputDialog.setInputText(_CurrentMetadata.getComment());
 
-            inputDialog.setPositiveButton(R.string.str_ok, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    String cmt = inputDialog.getText();
-                    _CurrentMetadata.setComment(cmt);
-                    onMetadataUpdate();
-                }
+            inputDialog.setPositiveButton(R.string.str_ok, (dialog, which) -> {
+                String cmt = inputDialog.getText();
+                _CurrentMetadata.setComment(cmt);
+                onMetadataUpdate();
             });
 
             inputDialog.setNeutralButton(R.string.str_cancel, null);

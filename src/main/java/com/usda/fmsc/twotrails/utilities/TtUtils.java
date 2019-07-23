@@ -1174,12 +1174,7 @@ public class TtUtils {
         public static void askAndUpdateImageOrientation(final Activity activity, final TtImage image) {
             new AlertDialog.Builder(activity)
                     .setMessage("Would you like to update the orientation (Azimuth) to this image?")
-                    .setPositiveButton(R.string.str_yes, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            updateImageOrientation(activity, image);
-                        }
-                    })
+                    .setPositiveButton(R.string.str_yes, (dialog, which) -> updateImageOrientation(activity, image))
                     .setNegativeButton(R.string.str_no, null)
                     .show();
         }

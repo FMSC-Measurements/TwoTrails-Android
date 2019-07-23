@@ -2,7 +2,6 @@ package com.usda.fmsc.twotrails.activities;
 
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import androidx.appcompat.app.AlertDialog;
@@ -70,54 +69,41 @@ public class GetMapExtentsActivity extends AppCompatActivity implements GpsServi
         btnMap = findViewById(R.id.getMapFabMap);
         btnGps = findViewById(R.id.getMapFabPos);
 
-        btnMap.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                final DownloadOfflineArcGISMapTask task = new DownloadOfflineArcGISMapTask(
-                        agml,
-                        fragment.getArcExtents(),
-                        fragment.getSpatialReference(),
-                        null,
-                        TtAppCtx.getArcGISTools().getCredentials(GetMapExtentsActivity.this));
+        btnMap.setOnLongClickListener(v -> {
+            final DownloadOfflineArcGISMapTask task = new DownloadOfflineArcGISMapTask(
+                    agml,
+                    fragment.getArcExtents(),
+                    fragment.getSpatialReference(),
+                    null,
+                    TtAppCtx.getArcGISTools().getCredentials(GetMapExtentsActivity.this));
 
-                task.getMapServiceInfo(new DownloadOfflineArcGISMapTask.ServiceInfoListener() {
-                    @Override
-                    public void onInfoReceived(final MapServiceInfo msi) {
-                        GetMapExtentsActivity.this.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                new AlertDialog.Builder(GetMapExtentsActivity.this)
-                                        .setTitle("Map Service Info")
-                                        .setMessage(StringEx.format("Map Name: %s\nMin Scale: 1:%.4f\nMax Scale: 1:%.4f\nMax Export Tiles: %d\nMax Record Count: %d\n\nURL: %s\n\nDescription: %s",
-                                            msi.getMapName(),
-                                            msi.getMinScale(), msi.getMaxScale(),
-                                            msi.getMaxExportTilesCount(),
-                                            msi.getMaximumRecordCount(),
-                                            msi.getUrl(),
-                                            msi.getDescription()
-                                        ))
-                                        .setPositiveButton(R.string.str_ok, null)
-                                        .show();
-                            }
-                        });
-                    }
+            task.getMapServiceInfo(new DownloadOfflineArcGISMapTask.ServiceInfoListener() {
+                @Override
+                public void onInfoReceived(final MapServiceInfo msi) {
+                    GetMapExtentsActivity.this.runOnUiThread(() -> new AlertDialog.Builder(GetMapExtentsActivity.this)
+                            .setTitle("Map Service Info")
+                            .setMessage(StringEx.format("Map Name: %s\nMin Scale: 1:%.4f\nMax Scale: 1:%.4f\nMax Export Tiles: %d\nMax Record Count: %d\n\nURL: %s\n\nDescription: %s",
+                                msi.getMapName(),
+                                msi.getMinScale(), msi.getMaxScale(),
+                                msi.getMaxExportTilesCount(),
+                                msi.getMaximumRecordCount(),
+                                msi.getUrl(),
+                                msi.getDescription()
+                            ))
+                            .setPositiveButton(R.string.str_ok, null)
+                            .show());
+                }
 
-                    @Override
-                    public void onError(String error) {
-                        GetMapExtentsActivity.this.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                new AlertDialog.Builder(GetMapExtentsActivity.this)
-                                        .setMessage("Error receiving map info.")
-                                        .setPositiveButton(R.string.str_ok, null)
-                                        .show();
-                            }
-                        });
-                    }
-                });
+                @Override
+                public void onError(String error) {
+                    GetMapExtentsActivity.this.runOnUiThread(() -> new AlertDialog.Builder(GetMapExtentsActivity.this)
+                            .setMessage("Error receiving map info.")
+                            .setPositiveButton(R.string.str_ok, null)
+                            .show());
+                }
+            });
 
-                return true;
-            }
+            return true;
         });
 
         //squareOverlay = (SquareOverlay)findViewById(R.id.getMapOverlay);
@@ -232,52 +218,31 @@ public class GetMapExtentsActivity extends AppCompatActivity implements GpsServi
             estimateReceived = true;
 
             if (progressDialog != null) {
-                GetMapExtentsActivity.this.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        progressDialog.hide();
-                    }
-                });
+                GetMapExtentsActivity.this.runOnUiThread(() -> progressDialog.hide());
             }
 
-            GetMapExtentsActivity.this.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if (bytes != null && bytes > 0) {
-                        estimateDialog = new AlertDialog.Builder(GetMapExtentsActivity.this)
-                                .setMessage(StringEx.format("Estimated map size: %d Mb", bytes / 1000000))
-                                .setPositiveButton("Download", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        TtAppCtx.getArcGISTools().startOfflineMapDownload(task);
-                                        GetMapExtentsActivity.this.setResult(Consts.Codes.Results.DOWNLOADING_MAP);
-                                        GetMapExtentsActivity.this.finish();
-                                    }
-                                })
-                                .setNeutralButton(R.string.str_cancel, null)
-                                .setOnDismissListener(new DialogInterface.OnDismissListener() {
-                                    @Override
-                                    public void onDismiss(DialogInterface dialog) {
-                                        estimateReceived = false;
-                                    }
-                                })
-                                .create();
+            GetMapExtentsActivity.this.runOnUiThread(() -> {
+                if (bytes != null && bytes > 0) {
+                    estimateDialog = new AlertDialog.Builder(GetMapExtentsActivity.this)
+                            .setMessage(StringEx.format("Estimated map size: %d Mb", bytes / 1000000))
+                            .setPositiveButton("Download", (dialog, which) -> {
+                                TtAppCtx.getArcGISTools().startOfflineMapDownload(task);
+                                GetMapExtentsActivity.this.setResult(Consts.Codes.Results.DOWNLOADING_MAP);
+                                GetMapExtentsActivity.this.finish();
+                            })
+                            .setNeutralButton(R.string.str_cancel, null)
+                            .setOnDismissListener(dialog -> estimateReceived = false)
+                            .create();
 
-                        estimateDialog.show();
-                    } else {
-                        new AlertDialog.Builder(GetMapExtentsActivity.this)
-                                .setMessage("This Map is too large to download from the selected map service.")
-                                .setPositiveButton(R.string.str_ok, null)
-                                .setOnDismissListener(new DialogInterface.OnDismissListener() {
-                                    @Override
-                                    public void onDismiss(DialogInterface dialog) {
-                                        estimateReceived = false;
-                                    }
-                                }).show();
-                    }
-
-                    btnMap.setEnabled(true);
+                    estimateDialog.show();
+                } else {
+                    new AlertDialog.Builder(GetMapExtentsActivity.this)
+                            .setMessage("This Map is too large to download from the selected map service.")
+                            .setPositiveButton(R.string.str_ok, null)
+                            .setOnDismissListener(dialog -> estimateReceived = false).show();
                 }
+
+                btnMap.setEnabled(true);
             });
 
             estimating = false;

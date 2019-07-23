@@ -36,8 +36,8 @@ public class SelectMapTypeDialog extends DialogFragment {
     private List<ArcGisMapLayer> mapLayers;
 
     private SelectMapMode mode;
-    private MapType mapType, defaultMapType;
-    private int mapId = -1, defaultMapId;
+    private MapType mapType;
+    private int mapId = -1;
 
     private LayoutInflater inflater;
     private View arcView, gmapView;
@@ -93,10 +93,6 @@ public class SelectMapTypeDialog extends DialogFragment {
 
         inflater = LayoutInflater.from(getContext());
 
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            AndroidUtils.UI.setOverscrollColor(getResources(), getContext(), R.color.primary);
-        }
-
         FrameLayout fl = new FrameLayout(getActivity());
 
         View view = inflater.inflate(mode == SelectMapMode.ALL ? R.layout.diag_select_map :  R.layout.diag_select_map_arc_map, fl);
@@ -124,14 +120,11 @@ public class SelectMapTypeDialog extends DialogFragment {
                 }
             }
 
-            arcMapAdapter = new ArcGisMapSelectionAdapter(getContext(), amls, -1, new ArcGisMapSelectionAdapter.IArcGisMapAdapterListener() {
-                @Override
-                public void onArcGisMapSelected(ArcGisMapLayer map) {
-                    mapType = MapType.ArcGIS;
-                    mapId = map.getId();
+            arcMapAdapter = new ArcGisMapSelectionAdapter(getContext(), amls, -1, map -> {
+                mapType = MapType.ArcGIS;
+                mapId = map.getId();
 
-                    onMapSelected();
-                }
+                onMapSelected();
             });
             lvArcMap.setAdapter(arcMapAdapter);
         } else {
@@ -159,8 +152,7 @@ public class SelectMapTypeDialog extends DialogFragment {
 
 
     private void onMapSelected() {
-        if (listener != null && (mapType != null && mapId != -1 &&
-                (mapType != defaultMapType || mapId != defaultMapId))) {
+        if (listener != null && (mapType != null && mapId != -1)) {
             listener.mapSelected(mapType, mapId);
         }
 

@@ -33,7 +33,7 @@ public class PointEditorDialog extends DialogFragment {
     private static String PID = "PID";
     private static String METACN = "METACN";
     private static String META = "META";
-    int ds = -1;
+    private int ds = -1;
 
     private View lastSelected;
     private Button posButton;
@@ -42,7 +42,7 @@ public class PointEditorDialog extends DialogFragment {
     private String posBtnText, negBtnText, pid, metacn, newMetacn, cn;
     private ArrayList<TtMetadata> meta = null;
 
-    PointEditorListener listener;
+    private PointEditorListener listener;
 
 
     public static PointEditorDialog newInstance(String cn, int pid, String metacn, HashMap<String, TtMetadata> metas) {
@@ -66,7 +66,7 @@ public class PointEditorDialog extends DialogFragment {
         negBtnText = "Cancel";
     }
 
-    DialogInterface.OnClickListener onPosClick, onNegClick;
+    private DialogInterface.OnClickListener onPosClick, onNegClick;
 
 
     @Override
@@ -118,73 +118,64 @@ public class PointEditorDialog extends DialogFragment {
         lvcMeta.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         lvcMeta.setAdapter(new MetadataDetailsAdapter(getContext(), meta, ds));
 
-        lvcMeta.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                TtMetadata m = meta.get(position);
+        lvcMeta.setOnItemClickListener((parent, view1, position, id) -> {
+            TtMetadata m = meta.get(position);
 
-                if (!m.getCN().equals(metacn)) {
-                    posButton.setEnabled(true);
-                }
-
-                newMetacn = m.getCN();
-
-                if (lastSelected == null && ds > -1) {
-                    lvcMeta.getChildAt(ds).setBackground(AndroidUtils.UI.getDrawable(getContext(), R.drawable.list_item_selector));
-                    ds = -1;
-                } else if (lastSelected != null && lastSelected != view) {
-                    lastSelected.setSelected(false);
-                }
-
-                view.setSelected(true);
-                lastSelected = view;
+            if (!m.getCN().equals(metacn)) {
+                posButton.setEnabled(true);
             }
+
+            newMetacn = m.getCN();
+
+            if (lastSelected == null && ds > -1) {
+                lvcMeta.getChildAt(ds).setBackground(AndroidUtils.UI.getDrawable(getContext(), R.drawable.list_item_selector));
+                ds = -1;
+            } else if (lastSelected != null && lastSelected != view1) {
+                lastSelected.setSelected(false);
+            }
+
+            view1.setSelected(true);
+            lastSelected = view1;
         });
 
          builder.setTitle("Edit Point");
 
         builder.setView(view);
 
-        builder.setPositiveButton(posBtnText, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                if (onPosClick != null) {
-                    onPosClick.onClick(dialog, which);
-                }
+        builder.setPositiveButton(posBtnText, (dialog, which) -> {
+            if (onPosClick != null) {
+                onPosClick.onClick(dialog, which);
+            }
 
-                boolean update = false;
-                if (!StringEx.isEmpty(newMetacn) && !newMetacn.equals(metacn)) {
+            boolean update = false;
+            if (!StringEx.isEmpty(newMetacn) && !newMetacn.equals(metacn)) {
+                update = true;
+            }
+
+            String p = txtPID.getText().toString();
+            if (p.length() > 0) {
+                if (!p.equals(pid)) {
                     update = true;
                 }
+            } else {
+                update = false;
+                txtPID.requestFocus();
+            }
 
-                String p = txtPID.getText().toString();
-                if (p.length() > 0) {
-                    if (!p.equals(pid)) {
-                        update = true;
-                    }
-                } else {
-                    update = false;
-                    txtPID.requestFocus();
-                }
-
-                if (update) {
-                    if (listener != null) {
-                        listener.onEdited(cn, Integer.parseInt(p), newMetacn);
-                    }
+            if (update) {
+                if (listener != null) {
+                    listener.onEdited(cn, Integer.parseInt(p), newMetacn);
                 }
             }
         });
 
-        builder.setNegativeButton(negBtnText, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                if (onNegClick != null) {
-                    onNegClick.onClick(dialog, which);
-                }
+        builder.setNegativeButton(negBtnText, (dialog, which) -> {
+            if (onNegClick != null) {
+                onNegClick.onClick(dialog, which);
+            }
 
-                if (listener != null) {
-                    listener.onCanceled();
-                }
+            if (listener != null) {
+                listener.onCanceled();
             }
         });
 

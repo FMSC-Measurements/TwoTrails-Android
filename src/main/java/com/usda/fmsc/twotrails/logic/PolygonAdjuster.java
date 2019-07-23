@@ -67,47 +67,44 @@ public class PolygonAdjuster {
 
             _processing = true;
 
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    AdjustResult result = AdjustResult.ADJUSTING;
-                    boolean success = false;
+            new Thread(() -> {
+                AdjustResult result = AdjustResult.ADJUSTING;
+                boolean success = false;
 
-                    AdjustingException.AdjustingError error = AdjustingException.AdjustingError.None;
+                AdjustingException.AdjustingError error = AdjustingException.AdjustingError.None;
 
-                    try {
-                        if (_Listener != null)
-                            _Listener.adjusterStarted();
+                try {
+                    if (_Listener != null)
+                        _Listener.adjusterStarted();
 
-                        if (updateIndexes)
-                            updateIndexes(dal);
+                    if (updateIndexes)
+                        updateIndexes(dal);
 
-                        if (!_cancelToken) {
-                            success = adjustPoints(dal);
-                        }
+                    if (!_cancelToken) {
+                        success = adjustPoints(dal);
+                    }
 
-                        if (success) {
-                            result = AdjustResult.SUCCESSFUL;
-                        } else {
-                            result = AdjustResult.ERROR;
-                        }
-                    } catch (AdjustingException ex) {
-                        TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "PolygonAdjuster:adjust", ex.getStackTrace());
+                    if (success) {
+                        result = AdjustResult.SUCCESSFUL;
+                    } else {
                         result = AdjustResult.ERROR;
-                        error = ex.getErrorType();
-                    } catch (Exception ex) {
-                        TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "PolygonAdjuster:adjust", ex.getStackTrace());
-                        result = AdjustResult.ERROR;
-                    } finally {
-                        _processing = false;
+                    }
+                } catch (AdjustingException ex) {
+                    TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "PolygonAdjuster:adjust", ex.getStackTrace());
+                    result = AdjustResult.ERROR;
+                    error = ex.getErrorType();
+                } catch (Exception ex) {
+                    TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "PolygonAdjuster:adjust", ex.getStackTrace());
+                    result = AdjustResult.ERROR;
+                } finally {
+                    _processing = false;
 
-                        if (_Listener != null) {
-                            if (_cancelToken) {
-                                result = AdjustResult.CANCELED;
-                            }
-
-                            _Listener.adjusterStopped(result, error);
+                    if (_Listener != null) {
+                        if (_cancelToken) {
+                            result = AdjustResult.CANCELED;
                         }
+
+                        _Listener.adjusterStopped(result, error);
                     }
                 }
             }).start();

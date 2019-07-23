@@ -164,22 +164,19 @@ public class AppLifecycle implements Application.ActivityLifecycleCallbacks {
         if (check != null)
             handler.removeCallbacks(check);
 
-        handler.postDelayed(check = new Runnable(){
-            @Override
-            public void run() {
-                if (foreground && paused) {
-                    foreground = false;
-                    Log.i(TAG, "went background");
-                    for (Listener l : listeners) {
-                        try {
-                            l.onBecameBackground(activity);
-                        } catch (Exception exc) {
-                            Log.e(TAG, "onBecameBackground threw exception!", exc);
-                        }
+        handler.postDelayed(check = () -> {
+            if (foreground && paused) {
+                foreground = false;
+                Log.i(TAG, "went background");
+                for (Listener l : listeners) {
+                    try {
+                        l.onBecameBackground(activity);
+                    } catch (Exception exc) {
+                        Log.e(TAG, "onBecameBackground threw exception!", exc);
                     }
-                } else {
-                    Log.i(TAG, "still foreground");
                 }
+            } else {
+                Log.i(TAG, "still foreground");
             }
         }, CHECK_DELAY);
     }

@@ -75,23 +75,20 @@ public class HaidActivity extends CustomToolbarActivity {
         if (lvPolys != null) {
             lvPolys.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, polyNames));
 
-            lvPolys.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                    if (i > -1) {
-                        currentPoly = polyinfo[i];
+            lvPolys.setOnItemClickListener((adapterView, view, i1, l) -> {
+                if (i1 > -1) {
+                    currentPoly = polyinfo[i1];
 
-                        updateContent();
+                    updateContent();
 
-                        getToolbar().setTitle(currentPoly.getName());
-                    } else {
-                        currentPoly = null;
-                        tvInfo.setText("Invalid Option");
-                        getToolbar().setTitle(getString(R.string.title_activity_haid));
-                    }
-
-                    drawerLayout.closeDrawers();
+                    getToolbar().setTitle(currentPoly.getName());
+                } else {
+                    currentPoly = null;
+                    tvInfo.setText("Invalid Option");
+                    getToolbar().setTitle(getString(R.string.title_activity_haid));
                 }
+
+                drawerLayout.closeDrawers();
             });
         }
 
@@ -130,14 +127,11 @@ public class HaidActivity extends CustomToolbarActivity {
             onWait = currentPoly.getCN();
             progress.setVisibility(View.VISIBLE);
 
-            currentPoly.setListener(new PolyInfo.Listener() {
-                @Override
-                public void onGenerated(String txt) {
-                    if (onWait != null && onWait.equals(currentPoly.getCN())) {
-                        tvInfo.setText(currentPoly.getText());
-                        onWait = null;
-                        progress.setVisibility(View.GONE);
-                    }
+            currentPoly.setListener(txt -> {
+                if (onWait != null && onWait.equals(currentPoly.getCN())) {
+                    tvInfo.setText(currentPoly.getText());
+                    onWait = null;
+                    progress.setVisibility(View.GONE);
                 }
             });
         }
@@ -184,10 +178,8 @@ public class HaidActivity extends CustomToolbarActivity {
 
                 builder.setTitle(R.string.str_help)
                         .setMessage(R.string.haid_help_text)
-                        .setPositiveButton(R.string.str_ok, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                // User clicked OK button
-                            }
+                        .setPositiveButton(R.string.str_ok, (dialog, id1) -> {
+                            // User clicked OK button
                         });
 
                 builder.create().show();

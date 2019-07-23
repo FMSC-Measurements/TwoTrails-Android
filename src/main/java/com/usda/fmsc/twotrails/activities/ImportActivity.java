@@ -51,32 +51,27 @@ public class ImportActivity extends CustomToolbarActivity {
                     View view = findViewById(R.id.parent);
                     if (view != null) {
                         Snackbar snackbar = Snackbar.make(view, "File Imported", Snackbar.LENGTH_LONG)
-                                .setAction("View Map", new View.OnClickListener() {
+                                .setAction("View Map", v -> PolygonAdjuster.adjust(getTtAppCtx().getDAL(), false, new PolygonAdjuster.Listener() {
                                     @Override
-                                    public void onClick(View v) {
-                                        PolygonAdjuster.adjust(getTtAppCtx().getDAL(), false, new PolygonAdjuster.Listener() {
-                                            @Override
-                                            public void adjusterStarted() {
+                                    public void adjusterStarted() {
 
-                                            }
-
-                                            @Override
-                                            public void adjusterStopped(PolygonAdjuster.AdjustResult result, AdjustingException.AdjustingError error) {
-                                                if (result == PolygonAdjuster.AdjustResult.SUCCESSFUL) {
-                                                    adjust = false;
-                                                    startActivity(new Intent(ImportActivity.this, MapActivity.class));
-                                                } else {
-                                                    Toast.makeText(ImportActivity.this, "Polygon(s) failed to adjust.", Toast.LENGTH_SHORT).show();
-                                                }
-                                            }
-
-                                            @Override
-                                            public void adjusterRunningSlow() {
-
-                                            }
-                                        });
                                     }
-                                })
+
+                                    @Override
+                                    public void adjusterStopped(PolygonAdjuster.AdjustResult result, AdjustingException.AdjustingError error) {
+                                        if (result == PolygonAdjuster.AdjustResult.SUCCESSFUL) {
+                                            adjust = false;
+                                            startActivity(new Intent(ImportActivity.this, MapActivity.class));
+                                        } else {
+                                            Toast.makeText(ImportActivity.this, "Polygon(s) failed to adjust.", Toast.LENGTH_SHORT).show();
+                                        }
+                                    }
+
+                                    @Override
+                                    public void adjusterRunningSlow() {
+
+                                    }
+                                }))
                                 .setActionTextColor(AndroidUtils.UI.getColor(getBaseContext(), R.color.primaryLighter));
 
                         AndroidUtils.UI.setSnackbarTextColor(snackbar, Color.WHITE);
@@ -108,20 +103,12 @@ public class ImportActivity extends CustomToolbarActivity {
 
         @Override
         public void onReadyToImport(final boolean ready) {
-            pdhShowFab.post(new Runnable() {
-                @Override
-                public void run() {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (ready)
-                                fabImport.show();
-                            else
-                                fabImport.hide();
-                        }
-                    });
-                }
-            });
+            pdhShowFab.post(() -> runOnUiThread(() -> {
+                if (ready)
+                    fabImport.show();
+                else
+                    fabImport.hide();
+            }));
         }
     };
 
@@ -133,12 +120,7 @@ public class ImportActivity extends CustomToolbarActivity {
         fabImport = findViewById(R.id.importFabImport);
         fabProgCircle = findViewById(R.id.importFabImportProgressCircle);
 
-        fabProgCircle.attachListener(new FABProgressCircleEx.FABProgressListener() {
-            @Override
-            public void onFABProgressAnimationEnd() {
-                fabProgCircle.hide();
-            }
-        });
+        fabProgCircle.attachListener(() -> fabProgCircle.hide());
 
         txtFile = findViewById(R.id.importTxtFile);
         AndroidUtils.UI.removeSelectionOnUnfocus(txtFile);
@@ -158,12 +140,7 @@ public class ImportActivity extends CustomToolbarActivity {
             @Override
             public void afterTextChanged(final Editable s) {
                 if (!ignoreChange) {
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            updateFileName(s.toString());
-                        }
-                    });
+                    handler.post(() -> updateFileName(s.toString()));
                 }
 
                 ignoreChange = false;

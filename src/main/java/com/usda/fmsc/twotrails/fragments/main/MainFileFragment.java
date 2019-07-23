@@ -26,7 +26,7 @@ public class MainFileFragment extends Fragment {
     private DataAccessLayer _dal;
     private View viewCleanDb;
 
-    boolean enabled = false, viewExists = false;
+    private boolean enabled = false, viewExists = false;
 
     public boolean isViewCreated() {
         return viewExists;

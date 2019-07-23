@@ -72,34 +72,28 @@ public class ArcGisMapSelectionAdapter extends ArrayAdapter<ArcGisMapLayer> {
                 convertView.setTag(holder);
 
                 final View fview = convertView;
-                convertView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (selectedView != null) {
-                            selectedView.setSelected(false);
-                        }
+                convertView.setOnClickListener(v -> {
+                    if (selectedView != null) {
+                        selectedView.setSelected(false);
+                    }
 
-                        fview.setSelected(true);
-                        selectedView = fview;
-                        selectedIndex = position;
+                    fview.setSelected(true);
+                    selectedView = fview;
+                    selectedIndex = position;
 
-                        if (listener != null) {
-                            listener.onArcGisMapSelected(map);
-                        }
+                    if (listener != null) {
+                        listener.onArcGisMapSelected(map);
                     }
                 });
 
-                convertView.setOnLongClickListener(new View.OnLongClickListener() {
-                    @Override
-                    public boolean onLongClick(View v) {
+                convertView.setOnLongClickListener(v -> {
 
-                        new AlertDialog.Builder(getContext())
-                            .setTitle(map.getName())
-                            .setMessage(map.getDescription())
-                            .setPositiveButton(R.string.str_ok, null)
-                            .show();
-                        return true;
-                    }
+                    new AlertDialog.Builder(getContext())
+                        .setTitle(map.getName())
+                        .setMessage(map.getDescription())
+                        .setPositiveButton(R.string.str_ok, null)
+                        .show();
+                    return true;
                 });
             } else {
                 holder = (MapViewHolder)convertView.getTag();

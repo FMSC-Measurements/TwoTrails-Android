@@ -557,43 +557,40 @@ public class MediaAccessLayer extends IDataLayer {
                     listener.loadingFailed(image, null, "File does not exist");
             }
         } else {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        String query = String.format("select %s from %s where %s = '%s'",
-                                TwoTrailsMediaSchema.Data.BinaryData,
-                                TwoTrailsMediaSchema.Data.TableName,
-                                TwoTrailsMediaSchema.SharedSchema.CN,
-                                image.getCN());
+            new Thread(() -> {
+                try {
+                    String query = String.format("select %s from %s where %s = '%s'",
+                            TwoTrailsMediaSchema.Data.BinaryData,
+                            TwoTrailsMediaSchema.Data.TableName,
+                            TwoTrailsMediaSchema.SharedSchema.CN,
+                            image.getCN());
 
-                        Cursor c = _db.rawQuery(query, null);
+                    Cursor c = _db.rawQuery(query, null);
 
-                        if (c.moveToFirst()) {
-                            do {
-                                byte[] data = getLargeBlob(
-                                        TwoTrailsMediaSchema.Data.TableName,
-                                        TwoTrailsMediaSchema.Data.BinaryData,
-                                        String.format("%s = '%s'",TwoTrailsMediaSchema.SharedSchema.CN, image.getCN()));
+                    if (c.moveToFirst()) {
+                        do {
+                            byte[] data = getLargeBlob(
+                                    TwoTrailsMediaSchema.Data.TableName,
+                                    TwoTrailsMediaSchema.Data.BinaryData,
+                                    String.format("%s = '%s'",TwoTrailsMediaSchema.SharedSchema.CN, image.getCN()));
 
-                                if (data != null) {
-                                    Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+                            if (data != null) {
+                                Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
 
-                                    if (listener != null) {
-                                        if (bitmap != null) {
-                                            listener.imageLoaded(image, null, bitmap);
-                                        } else {
-                                            listener.loadingFailed(image, null, "Bitmap is NULL");
-                                        }
+                                if (listener != null) {
+                                    if (bitmap != null) {
+                                        listener.imageLoaded(image, null, bitmap);
+                                    } else {
+                                        listener.loadingFailed(image, null, "Bitmap is NULL");
                                     }
                                 }
-                            } while (c.moveToNext());
-                        }
-
-                        c.close();
-                    } catch (Exception ex) {
-                        TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:loadImage");
+                            }
+                        } while (c.moveToNext());
                     }
+
+                    c.close();
+                } catch (Exception ex) {
+                    TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:loadImage");
                 }
             }).start();
         }
