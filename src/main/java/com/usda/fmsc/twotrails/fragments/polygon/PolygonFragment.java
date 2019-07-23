@@ -3,7 +3,7 @@ package com.usda.fmsc.twotrails.fragments.polygon;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Looper;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.text.Editable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,7 +20,6 @@ import com.usda.fmsc.twotrails.activities.PolygonsActivity;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.fragments.AnimationCardFragment;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.objects.PointD;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
@@ -30,11 +29,9 @@ import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import com.usda.fmsc.utilities.ParseEx;
 import com.usda.fmsc.utilities.StringEx;
-import com.usda.fmsc.utilities.Tuple;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 public class PolygonFragment extends AnimationCardFragment implements PolygonsActivity.Listener {
     private static final String POLYGON_CN = "PolygonCN";

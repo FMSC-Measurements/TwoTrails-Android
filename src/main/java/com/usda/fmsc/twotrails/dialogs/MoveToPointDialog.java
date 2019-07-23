@@ -1,11 +1,11 @@
 package com.usda.fmsc.twotrails.dialogs;
 
-import android.support.annotation.ColorInt;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AlertDialog;
+import androidx.annotation.ColorInt;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import android.app.Dialog;
-import android.content.Context;
-import android.support.v4.app.DialogFragment;
+
+import androidx.fragment.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -22,7 +22,6 @@ import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.utilities.AppUnits;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import com.usda.fmsc.utilities.StringEx;
 

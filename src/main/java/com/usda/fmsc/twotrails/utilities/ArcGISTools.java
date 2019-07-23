@@ -2,7 +2,7 @@ package com.usda.fmsc.twotrails.utilities;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.support.v7.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.util.Base64;
 import android.widget.Toast;
 

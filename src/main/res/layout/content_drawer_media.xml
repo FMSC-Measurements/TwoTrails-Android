@@ -11,7 +11,7 @@
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <android.support.v7.widget.Toolbar
+        <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbarMedia"
             android:layout_width="match_parent"
             android:layout_height="@dimen/toolbar_height"
@@ -58,9 +58,9 @@
                     android:layout_toStartOf="@id/pmdMenu"
                     android:layout_centerVertical="true"/>
             </RelativeLayout>
-        </android.support.v7.widget.Toolbar>
+        </androidx.appcompat.widget.Toolbar>
 
-        <android.support.v4.view.ViewPager
+        <androidx.viewpager.widget.ViewPager
             android:id="@+id/pmdViewPager"
             android:layout_width="match_parent"
             android:layout_height="0dp"

@@ -1,6 +1,6 @@
 package com.usda.fmsc.twotrails;
 
-import android.support.annotation.ColorInt;
+import androidx.annotation.ColorInt;
 
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.twotrails.objects.map.PolygonDrawOptions;

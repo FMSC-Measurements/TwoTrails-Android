@@ -4,7 +4,7 @@ package com.usda.fmsc.twotrails.fragments.settings;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
-import android.support.v7.app.ActionBar;
+import androidx.appcompat.app.ActionBar;
 
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;

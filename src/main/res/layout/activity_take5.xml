@@ -1,4 +1,4 @@
-<android.support.design.widget.CoordinatorLayout
+<androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -26,7 +26,7 @@
             android:layout_below="@id/toolbar"
             android:layout_alignParentBottom="true">
 
-            <android.support.v7.widget.CardView
+            <androidx.cardview.widget.CardView
                 android:id="@+id/take5CardGpsInfo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -38,7 +38,7 @@
                     layout="@layout/control_gps_info"
                     android:layout_height="wrap_content"
                     android:layout_width="match_parent"/>
-            </android.support.v7.widget.CardView>
+            </androidx.cardview.widget.CardView>
 
             <LinearLayout
                 android:id="@+id/take5LayInfo"
@@ -56,7 +56,7 @@
     </RelativeLayout>
 
 
-    <android.support.design.widget.FloatingActionButton
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/take5FabT5"
         style="@style/fabStyle"
         android:src="@drawable/ic_ttpoint_take5_white"
@@ -64,7 +64,7 @@
         app:layout_anchorGravity="bottom|right|end"
         android:onClick="btnTake5Click"/>
 
-    <android.support.design.widget.FloatingActionButton
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/take5FabSideShot"
         style="@style/fabStyle"
         android:src="@drawable/ic_ttpoint_sideshot_white"
@@ -76,7 +76,7 @@
         android:onClick="btnSideShotClick"
         android:visibility="gone"/>
 
-    <android.support.design.widget.FloatingActionButton
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/take5FabSideShotCommit"
         style="@style/fabStyle"
         android:src="@drawable/ic_done_white_36dp"
@@ -88,7 +88,7 @@
         android:onClick="btnCommitSideShotClick"
         android:visibility="gone"/>
 
-    <android.support.design.widget.FloatingActionButton
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/take5FabCancel"
         style="@style/fabStyle"
         android:src="@drawable/ic_clear_white_36dp"
@@ -129,4 +129,4 @@
             android:textSize="32sp"
             android:layout_centerInParent="true"/>
     </RelativeLayout>
-</android.support.design.widget.CoordinatorLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

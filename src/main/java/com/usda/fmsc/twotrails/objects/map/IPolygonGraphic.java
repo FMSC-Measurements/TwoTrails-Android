@@ -1,6 +1,6 @@
 package com.usda.fmsc.twotrails.objects.map;
 
-import android.support.annotation.ColorInt;
+import androidx.annotation.ColorInt;
 
 import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.twotrails.objects.TtMetadata;

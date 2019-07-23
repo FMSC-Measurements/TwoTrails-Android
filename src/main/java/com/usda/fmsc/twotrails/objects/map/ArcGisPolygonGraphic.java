@@ -1,6 +1,6 @@
 package com.usda.fmsc.twotrails.objects.map;
 
-import android.support.annotation.ColorInt;
+import androidx.annotation.ColorInt;
 
 import com.esri.android.map.GraphicsLayer;
 import com.esri.android.map.MapView;

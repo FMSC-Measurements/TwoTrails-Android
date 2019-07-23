@@ -1,4 +1,4 @@
-<android.support.design.widget.CoordinatorLayout
+<androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -15,7 +15,7 @@
 
         <include layout="@layout/toolbar_default" android:id="@id/toolbar" />
 
-        <android.support.v4.view.ViewPager
+        <androidx.viewpager.widget.ViewPager
             android:id="@+id/metaViewPager"
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -25,11 +25,11 @@
         <View style="@style/ToolbarShadowViewElevation" android:layout_below="@id/toolbar" />
     </RelativeLayout>
 
-    <android.support.design.widget.FloatingActionButton
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/metaFabNew"
         style="@style/fabStyle"
         android:src="@drawable/ic_add_white"
         app:layout_anchor="@id/lay1"
         android:onClick="btnNewClick" />
 
-</android.support.design.widget.CoordinatorLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

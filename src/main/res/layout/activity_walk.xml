@@ -1,4 +1,4 @@
-<android.support.design.widget.CoordinatorLayout
+<androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -17,7 +17,7 @@
 
         <View style="@style/ToolbarShadowViewElevation" android:layout_below="@id/toolbar"/>
 
-        <android.support.v7.widget.CardView
+        <androidx.cardview.widget.CardView
             android:id="@+id/cardView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -29,7 +29,7 @@
             <include layout="@layout/control_gps_info"
                 android:layout_height="wrap_content"
                 android:layout_width="match_parent"/>
-        </android.support.v7.widget.CardView>
+        </androidx.cardview.widget.CardView>
 
         <include android:id="@+id/walkCardWalk"
                  layout="@layout/card_walk_walk"
@@ -39,7 +39,7 @@
                  android:visibility="gone"/>
     </RelativeLayout>
 
-    <android.support.design.widget.FloatingActionButton
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/walkFabWalk"
         style="@style/fabStyle"
         android:src="@drawable/ic_ttpoint_walk_white"
@@ -47,4 +47,4 @@
         app:layout_anchorGravity="bottom|right|end"
         android:onClick="btnWalkClick" />
 
-</android.support.design.widget.CoordinatorLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

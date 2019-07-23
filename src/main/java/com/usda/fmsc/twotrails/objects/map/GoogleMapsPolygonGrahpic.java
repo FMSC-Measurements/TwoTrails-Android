@@ -1,6 +1,6 @@
 package com.usda.fmsc.twotrails.objects.map;
 
-import android.support.annotation.ColorInt;
+import androidx.annotation.ColorInt;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;

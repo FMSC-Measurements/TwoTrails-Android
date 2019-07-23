@@ -1,11 +1,11 @@
 package com.usda.fmsc.twotrails.activities;
 
 import android.content.Intent;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.appcompat.app.ActionBar;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
+import androidx.appcompat.widget.Toolbar;
 import android.text.Editable;
 import android.view.View;
 import android.widget.AdapterView;
@@ -22,7 +22,6 @@ import com.usda.fmsc.android.listeners.SimpleTextWatcher;
 import com.usda.fmsc.android.widget.SheetLayoutEx;
 import com.usda.fmsc.geospatial.GeoPosition;
 import com.usda.fmsc.geospatial.GeoTools;
-import com.usda.fmsc.geospatial.UomElevation;
 import com.usda.fmsc.geospatial.nmea.INmeaBurst;
 import com.usda.fmsc.geospatial.nmea.sentences.GGASentence;
 import com.usda.fmsc.geospatial.nmea.sentences.GSASentence;

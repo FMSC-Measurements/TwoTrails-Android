@@ -4,7 +4,7 @@
     android:layout_height="wrap_content"
     style="@style/margin8880">
 
-    <android.support.v7.widget.CardView
+    <androidx.cardview.widget.CardView
         android:id="@+id/card"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -227,5 +227,5 @@
                 <View style="@style/ToolbarShadowViewElevation2" android:layout_alignParentTop="true" />
             </RelativeLayout>
         </LinearLayout>
-    </android.support.v7.widget.CardView>
+    </androidx.cardview.widget.CardView>
 </FrameLayout>

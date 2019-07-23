@@ -150,7 +150,7 @@
 
         <View style="@style/ToolbarShadowViewElevation2" android:layout_below="@id/cardContent" />
 
-        <android.support.design.widget.TextInputLayout
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="5dp"
@@ -164,7 +164,7 @@
                 android:inputType="textMultiLine"
                 android:hint="@string/str_cmt"
                 android:maxLines="6"/>
-        </android.support.design.widget.TextInputLayout>
+        </com.google.android.material.textfield.TextInputLayout>
     </RelativeLayout>
 
 </RelativeLayout>

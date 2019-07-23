@@ -1,10 +1,9 @@
 package com.usda.fmsc.twotrails.adapters;
 
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 import com.usda.fmsc.android.adapters.FragmentStatePagerAdapterEx;
-import com.usda.fmsc.android.widget.RecyclerViewEx;
 import com.usda.fmsc.twotrails.fragments.media.PictureMediaFragment;
 import com.usda.fmsc.twotrails.objects.media.TtImage;
 import com.usda.fmsc.twotrails.objects.media.TtMedia;

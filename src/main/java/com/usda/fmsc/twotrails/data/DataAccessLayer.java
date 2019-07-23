@@ -95,7 +95,7 @@ public class DataAccessLayer extends IDataLayer {
             _db = SQLiteDatabase.openDatabase(_FilePath, null, 0);
 
             try {
-                _dbFile = new File(_FilePath);
+                _dbFile = new File(_FilePath);r
                 _DalVersion = new TtVersion(getTtDbVersion());
                 _Activity = createUserActivty();
             } catch (Exception ex) {
