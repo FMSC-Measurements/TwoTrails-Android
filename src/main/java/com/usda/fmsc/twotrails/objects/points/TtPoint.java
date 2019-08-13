@@ -343,6 +343,10 @@ public abstract class TtPoint extends TtObject implements Comparable<TtPoint>, C
         return  (getOp() == OpType.GPS || getOp() == OpType.Take5 ||
                 getOp() == OpType.Walk || getOp() == OpType.Traverse);
     }
+
+    public boolean isMiscPoint() {
+        return !isOnBnd() && (getOp() == OpType.SideShot || getOp() == OpType.Quondam);
+    }
     //endregion
 
 

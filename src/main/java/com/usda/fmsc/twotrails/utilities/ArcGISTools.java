@@ -8,17 +8,11 @@ import android.widget.Toast;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.esri.android.map.Layer;
-import com.esri.android.map.MapView;
-import com.esri.android.map.ags.ArcGISLocalTiledLayer;
-import com.esri.android.map.ags.ArcGISTiledMapServiceLayer;
-import com.esri.core.geometry.Envelope;
-import com.esri.core.geometry.GeometryEngine;
-import com.esri.core.geometry.Point;
-import com.esri.core.geometry.SpatialReference;
-import com.esri.core.io.UserCredentials;
-import com.esri.core.tasks.ags.geoprocessing.GPJobResource;
-import com.esri.core.tasks.tilecache.ExportTileCacheStatus;
+import com.esri.arcgisruntime.data.TileCache;
+import com.esri.arcgisruntime.geometry.SpatialReference;
+import com.esri.arcgisruntime.layers.ArcGISTiledLayer;
+import com.esri.arcgisruntime.mapping.ArcGISMap;
+import com.esri.arcgisruntime.mapping.Basemap;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.utilities.WebRequest;
 import com.usda.fmsc.geospatial.Extent;
@@ -48,7 +42,7 @@ public class ArcGISTools {
     
     private SpatialReference LatLonSpatialReference = SpatialReference.create(4326);
 
-    private UserCredentials userCredentials;
+    //private UserCredentials userCredentials;
 
     private HashMap<Integer, ArcGisMapLayer> mapLayers;
     private int idCounter = 0;
@@ -206,9 +200,7 @@ public class ArcGISTools {
     }
 
     public void removeListener(IArcToolsListener listener) {
-        if (listeners.contains(listener)) {
-            listeners.remove(listener);
-        }
+        listeners.remove(listener);
     }
 
 
@@ -245,26 +237,30 @@ public class ArcGISTools {
     }
 
 
-    public Layer getBaseLayer(Context context, int id) throws FileNotFoundException {
+    public ArcGISMap getBaseLayer(Context context, int id) throws FileNotFoundException {
         return getBaseLayer(context, mapLayers.get(id));
     }
 
-    public Layer getBaseLayer(Context context, ArcGisMapLayer agml) throws FileNotFoundException {
+    public ArcGISMap getBaseLayer(Context context, ArcGisMapLayer agml) throws FileNotFoundException {
         return getBaseLayer(context, agml, agml.isOnline());
     }
 
-    public Layer getBaseLayer(Context context, ArcGisMapLayer agml, boolean isOnline) throws FileNotFoundException {
-        Layer layer = null;
+    public ArcGISMap getBaseLayer(Context context, ArcGisMapLayer agml, boolean isOnline) throws FileNotFoundException {
+        Basemap basemap = null;
+        ArcGISTiledLayer tiledLayer = null;
 
         if (isOnline) {
-            layer = new ArcGISTiledMapServiceLayer(agml.getUrl(),
-                    agml.getUrl().contains("services.arcgisonline") ?
-                            null: getCredentials(context)
-            );
+//            layer = new ArcGISTiledMapServiceLayer(agml.getUrl(),
+//                    agml.getUrl().contains("services.arcgisonline") ?
+//                            null: getCredentials(context)
+//            );
+
+            tiledLayer = new ArcGISTiledLayer(agml.getUrl());
         } else {
             if (FileUtils.fileOrFolderExists(agml.getFilePath())) {
                 try {
-                    layer = new ArcGISLocalTiledLayer(agml.getFilePath());
+                    TileCache tileCache = new TileCache(agml.getFilePath());
+                    tiledLayer = new ArcGISTiledLayer(tileCache);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -273,7 +269,7 @@ public class ArcGISTools {
             }
         }
 
-        return layer;
+        return new ArcGISMap(new Basemap(tiledLayer));
     }
 
 
