@@ -245,8 +245,7 @@ public class ArcGISTools {
         return getBaseLayer(context, agml, agml.isOnline());
     }
 
-    public ArcGISMap getBaseLayer(Context context, ArcGisMapLayer agml, boolean isOnline) throws FileNotFoundException {
-        Basemap basemap = null;
+    public ArcGISMap getBaseLayer(Context context, ArcGisMapLayer agml, boolean isOnline) throws FileNotFoundException {\
         ArcGISTiledLayer tiledLayer = null;
 
         if (isOnline) {
