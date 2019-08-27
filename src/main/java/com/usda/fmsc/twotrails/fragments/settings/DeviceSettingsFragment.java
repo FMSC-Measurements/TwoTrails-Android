@@ -26,7 +26,7 @@ import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.dialogs.DontAskAgainDialog;
 import com.usda.fmsc.android.preferences.ListCompatPreference;
 import com.usda.fmsc.android.preferences.SwitchCompatPreference;
-import com.usda.fmsc.geospatial.nmea.INmeaBurst;
+import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.DeviceSettings;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
@@ -43,7 +43,7 @@ import com.usda.fmsc.twotrails.rangefinder.TtRangeFinderData;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
+import com.usda.fmsc.geospatial.nmea41.sentences.base.NmeaSentence;
 import com.usda.fmsc.utilities.StringEx;
 
 import org.joda.time.DateTime;
@@ -238,7 +238,7 @@ public class DeviceSettingsFragment extends PreferenceFragment {
 
                     final GpsService.Listener listener = new GpsService.Listener() {
                         @Override
-                        public void nmeaBurstReceived(INmeaBurst nmeaBurst) {
+                        public void nmeaBurstReceived(NmeaBurst nmeaBurst) {
 
                         }
 

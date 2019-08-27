@@ -10,7 +10,7 @@ import android.util.AttributeSet;
 
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.geospatial.GnssType;
-import com.usda.fmsc.geospatial.nmea.Satellite;
+import com.usda.fmsc.geospatial.nmea41.Satellite;
 import com.usda.fmsc.twotrails.R;
 
 import java.util.HashMap;

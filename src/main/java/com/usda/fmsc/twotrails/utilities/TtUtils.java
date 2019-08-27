@@ -32,7 +32,7 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.usda.fmsc.android.utilities.DeviceOrientationEx;
-import com.usda.fmsc.geospatial.nmea.INmeaBurst;
+import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
 import com.usda.fmsc.twotrails.BuildConfig;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
@@ -72,7 +72,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
-import com.usda.fmsc.geospatial.GeoPosition;
+import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.geospatial.utm.UTMTools;
 import com.usda.fmsc.geospatial.UomElevation;
@@ -733,7 +733,7 @@ public class TtUtils {
 
                 int zone = metadata.get(point.getMetadataCN()).getZone();
 
-                GeoPosition position = UTMTools.convertUTMtoLatLonSignedDec(utmx, utmy, zone);
+                Position position = UTMTools.convertUTMtoLatLonSignedDec(utmx, utmy, zone);
 
                 location.setLatitude(position.getLatitudeSignedDecimal());
                 location.setLongitude(position.getLongitudeSignedDecimal());
@@ -764,7 +764,7 @@ public class TtUtils {
 
                 return UTMTools.convertLatLonSignedDecToUTM(gps.getLatitude(), gps.getLongitude(), targetZone);
             } else {
-                GeoPosition position;
+                Position position;
 
                 if (adjusted) {
                     if (point.getAdjX() == null || point.getAdjY() == null)
@@ -776,8 +776,8 @@ public class TtUtils {
                 }
 
                 return UTMTools.convertLatLonSignedDecToUTM(
-                    position.getLatitude().toSignedDecimal(),
-                    position.getLongitude().toSignedDecimal(),
+                    position.getLatitudeSignedDecimal(),
+                    position.getLongitudeSignedDecimal(),
                     targetZone);
             }
         }
@@ -800,7 +800,7 @@ public class TtUtils {
                     ArrayList<TtNmeaBurst> bursts = dal.getNmeaBurstsByPointCN(gps.getCN());
 
                     if (bursts.size() > 0) {
-                        ArrayList<GeoPosition> positions = new ArrayList<>();
+                        ArrayList<Position> positions = new ArrayList<>();
 
                         //recalculate using only bursts that were used before
                         if (options == null) {
@@ -832,7 +832,7 @@ public class TtUtils {
 
                         ArrayList<PointD> points = new ArrayList<>(positions.size());
 
-                        for (GeoPosition p : positions) {
+                        for (Position p : positions) {
                             lat = p.getLatitudeSignedDecimal();
                             lon = p.getLongitudeSignedDecimal();
 
@@ -902,7 +902,7 @@ public class TtUtils {
             return point;
         }
 
-        public static GeoPosition getLatLonFromPoint(TtPoint point, boolean adjusted, TtMetadata meta) {
+        public static Position getLatLonFromPoint(TtPoint point, boolean adjusted, TtMetadata meta) {
             Double z = adjusted ? point.getAdjZ() : point.getUnAdjZ();
 
             if (z == null) {
@@ -928,12 +928,12 @@ public class TtUtils {
                 if (y == null)
                     y = 0d;
 
-                GeoPosition position = UTMTools.convertUTMtoLatLonSignedDec(x, y, meta.getZone());
+                Position position = UTMTools.convertUTMtoLatLonSignedDec(x, y, meta.getZone());
                 lat = position.getLatitudeSignedDecimal();
                 lon = position.getLongitudeSignedDecimal();
             }
 
-            return new GeoPosition(lat, lon, z, meta.getElevation());
+            return new Position(lat, lon, z, meta.getElevation());
         }
     }
 
@@ -1191,7 +1191,7 @@ public class TtUtils {
     }
 
     public static class NMEA {
-        public static boolean isBurstUsable(INmeaBurst nmeaBurst, FilterOptions options) {
+        public static boolean isBurstUsable(NmeaBurst nmeaBurst, FilterOptions options) {
             boolean valid = false;
 
             if (options == null) {
@@ -1547,7 +1547,7 @@ public class TtUtils {
                     lat = point.getLatitude();
                     lon = point.getLongitude();
                 } else {
-                    GeoPosition position = UTMTools.convertUTMtoLatLonSignedDec(x, y, meta.getZone());
+                    Position position = UTMTools.convertUTMtoLatLonSignedDec(x, y, meta.getZone());
                     lat = position.getLatitudeSignedDecimal();
                     lon = position.getLongitudeSignedDecimal();
                 }
@@ -1601,7 +1601,7 @@ public class TtUtils {
                     StringEx.Empty
             );
 
-            GeoPosition position = UTMTools.convertUTMtoLatLonSignedDec(x, y, meta.getZone());
+            Position position = UTMTools.convertUTMtoLatLonSignedDec(x, y, meta.getZone());
 
             return new MarkerOptions()
                     .title(StringEx.format("%d (%s)", point.getPID(), adjusted ? "Adj" : "UnAdj"))
@@ -1625,8 +1625,8 @@ public class TtUtils {
 
 
         public static LatLngBounds getStartPosInZone(int zone) {
-            GeoPosition ne = UTMTools.convertUTMtoLatLonSignedDec(750000, 5420000, zone);
-            GeoPosition sw = UTMTools.convertUTMtoLatLonSignedDec(200000, 3210000, zone);
+            Position ne = UTMTools.convertUTMtoLatLonSignedDec(750000, 5420000, zone);
+            Position sw = UTMTools.convertUTMtoLatLonSignedDec(200000, 3210000, zone);
 
             return new LatLngBounds(new LatLng(sw.getLatitudeSignedDecimal(), sw.getLongitudeSignedDecimal()),
                     new LatLng(ne.getLatitudeSignedDecimal(), ne.getLongitudeSignedDecimal()));
@@ -1815,7 +1815,7 @@ public class TtUtils {
                     lat = point.getLatitude();
                     lon = point.getLongitude();
                 } else {
-                    GeoPosition position = UTMTools.convertUTMtoLatLonSignedDec(x, y, meta.getZone());
+                    Position position = UTMTools.convertUTMtoLatLonSignedDec(x, y, meta.getZone());
                     lat = position.getLatitudeSignedDecimal();
                     lon = position.getLongitudeSignedDecimal();
                 }

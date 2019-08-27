@@ -23,7 +23,7 @@ import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.dialogs.InputDialog;
 import com.usda.fmsc.android.widget.SheetLayoutEx;
 import com.usda.fmsc.android.widget.drawables.AnimationDrawableEx;
-import com.usda.fmsc.geospatial.nmea.INmeaBurst;
+import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.activities.base.AcquireGpsMapActivity;
 import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
@@ -345,7 +345,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
     }
 
 
-    private void createPoint(INmeaBurst nmeaBurst, UTMCoords utmCoords) {
+    private void createPoint(NmeaBurst nmeaBurst, UTMCoords utmCoords) {
         if (updated) {
             getTtAppCtx().getDAL().updatePoint(_CurrentPoint);
             updated = false;
@@ -539,7 +539,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
     }
 
     @Override
-    protected void onNmeaBurstReceived(INmeaBurst nmeaBurst) {
+    protected void onNmeaBurstReceived(NmeaBurst nmeaBurst) {
         super.onNmeaBurstReceived(nmeaBurst);
 
         if (walking) {

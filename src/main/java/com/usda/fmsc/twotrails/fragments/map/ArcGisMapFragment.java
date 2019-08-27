@@ -28,9 +28,9 @@ import com.esri.core.map.Graphic;
 import com.esri.core.symbol.SimpleMarkerSymbol;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.geospatial.Extent;
-import com.usda.fmsc.geospatial.Position;
-import com.usda.fmsc.geospatial.nmea.INmeaBurst;
-import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
+import com.usda.fmsc.geospatial.PositionLegacy;
+import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
+import com.usda.fmsc.geospatial.nmea41.sentences.base.NmeaSentence;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
@@ -420,10 +420,10 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
     }
 
     @Override
-    public Position getLatLon() {
+    public PositionLegacy getLatLon() {
         Point point = TtAppCtx.getArcGISTools().pointToLatLng(mMapView.getCenter(), mMapView);
 
-        return new Position(point.getY(), point.getX());
+        return new PositionLegacy(point.getY(), point.getX());
     }
 
     @Override
@@ -614,7 +614,7 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
 
 
     @Override
-    public void nmeaBurstReceived(INmeaBurst nmeaBurst) {
+    public void nmeaBurstReceived(NmeaBurst nmeaBurst) {
         if (showPosition && nmeaBurst.hasPosition() && mMapView != null) {
             Point point = TtAppCtx.getArcGISTools().latLngToMapSpatial(nmeaBurst.getLatitude(), nmeaBurst.getLongitude(), mMapView);
 
@@ -745,7 +745,7 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
             if (!infoDisplayed && mmListener != null) {
                 Point pointLL = TtAppCtx.getArcGISTools().pointToLatLng(point.getX(), point.getY(), mMapView);
 
-                mmListener.onMapClick(new Position(pointLL.getY(), pointLL.getX()));
+                mmListener.onMapClick(new PositionLegacy(pointLL.getY(), pointLL.getX()));
             }
 
             return super.onSingleTap(point);

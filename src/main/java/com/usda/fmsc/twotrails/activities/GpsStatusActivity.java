@@ -11,10 +11,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.usda.fmsc.android.AndroidUtils;
-import com.usda.fmsc.geospatial.nmea.INmeaBurst;
-import com.usda.fmsc.geospatial.nmea.NmeaIDs;
-import com.usda.fmsc.geospatial.nmea.sentences.GGASentence;
-import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
+import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
+import com.usda.fmsc.geospatial.nmea41.NmeaIDs;
+import com.usda.fmsc.geospatial.nmea41.sentences.GGASentence;
+import com.usda.fmsc.geospatial.nmea41.sentences.base.NmeaSentence;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
@@ -121,7 +121,7 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
         }
     }
 
-    protected void setNmeaData(final INmeaBurst burst) {
+    protected void setNmeaData(final NmeaBurst burst) {
         runOnUiThread(() -> {
             try {
                 if (burst.hasPosition()) {
@@ -213,7 +213,7 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
 
 
     @Override
-    public void nmeaBurstReceived(INmeaBurst burst) {
+    public void nmeaBurstReceived(NmeaBurst burst) {
         setNmeaData(burst);
     }
 

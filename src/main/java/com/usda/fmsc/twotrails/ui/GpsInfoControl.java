@@ -5,8 +5,8 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 
 import com.usda.fmsc.android.animation.ViewAnimator;
-import com.usda.fmsc.geospatial.nmea.INmeaBurst;
-import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
+import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
+import com.usda.fmsc.geospatial.nmea41.sentences.base.NmeaSentence;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.gps.GpsService;
@@ -45,7 +45,7 @@ public class GpsInfoControl implements GpsService.Listener {
     }
 
     @Override
-    public void nmeaBurstReceived(INmeaBurst burst) {
+    public void nmeaBurstReceived(NmeaBurst burst) {
         if (gpsExtraVisable) {
             skyView.update(burst);
             statusView.update(burst);

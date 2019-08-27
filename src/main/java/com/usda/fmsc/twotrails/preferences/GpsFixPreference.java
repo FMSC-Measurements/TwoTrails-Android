@@ -6,7 +6,7 @@ import android.content.res.TypedArray;
 import android.util.AttributeSet;
 
 import com.usda.fmsc.android.preferences.EnumPreference;
-import com.usda.fmsc.geospatial.nmea.sentences.GSASentence;
+import com.usda.fmsc.geospatial.nmea41.sentences.GSASentence;
 
 public class GpsFixPreference extends EnumPreference {
     private int[] itemValues;

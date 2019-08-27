@@ -8,7 +8,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.usda.fmsc.geospatial.Extent;
-import com.usda.fmsc.geospatial.GeoPosition;
+import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
@@ -64,8 +64,8 @@ public class GoogleMapsTrailGraphic implements ITrailGraphic, IMarkerDataGraphic
     }
 
     @Override
-    public GeoPosition add(TtPoint point, HashMap<String, TtMetadata> meta) {
-        GeoPosition pos = addPoint(point, meta);
+    public Position add(TtPoint point, HashMap<String, TtMetadata> meta) {
+        Position pos = addPoint(point, meta);
 
         LatLngBounds bounds = llBuilder.build();
         polyBounds = new Extent(bounds.northeast.latitude, bounds.northeast.longitude,
@@ -74,7 +74,7 @@ public class GoogleMapsTrailGraphic implements ITrailGraphic, IMarkerDataGraphic
         return pos;
     }
 
-    private GeoPosition addPoint(TtPoint point, HashMap<String, TtMetadata> meta) {
+    private Position addPoint(TtPoint point, HashMap<String, TtMetadata> meta) {
         MarkerOptions markerOptions = TtUtils.GMap.createMarkerOptions(point, false, meta);
         Marker marker = map.addMarker(markerOptions.visible(markersVisible));
 
@@ -90,7 +90,7 @@ public class GoogleMapsTrailGraphic implements ITrailGraphic, IMarkerDataGraphic
             polyline.setPoints(latLngs);
         }
 
-        return new GeoPosition(markerOptions.getPosition().latitude, markerOptions.getPosition().longitude, point.getUnAdjZ(), metadata.getElevation());
+        return new Position(markerOptions.getPosition().latitude, markerOptions.getPosition().longitude, point.getUnAdjZ(), metadata.getElevation());
     }
 
     @Override

@@ -1,7 +1,7 @@
 package com.usda.fmsc.twotrails.objects.map;
 
 import com.usda.fmsc.geospatial.Extent;
-import com.usda.fmsc.geospatial.GeoPosition;
+import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
@@ -12,7 +12,7 @@ import java.util.HashMap;
 public class TrailGraphicManager implements IGraphicManager {
     private TtPolygon polygon;
     private ArrayList<TtPoint> points;
-    private ArrayList<GeoPosition> positions;
+    private ArrayList<Position> positions;
     private HashMap<String, TtMetadata> meta;
 
     private ITrailGraphic trailGraphic;
@@ -68,7 +68,7 @@ public class TrailGraphicManager implements IGraphicManager {
     }
 
 
-    public GeoPosition getPosition(int index) {
+    public Position getPosition(int index) {
         return positions.get(index);
     }
 
@@ -76,8 +76,8 @@ public class TrailGraphicManager implements IGraphicManager {
         return positions.size();
     }
 
-    public GeoPosition addPoint(TtPoint point) {
-        GeoPosition position = null;
+    public Position addPoint(TtPoint point) {
+        Position position = null;
 
         if (trailGraphic != null) {
             position = trailGraphic.add(point, meta);

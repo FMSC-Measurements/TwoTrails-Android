@@ -14,7 +14,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.usda.fmsc.android.AndroidUtils;
-import com.usda.fmsc.geospatial.nmea.INmeaBurst;
+import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.gps.GpsService;
@@ -24,7 +24,7 @@ import org.joda.time.DateTime;
 
 import java.util.ArrayList;
 
-import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
+import com.usda.fmsc.geospatial.nmea41.sentences.base.NmeaSentence;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 public class GpsLoggerActivity extends CustomToolbarActivity implements GpsService.Listener {
@@ -254,7 +254,7 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
     }
 
     @Override
-    public void nmeaBurstReceived(INmeaBurst nmeaBurst) {
+    public void nmeaBurstReceived(NmeaBurst nmeaBurst) {
         if (logging) {
             strings.add(0, nmeaBurst.toString());//String.format("Burst Received- Valid: %s", Boolean.toString(nmeaBurst.isValid())));
             updateList();

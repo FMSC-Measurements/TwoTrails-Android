@@ -6,8 +6,8 @@ import android.util.JsonWriter;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.usda.fmsc.geospatial.nmea.sentences.GGASentence;
-import com.usda.fmsc.geospatial.nmea.sentences.GSASentence;
+import com.usda.fmsc.geospatial.nmea41.sentences.GGASentence;
+import com.usda.fmsc.geospatial.nmea41.sentences.GSASentence;
 import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
 import com.usda.fmsc.twotrails.units.DopType;
 import com.usda.fmsc.twotrails.units.MapTracking;

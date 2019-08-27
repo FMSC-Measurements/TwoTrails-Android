@@ -47,10 +47,10 @@ import com.usda.fmsc.android.widget.MultiStateTouchCheckBox;
 import com.usda.fmsc.android.widget.drawables.FadeBitmapProgressDrawable;
 import com.usda.fmsc.android.widget.drawables.PolygonProgressDrawable;
 import com.usda.fmsc.geospatial.Extent;
-import com.usda.fmsc.geospatial.GeoPosition;
 import com.usda.fmsc.geospatial.Position;
-import com.usda.fmsc.geospatial.nmea.INmeaBurst;
-import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
+import com.usda.fmsc.geospatial.PositionLegacy;
+import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
+import com.usda.fmsc.geospatial.nmea41.sentences.base.NmeaSentence;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.geospatial.utm.UTMTools;
 import com.usda.fmsc.twotrails.Consts;
@@ -123,7 +123,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     private ArrayList<PolygonGraphicManager> polyGraphicManagers = new ArrayList<>();
     private ArrayList<TrailGraphicManager> trailGraphicManagers = new ArrayList<>();
 
-    private GeoPosition lastPosition;
+    private Position lastPosition;
     private android.location.Location currentLocation, targetLocation;
 
     private DrawerLayout baseMapDrawer;
@@ -742,7 +742,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         if (position != null) {
             moveToLocation((float) position.getLatitudeSignedDecimal(), (float) position.getLongitudeSignedDecimal(), animate);
         } else {
-            getTtAppCtx().getReport().writeWarn("Null Position", "BaseMapActivity:moveToLocation(p,b)");
+            getTtAppCtx().getReport().writeWarn("Null PositionLegacy", "BaseMapActivity:moveToLocation(p,b)");
         }
     }
 
@@ -750,7 +750,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         if (position != null) {
             moveToLocation((float) position.getLatitudeSignedDecimal(), (float) position.getLongitudeSignedDecimal(), zoomLevel, animate);
         } else {
-            getTtAppCtx().getReport().writeWarn("Null Position", "BaseMapActivity:moveToLocation(p,f,b)", Thread.currentThread().getStackTrace());
+            getTtAppCtx().getReport().writeWarn("Null PositionLegacy", "BaseMapActivity:moveToLocation(p,f,b)", Thread.currentThread().getStackTrace());
         }
     }
 
@@ -827,7 +827,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     }
 
     @Override
-    public void onMapClick(Position position) {
+    public void onMapClick(PositionLegacy position) {
         slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
         hideSelectedMarkerInfo();
     }
@@ -983,18 +983,18 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         }
     }
 
-    protected void onPositionReceived(GeoPosition position) {
+    protected void onPositionReceived(Position position) {
         updateMapView(position);
     }
 
-    protected void onFirstPositionReceived(GeoPosition position) {
+    protected void onFirstPositionReceived(Position position) {
         if (mapReady) {
             moveToLocation(position, Consts.Location.ZOOM_CLOSE, true);
             mapMoved = false;
         }
     }
 
-    private void updateMapView(GeoPosition position) {
+    private void updateMapView(Position position) {
         if (getMapTracking() == MapTracking.FOLLOW) {
             moveToLocation(position, true);
         } else if (mapMoved) {
@@ -1011,9 +1011,9 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
 
     //region GPS
     @Override
-    public void nmeaBurstReceived(INmeaBurst nmeaBurst) {
+    public void nmeaBurstReceived(NmeaBurst nmeaBurst) {
         if (nmeaBurst.hasPosition()) {
-            GeoPosition position = nmeaBurst.getPosition();
+            Position position = nmeaBurst.getPosition();
 
             if (currentLocation == null) {
                 currentLocation = new android.location.Location(StringEx.Empty);
@@ -1045,7 +1045,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         receivingNmea = true;
     }
 
-    protected void onNmeaBurstReceived(INmeaBurst nmeaBurst) {
+    protected void onNmeaBurstReceived(NmeaBurst nmeaBurst) {
         //
     }
 
@@ -1684,7 +1684,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         return polys;
     }
 
-    protected GeoPosition getLastPosition() {
+    protected Position getLastPosition() {
         return lastPosition;
     }
     

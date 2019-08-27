@@ -41,7 +41,7 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import com.usda.fmsc.geospatial.GeoPosition;
+import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.utilities.StringEx;
 
 import com.usda.fmsc.twotrails.units.OpType;
@@ -535,7 +535,7 @@ public class Export {
                     }
 
                     if (adjpoint == null) {
-                        GeoPosition pos = UTMTools.convertUTMtoLatLonSignedDec(point.getAdjX(), point.getAdjY(), tmpMeta.getZone());
+                        Position pos = UTMTools.convertUTMtoLatLonSignedDec(point.getAdjX(), point.getAdjY(), tmpMeta.getZone());
                         adjpoint = new GpxPoint(pos.getLatitudeSignedDecimal(), pos.getLongitudeSignedDecimal(), point.getAdjZ());
 
                         pos = UTMTools.convertUTMtoLatLonSignedDec(point.getUnAdjX(), point.getUnAdjY(), tmpMeta.getZone());
@@ -838,7 +838,7 @@ public class Export {
                     throw new RuntimeException("Meta Data is null. Cant obtain UTM Zone");
 
                 for (TtPoint point : points) {
-                    GeoPosition coords = TtUtils.Points.getLatLonFromPoint(point, true, md.get(point.getMetadataCN()));
+                    Position coords = TtUtils.Points.getLatLonFromPoint(point, true, md.get(point.getMetadataCN()));
 
                     Coordinates adjCoord = new Coordinates(coords.getLatitudeSignedDecimal(), coords.getLongitudeSignedDecimal(), coords.getElevation());
 

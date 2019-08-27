@@ -38,9 +38,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
-import com.usda.fmsc.geospatial.GeoPosition;
-import com.usda.fmsc.geospatial.nmea.sentences.GGASentence;
-import com.usda.fmsc.geospatial.nmea.sentences.GSASentence;
+import com.usda.fmsc.geospatial.Position;
+import com.usda.fmsc.geospatial.nmea41.sentences.GGASentence;
+import com.usda.fmsc.geospatial.nmea41.sentences.GSASentence;
 import com.usda.fmsc.utilities.FileUtils;
 import com.usda.fmsc.utilities.ParseEx;
 import com.usda.fmsc.utilities.StringEx;
@@ -1970,7 +1970,7 @@ public class DataAccessLayer extends IDataLayer {
 
                     //endregion
 
-                    nmeas.add(new TtNmeaBurst(cn, timeCreated, pointCN, used, new GeoPosition(lat, latDir, lon, lonDir, elev, uomelev), fixTime, groundSpeed,
+                    nmeas.add(new TtNmeaBurst(cn, timeCreated, pointCN, used, new Position(lat, latDir, lon, lonDir, elev, uomelev), fixTime, groundSpeed,
                             trackAngle, magVar, magVarDir, mode, fix, satsUsed, pdop, hdop, vdop, fixQuality,
                             trackedSatellites, horizDilution, geoidHeight, geoUom, numberOfSatellitesInView, satsInView));
                 } while (c.moveToNext());

@@ -137,7 +137,7 @@ dependencies {
     implementation 'me.zhanghai.android.materialprogressbar:library:1.1.4'
     implementation 'com.esri.arcgis.android:arcgis-android:10.2.9'
     implementation 'com.sothree.slidinguppanel:library:3.3.0'
-    implementation 'jp.wasabeef:recyclerview-animators:2.2.0'
+    implementation 'jp.wasabeef:recyclerview-animators:3.0.0'
     implementation 'com.larswerkman:HoloColorPicker:1.5'
     implementation 'org.apache.commons:commons-csv:1.2'
     implementation 'com.mcxiaoke.volley:library:1.0.19'
