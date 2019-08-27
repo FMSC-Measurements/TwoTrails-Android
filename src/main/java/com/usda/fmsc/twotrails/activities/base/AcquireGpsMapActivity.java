@@ -15,10 +15,10 @@ import android.widget.Toast;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.animation.ViewAnimator;
 import com.usda.fmsc.geospatial.Extent;
-import com.usda.fmsc.geospatial.GeoPosition;
-import com.usda.fmsc.geospatial.nmea.INmeaBurst;
-import com.usda.fmsc.geospatial.nmea.NmeaIDs;
-import com.usda.fmsc.geospatial.nmea.sentences.GGASentence;
+import com.usda.fmsc.geospatial.Position;
+import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
+import com.usda.fmsc.geospatial.nmea41.NmeaIDs;
+import com.usda.fmsc.geospatial.nmea41.sentences.GGASentence;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
@@ -187,7 +187,7 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
 
     public void addPosition(TtPoint point, boolean moveToPointAfterAdd) {
         if (trailModeEnabled) {
-            final GeoPosition position = trailGraphicManager.addPoint(point);
+            final Position position = trailGraphicManager.addPoint(point);
 
             if (position != null) {
                 if (moveToPointAfterAdd) {
@@ -294,7 +294,7 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
         return trailModeEnabled;
     }
 
-    protected void setNmeaData(final INmeaBurst burst) {
+    protected void setNmeaData(final NmeaBurst burst) {
         runOnUiThread(() -> {
             try {
                 if (burst.hasPosition()) {
@@ -398,7 +398,7 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
 
     //region GPS
     @Override
-    protected void onNmeaBurstReceived(INmeaBurst nmeaBurst) {
+    protected void onNmeaBurstReceived(NmeaBurst nmeaBurst) {
         super.onNmeaBurstReceived(nmeaBurst);
         setNmeaData(nmeaBurst);
     }
@@ -442,14 +442,14 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
 
 
     @Override
-    protected void onFirstPositionReceived(GeoPosition position) {
+    protected void onFirstPositionReceived(Position position) {
         moveToLocation(position, Consts.Location.ZOOM_CLOSE, true);
 
         firstPositionFixTime = System.currentTimeMillis();
     }
 
     @Override
-    protected void onPositionReceived(GeoPosition position) {
+    protected void onPositionReceived(Position position) {
         if (firstPositionFixTime == Long.MAX_VALUE || System.currentTimeMillis() - firstPositionFixTime > 3000) {
             super.onPositionReceived(position);
             firstPositionFixTime = Long.MAX_VALUE;

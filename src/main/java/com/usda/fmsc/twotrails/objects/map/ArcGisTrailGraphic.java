@@ -8,7 +8,7 @@ import com.esri.core.map.Graphic;
 import com.esri.core.symbol.SimpleLineSymbol;
 import com.esri.core.symbol.SimpleMarkerSymbol;
 import com.usda.fmsc.geospatial.Extent;
-import com.usda.fmsc.geospatial.GeoPosition;
+import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
@@ -76,18 +76,18 @@ public class ArcGisTrailGraphic implements ITrailGraphic, IMarkerDataGraphic {
     }
 
     @Override
-    public GeoPosition add(TtPoint point, HashMap<String, TtMetadata> meta) {
-        GeoPosition position = addPoint(point, meta);
+    public Position add(TtPoint point, HashMap<String, TtMetadata> meta) {
+        Position position = addPoint(point, meta);
 
         polyBounds = eBuilder.build();
 
         return position;
     }
 
-    private GeoPosition addPoint(TtPoint point, HashMap<String, TtMetadata> meta) {
+    private Position addPoint(TtPoint point, HashMap<String, TtMetadata> meta) {
         TtMetadata metadata = meta.get(point.getMetadataCN());
 
-        GeoPosition pos = TtUtils.Points.getLatLonFromPoint(point, false, metadata);
+        Position pos = TtUtils.Points.getLatLonFromPoint(point, false, metadata);
         Point posLL = TwoTrailsApp.getInstance().getArcGISTools().latLngToMapSpatial(pos.getLatitudeSignedDecimal(), pos.getLongitudeSignedDecimal(), map);
         Graphic mk = new Graphic(posLL, markerOpts);
 

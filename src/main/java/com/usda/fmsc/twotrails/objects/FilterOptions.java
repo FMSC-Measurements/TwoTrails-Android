@@ -1,7 +1,7 @@
 package com.usda.fmsc.twotrails.objects;
 
-import com.usda.fmsc.geospatial.nmea.sentences.GGASentence;
-import com.usda.fmsc.geospatial.nmea.sentences.GSASentence;
+import com.usda.fmsc.geospatial.nmea41.sentences.GGASentence;
+import com.usda.fmsc.geospatial.nmea41.sentences.GSASentence;
 
 public class FilterOptions {
     public com.usda.fmsc.twotrails.units.DopType DopType;

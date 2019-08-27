@@ -9,7 +9,7 @@ import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 
 import com.usda.fmsc.android.AndroidUtils;
-import com.usda.fmsc.geospatial.nmea.NmeaBurst;
+import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
 
 public class MyPositionDrawable extends Drawable {
     private static final int DEFAULT_RADIUS = 10;
