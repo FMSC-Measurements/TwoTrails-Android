@@ -19,6 +19,7 @@ import com.usda.fmsc.geospatial.nmea41.NmeaIDs;
 import com.usda.fmsc.geospatial.nmea41.Satellite;
 import com.usda.fmsc.geospatial.nmea41.sentences.GGASentence;
 import com.usda.fmsc.geospatial.nmea41.sentences.GSASentence;
+import com.usda.fmsc.geospatial.nmea41.sentences.Status;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.geospatial.utm.UTMTools;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
@@ -57,7 +58,7 @@ public class TtNmeaBurst extends TtObject implements Parcelable {
     private EastWest magVarDir;
 
     //gsa
-    private GSASentence.Mode mode;
+    private Status opMode;
     private GSASentence.Fix fix;
     private ArrayList<Integer> satsUsed;
     private double pdop, hdop, vdop;
@@ -92,7 +93,7 @@ public class TtNmeaBurst extends TtObject implements Parcelable {
         this.magVar = source.readDouble();
         this.magVarDir = (val = ParcelTools.readNInt(source)) != null ?  EastWest.parse(val) : null;
 
-        this.mode = (val = ParcelTools.readNInt(source)) != null ?  GSASentence.Mode.parse(val) : null;
+        this.opMode = (val = ParcelTools.readNInt(source)) != null ?  Status.parse(val) : null;
         this.fix = (val = ParcelTools.readNInt(source)) != null ?  GSASentence.Fix.parse(val) : null;
         this.satsUsed = source.readArrayList(Integer.class.getClassLoader());
         this.pdop = source.readDouble();
@@ -112,7 +113,7 @@ public class TtNmeaBurst extends TtObject implements Parcelable {
 
     private TtNmeaBurst(String cn, DateTime timeCreated, String pointCN, boolean used,
                        Position position, DateTime fixTime, double groundSpeed, double trackAngle,
-                       double magVar, EastWest magVarDir, GSASentence.Mode mode, GSASentence.Fix fix,
+                       double magVar, EastWest magVarDir, Status mode, GSASentence.Fix fix,
                        ArrayList<Integer> satsUsed, double pdop, double hdop, double vdop, GGASentence.GpsFixType fixQuality,
                        int trackedSatellites, double horizDilution, double geoidHeight, UomElevation geoUom,
                        int numberOfSatellitesInView) {
@@ -129,7 +130,7 @@ public class TtNmeaBurst extends TtObject implements Parcelable {
         this.magVar = magVar;
         this.magVarDir = magVarDir;
 
-        this.mode = mode;
+        this.opMode = mode;
         this.fix = fix;
         this.satsUsed = satsUsed;
         this.pdop = pdop;
@@ -147,7 +148,7 @@ public class TtNmeaBurst extends TtObject implements Parcelable {
 
     public TtNmeaBurst(String cn, DateTime timeCreated, String pointCN, boolean used,
         Position position, DateTime fixTime, double groundSpeed, double trackAngle,
-        double magVar, EastWest magVarDir, GSASentence.Mode mode, GSASentence.Fix fix,
+        double magVar, EastWest magVarDir, Status mode, GSASentence.Fix fix,
         ArrayList<Integer> satsUsed, double pdop, double hdop, double vdop, GGASentence.GpsFixType fixQuality,
         int trackedSatellites, double horizDilution, double geoidHeight, UomElevation geoUom,
         int numberOfSatellitesInView, ArrayList<Satellite> satellitesInView) {
@@ -161,7 +162,7 @@ public class TtNmeaBurst extends TtObject implements Parcelable {
 
     public TtNmeaBurst(String cn, DateTime timeCreated, String pointCN, boolean used,
                        Position position, DateTime fixTime, double groundSpeed, double trackAngle,
-                       double magVar, EastWest magVarDir, GSASentence.Mode mode, GSASentence.Fix fix,
+                       double magVar, EastWest magVarDir, Status mode, GSASentence.Fix fix,
                        ArrayList<Integer> satsUsed, double pdop, double hdop, double vdop, GGASentence.GpsFixType fixQuality,
                        int trackedSatellites, double horizDilution, double geoidHeight, UomElevation geoUom,
                        int numberOfSatellitesInView, String satellitesInView) {
@@ -184,7 +185,7 @@ public class TtNmeaBurst extends TtObject implements Parcelable {
                 burst.getTrackAngle(),
                 burst.getMagVar(),
                 burst.getMagVarDir(),
-                burst.getMode(),
+                burst.getOperationMode(),
                 burst.getFix(),
                 burst.getUsedSatelliteIDs(),
                 burst.getPDOP(),
@@ -224,7 +225,7 @@ public class TtNmeaBurst extends TtObject implements Parcelable {
             dest.writeDouble(magVar);
             ParcelTools.writeNInt(dest, magVarDir != null ? magVarDir.getValue() : null);
 
-            ParcelTools.writeNInt(dest, mode != null ? mode.getValue() : null);
+            ParcelTools.writeNInt(dest, opMode != null ? opMode.getValue() : null);
             ParcelTools.writeNInt(dest, fix != null ? fix.getValue() : null);
             dest.writeList(satsUsed);
             dest.writeDouble(pdop);
@@ -453,8 +454,8 @@ public class TtNmeaBurst extends TtObject implements Parcelable {
         return fix;
     }
 
-    public GSASentence.Mode getMode() {
-        return mode;
+    public Status getOperationMode() {
+        return opMode;
     }
 
     public double getHDOP() {
