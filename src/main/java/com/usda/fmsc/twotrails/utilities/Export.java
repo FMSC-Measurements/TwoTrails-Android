@@ -414,7 +414,7 @@ public class Export {
 
                     "Fix",
                     "Fix Quality",
-                    "Mode",
+                    "Operation Mode",
 
                     "PDOP",
                     "HDOP",
@@ -455,7 +455,7 @@ public class Export {
 
                 values.add(burst.getFix().toStringF());
                 values.add(burst.getFixQuality() == null ? StringEx.Empty : burst.getFixQuality().toStringF());
-                values.add(burst.getMode().toStringF());
+                values.add(burst.getOperationMode().toString());
 
                 values.add(StringEx.toString(burst.getPDOP()));
                 values.add(StringEx.toString(burst.getHDOP()));
