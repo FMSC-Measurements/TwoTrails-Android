@@ -138,6 +138,11 @@ public class CheckNmeaDialog extends DialogFragment implements GpsService.Listen
     }
 
     @Override
+    public void receivingNmeaStrings(boolean receiving) {
+
+    }
+
+    @Override
     public void gpsStarted() {
 
     }

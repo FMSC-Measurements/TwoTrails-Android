@@ -300,6 +300,11 @@ public class DeviceSettingsFragment extends PreferenceFragment {
                         }
 
                         @Override
+                        public void receivingNmeaStrings(boolean receiving) {
+
+                        }
+
+                        @Override
                         public void gpsStarted() {
                             if (gps.isExternalGpsUsed()) {
                                 getActivity().runOnUiThread(() -> pd.setMessage("External GPS Connected. Listening for data."));

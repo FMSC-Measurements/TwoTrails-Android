@@ -97,6 +97,11 @@ public class TwoTrailsApp extends Application {
                 }
 
                 @Override
+                public void receivingNmeaStrings(boolean receiving) {
+
+                }
+
+                @Override
                 public void gpsStarted() {
                     if (silentConnectToExternalGps && getGps().isExternalGpsUsed()) {
                         silentConnectToExternalGps = false;

@@ -233,6 +233,13 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
     }
 
     @Override
+    public void receivingNmeaStrings(boolean receiving) {
+        if (!receiving) {
+            Toast.makeText(GpsStatusActivity.this, "Not receiving NMEA data.", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    @Override
     public void gpsStarted() {
 
     }
