@@ -277,6 +277,11 @@ public class GetMapExtentsActivity extends AppCompatActivity implements GpsServi
     }
 
     @Override
+    public void receivingNmeaStrings(boolean receiving) {
+
+    }
+
+    @Override
     public void gpsStarted() {
 
     }

@@ -68,6 +68,11 @@ public class GpsInfoControl implements GpsService.Listener {
     }
 
     @Override
+    public void receivingNmeaStrings(boolean receiving) {
+
+    }
+
+    @Override
     public void gpsStarted() {
 
     }

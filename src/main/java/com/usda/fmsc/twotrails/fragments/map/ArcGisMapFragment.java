@@ -656,6 +656,11 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
     }
 
     @Override
+    public void receivingNmeaStrings(boolean receiving) {
+
+    }
+
+    @Override
     public void gpsStarted() {
 
     }
