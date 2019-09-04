@@ -742,7 +742,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         if (position != null) {
             moveToLocation((float) position.getLatitudeSignedDecimal(), (float) position.getLongitudeSignedDecimal(), animate);
         } else {
-            getTtAppCtx().getReport().writeWarn("Null PositionLegacy", "BaseMapActivity:moveToLocation(p,b)");
+            getTtAppCtx().getReport().writeWarn("Null Position", "BaseMapActivity:moveToLocation(p,b)");
         }
     }
 
@@ -750,7 +750,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         if (position != null) {
             moveToLocation((float) position.getLatitudeSignedDecimal(), (float) position.getLongitudeSignedDecimal(), zoomLevel, animate);
         } else {
-            getTtAppCtx().getReport().writeWarn("Null PositionLegacy", "BaseMapActivity:moveToLocation(p,f,b)", Thread.currentThread().getStackTrace());
+            getTtAppCtx().getReport().writeWarn("Null Position", "BaseMapActivity:moveToLocation(p,f,b)", Thread.currentThread().getStackTrace());
         }
     }
 

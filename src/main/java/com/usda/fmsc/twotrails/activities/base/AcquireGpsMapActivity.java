@@ -19,6 +19,7 @@ import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
 import com.usda.fmsc.geospatial.nmea41.NmeaIDs;
 import com.usda.fmsc.geospatial.nmea41.sentences.GGASentence;
+import com.usda.fmsc.geospatial.nmea41.sentences.GSASentence;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
@@ -348,7 +349,7 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
                     tvPdop.setText(StringEx.format("%.2f", burst.getPDOP()));
                     tvHdop.setText(StringEx.format("%.2f", burst.getHDOP()));
                 } else {
-                    tvGpsStatus.setText(nVal);
+                    tvGpsStatus.setText(GSASentence.Fix.NoFix.toString());
                     tvHdop.setText(nVal);
                     tvPdop.setText(nVal);
                 }
@@ -356,7 +357,7 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
                 if (burst.isValid(NmeaIDs.SentenceID.GSV)) {
 
                     tvSat.setText(StringEx.format("%d/%d/%d",
-                            burst.isValid(NmeaIDs.SentenceID.GSA) ? burst.getUsedSatellitesCount() : 0,
+                            burst.getUsedSatellitesCount(),
                             burst.isValid(NmeaIDs.SentenceID.GGA) ? burst.getTrackedSatellitesCount() : 0,
                             burst.getSatellitesInViewCount()));
                 } else {

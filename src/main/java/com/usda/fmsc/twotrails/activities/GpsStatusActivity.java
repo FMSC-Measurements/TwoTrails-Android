@@ -14,6 +14,7 @@ import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
 import com.usda.fmsc.geospatial.nmea41.NmeaIDs;
 import com.usda.fmsc.geospatial.nmea41.sentences.GGASentence;
+import com.usda.fmsc.geospatial.nmea41.sentences.GSASentence;
 import com.usda.fmsc.geospatial.nmea41.sentences.base.NmeaSentence;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.twotrails.Consts;
@@ -172,10 +173,10 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
 
                 if (burst.isValid(NmeaIDs.SentenceID.GSA)) {
                     tvGpsStatus.setText(burst.getFix().toString());
-                    tvPdop.setText(String.format("%.2f", burst.getPDOP()));
-                    tvHdop.setText(String.format("%.2f", burst.getHDOP()));
+                    tvPdop.setText(burst.getPDOP() == null ? nVal : String.format("%.2f", burst.getPDOP()));
+                    tvHdop.setText(burst.getHDOP() == null ? nVal : String.format("%.2f", burst.getHDOP()));
                 } else {
-                    tvGpsStatus.setText(nVal);
+                    tvGpsStatus.setText(GSASentence.Fix.NoFix.toString());
                     tvHdop.setText(nVal);
                     tvPdop.setText(nVal);
                 }

@@ -96,10 +96,11 @@ public class GpsStatusSatView extends GpsStatusView {
 
     @Override
     protected void onDraw(Canvas canvas) {
+        canvas.drawColor(Color.WHITE);
         int vHeight = getHeight();
 
-        if (getValidSatelliteCount() > 0) {
-            int width = getWidth() / getValidSatelliteCount();
+        if (getValidSrnSatelliteCount() > 0) {
+            int width = getWidth() / getValidSrnSatelliteCount();
 
             int flagWidth = width / 3;
             if (flagWidth > 46)
@@ -115,7 +116,7 @@ public class GpsStatusSatView extends GpsStatusView {
             int count = 0;
 
             for (Satellite sat : getSatellites().values()) {
-                if (getSatellitesValid().containsKey(sat.getNmeaID()) && getSatellitesValid().get(sat.getNmeaID())) {
+                if (getSatellitesSrnValid().containsKey(sat.getNmeaID()) && getSatellitesSrnValid().get(sat.getNmeaID())) {
                     float height = ((sat.getSRN() != null ? Math.abs(sat.getSRN()) : 0) / 99f) * vHeight;
 
                     Paint paint;
@@ -130,7 +131,7 @@ public class GpsStatusSatView extends GpsStatusView {
 
                     canvas.drawRect(offset,
                             vHeight - height,
-                            ++count == getValidSatelliteCount() ? getWidth() : (offset + width),
+                            ++count == getValidSrnSatelliteCount() ? getWidth() : (offset + width),
                             vHeight,
                             paint);
 
@@ -156,7 +157,7 @@ public class GpsStatusSatView extends GpsStatusView {
 
 
     private Bitmap getFlag(int flagWidth, GnssType gnssType) {
-        if (flagsSize.get(gnssType) != null && flagsSize.get(gnssType) != flagWidth) {
+        if (flagsSize.get(gnssType) != null && flagsSize.get(gnssType) == flagWidth) {
             return flags.get(gnssType);
         } else {
             int res;
@@ -189,11 +190,7 @@ public class GpsStatusSatView extends GpsStatusView {
                     return null;
             }
 
-            Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), res);
-
-            if (flagWidth != 46) {
-                bitmap = AndroidUtils.UI.scaleBitmap(bitmap, flagWidth, false);
-            }
+            Bitmap bitmap = AndroidUtils.UI.scaleBitmap( BitmapFactory.decodeResource(context.getResources(), res), flagWidth, false);
 
             flagsSize.put(gnssType, flagWidth);
             flags.put(gnssType, bitmap);

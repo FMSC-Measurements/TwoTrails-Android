@@ -10,20 +10,21 @@ import com.usda.fmsc.geospatial.nmea41.Satellite;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class GpsStatusView extends View {
     public static final long SATELLITE_VISIBILITY_TIMEOUT = 60000; //60 sec
+    public static final long SBAS_VISIBILITY_TIMEOUT = 120000; //120 sec
 
     private List<Integer> usedSats;
     private ConcurrentHashMap<Integer, Satellite> satellites;
     private ConcurrentHashMap<Integer, Boolean> satellitesVisibility;
     private ConcurrentHashMap<Integer, Boolean> satellitesUsed;
-    private ConcurrentHashMap<Integer, Boolean> satellitesValid;
+    private ConcurrentHashMap<Integer, Boolean> satellitesLocValid;
+    private ConcurrentHashMap<Integer, Boolean> satellitesSrnValid;
     private ConcurrentHashMap<Integer, Long> satellitesLastSeen;
 
-    private int satsUsedCount, satsVisCount, satsTrackedCount, satValidCount;
+    private int satsUsedCount, satsVisCount, satsTrackedCount, satValidLocCount, satValidSrnCount;
 
 
     public GpsStatusView(Context context) {
@@ -39,12 +40,13 @@ public class GpsStatusView extends View {
 
         usedSats = new ArrayList<>();
         satellitesUsed = new ConcurrentHashMap<>();
-        satellitesValid = new ConcurrentHashMap<>();
+        satellitesLocValid = new ConcurrentHashMap<>();
+        satellitesSrnValid = new ConcurrentHashMap<>();
         satellites = new ConcurrentHashMap<>();
         satellitesVisibility = new ConcurrentHashMap<>();
         satellitesLastSeen = new ConcurrentHashMap<>();
 
-        satsUsedCount = satsVisCount = satsTrackedCount = satValidCount = 0;
+        satsUsedCount = satsVisCount = satsTrackedCount = satValidLocCount = 0;
     }
 
     public void update(NmeaBurst burst) {
@@ -64,46 +66,61 @@ public class GpsStatusView extends View {
                 satsUsedCount = 0;
             }
 
-            for (Integer id : satellitesVisibility.keySet()) {
-                satellitesVisibility.put(id, false);
-                satellitesUsed.put(id, false);
+            for (Satellite sat : satellites.values()) {
+                if (!sat.isSBAS() || (now - satellitesLastSeen.get(sat.getNmeaID())) > 90000)
+                    satellitesVisibility.put(sat.getNmeaID(), false);
+                satellitesUsed.put(sat.getNmeaID(), false);
             }
 
             int nid;
             for (Satellite sat : burst.getSatellitesInView()) {
                 nid = sat.getNmeaID();
+
                 if (nid != 0) {
                     satellites.put(nid, sat);
                     satellitesLastSeen.put(nid, now);
                     satellitesVisibility.put(nid, true);
                     satellitesUsed.put(nid, usedSats.contains(nid));
 
-                    boolean valid = sat.getAzimuth() != null && sat.getElevation() != null;
-                    boolean wasValid = satellitesValid.containsKey(nid) && satellitesValid.get(nid);
+                    boolean locValid = sat.getAzimuth() != null && sat.getElevation() != null;
+                    boolean locWasValid = satellitesLocValid.containsKey(nid) && satellitesLocValid.get(nid);
+                    boolean srnValid = sat.getSRN() != null;
+                    boolean srnWasValid = satellitesSrnValid.containsKey(nid) && satellitesSrnValid.get(nid);
 
-                    if (!wasValid && valid) {
-                        satValidCount++;
-                    } else if (wasValid && !valid) {
-                        satValidCount--;
-                    }
+                    if (!locWasValid && locValid)
+                        satValidLocCount++;
+                    else if (locWasValid && !locValid)
+                        satValidLocCount--;
 
-                    satellitesValid.put(nid, valid);
+                    if (!srnWasValid && srnValid)
+                        satValidSrnCount++;
+                    else if (srnWasValid && !srnValid)
+                        satValidSrnCount--;
+
+                    satellitesLocValid.put(nid, locValid);
+                    satellitesSrnValid.put(nid, srnValid);
                 }
             }
         }
 
-        for (Integer id : satellites.keySet()) {
-            if (now - satellitesLastSeen.get(id) > SATELLITE_VISIBILITY_TIMEOUT) {
+        for (Satellite sat : satellites.values()) {
+            int id = sat.getNmeaID();
+            if (now - satellitesLastSeen.get(id) > (sat.isSBAS() ? SBAS_VISIBILITY_TIMEOUT : SATELLITE_VISIBILITY_TIMEOUT)) {
                 satellites.remove(id);
                 satellitesLastSeen.remove(id);
                 satellitesVisibility.remove(id);
                 satellitesUsed.remove(id);
 
-                if (satellitesValid.get(id)) {
-                    satValidCount--;
+                if (satellitesLocValid.get(id)) {
+                    satValidLocCount--;
                 }
 
-                satellitesValid.remove(id);
+                if (satellitesSrnValid.get(id)) {
+                    satValidSrnCount--;
+                }
+
+                satellitesLocValid.remove(id);
+                satellitesSrnValid.remove(id);
             }
         }
 
@@ -123,12 +140,20 @@ public class GpsStatusView extends View {
         return satellitesVisibility;
     }
 
-    public ConcurrentHashMap<Integer, Boolean> getSatellitesValid() {
-        return satellitesValid;
+    public ConcurrentHashMap<Integer, Boolean> getSatellitesLocValid() {
+        return satellitesLocValid;
     }
 
-    public int getValidSatelliteCount() {
-        return satValidCount;
+    public ConcurrentHashMap<Integer, Boolean> getSatellitesSrnValid() {
+        return satellitesSrnValid;
+    }
+
+    public int getValidLocSatelliteCount() {
+        return satValidLocCount;
+    }
+
+    public int getValidSrnSatelliteCount() {
+        return satValidSrnCount;
     }
 
     public int getUsedSatelliteCount() {
