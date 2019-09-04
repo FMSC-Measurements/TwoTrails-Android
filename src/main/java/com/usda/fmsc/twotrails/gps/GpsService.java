@@ -17,6 +17,7 @@ import android.os.Looper;
 
 import com.google.android.gms.maps.LocationSource;
 import com.usda.fmsc.android.AndroidUtils;
+import com.usda.fmsc.android.utilities.PostDelayHandler;
 import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
 import com.usda.fmsc.geospatial.nmea41.NmeaIDs.*;
@@ -40,6 +41,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
 
     public final int GPS_UPDATE_INTERVAL = 1000;    //in milliseconds
     public final int GPS_MINIMUM_DISTANCE = 0;      //in meters
+    public final int NMEA_WAIT_TIMEOUT = 5000;      //in meters
 
     private TwoTrailsApp TtAppCtx;
 
@@ -59,6 +61,8 @@ public class GpsService extends Service implements LocationListener, LocationSou
     private LocationManager locManager;
 
     private NmeaParser parser;
+    private PostDelayHandler nmeaReceived;
+    private boolean receivingNmea;
 
     private GnssStatus.Callback mGnssStatusCallback = new GnssStatus.Callback() {
         @Override
@@ -94,6 +98,16 @@ public class GpsService extends Service implements LocationListener, LocationSou
 
         parser = new NmeaParser(EnumSet.of(TalkerID.GP, TalkerID.GL, TalkerID.GA, TalkerID.GN));
         parser.addListener(this);
+
+        nmeaReceived = new PostDelayHandler(NMEA_WAIT_TIMEOUT, () -> {
+            if (receivingNmea) {
+                if (isGpsRunning()) {
+                    postReceivingNmeaStrings(false);
+                }
+
+                receivingNmea = false;
+            }
+        });
 
         SharedPreferences prefs = TtAppCtx.getDeviceSettings().getPrefs();
 
@@ -184,10 +198,16 @@ public class GpsService extends Service implements LocationListener, LocationSou
                 if (logging) {
                     writeStartLog();
                 }
+
+                receivingNmea = true;
+                nmeaReceived.post();
             }
         } else {
             status = GpsDeviceStatus.GpsAlreadyStarted;
             TtAppCtx.getTtNotifyManager().setGpsOn(isExternalGpsUsed());
+
+            receivingNmea = true;
+            nmeaReceived.post();
         }
 
         return status;
@@ -491,6 +511,13 @@ public class GpsService extends Service implements LocationListener, LocationSou
                     TtAppCtx.getReport().writeError(e.getMessage(), "GpsService:parseNmeaString:logToFile");
                 }
             }
+
+            if (!receivingNmea) {
+                postReceivingNmeaStrings(true);
+                receivingNmea = true;
+            }
+
+            nmeaReceived.post();
         }
     }
 
@@ -577,6 +604,16 @@ public class GpsService extends Service implements LocationListener, LocationSou
         for (final Listener listener : listeners) {
             try {
                 new Handler(Looper.getMainLooper()).post(() -> listener.nmeaBurstValidityChanged(receivingValidBursts));
+            } catch (Exception ex) {
+                //
+            }
+        }
+    }
+
+    private void postReceivingNmeaStrings(final boolean receivingNmea) {
+        for (final Listener listener : listeners) {
+            try {
+                new Handler(Looper.getMainLooper()).post(() -> listener.receivingNmeaStrings(receivingNmea));
             } catch (Exception ex) {
                 //
             }
@@ -785,6 +822,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
         void nmeaStringReceived(String nmeaString);
         void nmeaSentenceReceived(NmeaSentence nmeaSentence);
         void nmeaBurstValidityChanged(boolean burstsAreValid);
+        void receivingNmeaStrings(boolean receiving);
 
         void gpsStarted();
         void gpsStopped();

@@ -56,6 +56,7 @@ import com.usda.fmsc.geospatial.utm.UTMTools;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.DeviceSettings;
 import com.usda.fmsc.twotrails.R;
+import com.usda.fmsc.twotrails.activities.GpsStatusActivity;
 import com.usda.fmsc.twotrails.activities.SettingsActivity;
 import com.usda.fmsc.twotrails.adapters.PointDetailsAdapter;
 import com.usda.fmsc.twotrails.adapters.PolyMarkerMapRvAdapter;
@@ -235,6 +236,10 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         setLocationEnabled(getShowMyPos());
 
         getTtAppCtx().getGps().addListener(this);
+
+        if (getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
+            getTtAppCtx().getGps().startGps();
+        }
 
         if (AndroidUtils.Device.isFullOrientationAvailable(this)) {
             mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
@@ -1099,6 +1104,12 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
 
     }
 
+    @Override
+    public void receivingNmeaStrings(boolean receiving) {
+        if (!receiving) {
+            Toast.makeText(BaseMapActivity.this, "Not receiving NMEA data.", Toast.LENGTH_LONG).show();
+        }
+    }
 
     protected boolean isReceivingNmea() {
         return receivingNmea;
