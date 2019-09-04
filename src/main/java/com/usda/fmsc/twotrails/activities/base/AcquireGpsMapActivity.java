@@ -68,16 +68,14 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
             canceling = true;
             setResult(Consts.Codes.Results.GPS_NOT_CONFIGURED);
             finish();
-            return;
-        }
+        } else {
+            if (trailModeEnabled) {
+                Intent intent = getIntent();
 
-        if (trailModeEnabled) {
-            Intent intent = getIntent();
-
-            if (intent != null) {
-                if (intent.hasExtra(Consts.Codes.Data.POLYGON_DATA)) {
-                    _Polygon = intent.getParcelableExtra(Consts.Codes.Data.POLYGON_DATA);
-                }
+                if (intent != null) {
+                    if (intent.hasExtra(Consts.Codes.Data.POLYGON_DATA)) {
+                        _Polygon = intent.getParcelableExtra(Consts.Codes.Data.POLYGON_DATA);
+                    }
 
 //                else if (intent.hasExtra(Consts.Codes.Data.POINT_PACKAGE)) {
 //                    Bundle bundle = intent.getExtras();
@@ -86,20 +84,21 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
 //                    }
 //                }
 
-                if (_Polygon == null) {
-                    trailModeEnabled = false;
-                }
+                    if (_Polygon == null) {
+                        trailModeEnabled = false;
+                    }
 
-                super.onCreate(savedInstanceState);
+                    super.onCreate(savedInstanceState);
 
-                if (trailModeEnabled) {
-                    setupTrailMode(_Polygon);
+                    if (trailModeEnabled) {
+                        setupTrailMode(_Polygon);
+                    }
+                } else {
+                    canceling = true;
                 }
             } else {
-                canceling = true;
+                super.onCreate(savedInstanceState);
             }
-        } else {
-            super.onCreate(savedInstanceState);
         }
     }
 
@@ -438,6 +437,11 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
                 dialog.show();
             }
         }
+    }
+
+    @Override
+    public void receivingNmeaStrings(boolean receivingNmea) {
+
     }
     //endregion
 
