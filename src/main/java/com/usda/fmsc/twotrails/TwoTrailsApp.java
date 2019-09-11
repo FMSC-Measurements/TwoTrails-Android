@@ -509,6 +509,17 @@ public class TwoTrailsApp extends Application {
             return _DAL;
         }
 
+        if (getDeviceSettings().getLastOpenedProject() != null) {
+            _DALFile = getDeviceSettings().getLastOpenedProject();
+
+            if (FileUtils.fileExists(_DALFile)) {
+                setDAL(new DataAccessLayer(_DALFile, getInstance()));
+                return _DAL;
+            }
+
+            _DALFile = null;
+        }
+
         throw new RuntimeException("DAL not set");
     }
 
@@ -520,6 +531,7 @@ public class TwoTrailsApp extends Application {
             _DALFile = dal.getFilePath();
             getReport().writeEvent(StringEx.format("DAL Loaded: %s", _DALFile));
             getMapSettings().reset();
+            getDeviceSettings().setLastOpenedProject(dal.getFilePath());
         } else {
             getReport().writeEvent("DAL Unloaded");
         }
