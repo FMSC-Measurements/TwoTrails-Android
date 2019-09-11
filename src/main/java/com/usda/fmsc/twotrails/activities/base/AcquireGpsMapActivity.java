@@ -441,7 +441,10 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
 
     @Override
     public void receivingNmeaStrings(boolean receivingNmea) {
-
+        if (!receivingNmea) {
+            Toast.makeText(AcquireGpsMapActivity.this, "Not receiving NMEA data.", Toast.LENGTH_LONG).show();
+            AndroidUtils.Device.vibrate(getApplicationContext(), Consts.Notifications.VIB_PATTERN_GPS_LOST_CONNECTED);
+        }
     }
     //endregion
 

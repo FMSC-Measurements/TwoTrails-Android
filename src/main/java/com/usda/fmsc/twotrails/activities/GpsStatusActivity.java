@@ -184,7 +184,7 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
                 if (burst.isValid(NmeaIDs.SentenceID.GSV)) {
 
                     tvSat.setText(String.format("%d/%d/%d",
-                            burst.isValid(NmeaIDs.SentenceID.GSA) ? burst.getUsedSatellitesCount() : 0,
+                            burst.getUsedSatellitesCount(),
                             burst.isValid(NmeaIDs.SentenceID.GGA) ? burst.getTrackedSatellitesCount() : 0,
                             burst.getSatellitesInViewCount()));
                 } else {
@@ -268,7 +268,7 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
             final Activity activity = this;
             dialog.setTitle("GPS Connection Lost");
             dialog.setMessage("The GPS bluetooth connection has been broken. Would you like to try and reestablish the connection?");
-            dialog.setPositiveButton("Connect", (dialog1, which) -> {
+            dialog.setPositiveButton("Connect", (d, which) -> {
                 GpsService.GpsDeviceStatus status = binder.startGps();
 
                 if (status != GpsService.GpsDeviceStatus.ExternalGpsStarted &&
@@ -280,7 +280,7 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
                     AndroidUtils.Device.vibrate(getApplicationContext(), Consts.Notifications.VIB_PATTERN_GPS_CONNECTED);
                 }
             });
-            dialog.setNegativeButton(R.string.str_exit, (dialog12, which) -> {
+            dialog.setNegativeButton(R.string.str_exit, (d, which) -> {
                 activity.setResult(RESULT_CANCELED);
                 activity.finish();
             });
