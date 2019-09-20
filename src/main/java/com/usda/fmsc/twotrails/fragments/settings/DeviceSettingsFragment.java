@@ -205,7 +205,7 @@ public class DeviceSettingsFragment extends PreferenceFragment {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        if (requestCode == Consts.Codes.Requests.BLUETOOH && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        if (requestCode == Consts.Codes.Requests.BLUETOOTH && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             switchToExternal();
         }
     }
@@ -598,7 +598,7 @@ public class DeviceSettingsFragment extends PreferenceFragment {
             if (useExternal) {
                 if (AndroidUtils.App.requestPermission(getActivity(),
                         new String [] {Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN},
-                        Consts.Codes.Requests.BLUETOOH,
+                        Consts.Codes.Requests.BLUETOOTH,
                         "Bluetooth is required for connecting to the external GPS receiver.")) {
                     success = switchToExternal();
                 }

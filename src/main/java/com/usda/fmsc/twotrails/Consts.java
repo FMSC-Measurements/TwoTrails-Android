@@ -119,7 +119,7 @@ public class Consts {
             public static final int MEDIA_UPDATED = 2004;
             public static final int NO_POINT_DATA = 2005;
             public static final int NO_POLYGON_DATA = 2006;
-            public static final int NO_METDATA_DATA = 2007;
+            public static final int NO_METADATA_DATA = 2007;
             public static final int MAP_CREATED = 2008;
             public static final int MAP_UPDATED = 2009;
             public static final int MAP_DELETED = 2010;
@@ -156,7 +156,7 @@ public class Consts {
             public static final int LOCATION = 5000;
             public static final int PHONE = 5001;
             public static final int STORAGE = 5002;
-            public static final int BLUETOOH = 5003;
+            public static final int BLUETOOTH = 5003;
             public static final int INTERNET = 5004;
             public static final int VIBRATE = 5005;
             public static final int CAPTURE_IMAGE = 5006;
