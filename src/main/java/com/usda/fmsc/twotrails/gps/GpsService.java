@@ -40,8 +40,8 @@ public class GpsService extends Service implements LocationListener, LocationSou
         NmeaParser.Listener, BluetoothConnection.Listener, SharedPreferences.OnSharedPreferenceChangeListener {
 
     public final int GPS_UPDATE_INTERVAL = 1000;    //in milliseconds
+    public final int NMEA_WAIT_TIMEOUT = 5000;      //in milliseconds
     public final int GPS_MINIMUM_DISTANCE = 0;      //in meters
-    public final int NMEA_WAIT_TIMEOUT = 5000;      //in meters
 
     private TwoTrailsApp TtAppCtx;
 
@@ -362,9 +362,11 @@ public class GpsService extends Service implements LocationListener, LocationSou
     }
 
     private void writeStartLog() {
-        logPrintWriter.println(String.format("[%s] %s GPS Started%s", DateTime.now(),
+        logPrintWriter.println(String.format("[%s] %s GPS Started [%s]", DateTime.now(),
                 isExternalGpsUsed() ? "External" : "Internal",
-                isExternalGpsUsed() ? String.format(" [%s]", TtAppCtx.getDeviceSettings().getGpsDeviceName()) : StringEx.Empty));
+                isExternalGpsUsed() ?
+                    TtAppCtx.getDeviceSettings().getGpsDeviceName() :
+                    android.os.Build.MODEL));
         logPrintWriter.flush();
     }
 

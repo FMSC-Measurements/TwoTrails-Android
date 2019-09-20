@@ -2,7 +2,6 @@ package com.usda.fmsc.twotrails.activities;
 
 import android.Manifest;
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -139,32 +138,22 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
         Intent startIntent = getIntent();
 
         if (!showedCrashed && startIntent != null && startIntent.hasExtra(Consts.Codes.Data.CRASH)) {
-            AndroidUtils.Device.isInternetAvailable(new AndroidUtils.Device.InternetAvailableCallback() {
-                @Override
-                public void onCheckInternet(final boolean internetAvailable) {
-                    runOnUiThread(() -> {
-                        if (internetAvailable) {
-                            new AlertDialog.Builder(MainActivity.this)
-                                    .setMessage("TwoTrails experienced a crash. Would you like to send an error report to the developer team to help prevent future crashes?")
-                                    .setPositiveButton("Send", new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            TtUtils.SendCrashEmailToDev(MainActivity.this);
-                                        }
-                                    })
-                                    .setNeutralButton("Don't Send", null)
-                                    .show();
-                            showedCrashed = true;
-                        } else {
-                            new AlertDialog.Builder(MainActivity.this)
-                                    .setMessage("TwoTrails experienced a crash. You can send a crash log to the development team from inside the settings menu.")
-                                    .setPositiveButton(R.string.str_ok, null)
-                                    .show();
-                            showedCrashed = true;
-                        }
-                    });
+            AndroidUtils.Device.isInternetAvailable(internetAvailable -> runOnUiThread(() -> {
+                if (internetAvailable) {
+                    new AlertDialog.Builder(MainActivity.this)
+                            .setMessage("TwoTrails experienced a crash. Would you like to send an error report to the developer team to help prevent future crashes?")
+                            .setPositiveButton("Send", (dialog, which) -> TtUtils.SendCrashEmailToDev(MainActivity.this))
+                            .setNeutralButton("Don't Send", null)
+                            .show();
+                    showedCrashed = true;
+                } else {
+                    new AlertDialog.Builder(MainActivity.this)
+                            .setMessage("TwoTrails experienced a crash. You can send a crash log to the development team from inside the settings menu.")
+                            .setPositiveButton(R.string.str_ok, null)
+                            .show();
+                    showedCrashed = true;
                 }
-            });
+            }));
         }
     }
 
@@ -553,12 +542,7 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
         if (getTtAppCtx().getDAL().duplicate(fileName)) {
             View view = findViewById(R.id.parent);
             if (view != null) {
-                Snackbar snackbar = Snackbar.make(view, "File duplicated", Snackbar.LENGTH_LONG).setAction("Open", new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        openFile(fileName);
-                    }
-                })
+                Snackbar snackbar = Snackbar.make(view, "File duplicated", Snackbar.LENGTH_LONG).setAction("Open", v -> openFile(fileName))
                 .setActionTextColor(AndroidUtils.UI.getColor(getBaseContext(), R.color.primaryLighter));
 
                 AndroidUtils.UI.setSnackbarTextColor(snackbar, Color.WHITE);
@@ -591,12 +575,7 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
                     createFile(filePath);
                 }
             } else {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(MainActivity.this, "Invalid Filename", Toast.LENGTH_LONG).show();
-                    }
-                });
+                runOnUiThread(() -> Toast.makeText(MainActivity.this, "Invalid Filename", Toast.LENGTH_LONG).show());
             }
         });
 
