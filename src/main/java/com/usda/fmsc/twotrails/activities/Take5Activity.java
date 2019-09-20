@@ -378,7 +378,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                     }
 
                     if (_Metadata == null) {
-                        cancelResult = Consts.Codes.Results.NO_METDATA_DATA;
+                        cancelResult = Consts.Codes.Results.NO_METADATA_DATA;
                     } else {
                         setZone(_Metadata.getZone());
 

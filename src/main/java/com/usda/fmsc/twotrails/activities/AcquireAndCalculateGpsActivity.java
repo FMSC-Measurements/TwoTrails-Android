@@ -118,7 +118,7 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
                     return;
                 }
                 if (_Metadata == null) {
-                    setResult(Consts.Codes.Results.NO_METDATA_DATA);
+                    setResult(Consts.Codes.Results.NO_METADATA_DATA);
                     finish();
                     return;
                 }
