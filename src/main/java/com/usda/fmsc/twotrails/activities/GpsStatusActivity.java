@@ -159,7 +159,7 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
                     }
                 }
 
-                if (burst.isValid(NmeaIDs.SentenceID.RMC) && burst.getMagVarDir() != null) {
+                if (burst.isValid(NmeaIDs.SentenceID.RMC) && burst.getMagVar() != null) {
                     tvDec.setText(String.format("%.2f %s", burst.getMagVar(), burst.getMagVarDir().toStringAbv()));
                 } else {
                     tvDec.setText(nVal);

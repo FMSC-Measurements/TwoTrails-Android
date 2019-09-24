@@ -494,8 +494,6 @@ public class GpsService extends Service implements LocationListener, LocationSou
         if (nmeaString != null) {
             nmeaString = nmeaString.trim();
 
-            postNmeaString(nmeaString);
-
             if (parser.isSynced() || parser.sync(nmeaString)) {
                 try {
                     parser.parse(nmeaString);
@@ -504,6 +502,8 @@ public class GpsService extends Service implements LocationListener, LocationSou
                     postNmeaBurstValidityChanged(false);
                 }
             }
+
+            postNmeaString(nmeaString);
 
             if (logging) {
                 try {
