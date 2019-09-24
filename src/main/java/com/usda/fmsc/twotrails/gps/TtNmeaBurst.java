@@ -113,7 +113,7 @@ public class TtNmeaBurst extends TtObject implements Parcelable {
 
     private TtNmeaBurst(String cn, DateTime timeCreated, String pointCN, boolean used,
                        Position position, DateTime fixTime, double groundSpeed, double trackAngle,
-                       double magVar, EastWest magVarDir, Status mode, GSASentence.Fix fix,
+                       Double magVar, EastWest magVarDir, Status mode, GSASentence.Fix fix,
                        ArrayList<Integer> satsUsed, double pdop, double hdop, double vdop, GGASentence.GpsFixType fixQuality,
                        int trackedSatellites, double horizDilution, double geoidHeight, UomElevation geoUom,
                        int numberOfSatellitesInView) {
@@ -127,7 +127,7 @@ public class TtNmeaBurst extends TtObject implements Parcelable {
         this.fixTime = fixTime;
         this.groundSpeed = groundSpeed;
         this.trackAngle = trackAngle;
-        this.magVar = magVar;
+        this.magVar = magVar == null ? 0 : magVar;
         this.magVarDir = magVarDir;
 
         this.opMode = mode;
@@ -148,7 +148,7 @@ public class TtNmeaBurst extends TtObject implements Parcelable {
 
     public TtNmeaBurst(String cn, DateTime timeCreated, String pointCN, boolean used,
         Position position, DateTime fixTime, double groundSpeed, double trackAngle,
-        double magVar, EastWest magVarDir, Status mode, GSASentence.Fix fix,
+        Double magVar, EastWest magVarDir, Status mode, GSASentence.Fix fix,
         ArrayList<Integer> satsUsed, double pdop, double hdop, double vdop, GGASentence.GpsFixType fixQuality,
         int trackedSatellites, double horizDilution, double geoidHeight, UomElevation geoUom,
         int numberOfSatellitesInView, ArrayList<Satellite> satellitesInView) {
@@ -162,7 +162,7 @@ public class TtNmeaBurst extends TtObject implements Parcelable {
 
     public TtNmeaBurst(String cn, DateTime timeCreated, String pointCN, boolean used,
                        Position position, DateTime fixTime, double groundSpeed, double trackAngle,
-                       double magVar, EastWest magVarDir, Status mode, GSASentence.Fix fix,
+                       Double magVar, EastWest magVarDir, Status mode, GSASentence.Fix fix,
                        ArrayList<Integer> satsUsed, double pdop, double hdop, double vdop, GGASentence.GpsFixType fixQuality,
                        int trackedSatellites, double horizDilution, double geoidHeight, UomElevation geoUom,
                        int numberOfSatellitesInView, String satellitesInView) {
