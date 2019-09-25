@@ -16,7 +16,7 @@ import android.hardware.SensorManager;
 import android.util.AttributeSet;
 
 import com.usda.fmsc.android.AndroidUtils;
-import com.usda.fmsc.geospatial.nmea.Satellite;
+import com.usda.fmsc.geospatial.nmea41.Satellite;
 import com.usda.fmsc.twotrails.R;
 
 public class GpsStatusSkyView extends GpsStatusView implements SensorEventListener {
@@ -158,7 +158,7 @@ public class GpsStatusSkyView extends GpsStatusView implements SensorEventListen
         canvas.drawCircle(center.x, center.y, outerCircleRadius, paintCompass);
         canvas.drawCircle(center.x, center.y, innerCircleRadius, paintCompass);
 
-        if (getValidSatelliteCount() > 0) {
+        if (getValidLocSatelliteCount() > 0) {
             for (Satellite sat : getSatellites().values()) {
                 drawSatellite(canvas, sat);
             }
@@ -167,7 +167,7 @@ public class GpsStatusSkyView extends GpsStatusView implements SensorEventListen
 
 
     private void drawSatellite(Canvas canvas, Satellite sat) {
-        if (getSatellitesValid().containsKey(sat.getNmeaID()) && getSatellitesValid().get(sat.getNmeaID())) {
+        if (getSatellitesLocValid().containsKey(sat.getNmeaID()) && getSatellitesLocValid().get(sat.getNmeaID())) {
             float radius = elevationToRadius(sat.getElevation());
             float az = sat.getAzimuth() - orientation;
             float angle = (float) Math.toRadians(az);
@@ -176,7 +176,8 @@ public class GpsStatusSkyView extends GpsStatusView implements SensorEventListen
             float y = (float) (center.y - (radius * Math.cos(angle)));
 
             if (sat.isSBAS()) {
-                canvas.drawBitmap(bmSatSBAS, x - satRad, y - satRad, paintVisSatellite);
+                canvas.drawBitmap(bmSatSBAS, x - satRad, y - satRad,
+                        getSatellitesVisibility().get(sat.getNmeaID()) ? paintVisSatellite : paintInvisSatellite);
             } else {
                 canvas.drawBitmap(getSatellitesUsed().get(sat.getNmeaID()) ? bmSatUsed : bmSatVis, x - satRad, y - satRad,
                         getSatellitesVisibility().get(sat.getNmeaID()) ? paintVisSatellite : paintInvisSatellite);
@@ -185,6 +186,8 @@ public class GpsStatusSkyView extends GpsStatusView implements SensorEventListen
             float txtX = sat.getNmeaID() < 10 ? x - 7 : x - 12;
 
             canvas.drawText(String.valueOf(sat.getNmeaID()), txtX, y + 7, paintText);
+        } else {
+            Satellite s = sat;
         }
     }
 

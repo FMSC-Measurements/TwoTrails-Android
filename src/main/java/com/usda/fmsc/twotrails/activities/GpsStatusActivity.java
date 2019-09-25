@@ -11,10 +11,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.usda.fmsc.android.AndroidUtils;
-import com.usda.fmsc.geospatial.nmea.INmeaBurst;
-import com.usda.fmsc.geospatial.nmea.NmeaIDs;
-import com.usda.fmsc.geospatial.nmea.sentences.GGASentence;
-import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
+import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
+import com.usda.fmsc.geospatial.nmea41.NmeaIDs;
+import com.usda.fmsc.geospatial.nmea41.sentences.GGASentence;
+import com.usda.fmsc.geospatial.nmea41.sentences.GSASentence;
+import com.usda.fmsc.geospatial.nmea41.sentences.base.NmeaSentence;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
@@ -121,7 +122,7 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
         }
     }
 
-    protected void setNmeaData(final INmeaBurst burst) {
+    protected void setNmeaData(final NmeaBurst burst) {
         runOnUiThread(() -> {
             try {
                 if (burst.hasPosition()) {
@@ -158,7 +159,7 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
                     }
                 }
 
-                if (burst.isValid(NmeaIDs.SentenceID.RMC) && burst.getMagVarDir() != null) {
+                if (burst.isValid(NmeaIDs.SentenceID.RMC) && burst.getMagVar() != null) {
                     tvDec.setText(String.format("%.2f %s", burst.getMagVar(), burst.getMagVarDir().toStringAbv()));
                 } else {
                     tvDec.setText(nVal);
@@ -172,10 +173,10 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
 
                 if (burst.isValid(NmeaIDs.SentenceID.GSA)) {
                     tvGpsStatus.setText(burst.getFix().toString());
-                    tvPdop.setText(String.format("%.2f", burst.getPDOP()));
-                    tvHdop.setText(String.format("%.2f", burst.getHDOP()));
+                    tvPdop.setText(burst.getPDOP() == null ? nVal : String.format("%.2f", burst.getPDOP()));
+                    tvHdop.setText(burst.getHDOP() == null ? nVal : String.format("%.2f", burst.getHDOP()));
                 } else {
-                    tvGpsStatus.setText(nVal);
+                    tvGpsStatus.setText(GSASentence.Fix.NoFix.toString());
                     tvHdop.setText(nVal);
                     tvPdop.setText(nVal);
                 }
@@ -183,7 +184,7 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
                 if (burst.isValid(NmeaIDs.SentenceID.GSV)) {
 
                     tvSat.setText(String.format("%d/%d/%d",
-                            burst.isValid(NmeaIDs.SentenceID.GSA) ? burst.getUsedSatellitesCount() : 0,
+                            burst.getUsedSatellitesCount(),
                             burst.isValid(NmeaIDs.SentenceID.GGA) ? burst.getTrackedSatellitesCount() : 0,
                             burst.getSatellitesInViewCount()));
                 } else {
@@ -213,7 +214,7 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
 
 
     @Override
-    public void nmeaBurstReceived(INmeaBurst burst) {
+    public void nmeaBurstReceived(NmeaBurst burst) {
         setNmeaData(burst);
     }
 
@@ -230,6 +231,13 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
     @Override
     public void nmeaBurstValidityChanged(boolean burstsAreValid) {
 
+    }
+
+    @Override
+    public void receivingNmeaStrings(boolean receiving) {
+        if (!receiving) {
+            Toast.makeText(GpsStatusActivity.this, "Not receiving NMEA data.", Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override
@@ -260,7 +268,7 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
             final Activity activity = this;
             dialog.setTitle("GPS Connection Lost");
             dialog.setMessage("The GPS bluetooth connection has been broken. Would you like to try and reestablish the connection?");
-            dialog.setPositiveButton("Connect", (dialog1, which) -> {
+            dialog.setPositiveButton("Connect", (d, which) -> {
                 GpsService.GpsDeviceStatus status = binder.startGps();
 
                 if (status != GpsService.GpsDeviceStatus.ExternalGpsStarted &&
@@ -272,7 +280,7 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
                     AndroidUtils.Device.vibrate(getApplicationContext(), Consts.Notifications.VIB_PATTERN_GPS_CONNECTED);
                 }
             });
-            dialog.setNegativeButton(R.string.str_exit, (dialog12, which) -> {
+            dialog.setNegativeButton(R.string.str_exit, (d, which) -> {
                 activity.setResult(RESULT_CANCELED);
                 activity.finish();
             });

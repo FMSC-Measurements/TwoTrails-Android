@@ -15,10 +15,11 @@ import android.widget.Toast;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.animation.ViewAnimator;
 import com.usda.fmsc.geospatial.Extent;
-import com.usda.fmsc.geospatial.GeoPosition;
-import com.usda.fmsc.geospatial.nmea.INmeaBurst;
-import com.usda.fmsc.geospatial.nmea.NmeaIDs;
-import com.usda.fmsc.geospatial.nmea.sentences.GGASentence;
+import com.usda.fmsc.geospatial.Position;
+import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
+import com.usda.fmsc.geospatial.nmea41.NmeaIDs;
+import com.usda.fmsc.geospatial.nmea41.sentences.GGASentence;
+import com.usda.fmsc.geospatial.nmea41.sentences.GSASentence;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
@@ -67,16 +68,14 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
             canceling = true;
             setResult(Consts.Codes.Results.GPS_NOT_CONFIGURED);
             finish();
-            return;
-        }
+        } else {
+            if (trailModeEnabled) {
+                Intent intent = getIntent();
 
-        if (trailModeEnabled) {
-            Intent intent = getIntent();
-
-            if (intent != null) {
-                if (intent.hasExtra(Consts.Codes.Data.POLYGON_DATA)) {
-                    _Polygon = intent.getParcelableExtra(Consts.Codes.Data.POLYGON_DATA);
-                }
+                if (intent != null) {
+                    if (intent.hasExtra(Consts.Codes.Data.POLYGON_DATA)) {
+                        _Polygon = intent.getParcelableExtra(Consts.Codes.Data.POLYGON_DATA);
+                    }
 
 //                else if (intent.hasExtra(Consts.Codes.Data.POINT_PACKAGE)) {
 //                    Bundle bundle = intent.getExtras();
@@ -85,20 +84,21 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
 //                    }
 //                }
 
-                if (_Polygon == null) {
-                    trailModeEnabled = false;
-                }
+                    if (_Polygon == null) {
+                        trailModeEnabled = false;
+                    }
 
-                super.onCreate(savedInstanceState);
+                    super.onCreate(savedInstanceState);
 
-                if (trailModeEnabled) {
-                    setupTrailMode(_Polygon);
+                    if (trailModeEnabled) {
+                        setupTrailMode(_Polygon);
+                    }
+                } else {
+                    canceling = true;
                 }
             } else {
-                canceling = true;
+                super.onCreate(savedInstanceState);
             }
-        } else {
-            super.onCreate(savedInstanceState);
         }
     }
 
@@ -187,7 +187,7 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
 
     public void addPosition(TtPoint point, boolean moveToPointAfterAdd) {
         if (trailModeEnabled) {
-            final GeoPosition position = trailGraphicManager.addPoint(point);
+            final Position position = trailGraphicManager.addPoint(point);
 
             if (position != null) {
                 if (moveToPointAfterAdd) {
@@ -294,17 +294,17 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
         return trailModeEnabled;
     }
 
-    protected void setNmeaData(final INmeaBurst burst) {
+    protected void setNmeaData(final NmeaBurst burst) {
         runOnUiThread(() -> {
             try {
                 if (burst.hasPosition()) {
                     UTMCoords coords = zone != null ? burst.getUTM(zone) : burst.getTrueUTM();
 
-                    tvLat.setText(StringEx.format("%.4f", burst.getLatitude()));
-                    tvLon.setText(StringEx.format("%.4f", burst.getLongitude()));
+                    tvLat.setText(String.format("%.4f", burst.getLatitude()));
+                    tvLon.setText(String.format("%.4f", burst.getLongitude()));
 
-                    tvUtmX.setText(StringEx.format("%.3f", coords.getX()));
-                    tvUtmY.setText(StringEx.format("%.3f", coords.getY()));
+                    tvUtmX.setText(String.format("%.3f", coords.getX()));
+                    tvUtmY.setText(String.format("%.3f", coords.getY()));
 
                     if (zone == null) {
                         tvZone.setText(StringEx.toString(coords.getZone()));
@@ -313,7 +313,7 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
                     }
 
                     if (burst.hasElevation()) {
-                        tvElev.setText(StringEx.format("%.2f", burst.getElevation()));
+                        tvElev.setText(String.format("%.2f", burst.getElevation()));
                     } else {
                         tvElev.setText(nVal);
                     }
@@ -331,8 +331,8 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
                     }
                 }
 
-                if (burst.isValid(NmeaIDs.SentenceID.RMC) && burst.getMagVarDir() != null) {
-                    tvDec.setText(StringEx.format("%.2f %s", burst.getMagVar(), burst.getMagVarDir().toStringAbv()));
+                if (burst.isValid(NmeaIDs.SentenceID.RMC) && burst.getMagVar() != null) {
+                    tvDec.setText(String.format("%.2f %s", burst.getMagVar(), burst.getMagVarDir().toStringAbv()));
                 } else {
                     tvDec.setText(nVal);
                 }
@@ -345,18 +345,18 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
 
                 if (burst.isValid(NmeaIDs.SentenceID.GSA)) {
                     tvGpsStatus.setText(burst.getFix().toString());
-                    tvPdop.setText(StringEx.format("%.2f", burst.getPDOP()));
-                    tvHdop.setText(StringEx.format("%.2f", burst.getHDOP()));
+                    tvPdop.setText(burst.getPDOP() == null ? nVal : String.format("%.2f", burst.getPDOP()));
+                    tvHdop.setText(burst.getHDOP() == null ? nVal : String.format("%.2f", burst.getHDOP()));
                 } else {
-                    tvGpsStatus.setText(nVal);
+                    tvGpsStatus.setText(GSASentence.Fix.NoFix.toString());
                     tvHdop.setText(nVal);
                     tvPdop.setText(nVal);
                 }
 
                 if (burst.isValid(NmeaIDs.SentenceID.GSV)) {
 
-                    tvSat.setText(StringEx.format("%d/%d/%d",
-                            burst.isValid(NmeaIDs.SentenceID.GSA) ? burst.getUsedSatellitesCount() : 0,
+                    tvSat.setText(String.format("%d/%d/%d",
+                            burst.getUsedSatellitesCount(),
                             burst.isValid(NmeaIDs.SentenceID.GGA) ? burst.getTrackedSatellitesCount() : 0,
                             burst.getSatellitesInViewCount()));
                 } else {
@@ -398,7 +398,7 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
 
     //region GPS
     @Override
-    protected void onNmeaBurstReceived(INmeaBurst nmeaBurst) {
+    protected void onNmeaBurstReceived(NmeaBurst nmeaBurst) {
         super.onNmeaBurstReceived(nmeaBurst);
         setNmeaData(nmeaBurst);
     }
@@ -438,18 +438,26 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
             }
         }
     }
+
+    @Override
+    public void receivingNmeaStrings(boolean receivingNmea) {
+        if (!receivingNmea) {
+            Toast.makeText(AcquireGpsMapActivity.this, "Not receiving NMEA data.", Toast.LENGTH_LONG).show();
+            AndroidUtils.Device.vibrate(getApplicationContext(), Consts.Notifications.VIB_PATTERN_GPS_LOST_CONNECTED);
+        }
+    }
     //endregion
 
 
     @Override
-    protected void onFirstPositionReceived(GeoPosition position) {
+    protected void onFirstPositionReceived(Position position) {
         moveToLocation(position, Consts.Location.ZOOM_CLOSE, true);
 
         firstPositionFixTime = System.currentTimeMillis();
     }
 
     @Override
-    protected void onPositionReceived(GeoPosition position) {
+    protected void onPositionReceived(Position position) {
         if (firstPositionFixTime == Long.MAX_VALUE || System.currentTimeMillis() - firstPositionFixTime > 3000) {
             super.onPositionReceived(position);
             firstPositionFixTime = Long.MAX_VALUE;

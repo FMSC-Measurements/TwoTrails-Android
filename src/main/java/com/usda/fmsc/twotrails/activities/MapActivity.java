@@ -9,14 +9,14 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.usda.fmsc.geospatial.Position;
-import com.usda.fmsc.geospatial.nmea.INmeaBurst;
+import com.usda.fmsc.geospatial.PositionLegacy;
+import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.activities.base.BaseMapActivity;
 import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment;
 import com.usda.fmsc.twotrails.R;
 
-import com.usda.fmsc.geospatial.GeoPosition;
+import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.geospatial.utm.UTMTools;
 import com.usda.fmsc.utilities.StringEx;
@@ -127,7 +127,7 @@ public class MapActivity extends BaseMapActivity {
     public void btnMyLocClick(View view) {
         //onMyLocationButtonClick();
 
-        GeoPosition lastPosition = getLastPosition();
+        Position lastPosition = getLastPosition();
 
         if (lastPosition == null) {
             lastPosition = getTtAppCtx().getGps().getLastPosition();
@@ -146,7 +146,7 @@ public class MapActivity extends BaseMapActivity {
     }
 
     @Override
-    public void onMapClick(Position position) {
+    public void onMapClick(PositionLegacy position) {
         super.onMapClick(position);
         fabMyPos.show();
     }
@@ -158,7 +158,7 @@ public class MapActivity extends BaseMapActivity {
     }
 
     @Override
-    public void onNmeaBurstReceived(INmeaBurst nmeaBurst) {
+    public void onNmeaBurstReceived(NmeaBurst nmeaBurst) {
         super.onNmeaBurstReceived(nmeaBurst);
 
         if (getLastPosition() != null) {
@@ -173,7 +173,7 @@ public class MapActivity extends BaseMapActivity {
 
 
     private void setDisplayLocInfo() {
-        GeoPosition lastPosition = getLastPosition();
+        Position lastPosition = getLastPosition();
 
         if (dispLoc && lastPosition != null) {
             if (locUtm) {

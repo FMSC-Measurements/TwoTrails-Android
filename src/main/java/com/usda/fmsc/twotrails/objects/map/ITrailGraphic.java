@@ -1,7 +1,7 @@
 package com.usda.fmsc.twotrails.objects.map;
 
 import com.usda.fmsc.geospatial.Extent;
-import com.usda.fmsc.geospatial.GeoPosition;
+import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
 
@@ -11,7 +11,7 @@ import java.util.List;
 public interface ITrailGraphic {
     void build(List<TtPoint> points, HashMap<String, TtMetadata> meta, TrailGraphicOptions graphicOptions);
 
-    GeoPosition add(TtPoint point, HashMap<String, TtMetadata> meta);
+    Position add(TtPoint point, HashMap<String, TtMetadata> meta);
 
     void deleteLastPoint();
 

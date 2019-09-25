@@ -22,8 +22,8 @@ import com.esri.android.runtime.ArcGISRuntime;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.usda.fmsc.android.AndroidUtils;
-import com.usda.fmsc.geospatial.nmea.INmeaBurst;
-import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
+import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
+import com.usda.fmsc.geospatial.nmea41.sentences.base.NmeaSentence;
 import com.usda.fmsc.twotrails.activities.MainActivity;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
 import com.usda.fmsc.twotrails.data.MediaAccessLayer;
@@ -77,7 +77,7 @@ public class TwoTrailsApp extends Application {
 
             gpsServiceBinder.addListener(new GpsService.Listener() {
                 @Override
-                public void nmeaBurstReceived(INmeaBurst INmeaBurst) {
+                public void nmeaBurstReceived(NmeaBurst NmeaBurst) {
 
                 }
 
@@ -94,6 +94,11 @@ public class TwoTrailsApp extends Application {
                 @Override
                 public void nmeaBurstValidityChanged(boolean burstsAreValid) {
                     
+                }
+
+                @Override
+                public void receivingNmeaStrings(boolean receiving) {
+
                 }
 
                 @Override
@@ -504,6 +509,17 @@ public class TwoTrailsApp extends Application {
             return _DAL;
         }
 
+        if (getDeviceSettings().getLastOpenedProject() != null) {
+            _DALFile = getDeviceSettings().getLastOpenedProject();
+
+            if (FileUtils.fileExists(_DALFile)) {
+                setDAL(new DataAccessLayer(_DALFile, getInstance()));
+                return _DAL;
+            }
+
+            _DALFile = null;
+        }
+
         throw new RuntimeException("DAL not set");
     }
 
@@ -515,6 +531,7 @@ public class TwoTrailsApp extends Application {
             _DALFile = dal.getFilePath();
             getReport().writeEvent(StringEx.format("DAL Loaded: %s", _DALFile));
             getMapSettings().reset();
+            getDeviceSettings().setLastOpenedProject(dal.getFilePath());
         } else {
             getReport().writeEvent("DAL Unloaded");
         }
@@ -561,7 +578,7 @@ public class TwoTrailsApp extends Application {
             _Report.writeEvent(StringEx.format("TwoTrails Started (%s)", AndroidUtils.App.getAppVersion(this)));
         }
 
-        ArcGISRuntime.setClientId(this.getString(R.string.arcgis_client_id));
+        //ArcGISRuntime.setClientId(this.getString(R.string.arcgis_client_id));
 
         ImageLoader.getInstance().init(new ImageLoaderConfiguration.Builder(this).build());
 

@@ -10,9 +10,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ListView;
 
-import com.usda.fmsc.geospatial.nmea.INmeaBurst;
-import com.usda.fmsc.geospatial.nmea.NmeaIDs;
-import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
+import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
+import com.usda.fmsc.geospatial.nmea41.NmeaIDs;
+import com.usda.fmsc.geospatial.nmea41.sentences.base.NmeaSentence;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.adapters.NmeaDetailsAdapter;
@@ -84,7 +84,7 @@ public class CheckNmeaDialog extends DialogFragment implements GpsService.Listen
     }
 
     @Override
-    public void nmeaBurstReceived(INmeaBurst nmeaBurst) {
+    public void nmeaBurstReceived(NmeaBurst nmeaBurst) {
 
     }
 
@@ -134,6 +134,11 @@ public class CheckNmeaDialog extends DialogFragment implements GpsService.Listen
 
     @Override
     public void nmeaBurstValidityChanged(boolean burstsAreValid) {
+
+    }
+
+    @Override
+    public void receivingNmeaStrings(boolean receiving) {
 
     }
 

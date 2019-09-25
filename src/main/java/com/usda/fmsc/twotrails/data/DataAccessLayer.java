@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import com.usda.fmsc.geospatial.EastWest;
 import com.usda.fmsc.geospatial.NorthSouth;
 import com.usda.fmsc.geospatial.UomElevation;
+import com.usda.fmsc.geospatial.nmea41.sentences.Status;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.MapSettings;
 import com.usda.fmsc.twotrails.ProjectSettings;
@@ -38,9 +39,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
-import com.usda.fmsc.geospatial.GeoPosition;
-import com.usda.fmsc.geospatial.nmea.sentences.GGASentence;
-import com.usda.fmsc.geospatial.nmea.sentences.GSASentence;
+import com.usda.fmsc.geospatial.Position;
+import com.usda.fmsc.geospatial.nmea41.sentences.GGASentence;
+import com.usda.fmsc.geospatial.nmea41.sentences.GSASentence;
 import com.usda.fmsc.utilities.FileUtils;
 import com.usda.fmsc.utilities.ParseEx;
 import com.usda.fmsc.utilities.StringEx;
@@ -1805,7 +1806,7 @@ public class DataAccessLayer extends IDataLayer {
                     DateTime fixTime;
                     double groundSpeed, trackAngle, magVar, pdop, hdop, vdop, horizDilution, geoidHeight;
                     EastWest magVarDir;
-                    GSASentence.Mode mode;
+                    Status opMode;
                     GSASentence.Fix fix;
                     ArrayList<Integer> satsUsed;
                     GGASentence.GpsFixType fixQuality;
@@ -1896,7 +1897,7 @@ public class DataAccessLayer extends IDataLayer {
                         continue;
 
                     if (!c.isNull(15))
-                        mode = GSASentence.Mode.parse(c.getInt(15));
+                        opMode = Status.parse(c.getInt(15));
                     else
                         continue;
 
@@ -1970,8 +1971,8 @@ public class DataAccessLayer extends IDataLayer {
 
                     //endregion
 
-                    nmeas.add(new TtNmeaBurst(cn, timeCreated, pointCN, used, new GeoPosition(lat, latDir, lon, lonDir, elev, uomelev), fixTime, groundSpeed,
-                            trackAngle, magVar, magVarDir, mode, fix, satsUsed, pdop, hdop, vdop, fixQuality,
+                    nmeas.add(new TtNmeaBurst(cn, timeCreated, pointCN, used, new Position(lat, latDir, lon, lonDir, elev, uomelev), fixTime, groundSpeed,
+                            trackAngle, magVar, magVarDir, opMode, fix, satsUsed, pdop, hdop, vdop, fixQuality,
                             trackedSatellites, horizDilution, geoidHeight, geoUom, numberOfSatellitesInView, satsInView));
                 } while (c.moveToNext());
             }
@@ -2050,7 +2051,7 @@ public class DataAccessLayer extends IDataLayer {
             if (burst.getMagVarDir() != null) { cvs.put(TwoTrailsSchema.TtNmeaSchema.MagDir,burst.getMagVarDir().getValue()); }
             if (burst.getFix() != null) { cvs.put(TwoTrailsSchema.TtNmeaSchema.Fix,burst.getFix().getValue()); }
             if (burst.getFixQuality() != null) { cvs.put(TwoTrailsSchema.TtNmeaSchema.FixQuality,burst.getFixQuality().getValue()); }
-            if (burst.getMode() != null) { cvs.put(TwoTrailsSchema.TtNmeaSchema.Mode,burst.getMode().getValue()); }
+            if (burst.getOperationMode() != null) { cvs.put(TwoTrailsSchema.TtNmeaSchema.Mode,burst.getOperationMode().getValue()); }
 
             cvs.put(TwoTrailsSchema.TtNmeaSchema.PDOP, burst.getPDOP());
             cvs.put(TwoTrailsSchema.TtNmeaSchema.HDOP, burst.getHDOP());
@@ -2138,7 +2139,7 @@ public class DataAccessLayer extends IDataLayer {
             cvs.put(TwoTrailsSchema.TtNmeaSchema.MagDir, burst.getMagVarDir().getValue());
             cvs.put(TwoTrailsSchema.TtNmeaSchema.Fix, burst.getFix().getValue());
             cvs.put(TwoTrailsSchema.TtNmeaSchema.FixQuality, burst.getFixQuality().getValue());
-            cvs.put(TwoTrailsSchema.TtNmeaSchema.Mode, burst.getMode().getValue());
+            cvs.put(TwoTrailsSchema.TtNmeaSchema.Mode, burst.getOperationMode().getValue());
 
             cvs.put(TwoTrailsSchema.TtNmeaSchema.PDOP, burst.getPDOP());
             cvs.put(TwoTrailsSchema.TtNmeaSchema.HDOP, burst.getHDOP());

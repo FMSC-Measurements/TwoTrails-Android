@@ -12,7 +12,7 @@ import com.esri.core.symbol.SimpleLineSymbol;
 import com.esri.core.symbol.SimpleMarkerSymbol;
 import com.esri.core.symbol.Symbol;
 import com.usda.fmsc.geospatial.Extent;
-import com.usda.fmsc.geospatial.GeoPosition;
+import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
@@ -86,7 +86,7 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
                 SimpleMarkerSymbol.STYLE.SQUARE
         );
 
-        GeoPosition adjPos, unAdjPos;
+        Position adjPos, unAdjPos;
         Point adjLL, unadjLL;
         Graphic adjmk, unadjmk;
 

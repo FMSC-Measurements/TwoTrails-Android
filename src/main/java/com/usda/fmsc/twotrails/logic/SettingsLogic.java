@@ -80,7 +80,7 @@ public class SettingsLogic {
 //                        @Override
 //                        public void onClick(View v) {
 //                            Intent intent = new Intent(Intent.ACTION_VIEW);
-//                            intent.setDataAndType(Uri.parse(TtUtils.getTtFileDir()), "resource/folder");
+//                            intent.setDataAndType(Uri.parseNmea(TtUtils.getTtFileDir()), "resource/folder");
 //
 //                            if (snackbar != null)
 //                                snackbar.dismiss();

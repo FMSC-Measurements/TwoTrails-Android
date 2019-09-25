@@ -20,11 +20,10 @@ import android.widget.Toast;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.listeners.SimpleTextWatcher;
 import com.usda.fmsc.android.widget.SheetLayoutEx;
-import com.usda.fmsc.geospatial.GeoPosition;
 import com.usda.fmsc.geospatial.GeoTools;
-import com.usda.fmsc.geospatial.nmea.INmeaBurst;
-import com.usda.fmsc.geospatial.nmea.sentences.GGASentence;
-import com.usda.fmsc.geospatial.nmea.sentences.GSASentence;
+import com.usda.fmsc.geospatial.Position;
+import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
+import com.usda.fmsc.geospatial.nmea41.sentences.*;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.DeviceSettings;
 import com.usda.fmsc.twotrails.R;
@@ -119,7 +118,7 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
                     return;
                 }
                 if (_Metadata == null) {
-                    setResult(Consts.Codes.Results.NO_METDATA_DATA);
+                    setResult(Consts.Codes.Results.NO_METADATA_DATA);
                     finish();
                     return;
                 }
@@ -587,7 +586,7 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
                         yF /= countF;
                         zF /= countF;
 
-                        ArrayList<GeoPosition> positions = new ArrayList<>(countF);
+                        ArrayList<Position> positions = new ArrayList<>(countF);
 
                         for (int i = 0; i < countF; i++) {
                             tmpBurst = usedBursts.get(i);
@@ -603,7 +602,7 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
                         dRMSEyf = Math.sqrt(dRMSEyf / countF);
                         dRMSErf = Math.sqrt(Math.pow(dRMSExf, 2) + Math.pow(dRMSEyf, 2)) * Consts.RMSEr95_Coeff;
 
-                        GeoPosition position = GeoTools.getMidPioint(positions);
+                        Position position = GeoTools.getMidPioint(positions);
 
                         _Point.setLatitude(position.getLatitudeSignedDecimal());
                         _Point.setLongitude(position.getLongitudeSignedDecimal());
@@ -696,7 +695,7 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
     }
 
 
-    protected void onLoggedNmeaBurst(INmeaBurst burst) {
+    protected void onLoggedNmeaBurst(NmeaBurst burst) {
         _Bursts.add(TtNmeaBurst.create(_Point.getCN(), false, burst));
 
         if (!btnCalc.isEnabled() && getLoggedCount() > 0) {
@@ -706,7 +705,7 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
     }
 
     @Override
-    public void onNmeaBurstReceived(final INmeaBurst nmeaBurst) {
+    public void onNmeaBurstReceived(final NmeaBurst nmeaBurst) {
         super.onNmeaBurstReceived(nmeaBurst);
 
         if (isLogging() && nmeaBurst.hasPosition()) {
@@ -843,7 +842,7 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
     }
 
     public void btnMyLocClick(View view) {
-        GeoPosition lastPosition = getLastPosition();
+        Position lastPosition = getLastPosition();
 
         if (lastPosition == null) {
             lastPosition = getTtAppCtx().getGps().getLastPosition();
