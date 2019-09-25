@@ -26,7 +26,7 @@ import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.dialogs.DontAskAgainDialog;
 import com.usda.fmsc.android.preferences.ListCompatPreference;
 import com.usda.fmsc.android.preferences.SwitchCompatPreference;
-import com.usda.fmsc.geospatial.nmea.INmeaBurst;
+import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.DeviceSettings;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
@@ -43,7 +43,7 @@ import com.usda.fmsc.twotrails.rangefinder.TtRangeFinderData;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
+import com.usda.fmsc.geospatial.nmea41.sentences.base.NmeaSentence;
 import com.usda.fmsc.utilities.StringEx;
 
 import org.joda.time.DateTime;
@@ -205,7 +205,7 @@ public class DeviceSettingsFragment extends PreferenceFragment {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        if (requestCode == Consts.Codes.Requests.BLUETOOH && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        if (requestCode == Consts.Codes.Requests.BLUETOOTH && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             switchToExternal();
         }
     }
@@ -238,7 +238,7 @@ public class DeviceSettingsFragment extends PreferenceFragment {
 
                     final GpsService.Listener listener = new GpsService.Listener() {
                         @Override
-                        public void nmeaBurstReceived(INmeaBurst nmeaBurst) {
+                        public void nmeaBurstReceived(NmeaBurst nmeaBurst) {
 
                         }
 
@@ -296,6 +296,11 @@ public class DeviceSettingsFragment extends PreferenceFragment {
 
                         @Override
                         public void nmeaBurstValidityChanged(boolean burstsAreValid) {
+
+                        }
+
+                        @Override
+                        public void receivingNmeaStrings(boolean receiving) {
 
                         }
 
@@ -593,7 +598,7 @@ public class DeviceSettingsFragment extends PreferenceFragment {
             if (useExternal) {
                 if (AndroidUtils.App.requestPermission(getActivity(),
                         new String [] {Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN},
-                        Consts.Codes.Requests.BLUETOOH,
+                        Consts.Codes.Requests.BLUETOOTH,
                         "Bluetooth is required for connecting to the external GPS receiver.")) {
                     success = switchToExternal();
                 }

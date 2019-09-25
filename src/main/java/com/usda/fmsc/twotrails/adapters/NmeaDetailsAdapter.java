@@ -7,7 +7,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-import com.usda.fmsc.geospatial.nmea.NmeaIDs;
+import com.usda.fmsc.geospatial.nmea41.NmeaIDs;
 import com.usda.fmsc.twotrails.R;
 
 import java.util.ArrayList;

@@ -6,8 +6,8 @@ import android.util.JsonWriter;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.usda.fmsc.geospatial.nmea.sentences.GGASentence;
-import com.usda.fmsc.geospatial.nmea.sentences.GSASentence;
+import com.usda.fmsc.geospatial.nmea41.sentences.GGASentence;
+import com.usda.fmsc.geospatial.nmea41.sentences.GSASentence;
 import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
 import com.usda.fmsc.twotrails.units.DopType;
 import com.usda.fmsc.twotrails.units.MapTracking;
@@ -96,11 +96,11 @@ public class DeviceSettings extends Settings {
     public static final String USE_TTCAMERA_ASK = "UseTtCameraAsk";
 
     public static final String AUTO_OPEN_LAST_PROJECT = "AutoOpenLastProject";
-    //public static final String LAST_OPENED_PROJECT = "AutoOpenLastProject";
+    public static final String LAST_OPENED_PROJECT = "LastOpenedProject";
 
     public static final String MAP_TRACKING_OPTION = "MapTrackingOption";
     public static final String MAP_COMPASS_ENABLED = "MapCompassEnabled";
-    public static final String MAP_MYPOS_BUTTON = "MapMyPosButton";
+    public static final String MAP_MY_POS_BUTTON = "MapMyPosButton";
     public static final String MAP_MIN_DIST = "MapMinDist";
     public static final String MAP_SHOW_MY_POS = "MapShowMyPos";
     public static final String MAP_DISPLAY_GPS_LOCATION = "MapDisplayGpsLocation";
@@ -153,6 +153,7 @@ public class DeviceSettings extends Settings {
     public final boolean DEFAULT_WALK_SHOW_ALL_POINTS_ON_MAP = true;
 
     public final boolean DEFAULT_AUTO_OPEN_LAST_PROJECT = true;
+    public final String DEFAULT_LAST_OPENED_PROJECT = null;
 
     public final boolean DEFAULT_GPS_LOG_BURST_DETAILS = false;
 
@@ -266,9 +267,10 @@ public class DeviceSettings extends Settings {
 
 
         editor.putBoolean(AUTO_OPEN_LAST_PROJECT, DEFAULT_AUTO_OPEN_LAST_PROJECT);
+        editor.putString(LAST_OPENED_PROJECT, DEFAULT_LAST_OPENED_PROJECT);
 
         editor.putInt(MAP_TRACKING_OPTION, DEFAULT_MAP_TRACKING_OPTION.getValue());
-        editor.putBoolean(MAP_MYPOS_BUTTON, DEFAULT_MAP_MYPOS_BUTTON);
+        editor.putBoolean(MAP_MY_POS_BUTTON, DEFAULT_MAP_MYPOS_BUTTON);
         editor.putBoolean(MAP_COMPASS_ENABLED, DEFAULT_MAP_COMPASS_ENABLED);
         editor.putBoolean(MAP_SHOW_MY_POS, DEFAULT_MAP_SHOW_MY_POS);
         editor.putBoolean(MAP_DISPLAY_GPS_LOCATION, DEFAULT_MAP_DISPLAY_GPS_LOCATION);
@@ -364,11 +366,11 @@ public class DeviceSettings extends Settings {
         js.name(USE_TTCAMERA_ASK).value(getUseTtCameraAsk());
 
         js.name(AUTO_OPEN_LAST_PROJECT).value(getAutoOpenLastProject());
-        //js.name(LAST_OPENED_PROJECT).value(getLastOpenedProject());
+        js.name(LAST_OPENED_PROJECT).value(getLastOpenedProject());
 
         js.name(MAP_TRACKING_OPTION).value(getMapTrackingOption().toString());
         js.name(MAP_COMPASS_ENABLED).value(getMapCompassEnabled());
-        js.name(MAP_MYPOS_BUTTON).value(getMapMyPosBtns());
+        js.name(MAP_MY_POS_BUTTON).value(getMapMyPosBtns());
         js.name(MAP_MIN_DIST).value(getMapMinDist());
         js.name(MAP_SHOW_MY_POS).value(getMapShowMyPos());
         js.name(MAP_DISPLAY_GPS_LOCATION).value(getMapDisplayGpsLocation());
@@ -767,11 +769,11 @@ public class DeviceSettings extends Settings {
 
 
     public boolean getMapMyPosBtns() {
-        return getBool(MAP_MYPOS_BUTTON, DEFAULT_MAP_MYPOS_BUTTON);
+        return getBool(MAP_MY_POS_BUTTON, DEFAULT_MAP_MYPOS_BUTTON);
     }
 
     public void setMapMyposButton(boolean value) {
-        setBool(MAP_MYPOS_BUTTON, value);
+        setBool(MAP_MY_POS_BUTTON, value);
     }
 
 
@@ -1047,13 +1049,13 @@ public class DeviceSettings extends Settings {
 
 
 
-//    public String getLastOpenedProject() {
-//        return getString(LAST_OPENED_PROJECT);
-//    }
-//
-//    public void setLastOpenedProject(String value) {
-//        setString(LAST_OPENED_PROJECT, value);
-//    }
+    public String getLastOpenedProject() {
+        return getString(LAST_OPENED_PROJECT);
+    }
+
+    public void setLastOpenedProject(String value) {
+        setString(LAST_OPENED_PROJECT, value);
+    }
 
 
     public boolean getAutoOpenLastProject() {

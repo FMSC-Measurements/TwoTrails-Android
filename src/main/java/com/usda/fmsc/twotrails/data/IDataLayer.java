@@ -188,6 +188,10 @@ public abstract class IDataLayer {
             throw new RuntimeException("Blob doesn't exists");
         }
 
+        if (!cursor.isClosed()) {
+            cursor.close();
+        }
+
         return data;
     }
 

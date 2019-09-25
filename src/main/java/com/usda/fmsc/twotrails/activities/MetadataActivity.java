@@ -24,7 +24,7 @@ import com.usda.fmsc.android.dialogs.InputDialog;
 import com.usda.fmsc.android.dialogs.NumericInputDialog;
 import com.usda.fmsc.android.listeners.ComplexOnPageChangeListener;
 import com.usda.fmsc.geospatial.UomElevation;
-import com.usda.fmsc.geospatial.nmea.INmeaBurst;
+import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
 import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.data.TwoTrailsSchema;
@@ -46,7 +46,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
+import com.usda.fmsc.geospatial.nmea41.sentences.base.NmeaSentence;
 import com.usda.fmsc.utilities.StringEx;
 
 public class MetadataActivity extends CustomToolbarActivity {
@@ -549,7 +549,7 @@ public class MetadataActivity extends CustomToolbarActivity {
 
                         listener = new GpsService.Listener() {
                             @Override
-                            public void nmeaBurstReceived(INmeaBurst nmeaBurst) {
+                            public void nmeaBurstReceived(NmeaBurst nmeaBurst) {
                                 if (!getTtAppCtx().getDeviceSettings().isGpsAlwaysOn()) {
                                     getTtAppCtx().getGps().stopGps();
                                 }
@@ -575,6 +575,11 @@ public class MetadataActivity extends CustomToolbarActivity {
 
                             @Override
                             public void nmeaBurstValidityChanged(boolean burstsValid) { }
+
+                            @Override
+                            public void receivingNmeaStrings(boolean receiving) {
+
+                            }
 
                             @Override
                             public void gpsStarted() {

@@ -16,9 +16,9 @@ import com.esri.arcgisruntime.mapping.ArcGISMap;
 import com.esri.arcgisruntime.mapping.view.MapView;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.geospatial.Extent;
-import com.usda.fmsc.geospatial.Position;
-import com.usda.fmsc.geospatial.nmea.INmeaBurst;
-import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
+import com.usda.fmsc.geospatial.PositionLegacy;
+import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
+import com.usda.fmsc.geospatial.nmea41.sentences.base.NmeaSentence;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
@@ -594,30 +594,30 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
 
 
     @Override
-    public void nmeaBurstReceived(INmeaBurst nmeaBurst) {
-//        if (showPosition && nmeaBurst.hasPosition() && mMapView != null) {
-//            Point point = TtAppCtx.getArcGISTools().latLngToMapSpatial(nmeaBurst.getLatitude(), nmeaBurst.getLongitude(), mMapView);
-//
-//            if (locationLayer != null) {
-//                Layer[] layers = mMapView.getLayers();
-//
-//                if (layers[layers.length - 1].getID() != locationLayer.getID()) {
-//                    mMapView.removeLayer(locationLayer);
-//                    locationLayer = new GraphicsLayer();
-//                    mMapView.addLayer(locationLayer);
-//                } else if (locationGraphic != null) {
-//                    locationLayer.removeGraphic(gid);
-//                }
-//            }
-//
-//            if (sms == null) {
-//                sms = new SimpleMarkerSymbol(Color.RED, 20, SimpleMarkerSymbol.STYLE.DIAMOND);
-//            }
-//
-//            locationGraphic = new Graphic(point, sms);
-//
-//            gid = locationLayer.addGraphic(locationGraphic);
-//        }
+    public void nmeaBurstReceived(NmeaBurst nmeaBurst) {
+        if (showPosition && nmeaBurst.hasPosition() && mMapView != null) {
+            Point point = TtAppCtx.getArcGISTools().latLngToMapSpatial(nmeaBurst.getLatitude(), nmeaBurst.getLongitude(), mMapView);
+
+            if (locationLayer != null) {
+                Layer[] layers = mMapView.getLayers();
+
+                if (layers[layers.length - 1].getID() != locationLayer.getID()) {
+                    mMapView.removeLayer(locationLayer);
+                    locationLayer = new GraphicsLayer();
+                    mMapView.addLayer(locationLayer);
+                } else if (locationGraphic != null) {
+                    locationLayer.removeGraphic(gid);
+                }
+            }
+
+            if (sms == null) {
+                sms = new SimpleMarkerSymbol(Color.RED, 20, SimpleMarkerSymbol.STYLE.DIAMOND);
+            }
+
+            locationGraphic = new Graphic(point, sms);
+
+            gid = locationLayer.addGraphic(locationGraphic);
+        }
     }
 
     @Override
@@ -632,6 +632,11 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
 
     @Override
     public void nmeaBurstValidityChanged(boolean burstsAreValid) {
+
+    }
+
+    @Override
+    public void receivingNmeaStrings(boolean receiving) {
 
     }
 

@@ -9,9 +9,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
 
 import com.esri.core.ags.MapServiceInfo;
-import com.usda.fmsc.geospatial.GeoPosition;
-import com.usda.fmsc.geospatial.nmea.INmeaBurst;
-import com.usda.fmsc.geospatial.nmea.sentences.base.NmeaSentence;
+import com.usda.fmsc.geospatial.Position;
+import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
+import com.usda.fmsc.geospatial.nmea41.sentences.base.NmeaSentence;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
@@ -42,7 +42,7 @@ public class GetMapExtentsActivity extends AppCompatActivity implements GpsServi
 
     private boolean estimating, estimateReceived;
 
-    private GeoPosition position;
+    private Position position;
 
 
     @Override
@@ -251,9 +251,9 @@ public class GetMapExtentsActivity extends AppCompatActivity implements GpsServi
 
 
     @Override
-    public void nmeaBurstReceived(INmeaBurst INmeaBurst) {
-        if (INmeaBurst.hasPosition()) {
-            position = INmeaBurst.getPosition();
+    public void nmeaBurstReceived(NmeaBurst NmeaBurst) {
+        if (NmeaBurst.hasPosition()) {
+            position = NmeaBurst.getPosition();
 
             if (btnGps.getVisibility() != View.VISIBLE) {
                 btnGps.setVisibility(View.VISIBLE);
@@ -273,6 +273,11 @@ public class GetMapExtentsActivity extends AppCompatActivity implements GpsServi
 
     @Override
     public void nmeaBurstValidityChanged(boolean burstsAreValid) {
+
+    }
+
+    @Override
+    public void receivingNmeaStrings(boolean receiving) {
 
     }
 

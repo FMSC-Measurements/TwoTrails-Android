@@ -45,7 +45,7 @@ import com.usda.fmsc.android.widget.PopupMenuButton;
 import com.usda.fmsc.android.widget.SheetLayoutEx;
 import com.usda.fmsc.android.widget.layoutmanagers.LinearLayoutManagerWithSmoothScroller;
 import com.usda.fmsc.android.widget.RecyclerViewEx;
-import com.usda.fmsc.geospatial.nmea.INmeaBurst;
+import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
 import com.usda.fmsc.twotrails.DeviceSettings;
 import com.usda.fmsc.twotrails.activities.base.AcquireGpsMapActivity;
 import com.usda.fmsc.twotrails.activities.base.PointMediaController;
@@ -82,7 +82,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 
-import com.usda.fmsc.geospatial.GeoPosition;
+import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.geospatial.GeoTools;
 
 import jp.wasabeef.recyclerview.animators.BaseItemAnimator;
@@ -378,7 +378,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                     }
 
                     if (_Metadata == null) {
-                        cancelResult = Consts.Codes.Results.NO_METDATA_DATA;
+                        cancelResult = Consts.Codes.Results.NO_METADATA_DATA;
                     } else {
                         setZone(_Metadata.getZone());
 
@@ -1326,7 +1326,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
 
     //region GPS
     @Override
-    protected void onNmeaBurstReceived(INmeaBurst nmeaBurst) {
+    protected void onNmeaBurstReceived(NmeaBurst nmeaBurst) {
         super.onNmeaBurstReceived(nmeaBurst);
 
         if (isLogging() && nmeaBurst.isValid()) {
@@ -1344,7 +1344,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                 if (_UsedBursts.size() == takeAmount) {
                     stopLogging();
 
-                    ArrayList<GeoPosition> positions = new ArrayList<>();
+                    ArrayList<Position> positions = new ArrayList<>();
                     int zone = _Metadata.getZone();
                     double x = 0, y = 0, count = _UsedBursts.size(), dRMSEx = 0, dRMSEy = 0, dRMSEr;
 
@@ -1369,10 +1369,10 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                     dRMSEy = Math.sqrt(dRMSEy / count);
                     dRMSEr = Math.sqrt(Math.pow(dRMSEx, 2) + Math.pow(dRMSEy, 2)) * Consts.RMSEr95_Coeff;
 
-                    GeoPosition position = GeoTools.getMidPioint(positions);
+                    Position position = GeoTools.getMidPioint(positions);
 
-                    _AddTake5.setLatitude(position.getLatitude().toSignedDecimal());
-                    _AddTake5.setLongitude(position.getLongitude().toSignedDecimal());
+                    _AddTake5.setLatitude(position.getLatitudeSignedDecimal());
+                    _AddTake5.setLongitude(position.getLongitudeSignedDecimal());
                     _AddTake5.setElevation(position.getElevation());
                     _AddTake5.setRMSEr(dRMSEr);
                     _AddTake5.setAndCalc(x, y, position.getElevation(), _Polygon);
