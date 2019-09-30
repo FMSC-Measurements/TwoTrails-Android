@@ -578,7 +578,7 @@ public class TwoTrailsApp extends Application {
             _Report.writeEvent(StringEx.format("TwoTrails Started (%s)", AndroidUtils.App.getAppVersion(this)));
         }
 
-        //ArcGISRuntime.setClientId(this.getString(R.string.arcgis_client_id));
+        ArcGISRuntime.setClientId(this.getString(R.string.arcgis_client_id));
 
         ImageLoader.getInstance().init(new ImageLoaderConfiguration.Builder(this).build());
 

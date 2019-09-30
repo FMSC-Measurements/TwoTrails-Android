@@ -616,7 +616,7 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
     @Override
     public void nmeaBurstReceived(NmeaBurst nmeaBurst) {
         if (showPosition && nmeaBurst.hasPosition() && mMapView != null) {
-            Point point = TtAppCtx.getArcGISTools().latLngToMapSpatial(nmeaBurst.getLatitude(), nmeaBurst.getLongitude(), mMapView);
+            Point point = TtAppCtx.getArcGISTools().latLngToMapSpatial(nmeaBurst.getLatitudeSD(), nmeaBurst.getLongitudeSD(), mMapView);
 
             if (locationLayer != null) {
                 Layer[] layers = mMapView.getLayers();
