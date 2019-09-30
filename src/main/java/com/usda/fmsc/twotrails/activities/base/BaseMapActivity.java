@@ -304,9 +304,15 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     }
 
     private void startArcMap() {
-        mapFragment = createMapFragment(mapType, getMapOptions(mapType, mapId));
-        mmFrag = (IMultiMapFragment)mapFragment;
-        getSupportFragmentManager().beginTransaction().add(R.id.mapContainer, mapFragment).commit();
+        try {
+            mapFragment = createMapFragment(mapType, getMapOptions(mapType, mapId));
+            mmFrag = (IMultiMapFragment)mapFragment;
+            getSupportFragmentManager().beginTransaction().add(R.id.mapContainer, mapFragment).commit();
+        } catch (Exception e) {
+            getTtAppCtx().getReport().writeError(e.getMessage(), "BaseMapActivity:startArcMap", e.getStackTrace());
+            setMapType(MapType.Google, GoogleMapType.MAP_TYPE_NONE.getValue());
+            Toast.makeText(BaseMapActivity.this, "Error displaying ArcMap. See log for details.", Toast.LENGTH_LONG).show();
+        }
     }
 
     private void requestOfflineMap() {

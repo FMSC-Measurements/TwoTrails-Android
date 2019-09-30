@@ -300,8 +300,8 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
                 if (burst.hasPosition()) {
                     UTMCoords coords = zone != null ? burst.getUTM(zone) : burst.getTrueUTM();
 
-                    tvLat.setText(String.format("%.4f", burst.getLatitude()));
-                    tvLon.setText(String.format("%.4f", burst.getLongitude()));
+                    tvLat.setText(String.format("%.4f", burst.getLatitudeSD()));
+                    tvLon.setText(String.format("%.4f", burst.getLongitudeSD()));
 
                     tvUtmX.setText(String.format("%.3f", coords.getX()));
                     tvUtmY.setText(String.format("%.3f", coords.getY()));
