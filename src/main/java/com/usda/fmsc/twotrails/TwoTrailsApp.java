@@ -18,7 +18,6 @@ import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.esri.android.runtime.ArcGISRuntime;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.usda.fmsc.android.AndroidUtils;
@@ -145,8 +144,8 @@ public class TwoTrailsApp extends Application {
                                     msg = "Failed to connected to external GPS.";
                                     delayAndSearchForGps.run();
                                     break;
-                                case Unknown:
-                                    break;
+                                //case Unknown:
+                                //    break;
                             }
 
                             if (msg != null) {

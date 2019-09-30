@@ -41,7 +41,7 @@ public class ProjectSettings extends Settings {
             setForest(dal.getProjectForest());
             setDistrict(dal.getProjectDistrict());
         } else {
-            setProjectId("Unamed");
+            setProjectId("Unnamed");
             setDescription(StringEx.Empty);
         }
     }
