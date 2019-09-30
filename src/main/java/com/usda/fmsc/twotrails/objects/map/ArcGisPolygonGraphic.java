@@ -2,15 +2,7 @@ package com.usda.fmsc.twotrails.objects.map;
 
 import androidx.annotation.ColorInt;
 
-import com.esri.android.map.GraphicsLayer;
-import com.esri.android.map.MapView;
-import com.esri.core.geometry.Point;
-import com.esri.core.geometry.Polygon;
-import com.esri.core.geometry.Polyline;
-import com.esri.core.map.Graphic;
-import com.esri.core.symbol.SimpleLineSymbol;
-import com.esri.core.symbol.SimpleMarkerSymbol;
-import com.esri.core.symbol.Symbol;
+import com.esri.arcgisruntime.mapping.view.MapView;
 import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
