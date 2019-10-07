@@ -43,6 +43,12 @@ android {
         resValue "string", "arcgis_client_id", project.property("TwoTrails.ArcGIS.ClientID")
         resValue "string", "arcgis_client_secret", project.property("TwoTrails.ArcGIS.ClientSecret")
         resValue "string", "dev_email_addr", project.property("TwoTrails.Dev.EmailAddress")
+
+        //temp for getting to work on devices with old ArcGIS api
+        //TODO remove for release on 64bit
+        ndk {
+            abiFilters "armeabi", "armeabi-v7a", "x86", "mips"
+        }
     }
 
     signingConfigs {

@@ -56,7 +56,6 @@ import com.usda.fmsc.geospatial.utm.UTMTools;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.DeviceSettings;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.activities.GpsStatusActivity;
 import com.usda.fmsc.twotrails.activities.SettingsActivity;
 import com.usda.fmsc.twotrails.adapters.PointDetailsAdapter;
 import com.usda.fmsc.twotrails.adapters.PolyMarkerMapRvAdapter;
@@ -304,9 +303,15 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     }
 
     private void startArcMap() {
-        mapFragment = createMapFragment(mapType, getMapOptions(mapType, mapId));
-        mmFrag = (IMultiMapFragment)mapFragment;
-        getSupportFragmentManager().beginTransaction().add(R.id.mapContainer, mapFragment).commit();
+        try {
+            mapFragment = createMapFragment(mapType, getMapOptions(mapType, mapId));
+            mmFrag = (IMultiMapFragment)mapFragment;
+            getSupportFragmentManager().beginTransaction().add(R.id.mapContainer, mapFragment).commit();
+        } catch (Exception e) {
+            getTtAppCtx().getReport().writeError(e.getMessage(), "BaseMapActivity:startArcMap", e.getStackTrace());
+            setMapType(MapType.Google, GoogleMapType.MAP_TYPE_NONE.getValue());
+            Toast.makeText(BaseMapActivity.this, "Error displaying ArcMap. See log for details.", Toast.LENGTH_LONG).show();
+        }
     }
 
     private void requestOfflineMap() {

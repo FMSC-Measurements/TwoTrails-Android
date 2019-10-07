@@ -1,7 +1,6 @@
 package com.usda.fmsc.twotrails.activities;
 
 import android.app.Activity;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import androidx.appcompat.app.AlertDialog;
@@ -128,8 +127,8 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
                 if (burst.hasPosition()) {
                     UTMCoords coords = zone != null ? burst.getUTM(zone) : burst.getTrueUTM();
 
-                    tvLat.setText(String.format("%.4f", burst.getLatitude()));
-                    tvLon.setText(String.format("%.4f", burst.getLongitude()));
+                    tvLat.setText(String.format("%.4f", burst.getLatitudeSD()));
+                    tvLon.setText(String.format("%.4f", burst.getLongitudeSD()));
 
                     tvUtmX.setText(String.format("%.3f", coords.getX()));
                     tvUtmY.setText(String.format("%.3f", coords.getY()));
