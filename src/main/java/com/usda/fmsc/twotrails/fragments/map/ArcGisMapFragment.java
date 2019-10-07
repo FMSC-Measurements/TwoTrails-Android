@@ -628,6 +628,9 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
                 } else if (locationGraphic != null) {
                     locationLayer.removeGraphic(gid);
                 }
+            } else {
+                locationLayer = new GraphicsLayer();
+                mMapView.addLayer(locationLayer);
             }
 
             if (sms == null) {
