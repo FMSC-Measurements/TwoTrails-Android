@@ -56,7 +56,6 @@ import com.usda.fmsc.geospatial.utm.UTMTools;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.DeviceSettings;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.activities.GpsStatusActivity;
 import com.usda.fmsc.twotrails.activities.SettingsActivity;
 import com.usda.fmsc.twotrails.adapters.PointDetailsAdapter;
 import com.usda.fmsc.twotrails.adapters.PolyMarkerMapRvAdapter;
