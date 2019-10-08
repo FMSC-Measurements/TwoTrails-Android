@@ -9,10 +9,17 @@ import android.widget.Toast;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.esri.arcgisruntime.data.TileCache;
+import com.esri.arcgisruntime.geometry.DatumTransformation;
+import com.esri.arcgisruntime.geometry.Envelope;
+import com.esri.arcgisruntime.geometry.GeographicTransformation;
+import com.esri.arcgisruntime.geometry.GeographicTransformationStep;
+import com.esri.arcgisruntime.geometry.GeometryEngine;
+import com.esri.arcgisruntime.geometry.Point;
 import com.esri.arcgisruntime.geometry.SpatialReference;
 import com.esri.arcgisruntime.layers.ArcGISTiledLayer;
 import com.esri.arcgisruntime.mapping.ArcGISMap;
 import com.esri.arcgisruntime.mapping.Basemap;
+import com.esri.arcgisruntime.mapping.view.MapView;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.utilities.WebRequest;
 import com.usda.fmsc.geospatial.Extent;
@@ -39,8 +46,9 @@ public class ArcGISTools {
     private static ArcGISTools _ArcGISTools;
 
     private TwoTrailsApp TtAppCtx;
-    
+
     private SpatialReference LatLonSpatialReference = SpatialReference.create(4326);
+    private GeographicTransformation LatLonSpatialTransformation = GeographicTransformation.create(GeographicTransformationStep.create(4326));
 
     //private UserCredentials userCredentials;
 
@@ -245,7 +253,7 @@ public class ArcGISTools {
         return getBaseLayer(context, agml, agml.isOnline());
     }
 
-    public ArcGISMap getBaseLayer(Context context, ArcGisMapLayer agml, boolean isOnline) throws FileNotFoundException {\
+    public ArcGISMap getBaseLayer(Context context, ArcGisMapLayer agml, boolean isOnline) throws FileNotFoundException {
         ArcGISTiledLayer tiledLayer = null;
 
         if (isOnline) {
@@ -347,7 +355,7 @@ public class ArcGISTools {
     }
 
     public Point pointToLatLng(Point point, MapView mapView) {
-        return (Point) GeometryEngine.project(point, mapView.getSpatialReference(), LatLonSpatialReference);
+        return (Point) GeometryEngine.project(point, mapView.getSpatialReference(), LatLonSpatialTransformation);
     }
 
     public Point latLngToMapSpatial(double lat, double lon, MapView mapView) {
@@ -355,7 +363,8 @@ public class ArcGISTools {
     }
 
     public Point latLngToMapSpatial(Point point, MapView mapView) {
-        return (Point) GeometryEngine.project(point, LatLonSpatialReference, mapView.getSpatialReference());
+        return (Point) GeometryEngine.project(point, LatLonSpatialReference,
+                GeographicTransformation.create(GeographicTransformationStep.create(mapView.getSpatialReference().getWkid())));
     }
 
     public Envelope getEnvelopFromLatLngExtents(Extent extents, MapView mapView) {
@@ -367,7 +376,7 @@ public class ArcGISTools {
         Point ne = latLngToMapSpatial(n, e, mapView);
         Point sw = latLngToMapSpatial(s, w, mapView);
 
-        return new Envelope(sw.getX(), sw.getY(), ne.getX(), ne.getY());
+        return new Envelope(sw.getX(), sw.getY(), ne.getX(), ne.getY(), LatLonSpatialReference);
     }
 
 
