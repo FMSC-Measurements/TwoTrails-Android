@@ -2,7 +2,16 @@ package com.usda.fmsc.twotrails.objects.map;
 
 import androidx.annotation.ColorInt;
 
+import com.esri.arcgisruntime.geometry.Point;
+import com.esri.arcgisruntime.geometry.PointCollection;
+import com.esri.arcgisruntime.geometry.Polygon;
+import com.esri.arcgisruntime.geometry.Polyline;
+import com.esri.arcgisruntime.mapping.view.Graphic;
+import com.esri.arcgisruntime.mapping.view.GraphicsOverlay;
 import com.esri.arcgisruntime.mapping.view.MapView;
+import com.esri.arcgisruntime.symbology.SimpleLineSymbol;
+import com.esri.arcgisruntime.symbology.SimpleMarkerSymbol;
+import com.esri.arcgisruntime.symbology.Symbol;
 import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
@@ -25,9 +34,9 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
     private MapView map;
     private Extent polyBounds;
 
-    private GraphicsLayer _AdjBndPts, _UnadjBndPts, _AdjNavPts, _UnadjNavPts, _WayPts, _AdjMiscPts, _UnadjMiscPts;
-    private GraphicsLayer _AdjBndCB, _UnadjBndCB;
-    private GraphicsLayer _AdjBnd, _UnadjBnd, _AdjNav, _UnadjNav;
+    private GraphicsOverlay _AdjBndPts, _UnadjBndPts, _AdjNavPts, _UnadjNavPts, _WayPts, _AdjMiscPts, _UnadjMiscPts;
+    private GraphicsOverlay _AdjBndCB, _UnadjBndCB;
+    private GraphicsOverlay _AdjBnd, _UnadjBnd, _AdjNav, _UnadjNav;
 
     public ArcGisPolygonGraphic(MapView map) {
         this.map = map;
@@ -41,46 +50,54 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
 
         _MarkerData = new HashMap<>();
 
-        _AdjBndCB = new GraphicsLayer();
-        _UnadjBndCB = new GraphicsLayer();
-        _AdjBnd = new GraphicsLayer();
-        _UnadjBnd = new GraphicsLayer();
-        _AdjNav = new GraphicsLayer();
-        _UnadjNav = new GraphicsLayer();
+        _AdjBndCB = new GraphicsOverlay();
+        _UnadjBndCB = new GraphicsOverlay();
+        _AdjBnd = new GraphicsOverlay();
+        _UnadjBnd = new GraphicsOverlay();
+        _AdjNav = new GraphicsOverlay();
+        _UnadjNav = new GraphicsOverlay();
 
-        _AdjBndPts = new GraphicsLayer();
-        _AdjNavPts = new GraphicsLayer();
-        _UnadjBndPts = new GraphicsLayer();
-        _UnadjNavPts = new GraphicsLayer();
-        _WayPts = new GraphicsLayer();
-        _AdjMiscPts = new GraphicsLayer();
-        _UnadjMiscPts = new GraphicsLayer();
+        _AdjBndPts = new GraphicsOverlay();
+        _AdjNavPts = new GraphicsOverlay();
+        _UnadjBndPts = new GraphicsOverlay();
+        _UnadjNavPts = new GraphicsOverlay();
+        _WayPts = new GraphicsOverlay();
+        _AdjMiscPts = new GraphicsOverlay();
+        _UnadjMiscPts = new GraphicsOverlay();
 
         Extent.Builder llBuilder = new Extent.Builder();
 
-        Polygon adjBndPO = null;
-        Polygon unadjBndPO = null;
+//        Polygon adjBndPO = null;
+//        Polygon unadjBndPO = null;
+//
+//        Polyline adjBndPLO = null;
+//        Polyline unadjBndPLO = null;
+//        Polyline adjNavPLO = null;
+//        Polyline unadjNavPLO = null;
 
-        Polyline adjBndPLO = null;
-        Polyline unadjBndPLO = null;
-        Polyline adjNavPLO = null;
-        Polyline unadjNavPLO = null;
+        PointCollection adjBndPC = new PointCollection(map.getSpatialReference());
+        PointCollection unadjBndPC = new PointCollection(map.getSpatialReference());
+
+        PointCollection adjBndPLC = new PointCollection(map.getSpatialReference());
+        PointCollection unadjBndPLC = new PointCollection(map.getSpatialReference());
+        PointCollection adjNavPLC = new PointCollection(map.getSpatialReference());
+        PointCollection unadjNavPLC = new PointCollection(map.getSpatialReference());
 
         SimpleMarkerSymbol adjMkOpts = new SimpleMarkerSymbol(
+                SimpleMarkerSymbol.Style.DIAMOND,
                 graphicOptions.getAdjPtsColor(),
-                (int)graphicOptions.getUnAdjWidth(),
-                SimpleMarkerSymbol.STYLE.DIAMOND
+                (int)graphicOptions.getUnAdjWidth()
         );
 
         SimpleMarkerSymbol unAdjMkOpts = new SimpleMarkerSymbol(
+                SimpleMarkerSymbol.Style.SQUARE,
                 graphicOptions.getUnAdjPtsColor(),
-                (int)graphicOptions.getUnAdjWidth(),
-                SimpleMarkerSymbol.STYLE.SQUARE
+                (int)graphicOptions.getUnAdjWidth()
         );
 
         Position adjPos, unAdjPos;
         Point adjLL, unadjLL;
-        Graphic adjmk, unadjmk;
+        //Graphic adjmk, unadjmk;
 
         TtMetadata metadata;
 
@@ -95,61 +112,57 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
             unAdjPos = TtUtils.Points.getLatLonFromPoint(point, false, metadata);
             unadjLL = TwoTrailsApp.getInstance().getArcGISTools().latLngToMapSpatial(unAdjPos.getLatitudeSignedDecimal(), unAdjPos.getLongitudeSignedDecimal(), map);
 
-            adjmk = new Graphic(adjLL, adjMkOpts);
-            unadjmk = new Graphic(adjLL, unAdjMkOpts);
+            //adjmk = new Graphic(adjLL, adjMkOpts);
+            //unadjmk = new Graphic(adjLL, unAdjMkOpts);
 
             adjMd = new IMultiMapFragment.MarkerData(point, metadata, true);
             unadjMd = new IMultiMapFragment.MarkerData(point, metadata, false);
 
             if (point.isBndPoint()) {
-                _MarkerData.put(Integer.toHexString(_AdjBndPts.addGraphic(adjmk)), adjMd);
-                _MarkerData.put(Integer.toHexString(_UnadjBndPts.addGraphic(unadjmk)), unadjMd);
+                Graphic adjmk = new Graphic(adjLL, adjMkOpts);
+                _AdjBndPts.getGraphics().add(adjmk);
+                _MarkerData.put(Integer.toHexString(adjmk.hashCode()) + "_bnd", adjMd);
 
-                if (adjBndPO == null) {
-                    adjBndPO = new Polygon();
-                    unadjBndPO = new Polygon();
-                    adjBndPLO = new Polyline ();
-                    unadjBndPLO = new Polyline ();
+                Graphic unadjmk = new Graphic(adjLL, unAdjMkOpts);
+                _UnadjBndPts.getGraphics().add(unadjmk);
+                _MarkerData.put(Integer.toHexString(unadjmk.hashCode()) + "_bnd", unadjMd);
 
-                    adjBndPO.startPath(adjLL);
-                    unadjBndPO.startPath(unadjLL);
+                adjBndPC.add(adjLL);
+                unadjBndPC.add(unadjLL);
 
-                    adjBndPLO.startPath(adjLL);
-                    unadjBndPLO.startPath(unadjLL);
-                } else {
-                    adjBndPO.lineTo(adjLL);
-                    unadjBndPO.lineTo(unadjLL);
-
-                    adjBndPLO.lineTo(adjLL);
-                    unadjBndPLO.lineTo(unadjLL);
-                }
+                adjBndPLC.add(adjLL);
+                unadjBndPLC.add(unadjLL);
             }
 
             if (point.isNavPoint()) {
-                _MarkerData.put(Integer.toHexString(_AdjNavPts.addGraphic(adjmk)), adjMd);
-                _MarkerData.put(Integer.toHexString(_UnadjNavPts.addGraphic(unadjmk)), unadjMd);
+                Graphic adjmk = new Graphic(adjLL, adjMkOpts);
+                _AdjNavPts.getGraphics().add(adjmk);
+                _MarkerData.put(Integer.toHexString(adjmk.hashCode()) + "_nav", adjMd);
 
-                if (adjNavPLO == null) {
-                    adjNavPLO = new Polyline();
-                    unadjNavPLO = new Polyline();
+                Graphic unadjmk = new Graphic(adjLL, unAdjMkOpts);
+                _UnadjNavPts.getGraphics().add(unadjmk);
+                _MarkerData.put(Integer.toHexString(unadjmk.hashCode()) + "_nav", unadjMd);
 
-                    adjNavPLO.startPath(adjLL);
-                    unadjNavPLO.startPath(unadjLL);
-                } else {
-                    adjNavPLO.lineTo(adjLL);
-                    unadjNavPLO.lineTo(unadjLL);
-                }
+                adjNavPLC.add(adjLL);
+                unadjNavPLC.add(unadjLL);
             }
 
             if (point.getOp() == OpType.WayPoint) {
-                _MarkerData.put(Integer.toHexString(_WayPts.addGraphic(unadjmk)), unadjMd);
+                Graphic unadjmk = new Graphic(adjLL, unAdjMkOpts);
+                _WayPts.getGraphics().add(unadjmk);
+                _MarkerData.put(Integer.toHexString(unadjmk.hashCode()) + "_way", unadjMd);
             }
 
             if (point.getOp() == OpType.SideShot && !point.isOnBnd()) {
-                _MarkerData.put(Integer.toHexString(_AdjMiscPts.addGraphic(adjmk)), adjMd);
-                _MarkerData.put(Integer.toHexString(_UnadjMiscPts.addGraphic(unadjmk)), unadjMd);
+                Graphic adjmk = new Graphic(adjLL, adjMkOpts);
+                _AdjMiscPts.getGraphics().add(adjmk);
+                _MarkerData.put(Integer.toHexString(adjmk.hashCode()) + "_misc", adjMd);
+
+                Graphic unadjmk = new Graphic(adjLL, unAdjMkOpts);
+                _UnadjMiscPts.getGraphics().add(unadjmk);
+                _MarkerData.put(Integer.toHexString(unadjmk.hashCode()) + "_misc", unadjMd);
             }
-            
+
             llBuilder.include(adjPos);
         }
 
@@ -159,20 +172,20 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
             polyBounds = null;
         }
 
-        SimpleLineSymbol outline = new SimpleLineSymbol(graphicOptions.getAdjBndColor(), graphicOptions.getAdjWidth(), SimpleLineSymbol.STYLE.SOLID);
-        _AdjBnd.addGraphic(new Graphic(adjBndPLO, outline));
-        _AdjBndCB.addGraphic(new Graphic(adjBndPO, outline));
+        SimpleLineSymbol outline = new SimpleLineSymbol(SimpleLineSymbol.Style.SOLID, graphicOptions.getAdjBndColor(), graphicOptions.getAdjWidth());
+        _AdjBnd.getGraphics().add(new Graphic(new Polygon(adjBndPLC), outline));
+        _AdjBndCB.getGraphics().add(new Graphic(new Polyline(adjBndPC), outline));
 
-        outline = new SimpleLineSymbol(graphicOptions.getUnAdjBndColor(), graphicOptions.getUnAdjWidth(), SimpleLineSymbol.STYLE.SOLID);
-        _UnadjBnd.addGraphic(new Graphic(unadjBndPLO, outline));
-        _UnadjBndCB.addGraphic(new Graphic(unadjBndPO, outline));
+        outline = new SimpleLineSymbol(SimpleLineSymbol.Style.SOLID, graphicOptions.getUnAdjBndColor(), graphicOptions.getUnAdjWidth());
+        _UnadjBnd.getGraphics().add(new Graphic(new Polygon(unadjBndPLC), outline));
+        _UnadjBndCB.getGraphics().add(new Graphic(new Polyline(unadjBndPC), outline));
 
-        outline = new SimpleLineSymbol(graphicOptions.getAdjNavColor(), graphicOptions.getAdjWidth(), SimpleLineSymbol.STYLE.SOLID);
-        _AdjNav.addGraphic(new Graphic(adjNavPLO, outline));
+        outline = new SimpleLineSymbol(SimpleLineSymbol.Style.SOLID, graphicOptions.getAdjNavColor(), graphicOptions.getAdjWidth());
+        _AdjNav.getGraphics().add(new Graphic(new Polyline(adjNavPLC), outline));
 
 
-        outline = new SimpleLineSymbol(graphicOptions.getUnAdjNavColor(), graphicOptions.getUnAdjWidth(), SimpleLineSymbol.STYLE.SOLID);
-        _UnadjNav.addGraphic(new Graphic(unadjNavPLO, outline));
+        outline = new SimpleLineSymbol(SimpleLineSymbol.Style.SOLID, graphicOptions.getUnAdjNavColor(), graphicOptions.getUnAdjWidth());
+        _UnadjNav.getGraphics().add(new Graphic(new Polyline(unadjNavPLC), outline));
 
         if (drawOptions.isVisible()) {
             if (drawOptions.isAdjBnd()) {
@@ -220,7 +233,7 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
             if (!drawOptions.isUnadjNavPts()) {
                 _UnadjNavPts.setVisible(false);
             }
-            
+
             if (!drawOptions.isAdjMiscPts()) {
                 _AdjMiscPts.setVisible(false);
             }
@@ -228,7 +241,7 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
             if (!drawOptions.isUnadjMiscPts()) {
                 _UnadjMiscPts.setVisible(false);
             }
-            
+
             if (!drawOptions.isWayPts()) {
                 _WayPts.setVisible(false);
             }
@@ -244,7 +257,7 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
 
             _AdjBndPts.setVisible(false);
             _UnadjBndPts.setVisible(false);
-            
+
             _AdjNavPts.setVisible(false);
             _UnadjNavPts.setVisible(false);
 
@@ -254,25 +267,26 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
             _WayPts.setVisible(false);
         }
 
-        map.addLayer(_UnadjBnd);
-        map.addLayer(_UnadjBndCB);
+        map.getGraphicsOverlays().add(_UnadjBnd);
+        map.getGraphicsOverlays().add(_UnadjBnd);
+        map.getGraphicsOverlays().add(_UnadjBndCB);
 
-        map.addLayer(_AdjBnd);
-        map.addLayer(_AdjBndCB);
+        map.getGraphicsOverlays().add(_AdjBnd);
+        map.getGraphicsOverlays().add(_AdjBndCB);
 
-        map.addLayer(_UnadjNav);
-        map.addLayer(_AdjNav);
+        map.getGraphicsOverlays().add(_UnadjNav);
+        map.getGraphicsOverlays().add(_AdjNav);
 
-        map.addLayer(_UnadjBndPts);
-        map.addLayer(_AdjBndPts);
+        map.getGraphicsOverlays().add(_UnadjBndPts);
+        map.getGraphicsOverlays().add(_AdjBndPts);
 
-        map.addLayer(_UnadjNavPts);
-        map.addLayer(_AdjNavPts);
+        map.getGraphicsOverlays().add(_UnadjNavPts);
+        map.getGraphicsOverlays().add(_AdjNavPts);
 
-        map.addLayer(_UnadjMiscPts);
-        map.addLayer(_AdjMiscPts);
+        map.getGraphicsOverlays().add(_UnadjMiscPts);
+        map.getGraphicsOverlays().add(_AdjMiscPts);
 
-        map.addLayer(_WayPts);
+        map.getGraphicsOverlays().add(_WayPts);
     }
 
     @Override
@@ -301,51 +315,51 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
     }
 
     //region Get Layers
-    public GraphicsLayer getAdjBndPtsLayer() {
+    public GraphicsOverlay getAdjBndPtsLayer() {
         return _AdjBndPts;
     }
 
-    public GraphicsLayer getUnadjBndPtsLayer() {
+    public GraphicsOverlay getUnadjBndPtsLayer() {
         return _UnadjBndPts;
     }
 
-    public GraphicsLayer getAdjNavPtsLayer() {
+    public GraphicsOverlay getAdjNavPtsLayer() {
         return _AdjNavPts;
     }
 
-    public GraphicsLayer getUnadjNavPtsLayer() {
+    public GraphicsOverlay getUnadjNavPtsLayer() {
         return _UnadjNavPts;
     }
 
-    public GraphicsLayer getWayPtsLayer() {
+    public GraphicsOverlay getWayPtsLayer() {
         return _WayPts;
     }
 
-    public GraphicsLayer getAdjMiscPtsLayer() {
+    public GraphicsOverlay getAdjMiscPtsLayer() {
         return _AdjMiscPts;
     }
 
-    public GraphicsLayer getUnadjMiscPtsLayer() {
+    public GraphicsOverlay getUnadjMiscPtsLayer() {
         return _UnadjMiscPts;
     }
 
-    public GraphicsLayer getAdjBndCBLayer() {
+    public GraphicsOverlay getAdjBndCBLayer() {
         return _AdjBndCB;
     }
 
-    public GraphicsLayer getUnadjBndCBLayer() {
+    public GraphicsOverlay getUnadjBndCBLayer() {
         return _UnadjBndCB;
     }
 
-    public GraphicsLayer getAdjBndLayer() {
+    public GraphicsOverlay getAdjBndLayer() {
         return _AdjBnd;
     }
 
-    public GraphicsLayer getUnadjBndLayer() {
+    public GraphicsOverlay getUnadjBndLayer() {
         return _UnadjBnd;
     }
 
-    public GraphicsLayer getAdjNavLayer() {
+    public GraphicsOverlay getAdjNavLayer() {
         return _AdjNav;
     }
     //endregion
@@ -401,7 +415,7 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
     public void setAdjBndVisible(boolean visible) {
         drawOptions.setAdjBnd(visible);
         visible &= drawOptions.isVisible();
-        
+
         if (drawOptions.isAdjBndClose())
             _AdjBndCB.setVisible(visible);
         else
@@ -494,7 +508,7 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
     @Override
     public void setAdjBndClose(boolean close) {
         drawOptions.setAdjBndClose(close);
-        
+
         if (drawOptions.isVisible()) {
             if (drawOptions.isAdjBndClose()) {
                 _AdjBndCB.setVisible(true);
@@ -576,37 +590,41 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
     }
 
 
-    private void setLineColor(@ColorInt int color, GraphicsLayer graphicLayer) {
-        if (graphicLayer.getNumberOfGraphics() > 0) {
-            int[] gids = graphicLayer.getGraphicIDs();
+    private void setLineColor(@ColorInt int color, GraphicsOverlay graphicOverlay) {
+        if (graphicOverlay.getGraphics().size() > 0) {
 
-            for (int id : gids) {
-                Graphic g = graphicLayer.getGraphic(id);
+            Graphic[] graphics = graphicOverlay.getGraphics().toArray(new Graphic[0]);
+            graphicOverlay.getGraphics().clear();
+
+            for (Graphic g : graphics) {
                 Symbol s = g.getSymbol();
 
                 if (s instanceof SimpleLineSymbol) {
                     SimpleLineSymbol sls = (SimpleLineSymbol)s;
                     sls.setColor(color);
 
-                    graphicLayer.updateGraphic(id, sls);
+                    graphicOverlay.getGraphics().remove(g);
+                    graphicOverlay.getGraphics().add(new Graphic(g.getGeometry(), sls));
                 }
             }
         }
     }
 
-    private void setPtsColor(@ColorInt int color, GraphicsLayer graphicLayer) {
-        if (graphicLayer.getNumberOfGraphics() > 0) {
-            int[] gids = graphicLayer.getGraphicIDs();
+    private void setPtsColor(@ColorInt int color, GraphicsOverlay graphicOverlay) {
+        if (graphicOverlay.getGraphics().size() > 0) {
 
-            for (int id : gids) {
-                Graphic g = graphicLayer.getGraphic(id);
+            Graphic[] graphics = graphicOverlay.getGraphics().toArray(new Graphic[0]);
+            graphicOverlay.getGraphics().clear();
+
+            for (Graphic g : graphics) {
                 Symbol s = g.getSymbol();
 
                 if (s instanceof SimpleMarkerSymbol) {
-                    SimpleMarkerSymbol sms = (SimpleMarkerSymbol)s;
-                    sms.setColor(color);
+                    SimpleMarkerSymbol sls = (SimpleMarkerSymbol)s;
+                    sls.setColor(color);
 
-                    graphicLayer.updateGraphic(id, sms);
+                    graphicOverlay.getGraphics().remove(g);
+                    graphicOverlay.getGraphics().add(new Graphic(g.getGeometry(), sls));
                 }
             }
         }
