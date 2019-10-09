@@ -3,7 +3,7 @@ package com.usda.fmsc.twotrails;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.usda.fmsc.geospatial.Extent;
-import com.usda.fmsc.geospatial.PositionLegacy;
+import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.twotrails.objects.TtGroup;
 
 import org.joda.time.format.DateTimeFormat;
@@ -178,7 +178,7 @@ public class Consts {
         private static final double center_lat = 39.8282;
         private static final double center_lon = -98.5795;
 
-        public static final PositionLegacy USA_CENTER = new PositionLegacy(center_lat, center_lon);
+        public static final Position USA_CENTER = new Position(center_lat, center_lon);
         public static final Extent USA_BOUNDS = new Extent(north, east, south, west);
 
         public static final int PADDING = 30;

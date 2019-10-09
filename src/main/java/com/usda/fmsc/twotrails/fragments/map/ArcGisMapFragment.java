@@ -12,11 +12,25 @@ import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 
 
+import com.esri.arcgisruntime.geometry.Geometry;
+import com.esri.arcgisruntime.geometry.GeometryType;
+import com.esri.arcgisruntime.geometry.Point;
 import com.esri.arcgisruntime.mapping.ArcGISMap;
+import com.esri.arcgisruntime.mapping.Viewpoint;
+import com.esri.arcgisruntime.mapping.view.AnimationCurve;
+import com.esri.arcgisruntime.mapping.view.DefaultMapViewOnTouchListener;
+import com.esri.arcgisruntime.mapping.view.Graphic;
+import com.esri.arcgisruntime.mapping.view.GraphicsOverlay;
+import com.esri.arcgisruntime.mapping.view.MapRotationChangedEvent;
+import com.esri.arcgisruntime.mapping.view.MapRotationChangedListener;
+import com.esri.arcgisruntime.mapping.view.MapScaleChangedEvent;
+import com.esri.arcgisruntime.mapping.view.MapScaleChangedListener;
 import com.esri.arcgisruntime.mapping.view.MapView;
 import com.esri.arcgisruntime.mapping.view.WrapAroundMode;
+import com.esri.arcgisruntime.symbology.SimpleMarkerSymbol;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.geospatial.Extent;
+import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
 import com.usda.fmsc.geospatial.nmea41.sentences.base.NmeaSentence;
 import com.usda.fmsc.twotrails.Consts;
@@ -38,7 +52,7 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
 
-public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, GpsService.Listener {
+public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, GpsService.Listener, MapRotationChangedListener, MapScaleChangedListener {
     private static final String START_ARC_OPTIONS = "StartupArcOptions";
 
     private TwoTrailsApp TtAppCtx;
@@ -50,15 +64,16 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
 
     private GpsService.GpsBinder binder;
 
-    private MapView mMapView;
+    private MapView mapView;
     private ArcGISMap mBasemapLayer;
+    private GraphicsOverlay _LocationLayer;
+    private SimpleMarkerSymbol sms;
 
     private ArrayList<IMarkerDataGraphic> _MarkerDataGraphics = new ArrayList<>();
     private ArrayList<ArcGisPolygonGraphic> polygonGraphics = new ArrayList<>();
     private ArrayList<ArcGisTrailGraphic> trailGraphics = new ArrayList<>();
 
     private ArcMapCompass compass;
-
     private Integer basemapId;
 
     //private LayoutInflater inflater;
@@ -123,19 +138,23 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_arc_gis_map, container, false);
 
-        mMapView = view.findViewById(R.id.map);
-        mMapView.setWrapAroundMode(WrapAroundMode.ENABLE_WHEN_SUPPORTED);
+        mapView = view.findViewById(R.id.map);
+        mapView.setWrapAroundMode(WrapAroundMode.ENABLE_WHEN_SUPPORTED);
 
-//        mMapView.enableWrapAround(true);
-//        mMapView.setAllowRotationByPinch(true);
+        mapView.addMapRotationChangedListener(this);
+        mapView.addMapScaleChangedListener(this);
+
+//        mapView.enableWrapAround(true);
+//        mapView.setAllowRotationByPinch(true);
 //
-//        mMapView.setOnStatusChangedListener(this);
-//        mMapView.setOnZoomListener(this);
-//        mMapView.setOnPanListener(this);
-//        mMapView.setOnTouchListener(new TouchListener(getContext(), mMapView));
+//        mapView.setOnStatusChangedListener(this);
+//        mapView.setOnZoomListener(this);
+//        mapView.setOnPanListener(this);
+
+        mapView.setOnTouchListener(new MapViewOnTouchListenerEx(getContext(), mapView));
 //
 //        compass = view.findViewById(R.id.compass);
-//        compass.setMapView(mMapView);
+//        compass.setMapView(mapView);
 
         if (startArcOpts != null) {
             changeBasemap(startArcOpts);
@@ -143,7 +162,7 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
             changeBasemap(startUpMapOptions.getMapId());
         }
 
-//        mMapView.addLayer(locationLayer);
+//        mapView.addLayer(locationLayer);
 
         if (startUpMapOptions.hasExtents() || startUpMapOptions.hasLocation()) {
             centerOnLoad = true;
@@ -165,9 +184,9 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
         }
 
         // Release MapView resources
-        if (mMapView != null) {
-            mMapView.dispose();
-            mMapView = null;
+        if (mapView != null) {
+            mapView.dispose();
+            mapView = null;
         }
     }
 
@@ -175,8 +194,8 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
     public void onResume() {
         super.onResume();
 
-        if (mMapView != null) {
-            mMapView.resume();
+        if (mapView != null) {
+            mapView.resume();
         }
     }
 
@@ -184,8 +203,8 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
     public void onPause() {
         super.onPause();
 
-        if (mMapView != null) {
-            mMapView.pause();
+        if (mapView != null) {
+            mapView.pause();
         }
     }
 
@@ -213,11 +232,11 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
 //                            startUpMapOptions.getEast(),
 //                            startUpMapOptions.getSouth(),
 //                            startUpMapOptions.getWest(),
-//                            mMapView);
+//                            mapView);
 //
-//                    mMapView.setExtent(e, 0, false);
+//                    mapView.setExtent(e, 0, false);
 //                } else {
-//                    mMapView.centerAt(startUpMapOptions.getLatitude(), startUpMapOptions.getLongitide(), false);
+//                    mapView.centerAt(startUpMapOptions.getLatitude(), startUpMapOptions.getLongitide(), false);
 //                }
 //
 //                centerOnLoad = false;
@@ -250,8 +269,7 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
     }
 
     public void changeBasemap(final ArcGisMapLayer agml) {
-
-        if (mMapView == null) {
+        if (mapView == null) {
             mBasemapLayer = null;
         } else {
             try {
@@ -262,14 +280,14 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
 
                 mBasemapLayer = baseMap;
 
-                mMapView.setMap(mBasemapLayer);
+                mapView.setMap(mBasemapLayer);
 
 //                if (agml.hasScales()) {
-//                    mMapView.setMaxScale(agml.getMaxScale());
-//                    mMapView.setMinScale(agml.getMinScale());
+//                    mapView.setMaxScale(agml.getMaxScale());
+//                    mapView.setMinScale(agml.getMinScale());
 //                } else {
-//                    mMapView.setMaxScale(50);
-//                    mMapView.setMinScale(591657550.5);
+//                    mapView.setMaxScale(50);
+//                    mapView.setMinScale(591657550.5);
 //                }
 
                 if (mmListener != null) {
@@ -344,30 +362,30 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
 
     @Override
     public void moveToLocation(float lat, float lon, float zoomLevel, boolean animate) {
-//        if (mMapView != null) {
-//            if (animate) {
-//                int zLevels = currentGisMapLayer.getNumberOfLevels();
-//
-//                if (currentGisMapLayer != null && zoomLevel > 0 && zLevels > 0 && zoomLevel > zLevels) {
-//                    zoomLevel = currentGisMapLayer.getNumberOfLevels();
-//                    //zoomLevel = (float)currentGisMapLayer.getLevelsOfDetail()[(int)zoomLevel].getResolution();
-//                }
-//
-//                if (zoomLevel > -1) {
-//                    mMapView.zoomToScale(TtAppCtx.getArcGISTools().latLngToMapSpatial(lat, lon, mMapView), zoomLevel);
-//                } else {
-//                    mMapView.centerAt(lat, lon, true);
-//                }
-//            } else {
-//                mMapView.centerAt(lat, lon, false);
-//            }
-//        }
+        if (mapView != null) {
+            if (animate) {
+                int zLevels = currentGisMapLayer.getNumberOfLevels();
+
+                if (currentGisMapLayer != null && zoomLevel > 0 && zLevels > 0 && zoomLevel > zLevels) {
+                    zoomLevel = currentGisMapLayer.getNumberOfLevels();
+                    //zoomLevel = (float)currentGisMapLayer.getLevelsOfDetail()[(int)zoomLevel].getResolution();
+                }
+
+                if (zoomLevel > -1) {
+                    mapView.setViewpointCenterAsync(TtAppCtx.getArcGISTools().latLngToMapSpatial(lat, lon, mapView), zoomLevel);
+                } else {
+                    mapView.setViewpointCenterAsync(TtAppCtx.getArcGISTools().latLngToMapSpatial(lat, lon, mapView), mapView.getMapScale());
+                }
+            } else {
+                mapView.setViewpointAsync(new Viewpoint(lat, lon, mapView.getMapScale()), 0, AnimationCurve.EASE_IN_EXPO);
+            }
+        }
     }
 
     @Override
     public void moveToLocation(Extent extents, int padding, boolean animate) {
-//        if (mMapView != null) {
-//            mMapView.setExtent(TtAppCtx.getArcGISTools().getEnvelopFromLatLngExtents(extents, mMapView), padding, animate);
+//        if (mapView != null) {
+//            mapView.setExtent(TtAppCtx.getArcGISTools().getEnvelopFromLatLngExtents(extents, mapView), padding, animate);
 //        }
     }
 
@@ -379,41 +397,38 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
         }
     }
 
-//    private void onMarkerClick(int graphicId, Geometry geometry) {
-//        MarkerData markerData = getMarkerData(Integer.toHexString(graphicId));
-//
-//        if (markerData != null) {
-//            if (Geometry.Type.POINT.equals(geometry.getType())) {
-//                Point point = (Point)geometry;
-//
-//                Point sp = mMapView.toScreenPoint(point);
-//                sp.setXY(sp.getX() + padLeft - padRight, sp.getY() - padTop + padBottom);
-//
-//                mMapView.centerAt(mMapView.toMapPoint(sp), true);
-//
-//                showSelectedMarkerInfo(markerData, point);
-//            }
-//
-//            if (mmListener != null) {
-//                mmListener.onMarkerClick(markerData);
-//            }
-//        }
-//    }
+    private void onMarkerClick(int graphicId, Geometry geometry) {
+        MarkerData markerData = getMarkerData(Integer.toHexString(graphicId));
+
+        if (markerData != null) {
+            if (geometry.getGeometryType().equals(GeometryType.POINT)) {
+                Point point = (Point)geometry;
+
+                mapView.setViewpointCenterAsync(point);
+
+                //showSelectedMarkerInfo(markerData, point);
+            }
+
+            if (mmListener != null) {
+                mmListener.onMarkerClick(markerData);
+            }
+        }
+    }
 
 //    @Override
-//    public Position getLatLon() {
-//        Point point = TtAppCtx.getArcGISTools().pointToLatLng(mMapView.getCenter(), mMapView);
+//    public Position getMapLatLonCenter() {
+//        Point point = TtAppCtx.getArcGISTools().pointToLatLng(mapView.getCenter(), mapView);
 //
 //        return new Position(point.getY(), point.getX());
 //    }
 
     @Override
     public Extent getExtents() {
-//        Polygon polygon = mMapView.getExtent();
+//        Polygon polygon = mapView.getExtent();
 //
 //        if (polygon != null) {
-//            Point ne = TtAppCtx.getArcGISTools().pointToLatLng(polygon.getPoint(1), mMapView);
-//            Point sw = TtAppCtx.getArcGISTools().pointToLatLng(polygon.getPoint(3), mMapView);
+//            Point ne = TtAppCtx.getArcGISTools().pointToLatLng(polygon.getPoint(1), mapView);
+//            Point sw = TtAppCtx.getArcGISTools().pointToLatLng(polygon.getPoint(3), mapView);
 //
 //            return new Extent(sw.getY(), ne.getX(), ne.getY(), sw.getX());
 //        }
@@ -423,25 +438,25 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
 
 //    public Envelope getArcExtents() {
 //        Envelope extents = new Envelope();
-//        if (mMapView.getExtent() != null) {
-//            mMapView.getExtent().queryEnvelope(extents);
+//        if (mapView.getExtent() != null) {
+//            mapView.getExtent().queryEnvelope(extents);
 //            return extents;
 //        }
 //        return null;
 //    }
 
 //    public SpatialReference getSpatialReference() {
-//        return mMapView.getSpatialReference();
+//        return mapView.getSpatialReference();
 //    }
 
 //    public double getScale() {
-//        return mMapView.getScale();
+//        return mapView.getScale();
 //    }
 
 
     public int getMapZoomLevel() {
 //        if (mBasemapLayer instanceof ArcGISTiledMapServiceLayer) {
-//            double mapRes = mMapView.getResolution();
+//            double mapRes = mapView.getResolution();
 //            double[] resolutions = ((ArcGISTiledMapServiceLayer) mBasemapLayer).getTileInfo().getResolutions();
 //
 //            for (int i = 0; i < resolutions.length - 2; i++) {
@@ -455,13 +470,13 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
 
 
 //    public Point getMapPoint(int x, int y) {
-//        return mMapView.toMapPoint(x, y);
+//        return mapView.toMapPoint(x, y);
 //    }
 
 
 //    public Extent getExtentsFromScreen(int xmin, int ymin, int xmax, int ymax) {
-//        Point ne = TtAppCtx.getArcGISTools().pointToLatLng(getMapPoint(xmin, ymin), mMapView);
-//        Point sw = TtAppCtx.getArcGISTools().pointToLatLng(getMapPoint(xmax, ymax), mMapView);
+//        Point ne = TtAppCtx.getArcGISTools().pointToLatLng(getMapPoint(xmin, ymin), mapView);
+//        Point sw = TtAppCtx.getArcGISTools().pointToLatLng(getMapPoint(xmax, ymax), mapView);
 //
 //        return new Extent(sw.getX(), ne.getY(), ne.getX(), sw.getY());
 //    }
@@ -519,14 +534,14 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
 
     @Override
     public void setGesturesEnabled(boolean enabled) {
-//        if (mMapView != null) {
-//            mMapView.setEnabled(enabled);
+//        if (mapView != null) {
+//            mapView.setEnabled(enabled);
 //        }
     }
 
     @Override
     public void addPolygon(PolygonGraphicManager graphicManager, PolygonDrawOptions drawOptions) {
-//        ArcGisPolygonGraphic polygonGraphic = new ArcGisPolygonGraphic(mMapView);
+//        ArcGisPolygonGraphic polygonGraphic = new ArcGisPolygonGraphic(mapView);
 //        polygonGraphics.add(polygonGraphic);
 //
 //        graphicManager.setGraphic(polygonGraphic, drawOptions);
@@ -544,7 +559,7 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
 
     @Override
     public void addTrail(TrailGraphicManager graphicManager) {
-//        ArcGisTrailGraphic trailGraphic = new ArcGisTrailGraphic(mMapView);
+//        ArcGisTrailGraphic trailGraphic = new ArcGisTrailGraphic(mapView);
 //        trailGraphics.add(trailGraphic);
 //
 //        graphicManager.setGraphic(trailGraphic);
@@ -578,11 +593,16 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
 //        }
     }
 
+//    @Override
+//    public Position getMapLatLonCenter() {
+//        return mapView.get;
+//    }
+
 //    private void showSelectedMarkerInfo(MarkerData markerData, Point point) {
 //        if (callout != null) {
 //            callout.hide();
 //        } else {
-//            callout = mMapView.getCallout();
+//            callout = mapView.getCallout();
 //        }
 //
 //        if (markerData != null) {
@@ -596,31 +616,30 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
 
     @Override
     public void nmeaBurstReceived(NmeaBurst nmeaBurst) {
-        if (showPosition && nmeaBurst.hasPosition() && mMapView != null) {
-            Point point = TtAppCtx.getArcGISTools().latLngToMapSpatial(nmeaBurst.getLatitudeSD(), nmeaBurst.getLongitudeSD(), mMapView);
+        if (showPosition && nmeaBurst.hasPosition() && mapView != null) {
+            Point point = TtAppCtx.getArcGISTools().latLngToMapSpatial(nmeaBurst.getLatitudeSD(), nmeaBurst.getLongitudeSD(), mapView);
 
-            if (locationLayer != null) {
-                Layer[] layers = mMapView.getLayers();
+            if (_LocationLayer != null) {
+                if (mapView.getGraphicsOverlays().get(mapView.getGraphicsOverlays().size() - 1) != _LocationLayer) {
+                    mapView.getGraphicsOverlays().remove(_LocationLayer);
 
-                if (layers[layers.length - 1].getID() != locationLayer.getID()) {
-                    mMapView.removeLayer(locationLayer);
-                    locationLayer = new GraphicsLayer();
-                    mMapView.addLayer(locationLayer);
-                } else if (locationGraphic != null) {
-                    locationLayer.removeGraphic(gid);
+                    _LocationLayer = new GraphicsOverlay();
+                    mapView.getGraphicsOverlays().add(_LocationLayer);
                 }
             } else {
-                locationLayer = new GraphicsLayer();
-                mMapView.addLayer(locationLayer);
+                _LocationLayer = new GraphicsOverlay();
+                mapView.getGraphicsOverlays().add(_LocationLayer);
+            }
+
+            if (_LocationLayer.getGraphics().size() > 0) {
+                _LocationLayer.getGraphics().clear();
             }
 
             if (sms == null) {
-                sms = new SimpleMarkerSymbol(Color.RED, 20, SimpleMarkerSymbol.STYLE.DIAMOND);
+                sms = new SimpleMarkerSymbol(SimpleMarkerSymbol.Style.DIAMOND, Color.RED, 20);
             }
 
-            locationGraphic = new Graphic(point, sms);
-
-            gid = locationLayer.addGraphic(locationGraphic);
+            _LocationLayer.getGraphics().add(new Graphic(point, sms));
         }
     }
 
@@ -669,80 +688,91 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
 
     }
 
+    @Override
+    public void mapRotationChanged(MapRotationChangedEvent mapRotationChangedEvent) {
+        onMapLocationChanged();
+    }
+
+    @Override
+    public void mapScaleChanged(MapScaleChangedEvent mapScaleChangedEvent) {
+        onMapLocationChanged();
+    }
 
 
+    private class MapViewOnTouchListenerEx extends DefaultMapViewOnTouchListener {
 
-//    private class TouchListener extends MapOnTouchListener {
-//        public TouchListener(Context context, MapView view) {
-//            super(context, view);
-//        }
+        public MapViewOnTouchListenerEx(Context context, MapView mapView) {
+            super(context, mapView);
+        }
+
+        @Override
+        public boolean onSingleTapConfirmed(MotionEvent e) {
+            hideSelectedMarkerInfo();
+
+            boolean infoDisplayed = false;
+
+            for (ArcGisTrailGraphic tGraphic : trailGraphics) {
+                if (tGraphic.isMarkersVisible() && displayInfoWindow(tGraphic.getPtsLayer(), e)) {
+                    infoDisplayed = true;
+                    break;
+                }
+            }
+
+            if (!infoDisplayed) {
+                for (ArcGisPolygonGraphic pGraphic : polygonGraphics) {
+                    if (pGraphic.isVisible()) {
+                        if (pGraphic.isAdjBndPtsVisible() && displayInfoWindow(pGraphic.getAdjBndPtsLayer(), e)) {
+                            infoDisplayed = true;
+                            break;
+                        }
+
+                        if (pGraphic.isUnadjBndPtsVisible() && displayInfoWindow(pGraphic.getUnadjBndPtsLayer(), e)) {
+                            infoDisplayed = true;
+                            break;
+                        }
+
+                        if (pGraphic.isAdjNavPtsVisible() && displayInfoWindow(pGraphic.getAdjNavPtsLayer(), e)) {
+                            infoDisplayed = true;
+                            break;
+                        }
+
+                        if (pGraphic.isUnadjNavPtsVisible() && displayInfoWindow(pGraphic.getUnadjNavPtsLayer(), e)) {
+                            infoDisplayed = true;
+                            break;
+                        }
+
+                        if (pGraphic.isAdjMiscPtsVisible() && displayInfoWindow(pGraphic.getAdjMiscPtsLayer(), e)) {
+                            infoDisplayed = true;
+                            break;
+                        }
+
+                        if (pGraphic.isUnadjMiscPtsVisible() && displayInfoWindow(pGraphic.getUnadjMiscPtsLayer(), e)) {
+                            infoDisplayed = true;
+                            break;
+                        }
+
+                        if (pGraphic.isWayPtsVisible() && displayInfoWindow(pGraphic.getWayPtsLayer(), e)) {
+                            infoDisplayed = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (!infoDisplayed && mmListener != null) {
+                Point pointLL = TtAppCtx.getArcGISTools().pointToLatLng(e.getX(), e.getY(), mapView);
+
+                mmListener.onMapClick(new Position(pointLL.getY(), pointLL.getX()));
+            }
+
+            return super.onSingleTapConfirmed(e);
+        }
+
+        boolean displayInfoWindow(GraphicsOverlay layer, MotionEvent me) {
+            try {
+//                layer.getSelectedGraphics();
 //
-//        @Override
-//        public boolean onSingleTap(MotionEvent point) {
-//            hideSelectedMarkerInfo();
-//
-//            boolean infoDisplayed = false;
-//
-//            for (ArcGisTrailGraphic tGraphic : trailGraphics) {
-//                if (tGraphic.isMarkersVisible() && displayInfoWindow(tGraphic.getPtsLayer(), point)) {
-//                    infoDisplayed = true;
-//                    break;
-//                }
-//            }
-//
-//            if (!infoDisplayed) {
-//                for (ArcGisPolygonGraphic pGraphic : polygonGraphics) {
-//                    if (pGraphic.isVisible()) {
-//                        if (pGraphic.isAdjBndPtsVisible() && displayInfoWindow(pGraphic.getAdjBndPtsLayer(), point)) {
-//                            infoDisplayed = true;
-//                            break;
-//                        }
-//
-//                        if (pGraphic.isUnadjBndPtsVisible() && displayInfoWindow(pGraphic.getUnadjBndPtsLayer(), point)) {
-//                            infoDisplayed = true;
-//                            break;
-//                        }
-//
-//                        if (pGraphic.isAdjNavPtsVisible() && displayInfoWindow(pGraphic.getAdjNavPtsLayer(), point)) {
-//                            infoDisplayed = true;
-//                            break;
-//                        }
-//
-//                        if (pGraphic.isUnadjNavPtsVisible() && displayInfoWindow(pGraphic.getUnadjNavPtsLayer(), point)) {
-//                            infoDisplayed = true;
-//                            break;
-//                        }
-//
-//                        if (pGraphic.isAdjMiscPtsVisible() && displayInfoWindow(pGraphic.getAdjMiscPtsLayer(), point)) {
-//                            infoDisplayed = true;
-//                            break;
-//                        }
-//
-//                        if (pGraphic.isUnadjMiscPtsVisible() && displayInfoWindow(pGraphic.getUnadjMiscPtsLayer(), point)) {
-//                            infoDisplayed = true;
-//                            break;
-//                        }
-//
-//                        if (pGraphic.isWayPtsVisible() && displayInfoWindow(pGraphic.getWayPtsLayer(), point)) {
-//                            infoDisplayed = true;
-//                            break;
-//                        }
-//                    }
-//                }
-//            }
-//
-//            if (!infoDisplayed && mmListener != null) {
-//                Point pointLL = TtAppCtx.getArcGISTools().pointToLatLng(point.getX(), point.getY(), mMapView);
-//
-//                mmListener.onMapClick(new Position(pointLL.getY(), pointLL.getX()));
-//            }
-//
-//            return super.onSingleTap(point);
-//        }
-//
-//        boolean displayInfoWindow(GraphicsLayer layer, MotionEvent point) {
-//            try {
-//                int[] graphicIds = layer.getGraphicIDs(point.getX(), point.getY(), TOLERANCE, 1);
+//                int[] graphicIds = layer.getGraphicIDs(me.getX(), me.getY(), TOLERANCE, 1);
 //
 //                Graphic graphic = null;
 //
@@ -751,14 +781,14 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
 //                }
 //
 //                if (graphic != null) {
-//                    onMarkerClick(graphicIds[0],graphic.getGeometry());
+//                    onMarkerClick(graphicIds[0], graphic.getGeometry());
 //                    return true;
 //                }
-//            } catch (Exception e) {
-//                //getGraphicIDs throws IllegalStateException sometimes for no reason
-//            }
-//
-//            return false;
-//        }
-//    }
+            } catch (Exception e) {
+                //getGraphicIDs throws IllegalStateException sometimes for no reason
+            }
+
+            return false;
+        }
+    }
 }

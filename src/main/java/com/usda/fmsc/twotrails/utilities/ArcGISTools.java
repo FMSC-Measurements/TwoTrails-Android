@@ -57,7 +57,7 @@ public class ArcGISTools {
 
     private List<IArcToolsListener> listeners = new ArrayList<>();
 
-    private HashMap<Integer, DownloadOfflineArcGISMapTask> tasks = new HashMap<>();
+    //private HashMap<Integer, DownloadOfflineArcGISMapTask> tasks = new HashMap<>();
     private long lastUpdate = System.currentTimeMillis();
 
     private WebRequest webRequest;
@@ -257,11 +257,6 @@ public class ArcGISTools {
         ArcGISTiledLayer tiledLayer = null;
 
         if (isOnline) {
-//            layer = new ArcGISTiledMapServiceLayer(agml.getUrl(),
-//                    agml.getUrl().contains("services.arcgisonline") ?
-//                            null: getCredentials(context)
-//            );
-
             tiledLayer = new ArcGISTiledLayer(agml.getUrl());
         } else {
             if (FileUtils.fileOrFolderExists(agml.getFilePath())) {
@@ -301,25 +296,19 @@ public class ArcGISTools {
         if (askDeleteFile && layer != null && !layer.isOnline()) {
             new AlertDialog.Builder(context)
                     .setMessage("Would you like to delete the offline map file as well?")
-                    .setPositiveButton(R.string.str_yes, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            String filename = layer.getFilePath();
+                    .setPositiveButton(R.string.str_yes, (dialog, which) -> {
+                        String filename = layer.getFilePath();
 
-                            if (!StringEx.isEmpty(filename)) {
-                                FileUtils.delete(filename);
-                            }
-
-                            if (event != null)
-                                event.onEventTriggered(null);
+                        if (!StringEx.isEmpty(filename)) {
+                            FileUtils.delete(filename);
                         }
+
+                        if (event != null)
+                            event.onEventTriggered(null);
                     })
-                    .setNegativeButton(R.string.str_no, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            if (event != null)
-                                event.onEventTriggered(null);
-                        }
+                    .setNegativeButton(R.string.str_no, (dialog, which) -> {
+                        if (event != null)
+                            event.onEventTriggered(null);
                     })
                     .show();
 
@@ -406,41 +395,33 @@ public class ArcGISTools {
         if (webRequest == null)
             webRequest = new WebRequest(context);
 
-        webRequest.getJson(jUrl, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                if (response.has("currentVersion")) {
-                    listener.onComplete(new ArcGisMapLayer(
-                                    getId(),
-                                    null,
-                                    response.optString("description", StringEx.Empty),
-                                    null,
-                                    url,
-                                    null,
-                                    response.optDouble("minScale", 0),
-                                    response.optDouble("maxScale", 0),
-                                    getDetailLevelsFromJson(response),
-                                    null,
-                                    false
-                            )
-                    );
-                } else {
-                    String message = "invalid json";
+        webRequest.getJson(jUrl, response -> {
+            if (response.has("currentVersion")) {
+                listener.onComplete(new ArcGisMapLayer(
+                                getId(),
+                                null,
+                                response.optString("description", StringEx.Empty),
+                                null,
+                                url,
+                                null,
+                                response.optDouble("minScale", 0),
+                                response.optDouble("maxScale", 0),
+                                getDetailLevelsFromJson(response),
+                                null,
+                                false
+                        )
+                );
+            } else {
+                String message = "invalid json";
 
-                    if (response.has("message")) {
-                        message = response.optString("message", "error");
-                    }
-
-                    listener.onBadUrl(message);
+                if (response.has("message")) {
+                    message = response.optString("message", "error");
                 }
+
+                listener.onBadUrl(message);
             }
         },
-        new Response.ErrorListener(){
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                listener.onBadUrl(error.getMessage());
-            }
-        });
+        error -> listener.onBadUrl(error.getMessage()));
     }
 
     private ArcGisMapLayer.DetailLevel[] getDetailLevelsFromJson(JSONObject jobj) {
@@ -476,225 +457,138 @@ public class ArcGISTools {
             //
         }
 
-        return detailLevels.toArray(new ArcGisMapLayer.DetailLevel[detailLevels.size()]);
+        return detailLevels.toArray(new ArcGisMapLayer.DetailLevel[0]);
     }
 
 
 
-    public void startOfflineMapDownload(DownloadOfflineArcGISMapTask task) {
-        final ArcGisMapLayer layer = task.getLayer();
-
-        if (tasks.containsKey(task.getLayer().getId())) {
-            throw new RuntimeException("DownloadOfflineArcGISMapTask already submitted.");
-        }
-
-        tasks.put(task.getLayer().getId(), task);
-
-        TtAppCtx.getTtNotifyManager().startMapDownload(layer.getId(), layer.getName());
-
-        task.startDownload(new DownloadOfflineArcGISMapTask.DownloadListener() {
-            @Override
-            public void onMapDownloaded(final ArcGisMapLayer layer) {
-                addMapLayer(layer);
-
-//                Global.getMainActivity().runOnUiThread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        Global.TtNotifyManager.endMapDownload(layer.getId());
-//                    }
-//                });
-                TtAppCtx.getTtNotifyManager().endMapDownload(layer.getId());
-
-//                final Activity activity = Global.getCurrentActivity();
-//                if (activity != null) {
-//                    activity.runOnUiThread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            Toast.makeText(Global.getApplicationContext(), String.format("%s Downloaded", layer.getName()), Toast.LENGTH_LONG).show();
-//                        }
-//                    });
-//                }
-                Toast.makeText(TtAppCtx, String.format("%s Downloaded", layer.getName()), Toast.LENGTH_LONG).show();
-            }
-
-            @Override
-            public void onTaskUpdate(final ExportTileCacheStatus status) {
-                if (status.getStatus() == GPJobResource.JobStatus.EXECUTING) {
-                    long now = System.currentTimeMillis();
-
-                    if (now > lastUpdate + 250) {
-                        final int progress = status.getDownloadSize() > 0 ? (int) (100 * status.getTotalBytesDownloaded() / status.getDownloadSize()) : 0;
-
-//                        Global.getMainActivity().runOnUiThread(new Runnable() {
-//                            @Override
-//                            public void run() {
-//                                Global.TtNotifyManager.updateMapDownload(layer.getId(), progress);
-//                            }
-//                        });
-                        TtAppCtx.getTtNotifyManager().updateMapDownload(layer.getId(), progress);
-
-                        lastUpdate = now;
-                    }
-                } else if (status.getStatus() == GPJobResource.JobStatus.FAILED) {
-//                    Global.getMainActivity().runOnUiThread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            Global.TtNotifyManager.endMapDownload(layer.getId());
-//                        }
-//                    });
-                    TtAppCtx.getTtNotifyManager().endMapDownload(layer.getId());
-
-//                    final Activity activity = Global.getCurrentActivity();
-
-//                    if (activity != null) {
-//                        activity.runOnUiThread(new Runnable() {
-//                            @Override
-//                            public void run() {
-//                                Toast.makeText(activity, "Failed to download offline map", Toast.LENGTH_LONG).show();
-//                            }
-//                        });
-//                    }
-                    Toast.makeText(TtAppCtx, "Failed to download offline map", Toast.LENGTH_LONG).show();
-                } //else {
-//                    final Activity activity = Global.getCurrentActivity();
+//    public void startOfflineMapDownload(DownloadOfflineArcGISMapTask task) {
+//        final ArcGisMapLayer layer = task.getLayer();
 //
-//                    if (activity != null) {
-//                        activity.runOnUiThread(new Runnable() {
-//                            @Override
-//                            public void run() {
-//                                Toast.makeText(activity, status.getStatus().toString(), Toast.LENGTH_LONG).show();
-//                            }
-//                        });
-//                    }
-//                }
-            }
-
-            @Override
-            public void onStatusError(String message) {
-                tasks.remove(layer.getId());
-
-//                Global.getMainActivity().runOnUiThread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        Global.TtNotifyManager.endMapDownload(layer.getId());
-//                    }
-//                });
-                TtAppCtx.getTtNotifyManager().endMapDownload(layer.getId());
-
-//                final Activity activity = Global.getCurrentActivity();
+//        if (tasks.containsKey(task.getLayer().getId())) {
+//            throw new RuntimeException("DownloadOfflineArcGISMapTask already submitted.");
+//        }
 //
-//                if (activity != null) {
-//                    activity.runOnUiThread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            Toast.makeText(activity, "Error creating offline map", Toast.LENGTH_LONG).show();
-//                        }
-//                    });
-//                }
-                Toast.makeText(TtAppCtx, "Error creating offline map", Toast.LENGTH_LONG).show();
-            }
-
-            @Override
-            public void onDownloadError(String message) {
-                tasks.remove(layer.getId());
-//                Global.getMainActivity().runOnUiThread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        Global.TtNotifyManager.endMapDownload(layer.getId());
-//                    }
-//                });
-                TtAppCtx.getTtNotifyManager().endMapDownload(layer.getId());
-
-//                final Activity activity = Global.getCurrentActivity();
+//        tasks.put(task.getLayer().getId(), task);
 //
-//                if (activity != null) {
-//                    activity.runOnUiThread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            Toast.makeText(activity, "Error downloading offline map", Toast.LENGTH_LONG).show();
-//                        }
-//                    });
+//        TtAppCtx.getTtNotifyManager().startMapDownload(layer.getId(), layer.getName());
+//
+//        task.startDownload(new DownloadOfflineArcGISMapTask.DownloadListener() {
+//            @Override
+//            public void onMapDownloaded(final ArcGisMapLayer layer) {
+//                addMapLayer(layer);
+//                TtAppCtx.getTtNotifyManager().endMapDownload(layer.getId());
+//                Toast.makeText(TtAppCtx, String.format("%s Downloaded", layer.getName()), Toast.LENGTH_LONG).show();
+//            }
+//
+//            @Override
+//            public void onTaskUpdate(final ExportTileCacheStatus status) {
+//                if (status.getStatus() == GPJobResource.JobStatus.EXECUTING) {
+//                    long now = System.currentTimeMillis();
+//
+//                    if (now > lastUpdate + 250) {
+//                        final int progress = status.getDownloadSize() > 0 ? (int) (100 * status.getTotalBytesDownloaded() / status.getDownloadSize()) : 0;
+//                        TtAppCtx.getTtNotifyManager().updateMapDownload(layer.getId(), progress);
+//
+//                        lastUpdate = now;
+//                    }
+//                } else if (status.getStatus() == GPJobResource.JobStatus.FAILED) {
+//                    TtAppCtx.getTtNotifyManager().endMapDownload(layer.getId());
+//                    Toast.makeText(TtAppCtx, "Failed to download offline map", Toast.LENGTH_LONG).show();
 //                }
-                Toast.makeText(TtAppCtx, "Error downloading offline map", Toast.LENGTH_LONG).show();
-            }
-        });
-    }
+//            }
+//
+//            @Override
+//            public void onStatusError(String message) {
+//                tasks.remove(layer.getId());
+//                TtAppCtx.getTtNotifyManager().endMapDownload(layer.getId());
+//                Toast.makeText(TtAppCtx, "Error creating offline map", Toast.LENGTH_LONG).show();
+//            }
+//
+//            @Override
+//            public void onDownloadError(String message) {
+//                tasks.remove(layer.getId());
+//                TtAppCtx.getTtNotifyManager().endMapDownload(layer.getId());
+//                Toast.makeText(TtAppCtx, "Error downloading offline map", Toast.LENGTH_LONG).show();
+//            }
+//        });
+//    }
 
 
 
 
 
-    public boolean hasValidCredentials(Context context) {
-        UserCredentials creds = getCredentials(context);
+//    public boolean hasValidCredentials(Context context) {
+//        UserCredentials creds = getCredentials(context);
+//
+//        if (creds != null) {
+//            long expire = creds.getTokenExpiry();
+//            long now = System.currentTimeMillis();
+//
+//            return expire == 0 || expire > now;
+//        }
+//        return false;
+//    }
 
-        if (creds != null) {
-            long expire = creds.getTokenExpiry();
-            long now = System.currentTimeMillis();
+//    public boolean hasCredentials(Context context) {
+//        return getCredentials(context) != null;
+//    }
 
-            return expire == 0 || expire > now;
-        }
-        return false;
-    }
+//    public UserCredentials getCredentials(Context context) {
+//        String credStr = TtAppCtx.getDeviceSettings().getArcCredentials();
+//
+//        if (userCredentials != null)
+//            return userCredentials;
+//
+//        userCredentials = new UserCredentials();
+//
+//        if (!StringEx.isEmpty(credStr)) {
+//            try {
+//                byte[] data = Base64.decode(credStr, Base64.DEFAULT);
+//
+//                byte[] decoded = Encryption.decodeFile(AndroidUtils.Device.getDeviceID(context), data);
+//
+//                userCredentials = (UserCredentials) SerializationTools.bytesToObject(decoded);
+//                return userCredentials;
+//            } catch (Exception e) {
+//                TtAppCtx.getReport().writeError("ArcGISTools:getCredentials", e.getMessage(), e.getStackTrace());
+//            }
+//        }
+//
+//        return null;
+//    }
 
-    public boolean hasCredentials(Context context) {
-        return getCredentials(context) != null;
-    }
+//    public boolean saveCredentials(Context context, UserCredentials credentials) {
+//        if (credentials == null)
+//            throw new NullPointerException();
+//
+//        try {
+//            byte[] data = SerializationTools.objectToBytes(credentials);
+//
+//            byte[] encoded = Encryption.encodeFile(AndroidUtils.Device.getDeviceID(context), data);
+//
+//            userCredentials = credentials;
+//
+//            TtAppCtx.getDeviceSettings().setArcCredentials(Base64.encodeToString(encoded, Base64.DEFAULT));
+//
+//            return true;
+//        } catch (Exception e) {
+//            TtAppCtx.getReport().writeError("ArcGISTools:setCredentials", e.getMessage(), e.getStackTrace());
+//        }
+//
+//        return false;
+//    }
 
-    public UserCredentials getCredentials(Context context) {
-        String credStr = TtAppCtx.getDeviceSettings().getArcCredentials();
+//    public void deleteCredentials() {
+//        TtAppCtx.getDeviceSettings().setArcCredentials(StringEx.Empty);
+//        userCredentials = null;
+//    }
 
-        if (userCredentials != null)
-            return userCredentials;
-
-        userCredentials = new UserCredentials();
-
-        if (!StringEx.isEmpty(credStr)) {
-            try {
-                byte[] data = Base64.decode(credStr, Base64.DEFAULT);
-
-                byte[] decoded = Encryption.decodeFile(AndroidUtils.Device.getDeviceID(context), data);
-
-                userCredentials = (UserCredentials) SerializationTools.bytesToObject(decoded);
-                return userCredentials;
-            } catch (Exception e) {
-                TtAppCtx.getReport().writeError("ArcGISTools:getCredentials", e.getMessage(), e.getStackTrace());
-            }
-        }
-
-        return null;
-    }
-
-    public boolean saveCredentials(Context context, UserCredentials credentials) {
-        if (credentials == null)
-            throw new NullPointerException();
-
-        try {
-            byte[] data = SerializationTools.objectToBytes(credentials);
-
-            byte[] encoded = Encryption.encodeFile(AndroidUtils.Device.getDeviceID(context), data);
-
-            userCredentials = credentials;
-
-            TtAppCtx.getDeviceSettings().setArcCredentials(Base64.encodeToString(encoded, Base64.DEFAULT));
-
-            return true;
-        } catch (Exception e) {
-            TtAppCtx.getReport().writeError("ArcGISTools:setCredentials", e.getMessage(), e.getStackTrace());
-        }
-
-        return false;
-    }
-
-    public void deleteCredentials() {
-        TtAppCtx.getDeviceSettings().setArcCredentials(StringEx.Empty);
-        userCredentials = null;
-    }
-
-    public boolean areCredentialsOutOfDate(Context context) {
-        UserCredentials creds = getCredentials(context);
-
-        return creds != null && creds.getTokenExpiry() < System.currentTimeMillis();
-    }
+//    public boolean areCredentialsOutOfDate(Context context) {
+//        UserCredentials creds = getCredentials(context);
+//
+//        return creds != null && creds.getTokenExpiry() < System.currentTimeMillis();
+//    }
 
 
 

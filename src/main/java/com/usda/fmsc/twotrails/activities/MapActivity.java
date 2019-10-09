@@ -9,7 +9,6 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.usda.fmsc.geospatial.PositionLegacy;
 import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.activities.base.BaseMapActivity;
@@ -146,7 +145,7 @@ public class MapActivity extends BaseMapActivity {
     }
 
     @Override
-    public void onMapClick(PositionLegacy position) {
+    public void onMapClick(Position position) {
         super.onMapClick(position);
         fabMyPos.show();
     }

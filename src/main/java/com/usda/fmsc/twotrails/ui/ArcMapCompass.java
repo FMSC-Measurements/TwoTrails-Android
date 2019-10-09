@@ -13,8 +13,9 @@ package com.usda.fmsc.twotrails.ui;
  *
  */
 
-import com.esri.android.map.MapView;
-import com.esri.android.map.event.OnPinchListener;
+import com.esri.arcgisruntime.mapping.view.MapRotationChangedEvent;
+import com.esri.arcgisruntime.mapping.view.MapRotationChangedListener;
+import com.esri.arcgisruntime.mapping.view.MapView;
 import com.usda.fmsc.twotrails.R;
 
 import android.content.Context;
@@ -57,36 +58,11 @@ public class ArcMapCompass extends View implements View.OnClickListener {
         if (this.mapView != null) {
 
             // Set an OnPinchListener on the map to listen for the pinch gesture which may change the map rotation.
-            this.mapView.setOnPinchListener(new OnPinchListener() {
 
-                private static final long serialVersionUID = 1L;
-
-                @Override
-                public void prePointersUp(float arg0, float arg1, float arg2, float arg3, double arg4) {
-                }
-
-                @Override
-                public void prePointersMove(float arg0, float arg1, float arg2, float arg3, double arg4) {
-                }
-
-                @Override
-                public void prePointersDown(float arg0, float arg1, float arg2, float arg3, double arg4) {
-                }
-
-                @Override
-                public void postPointersUp(float arg0, float arg1, float arg2, float arg3, double arg4) {
-                }
-
-                @Override
-                public void postPointersMove(float arg0, float arg1, float arg2, float arg3, double arg4) {
-                    // Update the compass angle from the map rotation angle (the arguments passed in to the method are not
-                    // relevant in this case).
-                    setRotationAngle(ArcMapCompass.this.mapView.getRotationAngle());
-                }
-
-                @Override
-                public void postPointersDown(float arg0, float arg1, float arg2, float arg3, double arg4) {
-                }
+            this.mapView.addMapRotationChangedListener(mapRotationChangedEvent -> {
+                // Update the compass angle from the map rotation angle (the arguments passed in to the method are not
+                // relevant in this case).
+                setRotationAngle(mapRotationChangedEvent.getSource().getMapRotation());
             });
         }
     }
@@ -136,7 +112,7 @@ public class ArcMapCompass extends View implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
-        mapView.setRotationAngle(0);
+        mapView.setViewpointRotationAsync(0);
         setRotationAngle(0);
         visible = false;
     }
