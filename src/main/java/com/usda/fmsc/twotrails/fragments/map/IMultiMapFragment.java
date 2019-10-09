@@ -3,8 +3,8 @@ package com.usda.fmsc.twotrails.fragments.map;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-//import com.google.android.gms.common.internal.safeparcel.SafeParcelable;
 import com.usda.fmsc.geospatial.Extent;
+import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.geospatial.PositionLegacy;
 import com.usda.fmsc.twotrails.objects.map.PolygonDrawOptions;
 import com.usda.fmsc.twotrails.objects.map.PolygonGraphicManager;
@@ -48,7 +48,7 @@ public interface IMultiMapFragment {
 
     void hideSelectedMarkerInfo();
 
-    PositionLegacy getLatLon();
+    Position getLatLon();
 
     Extent getExtents();
 

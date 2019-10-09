@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment;
 
 import com.esri.arcgisruntime.mapping.ArcGISMap;
 import com.esri.arcgisruntime.mapping.view.MapView;
+import com.esri.arcgisruntime.mapping.view.WrapAroundMode;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
@@ -123,6 +124,8 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
         View view = inflater.inflate(R.layout.fragment_arc_gis_map, container, false);
 
         mMapView = view.findViewById(R.id.map);
+        mMapView.setWrapAroundMode(WrapAroundMode.ENABLE_WHEN_SUPPORTED);
+
 //        mMapView.enableWrapAround(true);
 //        mMapView.setAllowRotationByPinch(true);
 //

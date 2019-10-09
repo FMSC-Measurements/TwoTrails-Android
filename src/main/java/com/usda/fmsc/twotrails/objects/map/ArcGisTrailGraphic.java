@@ -1,6 +1,10 @@
 package com.usda.fmsc.twotrails.objects.map;
 
+import com.esri.arcgisruntime.geometry.Point;
+import com.esri.arcgisruntime.geometry.PointCollection;
 import com.esri.arcgisruntime.geometry.Polyline;
+import com.esri.arcgisruntime.mapping.view.Graphic;
+import com.esri.arcgisruntime.mapping.view.GraphicsOverlay;
 import com.esri.arcgisruntime.mapping.view.MapView;
 import com.esri.arcgisruntime.symbology.SimpleLineSymbol;
 import com.esri.arcgisruntime.symbology.SimpleMarkerSymbol;
@@ -23,15 +27,17 @@ public class ArcGisTrailGraphic implements ITrailGraphic, IMarkerDataGraphic {
     private Extent polyBounds;
     private Extent.Builder eBuilder;
 
-    private GraphicsLayer _TrailLayer, _PtsLayer;
+    private GraphicsOverlay _TrailLayer, _PtsLayer;
+    private Graphic _TrailGraphic;
+    private PointCollection _TrailPoints;
     private SimpleLineSymbol _TrailOutline;
     private Stack<String> keys;
 
-    private Polyline _TrailPolyline;
     private SimpleMarkerSymbol markerOpts;
 
+    private TtPoint _LastPoint;
+
     private boolean visible = true, trailVisible = true, markersVisible = true;
-    private int trailGraphicId = -1;
 
 
     public ArcGisTrailGraphic(MapView mapView) {
@@ -46,25 +52,21 @@ public class ArcGisTrailGraphic implements ITrailGraphic, IMarkerDataGraphic {
         keys = new Stack<>();
         eBuilder = new Extent.Builder();
 
-        _TrailLayer = new GraphicsLayer();
-        _PtsLayer = new GraphicsLayer();
+        _TrailLayer = new GraphicsOverlay();
+        _PtsLayer = new GraphicsOverlay();
 
         int drawSize = (int)(graphicOptions.getTrailWidth() / 2);
 
-        markerOpts = new SimpleMarkerSymbol(graphicOptions.getPointColor(), drawSize, SimpleMarkerSymbol.STYLE.SQUARE);
+        markerOpts = new SimpleMarkerSymbol(SimpleMarkerSymbol.Style.SQUARE, graphicOptions.getPointColor(), drawSize);
+
+        _TrailOutline = new SimpleLineSymbol(SimpleLineSymbol.Style.SOLID, graphicOptions.getTrailColor(), drawSize);
 
         for (TtPoint point : points) {
             addPoint(point, meta);
         }
 
-        _TrailOutline = new SimpleLineSymbol(graphicOptions.getTrailColor(), drawSize, SimpleLineSymbol.STYLE.SOLID);
-
-        if (_TrailPolyline != null) {
-            trailGraphicId = _TrailLayer.addGraphic(new Graphic(_TrailPolyline, _TrailOutline));
-        }
-
-        map.addLayer(_TrailLayer);
-        map.addLayer(_PtsLayer);
+        map.getGraphicsOverlays().add(_TrailLayer);
+        map.getGraphicsOverlays().add(_PtsLayer);
 
         if (points.size() > 0)
             polyBounds = eBuilder.build();
@@ -87,36 +89,52 @@ public class ArcGisTrailGraphic implements ITrailGraphic, IMarkerDataGraphic {
         Position pos = TtUtils.Points.getLatLonFromPoint(point, false, metadata);
         Point posLL = TwoTrailsApp.getInstance().getArcGISTools().latLngToMapSpatial(pos.getLatitudeSignedDecimal(), pos.getLongitudeSignedDecimal(), map);
         Graphic mk = new Graphic(posLL, markerOpts);
+        _PtsLayer.getGraphics().add(mk);
 
-        String key = Integer.toHexString(_PtsLayer.addGraphic(mk));
+        String key = mk.hashCode() + "_trail";
         _MarkerData.put(key, new IMultiMapFragment.MarkerData(point, metadata, true));
         keys.add(key);
 
         if (point.isOnBnd()) {
-            if (_TrailPolyline == null) {
-                _TrailPolyline = new Polyline();
-                _TrailPolyline.startPath(posLL);
-            } else {
-                _TrailPolyline.lineTo(posLL);
+            if (_TrailPoints == null) {
+                _TrailPoints = new PointCollection(map.getSpatialReference());
             }
+
+            _TrailPoints.add(posLL);
+
+            if (_TrailGraphic != null) {
+                _TrailLayer.getGraphics().remove(_TrailGraphic);
+            }
+
+            _TrailGraphic = new Graphic(new Polyline(_TrailPoints), _TrailOutline);
+            _TrailLayer.getGraphics().add(_TrailGraphic);
+
+            eBuilder.include(pos);
         }
 
-
-        if (trailGraphicId != -1) {
-            _TrailLayer.removeGraphic(trailGraphicId);
-        }
-
-        trailGraphicId = _TrailLayer.addGraphic(new Graphic(_TrailPolyline, _TrailOutline));
-
-        eBuilder.include(pos);
+        _LastPoint = point;
 
         return pos;
     }
 
     @Override
     public void deleteLastPoint() {
-        _TrailPolyline.removePoint(_TrailPolyline.getPointCount() - 1);
-        _MarkerData.remove(keys.pop());
+        if (_LastPoint != null) {
+            if (_TrailPoints.size() > 0 && _LastPoint.isOnBnd()) {
+                _TrailPoints.remove(_TrailPoints.size() - 1);
+
+                if (_TrailGraphic != null) {
+                    _TrailLayer.getGraphics().remove(_TrailGraphic);
+                }
+
+                _TrailGraphic = new Graphic(new Polyline(_TrailPoints), _TrailOutline);
+                _TrailLayer.getGraphics().add(_TrailGraphic);
+            }
+
+            _PtsLayer.getGraphics().remove(_PtsLayer.getGraphics().size() - 1);
+
+            _MarkerData.remove(keys.pop());
+        }
     }
 
 
@@ -168,11 +186,11 @@ public class ArcGisTrailGraphic implements ITrailGraphic, IMarkerDataGraphic {
     }
 
 
-    public GraphicsLayer getTrailLayer() {
+    public GraphicsOverlay getTrailLayer() {
         return _TrailLayer;
     }
 
-    public GraphicsLayer getPtsLayer() {
+    public GraphicsOverlay getPtsLayer() {
         return _PtsLayer;
     }
 }
