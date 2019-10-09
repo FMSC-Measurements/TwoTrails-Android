@@ -22,7 +22,6 @@ import com.usda.fmsc.android.utilities.PostDelayHandler;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
-import com.usda.fmsc.twotrails.activities.GetMapExtentsActivity;
 import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
 import com.usda.fmsc.twotrails.ui.CheckMarkAnimatedView;
 import com.usda.fmsc.twotrails.utilities.ArcGISTools;
@@ -154,15 +153,15 @@ public class NewArcMapDialog extends DialogFragment {
 
                     if (mode == CreateMode.NEW_ONLINE || mode == CreateMode.OFFLINE_FROM_FILE) {
                         TwoTrailsApp.getInstance().getArcGISTools().addMapLayer(aLayer);
-                    } else {
-                        Intent intent = new Intent(getContext(), GetMapExtentsActivity.class);
-
-                        Bundle bundle = new Bundle();
-                        bundle.putParcelable(GetMapExtentsActivity.MAP_LAYER, aLayer);
-                        intent.putExtras(bundle);
-
-                        startActivity(intent);
-                    }
+                    } //else {
+//                        Intent intent = new Intent(getContext(), GetMapExtentsActivity.class);
+//
+//                        Bundle bundle = new Bundle();
+//                        bundle.putParcelable(GetMapExtentsActivity.MAP_LAYER, aLayer);
+//                        intent.putExtras(bundle);
+//
+//                        startActivity(intent);
+//                    }
                 })
                 .setNeutralButton(R.string.str_cancel, null);
 

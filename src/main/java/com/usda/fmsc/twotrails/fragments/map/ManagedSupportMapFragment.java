@@ -17,7 +17,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.adapters.MultiLineInfoWindowAdapter;
 import com.usda.fmsc.geospatial.Extent;
-import com.usda.fmsc.geospatial.PositionLegacy;
+import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
@@ -212,7 +212,7 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
     @Override
     public void onMapClick(LatLng latLng) {
         if (mmlistener != null) {
-            mmlistener.onMapClick(new PositionLegacy(latLng.latitude, latLng.longitude));
+            mmlistener.onMapClick(new Position(latLng.latitude, latLng.longitude));
         }
     }
 
@@ -354,11 +354,11 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
         }
     }
 
-    @Override
-    public PositionLegacy getLatLon() {
-        LatLng ll = map.getCameraPosition().target;
-        return new PositionLegacy(ll.latitude, ll.longitude);
-    }
+//    @Override
+////    public Position getMapLatLonCenter() {
+////        LatLng ll = map.getCameraPosition().target;
+////        return new Position(ll.latitude, ll.longitude);
+////    }
 
     @Override
     public Extent getExtents() {

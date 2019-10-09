@@ -5,7 +5,6 @@ import android.os.Parcelable;
 
 import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.geospatial.Position;
-import com.usda.fmsc.geospatial.PositionLegacy;
 import com.usda.fmsc.twotrails.objects.map.PolygonDrawOptions;
 import com.usda.fmsc.twotrails.objects.map.PolygonGraphicManager;
 import com.usda.fmsc.twotrails.objects.map.TrailGraphicManager;
@@ -48,7 +47,7 @@ public interface IMultiMapFragment {
 
     void hideSelectedMarkerInfo();
 
-    Position getLatLon();
+    //Position getMapLatLonCenter();
 
     Extent getExtents();
 
@@ -62,7 +61,7 @@ public interface IMultiMapFragment {
         void onMapLoaded();
         void onMapTypeChanged(MapType mapType, int mapId, boolean isOnline);
         void onMapLocationChanged();
-        void onMapClick(PositionLegacy position);
+        void onMapClick(Position position);
         void onMarkerClick(MarkerData markerData);
         boolean shouldStartGps();
         boolean shouldStopGps();
@@ -115,11 +114,11 @@ public interface IMultiMapFragment {
             this.Padding = padding;
         }
 
-        public MapOptions(int mapId, PositionLegacy northEast, PositionLegacy southWest) {
+        public MapOptions(int mapId, Position northEast, Position southWest) {
             this(mapId, northEast, southWest, 0);
         }
 
-        public MapOptions(int mapId, PositionLegacy northEast, PositionLegacy southWest, int padding) {
+        public MapOptions(int mapId, Position northEast, Position southWest, int padding) {
             this.MapId = mapId;
 
             this.North = northEast.getLatitudeSignedDecimal();
@@ -129,11 +128,11 @@ public interface IMultiMapFragment {
             this.Padding = padding;
         }
 
-        public MapOptions(int mapId, PositionLegacy position) {
+        public MapOptions(int mapId, Position position) {
             this(mapId, position.getLatitudeSignedDecimal(), position.getLongitudeSignedDecimal(), null);
         }
 
-        public MapOptions(int mapId, PositionLegacy position, Float zoomLevel) {
+        public MapOptions(int mapId, Position position, Float zoomLevel) {
             this(mapId, position.getLatitudeSignedDecimal(), position.getLongitudeSignedDecimal(), zoomLevel);
         }
 

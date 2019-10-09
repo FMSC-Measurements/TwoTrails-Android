@@ -1,13 +1,9 @@
 package com.usda.fmsc.twotrails.activities;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import androidx.core.util.Pair;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.widget.PopupMenu;
 import android.transition.Transition;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -16,8 +12,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.esri.core.io.UserCredentials;
+import androidx.appcompat.app.AlertDialog;
+import androidx.core.util.Pair;
+
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.Transitions.ElevationTransition;
 import com.usda.fmsc.android.dialogs.InputDialog;
@@ -32,7 +31,6 @@ import com.usda.fmsc.twotrails.dialogs.NewArcMapDialog;
 import com.usda.fmsc.twotrails.dialogs.SelectMapTypeDialog;
 import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
 import com.usda.fmsc.twotrails.ui.MSFloatingActionButton;
-import com.usda.fmsc.twotrails.units.MapType;
 import com.usda.fmsc.twotrails.utilities.ArcGISTools;
 import com.usda.fmsc.utilities.IListener;
 import com.usda.fmsc.utilities.StringEx;
@@ -211,16 +209,18 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
                 break;
             }
             case R.id.mmMenuLogin: {
-                Intent intent = new Intent(getBaseContext(), ArcGisLoginActivity.class);
+//                Intent intent = new Intent(getBaseContext(), ArcGisLoginActivity.class);
+//
+//                UserCredentials credentials = getTtAppCtx().getArcGISTools().getCredentials(MapManagerActivity.this);
+//                final String oldUn = credentials != null ? credentials.getUserName() : StringEx.Empty;
+//
+//                if (!StringEx.isEmpty(oldUn)) {
+//                    intent.putExtra(ArcGisLoginActivity.USERNAME, oldUn);
+//                }
+//
+//                startActivityForResult(intent, Consts.Codes.Activites.ARC_GIS_LOGIN);
 
-                UserCredentials credentials = getTtAppCtx().getArcGISTools().getCredentials(MapManagerActivity.this);
-                final String oldUn = credentials != null ? credentials.getUserName() : StringEx.Empty;
-
-                if (!StringEx.isEmpty(oldUn)) {
-                    intent.putExtra(ArcGisLoginActivity.USERNAME, oldUn);
-                }
-
-                startActivityForResult(intent, Consts.Codes.Activites.ARC_GIS_LOGIN);
+                Toast.makeText(MapManagerActivity.this, "ArcGIS Login is currently not supported.", Toast.LENGTH_LONG).show();
                 break;
             }
         }
@@ -245,87 +245,89 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
 
     public void btnMmAddOnlineClick(View view) {
         fabSheet.hideSheet();
-        if (checkCredentials()) {
-            createMap(null, null, NewArcMapDialog.CreateMode.NEW_ONLINE);
-        }
+//        if (checkCredentials()) {
+//            createMap(null, null, NewArcMapDialog.CreateMode.NEW_ONLINE);
+//        }
+
+        Toast.makeText(MapManagerActivity.this, "Adding custom online maps is currently not supported.", Toast.LENGTH_LONG).show();
     }
 
     public void btnMmAddOfflineClick(View view) {
         fabSheet.hideSheet();
-        addOfflineMap();
+        createMap(null, null, NewArcMapDialog.CreateMode.OFFLINE_FROM_FILE); //addOfflineMap();
     }
 
-    private boolean checkCredentials() {
-        if (getTtAppCtx().getArcGISTools().hasValidCredentials(MapManagerActivity.this)) {
-            return true;
-        } else {
-            String message;
-            boolean updateCredentials = false;
+//    private boolean checkCredentials() {
+////        if (getTtAppCtx().getArcGISTools().hasValidCredentials(MapManagerActivity.this)) {
+////            return true;
+////        } else {
+////            String message;
+////            boolean updateCredentials = false;
+////
+////            if (getTtAppCtx().getArcGISTools().hasCredentials(MapManagerActivity.this)) {
+////                if (getTtAppCtx().getArcGISTools().areCredentialsOutOfDate(MapManagerActivity.this)) {
+////                    message = "Your credentials are out of date. Would you like to update them now?";
+////                    updateCredentials = true;
+////                } else {
+////                    message = "??";
+////                }
+////            } else {
+////                message = "You need credentials before creating an offline map. Would you like to add them now?";
+////            }
+////
+////            UserCredentials credentials = getTtAppCtx().getArcGISTools().getCredentials(MapManagerActivity.this);
+////            final String oldUn = updateCredentials && credentials != null ? credentials.getUserName() : StringEx.Empty;
+////
+////            new AlertDialog.Builder(this)
+////                    .setMessage(message)
+////                    .setPositiveButton(R.string.str_yes, (dialog, which) -> {
+////                        Intent intent = new Intent(getBaseContext(), ArcGisLoginActivity.class);
+////
+////                        if (!StringEx.isEmpty(oldUn)) {
+////                            intent.putExtra(ArcGisLoginActivity.USERNAME, oldUn);
+////                        }
+////
+////                        startActivityForResult(intent, Consts.Codes.Activites.ARC_GIS_LOGIN);
+////                    })
+////                    .setNegativeButton(R.string.str_no, null)
+////                    .show();
+////        }
+////
+////        return false;
+////    }
 
-            if (getTtAppCtx().getArcGISTools().hasCredentials(MapManagerActivity.this)) {
-                if (getTtAppCtx().getArcGISTools().areCredentialsOutOfDate(MapManagerActivity.this)) {
-                    message = "Your credentials are out of date. Would you like to update them now?";
-                    updateCredentials = true;
-                } else {
-                    message = "??";
-                }
-            } else {
-                message = "You need credentials before creating an offline map. Would you like to add them now?";
-            }
 
-            UserCredentials credentials = getTtAppCtx().getArcGISTools().getCredentials(MapManagerActivity.this);
-            final String oldUn = updateCredentials && credentials != null ? credentials.getUserName() : StringEx.Empty;
-
-            new AlertDialog.Builder(this)
-                    .setMessage(message)
-                    .setPositiveButton(R.string.str_yes, (dialog, which) -> {
-                        Intent intent = new Intent(getBaseContext(), ArcGisLoginActivity.class);
-
-                        if (!StringEx.isEmpty(oldUn)) {
-                            intent.putExtra(ArcGisLoginActivity.USERNAME, oldUn);
-                        }
-
-                        startActivityForResult(intent, Consts.Codes.Activites.ARC_GIS_LOGIN);
-                    })
-                    .setNegativeButton(R.string.str_no, null)
-                    .show();
-        }
-
-        return false;
-    }
-
-
-    private void addOfflineMap() {
-        new AlertDialog.Builder(this)
-                .setMessage("Create Offline map from:")
-                .setPositiveButton("Existing Map", (dialog, which) -> {
-                    if (checkCredentials()) {
-                        SelectMapTypeDialog.newInstance(maps, SelectMapTypeDialog.SelectMapMode.ALL_ARC)
-                                .setOnMapSelectedListener((mapType, mapId) -> {
-                                    ArcGisMapLayer layer = getTtAppCtx().getArcGISTools().getMapLayer(mapId);
-
-                                    if (!layer.isOnline() && StringEx.isEmpty(layer.getUrl())) {
-                                        new AlertDialog.Builder(getBaseContext())
-                                                .setMessage("This offline map was not created from an online resource. " +
-                                                        "You can only create offline maps from online maps or offline" +
-                                                        "maps which were created from online resources.")
-                                                .setPositiveButton(R.string.str_ok, null)
-                                                .show();
-                                    } else {
-                                        createMap(String.format("%s (Offline)", layer.getName()), layer.getUrl(),
-                                                layer.isOnline() ?
-                                                        NewArcMapDialog.CreateMode.OFFLINE_FROM_ONLINE_URL :
-                                                        NewArcMapDialog.CreateMode.OFFLINE_FROM_OFFLINE_URL
-                                        );
-                                    }
-                                })
-                                .show(getSupportFragmentManager(), SELECT_MAP);
-                    }
-                })
-                .setNegativeButton("File", (dialog, which) -> createMap(null, null, NewArcMapDialog.CreateMode.OFFLINE_FROM_FILE))
-                .setNeutralButton(R.string.str_cancel, null)
-                .show();
-    }
+//    private void addOfflineMap() {
+//        new AlertDialog.Builder(this)
+//                .setMessage("Create Offline map from:")
+//                .setPositiveButton("Existing Map", (dialog, which) -> {
+//                    if (checkCredentials()) {
+//                        SelectMapTypeDialog.newInstance(maps, SelectMapTypeDialog.SelectMapMode.ALL_ARC)
+//                                .setOnMapSelectedListener((mapType, mapId) -> {
+//                                    ArcGisMapLayer layer = getTtAppCtx().getArcGISTools().getMapLayer(mapId);
+//
+//                                    if (!layer.isOnline() && StringEx.isEmpty(layer.getUrl())) {
+//                                        new AlertDialog.Builder(getBaseContext())
+//                                                .setMessage("This offline map was not created from an online resource. " +
+//                                                        "You can only create offline maps from online maps or offline" +
+//                                                        "maps which were created from online resources.")
+//                                                .setPositiveButton(R.string.str_ok, null)
+//                                                .show();
+//                                    } else {
+//                                        createMap(String.format("%s (Offline)", layer.getName()), layer.getUrl(),
+//                                                layer.isOnline() ?
+//                                                        NewArcMapDialog.CreateMode.OFFLINE_FROM_ONLINE_URL :
+//                                                        NewArcMapDialog.CreateMode.OFFLINE_FROM_OFFLINE_URL
+//                                        );
+//                                    }
+//                                })
+//                                .show(getSupportFragmentManager(), SELECT_MAP);
+//                    }
+//                })
+//                .setNegativeButton("File", (dialog, which) -> createMap(null, null, NewArcMapDialog.CreateMode.OFFLINE_FROM_FILE))
+//                .setNeutralButton(R.string.str_cancel, null)
+//                .show();
+//    }
 
     private void createMap(String name, String uri, NewArcMapDialog.CreateMode mode) {
         NewArcMapDialog.newInstance(name, uri, mode)

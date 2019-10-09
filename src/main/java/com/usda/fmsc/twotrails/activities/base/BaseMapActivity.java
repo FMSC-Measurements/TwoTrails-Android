@@ -48,7 +48,6 @@ import com.usda.fmsc.android.widget.drawables.FadeBitmapProgressDrawable;
 import com.usda.fmsc.android.widget.drawables.PolygonProgressDrawable;
 import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.geospatial.Position;
-import com.usda.fmsc.geospatial.PositionLegacy;
 import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
 import com.usda.fmsc.geospatial.nmea41.sentences.base.NmeaSentence;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
@@ -837,7 +836,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     }
 
     @Override
-    public void onMapClick(PositionLegacy position) {
+    public void onMapClick(Position position) {
         slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
         hideSelectedMarkerInfo();
     }
