@@ -1,35 +1,28 @@
 package com.usda.fmsc.twotrails.utilities;
 
 import android.content.Context;
-import android.content.DialogInterface;
-import androidx.appcompat.app.AlertDialog;
-import android.util.Base64;
-import android.widget.Toast;
 
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
+import androidx.appcompat.app.AlertDialog;
+
 import com.esri.arcgisruntime.data.TileCache;
-import com.esri.arcgisruntime.geometry.DatumTransformation;
 import com.esri.arcgisruntime.geometry.Envelope;
 import com.esri.arcgisruntime.geometry.GeographicTransformation;
 import com.esri.arcgisruntime.geometry.GeographicTransformationStep;
 import com.esri.arcgisruntime.geometry.GeometryEngine;
 import com.esri.arcgisruntime.geometry.Point;
 import com.esri.arcgisruntime.geometry.SpatialReference;
+import com.esri.arcgisruntime.geometry.SpatialReferences;
 import com.esri.arcgisruntime.layers.ArcGISTiledLayer;
 import com.esri.arcgisruntime.mapping.ArcGISMap;
 import com.esri.arcgisruntime.mapping.Basemap;
 import com.esri.arcgisruntime.mapping.view.MapView;
-import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.utilities.WebRequest;
 import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
-import com.usda.fmsc.utilities.Encryption;
 import com.usda.fmsc.utilities.FileUtils;
 import com.usda.fmsc.utilities.IListener;
-import com.usda.fmsc.utilities.SerializationTools;
 import com.usda.fmsc.utilities.StringEx;
 
 import org.json.JSONArray;
@@ -47,8 +40,8 @@ public class ArcGISTools {
 
     private TwoTrailsApp TtAppCtx;
 
-    private SpatialReference LatLonSpatialReference = SpatialReference.create(4326);
-    private GeographicTransformation LatLonSpatialTransformation = GeographicTransformation.create(GeographicTransformationStep.create(4326));
+    private SpatialReference LatLonSpatialReference = SpatialReferences.getWgs84();
+    private GeographicTransformation LatLonSpatialTransformation = GeographicTransformation.create(GeographicTransformationStep.create(15855));
 
     //private UserCredentials userCredentials;
 
@@ -339,22 +332,26 @@ public class ArcGISTools {
     }
 
 
-    public Point pointToLatLng(double x, double y, MapView mapView) {
-        return pointToLatLng(new Point(x, y), mapView);
+    public Point mapPointToLatLng(int x, int y, MapView mapView) {
+        return mapPointToLatLng(new android.graphics.Point(x, y), mapView);
     }
 
-    public Point pointToLatLng(Point point, MapView mapView) {
-        return (Point) GeometryEngine.project(point, mapView.getSpatialReference(), LatLonSpatialTransformation);
+    public Point mapPointToLatLng(android.graphics.Point screenPoint, MapView mapView) {
+        // create a map point from screen point
+        // convert to WGS84 for lat/lon format
+        return (Point) GeometryEngine.project(mapView.screenToLocation(screenPoint), SpatialReferences.getWgs84());
     }
 
-    public Point latLngToMapSpatial(double lat, double lon, MapView mapView) {
-        return latLngToMapSpatial(new Point(lon, lat), mapView);
-    }
-
-    public Point latLngToMapSpatial(Point point, MapView mapView) {
-        return (Point) GeometryEngine.project(point, LatLonSpatialReference,
-                GeographicTransformation.create(GeographicTransformationStep.create(mapView.getSpatialReference().getWkid())));
-    }
+//    public Point latLngToMapSpatial(double lat, double lon, MapView mapView) {
+//        return latLngToMapSpatial(new Point(lon, lat), mapView);
+//    }
+//
+//    public Point latLngToMapSpatial(Point point, MapView mapView) {
+//        //android.graphics.Point p = mapView.locationToScreen(point);
+//        //return new Point(p.x, p.y);
+//        return (Point) GeometryEngine.project(point, mapView.getSpatialReference(), LatLonSpatialTransformation);
+//        //return (Point) GeometryEngine.project(mapView.locationToScreen(point), SpatialReferences.getWgs84());
+//    }
 
     public Envelope getEnvelopFromLatLngExtents(Extent extents, MapView mapView) {
         return getEnvelopFromLatLngExtents(extents.getNorth(), extents.getEast(), extents.getSouth(), extents.getWest(), mapView);
@@ -362,10 +359,11 @@ public class ArcGISTools {
 
     public Envelope getEnvelopFromLatLngExtents(double n, double e, double s, double w, MapView mapView) {
 
-        Point ne = latLngToMapSpatial(n, e, mapView);
-        Point sw = latLngToMapSpatial(s, w, mapView);
+        //Point ne = latLngToMapSpatial(n, e, mapView);
+        //Point sw = latLngToMapSpatial(s, w, mapView);
 
-        return new Envelope(sw.getX(), sw.getY(), ne.getX(), ne.getY(), LatLonSpatialReference);
+        return new Envelope(w, s, e, n, LatLonSpatialReference);
+//        return new Envelope(sw.getX(), sw.getY(), ne.getX(), ne.getY(), LatLonSpatialReference);
     }
 
 

@@ -6,6 +6,8 @@ import com.esri.arcgisruntime.geometry.Point;
 import com.esri.arcgisruntime.geometry.PointCollection;
 import com.esri.arcgisruntime.geometry.Polygon;
 import com.esri.arcgisruntime.geometry.Polyline;
+import com.esri.arcgisruntime.geometry.SpatialReference;
+import com.esri.arcgisruntime.geometry.SpatialReferences;
 import com.esri.arcgisruntime.mapping.view.Graphic;
 import com.esri.arcgisruntime.mapping.view.GraphicsOverlay;
 import com.esri.arcgisruntime.mapping.view.MapView;
@@ -22,6 +24,8 @@ import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.units.OpType;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -67,21 +71,13 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
 
         Extent.Builder llBuilder = new Extent.Builder();
 
-//        Polygon adjBndPO = null;
-//        Polygon unadjBndPO = null;
-//
-//        Polyline adjBndPLO = null;
-//        Polyline unadjBndPLO = null;
-//        Polyline adjNavPLO = null;
-//        Polyline unadjNavPLO = null;
+        PointCollection adjBndPC = new PointCollection(SpatialReferences.getWgs84());
+        PointCollection unadjBndPC = new PointCollection(SpatialReferences.getWgs84());
 
-        PointCollection adjBndPC = new PointCollection(map.getSpatialReference());
-        PointCollection unadjBndPC = new PointCollection(map.getSpatialReference());
-
-        PointCollection adjBndPLC = new PointCollection(map.getSpatialReference());
-        PointCollection unadjBndPLC = new PointCollection(map.getSpatialReference());
-        PointCollection adjNavPLC = new PointCollection(map.getSpatialReference());
-        PointCollection unadjNavPLC = new PointCollection(map.getSpatialReference());
+        PointCollection adjBndPLC = new PointCollection(SpatialReferences.getWgs84());
+        PointCollection unadjBndPLC = new PointCollection(SpatialReferences.getWgs84());
+        PointCollection adjNavPLC = new PointCollection(SpatialReferences.getWgs84());
+        PointCollection unadjNavPLC = new PointCollection(SpatialReferences.getWgs84());
 
         SimpleMarkerSymbol adjMkOpts = new SimpleMarkerSymbol(
                 SimpleMarkerSymbol.Style.DIAMOND,
@@ -107,13 +103,10 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
             metadata = meta.get(point.getMetadataCN());
 
             adjPos = TtUtils.Points.getLatLonFromPoint(point, true, metadata);
-            adjLL = TwoTrailsApp.getInstance().getArcGISTools().latLngToMapSpatial(adjPos.getLatitudeSignedDecimal(), adjPos.getLongitudeSignedDecimal(), map);
+            adjLL = new Point(adjPos.getLongitudeSignedDecimal(), adjPos.getLatitudeSignedDecimal(), SpatialReferences.getWgs84());
 
             unAdjPos = TtUtils.Points.getLatLonFromPoint(point, false, metadata);
-            unadjLL = TwoTrailsApp.getInstance().getArcGISTools().latLngToMapSpatial(unAdjPos.getLatitudeSignedDecimal(), unAdjPos.getLongitudeSignedDecimal(), map);
-
-            //adjmk = new Graphic(adjLL, adjMkOpts);
-            //unadjmk = new Graphic(adjLL, unAdjMkOpts);
+            unadjLL = new Point(unAdjPos.getLongitudeSignedDecimal(), unAdjPos.getLatitudeSignedDecimal(), SpatialReferences.getWgs84());
 
             adjMd = new IMultiMapFragment.MarkerData(point, metadata, true);
             unadjMd = new IMultiMapFragment.MarkerData(point, metadata, false);
@@ -267,26 +260,14 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
             _WayPts.setVisible(false);
         }
 
-        map.getGraphicsOverlays().add(_UnadjBnd);
-        map.getGraphicsOverlays().add(_UnadjBnd);
-        map.getGraphicsOverlays().add(_UnadjBndCB);
-
-        map.getGraphicsOverlays().add(_AdjBnd);
-        map.getGraphicsOverlays().add(_AdjBndCB);
-
-        map.getGraphicsOverlays().add(_UnadjNav);
-        map.getGraphicsOverlays().add(_AdjNav);
-
-        map.getGraphicsOverlays().add(_UnadjBndPts);
-        map.getGraphicsOverlays().add(_AdjBndPts);
-
-        map.getGraphicsOverlays().add(_UnadjNavPts);
-        map.getGraphicsOverlays().add(_AdjNavPts);
-
-        map.getGraphicsOverlays().add(_UnadjMiscPts);
-        map.getGraphicsOverlays().add(_AdjMiscPts);
-
-        map.getGraphicsOverlays().add(_WayPts);
+        map.getGraphicsOverlays().addAll(Arrays.asList(
+                _UnadjBnd, _UnadjBndCB,
+                _AdjBnd, _AdjBndCB,
+                _UnadjNav, _AdjNav,
+                _UnadjBndPts, _AdjBndPts,
+                _UnadjNavPts, _AdjNavPts,
+                _UnadjMiscPts, _AdjMiscPts,
+                _WayPts));
     }
 
     @Override
@@ -370,8 +351,9 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
         drawOptions.setVisible(visible);
 
         if (drawOptions.isAdjBnd()) {
-            if (drawOptions.isAdjBndClose())
+            if (drawOptions.isAdjBndClose()) {
                 _AdjBndCB.setVisible(visible);
+            }
             else
                 _AdjBnd.setVisible(visible);
         }

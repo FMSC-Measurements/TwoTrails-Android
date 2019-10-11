@@ -3,6 +3,7 @@ package com.usda.fmsc.twotrails.objects.map;
 import com.esri.arcgisruntime.geometry.Point;
 import com.esri.arcgisruntime.geometry.PointCollection;
 import com.esri.arcgisruntime.geometry.Polyline;
+import com.esri.arcgisruntime.geometry.SpatialReferences;
 import com.esri.arcgisruntime.mapping.view.Graphic;
 import com.esri.arcgisruntime.mapping.view.GraphicsOverlay;
 import com.esri.arcgisruntime.mapping.view.MapView;
@@ -87,7 +88,7 @@ public class ArcGisTrailGraphic implements ITrailGraphic, IMarkerDataGraphic {
         TtMetadata metadata = meta.get(point.getMetadataCN());
 
         Position pos = TtUtils.Points.getLatLonFromPoint(point, false, metadata);
-        Point posLL = TwoTrailsApp.getInstance().getArcGISTools().latLngToMapSpatial(pos.getLatitudeSignedDecimal(), pos.getLongitudeSignedDecimal(), map);
+        Point posLL = new Point(pos.getLongitudeSignedDecimal(), pos.getLatitudeSignedDecimal(), SpatialReferences.getWgs84());
         Graphic mk = new Graphic(posLL, markerOpts);
         _PtsLayer.getGraphics().add(mk);
 
@@ -103,11 +104,11 @@ public class ArcGisTrailGraphic implements ITrailGraphic, IMarkerDataGraphic {
             _TrailPoints.add(posLL);
 
             if (_TrailGraphic != null) {
-                _TrailLayer.getGraphics().remove(_TrailGraphic);
+                _TrailGraphic.setGeometry(new Polyline(_TrailPoints));
+            } else {
+                _TrailGraphic = new Graphic(new Polyline(_TrailPoints), _TrailOutline);
+                _TrailLayer.getGraphics().add(_TrailGraphic);
             }
-
-            _TrailGraphic = new Graphic(new Polyline(_TrailPoints), _TrailOutline);
-            _TrailLayer.getGraphics().add(_TrailGraphic);
 
             eBuilder.include(pos);
         }
@@ -124,11 +125,11 @@ public class ArcGisTrailGraphic implements ITrailGraphic, IMarkerDataGraphic {
                 _TrailPoints.remove(_TrailPoints.size() - 1);
 
                 if (_TrailGraphic != null) {
-                    _TrailLayer.getGraphics().remove(_TrailGraphic);
+                    _TrailGraphic.setGeometry(new Polyline(_TrailPoints));
+                } else {
+                    _TrailGraphic = new Graphic(new Polyline(_TrailPoints), _TrailOutline);
+                    _TrailLayer.getGraphics().add(_TrailGraphic);
                 }
-
-                _TrailGraphic = new Graphic(new Polyline(_TrailPoints), _TrailOutline);
-                _TrailLayer.getGraphics().add(_TrailGraphic);
             }
 
             _PtsLayer.getGraphics().remove(_PtsLayer.getGraphics().size() - 1);

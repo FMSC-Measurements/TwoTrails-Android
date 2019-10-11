@@ -46,9 +46,9 @@ android {
 
         //temp for getting to work on devices with old ArcGIS api
         //TODO remove for release on 64bit
-        ndk {
-            abiFilters "armeabi", "armeabi-v7a", "x86", "mips"
-        }
+//        ndk {
+//            abiFilters "armeabi", "armeabi-v7a", "x86", "mips"
+//        }
     }
 
     signingConfigs {
