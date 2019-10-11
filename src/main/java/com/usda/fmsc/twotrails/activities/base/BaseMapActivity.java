@@ -525,9 +525,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
                 break;
             }
             case R.id.mapMenuResetBounds: {
-                mapMoved = true;
-                updateMapView(lastPosition);
-                break;
+                resetMapBounds();
             }
             case R.id.mapMenuZoomToPoly: {
                 int gSize = getPolyGraphicManagers().size();
@@ -812,6 +810,13 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
             }
         }
 
+        resetMapBounds();
+
+        setupPolygonOptionsUI();
+    }
+
+    protected void resetMapBounds() {
+        mapMoved = true;
         if (getMapTracking() == MapTracking.POLY_BOUNDS && getTrackedPoly() != null) {
             moveToLocation(getTrackedPoly(), Consts.Location.PADDING, true);
         } else if (getMapTracking() == MapTracking.FOLLOW && hasPosition()) {
@@ -821,8 +826,6 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         } else {
             moveToLocation(Consts.Location.USA_BOUNDS, Consts.Location.PADDING, true);
         }
-
-        setupPolygonOptionsUI();
     }
 
     @Override
