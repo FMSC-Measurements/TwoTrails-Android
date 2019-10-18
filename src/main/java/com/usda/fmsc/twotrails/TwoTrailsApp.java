@@ -18,6 +18,7 @@ import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.esri.arcgisruntime.ArcGISRuntimeEnvironment;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.usda.fmsc.android.AndroidUtils;
@@ -577,7 +578,8 @@ public class TwoTrailsApp extends Application {
             _Report.writeEvent(StringEx.format("TwoTrails Started (%s)", AndroidUtils.App.getAppVersion(this)));
         }
 
-        //ArcGISRuntime.setClientId(this.getString(R.string.arcgis_client_id));
+        //ArcGISRuntime.setClientId(this.getString(R.string.arcgis_client_id)); //100.2.9
+        ArcGISRuntimeEnvironment.setLicense(this.getString(R.string.arcgis_runtime_license)); //100.6.0
 
         ImageLoader.getInstance().init(new ImageLoaderConfiguration.Builder(this).build());
 
