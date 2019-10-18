@@ -370,15 +370,15 @@ public class TwoTrailsApp extends Application {
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
                             | Intent.FLAG_ACTIVITY_CLEAR_TASK
                             | Intent.FLAG_ACTIVITY_NEW_TASK);
-                    PendingIntent pendingIntent = PendingIntent.getActivity(getInstance().getBaseContext(), 0, intent, PendingIntent.FLAG_ONE_SHOT);
-                    AlarmManager mgr = (AlarmManager) getInstance().getBaseContext().getSystemService(Context.ALARM_SERVICE);
+                    PendingIntent pendingIntent = PendingIntent.getActivity(getBaseContext(), 0, intent, PendingIntent.FLAG_ONE_SHOT);
+                    AlarmManager mgr = (AlarmManager)getBaseContext().getSystemService(Context.ALARM_SERVICE);
                     mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 1000, pendingIntent);
                 } else {
                     new Thread() {
                         @Override
                         public void run() {
                             Looper.prepare();
-                            Toast.makeText(getInstance(),"TwoTrails crashed twice in the past minute. Check Log for details and contact development team if needed.", Toast.LENGTH_LONG).show();
+                            Toast.makeText(getBaseContext(),"TwoTrails crashed twice in the past minute. Check Log for details and contact development team if needed.", Toast.LENGTH_LONG).show();
                             Looper.loop();
                         }
                     }.start();
@@ -505,7 +505,7 @@ public class TwoTrailsApp extends Application {
             return _DAL;
 
         if (_DALFile != null) {
-            setDAL(new DataAccessLayer(_DALFile, getInstance()));
+            setDAL(new DataAccessLayer(_DALFile, this));
             return _DAL;
         }
 
@@ -513,7 +513,7 @@ public class TwoTrailsApp extends Application {
             _DALFile = getDeviceSettings().getLastOpenedProject();
 
             if (FileUtils.fileExists(_DALFile)) {
-                setDAL(new DataAccessLayer(_DALFile, getInstance()));
+                setDAL(new DataAccessLayer(_DALFile, this));
                 return _DAL;
             }
 
@@ -650,11 +650,14 @@ public class TwoTrailsApp extends Application {
         return rfServiceBinder;
     }
 
-
+    //Todo Remove static context
     public static synchronized TwoTrailsApp getInstance() {
         return _AppContext;
     }
 
+    public static TwoTrailsApp getInstance(Context baseContext) {
+        return (TwoTrailsApp)baseContext.getApplicationContext();
+    }
 
 //    @Override
 //    public void onConfigurationChanged(Configuration newConfig) {

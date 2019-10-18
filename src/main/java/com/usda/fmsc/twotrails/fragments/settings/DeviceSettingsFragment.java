@@ -76,7 +76,7 @@ public class DeviceSettingsFragment extends PreferenceFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        TtAppCtx = TwoTrailsApp.getInstance();
+        TtAppCtx = TwoTrailsApp.getInstance(getActivity());
 
         Bundle bundle = getArguments();
 

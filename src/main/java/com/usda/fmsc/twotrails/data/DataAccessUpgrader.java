@@ -5,7 +5,7 @@ import com.usda.fmsc.utilities.FileUtils;
 
 @SuppressWarnings("WeakerAccess")
 public class DataAccessUpgrader {
-    public static UpgradeResult UpgradeDAL(DataAccessLayer dal) {
+    public static UpgradeResult UpgradeDAL(TwoTrailsApp app, DataAccessLayer dal) {
         FileUtils.copyFile(dal.getFilePath(), dal.getFilePath()  + ".old");
 
         try {
@@ -17,7 +17,7 @@ public class DataAccessUpgrader {
                 }
             }
         } catch (Exception ex) {
-            TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "DataAccessUpgrader:UpgradeDAL", ex.getStackTrace());
+            app.getReport().writeError(ex.getMessage(), "DataAccessUpgrader:UpgradeDAL", ex.getStackTrace());
         }
 
         return UpgradeResult.Failed;
