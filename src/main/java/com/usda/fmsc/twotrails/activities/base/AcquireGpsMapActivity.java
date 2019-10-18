@@ -64,7 +64,7 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        if (!TwoTrailsApp.getInstance().getDeviceSettings().isGpsConfigured()) {
+        if (!getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
             canceling = true;
             setResult(Consts.Codes.Results.GPS_NOT_CONFIGURED);
             finish();

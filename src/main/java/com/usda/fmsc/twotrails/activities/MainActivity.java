@@ -290,6 +290,7 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
 
 
     //region Tabs
+    //TODO update to non deprecated version
     public class TabsPagerAdapter extends FragmentPagerAdapter {
 
         private TabsPagerAdapter(FragmentManager fm) {
@@ -297,6 +298,7 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
         }
 
         @Override
+        @NonNull
         public Fragment getItem(int position) {
 
             switch (position) {
@@ -404,7 +406,7 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
                     getTtAppCtx().setDAL(new DataAccessLayer(filePath, getTtAppCtx()));
 
                     if (getTtAppCtx().getDAL().getVersion().toIntVersion() < TwoTrailsSchema.SchemaVersion.toIntVersion()) {
-                        switch (DataAccessUpgrader.UpgradeDAL(getTtAppCtx().getDAL())) {
+                        switch (DataAccessUpgrader.UpgradeDAL(getTtAppCtx(), getTtAppCtx().getDAL())) {
                             case Successful:
                                 openFile(filePath); break;
                             case Failed:

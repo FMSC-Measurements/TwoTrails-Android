@@ -15,6 +15,7 @@ import com.usda.fmsc.geospatial.nmea41.NmeaIDs;
 import com.usda.fmsc.geospatial.nmea41.sentences.base.NmeaSentence;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
+import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.adapters.NmeaDetailsAdapter;
 import com.usda.fmsc.twotrails.gps.GpsService;
 
@@ -64,7 +65,7 @@ public class CheckNmeaDialog extends DialogFragment implements GpsService.Listen
     public void onStart() {
         super.onStart();
 
-        binder = TwoTrailsApp.getInstance().getGps();
+        binder = TwoTrailsApp.getInstance(getActivity()).getGps();
 
         binder.addListener(this);
         binder.startGps();
@@ -75,7 +76,7 @@ public class CheckNmeaDialog extends DialogFragment implements GpsService.Listen
         super.onStop();
 
         if (binder != null) {
-            if (!TwoTrailsApp.getInstance().getDeviceSettings().isGpsAlwaysOn()) {
+            if (!TwoTrailsApp.getInstance(getActivity()).getDeviceSettings().isGpsAlwaysOn()) {
                 binder.stopGps();
             }
 
