@@ -443,8 +443,8 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
     @Override
     public void moveToLocation(Extent extents, int padding, boolean animate) {
         if (mapView != null) {
-            mapView.setViewpointAsync(new Viewpoint(TtAppCtx.getArcGISTools().getEnvelopFromLatLngExtents(extents, mapView)));
-            //mapView.setExtent(TtAppCtx.getArcGISTools().getEnvelopFromLatLngExtents(extents, mapView), padding, animate);
+            //mapView.setViewpointAsync(new Viewpoint(TtAppCtx.getArcGISTools().getEnvelopFromLatLngExtents(extents, mapView)));
+            mapView.setViewpointGeometryAsync(TtAppCtx.getArcGISTools().getEnvelopFromLatLngExtents(extents, mapView), padding);
         }
     }
 
@@ -761,6 +761,14 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
         @Override
         public boolean onSingleTapConfirmed(MotionEvent e) {
             hideSelectedMarkerInfo();
+
+            for (GraphicsOverlay go : mapView.getGraphicsOverlays()) {
+                for (Graphic g : go.getGraphics()) {
+                    g.setVisible(false);
+                }
+
+                go.setVisible(false);
+            }
 
             boolean infoDisplayed = false;
 
