@@ -14,6 +14,7 @@ import com.esri.arcgisruntime.mapping.view.MapView;
 import com.esri.arcgisruntime.symbology.SimpleLineSymbol;
 import com.esri.arcgisruntime.symbology.SimpleMarkerSymbol;
 import com.esri.arcgisruntime.symbology.Symbol;
+import com.esri.arcgisruntime.util.ListenableList;
 import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
