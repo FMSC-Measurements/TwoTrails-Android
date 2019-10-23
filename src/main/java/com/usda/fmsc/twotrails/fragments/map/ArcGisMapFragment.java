@@ -66,9 +66,10 @@ import com.usda.fmsc.twotrails.utilities.ArcGISTools;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 
-public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, GpsService.Listener, MapRotationChangedListener, MapScaleChangedListener,
+public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, MapRotationChangedListener, MapScaleChangedListener,
         ArcGISMap.BasemapChangedListener, LoadStatusChangedListener {
     private static final String START_ARC_OPTIONS = "StartupArcOptions";
 
@@ -87,8 +88,8 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
     private SimpleMarkerSymbol sms;
 
     private ArrayList<IMarkerDataGraphic> _MarkerDataGraphics = new ArrayList<>();
-    private ArrayList<ArcGisPolygonGraphic> polygonGraphics = new ArrayList<>();
-    private ArrayList<ArcGisTrailGraphic> trailGraphics = new ArrayList<>();
+    private HashMap<String, ArcGisPolygonGraphic> polygonGraphics = new HashMap<>();
+    private HashMap<String, ArcGisTrailGraphic> trailGraphics = new HashMap<>();
 
     private ArcMapCompass compass;
     private Integer basemapId;
@@ -143,11 +144,6 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
             }
         } else {
             startUpMapOptions = new MapOptions(0, Consts.Location.USA_BOUNDS);
-        }
-
-        if (TwoTrailsApp.getInstance().getDeviceSettings().isGpsConfigured()) {
-            binder = TwoTrailsApp.getInstance().getGps();
-            binder.addListener(this);
         }
     }
 
@@ -227,11 +223,6 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
     @Override
     public void onDestroy() {
         super.onDestroy();
-
-        if (binder != null) {
-            binder.removeListener(this);
-        }
-
         if (mmListener != null && mmListener.shouldStopGps()) {
             binder.stopGps();
         }
@@ -309,12 +300,12 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
 
     @Override
     public void mapRotationChanged(MapRotationChangedEvent mapRotationChangedEvent) {
-        onMapLocationChanged();
+        //
     }
 
     @Override
     public void mapScaleChanged(MapScaleChangedEvent mapScaleChangedEvent) {
-        onMapLocationChanged();
+        //
     }
 
 
@@ -448,13 +439,6 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
         }
     }
 
-
-    @Override
-    public void onMapLocationChanged() {
-        if (mmListener != null) {
-            mmListener.onMapLocationChanged();
-        }
-    }
 
     private void onMarkerClick(int graphicId, Geometry geometry) {
         MarkerData markerData = getMarkerData(Integer.toHexString(graphicId));
@@ -604,12 +588,14 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
 
     @Override
     public void addPolygon(PolygonGraphicManager graphicManager, PolygonDrawOptions drawOptions) {
-        ArcGisPolygonGraphic polygonGraphic = new ArcGisPolygonGraphic(mapView);
-        polygonGraphics.add(polygonGraphic);
+        if (!polygonGraphics.containsKey(graphicManager.getPolygonCN())) {
+            ArcGisPolygonGraphic polygonGraphic = new ArcGisPolygonGraphic(mapView);
+            polygonGraphics.put(graphicManager.getPolygonCN(), polygonGraphic);
 
-        graphicManager.setGraphic(polygonGraphic, drawOptions);
+            graphicManager.setGraphic(polygonGraphic, drawOptions);
 
-        _MarkerDataGraphics.add(polygonGraphic);
+            _MarkerDataGraphics.add(polygonGraphic);
+        }
     }
 
     //todo removePolygon(PolygonGraphicManager graphicManager)
@@ -622,12 +608,14 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
 
     @Override
     public void addTrail(TrailGraphicManager graphicManager) {
-        ArcGisTrailGraphic trailGraphic = new ArcGisTrailGraphic(mapView);
-        trailGraphics.add(trailGraphic);
+        if (!trailGraphics.containsKey(graphicManager.getPolygonCN())) {
+            ArcGisTrailGraphic trailGraphic = new ArcGisTrailGraphic(mapView);
+            trailGraphics.put(graphicManager.getPolygonCN(), trailGraphic);
 
-        graphicManager.setGraphic(trailGraphic);
+            graphicManager.setGraphic(trailGraphic);
 
-        _MarkerDataGraphics.add(trailGraphic);
+            _MarkerDataGraphics.add(trailGraphic);
+        }
     }
 
     //todo removeTrail(TrailGraphicManager graphicManager)
@@ -677,10 +665,9 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
 
 
     //region GPS
-    @Override
-    public void nmeaBurstReceived(NmeaBurst nmeaBurst) {
-        if (showPosition && nmeaBurst.hasPosition() && mapView != null) {
-            Point point = new Point(nmeaBurst.getLongitudeSD(), nmeaBurst.getLatitudeSD(), SpatialReferences.getWgs84());
+    public void updateLocation(Position position) {
+        if (showPosition && mapView != null) {
+            Point point = new Point(position.getLongitudeSignedDecimal(), position.getLatitudeSignedDecimal(), SpatialReferences.getWgs84());
 
             if (_LocationLayer != null) {
                 if (mapView.getGraphicsOverlays().get(mapView.getGraphicsOverlays().size() - 1) != _LocationLayer) {
@@ -705,51 +692,6 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
             _LocationLayer.getGraphics().add(new Graphic(point, sms));
         }
     }
-
-    @Override
-    public void nmeaStringReceived(String nmeaString) {
-
-    }
-
-    @Override
-    public void nmeaSentenceReceived(NmeaSentence nmeaSentence) {
-
-    }
-
-    @Override
-    public void nmeaBurstValidityChanged(boolean burstsAreValid) {
-
-    }
-
-    @Override
-    public void receivingNmeaStrings(boolean receiving) {
-
-    }
-
-    @Override
-    public void gpsStarted() {
-
-    }
-
-    @Override
-    public void gpsStopped() {
-
-    }
-
-    @Override
-    public void gpsServiceStarted() {
-
-    }
-
-    @Override
-    public void gpsServiceStopped() {
-
-    }
-
-    @Override
-    public void gpsError(GpsService.GpsError error) {
-
-    }
     //endregion
 
     private class MapViewOnTouchListenerEx extends DefaultMapViewOnTouchListener {
@@ -762,17 +704,9 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
         public boolean onSingleTapConfirmed(MotionEvent e) {
             hideSelectedMarkerInfo();
 
-            for (GraphicsOverlay go : mapView.getGraphicsOverlays()) {
-                for (Graphic g : go.getGraphics()) {
-                    g.setVisible(false);
-                }
-
-                go.setVisible(false);
-            }
-
             boolean infoDisplayed = false;
 
-            for (ArcGisTrailGraphic tGraphic : trailGraphics) {
+            for (ArcGisTrailGraphic tGraphic : trailGraphics.values()) {
                 if (tGraphic.isMarkersVisible() && displayInfoWindow(tGraphic.getPtsLayer(), e)) {
                     infoDisplayed = true;
                     break;
@@ -780,7 +714,7 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
             }
 
             if (!infoDisplayed) {
-                for (ArcGisPolygonGraphic pGraphic : polygonGraphics) {
+                for (ArcGisPolygonGraphic pGraphic : polygonGraphics.values()) {
                     if (pGraphic.isVisible()) {
                         if (pGraphic.isAdjBndPtsVisible() && displayInfoWindow(pGraphic.getAdjBndPtsLayer(), e)) {
                             infoDisplayed = true;
