@@ -123,7 +123,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     private ArrayList<TrailGraphicManager> trailGraphicManagers = new ArrayList<>();
 
     private Position lastPosition;
-    private android.location.Location currentLocation, targetLocation;
+    private android.location.Location targetLocation;
 
     private DrawerLayout baseMapDrawer;
 
@@ -794,25 +794,27 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     //region Map Events
     @Override
     public void onMapReady() {
-        mapReady = true;
+        if (!mapReady) {
+            mapReady = true;
 
-        setCompassEnabled(getShowCompass());
-        setLocationEnabled(getShowMyPos());
+            setCompassEnabled(getShowCompass());
+            setLocationEnabled(getShowMyPos());
 
-        if (!polysCreated) {
-            setupGraphicManagers();
-            polysCreated = true;
-        }
-
-        if (mmFrag != null) {
-            for (PolygonGraphicManager pgm : getPolyGraphicManagers()) {
-                mmFrag.addPolygon(pgm, null);
+            if (!polysCreated) {
+                setupGraphicManagers();
+                polysCreated = true;
             }
+
+            if (mmFrag != null) {
+                for (PolygonGraphicManager pgm : getPolyGraphicManagers()) {
+                    mmFrag.addPolygon(pgm, null);
+                }
+            }
+
+            resetMapBounds();
+
+            setupPolygonOptionsUI();
         }
-
-        resetMapBounds();
-
-        setupPolygonOptionsUI();
     }
 
     protected void resetMapBounds() {
@@ -831,11 +833,6 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     @Override
     public void onMapLoaded() {
 
-    }
-
-    @Override
-    public void onMapLocationChanged() {
-        //getTtAppCtx().getDeviceSettings().setLastViewedExtents();
     }
 
     @Override
@@ -1027,29 +1024,23 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         if (nmeaBurst.hasPosition()) {
             Position position = nmeaBurst.getPosition();
 
-            if (currentLocation == null) {
-                currentLocation = new android.location.Location(StringEx.Empty);
-            } else {
-                currentLocation.reset();
-            }
-
-            currentLocation.setLatitude(position.getLatitudeSignedDecimal());
-            currentLocation.setLongitude(position.getLongitudeSignedDecimal());
-            currentLocation.setAltitude(position.hasElevation() ? position.getElevation() : 0);
-
             if (lastPosition == null) {
                 onFirstPositionReceived(position);
             } else {
                 onPositionReceived(position);
             }
 
+            lastPosition = position;
+
             if (fromMyLoc && slidingLayout != null && slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
                 calculateDir();
             }
 
-            onNmeaBurstReceived(nmeaBurst);
+            if (mmFrag != null) {
+                mmFrag.updateLocation(nmeaBurst.getPosition());
+            }
 
-            lastPosition = position;
+            onNmeaBurstReceived(nmeaBurst);
         } else {
             onNmeaBurstReceived(nmeaBurst);
         }
@@ -1138,7 +1129,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
             }
         }
 
-        if (mGravity != null && mGeomagnetic != null && currentLocation != null && targetLocation != null) {
+        if (mGravity != null && mGeomagnetic != null && lastPosition != null && targetLocation != null) {
             float[] R = new float[9];
             float[] I = new float[9];
 
@@ -1150,15 +1141,21 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
 
                 float azimuth = Double.valueOf(Math.toDegrees(orientation[0])).floatValue();
 
+
+                android.location.Location position = new android.location.Location(StringEx.Empty);
+                position.setLatitude(lastPosition.getLatitudeSignedDecimal());
+                position.setLongitude(lastPosition.getLongitudeSignedDecimal());
+                position.setAltitude(lastPosition.hasElevation() ? lastPosition.getElevation() : 0);
+
                 GeomagneticField geoField = new GeomagneticField(
-                        (float) currentLocation.getLatitude(),
-                        (float) currentLocation.getLongitude(),
-                        (float) currentLocation.getAltitude(),
+                        (float) position.getLatitude(),
+                        (float) position.getLongitude(),
+                        (float) position.getAltitude(),
                         System.currentTimeMillis());
 
                 azimuth += geoField.getDeclination(); // converts magnetic north into true north
 
-                float direction = currentLocation.bearingTo(targetLocation) - azimuth;
+                float direction = position.bearingTo(targetLocation) - azimuth;
 
                 // create a rotation animation (reverse turn degree degrees)
                 RotateAnimation ra = new RotateAnimation(
@@ -1661,8 +1658,8 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         if (toPoint != null) {
             UTMCoords currPos = null;
 
-            if (fromMyLoc && currentLocation != null) {
-                currPos = UTMTools.convertLatLonSignedDecToUTM(currentLocation.getLatitude(), currentLocation.getLongitude(), zone);
+            if (fromMyLoc && lastPosition != null) {
+                currPos = UTMTools.convertLatLonSignedDecToUTM(lastPosition.getLatitudeSignedDecimal(), lastPosition.getLongitudeSignedDecimal(), zone);
             } else if (!fromMyLoc && fromPoint != null){
                 currPos = new UTMCoords(fromPoint.getUnAdjX(), fromPoint.getUnAdjY(), zone);
             }
