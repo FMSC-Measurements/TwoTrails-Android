@@ -33,6 +33,7 @@ import com.usda.fmsc.twotrails.units.MapType;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Queue;
 
 public class ManagedSupportMapFragment extends SupportMapFragment implements IMultiMapFragment,
@@ -46,6 +47,8 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
     private MapOptions startUpMapOptions;
 
     private ArrayList<IMarkerDataGraphic> _MarkerDataGraphics = new ArrayList<>();
+    private HashMap<String, GoogleMapsPolygonGrahpic> polygonGraphics = new HashMap<>();
+    private HashMap<String, GoogleMapsTrailGraphic> trailGraphics = new HashMap<>();
 
     private Marker currentMarker;
 
@@ -194,19 +197,12 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
 
     @Override
     public void onCameraMove() {
-        onMapLocationChanged();
+        //
     }
 
     @Override
     public void onCameraMoveStarted(int i) {
 
-    }
-
-    @Override
-    public void onMapLocationChanged() {
-        if (mmlistener != null) {
-            mmlistener.onMapLocationChanged();
-        }
     }
 
     @Override
@@ -284,6 +280,11 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
         }
     }
 
+    @Override
+    public void updateLocation(Position position) {
+        //
+    }
+
     private void moveToLocation(CameraUpdate cu, boolean animate) {
         if (map != null && cu != null) {
             if (animate) {
@@ -308,7 +309,7 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
         }
     }
 
-    GoogleMap.CancelableCallback cancelableCallback = new GoogleMap.CancelableCallback() {
+    private GoogleMap.CancelableCallback cancelableCallback = new GoogleMap.CancelableCallback() {
         @Override
         public void onFinish() {
             if (cameraQueue.peek() != null) {
@@ -434,9 +435,14 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
 
     @Override
     public void addPolygon(PolygonGraphicManager graphicManager, PolygonDrawOptions drawOptions) {
-        GoogleMapsPolygonGrahpic gmpg = new GoogleMapsPolygonGrahpic(map);
-        graphicManager.setGraphic(gmpg, drawOptions);
-        _MarkerDataGraphics.add(gmpg);
+        if (!polygonGraphics.containsKey(graphicManager.getPolygonCN())) {
+            GoogleMapsPolygonGrahpic gmpg = new GoogleMapsPolygonGrahpic(map);
+            polygonGraphics.put(graphicManager.getPolygonCN(), gmpg);
+
+            graphicManager.setGraphic(gmpg, drawOptions);
+
+            _MarkerDataGraphics.add(gmpg);
+        }
     }
 
     //todo removePolygon(PolygonGraphicManager graphicManager)
@@ -447,9 +453,14 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
 
     @Override
     public void addTrail(TrailGraphicManager graphicManager) {
-        GoogleMapsTrailGraphic gmtg = new GoogleMapsTrailGraphic(map);
-        graphicManager.setGraphic(gmtg);
-        _MarkerDataGraphics.add(gmtg);
+        if (!trailGraphics.containsKey(graphicManager.getPolygonCN())) {
+            GoogleMapsTrailGraphic gmtg = new GoogleMapsTrailGraphic(map);
+            trailGraphics.put(graphicManager.getPolygonCN(), gmtg);
+
+            graphicManager.setGraphic(gmtg);
+
+            _MarkerDataGraphics.add(gmtg);
+        }
     }
 
     //todo removeTrail(TrailGraphicManager graphicManager)

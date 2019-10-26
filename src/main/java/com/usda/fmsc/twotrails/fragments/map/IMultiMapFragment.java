@@ -34,8 +34,7 @@ public interface IMultiMapFragment {
 
     void moveToLocation(Extent extents, int padding, boolean animate);
 
-
-    void onMapLocationChanged();
+    void updateLocation(Position position);
 
     void addPolygon(PolygonGraphicManager graphicManager, PolygonDrawOptions drawOptions);
 
@@ -60,7 +59,6 @@ public interface IMultiMapFragment {
         void onMapReady();
         void onMapLoaded();
         void onMapTypeChanged(MapType mapType, int mapId, boolean isOnline);
-        void onMapLocationChanged();
         void onMapClick(Position position);
         void onMarkerClick(MarkerData markerData);
         boolean shouldStartGps();
