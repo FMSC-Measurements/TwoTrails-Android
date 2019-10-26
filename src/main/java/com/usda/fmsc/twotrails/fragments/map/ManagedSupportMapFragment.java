@@ -232,7 +232,7 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
     }
 
     @Override
-    public void moveToLocation(float lat, float lon, boolean animate) {
+    public void moveToLocation(double lat, double lon, boolean animate) {
         if (map != null) {
             try
             {
@@ -246,7 +246,7 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
     }
 
     @Override
-    public void moveToLocation(float lat, float lon, float zoomLevel, boolean animate) {
+    public void moveToLocation(double lat, double lon, float zoomLevel, boolean animate) {
         if (map != null) {
             try {
                 moveToLocation(CameraUpdateFactory.newLatLngZoom(

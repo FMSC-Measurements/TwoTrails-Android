@@ -84,7 +84,6 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Ma
     private GpsService.GpsBinder binder;
 
     private MapView mapView;
-    private ArcGISMap mBasemapLayer;
     private GraphicsOverlay _LocationLayer = new GraphicsOverlay();
     private SimpleMarkerSymbol sms;
 
@@ -264,7 +263,7 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Ma
         //onMapLocationChanged();
     }
 
-    Runnable baseMapDoneLoading = new Runnable() {
+    private Runnable baseMapDoneLoading = new Runnable() {
         @Override
         public void run() {
             if (mmListener != null) {
@@ -272,30 +271,25 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Ma
                     mmListener.onMapReady();
                     mapReady = true;
 
-                    //if map is offline and has extents
-                    moveToMapMaxExtents(false);
+                    if (centerOnLoad) {
+                        if (startUpMapOptions.hasExtents()) {
+                            moveToLocation(new Extent(startUpMapOptions.getNorth(),
+                                    startUpMapOptions.getEast(),
+                                    startUpMapOptions.getSouth(),
+                                    startUpMapOptions.getWest()), 0, false);
+                        } else {
+                            moveToLocation(startUpMapOptions.getLatitude(), startUpMapOptions.getLongitide(), false);
+                        }
+
+                        centerOnLoad = false;
+                    } else {
+                        //if map is offline and has extents
+                        moveToMapMaxExtents(false);
+                    }
                 }
 
                 mmListener.onMapLoaded();
             }
-
-//            if (centerOnLoad) {
-//
-//                if (startUpMapOptions.hasExtents()) {
-//                    Envelope e = TtAppCtx.getArcGISTools().getEnvelopFromLatLngExtents(
-//                            startUpMapOptions.getNorth(),
-//                            startUpMapOptions.getEast(),
-//                            startUpMapOptions.getSouth(),
-//                            startUpMapOptions.getWest(),
-//                            mapView);
-//
-//                    mapView.setExtent(e, 0, false);
-//                } else {
-//                    mapView.centerAt(startUpMapOptions.getLatitude(), startUpMapOptions.getLongitide(), false);
-//                }
-//
-//                centerOnLoad = false;
-//            }
         }
     };
 
@@ -315,6 +309,7 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Ma
     }
 
     public void changeBasemap(final ArcGisMapLayer agml) {
+        ArcGISMap mBasemapLayer;
         if (mapView == null) {
             mBasemapLayer = null;
         } else {
@@ -406,12 +401,12 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Ma
     }
 
     @Override
-    public void moveToLocation(float lat, float lon, boolean animate) {
+    public void moveToLocation(double lat, double lon, boolean animate) {
         moveToLocation(lat, lon, -1, animate);
     }
 
     @Override
-    public void moveToLocation(float lat, float lon, float zoomLevel, boolean animate) {
+    public void moveToLocation(double lat, double lon, float zoomLevel, boolean animate) {
         if (mapView != null) {
             if (animate) {
                 int zLevels = currentGisMapLayer.getNumberOfLevels();
