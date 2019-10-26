@@ -93,7 +93,6 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
 
         Position adjPos, unAdjPos;
         Point adjLL, unadjLL;
-        //Graphic adjmk, unadjmk;
 
         TtMetadata metadata;
 

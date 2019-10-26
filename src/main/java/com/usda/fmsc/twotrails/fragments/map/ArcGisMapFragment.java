@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 
@@ -695,14 +696,14 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Gp
             }
 
             if (_LocationLayer.getGraphics().size() > 0) {
-                _LocationLayer.getGraphics().clear();
+                Graphic graphic = _LocationLayer.getGraphics().get(0);
+                graphic.setGeometry(point);
+            } else {
+//                if (sms == null) {
+//                    sms = new SimpleMarkerSymbol(SimpleMarkerSymbol.Style.DIAMOND, Color.RED, 20);
+//                }
+                _LocationLayer.getGraphics().add(new Graphic(point, new SimpleMarkerSymbol(SimpleMarkerSymbol.Style.DIAMOND, Color.RED, 20)));
             }
-
-            if (sms == null) {
-                sms = new SimpleMarkerSymbol(SimpleMarkerSymbol.Style.DIAMOND, Color.RED, 20);
-            }
-
-            _LocationLayer.getGraphics().add(new Graphic(point, sms));
         }
     }
 
