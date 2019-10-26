@@ -28,9 +28,9 @@ public interface IMultiMapFragment {
 
     void moveToMapMaxExtents(boolean animate);
 
-    void moveToLocation(float lat, float lon, boolean animate);
+    void moveToLocation(double lat, double lon, boolean animate);
 
-    void moveToLocation(float lat, float lon, float zoomLevel, boolean animate);
+    void moveToLocation(double lat, double lon, float zoomLevel, boolean animate);
 
     void moveToLocation(Extent extents, int padding, boolean animate);
 
