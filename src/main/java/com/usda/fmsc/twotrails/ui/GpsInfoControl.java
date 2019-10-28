@@ -17,10 +17,14 @@ public class GpsInfoControl implements GpsService.Listener {
     private GpsStatusSkyView skyView;
     private GpsStatusSatView statusView;
 
+    private TwoTrailsApp app;
+
     private boolean gpsExtraVisable = true, animating, gpsExtraLayoutSet;
 
 
-    public GpsInfoControl(View view) {
+    public GpsInfoControl(TwoTrailsApp app, View view) {
+        this.app = app;
+
         viewGpsInfoLaySatInfo = view.findViewById(R.id.gpsInfoLaySatInfo);
 
         skyView = view.findViewById(R.id.gpsInfoSatSky);
@@ -35,7 +39,7 @@ public class GpsInfoControl implements GpsService.Listener {
             }
         });
 
-        TwoTrailsApp.getInstance().getGps().addListener(this);
+        app.getGps().addListener(this);
     }
 
 
@@ -164,6 +168,6 @@ public class GpsInfoControl implements GpsService.Listener {
     }
 
     public void destroy() {
-        TwoTrailsApp.getInstance().getGps().removeListener(this);
+        app.getGps().removeListener(this);
     }
 }

@@ -22,7 +22,7 @@ public class ProjectFragment extends PreferenceFragment implements SharedPrefere
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        TtAppCtx = TwoTrailsApp.getInstance();
+        TtAppCtx = TwoTrailsApp.getInstance(getActivity());
 
         addPreferencesFromResource(R.xml.project_settings);
 

@@ -868,7 +868,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
                 new AlertDialog.Builder(this)
                         .setMessage("An error occurred trying to add a polygon. Please try readjusting your Polygons.")
                         .setPositiveButton("Adjust Polygons", (dialog, which) -> {
-                            PolygonAdjuster.adjust(getTtAppCtx().getDAL());
+                            PolygonAdjuster.adjust(getTtAppCtx());
                             finish();
                         })
                         .setNeutralButton(R.string.str_cancel, (dialog, which) -> finish())

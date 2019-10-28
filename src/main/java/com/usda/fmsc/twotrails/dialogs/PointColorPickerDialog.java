@@ -141,7 +141,7 @@ public class PointColorPickerDialog extends DialogFragment {
             Button button = ((AlertDialog) dialog12).getButton(AlertDialog.BUTTON_NEGATIVE);
 
             button.setOnClickListener(view1 -> {
-                MapSettings ms = TwoTrailsApp.getInstance().getMapSettings();
+                MapSettings ms = TwoTrailsApp.getInstance(getActivity()).getMapSettings();
 
                 updateColor(0, ms.getDefaultAdjBndColor());
                 updateColor(1, ms.getDefaultAdjNavColor());

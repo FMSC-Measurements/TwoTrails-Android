@@ -123,7 +123,7 @@ public class ImportGpxFragment extends BaseImportFragment {
 
 
     @Override
-    protected void runImportTask(DataAccessLayer dal) {
+    protected void runImportTask(TwoTrailsApp app) {
         task = new GPXImportTask();
 
         task.setListener(result -> onTaskComplete(result.getCode()));
@@ -131,7 +131,7 @@ public class ImportGpxFragment extends BaseImportFragment {
         selector.getSelectedPositions();
 
         GPXImportTask.GPXImportParams params = new GPXImportTask.GPXImportParams(
-                _FileName, dal, getParams()
+                app, _FileName, getParams()
         );
 
         onTaskStart();
@@ -162,7 +162,7 @@ public class ImportGpxFragment extends BaseImportFragment {
         for (GpxTracksAdapter.GpxBaseTrackHolder holder : polyParams) {
             params.add(new GPXImportTask.GPXPolyParams(
                     holder.getName(), null, null, null, null,
-                    tracks.get(holder.getAdapterPosition()), TwoTrailsApp.getInstance().getMetadataSettings().getDefaultMetadata()));
+                    tracks.get(holder.getAdapterPosition()), TwoTrailsApp.getInstance(getActivity()).getMetadataSettings().getDefaultMetadata()));
         }
 
         return params;

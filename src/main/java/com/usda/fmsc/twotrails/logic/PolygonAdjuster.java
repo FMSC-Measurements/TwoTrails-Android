@@ -35,16 +35,18 @@ public class PolygonAdjuster {
     }
 
 
-    public static AdjustResult adjust(DataAccessLayer dal) {
-        return adjust(dal, false, _Listener);
+    public static AdjustResult adjust(TwoTrailsApp app) {
+        return adjust(app, false, _Listener);
     }
 
-    public static AdjustResult adjust(final DataAccessLayer dal, final boolean updateIndexes) {
-        return adjust(dal, updateIndexes, _Listener);
+    public static AdjustResult adjust(final TwoTrailsApp app, final boolean updateIndexes) {
+        return adjust(app, updateIndexes, _Listener);
     }
 
-    public static AdjustResult adjust(final DataAccessLayer dal, final boolean updateIndexes, Listener listener) {
+    public static AdjustResult adjust(final TwoTrailsApp app, final boolean updateIndexes, Listener listener) {
         _Listener = listener;
+
+        final DataAccessLayer dal = app.getDAL();
 
         if (!_processing) {
 
@@ -90,11 +92,11 @@ public class PolygonAdjuster {
                         result = AdjustResult.ERROR;
                     }
                 } catch (AdjustingException ex) {
-                    TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "PolygonAdjuster:adjust", ex.getStackTrace());
+                    app.getReport().writeError(ex.getMessage(), "PolygonAdjuster:adjust", ex.getStackTrace());
                     result = AdjustResult.ERROR;
                     error = ex.getErrorType();
                 } catch (Exception ex) {
-                    TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "PolygonAdjuster:adjust", ex.getStackTrace());
+                    app.getReport().writeError(ex.getMessage(), "PolygonAdjuster:adjust", ex.getStackTrace());
                     result = AdjustResult.ERROR;
                 } finally {
                     _processing = false;
@@ -205,39 +207,35 @@ public class PolygonAdjuster {
 
         if (polys != null && polys.size() > 0) {
             for (TtPolygon poly : polys) {
-                try {
-                    ArrayList<TtPoint> points = dal.getBoundaryPointsInPoly(poly.getCN());
+                ArrayList<TtPoint> points = dal.getBoundaryPointsInPoly(poly.getCN());
 
-                    if (points.size() > 2) {
-                        double perim = 0, area = 0;
+                if (points.size() > 2) {
+                    double perim = 0, area = 0;
 
-                        TtPoint p1, p2;
-                        for (int i = 0; i < points.size() - 1; i++) {
-                            p1 = points.get(i);
-                            p2 = points.get(i + 1);
+                    TtPoint p1, p2;
+                    for (int i = 0; i < points.size() - 1; i++) {
+                        p1 = points.get(i);
+                        p2 = points.get(i + 1);
 
-                            perim += TtUtils.Math.distance(p1, p2);
-                            area += ((p2.getAdjX() - p1.getAdjX()) * (p2.getAdjY() + p1.getAdjY()) / 2);
-                        }
-
-                        poly.setPerimeterLine(perim);
-
-                        p1 = points.get(points.size() - 1);
-                        p2 = points.get(0);
                         perim += TtUtils.Math.distance(p1, p2);
                         area += ((p2.getAdjX() - p1.getAdjX()) * (p2.getAdjY() + p1.getAdjY()) / 2);
-
-                        poly.setPerimeter(perim);
-                        poly.setArea(Math.abs(area));
-                    } else {
-                        poly.setPerimeter(0);
-                        poly.setArea(0);
                     }
 
-                    dal.updatePolygon(poly);
-                } catch (Exception ex) {
-                    TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "SegmentFactory:CalculateAreaAndPerimeter");
+                    poly.setPerimeterLine(perim);
+
+                    p1 = points.get(points.size() - 1);
+                    p2 = points.get(0);
+                    perim += TtUtils.Math.distance(p1, p2);
+                    area += ((p2.getAdjX() - p1.getAdjX()) * (p2.getAdjY() + p1.getAdjY()) / 2);
+
+                    poly.setPerimeter(perim);
+                    poly.setArea(Math.abs(area));
+                } else {
+                    poly.setPerimeter(0);
+                    poly.setArea(0);
                 }
+
+                dal.updatePolygon(poly);
             }
         }
     }

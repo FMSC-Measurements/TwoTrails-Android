@@ -419,7 +419,7 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
                         }
                     } else {
                         if (getTtAppCtx().getDAL().needsAdjusting())
-                            PolygonAdjuster.adjust(getTtAppCtx().getDAL());
+                            PolygonAdjuster.adjust(getTtAppCtx());
 
                         runOnUiThread(() -> {
                             gotoDataTab();
@@ -601,7 +601,7 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
     private void askToAdjust() {
         new AlertDialog.Builder(MainActivity.this)
         .setMessage("It looks like the data layer needs to be adjusted. Would you like to try and adjust it now?")
-            .setPositiveButton(R.string.str_yes, (dialog, which) -> PolygonAdjuster.adjust(getTtAppCtx().getDAL(), true, MainActivity.this))
+            .setPositiveButton(R.string.str_yes, (dialog, which) -> PolygonAdjuster.adjust(getTtAppCtx(), true, MainActivity.this))
             .setNeutralButton(R.string.str_no, null)
             .show();
     }
