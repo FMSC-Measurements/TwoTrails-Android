@@ -50,7 +50,7 @@ public class TwoTrailsMediaSchema {
             CreationTime    + " TEXT, " +
             Comment         + " TEXT, " +
             IsExternal      + " BOOLEAN NOT NULL, " +
-            "PRIMARY KEY (" + SharedSchema.CN + "));";
+            "PRIMARY ATTR_KEY (" + SharedSchema.CN + "));";
 
         public static final String SelectItems =
                 SharedSchema.CN + ", " +
@@ -77,7 +77,7 @@ public class TwoTrailsMediaSchema {
                     SharedSchema.CN + " TEXT NOT NULL, " +
                     DataType + " TEXT, " +
                     BinaryData + " BLOB, " +
-                    "PRIMARY KEY (" + SharedSchema.CN + "));";
+                    "PRIMARY ATTR_KEY (" + SharedSchema.CN + "));";
 
         public static final String SelectItems =
             SharedSchema.CN + ", " +
@@ -104,7 +104,7 @@ public class TwoTrailsMediaSchema {
             Azimuth     + " REAL, " +
             Pitch       + " REAL, " +
             Roll        + " REAL, " +
-            "PRIMARY KEY (" + SharedSchema.CN + "));";
+            "PRIMARY ATTR_KEY (" + SharedSchema.CN + "));";
 
         public static final String SelectItemsNoCN =
             PicType + ", " +

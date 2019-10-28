@@ -249,14 +249,34 @@ public interface IMultiMapFragment {
     }
 
     class MarkerData {
-        public TtPoint Point;
-        public TtMetadata Metadata;
-        public boolean Adjusted;
+        public static final String ATTR_KEY = "MDK";
+
+        private TtPoint _Point;
+        private TtMetadata _Metadata;
+        private boolean _Adjusted;
+        private String _Key;
 
         public MarkerData(TtPoint point, TtMetadata metadata, boolean adjusted) {
-            Point = point;
-            Metadata = metadata;
-            Adjusted = adjusted;
+            _Point = point;
+            _Metadata = metadata;
+            _Adjusted = adjusted;
+            _Key = _Point.getCN() + (_Adjusted ? "Adj" : "UnAdj");
+        }
+
+        public String getKey() {
+            return _Key;
+        }
+
+        public TtPoint getPoint() {
+            return _Point;
+        }
+
+        public TtMetadata getMetadata() {
+            return _Metadata;
+        }
+
+        public boolean isAdjusted() {
+            return _Adjusted;
         }
     }
 }

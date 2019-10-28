@@ -61,6 +61,7 @@ import com.usda.fmsc.twotrails.adapters.PolyMarkerMapRvAdapter;
 import com.usda.fmsc.twotrails.dialogs.SelectMapTypeDialog;
 import com.usda.fmsc.twotrails.fragments.map.ArcGisMapFragment;
 import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment;
+import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment.MarkerData;
 import com.usda.fmsc.twotrails.fragments.map.ManagedSupportMapFragment;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.logic.PolygonAdjuster;
@@ -842,10 +843,10 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     }
 
     @Override
-    public void onMarkerClick(IMultiMapFragment.MarkerData markerData) {
-        TtPoint currentPoint = markerData.Point;
+    public void onMarkerClick(MarkerData markerData) {
+        TtPoint currentPoint = markerData.getPoint();
 
-        targetLocation = TtUtils.Points.getPointLocation(currentPoint, markerData.Adjusted, getMetadata());
+        targetLocation = TtUtils.Points.getPointLocation(currentPoint, markerData.isAdjusted(), getMetadata());
 
         tvNavPid.setText(StringEx.toString(currentPoint.getPID()));
         tvNavPoly.setText(currentPoint.getPolyName());

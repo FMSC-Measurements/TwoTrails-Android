@@ -1,6 +1,5 @@
 package com.usda.fmsc.twotrails.activities;
 
-import android.annotation.SuppressLint;
 import android.os.Bundle;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import android.view.Menu;
@@ -20,7 +19,6 @@ import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.geospatial.utm.UTMTools;
 import com.usda.fmsc.utilities.StringEx;
 
-@SuppressLint("RestrictedApi")
 public class MapActivity extends BaseMapActivity {
     private TextView tvLocX, tvLocY, tvLocZone, tvLocXType, tvLocYType, tvZoneLbl;
     private FloatingActionButton fabMyPos;
@@ -46,7 +44,12 @@ public class MapActivity extends BaseMapActivity {
 
         ivGps = findViewById(R.id.mapIvGps);
 
-        fabMyPos.setVisibility(myPosBtn && getLastPosition() != null ? View.VISIBLE : View.GONE);
+        //fabMyPos.setVisibility(myPosBtn && getLastPosition() != null ? View.VISIBLE : View.GONE);
+        if (myPosBtn && getLastPosition() != null)
+            fabMyPos.show();
+        else
+            fabMyPos.hide();
+
         setDisplayLocInfoVisible();
 
         if (getTtAppCtx().getDeviceSettings().isGpsConfigured() && shouldStartGps()) {
@@ -86,7 +89,11 @@ public class MapActivity extends BaseMapActivity {
 
         if (created) {
             if (fabMyPos != null && getLastPosition() != null) {
-                fabMyPos.setVisibility(myPosBtn ? View.VISIBLE : View.GONE);
+                //fabMyPos.setVisibility(myPosBtn ? View.VISIBLE : View.GONE);
+                if (myPosBtn)
+                    fabMyPos.show();
+                else
+                    fabMyPos.hide();
             }
 
             setDisplayLocInfoVisible();
@@ -124,8 +131,6 @@ public class MapActivity extends BaseMapActivity {
 
 
     public void btnMyLocClick(View view) {
-        //onMyLocationButtonClick();
-
         Position lastPosition = getLastPosition();
 
         if (lastPosition == null) {
@@ -162,7 +167,7 @@ public class MapActivity extends BaseMapActivity {
 
         if (getLastPosition() != null) {
             if (myPosBtn && fabMyPos != null && getLastPosition() != null) {
-                fabMyPos.setVisibility(View.VISIBLE);
+                //fabMyPos.setVisibility(View.VISIBLE);
                 fabMyPos.show();
             }
         }

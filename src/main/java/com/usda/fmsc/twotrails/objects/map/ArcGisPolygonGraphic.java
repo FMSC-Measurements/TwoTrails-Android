@@ -6,7 +6,6 @@ import com.esri.arcgisruntime.geometry.Point;
 import com.esri.arcgisruntime.geometry.PointCollection;
 import com.esri.arcgisruntime.geometry.Polygon;
 import com.esri.arcgisruntime.geometry.Polyline;
-import com.esri.arcgisruntime.geometry.SpatialReference;
 import com.esri.arcgisruntime.geometry.SpatialReferences;
 import com.esri.arcgisruntime.mapping.view.Graphic;
 import com.esri.arcgisruntime.mapping.view.GraphicsOverlay;
@@ -14,18 +13,15 @@ import com.esri.arcgisruntime.mapping.view.MapView;
 import com.esri.arcgisruntime.symbology.SimpleLineSymbol;
 import com.esri.arcgisruntime.symbology.SimpleMarkerSymbol;
 import com.esri.arcgisruntime.symbology.Symbol;
-import com.esri.arcgisruntime.util.ListenableList;
 import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.geospatial.Position;
-import com.usda.fmsc.twotrails.TwoTrailsApp;
-import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment;
+import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment.MarkerData;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.units.OpType;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -34,7 +30,7 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
     private TtPolygon polygon;
     private PolygonDrawOptions drawOptions;
     private PolygonGraphicOptions graphicOptions;
-    private HashMap<String, IMultiMapFragment.MarkerData> _MarkerData;
+    private HashMap<String, MarkerData> _MarkerData;
 
     private MapView map;
     private Extent polyBounds;
@@ -97,7 +93,7 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
 
         TtMetadata metadata;
 
-        IMultiMapFragment.MarkerData adjMd, unadjMd;
+        MarkerData adjMd, unadjMd;
 
         for (TtPoint point : points) {
             metadata = meta.get(point.getMetadataCN());
@@ -108,17 +104,20 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
             unAdjPos = TtUtils.Points.getLatLonFromPoint(point, false, metadata);
             unadjLL = new Point(unAdjPos.getLongitudeSignedDecimal(), unAdjPos.getLatitudeSignedDecimal(), SpatialReferences.getWgs84());
 
-            adjMd = new IMultiMapFragment.MarkerData(point, metadata, true);
-            unadjMd = new IMultiMapFragment.MarkerData(point, metadata, false);
+            adjMd = new MarkerData(point, metadata, true);
+            unadjMd = new MarkerData(point, metadata, false);
+
+            _MarkerData.put(adjMd.getKey(), adjMd);
+            _MarkerData.put(unadjMd.getKey(), unadjMd);
 
             if (point.isBndPoint()) {
                 Graphic adjmk = new Graphic(adjLL, adjMkOpts);
+                adjmk.getAttributes().put(MarkerData.ATTR_KEY, adjMd);
                 _AdjBndPts.getGraphics().add(adjmk);
-                _MarkerData.put(Integer.toHexString(adjmk.hashCode()) + "_bnd", adjMd);
 
                 Graphic unadjmk = new Graphic(adjLL, unAdjMkOpts);
+                unadjmk.getAttributes().put(MarkerData.ATTR_KEY, unadjMd);
                 _UnadjBndPts.getGraphics().add(unadjmk);
-                _MarkerData.put(Integer.toHexString(unadjmk.hashCode()) + "_bnd", unadjMd);
 
                 adjBndPC.add(adjLL);
                 unadjBndPC.add(unadjLL);
@@ -129,12 +128,12 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
 
             if (point.isNavPoint()) {
                 Graphic adjmk = new Graphic(adjLL, adjMkOpts);
+                adjmk.getAttributes().put(MarkerData.ATTR_KEY, adjMd);
                 _AdjNavPts.getGraphics().add(adjmk);
-                _MarkerData.put(Integer.toHexString(adjmk.hashCode()) + "_nav", adjMd);
 
                 Graphic unadjmk = new Graphic(adjLL, unAdjMkOpts);
+                unadjmk.getAttributes().put(MarkerData.ATTR_KEY, unadjMd);
                 _UnadjNavPts.getGraphics().add(unadjmk);
-                _MarkerData.put(Integer.toHexString(unadjmk.hashCode()) + "_nav", unadjMd);
 
                 adjNavPLC.add(adjLL);
                 unadjNavPLC.add(unadjLL);
@@ -142,18 +141,18 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
 
             if (point.getOp() == OpType.WayPoint) {
                 Graphic unadjmk = new Graphic(adjLL, unAdjMkOpts);
+                unadjmk.getAttributes().put(MarkerData.ATTR_KEY, unadjMd);
                 _WayPts.getGraphics().add(unadjmk);
-                _MarkerData.put(Integer.toHexString(unadjmk.hashCode()) + "_way", unadjMd);
             }
 
             if (point.getOp() == OpType.SideShot && !point.isOnBnd()) {
                 Graphic adjmk = new Graphic(adjLL, adjMkOpts);
+                adjmk.getAttributes().put(MarkerData.ATTR_KEY, adjMd);
                 _AdjMiscPts.getGraphics().add(adjmk);
-                _MarkerData.put(Integer.toHexString(adjmk.hashCode()) + "_misc", adjMd);
 
                 Graphic unadjmk = new Graphic(adjLL, unAdjMkOpts);
+                unadjmk.getAttributes().put(MarkerData.ATTR_KEY, unadjMd);
                 _UnadjMiscPts.getGraphics().add(unadjmk);
-                _MarkerData.put(Integer.toHexString(unadjmk.hashCode()) + "_misc", unadjMd);
             }
 
             llBuilder.include(adjPos);
@@ -281,7 +280,7 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
     }
 
     @Override
-    public HashMap<String, IMultiMapFragment.MarkerData> getMarkerData() {
+    public HashMap<String, MarkerData> getMarkerData() {
         return _MarkerData;
     }
 
