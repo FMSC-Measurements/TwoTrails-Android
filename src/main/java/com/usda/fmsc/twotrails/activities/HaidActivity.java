@@ -22,6 +22,7 @@ import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.R;
+import com.usda.fmsc.twotrails.data.DataAccessLayer;
 import com.usda.fmsc.twotrails.logic.HaidLogic;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
 
@@ -38,11 +39,14 @@ public class HaidActivity extends CustomToolbarActivity {
     private MenuItem miShowPoints, miTSInc, miTSDec;
     private TextView tvInfo;
     private int textSize = 18;
+    private HaidLogic _HaidLogic;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_haid);
+
+        _HaidLogic = new HaidLogic(getTtAppCtx());
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
@@ -68,7 +72,7 @@ public class HaidActivity extends CustomToolbarActivity {
         int i = 0;
         for (TtPolygon poly : polys) {
             polyNames[i] = poly.getName();
-            polyinfo[i] = new PolyInfo(poly, false);
+            polyinfo[i] = new PolyInfo(_HaidLogic, poly, false);
             i++;
         }
 
@@ -163,7 +167,7 @@ public class HaidActivity extends CustomToolbarActivity {
 
                 PolyInfo pi;
                 for (int i = 0; i < polyinfo.length; i++) {
-                    pi = new PolyInfo(polyinfo[i].getPolygon(), showPoints);
+                    pi = new PolyInfo(_HaidLogic, polyinfo[i].getPolygon(), showPoints);
                     polyinfo[i] = pi;
 
                     if (pi.getCN().equals(currentPoly.getCN())) {
@@ -239,17 +243,19 @@ public class HaidActivity extends CustomToolbarActivity {
     private static class PolyInfo extends AsyncTask<PolyInfo.PolyInfoParams, Void, String> {
         private TtPolygon polygon;
         private String text;
+        private HaidLogic haidLogic;
 
         private Listener listener;
 
-        public PolyInfo(TtPolygon polygon, boolean showPoints) {
+        public PolyInfo(HaidLogic haidLogic, TtPolygon polygon, boolean showPoints) {
+            this.haidLogic = haidLogic;
             this.polygon = polygon;
             this.execute(new PolyInfoParams(polygon, showPoints));
         }
 
         @Override
         protected String doInBackground(PolyInfoParams... params) {
-            return HaidLogic.generatePolyStats(params[0].polygon, TwoTrailsApp.getInstance().getDAL(), params[0].isShowingPoints(), false);
+            return haidLogic.generatePolyStats(params[0].polygon, params[0].isShowingPoints(), false);
         }
 
         @Override

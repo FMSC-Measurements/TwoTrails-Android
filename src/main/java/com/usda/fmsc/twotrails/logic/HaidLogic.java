@@ -21,25 +21,28 @@ import java.util.List;
 public class HaidLogic {
     private static final String INFINITE_SYMBOL = "\u221E";
 
-    private static StringBuilder pointStats;
-    private static double travLength, totalTravError, totalGpsError;
-    private static boolean traversing;
-    private static int traverseSegments, lastGpsPtPID;
+    private StringBuilder pointStats;
+    private double travLength, totalTravError, totalGpsError;
+    private boolean traversing;
+    private int traverseSegments, lastGpsPtPID;
 
-    private static TtPoint _LastTtPoint, _LastTtBndPt;
-    private static PointD _LastPoint;
+    private TtPoint _LastTtPoint, _LastTtBndPt;
+    private PointD _LastPoint;
 
-    private static List<Leg> _Legs;
-    private static HashMap<String, TtPolygon> _Polygons;
+    private List<Leg> _Legs;
+    private HashMap<String, TtPolygon> _Polygons;
 
+    private TwoTrailsApp app;
 
-    private static void init(DataAccessLayer dal) {
+    public HaidLogic(TwoTrailsApp app) {
+        this.app = app;
+
         pointStats = new StringBuilder();
 
         _Legs = new ArrayList<>();
 
         _Polygons = new HashMap<>();
-        for (TtPolygon poly : dal.getPolygons()) {
+        for (TtPolygon poly : app.getDAL().getPolygons()) {
             _Polygons.put(poly.getCN(), poly);
         }
 
@@ -50,13 +53,11 @@ public class HaidLogic {
         _LastTtPoint = _LastTtBndPt = null;
     }
 
-    public synchronized static String generatePolyStats(TtPolygon polygon, DataAccessLayer dal, boolean showPoints, boolean save) {
+    public synchronized String generatePolyStats(TtPolygon polygon, boolean showPoints, boolean save) {
         StringBuilder sb = new StringBuilder();
 
         try {
-            init(dal);
-
-            List<TtPoint> points = dal.getPointsInPolygon(polygon.getCN());
+            List<TtPoint> points = app.getDAL().getPointsInPolygon(polygon.getCN());
 
             if (save) {
                 sb.append(String.format("Polygon Name: %s%s%s", polygon.getName(), Consts.NewLine, Consts.NewLine));
@@ -107,7 +108,7 @@ public class HaidLogic {
                 sb.append("There are no points in the polygon.");
             }
         } catch (Exception ex) {
-            TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "HaidLogic:generatePolyStats", ex.getStackTrace());
+            app.getReport().writeError(ex.getMessage(), "HaidLogic:generatePolyStats", ex.getStackTrace());
             return "Error generating polygon info";
         }
 
@@ -118,20 +119,18 @@ public class HaidLogic {
         return sb.toString();
     }
 
-    public synchronized static String generateAllPolyStats(DataAccessLayer dal, boolean showPoints, boolean save) {
+    public synchronized String generateAllPolyStats(boolean showPoints, boolean save) {
         StringBuilder sb = new StringBuilder();
 
         try {
-            init(dal);
-
             for (TtPolygon polygon : _Polygons.values()) {
 
-                sb.append(generatePolyStats(polygon, dal, showPoints, save));
+                sb.append(generatePolyStats(polygon, showPoints, save));
 
                 sb.append(String.format("%s%s", Consts.NewLine, Consts.NewLine));
             }
         } catch (Exception ex) {
-            TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "HaidLogic:generateAllPolyStats");
+            app.getReport().writeError(ex.getMessage(), "HaidLogic:generateAllPolyStats");
             return "Error generating polygon info";
         }
 
@@ -139,7 +138,7 @@ public class HaidLogic {
     }
 
     
-    private static void closeTraverse(TtPoint point, StringBuilder sb) {
+    private void closeTraverse(TtPoint point, StringBuilder sb) {
         double closeError = TtUtils.Math.distance(_LastPoint.X, _LastPoint.Y,
                 point.getUnAdjX(), point.getUnAdjY());
 
@@ -161,9 +160,9 @@ public class HaidLogic {
         traversing = false;
     }
 
-    private static TtPoint _LastTravPoint = null;
+    private TtPoint _LastTravPoint = null;
 
-    private static String getPointSummary(TtPoint point, boolean fromQuondam, boolean showPoints) {
+    private String getPointSummary(TtPoint point, boolean fromQuondam, boolean showPoints) {
         StringBuilder sb = new StringBuilder();
 
         switch (point.getOp()) {
@@ -280,7 +279,7 @@ public class HaidLogic {
         return sb.toString();
     }
 
-    private static String getPolygonSummary(TtPolygon polygon, boolean save) {
+    private String getPolygonSummary(TtPolygon polygon, boolean save) {
         StringBuilder sb = new StringBuilder();
 
         if (polygon.getArea() > Consts.Minimum_Point_Accuracy) {

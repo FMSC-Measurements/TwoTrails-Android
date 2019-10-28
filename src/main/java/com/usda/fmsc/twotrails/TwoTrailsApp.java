@@ -650,9 +650,9 @@ public class TwoTrailsApp extends Application {
         return rfServiceBinder;
     }
 
-    //Todo Remove static context
-    public static synchronized TwoTrailsApp getInstance() {
-        return _AppContext;
+    //For use with logging only
+    public static synchronized TtReport getTtReport() {
+        return _AppContext.getReport();
     }
 
     public static TwoTrailsApp getInstance(Context baseContext) {

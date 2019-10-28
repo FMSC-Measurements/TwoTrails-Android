@@ -119,7 +119,7 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
         map = googleMap;
 
         //use external GPS if available
-        TwoTrailsApp TtAppCtx = TwoTrailsApp.getInstance();
+        TwoTrailsApp TtAppCtx = TwoTrailsApp.getInstance(getActivity());
 
         if (TtAppCtx.getDeviceSettings().isGpsConfigured() && TtAppCtx.getDeviceSettings().getGpsExternal()) {
             GpsService.GpsBinder binder = TtAppCtx.getGps();
@@ -172,7 +172,7 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
                     ));
                 }
             } catch (Exception e) {
-                TwoTrailsApp.getInstance().getReport().writeError("ManagedSupportMapFragment:onMapReady", e.getMessage(), e.getStackTrace());
+                TtAppCtx.getReport().writeError("ManagedSupportMapFragment:onMapReady", e.getMessage(), e.getStackTrace());
             }
         }
 
@@ -238,10 +238,10 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
             {
                 moveToLocation(CameraUpdateFactory.newLatLng(new LatLng(lat, lon)), animate);
             } catch (Exception ex) {
-                TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "ManagedSupportMapFragment:moveToLocation(f,f,b)", ex.getStackTrace());
+                TwoTrailsApp.getInstance(getActivity()).getReport().writeError(ex.getMessage(), "ManagedSupportMapFragment:moveToLocation(f,f,b)", ex.getStackTrace());
             }
         } else {
-            TwoTrailsApp.getInstance().getReport().writeWarn("Map not ready", "ManagedSupportMapFragment:moveToLocation(f,f,b)");
+            TwoTrailsApp.getInstance(getActivity()).getReport().writeWarn("Map not ready", "ManagedSupportMapFragment:moveToLocation(f,f,b)");
         }
     }
 
@@ -254,10 +254,10 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
                         zoomLevel
                 ), animate);
             } catch (Exception ex) {
-                TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "ManagedSupportMapFragment:moveToLocation(f,f,f,b)", ex.getStackTrace());
+                TwoTrailsApp.getInstance(getActivity()).getReport().writeError(ex.getMessage(), "ManagedSupportMapFragment:moveToLocation(f,f,f,b)", ex.getStackTrace());
             }
         } else {
-            TwoTrailsApp.getInstance().getReport().writeWarn("Map not ready", "ManagedSupportMapFragment:moveToLocation(f,f,f,b)");
+            TwoTrailsApp.getInstance(getActivity()).getReport().writeWarn("Map not ready", "ManagedSupportMapFragment:moveToLocation(f,f,f,b)");
         }
     }
 
@@ -273,10 +273,10 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
                         padding
                 ), animate);
             } catch (Exception ex) {
-                TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "ManagedSupportMapFragment:moveToLocation(e,i,b)", ex.getStackTrace());
+                TwoTrailsApp.getInstance(getActivity()).getReport().writeError(ex.getMessage(), "ManagedSupportMapFragment:moveToLocation(e,i,b)", ex.getStackTrace());
             }
         } else {
-            TwoTrailsApp.getInstance().getReport().writeWarn("Map not ready", "ManagedSupportMapFragment:moveToLocation(e,i,b)");
+            TwoTrailsApp.getInstance(getActivity()).getReport().writeWarn("Map not ready", "ManagedSupportMapFragment:moveToLocation(e,i,b)");
         }
     }
 

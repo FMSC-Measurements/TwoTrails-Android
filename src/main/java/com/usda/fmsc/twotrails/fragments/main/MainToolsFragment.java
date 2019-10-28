@@ -71,7 +71,7 @@ public class MainToolsFragment extends Fragment {
             //btnGpsLogger.setEnabled(enable);
             //btnGpsStatus.setEnabled(enable);
 
-            if (TwoTrailsApp.getInstance().getDeviceSettings().isDeveloperOptionsEnabled()) {
+            if (TwoTrailsApp.getInstance(getContext()).getDeviceSettings().isDeveloperOptionsEnabled()) {
                 viewTest.setVisibility(View.VISIBLE);
             } else {
                 viewTest.setVisibility(View.GONE);

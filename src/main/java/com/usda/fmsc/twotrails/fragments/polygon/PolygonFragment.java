@@ -116,7 +116,7 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
                 });
             }
 
-            if (TwoTrailsApp.getInstance().getDAL().getBoundaryPointsCountInPoly(_Polygon.getCN()) < 3) {
+            if (TwoTrailsApp.getInstance(getActivity()).getDAL().getBoundaryPointsCountInPoly(_Polygon.getCN()) < 3) {
                 View polyLayImage = view.findViewById(R.id.polyLayImage);
 
                 if (polyLayImage != null) {
@@ -319,7 +319,7 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
     public void onPolygonPointsUpdated() {
         new Thread(() -> {
             if (_Polygon != null) {
-                TwoTrailsApp TtAppCtx = TwoTrailsApp.getInstance();
+                TwoTrailsApp TtAppCtx = TwoTrailsApp.getInstance(getActivity());
                 final ArrayList<TtPoint> points = TtAppCtx.getDAL().getBoundaryPointsInPoly(_Polygon.getCN());
 
                 if (points != null && points.size() > 2) {

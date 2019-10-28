@@ -20,8 +20,8 @@ public class SettingsLogic {
         alert.setMessage("Do you want to reset all the settings in TwoTrails?");
 
         alert.setPositiveButton("Reset", (dialogInterface, i) -> {
-            TwoTrailsApp.getInstance().getDeviceSettings().reset();
-            TwoTrailsApp.getInstance().getArcGISTools().reset();
+            TwoTrailsApp.getInstance(context).getDeviceSettings().reset();
+            TwoTrailsApp.getInstance(context).getArcGISTools().reset();
         });
 
         alert.setNeutralButton(R.string.str_cancel, null);
@@ -36,7 +36,7 @@ public class SettingsLogic {
         alert.setMessage("Do you want clear the log file?");
 
         alert.setPositiveButton("Clear", (dialogInterface, i) -> {
-            TwoTrailsApp.getInstance().getReport().clearReport();
+            TwoTrailsApp.getInstance(context).getReport().clearReport();
             Toast.makeText(context, "Log Cleared", Toast.LENGTH_SHORT).show();
         });
 
@@ -48,14 +48,14 @@ public class SettingsLogic {
     public static void exportReport(final Activity activity) {
         AlertDialog.Builder dialog = new AlertDialog.Builder(activity);
 
-        if (TwoTrailsApp.getInstance().hasDAL()) {
+        if (TwoTrailsApp.getInstance(activity).hasDAL()) {
             dialog.setMessage("Would you like to include the current project into the report?")
-                    .setPositiveButton(R.string.str_yes, (dialog1, which) -> onExportReportComplete(activity, TtUtils.exportReport(TwoTrailsApp.getInstance().getDAL())))
-                    .setNegativeButton(R.string.str_no, (dialog12, which) -> onExportReportComplete(activity, TtUtils.exportReport(null)))
+                    .setPositiveButton(R.string.str_yes, (dialog1, which) -> onExportReportComplete(activity, TtUtils.exportReport(TwoTrailsApp.getInstance(activity),true)))
+                    .setNegativeButton(R.string.str_no, (dialog12, which) -> onExportReportComplete(activity, TtUtils.exportReport(TwoTrailsApp.getInstance(activity),false)))
                     .setNeutralButton(R.string.str_cancel, null)
                     .show();
         } else {
-            onExportReportComplete(activity, TtUtils.exportReport(null));
+            onExportReportComplete(activity, TtUtils.exportReport(TwoTrailsApp.getInstance(activity), false));
         }
     }
 
@@ -66,7 +66,7 @@ public class SettingsLogic {
                 if (internetAvailable) {
                     new AlertDialog.Builder(activity)
                             .setMessage("Would you like to send the report to the developer team to help prevent future crashes?")
-                            .setPositiveButton("Send", (dialog, which) -> TtUtils.SendEmailToDev(activity, filepath))
+                            .setPositiveButton("Send", (dialog, which) -> TtUtils.SendEmailToDev(activity, filepath, true))
                             .setNeutralButton("Don't Send", null)
                             .show();
                 } else {
@@ -106,30 +106,30 @@ public class SettingsLogic {
             switch (idialog.getText().toLowerCase()) {
                 case "dev":
                 case "developer": {
-                    TwoTrailsApp.getInstance().getDeviceSettings().enabledDevelopterOptions(true);
+                    TwoTrailsApp.getInstance(context).getDeviceSettings().enabledDevelopterOptions(true);
                     Toast.makeText(context, "Developer Mode Enabled", Toast.LENGTH_LONG).show();
-                    TwoTrailsApp.getInstance().getReport().writeDebug("Developer Mode: Enabled", "SettingsLogic:enterCode");
+                    TwoTrailsApp.getInstance(context).getReport().writeDebug("Developer Mode: Enabled", "SettingsLogic:enterCode");
                     break;
                 }
                 case "disable dev":
                 case "disable developer": {
-                    TwoTrailsApp.getInstance().getDeviceSettings().enabledDevelopterOptions(false);
+                    TwoTrailsApp.getInstance(context).getDeviceSettings().enabledDevelopterOptions(false);
                     Toast.makeText(context, "Developer Mode Disabled", Toast.LENGTH_LONG).show();
-                    TwoTrailsApp.getInstance().getReport().writeDebug("Developer Mode: Disabled", "SettingsLogic:enterCode");
+                    TwoTrailsApp.getInstance(context).getReport().writeDebug("Developer Mode: Disabled", "SettingsLogic:enterCode");
                     break;
                 }
                 case "dbg":
                 case "debug" : {
-                    TwoTrailsApp.getInstance().getDeviceSettings().enabledDebugMode(true);
+                    TwoTrailsApp.getInstance(context).getDeviceSettings().enabledDebugMode(true);
                     Toast.makeText(context, "Debug Mode Enabled", Toast.LENGTH_LONG).show();
-                    TwoTrailsApp.getInstance().getReport().writeDebug("Debug Mode: Enabled", "SettingsLogic:enterCode");
+                    TwoTrailsApp.getInstance(context).getReport().writeDebug("Debug Mode: Enabled", "SettingsLogic:enterCode");
                     break;
                 }
                 case "disable dbg":
                 case "disable debug" : {
-                    TwoTrailsApp.getInstance().getDeviceSettings().enabledDebugMode(false);
+                    TwoTrailsApp.getInstance(context).getDeviceSettings().enabledDebugMode(false);
                     Toast.makeText(context, "Debug Mode Disabled", Toast.LENGTH_LONG).show();
-                    TwoTrailsApp.getInstance().getReport().writeDebug("Debug Mode: Disabled", "SettingsLogic:enterCode");
+                    TwoTrailsApp.getInstance(context).getReport().writeDebug("Debug Mode: Disabled", "SettingsLogic:enterCode");
                     break;
                 }
             }

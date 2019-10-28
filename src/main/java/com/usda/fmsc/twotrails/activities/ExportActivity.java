@@ -361,8 +361,7 @@ public class ExportActivity extends CustomToolbarActivity {
 
             exportTask.execute(
                     new Export.ExportTask.ExportParams(
-                            getTtAppCtx().getDAL(),
-                            getTtAppCtx().hasMAL() ? getTtAppCtx().getMAL() : null,
+                            getTtAppCtx(),
                             directory,
                             chkPoints.isChecked(),
                             chkPolys.isChecked(),

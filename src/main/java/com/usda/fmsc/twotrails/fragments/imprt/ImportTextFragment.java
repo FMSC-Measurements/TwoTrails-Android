@@ -16,6 +16,7 @@ import android.widget.TableRow;
 import android.widget.Toast;
 
 import com.usda.fmsc.android.AndroidUtils;
+import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.utilities.StringEx;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
 import com.usda.fmsc.twotrails.R;
@@ -542,7 +543,7 @@ public class ImportTextFragment extends BaseImportFragment {
     }
 
     @Override
-    protected void runImportTask(DataAccessLayer dal) {
+    protected void runImportTask(TwoTrailsApp app) {
         task = new TextImportTask();
 
         task.setListener(result -> {
@@ -553,7 +554,7 @@ public class ImportTextFragment extends BaseImportFragment {
         Map<Import.TextFieldType, Integer> columnMap = getColumnsMap(advImport);
         List<String> polygonNames = new ArrayList<>();
 
-        TextImportTask.TextImportParams params = new TextImportTask.TextImportParams(_FileName, dal, columnMap, polygonNames, advImport);
+        TextImportTask.TextImportParams params = new TextImportTask.TextImportParams(app, _FileName, columnMap, polygonNames, advImport);
 
         onTaskStart();
         task.execute(params);

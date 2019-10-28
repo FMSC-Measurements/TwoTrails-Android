@@ -81,7 +81,7 @@ public class QuondamPointFragment extends BasePointFragment {
     public View onCreateViewEx(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_points_quondam_card, container, false);
 
-        _Polygons = TwoTrailsApp.getInstance().getDAL().getPolygons();
+        _Polygons = TwoTrailsApp.getInstance(getActivity()).getDAL().getPolygons();
         ArrayList<String> _PolygonNames = new ArrayList<>();
         _Points = new ArrayList<?>[_Polygons.size()];
 
@@ -223,7 +223,7 @@ public class QuondamPointFragment extends BasePointFragment {
 
         if (_Points[index] == null) {
             ArrayList<TtPoint> tmpPoints = new ArrayList<>();
-            for (TtPoint point : TwoTrailsApp.getInstance().getDAL().getPointsInPolygon(_Polygons.get(index).getCN())) {
+            for (TtPoint point : TwoTrailsApp.getInstance(getActivity()).getDAL().getPointsInPolygon(_Polygons.get(index).getCN())) {
                 if (point.getOp() != OpType.WayPoint) {
                     if (point.getOp() != OpType.Quondam || !point.getCN().equals(_Quondam.getCN())) {
                         tmpPoints.add(point);

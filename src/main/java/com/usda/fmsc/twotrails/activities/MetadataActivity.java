@@ -151,7 +151,7 @@ public class MetadataActivity extends CustomToolbarActivity {
         saveMetadata();
 
         if (adjust) {
-            PolygonAdjuster.adjust(getTtAppCtx().getDAL(), true);
+            PolygonAdjuster.adjust(getTtAppCtx(), true);
         }
     }
 

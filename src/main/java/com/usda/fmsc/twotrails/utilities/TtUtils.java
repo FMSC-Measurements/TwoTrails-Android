@@ -1528,56 +1528,51 @@ public class TtUtils {
 
         public static MarkerOptions createMarkerOptions(GpsPoint point, boolean adjusted, TtMetadata meta) {
 
-            try {
-                Double x = adjusted ? point.getAdjX() : point.getUnAdjX();
-                Double y = adjusted ? point.getAdjY() : point.getUnAdjY();
-                Double z = adjusted ? point.getAdjZ() : point.getUnAdjZ();
+            Double x = adjusted ? point.getAdjX() : point.getUnAdjX();
+            Double y = adjusted ? point.getAdjY() : point.getUnAdjY();
+            Double z = adjusted ? point.getAdjZ() : point.getUnAdjZ();
 
-                if (x == null) {
-                    x = point.getUnAdjX();
-                    y = point.getUnAdjY();
-                    z =  point.getUnAdjZ();
-                }
-
-                z = TtUtils.Convert.distance(z, meta.getElevation(), UomElevation.Meters);
-
-                double lat, lon;
-
-                if (point.hasLatLon()) { //ignore adjust since gps dont adjust to new positions
-                    lat = point.getLatitude();
-                    lon = point.getLongitude();
-                } else {
-                    Position position = UTMTools.convertUTMtoLatLonSignedDec(x, y, meta.getZone());
-                    lat = position.getLatitudeSignedDecimal();
-                    lon = position.getLongitudeSignedDecimal();
-                }
-
-                String snippet = StringEx.format("UTM X: %.3f\nUTM Y: %.3f\nElev (%s): %.1f\n\nLat: %.4f\nLon: %.4f%s",
-                        x, y, meta.getElevation().toStringAbv(), Convert.distance(z, meta.getElevation(), UomElevation.Meters), lat, lon,
-                        !StringEx.isEmpty(point.getComment()) ?
-                                StringEx.format("\n\nComment: %s", point.getComment()) :
-                                StringEx.Empty
-                );
-
-
-                MarkerOptions options = new MarkerOptions();
-
-                options.title(StringEx.format("%d (%s)", point.getPID(), adjusted ? "Adj" : "UnAdj"));
-                options.snippet(StringEx.format("%s\n\n%s", point.getOp().toString(), snippet));
-
-                LatLng ll = new LatLng(lat, lon);
-
-                try {
-                    options.position(ll);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-                return options;
-            } catch (Exception ex) {
-                TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "TtUtils:createMarkerOptions");
-                throw ex;
+            if (x == null) {
+                x = point.getUnAdjX();
+                y = point.getUnAdjY();
+                z =  point.getUnAdjZ();
             }
+
+            z = TtUtils.Convert.distance(z, meta.getElevation(), UomElevation.Meters);
+
+            double lat, lon;
+
+            if (point.hasLatLon()) { //ignore adjust since gps dont adjust to new positions
+                lat = point.getLatitude();
+                lon = point.getLongitude();
+            } else {
+                Position position = UTMTools.convertUTMtoLatLonSignedDec(x, y, meta.getZone());
+                lat = position.getLatitudeSignedDecimal();
+                lon = position.getLongitudeSignedDecimal();
+            }
+
+            String snippet = StringEx.format("UTM X: %.3f\nUTM Y: %.3f\nElev (%s): %.1f\n\nLat: %.4f\nLon: %.4f%s",
+                    x, y, meta.getElevation().toStringAbv(), Convert.distance(z, meta.getElevation(), UomElevation.Meters), lat, lon,
+                    !StringEx.isEmpty(point.getComment()) ?
+                            StringEx.format("\n\nComment: %s", point.getComment()) :
+                            StringEx.Empty
+            );
+
+
+            MarkerOptions options = new MarkerOptions();
+
+            options.title(StringEx.format("%d (%s)", point.getPID(), adjusted ? "Adj" : "UnAdj"));
+            options.snippet(StringEx.format("%s\n\n%s", point.getOp().toString(), snippet));
+
+            LatLng ll = new LatLng(lat, lon);
+
+            try {
+                options.position(ll);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return options;
         }
 
         public static MarkerOptions createMarkerOptions(TravPoint point, boolean adjusted, TtMetadata meta) {
@@ -1795,41 +1790,35 @@ public class TtUtils {
         }
 
         private static String getInfoWindowSnippet(GpsPoint point, boolean adjusted, TtMetadata meta) {
+            Double x = adjusted ? point.getAdjX() : point.getUnAdjX();
+            Double y = adjusted ? point.getAdjY() : point.getUnAdjY();
+            Double z = adjusted ? point.getAdjZ() : point.getUnAdjZ();
 
-            try {
-                Double x = adjusted ? point.getAdjX() : point.getUnAdjX();
-                Double y = adjusted ? point.getAdjY() : point.getUnAdjY();
-                Double z = adjusted ? point.getAdjZ() : point.getUnAdjZ();
-
-                if (x == null) {
-                    x = point.getUnAdjX();
-                    y = point.getUnAdjY();
-                    z =  point.getUnAdjZ();
-                }
-
-                z = TtUtils.Convert.distance(z, meta.getElevation(), UomElevation.Meters);
-
-                double lat, lon;
-
-                if (point.hasLatLon()) { //ignore adjust since gps dont adjust to new positions
-                    lat = point.getLatitude();
-                    lon = point.getLongitude();
-                } else {
-                    Position position = UTMTools.convertUTMtoLatLonSignedDec(x, y, meta.getZone());
-                    lat = position.getLatitudeSignedDecimal();
-                    lon = position.getLongitudeSignedDecimal();
-                }
-
-                return StringEx.format("%s\n\nUTM X: %.3f\nUTM Y: %.3f\nElev (%s): %.1f\n\nLat: %.4f\nLon: %.4f%s",
-                        point.getOp().toString(),
-                        x, y, meta.getElevation().toStringAbv(), Convert.distance(z, meta.getElevation(), UomElevation.Meters), lat, lon,
-                        !StringEx.isEmpty(point.getComment()) ?
-                                StringEx.format("\n\nComment: %s", point.getComment()) :
-                                StringEx.Empty);
-            } catch (Exception ex) {
-                TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "TtUtils:getInfoWindowSnippet");
-                return null;
+            if (x == null) {
+                x = point.getUnAdjX();
+                y = point.getUnAdjY();
+                z =  point.getUnAdjZ();
             }
+
+            z = TtUtils.Convert.distance(z, meta.getElevation(), UomElevation.Meters);
+
+            double lat, lon;
+
+            if (point.hasLatLon()) { //ignore adjust since gps dont adjust to new positions
+                lat = point.getLatitude();
+                lon = point.getLongitude();
+            } else {
+                Position position = UTMTools.convertUTMtoLatLonSignedDec(x, y, meta.getZone());
+                lat = position.getLatitudeSignedDecimal();
+                lon = position.getLongitudeSignedDecimal();
+            }
+
+            return StringEx.format("%s\n\nUTM X: %.3f\nUTM Y: %.3f\nElev (%s): %.1f\n\nLat: %.4f\nLon: %.4f%s",
+                    point.getOp().toString(),
+                    x, y, meta.getElevation().toStringAbv(), Convert.distance(z, meta.getElevation(), UomElevation.Meters), lat, lon,
+                    !StringEx.isEmpty(point.getComment()) ?
+                            StringEx.format("\n\nComment: %s", point.getComment()) :
+                            StringEx.Empty);
         }
 
         private static String getInfoWindowSnippet(TravPoint point, boolean adjusted, TtMetadata meta) {
@@ -1872,21 +1861,21 @@ public class TtUtils {
                 Build.MANUFACTURER, Build.MODEL, Build.ID);
     }
 
-    public static String exportReport(DataAccessLayer dal) {
+    public static String exportReport(TwoTrailsApp app, boolean addFile) {
         String exportFile = StringEx.format("%s%sTwoTrailsReport_%s.zip",
                 TtUtils.getTtLogFileDir(),
                 File.separator,
                 DateTime.now().toString());
 
         List<String> files = new ArrayList<>();
-        files.add(TwoTrailsApp.getInstance().getReport().getFilePath());
+        files.add(app.getReport().getFilePath());
 
-        if (generateSettingsFile()) {
+        if (generateSettingsFile(app)) {
             files.add(getSettingsFilePath());
         }
 
-        if (dal != null) {
-            files.add(dal.getFilePath());
+        if (app.getDAL() != null) {
+            files.add(app.getDAL().getFilePath());
         }
 
         File gpsFile = null;
@@ -1909,11 +1898,10 @@ public class TtUtils {
         return zipFile;
     }
 
-    public static boolean generateSettingsFile() {
+    public static boolean generateSettingsFile(TwoTrailsApp app) {
         int generated = 0;
 
         try {
-            TwoTrailsApp app = TwoTrailsApp.getInstance();
             String sp = getSettingsFilePath();
 
             FileWriter fw = new FileWriter(sp, false);
@@ -1929,8 +1917,8 @@ public class TtUtils {
 
                 generated += 1;
             } catch (IOException e) {
-                if (TwoTrailsApp.getInstance().hasReport()) {
-                    TwoTrailsApp.getInstance().getReport().writeError(e.getMessage(), "TtUtils:generateSettingsFile:DeviceSettings", e.getStackTrace());
+                if (app.hasReport()) {
+                    app.getReport().writeError(e.getMessage(), "TtUtils:generateSettingsFile:DeviceSettings", e.getStackTrace());
                 }
             }
 
@@ -1942,8 +1930,8 @@ public class TtUtils {
 
                 generated += 1;
             } catch (IOException e) {
-                if (TwoTrailsApp.getInstance().hasReport()) {
-                    TwoTrailsApp.getInstance().getReport().writeError(e.getMessage(), "TtUtils:generateSettingsFile:MetadataSettings", e.getStackTrace());
+                if (app.hasReport()) {
+                    app.getReport().writeError(e.getMessage(), "TtUtils:generateSettingsFile:MetadataSettings", e.getStackTrace());
                 }
             }
 
@@ -1955,16 +1943,16 @@ public class TtUtils {
 
                 generated += 1;
             } catch (IOException e) {
-                if (TwoTrailsApp.getInstance().hasReport()) {
-                    TwoTrailsApp.getInstance().getReport().writeError(e.getMessage(), "TtUtils:generateSettingsFile:ProjectSettings", e.getStackTrace());
+                if (app.hasReport()) {
+                    app.getReport().writeError(e.getMessage(), "TtUtils:generateSettingsFile:ProjectSettings", e.getStackTrace());
                 }
             }
 
             js.endObject().flush();
             js.close();
         } catch (Exception e) {
-            if (TwoTrailsApp.getInstance().hasReport()) {
-                TwoTrailsApp.getInstance().getReport().writeError(e.getMessage(), "TtUtils:generateSettingsFile", e.getStackTrace());
+            if (app.hasReport()) {
+                app.getReport().writeError(e.getMessage(), "TtUtils:generateSettingsFile", e.getStackTrace());
             }
 
             generated = 0;
@@ -1975,21 +1963,17 @@ public class TtUtils {
 
 
     public static void SendCrashEmailToDev(Activity activity) {
-        SendEmailToDev(activity, null);
+        SendEmailToDev(activity, null, true);
     }
 
-    public static void SendEmailToDev(Activity activity, String reportPath) {
-        TwoTrailsApp app = TwoTrailsApp.getInstance();
+    public static void SendEmailToDev(Activity activity, String reportPath, boolean addFile) {
+        TwoTrailsApp app = TwoTrailsApp.getInstance(activity);
 
         boolean isCrash = false;
 
         if (reportPath == null) {
             isCrash = true;
-            if (app.hasDAL()) {
-                reportPath = TtUtils.exportReport(app.getDAL());
-            } else {
-                reportPath = TtUtils.exportReport(null);
-            }
+            reportPath = TtUtils.exportReport(app, addFile);
         }
 
         if (reportPath != null) {

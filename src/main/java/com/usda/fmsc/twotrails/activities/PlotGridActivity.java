@@ -273,7 +273,7 @@ public class PlotGridActivity extends CustomToolbarActivity {
         super.onDestroy();
 
         if (adjust) {
-            PolygonAdjuster.adjust(getTtAppCtx().getDAL(), true);
+            PolygonAdjuster.adjust(getTtAppCtx(), true);
         }
     }
 
@@ -356,7 +356,7 @@ public class PlotGridActivity extends CustomToolbarActivity {
                 params.setSampleValue(ParseEx.parseInteger(txtSubSample.getText().toString()));
             }
 
-            generator = new PlotGenerator(getTtAppCtx().getDAL(), metadata, plotGenListener);
+            generator = new PlotGenerator(getTtAppCtx(), metadata, plotGenListener);
             generator.execute(params);
             layControls.setEnabled(false);
             progressBar.setVisibility(View.VISIBLE);

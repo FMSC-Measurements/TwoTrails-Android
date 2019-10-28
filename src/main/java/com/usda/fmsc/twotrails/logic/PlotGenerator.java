@@ -24,24 +24,24 @@ import com.usda.fmsc.geospatial.utm.UTMCoords;
 
 public class PlotGenerator extends AsyncTask<PlotGenerator.PlotParams, Void, TtPolygon> {
     private PlotGenListener listener;
-    private DataAccessLayer dal;
+    private TwoTrailsApp app;
     private Exception ex;
     private Map<String, TtMetadata> metadata;
 
-    public PlotGenerator(DataAccessLayer dal) {
-        this(dal, null, null);
+    public PlotGenerator(TwoTrailsApp app) {
+        this(app, null, null);
     }
 
-    public PlotGenerator(DataAccessLayer dal, Map<String, TtMetadata> metadata) {
-        this (dal, metadata, null);
+    public PlotGenerator(TwoTrailsApp app, Map<String, TtMetadata> metadata) {
+        this (app, metadata, null);
     }
 
-    public PlotGenerator(DataAccessLayer dal, PlotGenListener listener) {
-        this(dal, null, listener);
+    public PlotGenerator(TwoTrailsApp app, PlotGenListener listener) {
+        this(app, null, listener);
     }
 
-    public PlotGenerator(DataAccessLayer dal, Map<String, TtMetadata> metadata, PlotGenListener listener) {
-        this.dal = dal;
+    public PlotGenerator(TwoTrailsApp app, Map<String, TtMetadata> metadata, PlotGenListener listener) {
+        this.app = app;
         this.metadata = metadata;
         this.listener = listener;
     }
@@ -51,12 +51,14 @@ public class PlotGenerator extends AsyncTask<PlotGenerator.PlotParams, Void, TtP
     protected TtPolygon doInBackground(PlotParams... params) {
         PlotParams pp = params[0];
 
+        DataAccessLayer dal = app.getDAL();
+
         if (metadata == null)
             metadata = dal.getMetadataMap();
 
         TtPolygon poly = new TtPolygon();
         poly.setName(pp.PolyName);
-        poly.setPointStartIndex(TwoTrailsApp.getInstance().getDAL().getItemCount(TwoTrailsSchema.PolygonSchema.TableName) * 1000 + 1010);
+        poly.setPointStartIndex(dal.getItemCount(TwoTrailsSchema.PolygonSchema.TableName) * 1000 + 1010);
         poly.setIncrementBy(1);
         poly.setAccuracy(Consts.Default_Point_Accuracy);
 

@@ -244,7 +244,7 @@ public class Export {
             //endregion
         } catch (Exception ex) {
             pointsFilename = null;
-            TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "Export:points", ex.getStackTrace());
+            TwoTrailsApp.getTtReport().writeError(ex.getMessage(), "Export:points", ex.getStackTrace());
         }
 
         return pointsFilename;
@@ -288,7 +288,7 @@ public class Export {
             printer.close();
         } catch (Exception ex) {
             polysFilename = null;
-            TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "Export:polygons", ex.getStackTrace());
+            TwoTrailsApp.getTtReport().writeError(ex.getMessage(), "Export:polygons", ex.getStackTrace());
         }
 
         return polysFilename;
@@ -342,7 +342,7 @@ public class Export {
             writer.close();
         } catch (Exception ex) {
             metaFilename = null;
-            TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "Export:metadata", ex.getStackTrace());
+            TwoTrailsApp.getTtReport().writeError(ex.getMessage(), "Export:metadata", ex.getStackTrace());
         }
 
         return metaFilename;
@@ -383,7 +383,7 @@ public class Export {
             writer.close();
         } catch (Exception ex) {
             projFilename = null;
-            TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "Export:metadata", ex.getStackTrace());
+            TwoTrailsApp.getTtReport().writeError(ex.getMessage(), "Export:metadata", ex.getStackTrace());
         }
 
         return projFilename;
@@ -478,7 +478,7 @@ public class Export {
             //endregion
         } catch (Exception ex) {
             nmeaFilename = null;
-            TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "Export:nmea", ex.getStackTrace());
+            TwoTrailsApp.getTtReport().writeError(ex.getMessage(), "Export:nmea", ex.getStackTrace());
         }
 
         return nmeaFilename;
@@ -588,7 +588,7 @@ public class Export {
             GpxWriter.createFile(doc, gpxPath);
         } catch (IOException e) {
             gpxPath = null;
-            TwoTrailsApp.getInstance().getReport().writeError(e.getMessage(), "Export:gpx");
+            TwoTrailsApp.getTtReport().writeError(e.getMessage(), "Export:gpx");
         }
 
         return gpxPath;
@@ -1115,7 +1115,7 @@ public class Export {
             KmlWriter.createFile(doc, kmlPath);
         } catch (IOException e) {
             kmlPath = null;
-            TwoTrailsApp.getInstance().getReport().writeError(e.getMessage(), "Export:kml");
+            TwoTrailsApp.getTtReport().writeError(e.getMessage(), "Export:kml");
         }
 
         return kmlPath;
@@ -1151,24 +1151,24 @@ public class Export {
                 return kmzPath;
             }
         } catch (Exception e) {
-            TwoTrailsApp.getInstance().getReport().writeError(e.getMessage(), "Export:kmz");
+            TwoTrailsApp.getTtReport().writeError(e.getMessage(), "Export:kmz");
         }
 
         return kmzPath;
     }
 
-    public static String summary(DataAccessLayer dal, String dir) {
-        String summaryName = String.format("%s/%s_summary.txt", dir, scrubProjectName(dal.getProjectID()));
+    public static String summary(TwoTrailsApp app, String dir) {
+        String summaryName = String.format("%s/%s_summary.txt", dir, scrubProjectName(app.getDAL().getProjectID()));
 
         try {
             FileWriter writer = new FileWriter(summaryName);
 
-            writer.write(HaidLogic.generateAllPolyStats(dal, true, true));
+            writer.write(new HaidLogic(app).generateAllPolyStats(true, true));
 
             writer.close();
         } catch (Exception ex) {
             summaryName = null;
-            TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "Export:summary", ex.getStackTrace());
+            TwoTrailsApp.getTtReport().writeError(ex.getMessage(), "Export:summary", ex.getStackTrace());
         }
 
         return summaryName;
@@ -1214,7 +1214,7 @@ public class Export {
             printer.close();
         } catch (Exception ex) {
             imagesFileName = null;
-            TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "Export:imageInfo", ex.getStackTrace());
+            TwoTrailsApp.getTtReport().writeError(ex.getMessage(), "Export:imageInfo", ex.getStackTrace());
         }
 
         return imagesFileName;
@@ -1257,7 +1257,7 @@ public class Export {
 
                 return expPath;
         } catch (Exception e) {
-            TwoTrailsApp.getInstance().getReport().writeError(e.getMessage(), "Export:kmz");
+            TwoTrailsApp.getTtReport().writeError(e.getMessage(), "Export:kmz");
         }
 
         return null;
@@ -1334,7 +1334,7 @@ public class Export {
                 }
 
                 if (!isCancelled() && ep.isSummary()) {
-                    if (summary(ep.getDal(), dirPath) == null) {
+                    if (summary(ep.getApp(), dirPath) == null) {
                         return new ExportResult(ExportResultCode.ExportFailure, "Summary");
                     }
                 }
@@ -1351,7 +1351,7 @@ public class Export {
                     }
                 }
             } catch (Exception ex) {
-                TwoTrailsApp.getInstance().getReport().writeError(ex.getMessage(), "Export:ExportTask", ex.getStackTrace());
+                TwoTrailsApp.getTtReport().writeError(ex.getMessage(), "Export:ExportTask", ex.getStackTrace());
                 return new ExportResult(ExportResultCode.ExportFailure, "Unknown failure");
             }
 
@@ -1372,16 +1372,14 @@ public class Export {
         }
 
         public static class ExportParams {
-            private DataAccessLayer dal;
-            private MediaAccessLayer mal;
+            private TwoTrailsApp app;
             private File directory;
             private boolean points, polys, meta, proj, nmea, kmz, gpx, summary, imgInfo, pcExp;
 
-            public ExportParams(DataAccessLayer dal, MediaAccessLayer mal, File directory, boolean points, boolean polys, boolean meta,
+            public ExportParams(TwoTrailsApp app, File directory, boolean points, boolean polys, boolean meta,
                 boolean imgInfo, boolean proj, boolean nmea, boolean kmz, boolean gpx, boolean summary, boolean pcExp) {
 
-                this.dal = dal;
-                this.mal = mal;
+                this.app = app;
 
                 this.directory = directory;
 
@@ -1397,12 +1395,14 @@ public class Export {
                 this.pcExp = pcExp;
             }
 
+            public TwoTrailsApp getApp() { return app; }
+
             public DataAccessLayer getDal() {
-                return dal;
+                return app.getDAL();
             }
 
             public MediaAccessLayer getMal() {
-                return mal;
+                return app.hasMAL() ? app.getMAL() : null;
             }
 
             public File getDirectory() {

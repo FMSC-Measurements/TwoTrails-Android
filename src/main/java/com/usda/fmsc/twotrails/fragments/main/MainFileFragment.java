@@ -88,7 +88,7 @@ public class MainFileFragment extends Fragment {
 
             tblInfo.setVisibility(enable ? View.VISIBLE : View.INVISIBLE);
 
-            if (TwoTrailsApp.getInstance().getDeviceSettings().isDeveloperOptionsEnabled()) {
+            if (TwoTrailsApp.getInstance(getContext()).getDeviceSettings().isDeveloperOptionsEnabled()) {
                 viewCleanDb.setVisibility(View.VISIBLE);
             } else {
                 viewCleanDb.setVisibility(View.GONE);

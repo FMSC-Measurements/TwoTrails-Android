@@ -4,6 +4,7 @@ import android.os.Bundle;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
 import com.usda.fmsc.twotrails.utilities.Import;
 
@@ -16,13 +17,13 @@ public abstract class BaseImportFragment extends Fragment {
         readyToImport(validate());
     }
 
-    public final void importFile(DataAccessLayer dal) {
+    public final void importFile(TwoTrailsApp app) {
         if (validate(true)) {
-            runImportTask(dal);
+            runImportTask(app);
         }
     }
 
-    protected abstract void runImportTask(DataAccessLayer dal);
+    protected abstract void runImportTask(TwoTrailsApp app);
 
     public abstract void cancel();
 

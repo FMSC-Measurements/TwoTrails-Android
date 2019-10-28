@@ -682,7 +682,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
             saveMedia();
 
             if (adjust) {
-                PolygonAdjuster.adjust(getTtAppCtx().getDAL(), true);
+                PolygonAdjuster.adjust(getTtAppCtx(), true);
             }
         }
 
@@ -2138,7 +2138,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         if (!getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
             configGps();
         } else if (getTtAppCtx().getDAL().needsAdjusting()) {
-            PolygonAdjuster.adjust(getTtAppCtx().getDAL(), false, new PolygonAdjuster.Listener() {
+            PolygonAdjuster.adjust(getTtAppCtx(), false, new PolygonAdjuster.Listener() {
                 @Override
                 public void adjusterStarted() {
                     runOnUiThread(() -> Toast.makeText(PointsActivity.this, "Adjusting Points. Starting Acquire soon.", Toast.LENGTH_SHORT).show());
@@ -2201,7 +2201,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         if (!getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
             configGps();
         } else if (getTtAppCtx().getDAL().needsAdjusting()) {
-            PolygonAdjuster.adjust(getTtAppCtx().getDAL(), false, new PolygonAdjuster.Listener() {
+            PolygonAdjuster.adjust(getTtAppCtx(), false, new PolygonAdjuster.Listener() {
                 @Override
                 public void adjusterStarted() {
                     runOnUiThread(() -> Toast.makeText(PointsActivity.this, "Adjusting Points. Starting Acquire soon.", Toast.LENGTH_SHORT).show());
@@ -2264,7 +2264,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         if (!getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
             configGps();
         } else if (getTtAppCtx().getDAL().needsAdjusting()) {
-            PolygonAdjuster.adjust(getTtAppCtx().getDAL(), false, new PolygonAdjuster.Listener() {
+            PolygonAdjuster.adjust(getTtAppCtx(), false, new PolygonAdjuster.Listener() {
                 @Override
                 public void adjusterStarted() {
                     runOnUiThread(() -> Toast.makeText(PointsActivity.this, "Adjusting Points. Starting Acquire soon.", Toast.LENGTH_SHORT).show());

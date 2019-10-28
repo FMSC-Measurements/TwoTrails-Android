@@ -51,7 +51,7 @@ public class ImportActivity extends CustomToolbarActivity {
                     View view = findViewById(R.id.parent);
                     if (view != null) {
                         Snackbar snackbar = Snackbar.make(view, "File Imported", Snackbar.LENGTH_LONG)
-                                .setAction("View Map", v -> PolygonAdjuster.adjust(getTtAppCtx().getDAL(), false, new PolygonAdjuster.Listener() {
+                                .setAction("View Map", v -> PolygonAdjuster.adjust(getTtAppCtx(), false, new PolygonAdjuster.Listener() {
                                     @Override
                                     public void adjusterStarted() {
 
@@ -239,13 +239,13 @@ public class ImportActivity extends CustomToolbarActivity {
         super.onDestroy();
 
         if (adjust) {
-            PolygonAdjuster.adjust(getTtAppCtx().getDAL(), true);
+            PolygonAdjuster.adjust(getTtAppCtx(), true);
         }
     }
 
     public void btnImport(View view) {
         if (fragment != null) {
-            fragment.importFile(getTtAppCtx().getDAL());
+            fragment.importFile(getTtAppCtx());
         }
     }
 

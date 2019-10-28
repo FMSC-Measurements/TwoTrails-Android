@@ -136,7 +136,7 @@ public class ImportKmlFragment extends BaseImportFragment {
 
 
     @Override
-    protected void runImportTask(DataAccessLayer dal) {
+    protected void runImportTask(TwoTrailsApp app) {
         task = new Import.KMLImportTask();
 
         task.setListener(result -> onTaskComplete(result.getCode()));
@@ -144,7 +144,7 @@ public class ImportKmlFragment extends BaseImportFragment {
         selector.getSelectedPositions();
 
         Import.KMLImportTask.KMLImportParams params = new Import.KMLImportTask.KMLImportParams(
-                _FileName, dal, getParams()
+                app, _FileName, getParams()
         );
 
         onTaskStart();
@@ -176,7 +176,7 @@ public class ImportKmlFragment extends BaseImportFragment {
         for (KmlPolygonsAdapter.KmlPolygonHolder holder : polyParams) {
             params.add(new Import.KMLImportTask.KMLPolyParams(
                     holder.getName(), null, null, null, null, polygons.get(holder.getAdapterPosition()),
-                    TwoTrailsApp.getInstance().getMetadataSettings().getDefaultMetadata()));
+                    TwoTrailsApp.getInstance(getActivity()).getMetadataSettings().getDefaultMetadata()));
         }
 
         return params;
