@@ -11,18 +11,16 @@ import com.esri.arcgisruntime.symbology.SimpleLineSymbol;
 import com.esri.arcgisruntime.symbology.SimpleMarkerSymbol;
 import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.geospatial.Position;
-import com.usda.fmsc.twotrails.TwoTrailsApp;
-import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment;
+import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment.MarkerData;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Stack;
 
 public class ArcGisTrailGraphic implements ITrailGraphic, IMarkerDataGraphic {
-    private HashMap<String, IMultiMapFragment.MarkerData> _MarkerData;
+    private HashMap<String, MarkerData> _MarkerData;
 
     private MapView map;
     private Extent polyBounds;
@@ -32,7 +30,6 @@ public class ArcGisTrailGraphic implements ITrailGraphic, IMarkerDataGraphic {
     private Graphic _TrailGraphic;
     private PointCollection _TrailPoints;
     private SimpleLineSymbol _TrailOutline;
-    private Stack<String> keys;
 
     private SimpleMarkerSymbol markerOpts;
 
@@ -50,7 +47,6 @@ public class ArcGisTrailGraphic implements ITrailGraphic, IMarkerDataGraphic {
     public void build(List<TtPoint> points, HashMap<String, TtMetadata> meta, TrailGraphicOptions graphicOptions) {
         _MarkerData = new HashMap<>();
 
-        keys = new Stack<>();
         eBuilder = new Extent.Builder();
 
         _TrailLayer = new GraphicsOverlay();
@@ -90,11 +86,12 @@ public class ArcGisTrailGraphic implements ITrailGraphic, IMarkerDataGraphic {
         Position pos = TtUtils.Points.getLatLonFromPoint(point, false, metadata);
         Point posLL = new Point(pos.getLongitudeSignedDecimal(), pos.getLatitudeSignedDecimal(), SpatialReferences.getWgs84());
         Graphic mk = new Graphic(posLL, markerOpts);
+        MarkerData md = new MarkerData(point, metadata, true);
+
+        _MarkerData.put(md.getKey(), md);
+        mk.getAttributes().put(MarkerData.ATTR_KEY, md);
         _PtsLayer.getGraphics().add(mk);
 
-        String key = mk.hashCode() + "_trail";
-        _MarkerData.put(key, new IMultiMapFragment.MarkerData(point, metadata, true));
-        keys.add(key);
 
         if (point.isOnBnd()) {
             if (_TrailPoints == null) {
@@ -132,16 +129,18 @@ public class ArcGisTrailGraphic implements ITrailGraphic, IMarkerDataGraphic {
                 }
             }
 
+            Graphic ptGrapic = _PtsLayer.getGraphics().get(_PtsLayer.getGraphics().size() - 1);
+            if (ptGrapic.getAttributes().containsKey(MarkerData.ATTR_KEY)) {
+                _MarkerData.remove((String) ptGrapic.getAttributes().get(MarkerData.ATTR_KEY));
+            }
             _PtsLayer.getGraphics().remove(_PtsLayer.getGraphics().size() - 1);
-
-            _MarkerData.remove(keys.pop());
         }
     }
 
 
 
     @Override
-    public HashMap<String, IMultiMapFragment.MarkerData> getMarkerData() {
+    public HashMap<String, MarkerData> getMarkerData() {
         return _MarkerData;
     }
 

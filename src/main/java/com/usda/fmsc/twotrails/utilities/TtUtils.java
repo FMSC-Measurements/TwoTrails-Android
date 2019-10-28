@@ -1769,8 +1769,8 @@ public class TtUtils {
             TextView title = view.findViewById(R.id.title);
             TextView content = view.findViewById(R.id.text1);
 
-            title.setText(StringEx.format("%d", markerData.Point.getPID()));
-            content.setText(getInfoWindowSnippet(markerData.Point, markerData.Adjusted, markerData.Metadata));
+            title.setText(StringEx.format("%d", markerData.getPoint().getPID()));
+            content.setText(getInfoWindowSnippet(markerData.getPoint(), markerData.isAdjusted(), markerData.getMetadata()));
 
             return view;
         }

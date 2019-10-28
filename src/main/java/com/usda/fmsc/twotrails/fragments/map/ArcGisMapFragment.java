@@ -9,13 +9,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
-
+import com.esri.arcgisruntime.concurrent.ListenableFuture;
 import com.esri.arcgisruntime.geometry.Envelope;
 import com.esri.arcgisruntime.geometry.Geometry;
-import com.esri.arcgisruntime.geometry.GeometryEngine;
 import com.esri.arcgisruntime.geometry.GeometryType;
 import com.esri.arcgisruntime.geometry.Point;
 import com.esri.arcgisruntime.geometry.SpatialReference;
@@ -25,31 +23,21 @@ import com.esri.arcgisruntime.loadable.LoadStatusChangedListener;
 import com.esri.arcgisruntime.mapping.ArcGISMap;
 import com.esri.arcgisruntime.mapping.Viewpoint;
 import com.esri.arcgisruntime.mapping.view.AnimationCurve;
+import com.esri.arcgisruntime.mapping.view.Callout;
 import com.esri.arcgisruntime.mapping.view.DefaultMapViewOnTouchListener;
-import com.esri.arcgisruntime.mapping.view.DrawStatusChangedEvent;
-import com.esri.arcgisruntime.mapping.view.DrawStatusChangedListener;
 import com.esri.arcgisruntime.mapping.view.Graphic;
 import com.esri.arcgisruntime.mapping.view.GraphicsOverlay;
-import com.esri.arcgisruntime.mapping.view.LayerViewStateChangedEvent;
-import com.esri.arcgisruntime.mapping.view.LayerViewStateChangedListener;
+import com.esri.arcgisruntime.mapping.view.IdentifyGraphicsOverlayResult;
 import com.esri.arcgisruntime.mapping.view.MapRotationChangedEvent;
 import com.esri.arcgisruntime.mapping.view.MapRotationChangedListener;
 import com.esri.arcgisruntime.mapping.view.MapScaleChangedEvent;
 import com.esri.arcgisruntime.mapping.view.MapScaleChangedListener;
 import com.esri.arcgisruntime.mapping.view.MapView;
-import com.esri.arcgisruntime.mapping.view.NavigationChangedEvent;
-import com.esri.arcgisruntime.mapping.view.NavigationChangedListener;
-import com.esri.arcgisruntime.mapping.view.SpatialReferenceChangedEvent;
-import com.esri.arcgisruntime.mapping.view.SpatialReferenceChangedListener;
-import com.esri.arcgisruntime.mapping.view.ViewpointChangedEvent;
-import com.esri.arcgisruntime.mapping.view.ViewpointChangedListener;
 import com.esri.arcgisruntime.mapping.view.WrapAroundMode;
 import com.esri.arcgisruntime.symbology.SimpleMarkerSymbol;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.geospatial.Position;
-import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
-import com.usda.fmsc.geospatial.nmea41.sentences.base.NmeaSentence;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
@@ -64,10 +52,12 @@ import com.usda.fmsc.twotrails.objects.map.TrailGraphicManager;
 import com.usda.fmsc.twotrails.ui.ArcMapCompass;
 import com.usda.fmsc.twotrails.units.MapType;
 import com.usda.fmsc.twotrails.utilities.ArcGISTools;
+import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.ExecutionException;
 
 
 public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, MapRotationChangedListener, MapScaleChangedListener,
@@ -85,7 +75,9 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Ma
 
     private MapView mapView;
     private GraphicsOverlay _LocationLayer = new GraphicsOverlay();
-    private SimpleMarkerSymbol sms;
+    private Callout callout;
+
+    private LayoutInflater inflater;
 
     private ArrayList<IMarkerDataGraphic> _MarkerDataGraphics = new ArrayList<>();
     private HashMap<String, ArcGisPolygonGraphic> polygonGraphics = new HashMap<>();
@@ -132,7 +124,7 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Ma
         
         TtAppCtx = TwoTrailsApp.getInstance();
 
-        //inflater = LayoutInflater.from(getContext());
+        inflater = LayoutInflater.from(getContext());
 
         Bundle bundle = getArguments();
 
@@ -157,51 +149,8 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Ma
         mapView.addMapRotationChangedListener(this);
         mapView.addMapScaleChangedListener(this);
 
-        mapView.addDrawStatusChangedListener(new DrawStatusChangedListener() {
-            @Override
-            public void drawStatusChanged(DrawStatusChangedEvent drawStatusChangedEvent) {
-
-            }
-        });
-
-//        mapView.addSpatialReferenceChangedListener(new SpatialReferenceChangedListener() {
-//            @Override
-//            public void spatialReferenceChanged(SpatialReferenceChangedEvent spatialReferenceChangedEvent) {
-//
-//            }
-//        });
-
-        mapView.addNavigationChangedListener(new NavigationChangedListener() {
-            @Override
-            public void navigationChanged(NavigationChangedEvent navigationChangedEvent) {
-
-            }
-        });
-
-        mapView.addLayerViewStateChangedListener(new LayerViewStateChangedListener() {
-            @Override
-            public void layerViewStateChanged(LayerViewStateChangedEvent layerViewStateChangedEvent) {
-
-            }
-        });
-
-//        mapView.addViewpointChangedListener(new ViewpointChangedListener() {
-//            @Override
-//            public void viewpointChanged(ViewpointChangedEvent viewpointChangedEvent) {
-//
-//            }
-//        });
-
-
-//        mapView.enableWrapAround(true);
-//        mapView.setAllowRotationByPinch(true);
-//
-//        mapView.setOnStatusChangedListener(this);
-//        mapView.setOnZoomListener(this);
-//        mapView.setOnPanListener(this);
-
         mapView.setOnTouchListener(new MapViewOnTouchListenerEx(getContext(), mapView));
-//
+
         compass = view.findViewById(R.id.compass);
         compass.setMapView(mapView);
 
@@ -310,9 +259,7 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Ma
 
     public void changeBasemap(final ArcGisMapLayer agml) {
         ArcGISMap mBasemapLayer;
-        if (mapView == null) {
-            mBasemapLayer = null;
-        } else {
+        if (mapView != null) {
             try {
                 ArcGISMap baseMap = TtAppCtx.getArcGISTools().getBaseLayer(getContext(), agml);
 
@@ -326,14 +273,6 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Ma
                 mBasemapLayer = baseMap;
 
                 mapView.setMap(mBasemapLayer);
-
-//                if (agml.hasScales()) {
-//                    mapView.setMaxScale(agml.getMaxScale());
-//                    mapView.setMinScale(agml.getMinScale());
-//                } else {
-//                    mapView.setMaxScale(50);
-//                    mapView.setMinScale(591657550.5);
-//                }
 
                 if (mmListener != null) {
                     mmListener.onMapTypeChanged(MapType.ArcGIS, basemapId, agml.isOnline());
@@ -436,8 +375,8 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Ma
     }
 
 
-    private void onMarkerClick(int graphicId, Geometry geometry) {
-        MarkerData markerData = getMarkerData(Integer.toHexString(graphicId));
+    private void onMarkerClick(String mdKey, Geometry geometry) {
+        MarkerData markerData = getMarkerData(mdKey);
 
         if (markerData != null) {
             if (geometry.getGeometryType().equals(GeometryType.POINT)) {
@@ -445,7 +384,7 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Ma
 
                 mapView.setViewpointCenterAsync(point);
 
-                //showSelectedMarkerInfo(markerData, point);
+                showSelectedMarkerInfo(markerData, point);
             }
 
             if (mmListener != null) {
@@ -453,13 +392,6 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Ma
             }
         }
     }
-
-//    @Override
-//    public Position getMapLatLonCenter() {
-//        Point point = TtAppCtx.getArcGISTools().mapPointToLatLng(mapView.getCenter(), mapView);
-//
-//        return new Position(point.getY(), point.getX());
-//    }
 
     @Override
     public Extent getExtents() {
@@ -497,7 +429,7 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Ma
     }
 
 
-    public int getMapZoomLevel() {
+//    public int getMapZoomLevel() {
 //        if (mBasemapLayer instanceof ArcGISTiledMapServiceLayer) {
 //            double mapRes = mapView.getResolution();
 //            double[] resolutions = ((ArcGISTiledMapServiceLayer) mBasemapLayer).getTileInfo().getResolutions();
@@ -507,9 +439,9 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Ma
 //                    return i;
 //            }
 //        }
-
-        return  -1;
-    }
+//
+//        return  -1;
+//    }
 
 
 //    public Point getMapPoint(int x, int y) {
@@ -621,10 +553,10 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Ma
     }
 
     @Override
-    public MarkerData getMarkerData(String id) {
+    public MarkerData getMarkerData(String key) {
         for (IMarkerDataGraphic mdg : _MarkerDataGraphics) {
-            if (mdg.getMarkerData().containsKey(id)) {
-                return mdg.getMarkerData().get(id);
+            if (mdg.getMarkerData().containsKey(key)) {
+                return mdg.getMarkerData().get(key);
             }
         }
 
@@ -634,28 +566,23 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Ma
 
     @Override
     public void hideSelectedMarkerInfo() {
-//        if (callout != null) {
-//            callout.hide();
-//            callout = null;
-//        }
+        if (callout != null) {
+            callout.dismiss();
+            callout = null;
+        }
     }
 
-//    @Override
-//    public Position getMapLatLonCenter() {
-//        return mapView.get;
-//    }
+    private void showSelectedMarkerInfo(MarkerData markerData, Point point) {
+        if (callout != null) {
+            callout.dismiss();
+        } else {
+            callout = mapView.getCallout();
+        }
 
-//    private void showSelectedMarkerInfo(MarkerData markerData, Point point) {
-//        if (callout != null) {
-//            callout.hide();
-//        } else {
-//            callout = mapView.getCallout();
-//        }
-//
-//        if (markerData != null) {
-//            callout.show(point, TtUtils.ArcMap.createInfoWindow(inflater, markerData));
-//        }
-//    }
+        if (markerData != null) {
+            callout.show(TtUtils.ArcMap.createInfoWindow(inflater, markerData), point);
+        }
+    }
 
 
 
@@ -695,6 +622,7 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Ma
         public MapViewOnTouchListenerEx(Context context, MapView mapView) {
             super(context, mapView);
         }
+
 
         @Override
         public boolean onSingleTapConfirmed(MotionEvent e) {
@@ -759,24 +687,26 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Ma
             return super.onSingleTapConfirmed(e);
         }
 
-        boolean displayInfoWindow(GraphicsOverlay layer, MotionEvent me) {
+        boolean displayInfoWindow(GraphicsOverlay overlay, MotionEvent me) {
             try {
-//                layer.getSelectedGraphics();
-//
-//                int[] graphicIds = layer.getGraphicIDs(me.getX(), me.getY(), TOLERANCE, 1);
-//
-//                Graphic graphic = null;
-//
-//                if (graphicIds.length > 0) {
-//                    graphic = layer.getGraphic(graphicIds[0]);
-//                }
-//
-//                if (graphic != null) {
-//                    onMarkerClick(graphicIds[0], graphic.getGeometry());
-//                    return true;
-//                }
+                final ListenableFuture<IdentifyGraphicsOverlayResult> identifyFuture = mMapView.identifyGraphicsOverlayAsync(overlay,
+                        new android.graphics.Point((int)me.getX(), (int)me.getY()), TOLERANCE, false, 5);
+
+                identifyFuture.addDoneListener(() -> {
+                    try {
+                        for (Graphic graphic : identifyFuture.get().getGraphics()) {
+                            if (graphic.getGeometry().getGeometryType() == GeometryType.POINT && graphic.getAttributes().containsKey(MarkerData.ATTR_KEY)) {
+                                onMarkerClick((String)graphic.getAttributes().get(MarkerData.ATTR_KEY), graphic.getGeometry());
+                                break;
+                            }
+                        }
+                    } catch (InterruptedException | ExecutionException ex) {
+                        //
+                    }
+
+                });
             } catch (Exception e) {
-                //getGraphicIDs throws IllegalStateException sometimes for no reason
+                //
             }
 
             return false;
