@@ -112,11 +112,11 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
 
             if (point.isBndPoint()) {
                 Graphic adjmk = new Graphic(adjLL, adjMkOpts);
-                adjmk.getAttributes().put(MarkerData.ATTR_KEY, adjMd);
+                adjmk.getAttributes().put(MarkerData.ATTR_KEY, adjMd.getKey());
                 _AdjBndPts.getGraphics().add(adjmk);
 
                 Graphic unadjmk = new Graphic(adjLL, unAdjMkOpts);
-                unadjmk.getAttributes().put(MarkerData.ATTR_KEY, unadjMd);
+                unadjmk.getAttributes().put(MarkerData.ATTR_KEY, unadjMd.getKey());
                 _UnadjBndPts.getGraphics().add(unadjmk);
 
                 adjBndPC.add(adjLL);
@@ -128,11 +128,11 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
 
             if (point.isNavPoint()) {
                 Graphic adjmk = new Graphic(adjLL, adjMkOpts);
-                adjmk.getAttributes().put(MarkerData.ATTR_KEY, adjMd);
+                adjmk.getAttributes().put(MarkerData.ATTR_KEY, adjMd.getKey());
                 _AdjNavPts.getGraphics().add(adjmk);
 
                 Graphic unadjmk = new Graphic(adjLL, unAdjMkOpts);
-                unadjmk.getAttributes().put(MarkerData.ATTR_KEY, unadjMd);
+                unadjmk.getAttributes().put(MarkerData.ATTR_KEY, unadjMd.getKey());
                 _UnadjNavPts.getGraphics().add(unadjmk);
 
                 adjNavPLC.add(adjLL);
@@ -141,17 +141,17 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
 
             if (point.getOp() == OpType.WayPoint) {
                 Graphic unadjmk = new Graphic(adjLL, unAdjMkOpts);
-                unadjmk.getAttributes().put(MarkerData.ATTR_KEY, unadjMd);
+                unadjmk.getAttributes().put(MarkerData.ATTR_KEY, unadjMd.getKey());
                 _WayPts.getGraphics().add(unadjmk);
             }
 
             if (point.getOp() == OpType.SideShot && !point.isOnBnd()) {
                 Graphic adjmk = new Graphic(adjLL, adjMkOpts);
-                adjmk.getAttributes().put(MarkerData.ATTR_KEY, adjMd);
+                adjmk.getAttributes().put(MarkerData.ATTR_KEY, adjMd.getKey());
                 _AdjMiscPts.getGraphics().add(adjmk);
 
                 Graphic unadjmk = new Graphic(adjLL, unAdjMkOpts);
-                unadjmk.getAttributes().put(MarkerData.ATTR_KEY, unadjMd);
+                unadjmk.getAttributes().put(MarkerData.ATTR_KEY, unadjMd.getKey());
                 _UnadjMiscPts.getGraphics().add(unadjmk);
             }
 
