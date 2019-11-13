@@ -121,8 +121,6 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Ma
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
-        TtAppCtx = TwoTrailsApp.getInstance(getActivity());
 
         inflater = LayoutInflater.from(getContext());
 
@@ -468,6 +466,10 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Ma
     public void onAttach(Context context) {
         super.onAttach(context);
         if (context instanceof MultiMapListener) {
+            if (TtAppCtx == null) {
+                TtAppCtx = TwoTrailsApp.getInstance(context);
+            }
+
             mmListener = (MultiMapListener) context;
 
             if (mmListener.shouldStartGps()) {

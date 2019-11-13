@@ -89,7 +89,7 @@ public class ArcGisTrailGraphic implements ITrailGraphic, IMarkerDataGraphic {
         MarkerData md = new MarkerData(point, metadata, true);
 
         _MarkerData.put(md.getKey(), md);
-        mk.getAttributes().put(MarkerData.ATTR_KEY, md);
+        mk.getAttributes().put(MarkerData.ATTR_KEY, md.getKey());
         _PtsLayer.getGraphics().add(mk);
 
 
