@@ -86,6 +86,7 @@ public interface IMultiMapFragment {
         };
 
 
+
         public MapOptions(Parcel in) {
             MapId = in.readInt();
             North = in.readDouble();
