@@ -812,7 +812,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
                 }
             }
 
-            //resetMapBounds();
+            resetMapBounds();
 
             setupPolygonOptionsUI();
         }

@@ -160,9 +160,9 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Ma
 
         mapView.getGraphicsOverlays().add(_LocationLayer);
 
-        if (startUpMapOptions.hasExtents() || startUpMapOptions.hasLocation()) {
-            centerOnLoad = true;
-        }
+//        if (startUpMapOptions.hasExtents() || startUpMapOptions.hasLocation()) {
+//            centerOnLoad = true;
+//        }
 
         return view;
     }
