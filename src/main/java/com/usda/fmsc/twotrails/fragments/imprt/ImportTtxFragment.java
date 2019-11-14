@@ -1,49 +1,46 @@
 package com.usda.fmsc.twotrails.fragments.imprt;
 
 import android.os.Bundle;
-import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
-import com.usda.fmsc.android.widget.MultiSelectRecyclerView;
+import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.LinearLayoutManager;
+
+import com.usda.fmsc.android.widget.RecyclerViewEx;
 import com.usda.fmsc.android.widget.multiselection.MultiSelector;
 import com.usda.fmsc.android.widget.multiselection.SelectableHolder;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
-import com.usda.fmsc.utilities.gpx.GpxBaseTrack;
-import com.usda.fmsc.utilities.gpx.GpxDocument;
-import com.usda.fmsc.utilities.StringEx;
-import com.usda.fmsc.twotrails.adapters.GpxTracksAdapter;
-import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.utilities.Import;
-import com.usda.fmsc.twotrails.utilities.Import.GPXImportTask;
+import com.usda.fmsc.twotrails.adapters.TtxPolygonsAdapter;
+import com.usda.fmsc.twotrails.data.DataAccessLayer;
+import com.usda.fmsc.twotrails.objects.TtPolygon;
+import com.usda.fmsc.twotrails.utilities.Import.TTXImportTask;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import jp.wasabeef.recyclerview.animators.SlideInUpAnimator;
 
-public class ImportGpxFragment extends BaseImportFragment {
+public class ImportTtxFragment extends BaseImportFragment {
     private static final String FILENAME = "filename";
 
-    private MultiSelectRecyclerView rvImport;
-    private MultiSelector selector = new MultiSelector( new MultiSelector.Listener() {
+    private RecyclerViewEx rvImport;
+    private MultiSelector selector = new MultiSelector(new MultiSelector.Listener() {
         @Override
         public void onItemSelectionChange(SelectableHolder holder, boolean isSelected) {
-            if (holder instanceof GpxTracksAdapter.GpxBaseTrackHolder) {
-                GpxTracksAdapter.GpxBaseTrackHolder gh = (GpxTracksAdapter.GpxBaseTrackHolder)holder;
+            if (holder instanceof TtxPolygonsAdapter.TtPolygonHolder) {
+                TtxPolygonsAdapter.TtPolygonHolder ttxHolder = (TtxPolygonsAdapter.TtPolygonHolder)holder;
 
 
-                if (isSelected && !polyParams.contains(gh)) {
-                    polyParams.add(gh);
+                if (isSelected && !polyParams.contains(ttxHolder)) {
+                    polyParams.add(ttxHolder);
                 } else {
-                    polyParams.remove(gh);
+                    polyParams.remove(ttxHolder);
                 }
-
-                readyToImport(validate());
             }
+
+            readyToImport(validate());
         }
 
         @Override
@@ -53,18 +50,18 @@ public class ImportGpxFragment extends BaseImportFragment {
         }
     });
 
-    private Import.GPXImportTask task;
+    private TTXImportTask task;
 
     private String _FileName;
 
-    private GpxDocument gpxDocument;
+    private DataAccessLayer dal;
 
-    private List<GpxTracksAdapter.GpxBaseTrackHolder> polyParams;
-    private List<GpxBaseTrack> tracks;
+    private List<TtxPolygonsAdapter.TtPolygonHolder> polyParams;
+    private List<TtPolygon> polygons;
 
 
-    public static ImportGpxFragment newInstance(String fileName) {
-        ImportGpxFragment fragment = new ImportGpxFragment();
+    public static ImportTtxFragment newInstance(String fileName) {
+        ImportTtxFragment fragment = new ImportTtxFragment();
         Bundle args = new Bundle();
 
         args.putString(FILENAME, fileName);
@@ -108,14 +105,12 @@ public class ImportGpxFragment extends BaseImportFragment {
 
 
     private void setupTracks() {
-        if (rvImport != null && gpxDocument != null) {
-            tracks = new ArrayList<>();
-            tracks.addAll(gpxDocument.getTracks());
-            tracks.addAll(gpxDocument.getRoutes());
+        if (rvImport != null) {
+            polygons = dal.getPolygons();
 
             selector.clearSelections();
 
-            GpxTracksAdapter adapter = new GpxTracksAdapter(getContext(), tracks, selector);
+            TtxPolygonsAdapter adapter = new TtxPolygonsAdapter(getContext(), polygons, dal, selector);
             rvImport.setAdapter(adapter);
         }
     }
@@ -123,14 +118,14 @@ public class ImportGpxFragment extends BaseImportFragment {
 
     @Override
     protected void runImportTask(TwoTrailsApp app) {
-        task = new GPXImportTask();
+        task = new TTXImportTask();
 
         task.setListener(result -> onTaskComplete(result.getCode()));
 
         selector.getSelectedPositions();
 
-        GPXImportTask.GPXImportParams params = new GPXImportTask.GPXImportParams(
-                app, _FileName, getParams()
+        TTXImportTask.TTXImportParams params = new TTXImportTask.TTXImportParams(
+                app, _FileName, getPolygons()
         );
 
         onTaskStart();
@@ -155,7 +150,7 @@ public class ImportGpxFragment extends BaseImportFragment {
         return true;
     }
 
-    private List<GPXImportTask.GPXPolyParams> getParams() {
+    private List<TtPolygon> getPolygons() {
         ArrayList<GPXImportTask.GPXPolyParams> params = new ArrayList<>();
 
         for (GpxTracksAdapter.GpxBaseTrackHolder holder : polyParams) {

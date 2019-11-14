@@ -840,17 +840,17 @@ public class Import {
 
         @Override
         protected ImportResult doInBackground(KMLImportParams... params) {
-            KMLImportParams gip;
+            KMLImportParams kip;
 
-            if (params.length < 1 || !validatePolyParams((gip = params[0]).getPolyParms())) {
+            if (params.length < 1 || !validatePolyParams((kip = params[0]).getPolyParms())) {
                 return new ImportResult(ImportResultCode.InvalidParams);
             }
 
-            if (gip.getFilePath() == null) {
+            if (kip.getFilePath() == null) {
                 return new ImportResult(ImportResultCode.InvalidParams, "No File selected");
             }
 
-            DataAccessLayer dal = gip.getDal();
+            DataAccessLayer dal = kip.getDal();
 
             try {
                 ArrayList<TtPolygon> polygons = new ArrayList<>();
@@ -859,7 +859,7 @@ public class Import {
                 TtPolygon poly;
                 int polyCount = dal.getItemCount(TwoTrailsSchema.PolygonSchema.TableName);
 
-                for (KMLPolyParams gpp: gip.getPolyParms()) {
+                for (KMLPolyParams gpp: kip.getPolyParms()) {
                     poly = new TtPolygon();
                     poly.setName(gpp.PolyName);
 
@@ -947,7 +947,7 @@ public class Import {
                     return new ImportResult(ImportResultCode.Cancelled);
                 }
             } catch (Exception ex) {
-                gip.getApp().getReport().writeError(ex.getMessage(), "Import:GPXImportTask", ex.getStackTrace());
+                kip.getApp().getReport().writeError(ex.getMessage(), "Import:GPXImportTask", ex.getStackTrace());
                 return new ImportResult(ImportResultCode.ImportFailure, "Data error");
             }
         }
@@ -1007,6 +1007,129 @@ public class Import {
         }
     }
     //endregion
+
+    //region TTX
+    public static class TTXImportTask extends ImportTask<TTXImportTask.TTXImportParams, Void> {
+
+        @Override
+        protected ImportResult doInBackground(TTXImportParams... params) {
+            TTXImportParams tip;
+
+            //check to make sure all quondams have parent polygons imported
+            if (params.length < 1) {
+                return new ImportResult(ImportResultCode.InvalidParams);
+            } else {
+                tip = params[0];
+            }
+
+            if (tip.getFilePath() == null) {
+                return new ImportResult(ImportResultCode.InvalidParams, "No File selected");
+            }
+
+            DataAccessLayer dal = tip.getDal();
+
+            try {
+                ArrayList<TtPolygon> polygons = new ArrayList<>();
+                ArrayList<TtPoint> points = new ArrayList<>();
+
+                TtPolygon poly;
+                int polyCount = dal.getItemCount(TwoTrailsSchema.PolygonSchema.TableName);
+
+                for (TtPolygon polygon: tip.getPolygons()) {
+                    poly = new TtPolygon();
+                    poly.setName(polygon.getName());
+
+                    poly.setAccuracy(polygon.getAccuracy());
+                    poly.setIncrementBy(polygon.getIncrementBy());
+                    poly.setPointStartIndex(polygon.getPointStartIndex());
+                    poly.setDescription(polygon.getDescription());
+
+                    polygons.add(poly);
+
+                    int index = 0;
+                    GpsPoint point, prevPoint = null;
+
+                    for (Coordinates coord : polygon.Polygon.getInnerBoundary() != null ?
+                            polygon.Polygon.getInnerBoundary() : polygon.Polygon.getOuterBoundary()) {
+                        point = new GpsPoint();
+
+                        point.setIndex(index);
+                        index++;
+
+                        point.setPID(PointNamer.namePoint(prevPoint, poly));
+
+                        point.setPolyCN(poly.getCN());
+                        point.setPolyName(poly.getName());
+
+                        point.setGroupCN(Consts.EmptyGuid);
+                        point.setGroupName(Consts.Defaults.MainGroupName);
+
+                        point.setMetadataCN(polygon.Metadata.getCN());
+
+                        point.setOnBnd(true);
+
+                        UTMCoords utmcoords = UTMTools.convertLatLonSignedDecToUTM(coord.getLatitude(), coord.getLongitude(), polygon.Metadata.getZone());
+
+                        point.setUnAdjX(utmcoords.getX());
+                        point.setUnAdjY(utmcoords.getY());
+
+                        point.setLatitude(coord.getLatitude());
+                        point.setLongitude(coord.getLongitude());
+
+                        if (coord.getAltitude() != null) {
+                            point.setElevation(coord.getAltitude());
+                            point.setUnAdjZ(TtUtils.Convert.distance(coord.getAltitude(), UomElevation.Meters, polygon.Metadata.getElevation()));
+                        }
+
+
+                        points.add(point);
+                        prevPoint = point;
+                    }
+
+                    polyCount++;
+                }
+
+
+                if (!isCancelled()) {
+                    if (polygons.size() > 0) {
+                        for (TtPolygon p : polygons) {
+                            if (!dal.insertPolygon(p)) {
+                                throw new RuntimeException("Failed to insert Polygons");
+                            }
+                        }
+                    }
+
+                    if (points.size() > 0) {
+                        if (!dal.insertPoints(points)) {
+                            throw new RuntimeException("Failed to insert Points");
+                        }
+                    }
+
+                    return new ImportResult(ImportResultCode.Success);
+                } else {
+                    return new ImportResult(ImportResultCode.Cancelled);
+                }
+            } catch (Exception ex) {
+                tip.getApp().getReport().writeError(ex.getMessage(), "Import:GPXImportTask", ex.getStackTrace());
+                return new ImportResult(ImportResultCode.ImportFailure, "Data error");
+            }
+        }
+
+        public static class TTXImportParams extends ImportParams {
+            private Collection<TtPolygon> polygons;
+
+            public TTXImportParams(TwoTrailsApp app, String filePath, Collection<TtPolygon> polygons) {
+                super(app, filePath);
+                this.polygons = polygons;
+            }
+
+            public Collection<TtPolygon> getPolygons() {
+                return polygons;
+            }
+        }
+    }
+    //endregion
+
 
     public static abstract class ImportTask<IP extends ImportParams, Progress> extends AsyncTask<IP, Progress, ImportResult> {
         ImportTaskListener listener;
