@@ -80,8 +80,8 @@ public class DataAccessLayer extends IDataLayer {
 
 
     //region Constructors / Open / Close
-    public DataAccessLayer(String filePath, TwoTrailsApp contex) {
-        TtAppCtx = contex;
+    public DataAccessLayer(String filePath, TwoTrailsApp context) {
+        TtAppCtx = context;
 
         _FilePath = filePath;
 

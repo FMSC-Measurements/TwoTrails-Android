@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -16,6 +17,7 @@ import com.usda.fmsc.twotrails.adapters.TtxPolygonsAdapter;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.utilities.Import.TTXImportTask;
+import com.usda.fmsc.utilities.StringEx;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,7 +56,7 @@ public class ImportTtxFragment extends BaseImportFragment {
 
     private String _FileName;
 
-    private DataAccessLayer dal;
+    private DataAccessLayer idal;
 
     private List<TtxPolygonsAdapter.TtPolygonHolder> polyParams;
     private List<TtPolygon> polygons;
@@ -98,19 +100,19 @@ public class ImportTtxFragment extends BaseImportFragment {
         rvImport.setItemAnimator(new SlideInUpAnimator());
         rvImport.setViewHasFooter(true);
 
-        setupTracks();
+        setupPolygons();
 
         return view;
     }
 
 
-    private void setupTracks() {
+    private void setupPolygons() {
         if (rvImport != null) {
-            polygons = dal.getPolygons();
+            polygons = idal.getPolygons();
 
             selector.clearSelections();
 
-            TtxPolygonsAdapter adapter = new TtxPolygonsAdapter(getContext(), polygons, dal, selector);
+            TtxPolygonsAdapter adapter = new TtxPolygonsAdapter(getContext(), polygons, idal, selector);
             rvImport.setAdapter(adapter);
         }
     }
@@ -125,7 +127,7 @@ public class ImportTtxFragment extends BaseImportFragment {
         selector.getSelectedPositions();
 
         TTXImportTask.TTXImportParams params = new TTXImportTask.TTXImportParams(
-                app, _FileName, getPolygons()
+                app, _FileName, getPolygons(), idal
         );
 
         onTaskStart();
@@ -151,31 +153,23 @@ public class ImportTtxFragment extends BaseImportFragment {
     }
 
     private List<TtPolygon> getPolygons() {
-        ArrayList<GPXImportTask.GPXPolyParams> params = new ArrayList<>();
-
-        for (GpxTracksAdapter.GpxBaseTrackHolder holder : polyParams) {
-            params.add(new GPXImportTask.GPXPolyParams(
-                    holder.getName(), null, null, null, null,
-                    tracks.get(holder.getAdapterPosition()), TwoTrailsApp.getInstance(getActivity()).getMetadataSettings().getDefaultMetadata()));
-        }
-
-        return params;
+        return idal.getPolygons();
     }
 
-    private void scrollToPositionAndExpand(GpxTracksAdapter.GpxBaseTrackHolder holder) {
+    private void scrollToPositionAndExpand(TtxPolygonsAdapter.TtPolygonHolder holder) {
         rvImport.smoothScrollToPosition(holder.getLayoutPosition());
     }
 
     @Override
     public void updateFileName(String filename) {
-        if (!StringEx.isEmpty(_FileName)) {
+        if (!StringEx.isEmpty(_FileName) && getActivity() != null) {
 
             _FileName = filename;
 
             try {
-                gpxDocument = GpxDocument.parseFile(_FileName);
+                idal = new DataAccessLayer(_FileName, TwoTrailsApp.getInstance(getActivity()));
 
-                setupTracks();
+                setupPolygons();
 
             } catch (Exception e) {
                 e.printStackTrace();
