@@ -41,6 +41,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.function.Function;
+
+import androidx.constraintlayout.widget.Guideline;
 
 public class Import {
     
@@ -1027,63 +1031,64 @@ public class Import {
             }
 
             DataAccessLayer dal = tip.getDal();
+            DataAccessLayer idal = tip.getImportDal();
 
             try {
                 ArrayList<TtPolygon> polygons = new ArrayList<>();
                 ArrayList<TtPoint> points = new ArrayList<>();
 
                 TtPolygon poly;
-                int polyCount = dal.getItemCount(TwoTrailsSchema.PolygonSchema.TableName);
+                int polyCount = idal.getItemCount(TwoTrailsSchema.PolygonSchema.TableName);
+
+                HashMap<String, TtPolygon> addPolys = new HashMap<>();
+                HashMap<String, String> polyCNCvt = new HashMap<>();
+                HashMap<String, TtPolygon> currPolys = dal.getPolygonsMap();
+
+                HashMap<String, TtPoint> addPoints = new HashMap<>();
+                HashMap<String, TtPoint> cPoints = dal.getPointsMap();
+                HashMap<String, TtPoint> iPoints = idal.getPointsMap();
+
+                Function<String, List<TtPoint>> filterPointsByPoly = (cn) -> {
+                    ArrayList<TtPoint> fp = new ArrayList<>();
+                    for (TtPoint p : iPoints.values()) {
+                        if (p.getPolyCN().equals(cn))
+                            fp.add(p);
+                    }
+
+                    return fp;
+                };
 
                 for (TtPolygon polygon: tip.getPolygons()) {
-                    poly = new TtPolygon();
-                    poly.setName(polygon.getName());
+                    String oCN = polygon.getCN();
 
-                    poly.setAccuracy(polygon.getAccuracy());
-                    poly.setIncrementBy(polygon.getIncrementBy());
-                    poly.setPointStartIndex(polygon.getPointStartIndex());
-                    poly.setDescription(polygon.getDescription());
+                    if (currPolys.containsKey(polygon.getCN())) {
+                        String newPolyUuid = java.util.UUID.randomUUID().toString();
+                        polyCNCvt.put(oCN, newPolyUuid);
+                        polygon.setCN(newPolyUuid);
+                    }
 
-                    polygons.add(poly);
+                    addPolys.put(polygon.getCN(), polygon);
 
-                    int index = 0;
-                    GpsPoint point, prevPoint = null;
+                    for (TtPoint point : filterPointsByPoly.apply(oCN)) {
+                        String opCN = point.getCN();
+                        String pointCNCvt = null;
 
-                    for (Coordinates coord : polygon.Polygon.getInnerBoundary() != null ?
-                            polygon.Polygon.getInnerBoundary() : polygon.Polygon.getOuterBoundary()) {
-                        point = new GpsPoint();
+                        if (cPoints.containsKey(point.getCN())) {
+                            pointCNCvt = java.util.UUID.randomUUID().toString();
+                            point.setCN(pointCNCvt);
+                        }
 
-                        point.setIndex(index);
-                        index++;
-
-                        point.setPID(PointNamer.namePoint(prevPoint, poly));
-
-                        point.setPolyCN(poly.getCN());
-                        point.setPolyName(poly.getName());
-
-                        point.setGroupCN(Consts.EmptyGuid);
-                        point.setGroupName(Consts.Defaults.MainGroupName);
-
-                        point.setMetadataCN(polygon.Metadata.getCN());
-
-                        point.setOnBnd(true);
-
-                        UTMCoords utmcoords = UTMTools.convertLatLonSignedDecToUTM(coord.getLatitude(), coord.getLongitude(), polygon.Metadata.getZone());
-
-                        point.setUnAdjX(utmcoords.getX());
-                        point.setUnAdjY(utmcoords.getY());
-
-                        point.setLatitude(coord.getLatitude());
-                        point.setLongitude(coord.getLongitude());
-
-                        if (coord.getAltitude() != null) {
-                            point.setElevation(coord.getAltitude());
-                            point.setUnAdjZ(TtUtils.Convert.distance(coord.getAltitude(), UomElevation.Meters, polygon.Metadata.getElevation()));
+                        if (point.hasQuondamLinks() && pointCNCvt != null) {
+                            for (String ql : point.getLinkedPoints()) {
+                                if (cPoints.containsKey(ql)) {
+                                    QuondamPoint qp = (QuondamPoint)cPoints.get(ql);
+                                    qp.removeQuondamLink(opCN);
+                                    qp.addQuondamLink(pointCNCvt);
+                                }
+                            }
                         }
 
 
-                        points.add(point);
-                        prevPoint = point;
                     }
 
                     polyCount++;
@@ -1117,14 +1122,20 @@ public class Import {
 
         public static class TTXImportParams extends ImportParams {
             private Collection<TtPolygon> polygons;
+            private DataAccessLayer idal;
 
-            public TTXImportParams(TwoTrailsApp app, String filePath, Collection<TtPolygon> polygons) {
+            public TTXImportParams(TwoTrailsApp app, String filePath, Collection<TtPolygon> polygons, DataAccessLayer idal) {
                 super(app, filePath);
                 this.polygons = polygons;
+                this.idal = idal;
             }
 
             public Collection<TtPolygon> getPolygons() {
                 return polygons;
+            }
+
+            public DataAccessLayer getImportDal() {
+                return idal;
             }
         }
     }
