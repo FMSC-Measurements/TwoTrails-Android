@@ -8,6 +8,7 @@ import android.widget.TextView;
 import com.usda.fmsc.android.widget.MultiSelectRecyclerView;
 import com.usda.fmsc.android.widget.MultiStateTouchCheckBox;
 import com.usda.fmsc.android.widget.multiselection.MultiSelector;
+import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
 import com.usda.fmsc.twotrails.data.TwoTrailsSchema;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
