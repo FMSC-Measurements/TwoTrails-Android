@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.usda.fmsc.android.widget.RecyclerViewEx;
 import com.usda.fmsc.android.widget.multiselection.MultiSelector;
 import com.usda.fmsc.android.widget.multiselection.SelectableHolder;
+import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.adapters.TtxPolygonsAdapter;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
@@ -59,7 +60,6 @@ public class ImportTtxFragment extends BaseImportFragment {
     private DataAccessLayer idal;
 
     private List<TtxPolygonsAdapter.TtPolygonHolder> polyParams;
-    private List<TtPolygon> polygons;
 
 
     public static ImportTtxFragment newInstance(String fileName) {
@@ -108,11 +108,9 @@ public class ImportTtxFragment extends BaseImportFragment {
 
     private void setupPolygons() {
         if (rvImport != null) {
-            polygons = idal.getPolygons();
-
             selector.clearSelections();
 
-            TtxPolygonsAdapter adapter = new TtxPolygonsAdapter(getContext(), polygons, idal, selector);
+            TtxPolygonsAdapter adapter = new TtxPolygonsAdapter(getContext(), idal.getPolygons(), idal, selector);
             rvImport.setAdapter(adapter);
         }
     }
@@ -153,7 +151,12 @@ public class ImportTtxFragment extends BaseImportFragment {
     }
 
     private List<TtPolygon> getPolygons() {
-        return idal.getPolygons();
+        ArrayList<TtPolygon> polygons = new ArrayList<>();
+        for (TtxPolygonsAdapter.TtPolygonHolder holder : polyParams) {
+            polygons.add(holder.getPolygon());
+        }
+
+        return polygons;
     }
 
     private void scrollToPositionAndExpand(TtxPolygonsAdapter.TtPolygonHolder holder) {

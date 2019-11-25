@@ -8,6 +8,7 @@ import android.widget.TextView;
 import com.usda.fmsc.android.widget.MultiSelectRecyclerView;
 import com.usda.fmsc.android.widget.MultiStateTouchCheckBox;
 import com.usda.fmsc.android.widget.multiselection.MultiSelector;
+import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
 import com.usda.fmsc.twotrails.data.TwoTrailsSchema;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
@@ -62,6 +63,7 @@ public class TtxPolygonsAdapter extends MultiSelectRecyclerView.MSAdapter<MultiS
     public class TtPolygonHolder extends MultiSelectRecyclerView.MSViewHolder implements MultiStateTouchCheckBox.OnCheckedStateChangeListener {
         private MultiStateTouchCheckBox mcb;
         private TextView tvName, tvPointCount, tvDesv;
+        private TtPolygon polygon;
 
         protected boolean selected;
 
@@ -100,6 +102,8 @@ public class TtxPolygonsAdapter extends MultiSelectRecyclerView.MSAdapter<MultiS
 
 
         public void bindPolygon(TtPolygon poly, DataAccessLayer dal) {
+            this.polygon = poly;
+
             tvName.setText(poly.getName());
             tvPointCount.setText(StringEx.toString(dal.getItemsCount(TwoTrailsSchema.PolygonSchema.TableName, TwoTrailsSchema.SharedSchema.CN, poly.getCN())));
             if (!StringEx.isEmpty(poly.getDescription())) {
@@ -117,5 +121,8 @@ public class TtxPolygonsAdapter extends MultiSelectRecyclerView.MSAdapter<MultiS
             return tvName.getText().toString();
         }
 
+        public TtPolygon getPolygon() {
+            return this.polygon;
+        }
     }
 }
