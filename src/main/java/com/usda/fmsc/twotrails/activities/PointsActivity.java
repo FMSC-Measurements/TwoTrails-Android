@@ -2491,7 +2491,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         if (rfData.isValid()) {
             if (!_PointLocked) {
                 if (_CurrentPoint.getOp().isTravType()) {
-                    TravPoint tp = (TravPoint)_CurrentPoint;
+                    TravPoint tp = (TravPoint) _CurrentPoint;
 
                     if (tp.getFwdAz() != null || tp.getBkAz() != null || tp.getSlopeDistance() > 0) {
                         new AlertDialog.Builder(PointsActivity.this)
@@ -2503,13 +2503,11 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                         promptToFillTravDataFromRF(rfData);
                     }
                 }
-            } else if (_CurrentPoint.getOp() == OpType.SideShot) {
-                createPoint(OpType.SideShot);
+            } else {
+                createPoint(_CurrentPoint.getOp() == OpType.Traverse ? OpType.Traverse : OpType.SideShot);
                 updateCurrentPointFromRangeFinderData(rfData, true, true);
                 lockPoint(true);
-                Toast.makeText(PointsActivity.this, "Created SideShot from RF Data.", Toast.LENGTH_LONG).show();
-
-                //Toast.makeText(PointsActivity.this, "Point is Locked. Unlock to edit.", Toast.LENGTH_LONG).show();
+                Toast.makeText(PointsActivity.this, String.format("Created %s from RF Data.", _CurrentPoint.getOp().toString()), Toast.LENGTH_LONG).show();
             }
         } else {
             Toast.makeText(PointsActivity.this, "Range Finder did not supply Slope and/or Distance", Toast.LENGTH_LONG).show();
@@ -2558,7 +2556,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
     }
 
     private void updateCurrentPointFromRangeFinderData(TtRangeFinderData rfData, boolean useCompassData, boolean useFwdDir) {
-        if (_CurrentPoint != null && _CurrentPoint.getOp() == OpType.SideShot) {
+        if (_CurrentPoint != null && _CurrentPoint.getOp().isTravType()) {
             TravPoint trav = ((TravPoint)_CurrentPoint);
 
             trav.setSlopeAngle(TtUtils.Convert.angle(rfData.getInclination(), Slope.Percent, rfData.getIncType()));
