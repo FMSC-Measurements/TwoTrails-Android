@@ -9,7 +9,7 @@
             android:title="@string/menu_x_gps_settings"
             android:key="gpsSetup">
 
-            <com.usda.fmsc.android.preferences.SwitchCompatPreference
+            <SwitchPreferenceCompat
                 android:key="@string/set_GPS_EXTERNAL"
                 android:title="GPS Device"
                 android:summary="Device to use."
@@ -18,7 +18,7 @@
                 android:textOff="@string/str_internal"
                 android:textOn="@string/str_external"/>
 
-            <com.usda.fmsc.android.preferences.SwitchCompatPreference
+            <SwitchPreferenceCompat
                 android:key="@string/set_GPS_ALWAYS_ON"
                 android:title="Keep GPS ON"
                 android:summary="Run GPS Always"/>
@@ -32,7 +32,7 @@
                 android:title="External GPS Settings"
                 android:key="@string/set_GPS_CAT">
 
-                <com.usda.fmsc.android.preferences.ListCompatPreference
+                <ListPreference
                     android:id="@+id/prefLstGpsDevice"
                     android:key="@string/set_GPS_LIST_DEVICE"
                     android:title="External GPS Device"
@@ -43,7 +43,7 @@
                     android:title="Check GPS Connection"
                     android:summary="@string/ds_gps_not_connected"/>
 
-                <com.usda.fmsc.android.preferences.SwitchCompatPreference
+                <SwitchPreferenceCompat
                     android:title="Update Metadata on GPS"
                     android:key="@string/set_AUTO_SET_GPS_NAME_TO_META_ASK"
                     android:summary="Remember option to update metadata on GPS receiver change"/>
@@ -55,7 +55,7 @@
             android:key="@string/set_RF_SETUP"
             android:enabled="true">
 
-            <com.usda.fmsc.android.preferences.ListCompatPreference
+            <ListPreference
                 android:id="@+id/prefLstRFDevice"
                 android:key="@string/set_RF_LIST_DEVICE"
                 android:title="External Range Finder" />

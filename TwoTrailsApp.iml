@@ -106,6 +106,7 @@
     <orderEntry type="library" name="Gradle: androidx.mediarouter:mediarouter:1.1.0@aar" level="project" />
     <orderEntry type="library" name="Gradle: com.google.android.material:material:1.0.0@aar" level="project" />
     <orderEntry type="library" name="Gradle: com.sothree.slidinguppanel:library:3.3.0@aar" level="project" />
+    <orderEntry type="library" name="Gradle: androidx.preference:preference:1.1.0@aar" level="project" />
     <orderEntry type="library" name="Gradle: androidx.recyclerview:recyclerview:1.0.0@aar" level="project" />
     <orderEntry type="library" name="Gradle: me.zhanghai.android.materialprogressbar:library:1.1.4@aar" level="project" />
     <orderEntry type="library" name="Gradle: androidx.appcompat:appcompat:1.1.0@aar" level="project" />
@@ -156,17 +157,5 @@
     <orderEntry type="module" module-name="GeoSpatial" />
     <orderEntry type="module" module-name="Utilities" />
     <orderEntry type="library" name="Gradle: org.apache.http.legacy-android-29" level="project" />
-    <orderEntry type="module" module-name="AndroidEx" />
-    <orderEntry type="module" module-name="GeoSpatial" />
-    <orderEntry type="module" module-name="Utilities" />
-    <orderEntry type="module" module-name="AndroidEx" />
-    <orderEntry type="module" module-name="GeoSpatial" />
-    <orderEntry type="module" module-name="Utilities" />
-    <orderEntry type="module" module-name="AndroidEx" />
-    <orderEntry type="module" module-name="GeoSpatial" />
-    <orderEntry type="module" module-name="Utilities" />
-    <orderEntry type="module" module-name="AndroidEx" />
-    <orderEntry type="module" module-name="GeoSpatial" />
-    <orderEntry type="module" module-name="Utilities" />
   </component>
 </module>

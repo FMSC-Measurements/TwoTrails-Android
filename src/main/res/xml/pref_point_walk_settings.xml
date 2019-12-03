@@ -39,11 +39,11 @@
     <PreferenceCategory
         android:title="Notifications">
 
-        <com.usda.fmsc.android.preferences.SwitchCompatPreference
+        <SwitchPreferenceCompat
             android:title="Ring On Create"
             android:key="@string/set_WALK_RING_ON_CREATE_POINT"/>
 
-        <com.usda.fmsc.android.preferences.SwitchCompatPreference
+        <SwitchPreferenceCompat
             android:title="Vibrate On Create"
             android:key="@string/set_WALK_VIB_ON_CREATE_POINT"/>
     </PreferenceCategory>
@@ -57,7 +57,7 @@
             android:defaultValue="2"
             app:valueInSummary="true" />
 
-        <com.usda.fmsc.android.preferences.SwitchCompatPreference
+        <SwitchPreferenceCompat
             android:title="OnBoundary"
             android:key="@string/set_AUTO_UPDATE_WALK_ONBND_ASK"
             android:summary="Remember walk OnBoundary selection option"/>

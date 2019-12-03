@@ -4,17 +4,17 @@
     <!--<PreferenceCategory-->
     <!--android:title="Dialog Options">-->
 
-    <!--<com.usda.fmsc.android.preferences.SwitchCompatPreference-->
+    <!--<SwitchPreferenceCompat-->
     <!--android:title="OnBoundary"-->
     <!--android:key="@string/set_AUTO_UPDATE_WALK_ONBND_ASK"-->
     <!--android:summary="Remember walk OnBoundary selection option"/>-->
 
-    <!--<com.usda.fmsc.android.preferences.SwitchCompatPreference-->
+    <!--<SwitchPreferenceCompat-->
     <!--android:title="Update Metadata on GPS"-->
     <!--android:key="@string/set_AUTO_SET_GPS_NAME_TO_META_ASK"-->
     <!--android:summary="Remember to update metadata on GPS receiver change"/>-->
 
-    <!--<com.usda.fmsc.android.preferences.SwitchCompatPreference-->
+    <!--<SwitchPreferenceCompat-->
     <!--android:title="Overwrite PlotGrid"-->
     <!--android:key="@string/set_AUTO_OVERWRITE_PLOTGRID_ASK"-->
     <!--android:summary="Remember to overwrite the PlotGrid on regenerate"/>-->

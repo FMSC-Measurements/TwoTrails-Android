@@ -10,22 +10,22 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
-import android.preference.ListPreference;
-import android.preference.Preference;
-import android.preference.PreferenceCategory;
-import android.preference.PreferenceFragment;
-import android.preference.PreferenceScreen;
+
+import androidx.preference.ListPreference;
+import androidx.preference.Preference;
 import android.provider.Settings;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.preference.PreferenceCategory;
+import androidx.preference.PreferenceFragmentCompat;
+import androidx.preference.SwitchPreferenceCompat;
+
 import android.widget.Toast;
 
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.dialogs.DontAskAgainDialog;
-import com.usda.fmsc.android.preferences.ListCompatPreference;
-import com.usda.fmsc.android.preferences.SwitchCompatPreference;
 import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.DeviceSettings;
@@ -48,15 +48,15 @@ import com.usda.fmsc.utilities.StringEx;
 
 import org.joda.time.DateTime;
 
-public class DeviceSettingsFragment extends PreferenceFragment {
+public class DeviceSettingsFragment extends PreferenceFragmentCompat {
     public static final String CURRENT_PAGE = "CurrentPage";
 
     private TwoTrailsApp TtAppCtx;
 
     private Preference prefGpsCheck, prefRFCheck;
-    private SwitchCompatPreference swtUseExGpsDev;
+    private SwitchPreferenceCompat swtUseExGpsDev;
     private PreferenceCategory exGpsCat;
-    private ListCompatPreference prefLstGpsDevice, prefLstRFDevice;
+    private ListPreference prefLstGpsDevice, prefLstRFDevice;
 
     private String moveToPage;
 
@@ -76,9 +76,18 @@ public class DeviceSettingsFragment extends PreferenceFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        TtAppCtx = TwoTrailsApp.getInstance(getActivity());
+        if (TtAppCtx == null) {
+            TtAppCtx = TwoTrailsApp.getInstance(getActivity());
+        }
+    }
 
+    @Override
+    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         Bundle bundle = getArguments();
+
+        if (TtAppCtx == null) {
+            TtAppCtx = TwoTrailsApp.getInstance(getActivity());
+        }
 
         addPreferencesFromResource(R.xml.pref_device_setup);
 
@@ -110,11 +119,11 @@ public class DeviceSettingsFragment extends PreferenceFragment {
             }
         }
 
-        swtUseExGpsDev = (SwitchCompatPreference)findPreference(getString(R.string.set_GPS_EXTERNAL));
-        exGpsCat = (PreferenceCategory)findPreference(getString(R.string.set_GPS_CAT));
-        prefLstGpsDevice = (ListCompatPreference)findPreference(getString(R.string.set_GPS_LIST_DEVICE));
+        swtUseExGpsDev = findPreference(getString(R.string.set_GPS_EXTERNAL));
+        exGpsCat = findPreference(getString(R.string.set_GPS_CAT));
+        prefLstGpsDevice = findPreference(getString(R.string.set_GPS_LIST_DEVICE));
         prefGpsCheck = findPreference(getString(R.string.set_GPS_CHECK));
-        prefLstRFDevice = (ListCompatPreference)findPreference(getString(R.string.set_RF_LIST_DEVICE));
+        prefLstRFDevice = findPreference(getString(R.string.set_RF_LIST_DEVICE));
         prefRFCheck = findPreference(getString(R.string.set_RF_CHECK));
         Preference prefCheckNmea = findPreference(getString(R.string.set_GPS_CHECK_NMEA));
 
@@ -175,7 +184,7 @@ public class DeviceSettingsFragment extends PreferenceFragment {
         super.onResume();
 
         if (moveToPage != null && !moveToPage.equals(SettingsActivity.MAIN_SETTINGS_PAGE)) {
-            setPreferenceScreen((PreferenceScreen) findPreference(moveToPage));
+            setPreferenceScreen(findPreference(moveToPage));
         }
     }
 
@@ -221,7 +230,7 @@ public class DeviceSettingsFragment extends PreferenceFragment {
     }
 
     //region GPSCheck
-    Preference.OnPreferenceClickListener gpsCheckListener = new Preference.OnPreferenceClickListener() {
+    private Preference.OnPreferenceClickListener gpsCheckListener = new Preference.OnPreferenceClickListener() {
         @Override
         public boolean onPreferenceClick(Preference preference) {
             if (StringEx.isEmpty(TtAppCtx.getDeviceSettings().getGpsDeviceID())) {
@@ -435,7 +444,7 @@ public class DeviceSettingsFragment extends PreferenceFragment {
     //endregion
 
     //region RangeFinderCheck
-    Preference.OnPreferenceClickListener rfCheckListener = new Preference.OnPreferenceClickListener() {
+    private Preference.OnPreferenceClickListener rfCheckListener = new Preference.OnPreferenceClickListener() {
         @Override
         public boolean onPreferenceClick(Preference preference) {
             if (StringEx.isEmpty(TtAppCtx.getDeviceSettings().getGpsDeviceID())) {
@@ -588,7 +597,7 @@ public class DeviceSettingsFragment extends PreferenceFragment {
 
 
     //region External/Internal Switch & Listener
-    Preference.OnPreferenceChangeListener useExternalListener = new Preference.OnPreferenceChangeListener() {
+    private Preference.OnPreferenceChangeListener useExternalListener = new Preference.OnPreferenceChangeListener() {
         @Override
         public boolean onPreferenceChange(Preference preference, Object newValue) {
             boolean useExternal = (boolean)newValue;
@@ -660,6 +669,9 @@ public class DeviceSettingsFragment extends PreferenceFragment {
             TtAppCtx.getDeviceSettings().setGpsConfigured(true);
             exGpsCat.setEnabled(false);
 
+            TtAppCtx.getDeviceSettings().setGpsDeviceId(StringEx.Empty);
+            TtAppCtx.getDeviceSettings().setGpsDeviceName(StringEx.Empty);
+
             if (TtAppCtx.getDeviceSettings().isGpsAlwaysOn()) {
                 TtAppCtx.getGps().startGps();
             }
@@ -672,7 +684,7 @@ public class DeviceSettingsFragment extends PreferenceFragment {
 
 
     //region GPS Selection
-    Preference.OnPreferenceChangeListener btnGPSList = new Preference.OnPreferenceChangeListener() {
+    private Preference.OnPreferenceChangeListener btnGPSList = new Preference.OnPreferenceChangeListener() {
         public boolean onPreferenceChange(Preference preference, Object newValue) {
 
             try {
@@ -739,7 +751,7 @@ public class DeviceSettingsFragment extends PreferenceFragment {
 
 
     //region Check NMEA
-    Preference.OnPreferenceClickListener checkNmeaListener = new Preference.OnPreferenceClickListener() {
+    private Preference.OnPreferenceClickListener checkNmeaListener = new Preference.OnPreferenceClickListener() {
         @Override
         public boolean onPreferenceClick(Preference preference) {
             if (TtAppCtx.getDeviceSettings().isGpsConfigured()) {
@@ -758,7 +770,7 @@ public class DeviceSettingsFragment extends PreferenceFragment {
 
 
     //region MetaSelection
-    DontAskAgainDialog.OnClickListener setMetaListener = new DontAskAgainDialog.OnClickListener() {
+    private DontAskAgainDialog.OnClickListener setMetaListener = new DontAskAgainDialog.OnClickListener() {
         @Override
         public void onClick(DialogInterface dialogInterface, int i, Object value) {
             String receiver = TtAppCtx.getDeviceSettings().getGpsDeviceName();

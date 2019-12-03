@@ -63,7 +63,7 @@ public class TwoTrailsSchema {
             QuondamLinks+ " TEXT, " +
             GroupName   + " TEXT, " +
             GroupCN     + " TEXT NOT NULL, " +
-            "PRIMARY ATTR_KEY (" + TwoTrailsSchema.SharedSchema.CN + "));";
+            "PRIMARY KEY (" + TwoTrailsSchema.SharedSchema.CN + "));";
 
 
         public static final String SelectItems =
@@ -109,7 +109,7 @@ public class TwoTrailsSchema {
             Elevation       + " REAL, " +
             ManualAccuracy  + " REAL, " +
             RMSEr           + " REAL, " +
-            "PRIMARY ATTR_KEY (" + SharedSchema.CN + "));";
+            "PRIMARY KEY (" + SharedSchema.CN + "));";
 
 
         public static final String SelectItems =
@@ -141,7 +141,7 @@ public class TwoTrailsSchema {
             SlopeDistance       + " REAL NOT NULL, " +
             VerticalAngle       + " REAL NOT NULL, " +
             HorizDistance       + " REAL, " +
-            "PRIMARY ATTR_KEY (" + SharedSchema.CN + "));";
+            "PRIMARY KEY (" + SharedSchema.CN + "));";
 
 
         public static final String SelectItems =
@@ -166,7 +166,7 @@ public class TwoTrailsSchema {
             PointSchema.TableName   + ", " +
             ParentPointCN           + " TEXT NOT NULL, " +
             ManualAccuracy          + " REAL, " +
-            "PRIMARY ATTR_KEY (" + SharedSchema.CN + "));";
+            "PRIMARY KEY (" + SharedSchema.CN + "));";
 
 
         public static final String SelectItems =
@@ -202,7 +202,7 @@ public class TwoTrailsSchema {
             IncrementBy     + " INTEGER, " +
             PointStartIndex + " INTEGER, " +
             TimeCreated     + " TEXT, " +
-            "PRIMARY ATTR_KEY (" + SharedSchema.CN + "));";
+            "PRIMARY KEY (" + SharedSchema.CN + "));";
 
 
         public static final String SelectItems =
@@ -233,7 +233,7 @@ public class TwoTrailsSchema {
             Name            + " TEXT, " +
             Description     + " TEXT, " +
             Type            + " INTEGER, " +
-            "PRIMARY ATTR_KEY (" + SharedSchema.CN + "));";
+            "PRIMARY KEY (" + SharedSchema.CN + "));";
 
 
         public static final String SelectItems =
@@ -308,7 +308,7 @@ public class TwoTrailsSchema {
             SatellitesInViewCount   + " INTEGER, " +
             UsedSatPRNS + " TEXT, " +
             SatellitesInView + " TEXT, " +
-            "PRIMARY ATTR_KEY (" + SharedSchema.CN + "));";
+            "PRIMARY KEY (" + SharedSchema.CN + "));";
 
         public static final String SelectItems =
             SharedSchema.CN + ", " +
@@ -377,7 +377,7 @@ public class TwoTrailsSchema {
             Compass         + " TEXT, " +
             Crew            + " TEXT, " +
             UtmZone         + " INTEGER NOT NULL, " +
-            "PRIMARY ATTR_KEY (" + SharedSchema.CN + "));";
+            "PRIMARY KEY (" + SharedSchema.CN + "));";
 
         public static final String SelectItems =
             SharedSchema.CN + ", " +
@@ -450,7 +450,7 @@ public class TwoTrailsSchema {
             AdjPtsColor     + " INTEGER, " +
             UnAdjPtsColor   + " INTEGER, " +
             WayPtsColor     + " INTEGER, " +
-            "PRIMARY ATTR_KEY (" + SharedSchema.CN + "));";
+            "PRIMARY KEY (" + SharedSchema.CN + "));";
 
         public static final String SelectItems =
             SharedSchema.CN + ", " +

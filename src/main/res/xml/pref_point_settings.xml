@@ -35,7 +35,7 @@
         android:title="Misc Point Settings"
         android:persistent="false">
 
-        <com.usda.fmsc.android.preferences.SwitchCompatPreference
+        <SwitchPreferenceCompat
             android:title="Overwrite PlotGrid"
             android:key="@string/set_AUTO_OVERWRITE_PLOTGRID_ASK"
             android:summary="Remember to overwrite the PlotGrid on regenerate"/>

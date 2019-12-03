@@ -1,11 +1,11 @@
 package com.usda.fmsc.twotrails.activities;
 
-import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
-import android.preference.Preference;
-import android.preference.PreferenceFragment;
-import android.preference.PreferenceScreen;
+
+import androidx.fragment.app.Fragment;
+import androidx.preference.Preference;
+import androidx.preference.PreferenceFragmentCompat;
 import androidx.annotation.XmlRes;
 import androidx.appcompat.app.ActionBar;
 import android.view.MenuItem;
@@ -46,7 +46,7 @@ public class SettingsActivity extends CustomToolbarActivity {
             page = getIntent().getStringExtra(SETTINGS_PAGE);
         }
 
-        getFragmentManager().beginTransaction().replace(R.id.content, getSettingsFragment(page)).commit();
+        getSupportFragmentManager().beginTransaction().replace(R.id.content, getSettingsFragment(page)).commit();
     }
 
     @Override
@@ -97,7 +97,7 @@ public class SettingsActivity extends CustomToolbarActivity {
     }
 
 
-    public static class SettingsFragment extends PreferenceFragment {
+    public static class SettingsFragment extends PreferenceFragmentCompat {
         public static final String SETTINGS_PAGE = "CurrentPage";
 
         private String settingsPageKey;
@@ -115,6 +115,10 @@ public class SettingsActivity extends CustomToolbarActivity {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
+        }
+
+        @Override
+        public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
 
             @XmlRes int settingsPage = R.xml.pref_main;
 
@@ -123,8 +127,7 @@ public class SettingsActivity extends CustomToolbarActivity {
                 settingsPage = getSettingsPageRes(settingsPageKey);
             }
 
-            addPreferencesFromResource(settingsPage);
-
+            setPreferencesFromResource(settingsPage, rootKey);
         }
 
         @Override
@@ -154,8 +157,10 @@ public class SettingsActivity extends CustomToolbarActivity {
             }
         }
 
+
+
         @Override
-        public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
+        public boolean onPreferenceTreeClick(Preference preference) {
             if (preference != null && preference.hasKey()) {
                 Fragment frag = getSettingsFragment(preference.getKey());
 
@@ -168,7 +173,7 @@ public class SettingsActivity extends CustomToolbarActivity {
                 }
             }
 
-            return super.onPreferenceTreeClick(preferenceScreen, preference);
+            return super.onPreferenceTreeClick(preference);
         }
     }
 }
