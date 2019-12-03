@@ -2,16 +2,16 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     android:title="Other Settings">
 
-    <com.usda.fmsc.android.preferences.SwitchCompatPreference
+    <SwitchPreferenceCompat
         android:title="Open last project on start"
         android:key="@string/set_AUTO_OPEN_LAST_PROJECT"/>
 
-    <com.usda.fmsc.android.preferences.SwitchCompatPreference
+    <SwitchPreferenceCompat
         android:key="@string/set_DROP"
         android:title="Drop Zeros"
         android:summary="Drop Empty Points" />
 
-    <com.usda.fmsc.android.preferences.SwitchCompatPreference
+    <SwitchPreferenceCompat
         android:key="@string/set_KEEP_SCREEN_ON"
         android:title="Keep Screen On"
         android:summary="Keep Screen on when in Map and Collecting Points" />

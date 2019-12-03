@@ -10,7 +10,7 @@
             android:title="@string/menu_x_gps_settings"
             android:key="gpsSetup">
 
-            <com.usda.fmsc.android.preferences.SwitchCompatPreference
+            <SwitchPreferenceCompat
                 android:key="@string/set_GPS_EXTERNAL"
                 android:title="GPS Device"
                 android:summary="Device to use."
@@ -19,7 +19,7 @@
                 android:textOff="@string/str_internal"
                 android:textOn="@string/str_external"/>
 
-            <com.usda.fmsc.android.preferences.SwitchCompatPreference
+            <SwitchPreferenceCompat
                 android:key="@string/set_GPS_ALWAYS_ON"
                 android:title="Keep GPS ON"
                 android:summary="Run GPS Always"/>
@@ -44,7 +44,7 @@
                     android:title="Check GPS Connection"
                     android:summary="@string/ds_gps_not_connected"/>
 
-                <com.usda.fmsc.android.preferences.SwitchCompatPreference
+                <SwitchPreferenceCompat
                     android:title="Update Metadata on GPS"
                     android:key="@string/set_AUTO_SET_GPS_NAME_TO_META_ASK"
                     android:summary="Remember option to update metadata on GPS receiver change"/>
@@ -56,7 +56,7 @@
             android:key="@string/set_RF_SETUP"
             android:enabled="true">
 
-            <com.usda.fmsc.android.preferences.ListCompatPreference
+            <ListPreference
                 android:id="@+id/prefLstRFDevice"
                 android:key="@string/set_RF_LIST_DEVICE"
                 android:title="External Range Finder" />
@@ -138,11 +138,11 @@
             <PreferenceCategory
                 android:title="Notifications">
 
-                <com.usda.fmsc.android.preferences.SwitchCompatPreference
+                <SwitchPreferenceCompat
                     android:title="Ring On Create"
                     android:key="@string/set_TAKE5_RING_ON_CREATE_POINT"/>
 
-                <com.usda.fmsc.android.preferences.SwitchCompatPreference
+                <SwitchPreferenceCompat
                     android:title="Vibrate On Create"
                     android:key="@string/set_TAKE5_VIB_ON_CREATE_POINT"/>
             </PreferenceCategory>
@@ -162,7 +162,7 @@
                     android:key="@string/set_TAKE5_NMEA_AMOUNT"
                     android:enabled="false"/>
 
-                <com.usda.fmsc.android.preferences.SwitchCompatPreference
+                <SwitchPreferenceCompat
                     android:title="Ignore First Bursts"
                     android:summary="Ignore the first X bursts when creating a Take5 point"
                     android:key="@string/set_TAKE5_IGNORE_NMEA"
@@ -224,11 +224,11 @@
             <PreferenceCategory
                 android:title="Notifications">
 
-                <com.usda.fmsc.android.preferences.SwitchCompatPreference
+                <SwitchPreferenceCompat
                     android:title="Ring On Create"
                     android:key="@string/set_WALK_RING_ON_CREATE_POINT"/>
 
-                <com.usda.fmsc.android.preferences.SwitchCompatPreference
+                <SwitchPreferenceCompat
                     android:title="Vibrate On Create"
                     android:key="@string/set_WALK_VIB_ON_CREATE_POINT"/>
             </PreferenceCategory>
@@ -242,7 +242,7 @@
                     android:defaultValue="2"
                     app:valueInSummary="true" />
 
-                <com.usda.fmsc.android.preferences.SwitchCompatPreference
+                <SwitchPreferenceCompat
                     android:title="OnBoundary"
                     android:key="@string/set_AUTO_UPDATE_WALK_ONBND_ASK"
                     android:summary="Remember walk OnBoundary selection option"/>
@@ -257,11 +257,11 @@
         <PreferenceCategory
             android:title="Map Options">
 
-            <com.usda.fmsc.android.preferences.SwitchCompatPreference
+            <SwitchPreferenceCompat
                 android:title="Show My Position"
                 android:key="@string/set_MAP_SHOW_MY_POS"/>
 
-            <com.usda.fmsc.android.preferences.SwitchCompatPreference
+            <SwitchPreferenceCompat
                 android:title="Use UTM Navigation"
                 android:key="@string/set_MAP_USE_UTM_NAV"/>
 
@@ -270,11 +270,11 @@
                 android:key="@string/set_MAP_TRACKING_OPTION"
                 android:summary="Use UTM instead of Lat/Lon for Navigation"/>
 
-            <com.usda.fmsc.android.preferences.SwitchCompatPreference
+            <SwitchPreferenceCompat
                 android:title="Show Compass"
                 android:key="@string/set_MAP_COMPASS_ENABLED" />
 
-            <com.usda.fmsc.android.preferences.SwitchCompatPreference
+            <SwitchPreferenceCompat
                 android:title="Show My Position Button"
                 android:key="@string/set_MAP_MY_POS_BUTTON" />
 
@@ -292,17 +292,17 @@
     <!--<PreferenceCategory-->
     <!--android:title="Dialog Options">-->
 
-    <!--<com.usda.fmsc.android.preferences.SwitchCompatPreference-->
+    <!--<SwitchPreferenceCompat-->
     <!--android:title="OnBoundary"-->
     <!--android:key="@string/set_AUTO_UPDATE_WALK_ONBND_ASK"-->
     <!--android:summary="Remember walk OnBoundary selection option"/>-->
 
-    <!--<com.usda.fmsc.android.preferences.SwitchCompatPreference-->
+    <!--<SwitchPreferenceCompat-->
     <!--android:title="Update Metadata on GPS"-->
     <!--android:key="@string/set_AUTO_SET_GPS_NAME_TO_META_ASK"-->
     <!--android:summary="Remember to update metadata on GPS receiver change"/>-->
 
-    <!--<com.usda.fmsc.android.preferences.SwitchCompatPreference-->
+    <!--<SwitchPreferenceCompat-->
     <!--android:title="Overwrite PlotGrid"-->
     <!--android:key="@string/set_AUTO_OVERWRITE_PLOTGRID_ASK"-->
     <!--android:summary="Remember to overwrite the PlotGrid on regenerate"/>-->
@@ -313,11 +313,11 @@
         android:title="Misc Settings"
         android:key="miscSetup">
 
-        <com.usda.fmsc.android.preferences.SwitchCompatPreference
+        <SwitchPreferenceCompat
             android:title="Open last project on start"
             android:key="@string/set_AUTO_OPEN_LAST_PROJECT"/>
 
-        <com.usda.fmsc.android.preferences.SwitchCompatPreference
+        <SwitchPreferenceCompat
             android:key="@string/set_DROP"
             android:title="Drop Zeros"
             android:summary="Drop Empty Points" />

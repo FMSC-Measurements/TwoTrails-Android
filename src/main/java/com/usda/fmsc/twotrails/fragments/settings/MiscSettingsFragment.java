@@ -2,7 +2,7 @@ package com.usda.fmsc.twotrails.fragments.settings;
 
 
 import android.os.Bundle;
-import android.preference.PreferenceFragment;
+import androidx.preference.PreferenceFragmentCompat;
 
 import androidx.appcompat.app.ActionBar;
 
@@ -10,11 +10,12 @@ import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.logic.SettingsLogic;
 
-public class MiscSettingsFragment extends PreferenceFragment {
+public class MiscSettingsFragment extends PreferenceFragmentCompat {
+
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        addPreferencesFromResource(R.xml.pref_other_settings);
+    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+        setPreferencesFromResource(R.xml.pref_other_settings, rootKey);
+
         setHasOptionsMenu(true);
 
         findPreference(getString(R.string.set_RESET)).setOnPreferenceClickListener(preference -> {
