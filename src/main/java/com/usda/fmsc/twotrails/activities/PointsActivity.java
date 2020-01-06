@@ -2302,17 +2302,21 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         } else {
             Intent intent = new Intent(this, WalkActivity.class);
 
+            Bundle bundle = new Bundle();
+
             if (currentPoint != null) {
-                intent.putExtra(Consts.Codes.Data.POINT_DATA, TtUtils.Points.clonePoint(currentPoint));
+                bundle.putParcelable(Consts.Codes.Data.POINT_DATA, TtUtils.Points.clonePoint(currentPoint));
             }
 
             if (_CurrentMetadata != null) {
-                intent.putExtra(Consts.Codes.Data.METADATA_DATA, _CurrentMetadata);
+                bundle.putParcelable(Consts.Codes.Data.METADATA_DATA, _CurrentMetadata);
             } else {
-                intent.putExtra(Consts.Codes.Data.METADATA_DATA, getMetadata().get(Consts.EmptyGuid));
+                bundle.putParcelable(Consts.Codes.Data.METADATA_DATA, getMetadata().get(Consts.EmptyGuid));
             }
 
-            intent.putExtra(Consts.Codes.Data.POLYGON_DATA, _CurrentPolygon);
+            bundle.putParcelable(Consts.Codes.Data.POLYGON_DATA, _CurrentPolygon);
+
+            intent.putExtra(Consts.Codes.Data.POINT_PACKAGE, bundle);
 
             startActivityForResult(intent, Consts.Codes.Activites.WALK);
         }
