@@ -44,6 +44,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.usda.fmsc.geospatial.nmea41.sentences.base.NmeaSentence;
+import com.usda.fmsc.twotrails.utilities.TtUtils;
 import com.usda.fmsc.utilities.StringEx;
 
 import org.joda.time.DateTime;
@@ -268,7 +269,7 @@ public class DeviceSettingsFragment extends PreferenceFragmentCompat {
                                 }
 
                                 if (TtAppCtx.getDeviceSettings().getAutoSetGpsNameToMetaAsk()) {
-                                    if (lastMetaAsk.isBefore(DateTime.now().minusSeconds(10))) {
+                                    if (lastMetaAsk.isBefore(DateTime.now().minusSeconds(10)) && TtAppCtx.hasDAL()) {
                                         DontAskAgainDialog dialog = new DontAskAgainDialog(getActivity(),
                                                 DeviceSettings.AUTO_SET_GPS_NAME_TO_META_ASK,
                                                 DeviceSettings.AUTO_SET_GPS_NAME_TO_META,
@@ -698,6 +699,8 @@ public class DeviceSettingsFragment extends PreferenceFragmentCompat {
                         prefLstGpsDevice.setSummary(values[1]);
                         prefGpsCheck.setSummary(R.string.ds_dev_not_configured);
                         TtAppCtx.getDeviceSettings().setGpsConfigured(false);
+
+                        TtUtils.Misc.verifyGpsDevice(values[1], values[0], getActivity());
                     }
                 } else {
                     TtAppCtx.getDeviceSettings().setGpsDeviceId(StringEx.Empty);
@@ -706,6 +709,8 @@ public class DeviceSettingsFragment extends PreferenceFragmentCompat {
                     prefLstGpsDevice.setSummary(getString(R.string.ds_no_dev));
                     prefGpsCheck.setSummary(R.string.ds_dev_not_configured);
                     TtAppCtx.getDeviceSettings().setGpsConfigured(false);
+
+
                 }
             } catch (Exception ex) {
                 TtAppCtx.getReport().writeError(ex.getMessage(), "DeviceSettingsFragment:btnGPSList");
