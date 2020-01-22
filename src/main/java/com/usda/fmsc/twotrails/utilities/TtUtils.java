@@ -1855,6 +1855,24 @@ public class TtUtils {
 
     }
 
+    public static class Misc {
+        public static void verifyGpsDevice(String deviceName, String deviceId, Activity context) {
+            String dn = deviceName.toLowerCase();
+            String message = null;
+
+            if (dn.contains("garmin glo 2")) {
+                message = "Warning: Garmin GLO 2 has known issue where NMEA is not consistent. GPS Receiver may connect but have issues staying connected.";
+            }
+
+            if (message != null) {
+                new AlertDialog.Builder(context)
+                        .setMessage(message)
+                        .setPositiveButton(R.string.str_ok, null)
+                        .show();
+            }
+        }
+    }
+
 
     public static String getDeviceName() {
         return StringEx.format("%s %s %s",
