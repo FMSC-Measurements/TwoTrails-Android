@@ -151,7 +151,7 @@ public class TravPoint extends TtPoint {
     }
 
     public double getHorizontalDistance() {
-        return _SlopeDistance * Math.cos(_SlopeAngle * (Math.PI / 180.0));
+        return _SlopeDistance * Math.cos(TtUtils.Convert.percentToRadians(_SlopeAngle));
     }
 
 
@@ -212,7 +212,7 @@ public class TravPoint extends TtPoint {
 
         x = startingX + (horizontalDist * Math.cos(azAsRad));
         y = startingY + (horizontalDist * Math.sin(azAsRad));
-        z = startingZ + (horizontalDist * Math.sin(TtUtils.Convert.degreesToRadians(getSlopeAngle())));
+        z = startingZ + (getSlopeDistance() * Math.sin(TtUtils.Convert.percentToRadians(getSlopeAngle())));
 
         if (isAdjusted) {
             _AdjX = x;

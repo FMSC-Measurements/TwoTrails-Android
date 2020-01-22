@@ -233,20 +233,24 @@ public class TtUtils {
         }
 
 
+        public static double percentToDegrees(double percent) {
+            return radiansToDegrees(percentToRadians(percent / 100d));
+        }
+
         public static double degreesToPercent(double degrees) {
             return java.lang.Math.tan(degreesToRadians(degrees)) * 100;
         }
 
-        public static double percentToDegrees(double percent) {
-            return radiansToDegrees(java.lang.Math.atan(percent / 100d));
-        }
-
         public static double degreesToRadians(double degrees) {
-            return degrees * Degrees2Radians_Coeff;
+            return java.lang.Math.toRadians(degrees);
         }
 
         public static double radiansToDegrees(double radians) {
             return radians * Radians2Degrees_Coeff;
+        }
+
+        public static double percentToRadians(double percent) {
+            return java.lang.Math.atan(percent / 100);
         }
 
 
