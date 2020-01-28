@@ -242,8 +242,13 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
 
         if (AndroidUtils.Device.isFullOrientationAvailable(this)) {
             mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-            accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-            magnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+
+            if (mSensorManager != null) {
+                accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+                magnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+            } else {
+                getTtAppCtx().getReport().writeDebug("Sensors Not Found", "BaseMapActivity:onCreate");
+            }
         }
 
         getMapSettings();
@@ -1062,8 +1067,8 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
                 break;
             case NoExternalGpsSocket:
                 break;
-            case Unknown:
-                break;
+//            case Unknown:
+//                break;
         }
     }
 

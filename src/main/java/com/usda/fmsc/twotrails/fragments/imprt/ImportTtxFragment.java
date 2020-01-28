@@ -35,7 +35,6 @@ public class ImportTtxFragment extends BaseImportFragment {
             if (holder instanceof TtxPolygonsAdapter.TtPolygonHolder) {
                 TtxPolygonsAdapter.TtPolygonHolder ttxHolder = (TtxPolygonsAdapter.TtPolygonHolder)holder;
 
-
                 if (isSelected && !polyParams.contains(ttxHolder)) {
                     polyParams.add(ttxHolder);
                 } else {

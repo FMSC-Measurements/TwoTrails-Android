@@ -22,6 +22,7 @@ import com.usda.fmsc.twotrails.fragments.imprt.ImportGpxFragment;
 import com.usda.fmsc.twotrails.fragments.imprt.ImportKmlFragment;
 import com.usda.fmsc.twotrails.fragments.imprt.ImportTextFragment;
 import com.usda.fmsc.twotrails.R;
+import com.usda.fmsc.twotrails.fragments.imprt.ImportTtxFragment;
 import com.usda.fmsc.twotrails.logic.AdjustingException;
 import com.usda.fmsc.twotrails.logic.PolygonAdjuster;
 import com.usda.fmsc.twotrails.utilities.Import;
@@ -206,6 +207,15 @@ public class ImportActivity extends CustomToolbarActivity {
                     }
                     break;
                 }
+                case "ttx": {
+                    if (fragment == null || !(fragment instanceof ImportTtxFragment)) {
+                        fragment = ImportTtxFragment.newInstance(filename);
+                        fragUpdated = true;
+                    } else {
+                        fragment.updateFileName(filename);
+                    }
+                    break;
+                }
                 default: {
                     Toast.makeText(this, "Invalid File Type", Toast.LENGTH_SHORT).show();
                     return;
@@ -250,7 +260,7 @@ public class ImportActivity extends CustomToolbarActivity {
     }
 
     public void btnImportSelect(View view) {
-        String[] extraMimes = {"file/*.csv", "file/*.gpx"};
+        String[] extraMimes = {"file/*.csv", "file/*.gpx", "file/*.ttx"};
         AndroidUtils.App.openFileIntent(this, "file/*.txt", extraMimes, Consts.Codes.Requests.OPEN_FILE);
     }
 }
