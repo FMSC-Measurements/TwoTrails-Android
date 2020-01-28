@@ -1,6 +1,7 @@
 package com.usda.fmsc.twotrails.activities.base;
 
 import android.animation.Animator;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -23,7 +24,6 @@ import com.usda.fmsc.geospatial.nmea41.sentences.GSASentence;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
@@ -36,6 +36,7 @@ import com.usda.fmsc.utilities.StringEx;
 
 import java.util.ArrayList;
 
+@SuppressLint("DefaultLocale")
 public class AcquireGpsMapActivity extends BaseMapActivity {
     private static final String nVal = "*";
 
@@ -76,13 +77,6 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
                     if (intent.hasExtra(Consts.Codes.Data.POLYGON_DATA)) {
                         _Polygon = intent.getParcelableExtra(Consts.Codes.Data.POLYGON_DATA);
                     }
-
-//                else if (intent.hasExtra(Consts.Codes.Data.POINT_PACKAGE)) {
-//                    Bundle bundle = intent.getExtras();
-//                    if (bundle != null && bundle.containsKey(Consts.Codes.Data.POLYGON_DATA)) {
-//                        _Polygon = bundle.getParcelable(Consts.Codes.Data.POLYGON_DATA);
-//                    }
-//                }
 
                     if (_Polygon == null) {
                         trailModeEnabled = false;
