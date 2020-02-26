@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.Application;
 import android.content.ClipData;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.database.Cursor;
@@ -604,7 +603,7 @@ public class TtUtils {
                 {
                     GpsPoint gps = ((GpsPoint)point);
 
-                    if (gps.getUnAdjX() != 0 || gps.getUnAdjY() != 0 || gps.getUnAdjZ() != 0)
+                    if (gps.getUnAdjX() != 0 || gps.getUnAdjY() != 0 || gps.getUnAdjZ() != 0 && gps.getManualAccuracy() != null)
                         hasValue = true;
                 }
                 else if (point.isTravType())
@@ -735,13 +734,16 @@ public class TtUtils {
                     utmy = point.getUnAdjY();
                 }
 
-                int zone = metadata.get(point.getMetadataCN()).getZone();
+                TtMetadata meta = metadata.get(point.getMetadataCN());
+                if (meta != null) {
+                    int zone = meta.getZone();
 
-                Position position = UTMTools.convertUTMtoLatLonSignedDec(utmx, utmy, zone);
+                    Position position = UTMTools.convertUTMtoLatLonSignedDec(utmx, utmy, zone);
 
-                location.setLatitude(position.getLatitudeSignedDecimal());
-                location.setLongitude(position.getLongitudeSignedDecimal());
-                location.setAltitude(point.getAdjZ());
+                    location.setLatitude(position.getLatitudeSignedDecimal());
+                    location.setLongitude(position.getLongitudeSignedDecimal());
+                    location.setAltitude(point.getAdjZ());
+                }
             }
 
             return location;
@@ -942,13 +944,9 @@ public class TtUtils {
     }
 
     public static class Media {
-        public static Comparator<TtMedia> PictureTimeComparator = new Comparator<TtMedia>() {
-            @SuppressWarnings("ComparatorMethodParameterNotUsed")
-            @Override
-            public int compare(TtMedia lhs, TtMedia rhs) {
-                return lhs.getTimeCreated().isAfter(rhs.getTimeCreated()) ? 1 : -1;
-            }
-        };
+        public static Comparator<TtMedia> PictureTimeComparator =
+                (lhs, rhs) -> lhs.getTimeCreated().isAfter(rhs.getTimeCreated()) ? 1 :
+                        (lhs.getTimeCreated().equals(rhs.getTimeCreated()) ? 0 : -1);
 
         public static TtImage getPictureByType(PictureType type) {
             switch (type) {

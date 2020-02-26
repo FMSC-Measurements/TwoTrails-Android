@@ -42,10 +42,9 @@
                 <TextView
                     android:text="@string/str_name"
                     android:textSize="20sp"
-                    android:paddingRight="8dp"
                     android:paddingEnd="8dp"
                     android:paddingStart="0dp"
-                    android:paddingLeft="0dp" />
+                    android:labelFor="@+id/pmdFragTxtName" />
 
                 <EditText
                     android:id="@+id/pmdFragTxtName"
@@ -61,10 +60,9 @@
                 <TextView
                     android:text="@string/pmd_azimuth"
                     android:textSize="20sp"
-                    android:paddingRight="8dp"
                     android:paddingEnd="8dp"
                     android:paddingStart="0dp"
-                    android:paddingLeft="0dp" />
+                    android:labelFor="@+id/pmdFragPicTxtAzimuth" />
 
                 <EditText
                     android:id="@+id/pmdFragPicTxtAzimuth"
@@ -79,10 +77,9 @@
                 <TextView
                     android:text="@string/pmd_pitch"
                     android:textSize="20sp"
-                    android:paddingRight="8dp"
                     android:paddingEnd="8dp"
                     android:paddingStart="0dp"
-                    android:paddingLeft="0dp" />
+                    android:labelFor="@+id/pmdFragPicTxtPitch" />
 
                 <EditText
                     android:id="@+id/pmdFragPicTxtPitch"
@@ -97,10 +94,9 @@
                 <TextView
                     android:text="@string/pmd_roll"
                     android:textSize="20sp"
-                    android:paddingRight="8dp"
                     android:paddingEnd="8dp"
                     android:paddingStart="0dp"
-                    android:paddingLeft="0dp" />
+                    android:labelFor="@+id/pmdFragPicTxtRoll"/>
 
                 <EditText
                     android:id="@+id/pmdFragPicTxtRoll"
@@ -115,15 +111,12 @@
                 <TextView
                     android:text="@string/str_file"
                     android:textSize="20sp"
-                    android:paddingRight="8dp"
                     android:paddingEnd="8dp"
-                    android:paddingStart="0dp"
-                    android:paddingLeft="0dp"/>
+                    android:paddingStart="0dp"/>
 
                 <TextView
                     android:id="@+id/pmdFragTvFile"
                     style="@style/TvEditTextStyleNoFocus"
-                    android:maxLines="1"
                     android:singleLine="true"
                     android:ellipsize="start"/>
             </TableRow>
@@ -143,8 +136,7 @@
                 android:layout_height="wrap_content"
                 android:inputType="textMultiLine"
                 android:hint="@string/str_cmt"
-                style="@style/EditTextStyle"
-                android:enabled="false"/>
+                style="@style/EditTextStyle"/>
         </com.google.android.material.textfield.TextInputLayout>
     </RelativeLayout>
 </RelativeLayout>
