@@ -1040,11 +1040,9 @@ public class Import {
                 TtPolygon poly;
                 int polyCount = idal.getItemCount(TwoTrailsSchema.PolygonSchema.TableName);
 
-                HashMap<String, TtPolygon> addPolys = new HashMap<>();
                 HashMap<String, String> polyCNCvt = new HashMap<>();
                 HashMap<String, TtPolygon> currPolys = dal.getPolygonsMap();
 
-                HashMap<String, TtPoint> addPoints = new HashMap<>();
                 HashMap<String, TtPoint> cPoints = dal.getPointsMap();
                 HashMap<String, TtPoint> iPoints = idal.getPointsMap();
 
@@ -1067,7 +1065,7 @@ public class Import {
                         polygon.setCN(newPolyUuid);
                     }
 
-                    addPolys.put(polygon.getCN(), polygon);
+                    polygons.add(polygon);
 
                     for (TtPoint point : filterPointsByPoly.apply(oCN)) {
                         String opCN = point.getCN();
@@ -1088,12 +1086,11 @@ public class Import {
                             }
                         }
 
-
+                        points.add(point);
                     }
 
                     polyCount++;
                 }
-
 
                 if (!isCancelled()) {
                     if (polygons.size() > 0) {

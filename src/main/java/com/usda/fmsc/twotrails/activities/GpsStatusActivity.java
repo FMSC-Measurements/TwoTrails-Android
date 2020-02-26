@@ -1,5 +1,6 @@
 package com.usda.fmsc.twotrails.activities;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -25,6 +26,7 @@ import com.usda.fmsc.twotrails.ui.GpsStatusSatView;
 import com.usda.fmsc.twotrails.ui.GpsStatusSkyView;
 import com.usda.fmsc.utilities.StringEx;
 
+@SuppressLint("DefaultLocale")
 public class GpsStatusActivity extends CustomToolbarActivity implements GpsService.Listener {
     private static final String nVal = "*";
 

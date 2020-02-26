@@ -108,8 +108,12 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
 
                 if (intent.hasExtra(Consts.Codes.Data.POINT_PACKAGE)) {
                     Bundle bundle = intent.getBundleExtra(Consts.Codes.Data.POINT_PACKAGE);
-                    _Point = bundle.getParcelable(Consts.Codes.Data.POINT_DATA);
-                    _Metadata = bundle.getParcelable(Consts.Codes.Data.METADATA_DATA);
+                    if (bundle != null) {
+                        _Point = bundle.getParcelable(Consts.Codes.Data.POINT_DATA);
+                        _Metadata = bundle.getParcelable(Consts.Codes.Data.METADATA_DATA);
+                    } else {
+                        getTtAppCtx().getReport().writeDebug("PointPackage Not Found", "AcquireAndCalculateGpsActivity:onCreate");
+                    }
                 }
 
                 if (_Point == null) {
@@ -127,7 +131,9 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
 
                 if (intent.getExtras().containsKey(Consts.Codes.Data.ADDITIVE_NMEA_DATA)) {
                     _Bursts = intent.getParcelableArrayListExtra(Consts.Codes.Data.ADDITIVE_NMEA_DATA);
-                    setLoggedCount(_Bursts.size());
+                    if (_Bursts != null) {
+                        setLoggedCount(_Bursts.size());
+                    }
                 } else {
                     _Bursts = new ArrayList<>();
                 }
@@ -726,8 +732,6 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
                 stopLogging();
                 break;
             case NoExternalGpsSocket:
-                break;
-            case Unknown:
                 break;
         }
 
