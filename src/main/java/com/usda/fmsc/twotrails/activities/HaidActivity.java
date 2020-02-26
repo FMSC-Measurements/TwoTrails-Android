@@ -1,5 +1,6 @@
 package com.usda.fmsc.twotrails.activities;
 
+import android.annotation.SuppressLint;
 import android.os.AsyncTask;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
@@ -28,6 +29,7 @@ import com.usda.fmsc.twotrails.objects.TtPolygon;
 
 import java.util.ArrayList;
 
+@SuppressLint("DefaultLocale")
 public class HaidActivity extends CustomToolbarActivity {
     private ActionBarDrawerToggle drawerToggle;
     private DrawerLayout drawerLayout;
