@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     tools:context="com.usda.fmsc.twotrails.activities.AcquireAndCalculateGpsActivity">
 
-    <androidx.appcompat.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
+    <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="@dimen/toolbar_height"
@@ -24,7 +24,6 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/acquireGpsToolbarLblLogged"
                 android:text="@string/aqr_logged"
-                android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true"
                 android:textSize="20sp"
                 android:textColor="@android:color/white" />
@@ -34,12 +33,9 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/acquireGpsToolbarLblLoggedValue"
                 android:text="@string/zero"
-                android:layout_toRightOf="@+id/acquireGpsToolbarLblLogged"
                 android:layout_toEndOf="@+id/acquireGpsToolbarLblLogged"
                 android:paddingStart="10dp"
-                android:paddingLeft="10dp"
                 android:paddingEnd="0dp"
-                android:paddingRight="0dp"
                 android:textSize="20sp"
                 android:textColor="@android:color/white" />
 
@@ -48,28 +44,21 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/acquireGpsToolbarLblReceived"
                 android:text="@string/aqr_recv"
-                android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true"
                 android:textSize="20sp"
                 android:textColor="@android:color/white"
                 android:paddingEnd="15dp"
-                android:paddingRight="15dp"
-                android:paddingStart="0dp"
-                android:paddingLeft="0dp" />
+                android:paddingStart="0dp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/acquireGpsToolbarLblReceivedValue"
                 android:text="@string/zero"
-                android:layout_toLeftOf="@id/acquireGpsToolbarLblReceived"
                 android:layout_toStartOf="@id/acquireGpsToolbarLblReceived"
-                android:layout_toRightOf="@id/acquireGpsToolbarLblLoggedValue"
                 android:layout_toEndOf="@id/acquireGpsToolbarLblLoggedValue"
                 android:paddingEnd="10dp"
-                android:paddingRight="10dp"
                 android:paddingStart="0dp"
-                android:paddingLeft="0dp"
                 android:textSize="20sp"
                 android:textColor="@android:color/white"
                 android:gravity="end" />
@@ -143,7 +132,6 @@
         android:src="@drawable/ic_my_location_white_36dp"
         android:onClick="btnMyLocClick"
         android:layout_above="@id/buttonBar"
-        android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:layout_margin="8dp"
         android:layout_marginBottom="0dp"/>
