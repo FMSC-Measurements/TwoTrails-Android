@@ -109,8 +109,6 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
     private ArrayList<TtNmeaBurst> _Bursts, _UsedBursts;
     private TtPoint _PrevPoint, _CurrentPoint;
     private Take5Point _AddTake5;
-    private TtMetadata _Metadata;
-    private TtPolygon _Polygon;
     private TtGroup _Group;
 
     private int increment, takeAmount, nmeaCount = 0;
@@ -372,24 +370,21 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                                 onBnd = true;
                             }
                         }
-
-                        _Metadata = bundle.getParcelable(Consts.Codes.Data.METADATA_DATA);
-                        _Polygon = bundle.getParcelable(Consts.Codes.Data.POLYGON_DATA);
                     }
 
-                    if (_Metadata == null) {
+                    if (getCurrentMetadata() == null) {
                         cancelResult = Consts.Codes.Results.NO_METADATA_DATA;
                     } else {
-                        setZone(_Metadata.getZone());
+                        setZone(getCurrentMetadata().getZone());
 
-                        if (_Polygon == null) {
+                        if (getPolygon() == null) {
                             cancelResult = Consts.Codes.Results.NO_POLYGON_DATA;
                         } else {
                             if (!isTrailModeEnabled()) {
-                                enabledTrailMode(_Polygon);
+                                enabledTrailMode(getPolygon());
                             }
 
-                            _Points = getTtAppCtx().getDAL().getPointsInPolygon(_Polygon.getCN());
+                            _Points = getTtAppCtx().getDAL().getPointsInPolygon(getPolygon().getCN());
 
                             if (_Points.size() > 0 && _CurrentPoint != null) {
                                 _Points = _Points.subList(0, _CurrentPoint.getIndex() + 1);
@@ -427,7 +422,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
 
             ActionBar actionBar = getSupportActionBar();
             if (actionBar != null) {
-                actionBar.setTitle(_Polygon.getName());
+                actionBar.setTitle(getPolygon().getName());
                 actionBar.setDisplayShowTitleEnabled(true);
 
                 AndroidUtils.UI.createToastForToolbarTitle(Take5Activity.this, getToolbar());
@@ -443,7 +438,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
 
             layCardInfo = findViewById(R.id.take5LayInfo);
 
-            t5pAdapter = new Take5PointsEditRvAdapter(this, _Points, _Metadata);
+            t5pAdapter = new Take5PointsEditRvAdapter(this, _Points, getCurrentMetadata());
             linearLayoutManager = new LinearLayoutManagerWithSmoothScroller(this);
 
             cvGpsInfo = findViewById(R.id.take5CardGpsInfo);
@@ -956,13 +951,13 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
             point.setPID(PointNamer.namePoint(_PrevPoint, increment));
             point.setIndex(_PrevPoint.getIndex() + 1);
         } else {
-            point.setPID(PointNamer.nameFirstPoint(_Polygon));
+            point.setPID(PointNamer.nameFirstPoint(getPolygon()));
             point.setIndex(0);
         }
 
-        point.setPolyCN(_Polygon.getCN());
-        point.setPolyName(_Polygon.getName());
-        point.setMetadataCN(_Metadata.getCN());
+        point.setPolyCN(getPolygon().getCN());
+        point.setPolyName(getPolygon().getName());
+        point.setMetadataCN(getCurrentMetadata().getCN());
         point.setGroupCN(_Group.getCN());
         point.setGroupName(_Group.getName());
         point.setOnBnd(onBnd);
@@ -985,7 +980,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                         tmp =_Points.get(i);
 
                         if (tmp.getOp().isGpsType()) {
-                            ssp.calculatePoint(_Polygon, tmp);
+                            ssp.calculatePoint(getPolygon(), tmp);
                             addPosition(ssp);
                             break;
                         }
@@ -1345,7 +1340,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                     stopLogging();
 
                     ArrayList<Position> positions = new ArrayList<>();
-                    int zone = _Metadata.getZone();
+                    int zone = getCurrentMetadata().getZone();
                     double x = 0, y = 0, count = _UsedBursts.size(), dRMSEx = 0, dRMSEy = 0, dRMSEr;
 
                     TtNmeaBurst tmpBurst;
@@ -1375,7 +1370,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                     _AddTake5.setLongitude(position.getLongitudeSignedDecimal());
                     _AddTake5.setElevation(position.getElevation());
                     _AddTake5.setRMSEr(dRMSEr);
-                    _AddTake5.setAndCalc(x, y, position.getElevation(), _Polygon);
+                    _AddTake5.setAndCalc(x, y, position.getElevation(), getPolygon());
 
                     addTake5(_AddTake5);
                 }
@@ -1678,7 +1673,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
 
     @Override
     public TtMetadata getMetadata(String cn) {
-        return _Metadata;
+        return getCurrentMetadata();
     }
 
     @Override
@@ -1761,6 +1756,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
         return !mapViewMode || centerPosition ? MapTracking.FOLLOW : MapTracking.NONE;
     }
 
+    
 
     //region Fragment Interaction
     private void onLockChange() {

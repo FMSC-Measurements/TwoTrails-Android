@@ -1994,7 +1994,6 @@ public class DataAccessLayer extends IDataLayer {
 
             for (TtNmeaBurst burst : bursts) {
                 if (!insertNmeaBurstNoTrans(burst)) {
-                    _db.endTransaction();
                     return false;
                 }
             }
@@ -2059,8 +2058,8 @@ public class DataAccessLayer extends IDataLayer {
             cvs.put(TwoTrailsSchema.TtNmeaSchema.HorizDilution, burst.getHorizDilution());
             cvs.put(TwoTrailsSchema.TtNmeaSchema.GeiodHeight, burst.getGeoidHeight());
             cvs.put(TwoTrailsSchema.TtNmeaSchema.GeiodHeightUom, burst.getGeoUom().getValue());
-            cvs.put(TwoTrailsSchema.TtNmeaSchema.GroundSpeed, burst.getGroundSpeed());
-            cvs.put(TwoTrailsSchema.TtNmeaSchema.TrackAngle, burst.getTrackAngle());
+            if (burst.getGroundSpeed() != null) { cvs.put(TwoTrailsSchema.TtNmeaSchema.GroundSpeed, burst.getGroundSpeed()); }
+            if (burst.getTrackAngle() != null) { cvs.put(TwoTrailsSchema.TtNmeaSchema.TrackAngle, burst.getTrackAngle()); }
 
             cvs.put(TwoTrailsSchema.TtNmeaSchema.SatellitesUsedCount, burst.getUsedSatellitesCount());
             cvs.put(TwoTrailsSchema.TtNmeaSchema.SatellitesTrackedCount, burst.getTrackedSatellitesCount());
