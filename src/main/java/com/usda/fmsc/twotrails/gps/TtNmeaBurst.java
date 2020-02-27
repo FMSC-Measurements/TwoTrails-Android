@@ -52,8 +52,8 @@ public class TtNmeaBurst extends TtObject implements Parcelable {
 
     //rmc
     private DateTime fixTime;
-    private double groundSpeed; //groud speed in knots
-    private double trackAngle;  //in degrees, true
+    private Double groundSpeed; //groud speed in knots
+    private Double trackAngle;  //in degrees, true
     private double magVar;
     private EastWest magVarDir;
 
@@ -112,7 +112,7 @@ public class TtNmeaBurst extends TtObject implements Parcelable {
     }
 
     private TtNmeaBurst(String cn, DateTime timeCreated, String pointCN, boolean used,
-                       Position position, DateTime fixTime, double groundSpeed, double trackAngle,
+                       Position position, DateTime fixTime, Double groundSpeed, Double trackAngle,
                        Double magVar, EastWest magVarDir, Status mode, GSASentence.Fix fix,
                        ArrayList<Integer> satsUsed, double pdop, double hdop, double vdop, GGASentence.GpsFixType fixQuality,
                        int trackedSatellites, double horizDilution, double geoidHeight, UomElevation geoUom,
@@ -147,7 +147,7 @@ public class TtNmeaBurst extends TtObject implements Parcelable {
     }
 
     public TtNmeaBurst(String cn, DateTime timeCreated, String pointCN, boolean used,
-        Position position, DateTime fixTime, double groundSpeed, double trackAngle,
+        Position position, DateTime fixTime, Double groundSpeed, Double trackAngle,
         Double magVar, EastWest magVarDir, Status mode, GSASentence.Fix fix,
         ArrayList<Integer> satsUsed, double pdop, double hdop, double vdop, GGASentence.GpsFixType fixQuality,
         int trackedSatellites, double horizDilution, double geoidHeight, UomElevation geoUom,
@@ -161,7 +161,7 @@ public class TtNmeaBurst extends TtObject implements Parcelable {
     }
 
     public TtNmeaBurst(String cn, DateTime timeCreated, String pointCN, boolean used,
-                       Position position, DateTime fixTime, double groundSpeed, double trackAngle,
+                       Position position, DateTime fixTime, Double groundSpeed, Double trackAngle,
                        Double magVar, EastWest magVarDir, Status mode, GSASentence.Fix fix,
                        ArrayList<Integer> satsUsed, double pdop, double hdop, double vdop, GGASentence.GpsFixType fixQuality,
                        int trackedSatellites, double horizDilution, double geoidHeight, UomElevation geoUom,
