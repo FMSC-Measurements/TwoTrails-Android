@@ -104,7 +104,7 @@ import jp.wasabeef.recyclerview.animators.FadeInAnimator;
 
 @SuppressWarnings({"unused", "RestrictedApi"})
 public class PointsActivity extends CustomToolbarActivity implements PointMediaController, RangeFinderService.Listener {
-    private HashMap<String, PointMediaListener> listeners;
+    private HashMap<String, PointMediaListener> listeners = new HashMap<>();
 
     private MenuItem miLock, miLink, miReset, miEnterLatLon, miNmeaRecalc, miDelete, miGoto;//, miMovePoint;
     private SheetLayoutEx slexAqr, slexCreate;
@@ -405,8 +405,6 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         }
 
         setUseExitWarning(true);
-
-        listeners = new HashMap<>();
 
         final TtPolygon[] polyArray = getPolygons().values().toArray(new TtPolygon[0]);
         Arrays.sort(polyArray);
@@ -2086,12 +2084,14 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
     public void updatePoint(TtPoint point) {
         //only update if current point
-        if (_CurrentPoint.getCN().equals(point.getCN())) {
-            _CurrentPoint = point;
-            setPointUpdated(true);
-        }
+        if (point != null) {
+            if (_CurrentPoint.getCN().equals(point.getCN())) {
+                _CurrentPoint = point;
+                setPointUpdated(true);
+            }
 
-        adjust = true;
+            adjust = true;
+        }
     }
 
     public void updateMedia(TtMedia media) {
