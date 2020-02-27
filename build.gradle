@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 29
-    buildToolsVersion '29.0.2'
+    buildToolsVersion '29.0.3'
 
     def versionPropsFile = file('version.properties')
 
@@ -40,8 +40,8 @@ android {
         multiDexEnabled true
 
 
-        resValue "string", "arcgis_client_id", property("TwoTrails.ArcGIS.ClientID") //100.2.9
-        resValue "string", "arcgis_client_secret", property("TwoTrails.ArcGIS.ClientSecret") //100.2.9
+        //resValue "string", "arcgis_client_id", property("TwoTrails.ArcGIS.ClientID") //100.2.9
+        //resValue "string", "arcgis_client_secret", property("TwoTrails.ArcGIS.ClientSecret") //100.2.9
         resValue "string", "arcgis_runtime_license", property("TwoTrails.ArcGIS.RuntimeLicenseKey") //100.6.0
         resValue "string", "dev_email_addr", property("TwoTrails.Dev.EmailAddress")
 
@@ -131,14 +131,14 @@ dependencies {
     implementation project(':Utilities')
     implementation 'com.google.android.gms:play-services-maps:17.0.0'
     implementation 'com.google.code.gson:gson:2.8.5'
-    implementation 'androidx.recyclerview:recyclerview:1.0.0'
+    implementation 'androidx.recyclerview:recyclerview:1.1.0'
     implementation 'androidx.mediarouter:mediarouter:1.1.0'
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'com.google.android.material:material:1.0.0'
+    implementation 'com.google.android.material:material:1.1.0'
     implementation 'androidx.multidex:multidex:2.0.1'
-    implementation 'androidx.exifinterface:exifinterface:1.0.0'
+    implementation 'androidx.exifinterface:exifinterface:1.1.0'
     implementation 'joda-time:joda-time:2.9.2'
     implementation 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
     implementation 'me.zhanghai.android.materialprogressbar:library:1.1.4'

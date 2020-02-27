@@ -247,6 +247,10 @@ public interface IMultiMapFragment {
         public void setZoomLevel(Float zoomLevel) {
             ZoomLevel = zoomLevel;
         }
+
+        public Extent getExtents() {
+            return new Extent(North, South, East, West);
+        }
     }
 
     class MarkerData {

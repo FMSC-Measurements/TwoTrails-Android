@@ -138,8 +138,8 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
         Intent startIntent = getIntent();
 
         if (!showedCrashed && startIntent != null && startIntent.hasExtra(Consts.Codes.Data.CRASH)) {
-            AndroidUtils.Device.isInternetAvailable(internetAvailable -> runOnUiThread(() -> {
-                if (internetAvailable) {
+            runOnUiThread(() -> {
+                if (AndroidUtils.Device.isInternetAvailable(getTtAppCtx())) {
                     new AlertDialog.Builder(MainActivity.this)
                             .setMessage("TwoTrails experienced a crash. Would you like to send an error report to the developer team to help prevent future crashes?")
                             .setPositiveButton("Send", (dialog, which) -> TtUtils.SendCrashEmailToDev(MainActivity.this))
@@ -153,7 +153,24 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
                             .show();
                     showedCrashed = true;
                 }
-            }));
+            });
+
+//            AndroidUtils.Device.isInternetAvailable(internetAvailable -> runOnUiThread(() -> {
+//                if (internetAvailable) {
+//                    new AlertDialog.Builder(MainActivity.this)
+//                            .setMessage("TwoTrails experienced a crash. Would you like to send an error report to the developer team to help prevent future crashes?")
+//                            .setPositiveButton("Send", (dialog, which) -> TtUtils.SendCrashEmailToDev(MainActivity.this))
+//                            .setNeutralButton("Don't Send", null)
+//                            .show();
+//                    showedCrashed = true;
+//                } else {
+//                    new AlertDialog.Builder(MainActivity.this)
+//                            .setMessage("TwoTrails experienced a crash. You can send a crash log to the development team from inside the settings menu.")
+//                            .setPositiveButton(R.string.str_ok, null)
+//                            .show();
+//                    showedCrashed = true;
+//                }
+//            }));
         }
     }
 

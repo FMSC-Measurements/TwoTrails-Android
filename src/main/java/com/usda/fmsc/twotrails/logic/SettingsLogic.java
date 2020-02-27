@@ -62,8 +62,8 @@ public class SettingsLogic {
 //    private static Snackbar snackbar;
     private static void onExportReportComplete(final Activity activity, final String filepath) {
         if (filepath != null) {
-            AndroidUtils.Device.isInternetAvailable(internetAvailable -> activity.runOnUiThread(() -> {
-                if (internetAvailable) {
+            activity.runOnUiThread(() -> {
+                if (AndroidUtils.Device.isInternetAvailable(activity)) {
                     new AlertDialog.Builder(activity)
                             .setMessage("Would you like to send the report to the developer team to help prevent future crashes?")
                             .setPositiveButton("Send", (dialog, which) -> TtUtils.SendEmailToDev(activity, filepath, true))
@@ -72,7 +72,7 @@ public class SettingsLogic {
                 } else {
                     Toast.makeText(activity, "Report Exported to Documents/TwoTrailsFiles/" + FileUtils.getFileName(filepath), Toast.LENGTH_LONG).show();
                 }
-            }));
+            });
 
 //            snackbar = Snackbar.make(activity.findViewById(android.R.id.content), "Report Exported", Snackbar.LENGTH_LONG)
 //                    .setAction("View", new View.OnClickListener() {

@@ -190,37 +190,36 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
             mapType = getTtAppCtx().getDeviceSettings().getMapType();
             mapId = getTtAppCtx().getDeviceSettings().getMapId();
 
-            AndroidUtils.Device.isInternetAvailable(internetAvailable -> runOnUiThread(() -> {
-                switch (mapType) {
-                    case Google:
-                        if (internetAvailable || mapId == GoogleMapType.MAP_TYPE_NONE.getValue()) {
-                            // check google play services and setup map
-                            int code = AndroidUtils.App.checkPlayServices(BaseMapActivity.this, Consts.Codes.Services.REQUEST_GOOGLE_PLAY_SERVICES);
-                            if (code == 0) {
-                                startGMap();
-                            } else {
-                                String str = GoogleApiAvailability.getInstance().getErrorString(code);
-                                Toast.makeText(BaseMapActivity.this, str, Toast.LENGTH_LONG).show();
-                            }
+            final boolean internetAvailable = AndroidUtils.Device.isInternetAvailable(getTtAppCtx());
+            switch (mapType) {
+                case Google:
+                    if (internetAvailable || mapId == GoogleMapType.MAP_TYPE_NONE.getValue()) {
+                        // check google play services and setup map
+                        int code = AndroidUtils.App.checkPlayServices(BaseMapActivity.this, Consts.Codes.Services.REQUEST_GOOGLE_PLAY_SERVICES);
+                        if (code == 0) {
+                            startGMap();
                         } else {
-                            requestOfflineMap();
+                            String str = GoogleApiAvailability.getInstance().getErrorString(code);
+                            Toast.makeText(BaseMapActivity.this, str, Toast.LENGTH_LONG).show();
                         }
-                        break;
-                    case ArcGIS:
-                        ArcGisMapLayer agml = getTtAppCtx().getArcGISTools().getMapLayer(mapId);
-                        if (agml == null) {
-                            mapId = 0;
-                            agml = getTtAppCtx().getArcGISTools().getMapLayer(mapId);
-                        }
+                    } else {
+                        requestOfflineMap();
+                    }
+                    break;
+                case ArcGIS:
+                    ArcGisMapLayer agml = getTtAppCtx().getArcGISTools().getMapLayer(mapId);
+                    if (agml == null) {
+                        mapId = 0;
+                        agml = getTtAppCtx().getArcGISTools().getMapLayer(mapId);
+                    }
 
-                        if (agml.isOnline() && !internetAvailable) {
-                            requestOfflineMap();
-                        } else {
-                            startArcMap();
-                        }
-                        break;
-                }
-            }));
+                    if (agml.isOnline() && !internetAvailable) {
+                        requestOfflineMap();
+                    } else {
+                        startArcMap();
+                    }
+                    break;
+            }
         }
 
         if (getTtAppCtx().getDeviceSettings().getKeepScreenOn()) {
@@ -531,7 +530,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
                 break;
             }
             case R.id.mapMenuResetBounds: {
-                resetMapBounds();
+                resetMapBounds(true);
             }
             case R.id.mapMenuZoomToPoly: {
                 int gSize = getPolyGraphicManagers().size();
@@ -740,6 +739,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
                 Toast.makeText(getTtAppCtx(), "Google Play Services not available.", Toast.LENGTH_LONG).show();
                 finish();
             } else {
+                mapReady = false;
                 mapFragment = createMapFragment(mapType, getMapOptions(mapType, mapId));
                 mmFrag = (IMultiMapFragment) mapFragment;
                 getSupportFragmentManager().beginTransaction().replace(R.id.mapContainer, mapFragment).commit();
@@ -817,23 +817,24 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
                 }
             }
 
-            resetMapBounds();
+            resetMapBounds(true);
 
             setupPolygonOptionsUI();
         }
     }
 
-    protected void resetMapBounds() {
+    protected void resetMapBounds(boolean animate) {
         mapMoved = true;
         if (getMapTracking() == MapTracking.POLY_BOUNDS && getTrackedPoly() != null) {
-            moveToLocation(getTrackedPoly(), Consts.Location.PADDING, true);
+            moveToLocation(getTrackedPoly(), Consts.Location.PADDING, animate);
         } else if (getMapTracking() == MapTracking.FOLLOW && hasPosition()) {
-            moveToLocation(getLastPosition(), Consts.Location.ZOOM_CLOSE, true);
+            moveToLocation(getLastPosition(), Consts.Location.ZOOM_CLOSE, animate);
         } else if (getCompleteBounds() != null) {
-            moveToLocation(getCompleteBounds(), Consts.Location.PADDING, true);
+            moveToLocation(getCompleteBounds(), Consts.Location.PADDING, animate);
         } else {
-            moveToLocation(Consts.Location.USA_BOUNDS, Consts.Location.PADDING, true);
+            moveToLocation(Consts.Location.USA_BOUNDS, Consts.Location.PADDING, animate);
         }
+        mapMoved = false;
     }
 
     @Override
@@ -1004,8 +1005,10 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
 
     protected void onFirstPositionReceived(Position position) {
         if (mapReady) {
-            moveToLocation(position, Consts.Location.ZOOM_CLOSE, true);
-            mapMoved = false;
+            if (getMapTracking() == MapTracking.FOLLOW) {
+                moveToLocation(position, Consts.Location.ZOOM_CLOSE, true);
+                mapMoved = false;
+            }
         }
     }
 
