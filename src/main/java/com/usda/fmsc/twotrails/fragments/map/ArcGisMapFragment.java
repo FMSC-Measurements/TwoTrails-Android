@@ -218,21 +218,25 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Ma
                     mmListener.onMapReady();
                     mapReady = true;
 
-                    if (centerOnLoad) {
-                        if (startUpMapOptions.hasExtents()) {
-                            moveToLocation(new Extent(startUpMapOptions.getNorth(),
-                                    startUpMapOptions.getEast(),
-                                    startUpMapOptions.getSouth(),
-                                    startUpMapOptions.getWest()), 0, false);
-                        } else {
-                            moveToLocation(startUpMapOptions.getLatitude(), startUpMapOptions.getLongitide(), false);
-                        }
-
-                        centerOnLoad = false;
-                    } else {
-                        //if map is offline and has extents
-                        moveToMapMaxExtents(false);
-                    }
+//                    if (centerOnLoad) {
+//                        if (startUpMapOptions.hasExtents()) {
+//                            moveToLocation(new Extent(startUpMapOptions.getNorth(),
+//                                    startUpMapOptions.getEast(),
+//                                    startUpMapOptions.getSouth(),
+//                                    startUpMapOptions.getWest()), 0, false);
+//                        } else {
+//                            moveToLocation(startUpMapOptions.getLatitude(), startUpMapOptions.getLongitide(), false);
+//                        }
+//
+//                        centerOnLoad = false;
+//                    } else {
+//                        //if map is offline and has extents
+//                        if (startUpMapOptions.hasExtents()) {
+//                            moveToLocation(startUpMapOptions.getExtents(), 0, false);
+//                        } else {
+//                            moveToMapMaxExtents(false);
+//                        }
+//                    }
                 }
 
                 mmListener.onMapLoaded();
@@ -277,8 +281,8 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Ma
                 }
 
                 if (currentGisMapLayer.isOnline() && currentGisMapLayer.getNumberOfLevels() < 1) {
-                    AndroidUtils.Device.isInternetAvailable(internetAvailable -> {
-                        if (internetAvailable) {
+                    //AndroidUtils.Device.isInternetAvailable(getContext(), internetAvailable -> {
+                        if (AndroidUtils.Device.isInternetAvailable(getContext())) {
                             TtAppCtx.getArcGISTools().getLayerFromUrl(agml.getUrl(), getActivity(), new ArcGISTools.IGetArcMapLayerListener() {
                                 @Override
                                 public void onComplete(ArcGisMapLayer layer) {
@@ -310,7 +314,7 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Ma
                                 }
                             });
                         }
-                    });
+                    //});
                 }
             } catch (FileNotFoundException e) {
                 Toast.makeText(getActivity(), "Unable to find offline map file.", Toast.LENGTH_LONG).show();

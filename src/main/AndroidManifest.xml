@@ -87,7 +87,7 @@
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
+                <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
@@ -240,10 +240,10 @@
             android:label="@string/title_activity_offline_map_manager"
             android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait" />
-        <activity
-            android:name=".activities.GetMapExtentsActivity"
-            android:label="@string/title_activity_get_map_extents"
-            android:screenOrientation="portrait" />
+<!--        <activity-->
+<!--            android:name=".activities.GetMapExtentsActivity"-->
+<!--            android:label="@string/title_activity_get_map_extents"-->
+<!--            android:screenOrientation="portrait" />-->
         <activity
             android:name=".activities.base.AcquireGpsMapActivity"
             android:screenOrientation="portrait" />
@@ -252,11 +252,11 @@
             android:label="@string/title_activity_edit_arc_map"
             android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait" />
-        <activity
-            android:name=".activities.ArcGisLoginActivity"
-            android:label="@string/title_activity_arc_gis_login"
-            android:windowSoftInputMode="adjustPan"
-            android:screenOrientation="portrait" />
+<!--        <activity-->
+<!--            android:name=".activities.ArcGisLoginActivity"-->
+<!--            android:label="@string/title_activity_arc_gis_login"-->
+<!--            android:windowSoftInputMode="adjustPan"-->
+<!--            android:screenOrientation="portrait" />-->
         <activity
             android:name=".activities.TtCameraActivity"
             android:screenOrientation="portrait" />

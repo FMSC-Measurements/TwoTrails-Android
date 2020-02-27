@@ -144,37 +144,37 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
 
         setMapPadding(0, (int) (getResources().getDimension(R.dimen.toolbar_height)), 0, 0);
 
-        if (startUpMapOptions != null && startUpMapOptions.getMapId() != GoogleMapType.MAP_TYPE_NONE.getValue()) {
-            try {
-                if (startUpMapOptions.hasExtents()) {
-                    map.moveCamera(CameraUpdateFactory.newLatLngBounds(
-                            new LatLngBounds(
-                                    new LatLng(startUpMapOptions.getSouth(), startUpMapOptions.getWest()),
-                                    new LatLng(startUpMapOptions.getNorth(), startUpMapOptions.getEast())
-                            ),
-                            fragWidth - startUpMapOptions.getPadding() / 2,
-                            fragHeight - startUpMapOptions.getPadding() / 2,
-                            startUpMapOptions.getPadding()
-                    ));
-                } else if (startUpMapOptions.hasLocation()) {
-                    map.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                            new LatLng(
-                                    startUpMapOptions.getLatitude(),
-                                    startUpMapOptions.getLongitide()
-                            ),
-                            startUpMapOptions.getZoomLevel() != null ? startUpMapOptions.getZoomLevel() : Consts.Location.ZOOM_GENERAL));
-                } else {
-                    map.moveCamera(CameraUpdateFactory.newLatLngBounds(
-                            Consts.Location.GoogleMaps.USA_BOUNDS,
-                            fragWidth,
-                            fragHeight,
-                            Consts.Location.PADDING
-                    ));
-                }
-            } catch (Exception e) {
-                TtAppCtx.getReport().writeError("ManagedSupportMapFragment:onMapReady", e.getMessage(), e.getStackTrace());
-            }
-        }
+//        if (startUpMapOptions != null && startUpMapOptions.getMapId() != GoogleMapType.MAP_TYPE_NONE.getValue()) {
+//            try {
+//                if (startUpMapOptions.hasExtents()) {
+//                    map.moveCamera(CameraUpdateFactory.newLatLngBounds(
+//                            new LatLngBounds(
+//                                    new LatLng(startUpMapOptions.getSouth(), startUpMapOptions.getWest()),
+//                                    new LatLng(startUpMapOptions.getNorth(), startUpMapOptions.getEast())
+//                            ),
+//                            //fragWidth - startUpMapOptions.getPadding() / 2,
+//                            //fragHeight - startUpMapOptions.getPadding() / 2,
+//                            startUpMapOptions.getPadding()
+//                    ));
+//                } else if (startUpMapOptions.hasLocation()) {
+//                    map.moveCamera(CameraUpdateFactory.newLatLngZoom(
+//                            new LatLng(
+//                                    startUpMapOptions.getLatitude(),
+//                                    startUpMapOptions.getLongitide()
+//                            ),
+//                            startUpMapOptions.getZoomLevel() != null ? startUpMapOptions.getZoomLevel() : Consts.Location.ZOOM_GENERAL));
+//                } else {
+//                    map.moveCamera(CameraUpdateFactory.newLatLngBounds(
+//                            Consts.Location.GoogleMaps.USA_BOUNDS,
+//                            fragWidth,
+//                            fragHeight,
+//                            Consts.Location.PADDING
+//                    ));
+//                }
+//            } catch (Exception e) {
+//                TtAppCtx.getReport().writeError("ManagedSupportMapFragment:onMapReady", e.getMessage(), e.getStackTrace());
+//            }
+//        }
 
         if (mmlistener != null) {
             mmlistener.onMapReady();
