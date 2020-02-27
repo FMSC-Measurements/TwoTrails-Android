@@ -25,6 +25,7 @@ import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.gps.GpsService;
+import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.objects.map.PolygonGraphicOptions;
@@ -57,6 +58,7 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
     private int currentMapIndex = -1, mapOffsetY;
 
     private TtPolygon _Polygon;
+    private TtMetadata _Metadata;
 
     private TrailGraphicManager trailGraphicManager;
 
@@ -74,7 +76,12 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
                 Intent intent = getIntent();
 
                 if (intent != null) {
-                    if (intent.hasExtra(Consts.Codes.Data.POLYGON_DATA)) {
+                    if (intent.hasExtra(Consts.Codes.Data.POINT_PACKAGE)) {
+                        Bundle bundle = intent.getBundleExtra(Consts.Codes.Data.POINT_PACKAGE);
+
+                        _Metadata = bundle.getParcelable(Consts.Codes.Data.METADATA_DATA);
+                        _Polygon = bundle.getParcelable(Consts.Codes.Data.POLYGON_DATA);
+                    } else if (intent.hasExtra(Consts.Codes.Data.POLYGON_DATA)) {
                         _Polygon = intent.getParcelableExtra(Consts.Codes.Data.POLYGON_DATA);
                     }
 
@@ -576,5 +583,9 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
 
     protected TtPolygon getPolygon() {
         return _Polygon;
+    }
+
+    protected TtMetadata getCurrentMetadata() {
+        return _Metadata;
     }
 }

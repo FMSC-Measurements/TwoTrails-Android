@@ -61,7 +61,6 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
     private NmeaPointsView nmeaPointsView;
 
     private GpsPoint _Point;
-    private TtMetadata _Metadata;
     private ArrayList<TtNmeaBurst> _Bursts, _FilteredBursts;
 
     private Button btnLog, btnCalc;
@@ -110,7 +109,6 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
                     Bundle bundle = intent.getBundleExtra(Consts.Codes.Data.POINT_PACKAGE);
                     if (bundle != null) {
                         _Point = bundle.getParcelable(Consts.Codes.Data.POINT_DATA);
-                        _Metadata = bundle.getParcelable(Consts.Codes.Data.METADATA_DATA);
                     } else {
                         getTtAppCtx().getReport().writeDebug("PointPackage Not Found", "AcquireAndCalculateGpsActivity:onCreate");
                     }
@@ -121,13 +119,13 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
                     finish();
                     return;
                 }
-                if (_Metadata == null) {
+                if (getCurrentMetadata() == null) {
                     setResult(Consts.Codes.Results.NO_METADATA_DATA);
                     finish();
                     return;
                 }
 
-                setZone(_Metadata.getZone());
+                setZone(getCurrentMetadata().getZone());
 
                 if (intent.getExtras().containsKey(Consts.Codes.Data.ADDITIVE_NMEA_DATA)) {
                     _Bursts = intent.getParcelableArrayListExtra(Consts.Codes.Data.ADDITIVE_NMEA_DATA);
@@ -714,7 +712,7 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
     public void onNmeaBurstReceived(final NmeaBurst nmeaBurst) {
         super.onNmeaBurstReceived(nmeaBurst);
 
-        if (isLogging() && nmeaBurst.hasPosition()) {
+        if (isLogging() && nmeaBurst.isValid()) {
             onLoggedNmeaBurst(nmeaBurst);
             loggedCount++;
         }

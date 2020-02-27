@@ -302,11 +302,11 @@ public class TtNmeaBurst extends TtObject implements Parcelable {
         return magVarDir;
     }
 
-    public double getTrackAngle() {
+    public Double getTrackAngle() {
         return trackAngle;
     }
 
-    public double getGroundSpeed() {
+    public Double getGroundSpeed() {
         return groundSpeed;
     }
 

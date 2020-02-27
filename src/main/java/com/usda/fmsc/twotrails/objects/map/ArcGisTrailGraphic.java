@@ -95,7 +95,7 @@ public class ArcGisTrailGraphic implements ITrailGraphic, IMarkerDataGraphic {
 
         if (point.isOnBnd()) {
             if (_TrailPoints == null) {
-                _TrailPoints = new PointCollection(map.getSpatialReference());
+                _TrailPoints = new PointCollection(SpatialReferences.getWgs84());//new PointCollection(map.getSpatialReference());
             }
 
             _TrailPoints.add(posLL);

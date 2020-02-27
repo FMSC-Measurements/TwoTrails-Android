@@ -60,8 +60,6 @@ public class WalkActivity extends AcquireGpsMapActivity {
 
     private WalkPoint _CurrentPoint;
     private TtPoint _PrevPoint;
-    private TtMetadata _Metadata;
-    private TtPolygon _Polygon;
     private TtGroup _Group;
 
 
@@ -98,21 +96,18 @@ public class WalkActivity extends AcquireGpsMapActivity {
                                 onBnd = true;
                             }
                         }
-
-                        _Metadata = bundle.getParcelable(Consts.Codes.Data.METADATA_DATA);
-                        _Polygon = bundle.getParcelable(Consts.Codes.Data.POLYGON_DATA);
                     }
 
-                    if (_Metadata == null) {
+                    if (getCurrentMetadata() == null) {
                         cancelResult = Consts.Codes.Results.NO_METADATA_DATA;
                     } else {
-                        setZone(_Metadata.getZone());
+                        setZone(getCurrentMetadata().getZone());
 
-                        if (_Polygon == null) {
+                        if (getPolygon() == null) {
                             cancelResult = Consts.Codes.Results.NO_POLYGON_DATA;
                         } else {
                             if (!isTrailModeEnabled()) {
-                                enabledTrailMode(_Polygon);
+                                enabledTrailMode(getPolygon());
                             }
                         }
                     }
@@ -132,7 +127,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
 
             ActionBar actionBar = getSupportActionBar();
             if (actionBar != null) {
-                actionBar.setTitle(_Polygon.getName());
+                actionBar.setTitle(getPolygon().getName());
                 actionBar.setDisplayShowTitleEnabled(true);
 
                 AndroidUtils.UI.createToastForToolbarTitle(WalkActivity.this, getToolbar());
@@ -159,7 +154,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
 
             TextView tvElevType = findViewById(R.id.pointCardTvElevType);
             if (tvElevType != null) {
-                tvElevType.setText(_Metadata.getElevation().toString());
+                tvElevType.setText(getCurrentMetadata().getElevation().toString());
             }
 
             dOnBnd = AndroidUtils.UI.getDrawable(this, R.drawable.ic_onbnd_dark);
@@ -357,7 +352,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
         _CurrentPoint = new WalkPoint();
 
         if (_PrevPoint == null) {
-            _CurrentPoint.setPID(PointNamer.nameFirstPoint(_Polygon));
+            _CurrentPoint.setPID(PointNamer.nameFirstPoint(getPolygon()));
             _CurrentPoint.setIndex(0);
         } else {
             _CurrentPoint.setPID(PointNamer.namePoint(_PrevPoint, increment));
@@ -367,18 +362,18 @@ public class WalkActivity extends AcquireGpsMapActivity {
         TtNmeaBurst burst = TtNmeaBurst.create(_CurrentPoint.getCN(), true, nmeaBurst);
 
         _CurrentPoint.setOnBnd(onBnd);
-        _CurrentPoint.setPolyCN(_Polygon.getCN());
-        _CurrentPoint.setPolyName(_Polygon.getName());
+        _CurrentPoint.setPolyCN(getPolygon().getCN());
+        _CurrentPoint.setPolyName(getPolygon().getName());
         _CurrentPoint.setGroupCN(_Group.getCN());
         _CurrentPoint.setGroupName(_Group.getName());
-        _CurrentPoint.setMetadataCN(_Metadata.getCN());
+        _CurrentPoint.setMetadataCN(getCurrentMetadata().getCN());
 
         _CurrentPoint.setLatitude(nmeaBurst.getPosition().getLatitudeSignedDecimal());
         _CurrentPoint.setLongitude(nmeaBurst.getPosition().getLongitudeSignedDecimal());
         _CurrentPoint.setElevation(nmeaBurst.getElevation());
 
         //saves the need to recalculate utm
-        _CurrentPoint.setAndCalc(utmCoords.getX(), utmCoords.getY(), burst.getElevation(), _Polygon);
+        _CurrentPoint.setAndCalc(utmCoords.getX(), utmCoords.getY(), burst.getElevation(), getPolygon());
 
         try {
             getTtAppCtx().getDAL().insertPoint(_CurrentPoint);
@@ -548,7 +543,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
 
                 //if point is up good enough to use
                 if (TtUtils.NMEA.isBurstUsable(nmeaBurst, options)) {
-                    UTMCoords utmCoords = nmeaBurst.getUTM(_Metadata.getZone());
+                    UTMCoords utmCoords = nmeaBurst.getUTM(getCurrentMetadata().getZone());
 
                     //if more than minimum distance
                     if (_PrevPoint == null || minWalkDist <= 0 || TtUtils.Math.distance(utmCoords.getX(), utmCoords.getY(),
