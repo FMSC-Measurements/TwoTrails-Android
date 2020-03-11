@@ -1456,6 +1456,10 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
             if (getTtAppCtx().getMAL().insertMedia(picture)) {
                 mediaSelectionIndex = TtUtils.Media.getMediaIndex(picture, rvMediaAdapter.getItems());
                 loadImageToList(picture);
+
+                new Thread(() -> {
+                    getTtAppCtx().getMAL().internalizeImages(null);
+                }).start();
             } else {
                 Toast.makeText(Take5Activity.this, "Error saving picture", Toast.LENGTH_LONG).show();
             }

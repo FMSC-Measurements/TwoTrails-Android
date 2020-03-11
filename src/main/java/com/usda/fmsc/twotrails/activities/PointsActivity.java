@@ -911,6 +911,10 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                     }
 
                     addImages(images);
+
+                    new Thread(() -> {
+                        getTtAppCtx().getMAL().internalizeImages(null);
+                    }).start();
                 }
                 break;
             }
@@ -922,6 +926,10 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                         Toast.makeText(PointsActivity.this, "Unable to add Image", Toast.LENGTH_LONG).show();
                     } else {
                         addImage(image);
+
+                        new Thread(() -> {
+                            getTtAppCtx().getMAL().internalizeImages(null);
+                        }).start();
                     }
                 }
                 break;
@@ -935,6 +943,10 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                     } else {
                         TtUtils.Media.askAndUpdateImageOrientation(PointsActivity.this, null);
                         addImage(image);
+
+                        new Thread(() -> {
+                            getTtAppCtx().getMAL().internalizeImages(null);
+                        }).start();
                     }
                 }
                 break;
@@ -2157,17 +2169,12 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
                 @Override
                 public void adjusterRunningSlow() {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            new AlertDialog.Builder(getBaseContext())
-                            .setTitle(R.string.diag_slow_adjusting_title)
-                            .setMessage(R.string.diag_slow_adjusting)
-                            .setPositiveButton("Wait", null)
-                            .setNegativeButton(R.string.str_cancel, (dialogInterface, i) -> PolygonAdjuster.cancel())
-                            .show();
-                        }
-                    });
+                    runOnUiThread(() -> new AlertDialog.Builder(getBaseContext())
+                    .setTitle(R.string.diag_slow_adjusting_title)
+                    .setMessage(R.string.diag_slow_adjusting)
+                    .setPositiveButton("Wait", null)
+                    .setNegativeButton(R.string.str_cancel, (dialogInterface, i) -> PolygonAdjuster.cancel())
+                    .show());
                 }
             });
         } else {

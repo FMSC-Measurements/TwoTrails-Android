@@ -311,7 +311,7 @@ public class TwoTrailsApp extends Application {
 
             if (BluetoothDevice.ACTION_ACL_CONNECTED.equals(action)) {
                 if (!getGps().isGpsRunning() && getDeviceSettings().isGpsConfigured()) {
-                    if (device.getAddress().equals(getDeviceSettings().getGpsDeviceID())) {
+                    if (device != null && device.getAddress().equals(getDeviceSettings().getGpsDeviceID())) {
                         silentConnectToExternalGps = true;
                         new Handler().postDelayed(() -> getGps().startGps(), 1000);
                     }
@@ -372,7 +372,9 @@ public class TwoTrailsApp extends Application {
                             | Intent.FLAG_ACTIVITY_NEW_TASK);
                     PendingIntent pendingIntent = PendingIntent.getActivity(getBaseContext(), 0, intent, PendingIntent.FLAG_ONE_SHOT);
                     AlarmManager mgr = (AlarmManager)getBaseContext().getSystemService(Context.ALARM_SERVICE);
-                    mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 1000, pendingIntent);
+                    if (mgr != null) {
+                        mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 1000, pendingIntent);
+                    }
                 } else {
                     new Thread() {
                         @Override
