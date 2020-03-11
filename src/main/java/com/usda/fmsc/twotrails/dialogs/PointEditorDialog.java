@@ -12,7 +12,6 @@ import android.text.Editable;
 import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -31,7 +30,7 @@ import com.usda.fmsc.utilities.StringEx;
 public class PointEditorDialog extends DialogFragment {
     private static String CN = "CN";
     private static String PID = "PID";
-    private static String METACN = "METACN";
+    private static String META_CN = "META_CN";
     private static String META = "META";
     private int ds = -1;
 
@@ -39,19 +38,19 @@ public class PointEditorDialog extends DialogFragment {
     private Button posButton;
     private ListView lvcMeta;
 
-    private String posBtnText, negBtnText, pid, metacn, newMetacn, cn;
+    private String posBtnText, negBtnText, pid, metaCN, newMetaCN, cn;
     private ArrayList<TtMetadata> meta = null;
 
     private PointEditorListener listener;
 
 
-    public static PointEditorDialog newInstance(String cn, int pid, String metacn, HashMap<String, TtMetadata> metas) {
+    public static PointEditorDialog newInstance(String cn, int pid, String metaCN, HashMap<String, TtMetadata> metas) {
         PointEditorDialog f = new PointEditorDialog();
 
         Bundle args = new Bundle();
 
         args.putString(PID, Integer.toString(pid));
-        args.putString(METACN, metacn);
+        args.putString(META_CN, metaCN);
         args.putString(CN, cn);
         args.putParcelableArrayList(META, new ArrayList<Parcelable>(metas.values()));
 
@@ -77,11 +76,11 @@ public class PointEditorDialog extends DialogFragment {
 
         if (bundle != null && !bundle.isEmpty()) {
             pid = bundle.getString(PID);
-            metacn = bundle.getString(METACN);
+            metaCN = bundle.getString(META_CN);
             cn = bundle.getString(CN);
             meta = bundle.getParcelableArrayList(META);
 
-            newMetacn = metacn;
+            newMetaCN = metaCN;
         }
     }
 
@@ -109,23 +108,23 @@ public class PointEditorDialog extends DialogFragment {
         });
 
         for (int i = 0; i < meta.size(); i++) {
-            if (meta.get(i).getCN().equals(metacn)) {
+            if (meta.get(i).getCN().equals(metaCN)) {
                 ds = i;
                 break;
             }
         }
 
         lvcMeta.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-        lvcMeta.setAdapter(new MetadataDetailsAdapter(getContext(), meta, ds));
+        lvcMeta.setAdapter(new MetadataDetailsAdapter(getContext(), meta));
 
         lvcMeta.setOnItemClickListener((parent, view1, position, id) -> {
             TtMetadata m = meta.get(position);
 
-            if (!m.getCN().equals(metacn)) {
+            if (!m.getCN().equals(metaCN)) {
                 posButton.setEnabled(true);
             }
 
-            newMetacn = m.getCN();
+            newMetaCN = m.getCN();
 
             if (lastSelected == null && ds > -1) {
                 lvcMeta.getChildAt(ds).setBackground(AndroidUtils.UI.getDrawable(getContext(), R.drawable.list_item_selector));
@@ -138,7 +137,13 @@ public class PointEditorDialog extends DialogFragment {
             lastSelected = view1;
         });
 
-         builder.setTitle("Edit Point");
+        lvcMeta.setItemsCanFocus(true);
+        lvcMeta.post(() -> {
+            lvcMeta.requestFocusFromTouch();
+            lvcMeta.setSelection(ds);
+        });
+
+        builder.setTitle("Edit Point");
 
         builder.setView(view);
 
@@ -148,7 +153,7 @@ public class PointEditorDialog extends DialogFragment {
             }
 
             boolean update = false;
-            if (!StringEx.isEmpty(newMetacn) && !newMetacn.equals(metacn)) {
+            if (!StringEx.isEmpty(newMetaCN) && !newMetaCN.equals(metaCN)) {
                 update = true;
             }
 
@@ -164,7 +169,7 @@ public class PointEditorDialog extends DialogFragment {
 
             if (update) {
                 if (listener != null) {
-                    listener.onEdited(cn, Integer.parseInt(p), newMetacn);
+                    listener.onEdited(cn, Integer.parseInt(p), newMetaCN);
                 }
             }
         });

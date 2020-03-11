@@ -531,6 +531,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
             }
             case R.id.mapMenuResetBounds: {
                 resetMapBounds(true);
+                break;
             }
             case R.id.mapMenuZoomToPoly: {
                 int gSize = getPolyGraphicManagers().size();

@@ -2005,11 +2005,11 @@ public class TtUtils {
 
                 if (isCrash) {
                     intent.putExtra(Intent.EXTRA_SUBJECT, "TwoTrails Error Report");
-                    intent.putExtra(Intent.EXTRA_TEXT, "I have experienced a crash in TwoTrails Android and would like report it to the development team. \n\nIssue: \n\nWhat happened before the crash: ");
+                    intent.putExtra(Intent.EXTRA_TEXT, "I have experienced a crash in TwoTrails Android and would like to report it to the development team. \n\nIssue: \n\nWhat happened before the crash: ");
                     activity.startActivityForResult(Intent.createChooser(intent, "Send Error Report to Dev.."), Consts.Codes.Activites.SEND_EMAIL_TO_DEV);
                 } else {
                     intent.putExtra(Intent.EXTRA_SUBJECT, "TwoTrails Report");
-                    intent.putExtra(Intent.EXTRA_TEXT, "I am experiencing issues in TwoTrails Android and would like report it to the development team. \n\nNotes: ");
+                    intent.putExtra(Intent.EXTRA_TEXT, "I am experiencing issues in TwoTrails Android and would like to report it to the development team. \n\nNotes: ");
                     activity.startActivityForResult(Intent.createChooser(intent, "Send Report to Dev.."), Consts.Codes.Activites.SEND_EMAIL_TO_DEV);
                 }
 

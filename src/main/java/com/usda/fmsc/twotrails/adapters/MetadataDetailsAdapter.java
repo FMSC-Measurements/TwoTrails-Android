@@ -16,18 +16,15 @@ import java.util.List;
 public class MetadataDetailsAdapter extends BaseAdapter {
     private LayoutInflater inflater;
     private List<TtMetadata> metadata;
-    private int color, ds;
     private boolean autoHighlight;
 
-    public MetadataDetailsAdapter(Context context, List<TtMetadata> metadata, int ds) {
-        this(context, metadata, ds, true);
+    public MetadataDetailsAdapter(Context context, List<TtMetadata> metadata) {
+        this(context, metadata, true);
     }
 
-    public MetadataDetailsAdapter(Context context, List<TtMetadata> metadata, int ds, boolean autoHighlight) {
+    public MetadataDetailsAdapter(Context context, List<TtMetadata> metadata, boolean autoHighlight) {
         this.metadata = metadata;
         inflater = LayoutInflater.from(context);
-        color = AndroidUtils.UI.getColor(context, R.color.primaryLightest);
-        this.ds = ds;
         this.autoHighlight = autoHighlight;
     }
 
@@ -72,11 +69,6 @@ public class MetadataDetailsAdapter extends BaseAdapter {
 
         if (autoHighlight) {
             mViewHolder.parent.setBackgroundResource(R.drawable.list_item_selector);
-        }
-
-        if (position == ds) {
-            convertView.setBackgroundColor(color);
-            ds = -1;
         }
 
         return convertView;
