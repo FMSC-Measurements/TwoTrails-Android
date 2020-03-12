@@ -116,7 +116,7 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
                 });
             }
 
-            if (TwoTrailsApp.getInstance(getActivity()).getDAL().getBoundaryPointsCountInPoly(_Polygon.getCN()) < 3) {
+            if (activity != null && TwoTrailsApp.getInstance(activity).getDAL().getBoundaryPointsCountInPoly(_Polygon.getCN()) < 3) {
                 View polyLayImage = view.findViewById(R.id.polyLayImage);
 
                 if (polyLayImage != null) {
@@ -252,22 +252,20 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
         try {
             this.activity = (PolygonsActivity) activity;
 
-            if (activity != null) {
-                if (_PolyCN == null) {
-                    Bundle bundle = getArguments();
-                    if (bundle != null) {
-                        _PolyCN = bundle.getString(POLYGON_CN);
-                    }
+            if (_PolyCN == null) {
+                Bundle bundle = getArguments();
+                if (bundle != null) {
+                    _PolyCN = bundle.getString(POLYGON_CN);
                 }
-
-                if (_PolyCN != null) {
-                    _Polygon = this.activity.getPolygon(_PolyCN);
-                } else {
-                    this.activity.getTtAppCtx().getReport().writeError("Unable to get Polygon", "PolygonFragment");
-                }
-
-                this.activity.register(_PolyCN, this);
             }
+
+            if (_PolyCN != null) {
+                _Polygon = this.activity.getPolygon(_PolyCN);
+            } else {
+                this.activity.getTtAppCtx().getReport().writeError("Unable to get Polygon", "PolygonFragment");
+            }
+
+            this.activity.register(_PolyCN, this);
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString() + " must implement PolygonsActivity");
         }
@@ -318,8 +316,8 @@ public class PolygonFragment extends AnimationCardFragment implements PolygonsAc
     @Override
     public void onPolygonPointsUpdated() {
         new Thread(() -> {
-            if (_Polygon != null) {
-                TwoTrailsApp TtAppCtx = TwoTrailsApp.getInstance(getActivity());
+            if (_Polygon != null && activity != null) {
+                TwoTrailsApp TtAppCtx = TwoTrailsApp.getInstance(activity);
                 final ArrayList<TtPoint> points = TtAppCtx.getDAL().getBoundaryPointsInPoly(_Polygon.getCN());
 
                 if (points != null && points.size() > 2) {
