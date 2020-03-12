@@ -309,6 +309,7 @@ public class PolygonsActivity extends TtAdjusterCustomToolbarActivity {
         newPolygon.setName(String.format("Poly %d", polyCount + 1));
         newPolygon.setAccuracy(Consts.Default_Point_Accuracy);
         getTtAppCtx().getDAL().insertPolygon(newPolygon);
+        getTtAppCtx().getProjectSettings().setLastEditedPolyCN(newPolygon.getCN());
 
         addedPoly = newPolygon.getCN();
 
