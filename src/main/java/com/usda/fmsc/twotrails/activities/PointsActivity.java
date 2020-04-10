@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.appcompat.widget.PopupMenu;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.animation.Animation;
@@ -138,7 +139,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
     private boolean _PointUpdated, _PointLocked, _MediaUpdated, overrideHalfTrav;
     private String addedPoint;
 
-    private boolean autoSetTrav, autoSetAzFwd, autoSetAz;
+    private boolean autoSetTrav, autoSetAzFwd, autoSetAz, warnedTravNotFinished;
 
     private BitmapManager bitmapManager;
     private BitmapManager.ScaleOptions scaleOptions = new BitmapManager.ScaleOptions();
@@ -865,9 +866,18 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
             fabSheet.hideSheet();
         } else if (slidingLayout != null && slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
             slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
+        } else if (_Points.size() > 2 && _Points.get(_Points.size() - 1).getOp() == OpType.Traverse && !warnedTravNotFinished) {
+            Toast.makeText(PointsActivity.this, "Warning: Traverse is not completed.", Toast.LENGTH_LONG).show();
+            warnedTravNotFinished = true;
         } else {
             super.onBackPressed();
         }
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        warnedTravNotFinished = false;
+        return super.dispatchTouchEvent(event);
     }
 
     @Override

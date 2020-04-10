@@ -26,9 +26,7 @@ android {
         versionProps.store(versionPropsFile.newWriter(), null)
 
         vName = String.format("%d.%d.%d-%d", major, minor, revision,build)
-    }// else {
-    //    throw new GradleException("Could not read version.properties")
-    //}
+    }
 
 
     defaultConfig {
@@ -39,17 +37,8 @@ android {
         versionName vName
         multiDexEnabled true
 
-
-        //resValue "string", "arcgis_client_id", property("TwoTrails.ArcGIS.ClientID") //100.2.9
-        //resValue "string", "arcgis_client_secret", property("TwoTrails.ArcGIS.ClientSecret") //100.2.9
         resValue "string", "arcgis_runtime_license", property("TwoTrails.ArcGIS.RuntimeLicenseKey") //100.6.0
         resValue "string", "dev_email_addr", property("TwoTrails.Dev.EmailAddress")
-
-        //temp for getting to work on devices with old ArcGIS api
-        //TODO remove for release on 64bit
-//        ndk {
-//            abiFilters "armeabi", "armeabi-v7a", "x86", "mips"
-//        }
     }
 
     signingConfigs {
@@ -97,10 +86,10 @@ android {
     }
 
     dexOptions {
-//        incremental true  //last resort
-        javaMaxHeapSize "4g" //1g is too small
+        incremental true
+        javaMaxHeapSize "4g"
 //        jumboMode false
-        preDexLibraries true //faster incremental builds
+        preDexLibraries true
 //        threadCount 8
     }
 
