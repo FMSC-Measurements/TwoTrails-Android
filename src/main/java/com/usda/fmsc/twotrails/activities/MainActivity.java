@@ -816,11 +816,7 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
 
     public void btnExportClick(View view) {
         if (getTtAppCtx().getDAL().hasPolygons()) {
-            if (getTtAppCtx().getDAL().needsAdjusting()) {
-                askToAdjust();
-            } else {
-                startActivity(new Intent(this, ExportActivity.class));
-            }
+            startActivity(new Intent(this, ExportActivity.class));
         } else {
             Toast.makeText(this, "No Polygons in Project", Toast.LENGTH_SHORT).show();
         }
