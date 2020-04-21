@@ -35,6 +35,8 @@ import com.esri.arcgisruntime.mapping.view.MapScaleChangedListener;
 import com.esri.arcgisruntime.mapping.view.MapView;
 import com.esri.arcgisruntime.mapping.view.WrapAroundMode;
 import com.esri.arcgisruntime.symbology.SimpleMarkerSymbol;
+import com.esri.arcgisruntime.toolkit.compass.Compass;
+import com.esri.arcgisruntime.toolkit.scalebar.Scalebar;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.geospatial.Position;
@@ -83,7 +85,9 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Ma
     private HashMap<String, ArcGisPolygonGraphic> polygonGraphics = new HashMap<>();
     private HashMap<String, ArcGisTrailGraphic> trailGraphics = new HashMap<>();
 
-    private ArcMapCompass compass;
+    //private ArcMapCompass compass;
+    private Scalebar scalebar;
+    private Compass compass;
     private Integer basemapId;
 
     //private LayoutInflater inflater;
@@ -150,7 +154,11 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Ma
         mapView.setOnTouchListener(new MapViewOnTouchListenerEx(getContext(), mapView));
 
         compass = view.findViewById(R.id.compass);
-        compass.setMapView(mapView);
+        compass.bindTo(mapView);
+        //compass.setMapView(mapView);
+
+        scalebar = view.findViewById(R.id.scalebar);
+        scalebar.bindTo(mapView);
 
         if (startArcOpts != null) {
             changeBasemap(startArcOpts);
