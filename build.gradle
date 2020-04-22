@@ -37,7 +37,7 @@ android {
         versionName vName
         multiDexEnabled true
 
-        resValue "string", "arcgis_runtime_license", property("TwoTrails.ArcGIS.RuntimeLicenseKey") //100.6.0
+        resValue "string", "arcgis_runtime_license", property("TwoTrails.ArcGIS.RuntimeLicenseKey") //100.7.0
         resValue "string", "dev_email_addr", property("TwoTrails.Dev.EmailAddress")
     }
 

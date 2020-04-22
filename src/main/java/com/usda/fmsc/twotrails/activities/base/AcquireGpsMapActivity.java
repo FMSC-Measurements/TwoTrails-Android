@@ -41,7 +41,7 @@ import java.util.ArrayList;
 public class AcquireGpsMapActivity extends BaseMapActivity {
     private static final String nVal = "*";
 
-    private TextView tvGpsStatus, tvGpsMode, tvLat, tvLon, tvUtmX, tvUtmY,
+    private TextView tvGpsStatus, tvGpsFix, tvLat, tvLon, tvUtmX, tvUtmY,
             tvZone, tvDec, tvSat, tvElev, tvPdop, tvHdop;
 
     private View viewGpsInfoLaySatInfo;
@@ -108,7 +108,7 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
         super.setContentView(layoutResID);
 
         tvGpsStatus = findViewById(R.id.gpsInfoTvGpsStatus);
-        tvGpsMode = findViewById(R.id.gpsInfoTvGpsMode);
+        tvGpsFix = findViewById(R.id.gpsInfoTvGpsFix);
         tvLat = findViewById(R.id.gpsInfoTvLat);
         tvLon = findViewById(R.id.gpsInfoTvLon);
         tvUtmX = findViewById(R.id.gpsInfoTvUtmX);
@@ -120,7 +120,7 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
         tvPdop = findViewById(R.id.gpsInfoTvPdop);
         tvHdop = findViewById(R.id.gpsInfoTvHdop);
 
-        tvGpsMode.setText(GGASentence.GpsFixType.NoFix.toString());
+        tvGpsFix.setText(GGASentence.GpsFixType.NoFix.toString());
 
         viewGpsInfoLaySatInfo = findViewById(R.id.gpsInfoLaySatInfo);
 
@@ -339,9 +339,9 @@ public class AcquireGpsMapActivity extends BaseMapActivity {
                 }
 
                 if (burst.isValid(NmeaIDs.SentenceID.GGA)) {
-                    tvGpsMode.setText(burst.getFixQuality().toStringX());
+                    tvGpsFix.setText(burst.getFixQuality().toStringX());
                 } else {
-                    tvGpsMode.setText(GGASentence.GpsFixType.NoFix.toString());
+                    tvGpsFix.setText(GGASentence.GpsFixType.NoFix.toString());
                 }
 
                 if (burst.isValid(NmeaIDs.SentenceID.GSA)) {
