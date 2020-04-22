@@ -51,7 +51,6 @@ import com.usda.fmsc.twotrails.objects.map.IMarkerDataGraphic;
 import com.usda.fmsc.twotrails.objects.map.PolygonDrawOptions;
 import com.usda.fmsc.twotrails.objects.map.PolygonGraphicManager;
 import com.usda.fmsc.twotrails.objects.map.TrailGraphicManager;
-import com.usda.fmsc.twotrails.ui.ArcMapCompass;
 import com.usda.fmsc.twotrails.units.MapType;
 import com.usda.fmsc.twotrails.utilities.ArcGISTools;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
@@ -85,15 +84,12 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Ma
     private HashMap<String, ArcGisPolygonGraphic> polygonGraphics = new HashMap<>();
     private HashMap<String, ArcGisTrailGraphic> trailGraphics = new HashMap<>();
 
-    //private ArcMapCompass compass;
     private Scalebar scalebar;
     private Compass compass;
     private Integer basemapId;
 
-    //private LayoutInflater inflater;
-
     private boolean mapReady, showPosition, centerOnLoad = false;
-    private int gid, padLeft, padTop, padRight, padBottom;
+    private int padLeft, padTop, padRight, padBottom;
 
     private ArcGisMapLayer startArcOpts, currentGisMapLayer;
 
@@ -155,7 +151,6 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Ma
 
         compass = view.findViewById(R.id.compass);
         compass.bindTo(mapView);
-        //compass.setMapView(mapView);
 
         scalebar = view.findViewById(R.id.scalebar);
         scalebar.bindTo(mapView);
@@ -514,6 +509,7 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Ma
     @Override
     public void setMapPadding(int left, int top, int right, int bottom) {
         compass.setPadding(left, top, right, bottom);
+        scalebar.setPadding(left, top, right, bottom);
 
         padLeft = left;
         padTop = top;

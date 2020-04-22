@@ -34,7 +34,7 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
 
     private Integer zone = null;
 
-    private TextView tvGpsStatus, tvGpsMode, tvLat, tvLon, tvUtmX, tvUtmY,
+    private TextView tvGpsStatus, tvGpsFix, tvLat, tvLon, tvUtmX, tvUtmY,
             tvZone, tvDec, tvSat, tvElev, tvPdop, tvHdop;
 
     private GpsStatusSkyView skyView;
@@ -76,7 +76,7 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
         super.setContentView(layoutResID);
 
         tvGpsStatus = findViewById(R.id.gpsInfoTvGpsStatus);
-        tvGpsMode = findViewById(R.id.gpsInfoTvGpsMode);
+        tvGpsFix = findViewById(R.id.gpsInfoTvGpsFix);
         tvLat = findViewById(R.id.gpsInfoTvLat);
         tvLon = findViewById(R.id.gpsInfoTvLon);
         tvUtmX = findViewById(R.id.gpsInfoTvUtmX);
@@ -88,7 +88,7 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
         tvPdop = findViewById(R.id.gpsInfoTvPdop);
         tvHdop = findViewById(R.id.gpsInfoTvHdop);
 
-        tvGpsMode.setText(GGASentence.GpsFixType.NoFix.toString());
+        tvGpsFix.setText(GGASentence.GpsFixType.NoFix.toString());
 
         skyView = findViewById(R.id.gpsInfoSatSky);
         statusView = findViewById(R.id.gpsInfoSatStatus);
@@ -167,9 +167,9 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
                 }
 
                 if (burst.isValid(NmeaIDs.SentenceID.GGA)) {
-                    tvGpsMode.setText(burst.getFixQuality().toStringX());
+                    tvGpsFix.setText(burst.getFixQuality().toStringX());
                 } else {
-                    tvGpsMode.setText(GGASentence.GpsFixType.NoFix.toString());
+                    tvGpsFix.setText(GGASentence.GpsFixType.NoFix.toString());
                 }
 
                 if (burst.isValid(NmeaIDs.SentenceID.GSA)) {

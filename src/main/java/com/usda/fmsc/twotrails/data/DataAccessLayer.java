@@ -7,7 +7,6 @@ import android.database.sqlite.SQLiteDatabase;
 import com.usda.fmsc.geospatial.EastWest;
 import com.usda.fmsc.geospatial.NorthSouth;
 import com.usda.fmsc.geospatial.UomElevation;
-import com.usda.fmsc.geospatial.nmea41.sentences.Status;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.MapSettings;
 import com.usda.fmsc.twotrails.ProjectSettings;
@@ -1806,7 +1805,7 @@ public class DataAccessLayer extends IDataLayer {
                     DateTime fixTime;
                     double groundSpeed, trackAngle, magVar, pdop, hdop, vdop, horizDilution, geoidHeight;
                     EastWest magVarDir;
-                    Status opMode;
+                    GSASentence.Mode opMode;
                     GSASentence.Fix fix;
                     ArrayList<Integer> satsUsed;
                     GGASentence.GpsFixType fixQuality;
@@ -1897,7 +1896,7 @@ public class DataAccessLayer extends IDataLayer {
                         continue;
 
                     if (!c.isNull(15))
-                        opMode = Status.parse(c.getInt(15));
+                        opMode = GSASentence.Mode.parse(c.getInt(15));
                     else
                         continue;
 
