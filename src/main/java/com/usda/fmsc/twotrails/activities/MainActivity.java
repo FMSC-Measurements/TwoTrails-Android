@@ -100,9 +100,7 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
         updateAppInfo();
 
         if (!AndroidUtils.App.checkStoragePermission(MainActivity.this)) {
-            AndroidUtils.App.requestPermission(MainActivity.this,
-                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, android.Manifest.permission.READ_EXTERNAL_STORAGE},
-                    Consts.Codes.Requests.CREATE_FILE, "TwoTrails needs storage permissions in order to Open and Create files.");
+            getFilePermissions();
         }
         else if (!askLocation && !AndroidUtils.App.requestPermission(MainActivity.this,
                 new String[] { Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION},
@@ -180,6 +178,12 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
 //        //closeFile();
 //        //finishAndRemoveTask();
 //    }
+
+    private void getFilePermissions() {
+        AndroidUtils.App.requestPermission(MainActivity.this,
+                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, android.Manifest.permission.READ_EXTERNAL_STORAGE},
+                Consts.Codes.Requests.CREATE_FILE, "TwoTrails needs storage permissions in order to Open and Create files.");
+    }
 
     @Override
     public boolean onCreateOptionsMenuEx(Menu menu) {
@@ -628,10 +632,14 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
     //region Fragment Controls
     //region File
     public void btnNewClick(View view) {
-        if(PolygonAdjuster.isProcessing()) {
-            Toast.makeText(this, "Currently Adjusting Polygons.", Toast.LENGTH_LONG).show();
+        if (!AndroidUtils.App.checkStoragePermission(MainActivity.this)) {
+            getFilePermissions();
         } else {
-            CreateFileDialog();
+            if (PolygonAdjuster.isProcessing()) {
+                Toast.makeText(this, "Currently Adjusting Polygons.", Toast.LENGTH_LONG).show();
+            } else {
+                CreateFileDialog();
+            }
         }
     }
 
@@ -641,88 +649,108 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
         //        Consts.Codes.Dialogs.REQUEST_FILE);
         //AndroidUtils.App.openFileIntent(this, MimeTypeMap.getSingleton().getExtensionFromMimeType("ttx"), Consts.Codes.Dialogs.REQUEST_FILE);
         //AndroidUtils.App.openFileIntent(this, Consts.FileExtensions.TWO_TRAILS, Consts.Codes.Dialogs.REQUEST_FILE)
-        AndroidUtils.App.openFileIntent(this, "*/*", Consts.Codes.Dialogs.REQUEST_FILE);
+        if (!AndroidUtils.App.checkStoragePermission(MainActivity.this)) {
+            getFilePermissions();
+        } else {
+            AndroidUtils.App.openFileIntent(this, "*/*", Consts.Codes.Dialogs.REQUEST_FILE);
+        }
     }
 
     public void btnOpenRecClick(View view) {
-        AlertDialog.Builder builderSingle = new AlertDialog.Builder(
-                MainActivity.this);
-
-        builderSingle.setTitle("Recently Opened");
-
-        ArrayList<RecentProject> recentProjects = getTtAppCtx().getProjectSettings().getRecentProjects();
-
-        if (recentProjects.size() > 0) {
-            final RecentProjectAdapter adapter = new RecentProjectAdapter(MainActivity.this, recentProjects);
-
-            builderSingle.setNegativeButton("Cancel",
-                    (dialog, which) -> dialog.dismiss());
-
-            builderSingle.setAdapter(adapter,
-                    (dialog, which) -> {
-                        RecentProject project = adapter.getItem(which);
-
-                        if(FileUtils.fileExists(project.File))
-                            openFile(project.File);
-                        else
-                            Toast.makeText(getApplicationContext(), "File not found", Toast.LENGTH_LONG).show();
-                    });
-            builderSingle.show();
+        if (!AndroidUtils.App.checkStoragePermission(MainActivity.this)) {
+            getFilePermissions();
         } else {
-            Toast.makeText(MainActivity.this, "No Recent Projects.", Toast.LENGTH_LONG).show();
+            AlertDialog.Builder builderSingle = new AlertDialog.Builder(
+                    MainActivity.this);
+
+            builderSingle.setTitle("Recently Opened");
+
+            ArrayList<RecentProject> recentProjects = getTtAppCtx().getProjectSettings().getRecentProjects();
+
+            if (recentProjects.size() > 0) {
+                final RecentProjectAdapter adapter = new RecentProjectAdapter(MainActivity.this, recentProjects);
+
+                builderSingle.setNegativeButton("Cancel",
+                        (dialog, which) -> dialog.dismiss());
+
+                builderSingle.setAdapter(adapter,
+                        (dialog, which) -> {
+                            RecentProject project = adapter.getItem(which);
+
+                            if (FileUtils.fileExists(project.File))
+                                openFile(project.File);
+                            else
+                                Toast.makeText(getApplicationContext(), "File not found", Toast.LENGTH_LONG).show();
+                        });
+                builderSingle.show();
+            } else {
+                Toast.makeText(MainActivity.this, "No Recent Projects.", Toast.LENGTH_LONG).show();
+            }
         }
     }
 
     public void btnImportClick(View view) {
-        startActivityForResult(new Intent(this, ImportActivity.class), UPDATE_INFO);
+        if (!AndroidUtils.App.checkStoragePermission(MainActivity.this)) {
+            getFilePermissions();
+        } else {
+            startActivityForResult(new Intent(this, ImportActivity.class), UPDATE_INFO);
+        }
     }
 
     public void btnDupClick(View view) {
-        if (PolygonAdjuster.isProcessing()) {
-            Toast.makeText(this, "Currently Adjusting Polygons.", Toast.LENGTH_LONG).show();
+        if (!AndroidUtils.App.checkStoragePermission(MainActivity.this)) {
+            getFilePermissions();
         } else {
-            AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+            if (PolygonAdjuster.isProcessing()) {
+                Toast.makeText(this, "Currently Adjusting Polygons.", Toast.LENGTH_LONG).show();
+            } else {
+                AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 
-            String filepath = getTtAppCtx().getDAL().getFilePath();
+                String filepath = getTtAppCtx().getDAL().getFilePath();
 
-            String dupFile = String.format("%s_bk%s", FileUtils.getFilePathWoExt(filepath), Consts.FILE_EXTENSION);
-            int inc = 2;
+                String dupFile = String.format("%s_bk%s", FileUtils.getFilePathWoExt(filepath), Consts.FILE_EXTENSION);
+                int inc = 2;
 
-            while (true) {
-                if (FileUtils.fileExists(dupFile)) {
-                    dupFile = StringEx.format("%s_bk%d%s", FileUtils.getFilePathWoExt(filepath), inc, Consts.FILE_EXTENSION);
-                    inc++;
-                    continue;
+                while (true) {
+                    if (FileUtils.fileExists(dupFile)) {
+                        dupFile = StringEx.format("%s_bk%d%s", FileUtils.getFilePathWoExt(filepath), inc, Consts.FILE_EXTENSION);
+                        inc++;
+                        continue;
+                    }
+                    break;
                 }
-                break;
+
+                final String filename = dupFile;
+
+                dialog.setMessage(String.format("Duplicate File to: %s", dupFile.substring(dupFile.lastIndexOf("/") + 1)));
+
+                dialog.setPositiveButton(R.string.main_btn_duplicate, (dialog1, which) -> duplicateFile(filename))
+                        .setNeutralButton(R.string.str_cancel, null)
+                        .show();
             }
-
-            final String filename = dupFile;
-
-            dialog.setMessage(String.format("Duplicate File to: %s", dupFile.substring(dupFile.lastIndexOf("/") + 1)));
-
-            dialog.setPositiveButton(R.string.main_btn_duplicate, (dialog1, which) -> duplicateFile(filename))
-                    .setNeutralButton(R.string.str_cancel, null)
-                    .show();
         }
     }
 
     public void btnCleanDb(View view) {
-        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-        dialog.setMessage("This operation will remove data that is not properly connected within the database. Points, Polygons, Groups and NMEA may be deleted. "+
-                            "It is suggested that you backup your project before continuing.")
-                .setPositiveButton("Clean", (dialog1, which) -> {
-                    ProgressDialog pd = new ProgressDialog(getBaseContext());
-                    pd.setTitle("Cleaning..");
-                    pd.setMessage("This operation may take a few minutes.");
+        if (!AndroidUtils.App.checkStoragePermission(MainActivity.this)) {
+            getFilePermissions();
+        } else {
+            AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+            dialog.setMessage("This operation will remove data that is not properly connected within the database. Points, Polygons, Groups and NMEA may be deleted. " +
+                    "It is suggested that you backup your project before continuing.")
+                    .setPositiveButton("Clean", (dialog1, which) -> {
+                        ProgressDialog pd = new ProgressDialog(getBaseContext());
+                        pd.setTitle("Cleaning..");
+                        pd.setMessage("This operation may take a few minutes.");
 
-                    pd.show();
+                        pd.show();
 
-                    getTtAppCtx().getDAL().clean();
+                        getTtAppCtx().getDAL().clean();
 
-                    pd.cancel();
-                })
-                .setNeutralButton(R.string.str_cancel, null);
+                        pd.cancel();
+                    })
+                    .setNeutralButton(R.string.str_cancel, null);
+        }
     }
     //endregion
 
