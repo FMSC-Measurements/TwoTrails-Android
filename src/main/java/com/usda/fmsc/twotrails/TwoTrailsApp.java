@@ -503,49 +503,61 @@ public class TwoTrailsApp extends Application {
     }
 
     public DataAccessLayer getDAL() {
-        if (hasDAL())
-            return _DAL;
+        if (!areFoldersInitiated()) {
+            throw new RuntimeException("Folders Not Initiated");
+        } else {
+            if (hasDAL())
+                return _DAL;
 
-        if (_DALFile != null) {
-            setDAL(new DataAccessLayer(_DALFile, this));
-            return _DAL;
-        }
-
-        if (getDeviceSettings().getLastOpenedProject() != null) {
-            _DALFile = getDeviceSettings().getLastOpenedProject();
-
-            if (FileUtils.fileExists(_DALFile)) {
+            if (_DALFile != null) {
                 setDAL(new DataAccessLayer(_DALFile, this));
                 return _DAL;
             }
 
-            _DALFile = null;
-        }
+            if (getDeviceSettings().getLastOpenedProject() != null) {
+                _DALFile = getDeviceSettings().getLastOpenedProject();
 
-        throw new RuntimeException("DAL not set");
+                if (FileUtils.fileExists(_DALFile)) {
+                    setDAL(new DataAccessLayer(_DALFile, this));
+                    return _DAL;
+                }
+
+                _DALFile = null;
+            }
+
+            throw new RuntimeException("DAL not set");
+        }
     }
 
     public void setDAL(DataAccessLayer dal) {
-        _DAL = dal;
-        _MAL = null;
-
-        if (dal != null) {
-            _DALFile = dal.getFilePath();
-            getReport().writeEvent(StringEx.format("DAL Loaded: %s", _DALFile));
-            getMapSettings().reset();
-            getDeviceSettings().setLastOpenedProject(dal.getFilePath());
+        if (!areFoldersInitiated()) {
+            throw new RuntimeException("Folders Not Initiated");
         } else {
-            getReport().writeEvent("DAL Unloaded");
+            _DAL = dal;
+            _MAL = null;
+
+            if (dal != null) {
+                _DALFile = dal.getFilePath();
+                getReport().writeEvent(StringEx.format("DAL Loaded: %s", _DALFile));
+                getMapSettings().reset();
+                getDeviceSettings().setLastOpenedProject(dal.getFilePath());
+            } else {
+                getReport().writeEvent("DAL Unloaded");
+            }
         }
     }
 
     public MediaAccessLayer getMAL() {
-        if (_MAL == null && hasDAL()) {
-            _MAL = new MediaAccessLayer(getMALFilename(getDAL()), this);
-            getReport().writeEvent(StringEx.format("MAL Loaded: %s", _MAL.getFilePath()));
-        }
+        if (!areFoldersInitiated()) {
+            throw new RuntimeException("Folders Not Initiated");
+        } else {
+            if (_MAL == null && hasDAL()) {
+                _MAL = new MediaAccessLayer(getMALFilename(getDAL()), this);
+                getReport().writeEvent(StringEx.format("MAL Loaded: %s", _MAL.getFilePath()));
+            }
 
-        return _MAL;
+            return _MAL;
+        }
     }
 
     private String getMALFilename(DataAccessLayer dal) {

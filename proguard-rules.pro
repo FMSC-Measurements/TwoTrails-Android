@@ -64,6 +64,9 @@
 -keep class org.joda.time.** { *; }
 -keep interface org.joda.time.** { *; }
 
+-keep class com.esri.arcgisruntime.** { *; }
+-keep interface com.esri.arcgisruntime.** { *; }
+
 -dontwarn android.support.**
 -dontwarn jcifs.http**
 -dontwarn org.w3c.dom.bootstrap.**
@@ -72,3 +75,6 @@
 -dontwarn com.google.android.gms.**
 -dontwarn com.android.volley.toolbox.**
 -dontwarn org.joda.time.**
+-dontwarn com.esri.arcgisruntime.**
+
+-keepattributes Exceptions, Signature, InnerClasses
