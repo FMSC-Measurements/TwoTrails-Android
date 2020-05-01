@@ -53,8 +53,8 @@
                     android:layout_centerVertical="true"
                     style="@style/EditTextDarkStyle"
                     android:inputType="text|textNoSuggestions"
-                    android:lines="1"
-                    android:hint="@string/str_file"/>
+                    android:hint="@string/str_file"
+                    android:singleLine="true" />
             </RelativeLayout>
         </androidx.appcompat.widget.Toolbar>
 

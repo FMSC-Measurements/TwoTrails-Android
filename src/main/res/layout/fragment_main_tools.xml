@@ -56,17 +56,17 @@
 
         <View style="@style/Dividers"/>
 
-        <Button
-            android:text="@string/main_btn_multi_edit"
-            android:id="@+id/mainFragToolsBtnMultiEdit"
-            android:onClick="btnMultiEdit"
-            android:enabled="false"
-            style="@style/MainActivityButtons"
-            android:visibility="gone"/>
+<!--        <Button-->
+<!--            android:text="@string/main_btn_multi_edit"-->
+<!--            android:id="@+id/mainFragToolsBtnMultiEdit"-->
+<!--            android:onClick="btnMultiEdit"-->
+<!--            android:enabled="false"-->
+<!--            style="@style/MainActivityButtons"-->
+<!--            android:visibility="gone"/>-->
 
-        <View
-            style="@style/Dividers"
-            android:visibility="gone"/>
+<!--        <View-->
+<!--            style="@style/Dividers"-->
+<!--            android:visibility="gone"/>-->
 
         <Button
             android:text="@string/main_btn_map_manager"

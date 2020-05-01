@@ -114,6 +114,9 @@ public class ExportActivity extends CustomToolbarActivity {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
+    public void chkOnChange(View view){
+        chkOnChange(view, false, MultiStateTouchCheckBox.CheckedState.NotChecked);
+    }
 
     public void chkOnChange(View view, boolean isChecked, MultiStateTouchCheckBox.CheckedState state) {
         int checkedCount = 0;
