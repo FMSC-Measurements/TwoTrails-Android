@@ -190,23 +190,27 @@ public class DeviceSettingsFragment extends PreferenceFragmentCompat {
     }
 
     private void setBTValues(ListPreference lstPref) {
-        TtBluetoothManager btm = TtAppCtx.getBluetoothManager();
+        if (AndroidUtils.App.checkBluetoothPermission(getContext())) {
+            TtBluetoothManager btm = TtAppCtx.getBluetoothManager();
 
-        try {
-            if (btm.isEnabled() && btm.isAvailable()) {
-                List<String> deviceNames = new ArrayList<>();
-                List<String> deviceIDs = new ArrayList<>();
+            try {
+                if (btm.isEnabled() && btm.isAvailable()) {
+                    List<String> deviceNames = new ArrayList<>();
+                    List<String> deviceIDs = new ArrayList<>();
 
-                for (BluetoothDevice btd : btm.getAdapter().getBondedDevices()) {
-                    deviceNames.add(btd.getName());
-                    deviceIDs.add(String.format("%s,%s", btd.getAddress(), btd.getName()));
+                    for (BluetoothDevice btd : btm.getAdapter().getBondedDevices()) {
+                        deviceNames.add(btd.getName());
+                        deviceIDs.add(String.format("%s,%s", btd.getAddress(), btd.getName()));
+                    }
+
+                    lstPref.setEntries(deviceNames.toArray(new String[0]));
+                    lstPref.setEntryValues(deviceIDs.toArray(new String[0]));
                 }
-
-                lstPref.setEntries(deviceNames.toArray(new String[0]));
-                lstPref.setEntryValues(deviceIDs.toArray(new String[0]));
+            } catch (Exception e) {
+                //
             }
-        } catch (Exception e) {
-            //
+        } else {
+            Toast.makeText(getActivity(), "Requires Bluetooth Permission", Toast.LENGTH_LONG).show();
         }
     }
 

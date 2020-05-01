@@ -31,9 +31,7 @@
                     app:uncheckedColor="@android:color/white"
                     app:partialCheckedColor="@color/primaryLighter"
                     android:layout_centerVertical="true"
-                    android:layout_alignParentRight="true"
                     android:layout_alignParentEnd="true"
-                    android:layout_marginRight="12dp"
                     android:layout_marginEnd="12dp"/>
 
                 <TextView
@@ -42,11 +40,9 @@
                     android:text="@string/title_activity_export"
                     android:layout_centerVertical="true"
                     android:layout_alignParentStart="true"
-                    android:layout_alignParentLeft="true"
                     android:textColor="@android:color/white"
                     android:textSize="22sp"
                     android:gravity="center_vertical"
-                    android:layout_toLeftOf="@id/exportChkAll"
                     android:layout_toStartOf="@id/exportChkAll"/>
             </RelativeLayout>
         </androidx.appcompat.widget.Toolbar>
@@ -80,7 +76,6 @@
                         app:checkedColor="@color/primary"
                         android:layout_gravity="center"
                         android:layout_margin="5dp"
-                        android:layout_alignParentRight="true"
                         android:layout_alignParentEnd="true"
                         app:onCheckStateChange="chkOnChange"/>
 
@@ -90,9 +85,7 @@
                         android:text="@string/exp_pc"
                         android:layout_centerVertical="true"
                         android:textSize="22sp"
-                        android:layout_alignParentLeft="true"
                         android:layout_alignParentStart="true"
-                        android:layout_toLeftOf="@id/exportChkPC"
                         android:layout_toStartOf="@id/exportChkPC"
                         android:ellipsize="end"/>
 
@@ -111,7 +104,6 @@
                         app:checkedColor="@color/primary"
                         android:layout_gravity="center"
                         android:layout_margin="5dp"
-                        android:layout_alignParentRight="true"
                         android:layout_alignParentEnd="true"
                         app:onCheckStateChange="chkOnChange"/>
 
@@ -121,9 +113,7 @@
                         android:text="@string/str_points"
                         android:layout_centerVertical="true"
                         android:textSize="22sp"
-                        android:layout_alignParentLeft="true"
                         android:layout_alignParentStart="true"
-                        android:layout_toLeftOf="@id/exportChkPoints"
                         android:layout_toStartOf="@id/exportChkPoints"
                         android:ellipsize="end"/>
 
@@ -142,7 +132,6 @@
                         app:checkedColor="@color/primary"
                         android:layout_gravity="center"
                         android:layout_margin="5dp"
-                        android:layout_alignParentRight="true"
                         android:layout_alignParentEnd="true"
                         app:onCheckStateChange="chkOnChange"/>
 
@@ -152,9 +141,7 @@
                         android:text="@string/str_polygons"
                         android:layout_centerVertical="true"
                         android:textSize="22sp"
-                        android:layout_alignParentLeft="true"
                         android:layout_alignParentStart="true"
-                        android:layout_toLeftOf="@id/exportChkPolys"
                         android:layout_toStartOf="@id/exportChkPolys"/>
                 </RelativeLayout>
 
@@ -171,7 +158,6 @@
                         app:checkedColor="@color/primary"
                         android:layout_gravity="center"
                         android:layout_margin="5dp"
-                        android:layout_alignParentRight="true"
                         android:layout_alignParentEnd="true"
                         app:onCheckStateChange="chkOnChange"/>
 
@@ -181,9 +167,7 @@
                         android:text="@string/str_meta"
                         android:layout_centerVertical="true"
                         android:textSize="22sp"
-                        android:layout_alignParentLeft="true"
                         android:layout_alignParentStart="true"
-                        android:layout_toLeftOf="@id/exportChkMeta"
                         android:layout_toStartOf="@id/exportChkMeta"/>
                 </RelativeLayout>
 
@@ -200,7 +184,6 @@
                         app:checkedColor="@color/primary"
                         android:layout_gravity="center"
                         android:layout_margin="5dp"
-                        android:layout_alignParentRight="true"
                         android:layout_alignParentEnd="true"
                         app:onCheckStateChange="chkOnChange"/>
 
@@ -210,9 +193,7 @@
                         android:text="@string/str_img_info"
                         android:layout_centerVertical="true"
                         android:textSize="22sp"
-                        android:layout_alignParentLeft="true"
                         android:layout_alignParentStart="true"
-                        android:layout_toLeftOf="@id/exportChkImgInfo"
                         android:layout_toStartOf="@id/exportChkImgInfo"/>
                 </RelativeLayout>
 
@@ -229,7 +210,6 @@
                         app:checkedColor="@color/primary"
                         android:layout_gravity="center"
                         android:layout_margin="5dp"
-                        android:layout_alignParentRight="true"
                         android:layout_alignParentEnd="true"
                         app:onCheckStateChange="chkOnChange"/>
 
@@ -239,9 +219,7 @@
                         android:text="@string/str_project"
                         android:layout_centerVertical="true"
                         android:textSize="22sp"
-                        android:layout_alignParentLeft="true"
                         android:layout_alignParentStart="true"
-                        android:layout_toLeftOf="@id/exportChkProject"
                         android:layout_toStartOf="@id/exportChkProject"/>
                 </RelativeLayout>
 
@@ -258,7 +236,6 @@
                         app:checkedColor="@color/primary"
                         android:layout_gravity="center"
                         android:layout_margin="5dp"
-                        android:layout_alignParentRight="true"
                         android:layout_alignParentEnd="true"
                         app:onCheckStateChange="chkOnChange" />
 
@@ -268,9 +245,7 @@
                         android:text="@string/str_nmea"
                         android:layout_centerVertical="true"
                         android:textSize="22sp"
-                        android:layout_alignParentLeft="true"
                         android:layout_alignParentStart="true"
-                        android:layout_toLeftOf="@id/exportChkNMEA"
                         android:layout_toStartOf="@id/exportChkNMEA"/>
                 </RelativeLayout>
 
@@ -287,7 +262,6 @@
                         app:checkedColor="@color/primary"
                         android:layout_gravity="center"
                         android:layout_margin="5dp"
-                        android:layout_alignParentRight="true"
                         android:layout_alignParentEnd="true"
                         app:onCheckStateChange="chkOnChange" />
 
@@ -297,9 +271,7 @@
                         android:text="@string/str_kmz"
                         android:layout_centerVertical="true"
                         android:textSize="22sp"
-                        android:layout_alignParentLeft="true"
                         android:layout_alignParentStart="true"
-                        android:layout_toLeftOf="@id/exportChkKMZ"
                         android:layout_toStartOf="@id/exportChkKMZ"/>
                 </RelativeLayout>
 
@@ -316,7 +288,6 @@
                         app:checkedColor="@color/primary"
                         android:layout_gravity="center"
                         android:layout_margin="5dp"
-                        android:layout_alignParentRight="true"
                         android:layout_alignParentEnd="true"
                         app:onCheckStateChange="chkOnChange" />
 
@@ -326,9 +297,7 @@
                         android:text="@string/str_gpx"
                         android:layout_centerVertical="true"
                         android:textSize="22sp"
-                        android:layout_alignParentLeft="true"
                         android:layout_alignParentStart="true"
-                        android:layout_toLeftOf="@id/exportChkGPX"
                         android:layout_toStartOf="@id/exportChkGPX"/>
                 </RelativeLayout>
 
@@ -345,7 +314,6 @@
                         app:checkedColor="@color/primary"
                         android:layout_gravity="center"
                         android:layout_margin="5dp"
-                        android:layout_alignParentRight="true"
                         android:layout_alignParentEnd="true"
                         app:onCheckStateChange="chkOnChange"/>
 
@@ -355,9 +323,7 @@
                         android:text="@string/str_summary"
                         android:layout_centerVertical="true"
                         android:textSize="22sp"
-                        android:layout_alignParentLeft="true"
                         android:layout_alignParentStart="true"
-                        android:layout_toLeftOf="@id/exportChkSummary"
                         android:layout_toStartOf="@id/exportChkSummary"/>
                 </RelativeLayout>
 
