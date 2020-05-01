@@ -205,7 +205,7 @@ public class TravPoint extends TtPoint {
         /* Apply the magnetic declination */
         /* East declination is positve, west is negative */
         /* azimuth conversion from north to mathematic postive X-axis */
-        azimuth = 90 - azimuth + getDeclination();
+        azimuth = 90 - azimuth - getDeclination();
         double x, y, z, azAsRad = TtUtils.Convert.degreesToRadians(azimuth);
 
         double horizontalDist = getHorizontalDistance();

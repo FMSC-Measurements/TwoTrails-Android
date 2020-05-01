@@ -508,8 +508,8 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Ma
 
     @Override
     public void setMapPadding(int left, int top, int right, int bottom) {
-        compass.setPadding(left, top, right, bottom);
-        scalebar.setPadding(left, top, right, bottom);
+        //compass.setPadding(left, top, right, bottom);
+        //scalebar.setPadding(left, top, right, bottom);
 
         padLeft = left;
         padTop = top;
