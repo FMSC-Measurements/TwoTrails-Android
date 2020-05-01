@@ -153,7 +153,7 @@ public class Segment {
                     if (!currPoint.isAdjusted())
                         currPoint.adjustPoint();
                 } else if (currPoint.getOp() == OpType.SideShot) {
-                    for (int j = i - 1; j > -1; j++) {
+                    for (int j = i - 1; j > -1 && j < points.size(); j++) {
                         TtPoint pPoint = points.get(j);
                         if (pPoint.getOp() != OpType.SideShot) {
                             ((SideShotPoint)currPoint).adjustPoint(pPoint);
