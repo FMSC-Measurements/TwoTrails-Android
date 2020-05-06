@@ -1,5 +1,6 @@
 package com.usda.fmsc.twotrails;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.Application;
@@ -42,6 +43,7 @@ import org.joda.time.DateTime;
 
 import java.io.File;
 
+@SuppressLint("MissingPermission")
 public class TwoTrailsApp extends Application {
     private static TwoTrailsApp _AppContext;
 
