@@ -84,6 +84,9 @@ public class PlotGenerator extends AsyncTask<PlotGenerator.PlotParams, Void, TtP
 
             poly.setDescription(String.format("Angle: %d, GridX(Mt): %f, GridY(Mt): %f", angle, gridX, gridY));
 
+            //invert for corrector rotation
+            angle *= -1;
+
             List<PointD> points = new ArrayList<>();
 
             boolean allMatchMeta = TtUtils.Points.allPointsHaveSameMetadata(pp.Points);
