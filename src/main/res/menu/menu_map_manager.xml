@@ -4,5 +4,5 @@
     tools:context="com.usda.fmsc.twotrails.activities.HaidActivity">
 
     <item android:id="@+id/mmMenuLogin" android:title="@string/menu_map_manager_login"
-          android:orderInCategory="100" app:showAsAction="never" />
+          android:orderInCategory="100" app:showAsAction="never" android:visible="false" />
 </menu>
