@@ -70,7 +70,7 @@ public class PlotGridActivity extends CustomToolbarActivity {
 
     PlotGenerator.PlotGenListener plotGenListener = new PlotGenerator.PlotGenListener() {
         @Override
-        public void onCaneled() {
+        public void onCanceled() {
             //hide progress
             generating = false;
             hideProgress();

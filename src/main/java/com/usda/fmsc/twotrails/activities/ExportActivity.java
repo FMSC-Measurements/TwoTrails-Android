@@ -78,6 +78,17 @@ public class ExportActivity extends CustomToolbarActivity {
 //        }
 
         chkPc.setCheckedState(MultiStateTouchCheckBox.CheckedState.Checked);
+
+        chkPc.setOnCheckedStateChangeListener(this::chkOnChange);
+        chkPoints.setOnCheckedStateChangeListener(this::chkOnChange);
+        chkPolys.setOnCheckedStateChangeListener(this::chkOnChange);
+        chkMeta.setOnCheckedStateChangeListener(this::chkOnChange);
+        chkImgInfo.setOnCheckedStateChangeListener(this::chkOnChange);
+        chkProj.setOnCheckedStateChangeListener(this::chkOnChange);
+        chkNmea.setOnCheckedStateChangeListener(this::chkOnChange);
+        chkKmz.setOnCheckedStateChangeListener(this::chkOnChange);
+        chkGpx.setOnCheckedStateChangeListener(this::chkOnChange);
+        chkSum.setOnCheckedStateChangeListener(this::chkOnChange);
     }
 
     @Override
