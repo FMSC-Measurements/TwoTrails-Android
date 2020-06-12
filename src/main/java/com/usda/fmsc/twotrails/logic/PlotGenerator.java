@@ -73,7 +73,7 @@ public class PlotGenerator extends AsyncTask<PlotGenerator.PlotParams, Void, TtP
                 gridY = TtUtils.Convert.distance(gridY, Dist.Meters, pp.DistUom);
             }
 
-            int angle;
+            double angle;
 
             if (pp.Angle == null) {
                 Random random = new Random();
@@ -82,10 +82,10 @@ public class PlotGenerator extends AsyncTask<PlotGenerator.PlotParams, Void, TtP
                 angle = pp.Angle;
             }
 
-            poly.setDescription(String.format("Angle: %d, GridX(Mt): %f, GridY(Mt): %f", angle, gridX, gridY));
+            poly.setDescription(String.format("Angle: %f, GridX(Mt): %f, GridY(Mt): %f", angle, gridX, gridY));
 
-            //invert for corrector rotation
-            angle *= -1;
+            //convert to radians
+            angle = TtUtils.Convert.degreesToRadians(angle * -1);
 
             List<PointD> points = new ArrayList<>();
 
@@ -266,7 +266,7 @@ public class PlotGenerator extends AsyncTask<PlotGenerator.PlotParams, Void, TtP
         super.onCancelled();
 
         if (listener != null)
-            listener.onCaneled();
+            listener.onCanceled();
     }
 
     public static class PlotParams {
@@ -303,7 +303,7 @@ public class PlotGenerator extends AsyncTask<PlotGenerator.PlotParams, Void, TtP
     }
 
     public interface PlotGenListener {
-        void onCaneled();
+        void onCanceled();
         void onGenerated(TtPolygon polygon);
         void onError(Exception ex);
     }

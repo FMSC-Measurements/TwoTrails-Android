@@ -76,8 +76,8 @@
                         app:checkedColor="@color/primary"
                         android:layout_gravity="center"
                         android:layout_margin="5dp"
-                        android:layout_alignParentEnd="true"
-                        app:onCheckStateChange="chkOnChange"/>
+                        android:layout_alignParentEnd="true"/>
+<!--                    app:onCheckStateChange="chkOnChange"-->
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -104,8 +104,8 @@
                         app:checkedColor="@color/primary"
                         android:layout_gravity="center"
                         android:layout_margin="5dp"
-                        android:layout_alignParentEnd="true"
-                        app:onCheckStateChange="chkOnChange"/>
+                        android:layout_alignParentEnd="true"/>
+<!--                    app:onCheckStateChange="chkOnChange"-->
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -132,8 +132,8 @@
                         app:checkedColor="@color/primary"
                         android:layout_gravity="center"
                         android:layout_margin="5dp"
-                        android:layout_alignParentEnd="true"
-                        app:onCheckStateChange="chkOnChange"/>
+                        android:layout_alignParentEnd="true"/>
+<!--                    app:onCheckStateChange="chkOnChange"-->
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -158,8 +158,8 @@
                         app:checkedColor="@color/primary"
                         android:layout_gravity="center"
                         android:layout_margin="5dp"
-                        android:layout_alignParentEnd="true"
-                        app:onCheckStateChange="chkOnChange"/>
+                        android:layout_alignParentEnd="true"/>
+<!--                    app:onCheckStateChange="chkOnChange"-->
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -210,8 +210,8 @@
                         app:checkedColor="@color/primary"
                         android:layout_gravity="center"
                         android:layout_margin="5dp"
-                        android:layout_alignParentEnd="true"
-                        app:onCheckStateChange="chkOnChange"/>
+                        android:layout_alignParentEnd="true"/>
+<!--                    app:onCheckStateChange="chkOnChange"-->
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -236,8 +236,8 @@
                         app:checkedColor="@color/primary"
                         android:layout_gravity="center"
                         android:layout_margin="5dp"
-                        android:layout_alignParentEnd="true"
-                        app:onCheckStateChange="chkOnChange" />
+                        android:layout_alignParentEnd="true" />
+<!--                    app:onCheckStateChange="chkOnChange"-->
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -262,8 +262,8 @@
                         app:checkedColor="@color/primary"
                         android:layout_gravity="center"
                         android:layout_margin="5dp"
-                        android:layout_alignParentEnd="true"
-                        app:onCheckStateChange="chkOnChange" />
+                        android:layout_alignParentEnd="true" />
+<!--                    app:onCheckStateChange="chkOnChange"-->
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -288,8 +288,8 @@
                         app:checkedColor="@color/primary"
                         android:layout_gravity="center"
                         android:layout_margin="5dp"
-                        android:layout_alignParentEnd="true"
-                        app:onCheckStateChange="chkOnChange" />
+                        android:layout_alignParentEnd="true" />
+<!--                    app:onCheckStateChange="chkOnChange"-->
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -314,8 +314,8 @@
                         app:checkedColor="@color/primary"
                         android:layout_gravity="center"
                         android:layout_margin="5dp"
-                        android:layout_alignParentEnd="true"
-                        app:onCheckStateChange="chkOnChange"/>
+                        android:layout_alignParentEnd="true"/>
+<!--                    app:onCheckStateChange="chkOnChange"-->
 
                     <TextView
                         android:layout_width="wrap_content"
