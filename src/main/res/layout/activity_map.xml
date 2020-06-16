@@ -44,7 +44,6 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:layout_marginLeft="4dp"
                     android:layout_marginStart="4dp">
 
                     <TableRow
@@ -69,7 +68,6 @@
                             android:textColor="@android:color/white"
                             android:visibility="gone"
                             android:layout_gravity="center_vertical"
-                            android:layout_marginLeft="4dp"
                             android:layout_marginStart="4dp"
                             android:minWidth="10dp"/>
 
@@ -91,7 +89,6 @@
                             android:textColor="@android:color/white"
                             android:visibility="gone"
                             android:layout_gravity="center_vertical"
-                            android:layout_marginLeft="4dp"
                             android:layout_marginStart="4dp"/>
                     </TableRow>
 
@@ -117,7 +114,6 @@
                             android:textColor="@android:color/white"
                             android:visibility="gone"
                             android:layout_gravity="center_vertical"
-                            android:layout_marginLeft="4dp"
                             android:layout_marginStart="4dp"
                             android:minWidth="10dp"/>
                     </TableRow>
