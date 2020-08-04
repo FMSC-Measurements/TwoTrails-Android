@@ -4,8 +4,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.usda.fmsc.geospatial.Extent;
+import com.usda.fmsc.twotrails.objects.media.TtMedia;
 import com.usda.fmsc.utilities.FileUtils;
 import com.usda.fmsc.utilities.StringEx;
+
+import java.util.Comparator;
 
 public class ArcGisMapLayer implements Parcelable, Comparable {
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
@@ -373,4 +376,9 @@ public class ArcGisMapLayer implements Parcelable, Comparable {
             return false;
         }
     }
+
+    public static Comparator<ArcGisMapLayer> Comparator =
+            (lhs, rhs) -> lhs.isOnline() ^ rhs.isOnline() ?
+                    (rhs.isOnline() ? -1 : 1) :
+                    lhs.getName().compareTo(rhs.getName());
 }

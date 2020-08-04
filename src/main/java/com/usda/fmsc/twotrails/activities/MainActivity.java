@@ -409,6 +409,10 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
         if (PolygonAdjuster.isProcessing()) {
             Toast.makeText(this, "Currently Adjusting Polygons.", Toast.LENGTH_LONG).show();
         } else {
+            if (filePath != null && filePath.contains("home:")) { //temp fix for file path
+                filePath = "/storage/emulated/0/Documents/" + filePath.substring(filePath.indexOf("TwoTrailsFiles"));
+            }
+
             if (_fileOpen) {
                 closeFile();
             }

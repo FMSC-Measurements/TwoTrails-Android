@@ -52,7 +52,7 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
     private int notifyAdapter = -1;
 
 
-    @SuppressWarnings("unchecked")
+//    @SuppressWarnings("unchecked")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -94,7 +94,8 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
         maps = new ArrayList<>(getTtAppCtx().getArcGISTools().getMapLayers());
         visibleMaps = new ArrayList<>();
 
-        Collections.sort(maps);
+        maps.sort(ArcGisMapLayer.Comparator);
+        //Collections.sort(maps);
 
         visibleMaps.addAll(maps);
 
