@@ -202,6 +202,7 @@
     <string name="menu_pmd_update_orientation">Update Orientation</string>
     <string name="menu_pmd_capture">Capture Media</string>
     <string name="menu_pmd_delete">Delete Media</string>
+    <string name="menu_sat_settings">Sales Admin Settings</string>
 
 
     <!-- Transitions -->

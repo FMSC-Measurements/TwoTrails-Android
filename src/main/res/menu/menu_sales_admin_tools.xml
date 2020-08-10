@@ -1,0 +1,47 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.usda.fmsc.twotrails.activities.Take5ActivityOld">
+
+    <item
+        android:id="@+id/satMenuMode"
+        android:title="@string/menu_take5_map_mode"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_map_white_24dp"
+        android:visible="true"/>
+
+    <item
+        android:id="@+id/satMenuSatSettings"
+        android:title="@string/menu_map_select_type"
+        app:showAsAction="never"/>
+
+
+    <item
+        android:id="@+id/mmMenuSelectMap"
+        android:title="@string/menu_map_select_type"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/mmMenuMapSettings"
+        android:title="@string/menu_map_settings"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/satMenuGps"
+        android:title="@string/menu_x_gps_settings"
+        app:showAsAction="never"
+        android:visible="true"/>
+
+    <item
+        android:id="@+id/satMenuGpsInfoToggle"
+        android:title="@string/menu_x_hide_gps_info"
+        app:showAsAction="never"
+        android:visible="true"/>
+
+    <item
+        android:id="@+id/mapMenuZoomToPoly"
+        android:title="@string/menu_map_zoom_to_poly"
+        app:showAsAction="never"
+        android:visible="false"/>
+
+</menu>
