@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.usda.fmsc.twotrails.activities.SalesAdminToolsActivity">
+
+    <RelativeLayout
+        android:id="@+id/lay1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <include layout="@layout/toolbar_default"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:id="@+id/toolbar"/>
+
+        <View style="@style/ToolbarShadowViewElevation" android:layout_below="@id/toolbar"/>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/satCardGpsInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/white"
+            android:layout_margin="8dp"
+            style="@style/ToolbarElevation2"
+            android:layout_below="@id/toolbar"
+            android:layout_alignParentBottom="true">
+
+            <include
+                layout="@layout/control_gps_info"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"/>
+        </androidx.cardview.widget.CardView>
+    </RelativeLayout>
+
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/satFabTakePoint"
+        style="@style/fabStyle"
+        android:onClick="btnTakePointClick"
+        android:src="@drawable/ic_ttpoint_gps_white"
+        app:layout_constraintBottom_toBottomOf="@id/lay1"
+        app:layout_constraintEnd_toEndOf="@+id/lay1"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
