@@ -16,9 +16,34 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.widget.SheetLayoutEx;
+import com.usda.fmsc.geospatial.GeoTools;
+import com.usda.fmsc.geospatial.Position;
+import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
+import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.activities.base.AcquireGpsMapActivity;
+import com.usda.fmsc.twotrails.data.DataAccessLayer;
+import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
+import com.usda.fmsc.twotrails.logic.PointNamer;
+import com.usda.fmsc.twotrails.objects.FilterOptions;
+import com.usda.fmsc.twotrails.objects.PointD;
+import com.usda.fmsc.twotrails.objects.TtGroup;
+import com.usda.fmsc.twotrails.objects.TtMetadata;
+import com.usda.fmsc.twotrails.objects.TtPolygon;
+import com.usda.fmsc.twotrails.objects.points.TtPoint;
+import com.usda.fmsc.twotrails.objects.points.WayPoint;
+import com.usda.fmsc.twotrails.utilities.ClosestPositionCalculator;
+import com.usda.fmsc.twotrails.utilities.TtUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/*
+-Live view of Map and show a line (dashed) from current location.
+-Button takes 5 and averages, show window saying pass/fail and a button to create a waypt under poly named: (track_poly or all pts)_validation,
+  includes dist from poly and two closest points in desc
+*/
 
 public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
 
@@ -26,6 +51,27 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
 
     private MenuItem miHideGpsInfo;
     private boolean gpsInfoHidden;
+
+
+
+    private List<TtPoint> _Points;
+    private ArrayList<TtNmeaBurst> _Bursts, _UsedBursts;
+    private TtPoint _CurrentPoint;
+    private WayPoint _ValidationPoint;
+    private TtGroup _Group;
+
+    private boolean isPointSetup;
+
+    private int increment, takeAmount, nmeaCount = 0;
+
+    private TtPolygon _ValidationPolygon;
+    private TtMetadata _DefaultMeta;
+    private ClosestPositionCalculator _ClosestPositionCalc;
+
+    private DataAccessLayer _DAL;
+
+    private FilterOptions options = new FilterOptions();
+
 
     //region Activity
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +105,8 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
             AndroidUtils.UI.createToastForToolbarTitle(SalesAdminToolsActivity.this, getToolbar());
         }
 
+        _DAL = getTtAppCtx().getDAL();
+        _DefaultMeta = _DAL.getDefaultMetadata();
 
         cvGpsInfo = findViewById(R.id.take5CardGpsInfo);
     }
@@ -72,15 +120,12 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
     protected void getSettings() {
         super.getSettings();
 
-//        options.Fix = getTtAppCtx().getDeviceSettings().getTake5FilterFix();
-//        options.FixType = getTtAppCtx().getDeviceSettings().getTake5FilterFixType();
-//        options.DopType = getTtAppCtx().getDeviceSettings().getTake5FilterDopType();
-//        options.DopValue = getTtAppCtx().getDeviceSettings().getTake5FilterDopValue();
-//        increment = getTtAppCtx().getDeviceSettings().getTake5Increment();
-//        takeAmount = getTtAppCtx().getDeviceSettings().getTake5NmeaAmount();
-//
-//        useVib = getTtAppCtx().getDeviceSettings().getTake5VibrateOnCreate();
-//        useRing = getTtAppCtx().getDeviceSettings().getTake5RingOnCreate();
+        options.Fix = getTtAppCtx().getDeviceSettings().getSATFilterFix();
+        options.FixType = getTtAppCtx().getDeviceSettings().getSATFilterFixType();
+        options.DopType = getTtAppCtx().getDeviceSettings().getSATFilterDopType();
+        options.DopValue = getTtAppCtx().getDeviceSettings().getSATFilterDopValue();
+        increment = getTtAppCtx().getDeviceSettings().getSATIncrement();
+        takeAmount = getTtAppCtx().getDeviceSettings().getSATNmeaAmount();
     }
 
     @Override
@@ -114,7 +159,7 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
                         Consts.Codes.Activites.SETTINGS);
                 break;
             }
-            case R.id.take5MenuGpsInfoToggle: {
+            case R.id.satMenuGpsInfoToggle: {
                 if (gpsInfoHidden) {
                     gpsInfoHidden = false;
                     cvGpsInfo.setVisibility(View.VISIBLE);
@@ -124,6 +169,10 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
                     cvGpsInfo.setVisibility(View.GONE);
                     miHideGpsInfo.setTitle(R.string.menu_x_show_gps_info);
                 }
+                break;
+            }
+            case R.id.satMenuValidationPoly: {
+                //select poly or (all polys except _plts and _validations) for checking
                 break;
             }
         }
@@ -173,23 +222,7 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
 
 //    @Override
 //    public void finish() {
-//        if (validateSideShot()) {
-//            if (_Points != null && _Points.size() > 0) {
-//                if (!saved || updated) {
-//                    savePoint(_CurrentPoint);
-//                }
-//
-//                setResult(Consts.Codes.Results.POINT_CREATED, new Intent().putExtra(Consts.Codes.Data.NUMBER_OF_CREATED_POINTS, _Points.size()));
-//            } else {
-//                if (_Group != null) {
-//                    getTtAppCtx().getDAL().deleteGroup(_Group.getCN());
-//                }
-//
-//                setResult(RESULT_CANCELED);
-//            }
-//
-//            super.finish();
-//        }
+//        super.finish();
 //    }
 
     @Override
@@ -215,15 +248,155 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
     //endregion
 
 
+    //region Setup | Validate | Save
+
+    private void setupValidation() {
+        TtPoint prevPoint = _CurrentPoint;
+        _CurrentPoint = null;
+        _ValidationPoint = new WayPoint();
+
+        if (prevPoint != null) {
+            _ValidationPoint.setPID(PointNamer.namePoint(prevPoint, increment));
+            _ValidationPoint.setIndex(prevPoint.getIndex() + 1);
+        } else {
+            _ValidationPoint.setPID(PointNamer.nameFirstPoint(getPolygon()));
+            _ValidationPoint.setIndex(0);
+        }
+
+        _ValidationPoint.setPolyCN(getPolygon().getCN());
+        _ValidationPoint.setPolyName(getPolygon().getName());
+        _ValidationPoint.setMetadataCN(_DefaultMeta.getCN());
+        _ValidationPoint.setGroupCN(_Group.getCN());
+        _ValidationPoint.setGroupName(_Group.getName());
+        _ValidationPoint.setOnBnd(false);
+
+        _Bursts = new ArrayList<>();
+        _UsedBursts = new ArrayList<>();
+    }
+
+    private void showValidationPoint() {
+        ClosestPositionCalculator.ClosestPosition cp = _ClosestPositionCalc.getClosestPosition(_ValidationPoint.getAdjX(), _ValidationPoint.getAdjY());
+        updateDirPathUI(cp.getClosestPoint(), new PointD(_ValidationPoint.getAdjX(), _ValidationPoint.getAdjY()));
+
+        //TODO show msgbox with point information and whether to save
+    }
+
+    private void saveValidationPoint(ClosestPositionCalculator.ClosestPosition closestPosition) {
+        if (_ValidationPoint != null) {
+
+            _ValidationPoint.setComment("");
+
+            getTtAppCtx().getDAL().insertPoint(_ValidationPoint);
+            getTtAppCtx().getDAL().insertNmeaBursts(_Bursts);
+
+
+            _CurrentPoint = _ValidationPoint;
+
+            isPointSetup = false;
+        }
+    }
+    //endregion
+
+    //region UI
+    private void updateDirPathUI(PointD to, PointD from) {
+
+
+        setDirPath(to, from);
+    }
+
+    private void setDirPath(PointD to, PointD from) {
+        //TODO at MapBase
+    }
+    //endregion
+
+    //region GPS
+
+    @Override
+    protected void onNmeaBurstReceived(NmeaBurst nmeaBurst) {
+        super.onNmeaBurstReceived(nmeaBurst);
+
+        if (nmeaBurst.hasPosition()) {
+            if (isLogging() && nmeaBurst.isValid()) {
+                TtNmeaBurst burst = TtNmeaBurst.create(_ValidationPoint.getCN(), false, nmeaBurst);
+                _Bursts.add(burst);
+
+                if (TtUtils.NMEA.isBurstUsable(burst, options)) {
+                    burst.setUsed(true);
+                    _UsedBursts.add(burst);
+
+
+                    //runOnUiThread(() -> tvProg.setText(StringEx.toString(++nmeaCount)));
+
+                    if (_UsedBursts.size() == takeAmount) {
+                        stopLogging();
+
+                        ArrayList<Position> positions = new ArrayList<>();
+                        int zone = getCurrentMetadata().getZone();
+                        double x = 0, y = 0, count = _UsedBursts.size(), dRMSEx = 0, dRMSEy = 0, dRMSEr;
+
+                        TtNmeaBurst tmpBurst;
+                        for (int i = 0; i < count; i++) {
+                            tmpBurst = _UsedBursts.get(i);
+                            x += tmpBurst.getX(zone);
+                            y += tmpBurst.getY(zone);
+                            positions.add(tmpBurst.getPosition());
+                        }
+
+                        x /= count;
+                        y /= count;
+
+                        for (int i = 0; i < count; i++) {
+                            tmpBurst = _UsedBursts.get(i);
+                            dRMSEx += Math.pow(tmpBurst.getX(zone) - x, 2);
+                            dRMSEy += Math.pow(tmpBurst.getY(zone) - y, 2);
+                        }
+
+                        dRMSEx = Math.sqrt(dRMSEx / count);
+                        dRMSEy = Math.sqrt(dRMSEy / count);
+                        dRMSEr = Math.sqrt(Math.pow(dRMSEx, 2) + Math.pow(dRMSEy, 2)) * Consts.RMSEr95_Coeff;
+
+                        Position position = GeoTools.getMidPioint(positions);
+
+                        _ValidationPoint.setLatitude(position.getLatitudeSignedDecimal());
+                        _ValidationPoint.setLongitude(position.getLongitudeSignedDecimal());
+                        _ValidationPoint.setElevation(position.getElevation());
+                        _ValidationPoint.setRMSEr(dRMSEr);
+                        _ValidationPoint.setAndCalc(x, y, position.getElevation(), getPolygon());
+
+                        showValidationPoint();
+                    }
+                }
+            } else {
+                UTMCoords coords = nmeaBurst.getUTM(_DefaultMeta.getZone());
+                ClosestPositionCalculator.ClosestPosition cp = _ClosestPositionCalc.getClosestPosition(coords.getX(), coords.getY());
+                updateDirPathUI(cp.getClosestPoint(), new PointD(coords.getX(), coords.getY()));
+            }
+        }
+    }
+
+    //endregion
 
     //region Controls
     public void btnTakePointClick(View view) {
         if (isReceivingNmea()) {
-//            if (validateSideShot()) {
-//                setupTake5();
-//            }
+            if (!isPointSetup) {
+                setupValidation();
+                startLogging();
+            }
         } else {
             Toast.makeText(SalesAdminToolsActivity.this, "Currently not receiving NMEA data.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void btnCancelClick(View view) {
+        //hideCancel();
+
+        if (isLogging()) {
+            stopLogging();
+            _Bursts.clear();
+            _UsedBursts.clear();
+
+            //fabValidate.setEnabled(true);
         }
     }
     //endregion

@@ -70,6 +70,16 @@ public class DeviceSettings extends Settings {
     public static final String TAKE5_VIBRATE_ON_CREATE = "Take5VibrationOnCreate";
     public static final String TAKE5_RING_ON_CREATE = "Take5RingOnCreate";
 
+    public static final String SAT_FILTER_DOP_TYPE = "SATFilterDopType";
+    public static final String SAT_FILTER_DOP_VALUE = "SATFilterDopValue";
+    public static final String SAT_FILTER_FIX_TYPE = "SATFilterFixType";
+    public static final String SAT_FILTER_FIX = "SATFilterFix";
+    public static final String SAT_NMEA_AMOUNT = "SATNmeaAmount";
+    public static final String SAT_IGNORE_FIRST_NMEA = "SATIgnoreNmea";
+    public static final String SAT_IGNORE_FIRST_NMEA_AMOUNT = "SATIgnoreNmeaAmount";
+    public static final String SAT_FAIL_AMOUNT = "SATFailAmount";
+    public static final String SAT_INCREMENT = "SATIncrement";
+
     public static final String WALK_FILTER_DOP_TYPE = "WalkFilterDopType";
     public static final String WALK_FILTER_DOP_VALUE = "WalkFilterDopValue";
     public static final String WALK_FILTER_FIX_TYPE = "WalkFilterFixType";
@@ -141,6 +151,16 @@ public class DeviceSettings extends Settings {
     public final boolean DEFAULT_TAKE5_VIB_ON_CREATE = true;
     public final boolean DEFAULT_TAKE5_RING_ON_CREATE = true;
 
+    public final DopType DEFAULT_SAT_DOP_TYPE = DopType.HDOP;
+    public final GGASentence.GpsFixType DEFAULT_SAT_FIX_TYPE = GGASentence.GpsFixType.GPS;
+    public final GSASentence.Fix DEFAULT_SAT_FIX = GSASentence.Fix._3D;
+    public final int DEFAULT_SAT_DOP_VALUE = 20;
+    public final int DEFAULT_SAT_INCREMENT = 5;
+    public final int DEFAULT_SAT_NMEA_AMOUNT = 5;
+    public final boolean DEFAULT_SAT_IGNORE = false;
+    public final int DEFAULT_SAT_IGNORE_AMOUNT = 2;
+    public final int DEFAULT_SAT_FAIL_AMOUNT = 10;
+    
     public final DopType DEFAULT_WALK_DOP_TYPE = DopType.HDOP;
     public final GGASentence.GpsFixType DEFAULT_WALK_FIX_TYPE = GGASentence.GpsFixType.GPS;
     public final GSASentence.Fix DEFAULT_WALK_FIX = GSASentence.Fix._3D;
@@ -239,6 +259,16 @@ public class DeviceSettings extends Settings {
         editor.putInt(TAKE5_INCREMENT, DEFAULT_TAKE5_INCREMENT);
         editor.putBoolean(TAKE5_RING_ON_CREATE, DEFAULT_TAKE5_RING_ON_CREATE);
         editor.putBoolean(TAKE5_VIBRATE_ON_CREATE, DEFAULT_TAKE5_VIB_ON_CREATE);
+
+        editor.putInt(SAT_FILTER_DOP_TYPE, DEFAULT_SAT_DOP_TYPE.getValue());
+        editor.putInt(SAT_FILTER_DOP_VALUE, DEFAULT_SAT_DOP_VALUE);
+        editor.putInt(SAT_FILTER_FIX_TYPE, DEFAULT_SAT_FIX_TYPE.getValue());
+        editor.putInt(SAT_FILTER_FIX, DEFAULT_SAT_FIX.getValue());
+        editor.putInt(SAT_NMEA_AMOUNT, DEFAULT_SAT_NMEA_AMOUNT);
+        editor.putBoolean(SAT_IGNORE_FIRST_NMEA, DEFAULT_SAT_IGNORE);
+        editor.putInt(SAT_IGNORE_FIRST_NMEA_AMOUNT, DEFAULT_SAT_IGNORE_AMOUNT);
+        editor.putInt(SAT_FAIL_AMOUNT, DEFAULT_SAT_FAIL_AMOUNT);
+        editor.putInt(SAT_INCREMENT, DEFAULT_SAT_INCREMENT);
 
         editor.putInt(WALK_FILTER_DOP_TYPE, DEFAULT_WALK_DOP_TYPE.getValue());
         editor.putInt(WALK_FILTER_DOP_VALUE, DEFAULT_WALK_DOP_VALUE);
@@ -601,6 +631,41 @@ public class DeviceSettings extends Settings {
     }
 
 
+
+    public DopType getSATFilterDopType() {
+        return DopType.parse(getInt(SAT_FILTER_DOP_TYPE, DEFAULT_SAT_DOP_TYPE.getValue()));
+    }
+
+    public void setSATFilterDopType(DopType value) {
+        setInt(SAT_FILTER_DOP_TYPE, value.getValue());
+    }
+
+    public int getSATFilterDopValue() {
+        return getInt(SAT_FILTER_DOP_VALUE, DEFAULT_SAT_DOP_VALUE);
+    }
+
+    public void setSATFilterDopValue(int value) {
+        setInt(SAT_FILTER_DOP_VALUE, value);
+    }
+
+    public GGASentence.GpsFixType getSATFilterFixType() {
+        return GGASentence.GpsFixType.parse(getInt(SAT_FILTER_FIX_TYPE, DEFAULT_SAT_FIX_TYPE.getValue()));
+    }
+
+    public void setSATFilterFixType(GGASentence.GpsFixType value) {
+        setInt(SAT_FILTER_FIX_TYPE, value.getValue());
+    }
+
+    public GSASentence.Fix getSATFilterFix() {
+        return GSASentence.Fix.parse(getInt(SAT_FILTER_FIX, DEFAULT_SAT_FIX.getValue()));
+    }
+
+    public void setSATFilterFix(GSASentence.Fix value) {
+        setInt(SAT_FILTER_FIX, value.getValue());
+    }
+    
+    
+    
     public DopType getWalkFilterDopType() {
         return DopType.parse(getInt(WALK_FILTER_DOP_TYPE, DEFAULT_WALK_DOP_TYPE.getValue()));
     }
@@ -711,6 +776,48 @@ public class DeviceSettings extends Settings {
     }
     //endregion
 
+    //region SAT
+    public int getSATNmeaAmount() {
+        return getInt(SAT_NMEA_AMOUNT, DEFAULT_SAT_NMEA_AMOUNT);
+    }
+
+    public void setSATNmeaAmount(int value) {
+        setInt(SAT_NMEA_AMOUNT, value);
+    }
+
+    public boolean getSATIngoreFirstNmea() {
+        return getBool(SAT_IGNORE_FIRST_NMEA);
+    }
+
+    public void setSATIgnoreFirstNmea(boolean value) {
+        setBool(SAT_IGNORE_FIRST_NMEA, value);
+    }
+
+    public int getSATIngoreFirstNmeaAmount() {
+        return getInt(SAT_IGNORE_FIRST_NMEA_AMOUNT, DEFAULT_SAT_IGNORE_AMOUNT);
+    }
+
+    public void setSATIgnoreFirstNmeaAmount(int value) {
+        setInt(SAT_IGNORE_FIRST_NMEA_AMOUNT, value);
+    }
+
+    public int getSATFailAmount() {
+        return getInt(SAT_FAIL_AMOUNT, DEFAULT_SAT_FAIL_AMOUNT);
+    }
+
+    public void setSATFailAmount(int value) {
+        setInt(SAT_FAIL_AMOUNT, value);
+    }
+
+    public int getSATIncrement() {
+        return getInt(SAT_INCREMENT, DEFAULT_SAT_INCREMENT);
+    }
+
+    public void setSATIncrement(int value) {
+        setInt(SAT_INCREMENT, value);
+    }
+    //endregion
+    
     //region Walk
     public int getWalkIncrement() {
         return getInt(WALK_INCREMENT, DEFAULT_WALK_INCREMENT);
