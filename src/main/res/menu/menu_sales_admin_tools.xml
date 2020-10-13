@@ -1,7 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.usda.fmsc.twotrails.activities.Take5ActivityOld">
+    tools:context="com.usda.fmsc.twotrails.activities.SalesAdminToolsActivity">
 
     <item
         android:id="@+id/satMenuMode"
@@ -44,4 +44,9 @@
         app:showAsAction="never"
         android:visible="false"/>
 
+    <item
+        android:id="@+id/satMenuValidationPoly"
+        android:title="@string/menu_sat_validation_poly"
+        app:showAsAction="never"
+        android:visible="false"/>
 </menu>

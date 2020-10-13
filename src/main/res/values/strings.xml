@@ -203,6 +203,7 @@
     <string name="menu_pmd_capture">Capture Media</string>
     <string name="menu_pmd_delete">Delete Media</string>
     <string name="menu_sat_settings">Sales Admin Settings</string>
+    <string name="menu_sat_validation_poly">Validation Polygon</string>
 
 
     <!-- Transitions -->
