@@ -7,6 +7,8 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
@@ -14,6 +16,7 @@ import androidx.cardview.widget.CardView;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.widget.SheetLayoutEx;
 import com.usda.fmsc.geospatial.GeoTools;
@@ -48,6 +51,7 @@ import java.util.List;
 public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
 
     private CardView cvGpsInfo;
+    private FloatingActionButton fabTakePoint, fabCancel;
 
     private MenuItem miHideGpsInfo;
     private boolean gpsInfoHidden;
@@ -60,7 +64,7 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
     private WayPoint _ValidationPoint;
     private TtGroup _Group;
 
-    private boolean isPointSetup;
+    private boolean isPointSetup, cancelVisible;
 
     private int increment, takeAmount, nmeaCount = 0;
 
@@ -109,6 +113,9 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
         _DefaultMeta = _DAL.getDefaultMetadata();
 
         cvGpsInfo = findViewById(R.id.take5CardGpsInfo);
+
+        fabCancel = findViewById(R.id.take5FabCancel);
+        fabTakePoint = findViewById(R.id.satFabTakePoint);
     }
 
 //    @Override
@@ -132,10 +139,7 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_take5, menu);
 
-//        miMoveToEnd = menu.findItem(R.id.take5MenuToBottom);
-//        miMode = menu.findItem(R.id.take5MenuMode);
         miHideGpsInfo = menu.findItem(R.id.satMenuGpsInfoToggle);
-//        miCenterPosition = menu.findItem(R.id.take5MenuCenterPositionToggle);
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -228,7 +232,9 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN){
-            //TODO take point
+            if (fabTakePoint.isEnabled()) {
+                btnTakePointClick(null);
+            }
             return true;
         } else if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
             if (hasPosition()) {
@@ -272,9 +278,14 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
 
         _Bursts = new ArrayList<>();
         _UsedBursts = new ArrayList<>();
+
+        showCancel();
     }
 
     private void showValidationPoint() {
+        hideCancel();
+        fabTakePoint.setEnabled(true);
+
         ClosestPositionCalculator.ClosestPosition cp = _ClosestPositionCalc.getClosestPosition(_ValidationPoint.getAdjX(), _ValidationPoint.getAdjY());
         updateDirPathUI(cp.getClosestPoint(), new PointD(_ValidationPoint.getAdjX(), _ValidationPoint.getAdjY()));
 
@@ -307,6 +318,62 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
     private void setDirPath(PointD to, PointD from) {
         //TODO at MapBase
     }
+
+
+    private void showCancel() {
+        if (!cancelVisible) {
+            Animation a = AnimationUtils.loadAnimation(this, R.anim.push_right_in);
+
+            a.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+                    fabCancel.setVisibility(View.VISIBLE);
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+
+                }
+            });
+
+            fabCancel.startAnimation(a);
+            cancelVisible = true;
+        }
+    }
+
+    private void hideCancel() {
+        AndroidUtils.UI.hideKeyboard(this);
+
+        if (cancelVisible) {
+            final Animation a = AnimationUtils.loadAnimation(this, R.anim.push_left_out);
+
+            a.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    fabCancel.setVisibility(View.GONE);
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+
+                }
+            });
+
+            final Animation ac = AnimationUtils.loadAnimation(this, R.anim.push_right_out);
+
+            fabCancel.startAnimation(a);
+            cancelVisible = false;
+        }
+    }
     //endregion
 
     //region GPS
@@ -323,9 +390,6 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
                 if (TtUtils.NMEA.isBurstUsable(burst, options)) {
                     burst.setUsed(true);
                     _UsedBursts.add(burst);
-
-
-                    //runOnUiThread(() -> tvProg.setText(StringEx.toString(++nmeaCount)));
 
                     if (_UsedBursts.size() == takeAmount) {
                         stopLogging();
@@ -389,14 +453,14 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
     }
 
     public void btnCancelClick(View view) {
-        //hideCancel();
+        hideCancel();
 
         if (isLogging()) {
             stopLogging();
             _Bursts.clear();
             _UsedBursts.clear();
 
-            //fabValidate.setEnabled(true);
+            fabTakePoint.setEnabled(true);
         }
     }
     //endregion

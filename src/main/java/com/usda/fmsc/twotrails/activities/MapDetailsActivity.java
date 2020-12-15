@@ -252,7 +252,7 @@ public class MapDetailsActivity extends CustomToolbarActivity {
                             arcGisMapLayer.setMinScale(layer.getMinScale());
                         }
 
-                        if (overwrites[2]) {
+                        if (overwrites[2] && layer.hasDetailLevels()) {
                             arcGisMapLayer.setLevelsOfDetail(layer.getLevelsOfDetail());
                         }
 

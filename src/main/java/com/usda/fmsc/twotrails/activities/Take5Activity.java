@@ -92,7 +92,7 @@ import jp.wasabeef.recyclerview.animators.FadeInAnimator;
 public class Take5Activity extends AcquireGpsMapActivity implements PointMediaController {
     private static final boolean enableCardFading = true;
 
-    private HashMap<String, PointMediaListener> listeners = new HashMap<>();
+    private final HashMap<String, PointMediaListener> listeners = new HashMap<>();
 
     private RecyclerViewEx rvPoints;
     private Take5PointsEditRvAdapter t5pAdapter;
@@ -1332,7 +1332,6 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
             if (TtUtils.NMEA.isBurstUsable(burst, options)) {
                 burst.setUsed(true);
                 _UsedBursts.add(burst);
-
 
                 runOnUiThread(() -> tvProg.setText(StringEx.toString(++nmeaCount)));
 

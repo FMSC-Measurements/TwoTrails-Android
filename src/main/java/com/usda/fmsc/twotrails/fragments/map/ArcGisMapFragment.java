@@ -291,7 +291,7 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Ma
                                 public void onComplete(ArcGisMapLayer layer) {
                                     boolean updated = false;
 
-                                    if (layer.getLevelsOfDetail() != null) {
+                                    if (layer.hasDetailLevels()) {
                                         agml.setLevelsOfDetail(layer.getLevelsOfDetail());
                                         updated = true;
                                     }
