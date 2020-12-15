@@ -373,6 +373,7 @@
     <string name="main_btn_gps_log">GPS Logger</string>
     <string name="main_btn_gps_status">GPS Status</string>
     <string name="main_btn_map_manager">Map Manager</string>
+    <string name="main_btn_sat">Sales Admin Tools</string>
 
     <string name="main_tv_edited">Last Edited</string>
 

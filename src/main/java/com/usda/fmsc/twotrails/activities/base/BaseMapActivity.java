@@ -95,7 +95,7 @@ import static androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_LOCKED_OPEN;
 import static androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_UNDEFINED;
 import static androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_UNLOCKED;
 
-@SuppressWarnings({"unused", "SameParameterValue"})
+@SuppressWarnings({"SameParameterValue"})
 public abstract class BaseMapActivity extends CustomToolbarActivity implements IMultiMapFragment.MultiMapListener, GpsService.Listener,
         SensorEventListener, PolyMarkerMapRvAdapter.Listener {
 
@@ -120,8 +120,8 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     private Fragment mapFragment;
     private IMultiMapFragment mmFrag;
 
-    private ArrayList<PolygonGraphicManager> polyGraphicManagers = new ArrayList<>();
-    private ArrayList<TrailGraphicManager> trailGraphicManagers = new ArrayList<>();
+    private final ArrayList<PolygonGraphicManager> polyGraphicManagers = new ArrayList<>();
+    private final ArrayList<TrailGraphicManager> trailGraphicManagers = new ArrayList<>();
 
     private Position lastPosition;
     private android.location.Location targetLocation;

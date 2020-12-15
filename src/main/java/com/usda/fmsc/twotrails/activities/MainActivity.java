@@ -874,6 +874,14 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
         startActivity(new Intent(this, MapManagerActivity.class));
     }
 
+    public void btnSATClick(View view) {
+        if(getTtAppCtx().getDAL().hasPolygons()) {
+            startActivity(new Intent(this, SalesAdminToolsActivity.class));
+        } else {
+            Toast.makeText(this, "No Polygons in Project", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     public void btnTest(View view) {
 
         //throw  new RuntimeException("Crash on purpose");

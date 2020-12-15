@@ -429,11 +429,13 @@ public class DeviceSettings extends Settings {
 
             js.name("DetailLevels");
             js.beginArray();
-            for (ArcGisMapLayer.DetailLevel dl : layer.getLevelsOfDetail()) {
-                js.name("Resolution").value(dl.getResolution());
-                js.name("Level").value(dl.getLevel());
-                js.name("Scale").value(dl.getScale());
-                js.name("DescribeContents").value(dl.describeContents());
+            if (layer.hasDetailLevels()) {
+                for (ArcGisMapLayer.DetailLevel dl : layer.getLevelsOfDetail()) {
+                    js.name("Resolution").value(dl.getResolution());
+                    js.name("Level").value(dl.getLevel());
+                    js.name("Scale").value(dl.getScale());
+                    js.name("DescribeContents").value(dl.describeContents());
+                }
             }
             js.endArray();
 

@@ -234,6 +234,10 @@ public class ArcGisMapLayer implements Parcelable, Comparable {
         return levelsOfDetail.length;
     }
 
+    public boolean hasDetailLevels() {
+        return levelsOfDetail != null && levelsOfDetail.length > 0;
+    }
+
     public DetailLevel[] getLevelsOfDetail() {
         return levelsOfDetail;
     }

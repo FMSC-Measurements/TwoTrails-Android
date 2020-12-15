@@ -78,6 +78,15 @@
         <View style="@style/Dividers"/>
 
         <Button
+            android:text="@string/main_btn_sat"
+            android:id="@+id/mainFragToolsBtnSAT"
+            android:onClick="btnSATClick"
+            android:enabled="true"
+            style="@style/MainActivityButtons"/>
+
+        <View style="@style/Dividers"/>
+
+        <Button
             android:text="@string/main_btn_gps_log"
             android:id="@+id/mainFragToolsBtnGpsLogger"
             android:onClick="btnGpsLoggerClick"
