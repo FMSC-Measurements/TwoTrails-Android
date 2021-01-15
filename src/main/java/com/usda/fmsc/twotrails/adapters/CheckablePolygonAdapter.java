@@ -1,5 +1,6 @@
 package com.usda.fmsc.twotrails.adapters;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import androidx.annotation.NonNull;
 import android.view.LayoutInflater;
@@ -15,10 +16,11 @@ import com.usda.fmsc.twotrails.objects.TtPolygon;
 
 import java.util.ArrayList;
 
+@SuppressLint("DefaultLocale")
 public class CheckablePolygonAdapter extends ArrayAdapter<TtPolygon> {
-    private ArrayList<Tuple<TtPolygon, Boolean>> _Polygons;
-    private ArrayList<Integer> _PointInPolygonsCount;
-    private LayoutInflater inflater;
+    private final ArrayList<Tuple<TtPolygon, Boolean>> _Polygons;
+    private final ArrayList<Integer> _PointInPolygonsCount;
+    private final LayoutInflater inflater;
 
     public CheckablePolygonAdapter(Context context, int resource, ArrayList<TtPolygon> polygons, ArrayList<Integer> pointInPolysCounts) {
         super(context, resource);
@@ -70,8 +72,8 @@ public class CheckablePolygonAdapter extends ArrayAdapter<TtPolygon> {
 
 
     private static class ViewHolder {
-        private CheckBox checkBox;
-        private TextView textView;
+        private final CheckBox checkBox;
+        private final TextView textView;
 
         private ViewHolder(View view) {
             checkBox = view.findViewById(R.id.checkBox1);

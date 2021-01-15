@@ -9,7 +9,7 @@ import com.usda.fmsc.twotrails.objects.media.TtImage;
 import com.usda.fmsc.twotrails.objects.media.TtMedia;
 
 public class MediaPagerAdapter extends FragmentStatePagerAdapterEx {
-    private MediaRvAdapter adapter;
+    private final MediaRvAdapter adapter;
 
     public MediaPagerAdapter(FragmentManager fm, MediaRvAdapter adapter) {
         super(fm);

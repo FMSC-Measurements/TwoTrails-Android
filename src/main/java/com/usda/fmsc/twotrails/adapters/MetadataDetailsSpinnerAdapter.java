@@ -13,9 +13,9 @@ import com.usda.fmsc.twotrails.objects.TtMetadata;
 import java.util.List;
 
 public class MetadataDetailsSpinnerAdapter extends BaseAdapter {
-    private LayoutInflater inflater;
-    private List<TtMetadata> metadata;
-    private int itemView;
+    private final LayoutInflater inflater;
+    private final List<TtMetadata> metadata;
+    private final int itemView;
 
 
     public MetadataDetailsSpinnerAdapter(Context context, List<TtMetadata> metadata) {

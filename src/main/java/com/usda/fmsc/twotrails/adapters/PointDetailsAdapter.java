@@ -1,5 +1,6 @@
 package com.usda.fmsc.twotrails.adapters;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -23,8 +24,9 @@ import java.util.List;
 
 import com.usda.fmsc.utilities.StringEx;
 
+@SuppressLint("DefaultLocale")
 public class PointDetailsAdapter extends SelectableArrayAdapter<TtPoint> {
-    private LayoutInflater inflater;
+    private final LayoutInflater inflater;
     private AppUnits.IconColor iconColor = AppUnits.IconColor.Light;
     private boolean showPolygon = false;
     private boolean showQuondamLinks = false;
