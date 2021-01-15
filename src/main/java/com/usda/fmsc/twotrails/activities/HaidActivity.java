@@ -159,69 +159,59 @@ public class HaidActivity extends CustomToolbarActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
+        if (id == R.id.haidMenuShowPoints) {
+            miShowPoints.setTitle(showPoints ? R.string.haid_menu_show_points : R.string.haid_menu_hide_points);
+            miShowPoints.setIcon(showPoints ? R.drawable.ic_action_location_on_black : R.drawable.ic_action_location_off_black);
 
-        switch (id) {
-            case R.id.haidMenuShowPoints: {
-                miShowPoints.setTitle(showPoints ? R.string.haid_menu_show_points : R.string.haid_menu_hide_points);
-                miShowPoints.setIcon(showPoints ? R.drawable.ic_action_location_on_black : R.drawable.ic_action_location_off_black);
+            showPoints = !showPoints;
 
-                showPoints = !showPoints;
+            PolyInfo pi;
+            for (int i = 0; i < polyinfo.length; i++) {
+                pi = new PolyInfo(_HaidLogic, polyinfo[i].getPolygon(), showPoints);
+                polyinfo[i] = pi;
 
-                PolyInfo pi;
-                for (int i = 0; i < polyinfo.length; i++) {
-                    pi = new PolyInfo(_HaidLogic, polyinfo[i].getPolygon(), showPoints);
-                    polyinfo[i] = pi;
-
-                    if (pi.getCN().equals(currentPoly.getCN())) {
-                        currentPoly = pi;
-                        updateContent();
-                    }
+                if (pi.getCN().equals(currentPoly.getCN())) {
+                    currentPoly = pi;
+                    updateContent();
                 }
-                break;
             }
-            case R.id.haidMenuHelp: {
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        } else if (id == R.id.haidMenuHelp) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-                builder.setTitle(R.string.str_help)
-                        .setMessage(R.string.haid_help_text)
-                        .setPositiveButton(R.string.str_ok, (dialog, id1) -> {
-                            // User clicked OK button
-                        });
+            builder.setTitle(R.string.str_help)
+                    .setMessage(R.string.haid_help_text)
+                    .setPositiveButton(R.string.str_ok, (dialog, id1) -> {
+                        // User clicked OK button
+                    });
 
-                builder.create().show();
-                break;
-            }
-            case R.id.haidMenuIncreaseTextSize: {
-                if (textSize < 48) {
-                    textSize *= 1.2;
+            builder.create().show();
+        } else if (id == R.id.haidMenuIncreaseTextSize) {
+            if (textSize < 48) {
+                textSize *= 1.2;
 
-                    if (textSize >= 48) {
-                        AndroidUtils.UI.disableMenuItem(miTSInc);
-                    }
-
-                    if (!miTSDec.isEnabled()) {
-                        AndroidUtils.UI.enableMenuItem(miTSDec);
-                    }
-
-                    tvInfo.setTextSize(textSize);
+                if (textSize >= 48) {
+                    AndroidUtils.UI.disableMenuItem(miTSInc);
                 }
-                break;
-            }
-            case R.id.haidMenuDecreaseTextSize: {
-                if (textSize > 8) {
-                    textSize /= 1.2;
 
-                    if (textSize <= 8) {
-                        AndroidUtils.UI.disableMenuItem(miTSDec);
-                    }
-
-                    if (!miTSInc.isEnabled()) {
-                        AndroidUtils.UI.enableMenuItem(miTSInc);
-                    }
-
-                    tvInfo.setTextSize(textSize);
+                if (!miTSDec.isEnabled()) {
+                    AndroidUtils.UI.enableMenuItem(miTSDec);
                 }
-                break;
+
+                tvInfo.setTextSize(textSize);
+            }
+        } else if (id == R.id.haidMenuDecreaseTextSize) {
+            if (textSize > 8) {
+                textSize /= 1.2;
+
+                if (textSize <= 8) {
+                    AndroidUtils.UI.disableMenuItem(miTSDec);
+                }
+
+                if (!miTSInc.isEnabled()) {
+                    AndroidUtils.UI.enableMenuItem(miTSInc);
+                }
+
+                tvInfo.setTextSize(textSize);
             }
         }
 
@@ -243,9 +233,9 @@ public class HaidActivity extends CustomToolbarActivity {
 
 
     private static class PolyInfo extends AsyncTask<PolyInfo.PolyInfoParams, Void, String> {
-        private TtPolygon polygon;
+        private final TtPolygon polygon;
+        private final HaidLogic haidLogic;
         private String text;
-        private HaidLogic haidLogic;
 
         private Listener listener;
 
@@ -294,7 +284,7 @@ public class HaidActivity extends CustomToolbarActivity {
         }
 
 
-        public class PolyInfoParams {
+        public static class PolyInfoParams {
             private TtPolygon polygon;
             private boolean showPoints;
 

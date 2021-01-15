@@ -43,7 +43,7 @@ import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
 public class TableViewActivity extends CustomToolbarActivity {
     private static final DateTimeFormatter DateTimeFormatter = DateTimeFormat.forPattern("h:mm:ss a M/d/yyyy");
 
-    private static String[] Headers = new String[] {
+    private final static String[] Headers = new String[] {
         "OpType",
         "Index",
         "Polygon",
@@ -88,9 +88,9 @@ public class TableViewActivity extends CustomToolbarActivity {
     private HashMap<String, String> _MetaNames;
     private ArrayList<TtPoint> _DisplayedPoints, _Points;
 
-    private List<String> headers = new ArrayList<>(24);
-    private List<Integer> columnKeys = new ArrayList<>(24);
-    private List<Integer> columnSizes = new ArrayList<>(24);
+    private final List<String> headers = new ArrayList<>(24);
+    private final List<Integer> columnKeys = new ArrayList<>(24);
+    private final List<Integer> columnSizes = new ArrayList<>(24);
 
 
     boolean filterGps, filterT5, filterTrav, filterSS, filterQdnm, filterWalk, filterWay;
@@ -157,42 +157,36 @@ public class TableViewActivity extends CustomToolbarActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home: {
-                finish();
-                break;
+        int itemId = item.getItemId();
+        if (itemId == android.R.id.home) {
+            finish();
+        } else if (itemId == R.id.teMenuFilter) {
+            if (filterDisplayed) {
+                ViewAnimator.collapseView(filterView);
+            } else {
+                ViewAnimator.expandView(filterView);
             }
-            case R.id.teMenuFilter: {
-                if (filterDisplayed) {
-                    ViewAnimator.collapseView(filterView);
-                } else {
-                    ViewAnimator.expandView(filterView);
-                }
 
-                filterDisplayed = !filterDisplayed;
-                break;
-            }
-            case R.id.teMenuColumns: {
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            filterDisplayed = !filterDisplayed;
+        } else if (itemId == R.id.teMenuColumns) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-                builder.setTitle("Select Columns");
+            builder.setTitle("Select Columns");
 
-                builder.setMultiChoiceItems(Headers, viewOptions.getOptions(), (dialog, which, isChecked) -> viewOptions.setOption(which, isChecked));
+            builder.setMultiChoiceItems(Headers, viewOptions.getOptions(), (dialog, which, isChecked) -> viewOptions.setOption(which, isChecked));
 
-                builder.setPositiveButton(R.string.str_ok, (dialog, which) -> {
-                    setupHeaders();
-                    pointsAdapter.notifyDataSetChanged();
-                });
+            builder.setPositiveButton(R.string.str_ok, (dialog, which) -> {
+                setupHeaders();
+                pointsAdapter.notifyDataSetChanged();
+            });
 
-                builder.setNegativeButton(R.string.menu_table_edit_reset, (dialog, which) -> {
-                    viewOptions = new ViewOptions(true);
-                    setupHeaders();
-                    pointsAdapter.notifyDataSetChanged();
-                });
+            builder.setNegativeButton(R.string.menu_table_edit_reset, (dialog, which) -> {
+                viewOptions = new ViewOptions(true);
+                setupHeaders();
+                pointsAdapter.notifyDataSetChanged();
+            });
 
-                builder.show();
-                break;
-            }
+            builder.show();
         }
 
         return super.onOptionsItemSelected(item);

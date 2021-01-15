@@ -1,5 +1,6 @@
 package com.usda.fmsc.twotrails.activities;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -47,6 +48,7 @@ import org.joda.time.DateTime;
 
 import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
 
+@SuppressLint("DefaultLocale")
 public class PlotGridActivity extends CustomToolbarActivity {
     private Spinner spnPoints, spnPointLoc, spnSampleType;
     private EditText txtGridX, txtGridY, txtTilt, txtSubSample;
@@ -65,7 +67,7 @@ public class PlotGridActivity extends CustomToolbarActivity {
     private PlotGenerator generator;
     boolean generating = false, adjust;
 
-    private Random random = new Random(DateTime.now().getMillis());
+    private final Random random = new Random(DateTime.now().getMillis());
 
 
     PlotGenerator.PlotGenListener plotGenListener = new PlotGenerator.PlotGenListener() {
@@ -187,9 +189,7 @@ public class PlotGridActivity extends CustomToolbarActivity {
                 }
 
                 @Override
-                public void onNothingSelected(AdapterView<?> parent) {
-
-                }
+                public void onNothingSelected(AdapterView<?> parent) { }
             });
 
             spnPoints.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -208,9 +208,7 @@ public class PlotGridActivity extends CustomToolbarActivity {
                 }
 
                 @Override
-                public void onNothingSelected(AdapterView<?> parent) {
-
-                }
+                public void onNothingSelected(AdapterView<?> parent) { }
             });
 
             ArrayAdapter<CharSequence> distAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, EnumEx.getNames(Dist.class));
@@ -226,9 +224,7 @@ public class PlotGridActivity extends CustomToolbarActivity {
                 }
 
                 @Override
-                public void onNothingSelected(AdapterView<?> parent) {
-
-                }
+                public void onNothingSelected(AdapterView<?> parent) { }
             });
         } else {
             Toast.makeText(this, "No valid Polygons found", Toast.LENGTH_SHORT).show();
@@ -472,7 +468,7 @@ public class PlotGridActivity extends CustomToolbarActivity {
 
 
 
-    public class PointDetailsSkip1SpinnerAdapter extends BaseAdapter {
+    public static class PointDetailsSkip1SpinnerAdapter extends BaseAdapter {
         private List<TtPoint> points;
         private LayoutInflater inflater;
         private Context context;
@@ -558,12 +554,12 @@ public class PlotGridActivity extends CustomToolbarActivity {
             return convertView;
         }
 
-        private class DropDownViewHolder {
+        private static class DropDownViewHolder {
             ImageView image;
             TextView text;
         }
 
-        private class ViewHolder {
+        private static class ViewHolder {
             TextView text;
         }
     }

@@ -71,7 +71,7 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
 
     private int rangeStart = -1, rangeEnd = Integer.MAX_VALUE;
 
-    private FilterOptions options = new FilterOptions();
+    private final FilterOptions options = new FilterOptions();
 
     private Integer manualGroupSize = null;
 

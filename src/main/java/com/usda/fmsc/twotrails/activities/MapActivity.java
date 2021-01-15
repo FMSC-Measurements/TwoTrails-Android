@@ -44,7 +44,6 @@ public class MapActivity extends BaseMapActivity {
 
         ivGps = findViewById(R.id.mapIvGps);
 
-        //fabMyPos.setVisibility(myPosBtn && getLastPosition() != null ? View.VISIBLE : View.GONE);
         if (myPosBtn && getLastPosition() != null)
             fabMyPos.show();
         else
@@ -89,7 +88,6 @@ public class MapActivity extends BaseMapActivity {
 
         if (created) {
             if (fabMyPos != null && getLastPosition() != null) {
-                //fabMyPos.setVisibility(myPosBtn ? View.VISIBLE : View.GONE);
                 if (myPosBtn)
                     fabMyPos.show();
                 else
@@ -167,7 +165,6 @@ public class MapActivity extends BaseMapActivity {
 
         if (getLastPosition() != null) {
             if (myPosBtn && fabMyPos != null && getLastPosition() != null) {
-                //fabMyPos.setVisibility(View.VISIBLE);
                 fabMyPos.show();
             }
         }
