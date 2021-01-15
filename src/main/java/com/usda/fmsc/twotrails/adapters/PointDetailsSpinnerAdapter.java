@@ -1,5 +1,6 @@
 package com.usda.fmsc.twotrails.adapters;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,13 +19,14 @@ import java.util.List;
 
 import com.usda.fmsc.utilities.StringEx;
 
+@SuppressLint("DefaultLocale")
 public class PointDetailsSpinnerAdapter extends BaseAdapter {
-    private List<TtPoint> points;
-    private LayoutInflater inflater;
-    private Context context;
+    private final List<TtPoint> points;
+    private final LayoutInflater inflater;
+    private final Context context;
     private AppUnits.IconColor iconColor;
     private boolean showPolygon = false;
-    private int itemView;
+    private final int itemView;
 
     public PointDetailsSpinnerAdapter(ArrayList<TtPoint> points, Context context) {
         this(points, context, AppUnits.IconColor.Light, android.R.layout.simple_spinner_item);

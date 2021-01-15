@@ -20,13 +20,13 @@ public class MediaRvAdapter extends SelectableAdapterEx<TtMedia, SelectableAdapt
     private final int PIC = 1;
     private final int VIDEO = 4;
 
-    private int colorTrans;
-    private int colorSelected;
+    private final int colorTrans;
+    private final int colorSelected;
 
-    private int maxHeight;
+    private final int maxHeight;
 
-    private LayoutInflater inflater;
-    private BitmapManager bitmapManager;
+    private final LayoutInflater inflater;
+    private final BitmapManager bitmapManager;
     private MediaChangedListener listener;
 
     public MediaRvAdapter(Activity activity, List<TtMedia> mediaList, Listener<TtMedia> listener, int maxHeight, BitmapManager bitmapManager) {
@@ -143,7 +143,7 @@ public class MediaRvAdapter extends SelectableAdapterEx<TtMedia, SelectableAdapt
     }
 
     private class ImageViewHolder extends MediaViewHolder {
-        private ImageView ivImage;
+        private final ImageView ivImage;
 
         public ImageViewHolder(View itemView) {
             super(itemView);

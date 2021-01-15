@@ -14,9 +14,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NmeaDetailsAdapter extends ArrayAdapter<NmeaDetailsAdapter.NmeaDetails> {
-    private List<NmeaDetails> nmeaDetails;
+    private final List<NmeaDetails> nmeaDetails;
 
-    private LayoutInflater inflater;
+    private final LayoutInflater inflater;
 
 
     public NmeaDetailsAdapter(Context context) {
@@ -62,8 +62,8 @@ public class NmeaDetailsAdapter extends ArrayAdapter<NmeaDetailsAdapter.NmeaDeta
     }
 
     public static class NmeaDetails {
-        private String talkerIdStr;
-        private List<String> ids = new ArrayList<>();
+        private final String talkerIdStr;
+        private final List<String> ids = new ArrayList<>();
 
         public NmeaDetails(NmeaIDs.TalkerID talkerID) {
             this(talkerID.toStringCode());
@@ -112,10 +112,9 @@ public class NmeaDetailsAdapter extends ArrayAdapter<NmeaDetailsAdapter.NmeaDeta
     }
 
 
-    private class  ViewHolder {
+    private class ViewHolder {
         TextView talkerID;
         TextView nmeaIDs;
-
 
         public ViewHolder(View view)
         {

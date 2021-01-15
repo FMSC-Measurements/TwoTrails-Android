@@ -134,7 +134,7 @@ public class ArcGisMapSelectionAdapter extends ArrayAdapter<ArcGisMapLayer> {
     }
 
 
-    private class MapViewHolder {
+    private static class MapViewHolder {
         ImageView ivStatusIcon;
         PopupMenuButton ofmbMenu;
         TextView tvName;

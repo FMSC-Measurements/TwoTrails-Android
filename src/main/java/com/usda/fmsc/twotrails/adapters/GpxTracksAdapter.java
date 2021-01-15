@@ -20,7 +20,7 @@ import java.util.List;
 public class GpxTracksAdapter extends MultiSelectRecyclerView.MSAdapter<MultiSelectRecyclerView.MSViewHolder> {
     private static final int TRACK = 1, ROUTE = 2;
 
-    private List<GpxBaseTrack> tracks;
+    private final List<GpxBaseTrack> tracks;
 
 
     public GpxTracksAdapter(Context context, List<GpxBaseTrack> tracks, MultiSelector multiSelector) {
@@ -74,8 +74,8 @@ public class GpxTracksAdapter extends MultiSelectRecyclerView.MSAdapter<MultiSel
 
 
     public abstract class GpxBaseTrackHolder extends MultiSelectRecyclerView.MSViewHolder implements MultiStateTouchCheckBox.OnCheckedStateChangeListener {
-        private MultiStateTouchCheckBox mcb;
-        private TextView tvName, tvPointCount;
+        private final MultiStateTouchCheckBox mcb;
+        private final TextView tvName, tvPointCount;
 
         protected boolean selected;
 
