@@ -74,7 +74,7 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
 
     private DataAccessLayer _DAL;
 
-    private FilterOptions options = new FilterOptions();
+    private final FilterOptions options = new FilterOptions();
 
 
     //region Activity
@@ -87,10 +87,10 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
 
         SheetLayoutEx.enterFromBottomAnimation(this);
 
-        Intent intent = getIntent();
-        if (intent != null && intent.getExtras() != null) {
-
-        }
+//        Intent intent = getIntent();
+//        if (intent != null && intent.getExtras() != null) {
+//
+//        }
 
         addMapDrawerListener(new DrawerLayout.SimpleDrawerListener() {
             @Override
@@ -146,39 +146,28 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home: {
-                finish();
-                break;
+        int itemId = item.getItemId();
+        if (itemId == android.R.id.home) {
+            finish();
+        } else if (itemId == R.id.satMenuGps) {
+            startActivityForResult(new Intent(this, SettingsActivity.class)
+                            .putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.GPS_SETTINGS_PAGE),
+                    Consts.Codes.Activites.SETTINGS);
+        } else if (itemId == R.id.satMenuSatSettings) {
+            startActivityForResult(new Intent(this, SettingsActivity.class)
+                            .putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.POINT_TAKE5_SETTINGS_PAGE),
+                    Consts.Codes.Activites.SETTINGS);
+        } else if (itemId == R.id.satMenuGpsInfoToggle) {
+            if (gpsInfoHidden) {
+                gpsInfoHidden = false;
+                cvGpsInfo.setVisibility(View.VISIBLE);
+                miHideGpsInfo.setTitle(R.string.menu_x_hide_gps_info);
+            } else {
+                gpsInfoHidden = true;
+                cvGpsInfo.setVisibility(View.GONE);
+                miHideGpsInfo.setTitle(R.string.menu_x_show_gps_info);
             }
-            case R.id.satMenuGps: {
-                startActivityForResult(new Intent(this, SettingsActivity.class)
-                                .putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.GPS_SETTINGS_PAGE),
-                        Consts.Codes.Activites.SETTINGS);
-                break;
-            }
-            case R.id.satMenuSatSettings: {
-                startActivityForResult(new Intent(this, SettingsActivity.class)
-                                .putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.POINT_TAKE5_SETTINGS_PAGE),
-                        Consts.Codes.Activites.SETTINGS);
-                break;
-            }
-            case R.id.satMenuGpsInfoToggle: {
-                if (gpsInfoHidden) {
-                    gpsInfoHidden = false;
-                    cvGpsInfo.setVisibility(View.VISIBLE);
-                    miHideGpsInfo.setTitle(R.string.menu_x_hide_gps_info);
-                } else {
-                    gpsInfoHidden = true;
-                    cvGpsInfo.setVisibility(View.GONE);
-                    miHideGpsInfo.setTitle(R.string.menu_x_show_gps_info);
-                }
-                break;
-            }
-            case R.id.satMenuValidationPoly: {
-                //select poly or (all polys except _plts and _validations) for checking
-                break;
-            }
+        } else if (itemId == R.id.satMenuValidationPoly) {//select poly or (all polys except _plts and _validations) for checking
         }
 
         return super.onOptionsItemSelected(item);
@@ -186,13 +175,10 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode) {
-            case Consts.Codes.Activites.SETTINGS: {
-                getTtAppCtx().getGps().startGps();
+        if (requestCode == Consts.Codes.Activites.SETTINGS) {
+            getTtAppCtx().getGps().startGps();
 
-                getSettings();
-                break;
-            }
+            getSettings();
         }
 
         super.onActivityResult(requestCode, resultCode, data);

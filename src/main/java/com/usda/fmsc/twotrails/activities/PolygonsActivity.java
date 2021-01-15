@@ -1,5 +1,6 @@
 package com.usda.fmsc.twotrails.activities;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -30,6 +31,7 @@ import java.util.List;
 
 import com.usda.fmsc.utilities.StringEx;
 
+@SuppressLint("DefaultLocale")
 public class PolygonsActivity extends TtAdjusterCustomToolbarActivity {
     private HashMap<String, Listener> listeners;
 
@@ -56,7 +58,7 @@ public class PolygonsActivity extends TtAdjusterCustomToolbarActivity {
         return _Polygons;
     }
 
-    private ComplexOnPageChangeListener onPageChangeArrayListener = new ComplexOnPageChangeListener() {
+    private final ComplexOnPageChangeListener onPageChangeArrayListener = new ComplexOnPageChangeListener() {
         @Override
         public void onPageSelected(int position) {
             super.onPageSelected(position);
@@ -144,72 +146,62 @@ public class PolygonsActivity extends TtAdjusterCustomToolbarActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.polyMenuLock: {
-                lockPolygon(!_PolyLocked);
-                break;
-            }
-            case R.id.polyMenuDelete: {
-                if (!_PolyLocked) {
-                    AlertDialog.Builder alert = new AlertDialog.Builder(this);
-                    alert.setMessage(String.format("Delete Polygon %s", _CurrentPolygon.getName()));
+        int itemId = item.getItemId();
+        if (itemId == R.id.polyMenuLock) {
+            lockPolygon(!_PolyLocked);
+        } else if (itemId == R.id.polyMenuDelete) {
+            if (!_PolyLocked) {
+                AlertDialog.Builder alert = new AlertDialog.Builder(this);
+                alert.setMessage(String.format("Delete Polygon %s", _CurrentPolygon.getName()));
 
-                    alert.setPositiveButton(R.string.str_delete, (dialog, which) -> {
+                alert.setPositiveButton(R.string.str_delete, (dialog, which) -> {
 
-                        AnimationCardFragment card = ((AnimationCardFragment) mSectionsPagerAdapter.getFragments().get(_CurrentIndex));
+                    AnimationCardFragment card = ((AnimationCardFragment) mSectionsPagerAdapter.getFragments().get(_CurrentIndex));
 
-                        card.setVisibilityListener(new AnimationCardFragment.VisibilityListener() {
-                            @Override
-                            public void onHidden() {
-                                new Handler().post(() -> {
-                                    if (_CurrentIndex == 0 && getPolygons().size() < 2) { //only 1 point in poly
-                                        deletePolygon(_CurrentPolygon, _CurrentIndex);
+                    card.setVisibilityListener(new AnimationCardFragment.VisibilityListener() {
+                        @Override
+                        public void onHidden() {
+                            new Handler().post(() -> {
+                                if (_CurrentIndex == 0 && getPolygons().size() < 2) { //only 1 point in poly
+                                    deletePolygon(_CurrentPolygon, _CurrentIndex);
 
-                                        _CurrentPolygon = null;
-                                        _CurrentIndex = INVALID_INDEX;
-                                        lockPolygon(true);
-                                        AndroidUtils.UI.disableMenuItem(miLock);
-                                    } else if (_CurrentIndex < getPolygons().size() - 1) { //point is not at the end
-                                        _deleteIndex = _CurrentIndex;
-                                        _deletePolygon = _CurrentPolygon;
+                                    _CurrentPolygon = null;
+                                    _CurrentIndex = INVALID_INDEX;
+                                    lockPolygon(true);
+                                    AndroidUtils.UI.disableMenuItem(miLock);
+                                } else if (_CurrentIndex < getPolygons().size() - 1) { //point is not at the end
+                                    _deleteIndex = _CurrentIndex;
+                                    _deletePolygon = _CurrentPolygon;
 
-                                        moveToPolygon(_CurrentIndex + 1);
-                                    } else if (_CurrentIndex == getPolygons().size() - 1) { //point it at the end
-                                        _deleteIndex = _CurrentIndex;
-                                        _deletePolygon = _CurrentPolygon;
+                                    moveToPolygon(_CurrentIndex + 1);
+                                } else if (_CurrentIndex == getPolygons().size() - 1) { //point it at the end
+                                    _deleteIndex = _CurrentIndex;
+                                    _deletePolygon = _CurrentPolygon;
 
-                                        moveToPolygon(_CurrentIndex - 1);
-                                    }
-                                });
-                            }
+                                    moveToPolygon(_CurrentIndex - 1);
+                                }
+                            });
+                        }
 
-                            @Override
-                            public void onVisible() {
+                        @Override
+                        public void onVisible() {
 
-                            }
-                        });
-
-                        card.hideCard();
+                        }
                     });
 
-                    alert.setNeutralButton(R.string.str_cancel, null);
+                    card.hideCard();
+                });
 
-                    alert.create().show();
-                }
-                break;
+                alert.setNeutralButton(R.string.str_cancel, null);
+
+                alert.create().show();
             }
-            case R.id.polyMenuReset: {
-                resetPolygon();
-                break;
-            }
-            case R.id.polyMenuAdjust: {
-                PolygonAdjuster.adjust(getTtAppCtx());
-                break;
-            }
-            case android.R.id.home: {
-                finish();
-                break;
-            }
+        } else if (itemId == R.id.polyMenuReset) {
+            resetPolygon();
+        } else if (itemId == R.id.polyMenuAdjust) {
+            PolygonAdjuster.adjust(getTtAppCtx());
+        } else if (itemId == android.R.id.home) {
+            finish();
         }
 
         return super.onOptionsItemSelected(item);

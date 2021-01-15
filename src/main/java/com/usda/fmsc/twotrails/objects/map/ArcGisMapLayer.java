@@ -4,16 +4,15 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.usda.fmsc.geospatial.Extent;
-import com.usda.fmsc.twotrails.objects.media.TtMedia;
 import com.usda.fmsc.utilities.FileUtils;
 import com.usda.fmsc.utilities.StringEx;
 
 import java.util.Comparator;
 
-public class ArcGisMapLayer implements Parcelable, Comparable {
-    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+public class ArcGisMapLayer implements Parcelable, Comparable<ArcGisMapLayer> {
+    public static final Parcelable.Creator<ArcGisMapLayer> CREATOR = new Parcelable.Creator<ArcGisMapLayer>() {
         @Override
-        public Object createFromParcel(Parcel source) {
+        public ArcGisMapLayer createFromParcel(Parcel source) {
             return new ArcGisMapLayer(source);
         }
 
@@ -133,13 +132,8 @@ public class ArcGisMapLayer implements Parcelable, Comparable {
 
 
     @Override
-    public int compareTo(Object another) {
-        if (another instanceof  ArcGisMapLayer)
-        {
-            return this.getName().compareTo(((ArcGisMapLayer)another).getName());
-        }
-
-        return -1;
+    public int compareTo(ArcGisMapLayer another) {
+        return this.getName().compareTo((another).getName());
     }
 
     public int getId() {
@@ -301,9 +295,9 @@ public class ArcGisMapLayer implements Parcelable, Comparable {
 
 
     public static class DetailLevel implements Parcelable {
-        public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+        public static final Parcelable.Creator<DetailLevel> CREATOR = new Parcelable.Creator<DetailLevel>() {
             @Override
-            public Object createFromParcel(Parcel source) {
+            public DetailLevel createFromParcel(Parcel source) {
                 return new DetailLevel(source);
             }
 

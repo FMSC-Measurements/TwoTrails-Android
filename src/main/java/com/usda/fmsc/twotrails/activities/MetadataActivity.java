@@ -81,7 +81,7 @@ public class MetadataActivity extends CustomToolbarActivity {
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private ViewPager mViewPager;
 
-    private ComplexOnPageChangeListener onPageChangeListener = new ComplexOnPageChangeListener() {
+    private final ComplexOnPageChangeListener onPageChangeListener = new ComplexOnPageChangeListener() {
         @Override
         public void onPageSelected(int position) {
             super.onPageSelected(position);
@@ -171,74 +171,64 @@ public class MetadataActivity extends CustomToolbarActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.metaMenuLock: {
-                lockMetadata(!_MetaLocked);
-                break;
-            }
-            case R.id.metaMenuDelete: {
-                if (!_MetaLocked && _CurrentIndex > 0) {
-                    AlertDialog.Builder alert = new AlertDialog.Builder(this);
-                    alert.setTitle(String.format("Delete Metadata %s", _CurrentMetadata.getName()));
+        int itemId = item.getItemId();
+        if (itemId == R.id.metaMenuLock) {
+            lockMetadata(!_MetaLocked);
+        } else if (itemId == R.id.metaMenuDelete) {
+            if (!_MetaLocked && _CurrentIndex > 0) {
+                AlertDialog.Builder alert = new AlertDialog.Builder(this);
+                alert.setTitle(String.format("Delete Metadata %s", _CurrentMetadata.getName()));
 
-                    alert.setPositiveButton(R.string.str_delete, (dialog, which) -> {
+                alert.setPositiveButton(R.string.str_delete, (dialog, which) -> {
 
-                        AnimationCardFragment card = ((AnimationCardFragment) mSectionsPagerAdapter.getFragments().get(_CurrentIndex));
+                    AnimationCardFragment card = ((AnimationCardFragment) mSectionsPagerAdapter.getFragments().get(_CurrentIndex));
 
-                        card.setVisibilityListener(new AnimationCardFragment.VisibilityListener() {
-                            @Override
-                            public void onHidden() {
+                    card.setVisibilityListener(new AnimationCardFragment.VisibilityListener() {
+                        @Override
+                        public void onHidden() {
 
-                                new Handler().post(() -> {
-                                    if (_CurrentIndex > 0) {
-                                        _deleteIndex = _CurrentIndex;
-                                        _deleteMeta = _CurrentMetadata;
+                            new Handler().post(() -> {
+                                if (_CurrentIndex > 0) {
+                                    _deleteIndex = _CurrentIndex;
+                                    _deleteMeta = _CurrentMetadata;
 
-                                        _CurrentIndex--;
-                                        ignoreMetaChange = true;
+                                    _CurrentIndex--;
+                                    ignoreMetaChange = true;
 
-                                        moveToMetadata(_CurrentIndex);
-                                    } else if (getMetadata().size() > 1) {
-                                        _deleteIndex = _CurrentIndex;
-                                        _deleteMeta = _CurrentMetadata;
+                                    moveToMetadata(_CurrentIndex);
+                                } else if (getMetadata().size() > 1) {
+                                    _deleteIndex = _CurrentIndex;
+                                    _deleteMeta = _CurrentMetadata;
 
-                                        _CurrentIndex++;
-                                        ignoreMetaChange = true;
-                                        moveToMetadata(_CurrentIndex);
-                                    } else {
-                                        deleteMetadata(_deleteMeta, _CurrentIndex);
-                                    }
-                                });
-                            }
+                                    _CurrentIndex++;
+                                    ignoreMetaChange = true;
+                                    moveToMetadata(_CurrentIndex);
+                                } else {
+                                    deleteMetadata(_deleteMeta, _CurrentIndex);
+                                }
+                            });
+                        }
 
-                            @Override
-                            public void onVisible() {
+                        @Override
+                        public void onVisible() {
 
-                            }
-                        });
-
-                        card.hideCard();
+                        }
                     });
 
-                    alert.setNeutralButton(R.string.str_cancel, null);
+                    card.hideCard();
+                });
 
-                    alert.create().show();
-                }
-                break;
+                alert.setNeutralButton(R.string.str_cancel, null);
+
+                alert.create().show();
             }
-            case R.id.metaMenuReset: {
-                resetMetadata();
-                break;
-            }
-            case R.id.metaMenuDefault: {
-                getTtAppCtx().getMetadataSettings().setDefaultMetadata(_CurrentMetadata);
-                Toast.makeText(this, String.format("%s saved as default.", _CurrentMetadata.getName()), Toast.LENGTH_SHORT).show();
-                break;
-            }
-            case android.R.id.home: {
-                finish();
-                break;
-            }
+        } else if (itemId == R.id.metaMenuReset) {
+            resetMetadata();
+        } else if (itemId == R.id.metaMenuDefault) {
+            getTtAppCtx().getMetadataSettings().setDefaultMetadata(_CurrentMetadata);
+            Toast.makeText(this, String.format("%s saved as default.", _CurrentMetadata.getName()), Toast.LENGTH_SHORT).show();
+        } else if (itemId == android.R.id.home) {
+            finish();
         }
 
         return super.onOptionsItemSelected(item);

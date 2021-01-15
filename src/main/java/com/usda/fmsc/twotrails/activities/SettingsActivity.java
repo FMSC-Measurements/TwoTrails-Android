@@ -165,6 +165,7 @@ public class SettingsActivity extends CustomToolbarActivity {
                 Fragment frag = getSettingsFragment(preference.getKey());
 
                 if (frag != null){
+                    //TODO replace fragment manager
                     getFragmentManager()
                             .beginTransaction()
                             .replace(R.id.content, frag)

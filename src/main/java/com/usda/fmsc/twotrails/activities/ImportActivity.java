@@ -36,12 +36,13 @@ public class ImportActivity extends CustomToolbarActivity {
     private BaseImportFragment fragment;
 
     private EditText txtFile;
-    private PostDelayHandler handler = new PostDelayHandler(1000), pdhShowFab = new PostDelayHandler(250);
+    private final PostDelayHandler handler = new PostDelayHandler(1000);
+    private final PostDelayHandler pdhShowFab = new PostDelayHandler(250);
 
     private boolean ignoreChange, adjust;
 
 
-    private BaseImportFragment.Listener listener = new BaseImportFragment.Listener() {
+    private final BaseImportFragment.Listener listener = new BaseImportFragment.Listener() {
         String message = null;
 
         @Override
@@ -129,14 +130,10 @@ public class ImportActivity extends CustomToolbarActivity {
 
         txtFile.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
+            public void onTextChanged(CharSequence s, int start, int before, int count) { }
 
             @Override
             public void afterTextChanged(final Editable s) {

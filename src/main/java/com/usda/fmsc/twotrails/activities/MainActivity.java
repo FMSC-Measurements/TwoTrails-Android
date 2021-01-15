@@ -143,14 +143,13 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
                             .setPositiveButton("Send", (dialog, which) -> TtUtils.SendCrashEmailToDev(MainActivity.this))
                             .setNeutralButton("Don't Send", null)
                             .show();
-                    showedCrashed = true;
                 } else {
                     new AlertDialog.Builder(MainActivity.this)
                             .setMessage("TwoTrails experienced a crash. You can send a crash log to the development team from inside the settings menu.")
                             .setPositiveButton(R.string.str_ok, null)
                             .show();
-                    showedCrashed = true;
                 }
+                showedCrashed = true;
             });
 
 //            AndroidUtils.Device.isInternetAvailable(internetAvailable -> runOnUiThread(() -> {
@@ -193,24 +192,20 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.mainMenuSettings:
-                startActivityForResult(new Intent(this, SettingsActivity.class), Consts.Codes.Activites.SETTINGS);
-                break;
-            case R.id.mainMenuGpsSettings:
-                startActivity(new Intent(this, SettingsActivity.class).
-                        putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.GPS_SETTINGS_PAGE));
-                break;
-            case R.id.mainMenuRangeFinderSettings:
-                startActivity(new Intent(this, SettingsActivity.class).
-                        putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.LASER_SETTINGS_PAGE));
-                break;
-            case R.id.mainMenuAbout:
-                new AlertDialog.Builder(MainActivity.this)
-                        .setTitle(R.string.app_name)
-                        .setMessage(String.format("App: %s\nData: %s", TtUtils.getApplicationVersion(getTtAppCtx()), TwoTrailsSchema.SchemaVersion))
-                        .show();
-                break;
+        int itemId = item.getItemId();
+        if (itemId == R.id.mainMenuSettings) {
+            startActivityForResult(new Intent(this, SettingsActivity.class), Consts.Codes.Activites.SETTINGS);
+        } else if (itemId == R.id.mainMenuGpsSettings) {
+            startActivity(new Intent(this, SettingsActivity.class).
+                    putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.GPS_SETTINGS_PAGE));
+        } else if (itemId == R.id.mainMenuRangeFinderSettings) {
+            startActivity(new Intent(this, SettingsActivity.class).
+                    putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.LASER_SETTINGS_PAGE));
+        } else if (itemId == R.id.mainMenuAbout) {
+            new AlertDialog.Builder(MainActivity.this)
+                    .setTitle(R.string.app_name)
+                    .setMessage(String.format("App: %s\nData: %s", TtUtils.getApplicationVersion(getTtAppCtx()), TwoTrailsSchema.SchemaVersion))
+                    .show();
         }
 
         return super.onOptionsItemSelected(item);
@@ -514,34 +509,6 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
     }
 
     private void updateAppInfo() {
-//        if (viewCreated) {
-//            boolean updatePagerAdapter = false;
-//            if (!mFragFile.isViewCreated()) {
-//                mFragFile = MainFileFragment.newInstance();
-//                updatePagerAdapter = true;
-//            }
-//
-//            if (!mFragData.isViewCreated()) {
-//                mFragData = MainDataFragment.newInstance();
-//                mTabsPagerAdapter.notifyDataSetChanged();
-//                updatePagerAdapter = true;
-//            }
-//
-//            if (!mFragTools.isViewCreated()) {
-//                mFragTools = MainToolsFragment.newInstance();
-//                mTabsPagerAdapter.notifyDataSetChanged();
-//                updatePagerAdapter = true;
-//            }
-//
-//            if (updatePagerAdapter) {
-//                mTabsPagerAdapter.notifyDataSetChanged();
-//
-//                if (mViewPager != null) {
-//                    mViewPager.setAdapter(mTabsPagerAdapter);
-//                }
-//            }
-//        }
-
         boolean enable = false;
         if(getTtAppCtx().hasDAL()) {
             getTtAppCtx().getProjectSettings().updateRecentProjects(
@@ -648,11 +615,6 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
     }
 
     public void btnOpenClick(View view) {
-        //AndroidUtils.App.openFileIntent(this, "file/*",
-        //        new String[] { "file/*.ttx", "ttx", "*ttx", "*.ttx", "*/*", "*"},
-        //        Consts.Codes.Dialogs.REQUEST_FILE);
-        //AndroidUtils.App.openFileIntent(this, MimeTypeMap.getSingleton().getExtensionFromMimeType("ttx"), Consts.Codes.Dialogs.REQUEST_FILE);
-        //AndroidUtils.App.openFileIntent(this, Consts.FileExtensions.TWO_TRAILS, Consts.Codes.Dialogs.REQUEST_FILE)
         if (!AndroidUtils.App.checkStoragePermission(MainActivity.this)) {
             getFilePermissions();
         } else {

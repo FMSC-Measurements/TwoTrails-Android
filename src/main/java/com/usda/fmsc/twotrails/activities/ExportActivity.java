@@ -312,6 +312,9 @@ public class ExportActivity extends CustomToolbarActivity {
                     progCircle.beginFinalAnimation();
 
                     Toast.makeText(ExportActivity.this, "Files Exported", Toast.LENGTH_LONG).show();
+
+                    //TODO snakebar for uploading/sharing to a service (gdrive/wifi direct/bluetooth to PC)
+
 //                        View view = findViewById(R.id.parent);
 //                        if (view != null) {
 //                            snackbar = Snackbar.make(view, "Files Exported", Snackbar.LENGTH_INDEFINITE).setAction("View", new View.OnClickListener() {

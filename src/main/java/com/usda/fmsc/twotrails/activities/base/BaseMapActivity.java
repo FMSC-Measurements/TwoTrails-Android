@@ -149,15 +149,15 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     private float currentDirection;
     private float[] mGravity, mGeomagnetic;
 
-    private HashMap<String, ArrayList<TtPoint>> polyPoints = new HashMap<>();
+    private final HashMap<String, ArrayList<TtPoint>> polyPoints = new HashMap<>();
     private HashMap<String, TtPolygon> _Polygons = new HashMap<>();
     private HashMap<String, TtMetadata> _Metadata;
 
     private Extent completeBnds, trackedPoly;
 
-    private boolean[] visd = new boolean[12];
-    private boolean[] invisd = new boolean[12];
-    private int[] dpc = new int[12];
+    private final boolean[] visd = new boolean[12];
+    private final boolean[] invisd = new boolean[12];
+    private final int[] dpc = new int[12];
     //endregion
 
     //region get/set
@@ -483,7 +483,8 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
+        int itemId = item.getItemId();
+        switch (itemId) {
             case R.id.mapMenuShowMyPos: {
                 showMyPos = !showMyPos;
                 getTtAppCtx().getDeviceSettings().setMapShowMyPos(showMyPos);
@@ -1477,21 +1478,17 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     //region Controls
     public void radFromClick(View view) {
         if (((RadioButton) view).isChecked()) {
-            switch (view.getId()) {
-                case R.id.mapNavRadPoint: {
-                    fromMyLoc = false;
+            int id = view.getId();
+            if (id == R.id.mapNavRadPoint) {
+                fromMyLoc = false;
 
-                    btnFromPoint.setEnabled(true);
-                    btnFromPoly.setEnabled(true);
-                    break;
-                }
-                case R.id.mapNavRadMyLoc: {
-                    fromMyLoc = true;
+                btnFromPoint.setEnabled(true);
+                btnFromPoly.setEnabled(true);
+            } else if (id == R.id.mapNavRadMyLoc) {
+                fromMyLoc = true;
 
-                    btnFromPoint.setEnabled(false);
-                    btnFromPoly.setEnabled(false);
-                    break;
-                }
+                btnFromPoint.setEnabled(false);
+                btnFromPoly.setEnabled(false);
             }
 
             calculateDir();

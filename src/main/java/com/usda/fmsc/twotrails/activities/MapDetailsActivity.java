@@ -31,7 +31,7 @@ public class MapDetailsActivity extends CustomToolbarActivity {
 
     private boolean updated = false;
 
-    private boolean[] overwrites = new boolean[3];
+    private final boolean[] overwrites = new boolean[3];
 
 
     @Override
@@ -61,55 +61,45 @@ public class MapDetailsActivity extends CustomToolbarActivity {
             setUpdated(false);
 
             ofmb.setListener(item -> {
-                switch (item.getItemId()) {
-                    case R.id.amdMenuRename: {
-                        final InputDialog id = new InputDialog(MapDetailsActivity.this);
+                int itemId = item.getItemId();
+                if (itemId == R.id.amdMenuRename) {
+                    final InputDialog id = new InputDialog(MapDetailsActivity.this);
 
-                        id.setInputText(arcGisMapLayer.getName())
-                        .setPositiveButton(R.string.str_rename, (dialog, which) -> {
-                            String value = id.getText();
+                    id.setInputText(arcGisMapLayer.getName())
+                            .setPositiveButton(R.string.str_rename, (dialog, which) -> {
+                                String value = id.getText();
 
-                            arcGisMapLayer.setName(value);
-                            tvName.setText(value);
-                            setUpdated(true);
-                        })
-                        .setNeutralButton(R.string.str_cancel, null)
-                        .show();
-                        break;
+                                arcGisMapLayer.setName(value);
+                                tvName.setText(value);
+                                setUpdated(true);
+                            })
+                            .setNeutralButton(R.string.str_cancel, null)
+                            .show();
+                } else if (itemId == R.id.amdMenuUpdatePath) {
+                    updatePath();
+                } else if (itemId == R.id.amdMenuUpdateDetails) {
+                    checkUpdateDetails(0);
+                } else if (itemId == R.id.amdMenuReset) {
+                    if (updated) {
+                        arcGisMapLayer = new ArcGisMapLayer(agmlBackup);
+                        setValues(arcGisMapLayer);
+                        setUpdated(false);
                     }
-                    case R.id.amdMenuUpdatePath: {
-                        updatePath();
-                        break;
-                    }
-                    case R.id.amdMenuUpdateDetails: {
-                        checkUpdateDetails(0);
-                        break;
-                    }
-                    case R.id.amdMenuReset: {
-                        if (updated) {
-                            arcGisMapLayer = new ArcGisMapLayer(agmlBackup);
-                            setValues(arcGisMapLayer);
-                            setUpdated(false);
-                        }
-                        break;
-                    }
-                    case R.id.amdMenuDelete: {
-                        new AlertDialog.Builder(MapDetailsActivity.this)
-                                .setMessage("Arc you sure you want to delete this map?")
-                                .setPositiveButton(R.string.str_delete, (dialog, which) ->
-                                        getTtAppCtx().getArcGISTools().deleteMapLayer(MapDetailsActivity.this, arcGisMapLayer.getId(), true, o -> {
-                                            setUpdated(false);
+                } else if (itemId == R.id.amdMenuDelete) {
+                    new AlertDialog.Builder(MapDetailsActivity.this)
+                            .setMessage("Arc you sure you want to delete this map?")
+                            .setPositiveButton(R.string.str_delete, (dialog, which) ->
+                                    getTtAppCtx().getArcGISTools().deleteMapLayer(MapDetailsActivity.this, arcGisMapLayer.getId(), true, o -> {
+                                        setUpdated(false);
 
-                                    Intent i = new Intent();
-                                    i.putExtra(Consts.Codes.Data.MAP_DATA, arcGisMapLayer);
+                                        Intent i = new Intent();
+                                        i.putExtra(Consts.Codes.Data.MAP_DATA, arcGisMapLayer);
 
-                                    MapDetailsActivity.this.setResult(Consts.Codes.Results.MAP_DELETED, i);
-                                    MapDetailsActivity.this.finish();
-                                }))
-                                .setNeutralButton(R.string.str_cancel, null)
-                                .show();
-                        break;
-                    }
+                                        MapDetailsActivity.this.setResult(Consts.Codes.Results.MAP_DELETED, i);
+                                        MapDetailsActivity.this.finish();
+                                    }))
+                            .setNeutralButton(R.string.str_cancel, null)
+                            .show();
                 }
                 return false;
                 });
