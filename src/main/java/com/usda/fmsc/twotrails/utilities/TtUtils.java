@@ -2,7 +2,6 @@ package com.usda.fmsc.twotrails.utilities;
 
 import android.app.Activity;
 import android.app.Application;
-import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -10,71 +9,54 @@ import android.database.Cursor;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
-import android.os.Environment;
-import androidx.exifinterface.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
-import android.provider.MediaStore;
-import androidx.annotation.Nullable;
-import androidx.core.content.FileProvider;
-import androidx.appcompat.app.AlertDialog;
+import android.provider.OpenableColumns;
 import android.util.JsonWriter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.usda.fmsc.android.AndroidUtils;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.FileProvider;
+import androidx.exifinterface.media.ExifInterface;
+
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.usda.fmsc.android.utilities.DeviceOrientationEx;
+import com.usda.fmsc.android.AndroidUtils;
+import com.usda.fmsc.geospatial.Position;
+import com.usda.fmsc.geospatial.UomElevation;
 import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
+import com.usda.fmsc.geospatial.utm.UTMCoords;
+import com.usda.fmsc.geospatial.utm.UTMTools;
 import com.usda.fmsc.twotrails.BuildConfig;
 import com.usda.fmsc.twotrails.Consts;
+import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
-import com.usda.fmsc.twotrails.activities.GetDirectionActivity;
-import com.usda.fmsc.twotrails.activities.TtCameraActivity;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
 import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment;
 import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
-import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.objects.FilterOptions;
+import com.usda.fmsc.twotrails.objects.PointD;
+import com.usda.fmsc.twotrails.objects.TtMetadata;
+import com.usda.fmsc.twotrails.objects.media.TtImage;
 import com.usda.fmsc.twotrails.objects.media.TtMedia;
 import com.usda.fmsc.twotrails.objects.media.TtPanorama;
 import com.usda.fmsc.twotrails.objects.media.TtPhotoSphere;
-import com.usda.fmsc.twotrails.objects.media.TtImage;
 import com.usda.fmsc.twotrails.objects.media.TtVideo;
 import com.usda.fmsc.twotrails.objects.points.GpsPoint;
-import com.usda.fmsc.twotrails.objects.PointD;
 import com.usda.fmsc.twotrails.objects.points.QuondamPoint;
 import com.usda.fmsc.twotrails.objects.points.SideShotPoint;
 import com.usda.fmsc.twotrails.objects.points.Take5Point;
 import com.usda.fmsc.twotrails.objects.points.TravPoint;
-import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.points.WalkPoint;
 import com.usda.fmsc.twotrails.objects.points.WayPoint;
-
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-
-import com.usda.fmsc.geospatial.Position;
-import com.usda.fmsc.geospatial.utm.UTMCoords;
-import com.usda.fmsc.geospatial.utm.UTMTools;
-import com.usda.fmsc.geospatial.UomElevation;
 import com.usda.fmsc.twotrails.units.Dist;
 import com.usda.fmsc.twotrails.units.DopType;
 import com.usda.fmsc.twotrails.units.OpType;
@@ -83,6 +65,22 @@ import com.usda.fmsc.twotrails.units.Slope;
 import com.usda.fmsc.utilities.FileUtils;
 import com.usda.fmsc.utilities.ParseEx;
 import com.usda.fmsc.utilities.StringEx;
+
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 
 
 @SuppressWarnings({"WeakerAccess", "UnusedReturnValue", "unused", "SameParameterValue"})
@@ -991,99 +989,28 @@ public class TtUtils {
             return index;
         }
 
-        public static TtImage getPictureFromTtCameraIntent(Intent intent) {
-            if (intent.getExtras() != null && intent.getExtras().containsKey(Consts.Codes.Data.TTIMAGE)) {
-                return intent.getExtras().getParcelable(Consts.Codes.Data.TTIMAGE);
-            }
-
-            return null;
+        public static void openInImageViewer(Activity activity, Uri uri) {
+            File file = new File(uri.getPath());
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            Uri extUri = FileProvider.getUriForFile(activity, BuildConfig.APPLICATION_ID + ".provider", file);
+            intent.setDataAndType(extUri, "image/*");
+            intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            activity.startActivity(intent);
         }
 
-        public static ArrayList<TtImage> getPicturesFromImageIntent(TwoTrailsApp context, Intent intent, String pointCN) {
-            String[] filePathColumn = { MediaStore.Images.Media.DATA };
-            ArrayList<TtImage> pictures = new ArrayList<>();
 
-            String mediaDirStr = null;
-            boolean copyToProject = context.getDeviceSettings().getMediaCopyToProject();
-            if (copyToProject) {
-                mediaDirStr = TtUtils.getTtMediaDir();
-
-                File noMedia = new File(mediaDirStr, ".nomedia");
-                try {
-                    if (!noMedia.exists()) {
-                        noMedia.createNewFile();
-                    }
-                } catch (Exception e) {
-                    //
-                }
-            }
-
-            if (intent.getClipData() != null) {
-                ClipData cd = intent.getClipData();
-
-                for (int i = 0; i < cd.getItemCount(); i++) {
-                    ClipData.Item item = cd.getItemAt(i);
-                    Uri uri = item.getUri();
-                    Cursor cursor = context.getContentResolver().query(uri, filePathColumn, null, null, null);
-
-                    if (cursor != null) {
-                        cursor.moveToFirst();
-
-                        int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-                        String filePath = cursor.getString(columnIndex);
-
-                        if (copyToProject) {
-                            String newFilePath = StringEx.format("%s%s%s", mediaDirStr, File.separator, FileUtils.getFileName(filePath));
-                            if (FileUtils.copyFile(filePath, newFilePath)) {
-                                filePath = newFilePath;
-                            }
-                        }
-
-                        TtImage image = createImageFromFile(filePath, pointCN);
-                        if (image != null) {
-                            pictures.add(image);
-                        }
-
-                        cursor.close();
-                    }
-                }
-            } else if (intent.getData() != null) {
-                Cursor cursor = context.getContentResolver().query(intent.getData(), filePathColumn, null, null, null);
-
-                if (cursor != null) {
-                    cursor.moveToFirst();
-
-                    int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-                    String uri  = cursor.getString(columnIndex);
-                    cursor.close();
-
-                    if (copyToProject) {
-                        String newFilePath = StringEx.format("%s%s%s", mediaDirStr, File.separator, FileUtils.getFileName(uri));
-                        if (FileUtils.copyFile(uri, newFilePath)) {
-                            uri = newFilePath;
-                        }
-                    }
-
-                    TtImage image = createImageFromFile(uri, pointCN);
-                    if (image != null) {
-                        pictures.add(image);
-                    }
-                }
-            }
-
-            return pictures;
-        }
-
-        public static TtImage createPictureFromUri(Uri uri, String pointCN) {
-            return createImageFromFile(uri.getPath(), pointCN);
-        }
-
-        private static TtImage createImageFromFile(String filePath, String pointCN) {
-            if (FileUtils.fileExists(filePath)) {
+        public static TtImage createImageFromFile(TwoTrailsApp app, Uri uri, String pointCN) throws IOException {
+            if (uri != null && uri.getPath() != null && FileUtils.fileExists(app, uri)) {
                 DateTime time = null;
                 Integer width, height;
-                try {
-                    ExifInterface exifInterface = new ExifInterface(filePath);
+
+                Uri internalImage = app.getMediaFileByFileName(FileUtils.getFileName(uri.getPath()));
+                InputStream fileStream = app.getContentResolver().openInputStream(internalImage);
+
+                FileUtils.copyFile(app, uri, internalImage);
+
+                if (fileStream != null) {
+                    ExifInterface exifInterface = new ExifInterface(fileStream);
 
                     String info = exifInterface.getAttribute(ExifInterface.TAG_DATETIME);
 
@@ -1112,84 +1039,52 @@ public class TtUtils {
                         }
                     }
 
-                    if (time == null)
-                        time = new DateTime(new File(filePath).lastModified());
+                    info = exifInterface.getAttribute(ExifInterface.TAG_DATETIME);
 
-                    String name = FileUtils.getFileNameWoExt(filePath);
+                    if (info != null) {
+                        time = DateTime.parse(info);
+                    }
+
+                    String name = null;
+                    if (internalImage.getScheme().equals("content")) {
+                        try (Cursor cursor = app.getContentResolver().query(uri, null, null, null, null)) {
+                            if (cursor != null && cursor.moveToFirst()) {
+                                name = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+                            }
+                        }
+                    }
+
+                    if (name == null) {
+                        name = uri.getPath();
+                    }
+
+
+                    name = FileUtils.getFileNameWoExt(name);
 
                     if (type == PictureType.Panorama) {
-                        return new TtPanorama(name, filePath, time, pointCN, true);
+                        return new TtPanorama(name, FileUtils.getFileName(internalImage.getPath()), time, pointCN, true);
                     } else {
-                        return new TtImage(name, filePath, time, pointCN, true);
+                        return new TtImage(name, FileUtils.getFileName(internalImage.getPath()), time, pointCN, true);
                     }
-                } catch (IOException e) {
-                    //
-                }
-            }
-
-            return null;
-        }
-
-        public static Uri captureImage(Activity activity, boolean useTtCamera, TtPoint currentPoint) {
-            if (AndroidUtils.App.requestCameraPermission(activity, Consts.Codes.Requests.CAMERA)) {
-                if (useTtCamera) {
-                    Intent intent = new Intent(activity, TtCameraActivity.class);
-
-                    if (currentPoint != null) {
-                        intent.putExtra(Consts.Codes.Data.POINT_CN, currentPoint.getCN());
-                    }
-
-                    activity.startActivityForResult(intent, Consts.Codes.Activites.TTCAMERA);
                 } else {
-                    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-
-                    DateTime dateTime = DateTime.now();
-
-                    File photo = new File(TtUtils.getTtMediaDir(), StringEx.format("IMG_%d%d%d_%d.jpg",
-                            dateTime.getYear(), dateTime.getMonthOfYear(), dateTime.getDayOfMonth(), dateTime.getMillisOfDay()));
-
-                    intent.putExtra(MediaStore.EXTRA_OUTPUT,
-                            AndroidUtils.Files.getUri(activity, BuildConfig.APPLICATION_ID, photo)
-                    );
-
-                    if (intent.resolveActivity(activity.getPackageManager()) != null) {
-                        activity.startActivityForResult(intent, Consts.Codes.Requests.CAPTURE_IMAGE);
-                        return Uri.fromFile(photo);
-                    } else {
-                        Toast.makeText(activity, "Unable to find a Camera application", Toast.LENGTH_LONG).show();
-                    }
+                    throw new RuntimeException("Filestream not opened");
                 }
+            } else {
+                throw new RuntimeException("File does not exist");
+            }
+        }
+
+        public static ArrayList<TtImage> getImagesFromUris(TwoTrailsApp app, List<Uri> imageUris, String pointCN) throws IOException {
+            ArrayList<TtImage> pictures = new ArrayList<>();
+
+            for (Uri uri : imageUris) {
+                TtImage image = createImageFromFile(app, uri, pointCN);
+                pictures.add(image);
             }
 
-            return null;
+            return pictures;
         }
 
-        public static void openInImageViewer(Activity activity, String filePath) {
-            File file = new File(filePath);
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            Uri uri = FileProvider.getUriForFile(activity, BuildConfig.APPLICATION_ID + ".provider", file);
-            intent.setDataAndType(uri, "image/*");
-            intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            activity.startActivity(intent);
-        }
-
-        public static void askAndUpdateImageOrientation(final Activity activity, final TtImage image) {
-            new AlertDialog.Builder(activity)
-                    .setMessage("Would you like to update the orientation (Azimuth) to this image?")
-                    .setPositiveButton(R.string.str_yes, (dialog, which) -> updateImageOrientation(activity, image))
-                    .setNegativeButton(R.string.str_no, null)
-                    .show();
-        }
-
-        public static void updateImageOrientation(Activity activity, TtImage image) {
-            Intent intent = new Intent(activity, GetDirectionActivity.class);
-
-            if (image != null) {
-                intent.putExtra(Consts.Codes.Data.ORIENTATION, new DeviceOrientationEx.Orientation(image.getAzimuth(), image.getPitch(), image.getRoll()));
-            }
-
-            activity.startActivityForResult(intent, Consts.Codes.Requests.UPDATE_ORIENTATION);
-        }
     }
 
     public static class NMEA {
@@ -1495,7 +1390,7 @@ public class TtUtils {
             double width = maxX - minX;
             double height = maxY - minY;
 
-            double adjustment = canvasSize / (width > height ? width : height);
+            double adjustment = canvasSize / java.lang.Math.max(width, height);
 
             double xOffset = (height > width ? (canvasSize - width * adjustment) / 2 : 0);
             double yOffset = (width > height ? (canvasSize - height * adjustment) / 2 : 0);
@@ -1553,18 +1448,18 @@ public class TtUtils {
                 lon = position.getLongitudeSignedDecimal();
             }
 
-            String snippet = StringEx.format("UTM X: %.3f\nUTM Y: %.3f\nElev (%s): %.1f\n\nLat: %.4f\nLon: %.4f%s",
+            String snippet = String.format(Locale.getDefault(), "UTM X: %.3f\nUTM Y: %.3f\nElev (%s): %.1f\n\nLat: %.4f\nLon: %.4f%s",
                     x, y, meta.getElevation().toStringAbv(), Convert.distance(z, meta.getElevation(), UomElevation.Meters), lat, lon,
                     !StringEx.isEmpty(point.getComment()) ?
-                            StringEx.format("\n\nComment: %s", point.getComment()) :
+                            String.format("\n\nComment: %s", point.getComment()) :
                             StringEx.Empty
             );
 
 
             MarkerOptions options = new MarkerOptions();
 
-            options.title(StringEx.format("%d (%s)", point.getPID(), adjusted ? "Adj" : "UnAdj"));
-            options.snippet(StringEx.format("%s\n\n%s", point.getOp().toString(), snippet));
+            options.title(String.format(Locale.getDefault(), "%d (%s)", point.getPID(), adjusted ? "Adj" : "UnAdj"));
+            options.snippet(String.format("%s\n\n%s", point.getOp().toString(), snippet));
 
             LatLng ll = new LatLng(lat, lon);
 
@@ -1586,25 +1481,25 @@ public class TtUtils {
             Double faz = point.getFwdAz();
             Double baz = point.getBkAz();
 
-            String sFaz = faz == null ? StringEx.Empty : StringEx.format("%.2f", faz);
-            String sBaz = baz == null ? StringEx.Empty : StringEx.format("%.2f", baz);
+            String sFaz = faz == null ? StringEx.Empty : String.format(Locale.getDefault(), "%.2f", faz);
+            String sBaz = baz == null ? StringEx.Empty : String.format(Locale.getDefault(), "%.2f", baz);
 
-            String snippet = StringEx.format("UTM X: %.3f\nUTM Y: %.3f\nElev (%s): %.1f\n\nFwd Az: %s\nBk Az:   %s\nSlpDist (%s): %.2f\nSlope (%s): %.2f%s",
+            String snippet = String.format(Locale.getDefault(), "UTM X: %.3f\nUTM Y: %.3f\nElev (%s): %.1f\n\nFwd Az: %s\nBk Az:   %s\nSlpDist (%s): %.2f\nSlope (%s): %.2f%s",
                     x, y, meta.getElevation().toStringAbv(), Convert.distance(z, meta.getElevation(), UomElevation.Meters),
                     sFaz, sBaz, meta.getDistance().toString(), point.getSlopeAngle(),
                     meta.getSlope().toStringAbv(), point.getSlopeAngle(),
                     !StringEx.isEmpty(point.getComment()) ?
-                    StringEx.format("\n\nComment: %s", point.getComment()) :
+                    String.format("\n\nComment: %s", point.getComment()) :
                     StringEx.Empty
             );
 
             Position position = UTMTools.convertUTMtoLatLonSignedDec(x, y, meta.getZone());
 
             return new MarkerOptions()
-                    .title(StringEx.format("%d (%s)", point.getPID(), adjusted ? "Adj" : "UnAdj"))
-                    .snippet(StringEx.format("%s\n\n%s%s", point.getOp(), snippet,
+                    .title(String.format(Locale.getDefault(), "%d (%s)", point.getPID(), adjusted ? "Adj" : "UnAdj"))
+                    .snippet(String.format("%s\n\n%s%s", point.getOp(), snippet,
                             !StringEx.isEmpty(point.getComment()) ?
-                                    StringEx.format("\n\nComment: %s", point.getComment()) :
+                                    String.format("\n\nComment: %s", point.getComment()) :
                                     StringEx.Empty))
                     .position(new LatLng(position.getLatitudeSignedDecimal(), position.getLongitudeSignedDecimal()));
         }
@@ -1614,7 +1509,7 @@ public class TtUtils {
 
             return markerOptions
                     .title(Integer.toString(point.getPID()))
-                    .snippet(StringEx.format("%s -> %d %s",
+                    .snippet(String.format(Locale.getDefault(), "%s -> %d %s",
                             point.getOp().toString(),
                             point.getParentPID(),
                             markerOptions.getSnippet()));
@@ -1766,7 +1661,7 @@ public class TtUtils {
             TextView title = view.findViewById(R.id.title);
             TextView content = view.findViewById(R.id.text1);
 
-            title.setText(StringEx.format("%d", markerData.getPoint().getPID()));
+            title.setText(String.format(Locale.getDefault(), "%d", markerData.getPoint().getPID()));
             content.setText(getInfoWindowSnippet(markerData.getPoint(), markerData.isAdjusted(), markerData.getMetadata()));
 
             return view;
@@ -1815,11 +1710,11 @@ public class TtUtils {
                 lon = position.getLongitudeSignedDecimal();
             }
 
-            return StringEx.format("%s\n\nUTM X: %.3f\nUTM Y: %.3f\nElev (%s): %.1f\n\nLat: %.4f\nLon: %.4f%s",
+            return String.format(Locale.getDefault(), "%s\n\nUTM X: %.3f\nUTM Y: %.3f\nElev (%s): %.1f\n\nLat: %.4f\nLon: %.4f%s",
                     point.getOp().toString(),
                     x, y, meta.getElevation().toStringAbv(), Convert.distance(z, meta.getElevation(), UomElevation.Meters), lat, lon,
                     !StringEx.isEmpty(point.getComment()) ?
-                            StringEx.format("\n\nComment: %s", point.getComment()) :
+                            String.format(Locale.getDefault(), "\n\nComment: %s", point.getComment()) :
                             StringEx.Empty);
         }
 
@@ -1832,26 +1727,26 @@ public class TtUtils {
             Double faz = point.getFwdAz();
             Double baz = point.getBkAz();
 
-            String sFaz = faz == null ? StringEx.Empty : StringEx.format("%.2f", faz);
-            String sBaz = baz == null ? StringEx.Empty : StringEx.format("%.2f", baz);
+            String sFaz = faz == null ? StringEx.Empty : String.format(Locale.getDefault(), "%.2f", faz);
+            String sBaz = baz == null ? StringEx.Empty : String.format(Locale.getDefault(), "%.2f", baz);
 
-            return StringEx.format("%s\n\nUTM X: %.3f\nUTM Y: %.3f\nElev (%s): %.1f\n\nFwd Az: %s\nBk Az:   %s\nSlpDist (%s): %.2f\nSlope (%s): %.2f%s",
+            return String.format(Locale.getDefault(), "%s\n\nUTM X: %.3f\nUTM Y: %.3f\nElev (%s): %.1f\n\nFwd Az: %s\nBk Az:   %s\nSlpDist (%s): %.2f\nSlope (%s): %.2f%s",
                     point.getOp(),
                     x, y, meta.getElevation().toStringAbv(), Convert.distance(z, meta.getElevation(), UomElevation.Meters),
                     sFaz, sBaz, meta.getDistance().toString(), point.getSlopeAngle(),
                     meta.getSlope().toStringAbv(), point.getSlopeAngle(),
                     !StringEx.isEmpty(point.getComment()) ?
-                            StringEx.format("\n\nComment: %s", point.getComment()) :
+                            String.format("\n\nComment: %s", point.getComment()) :
                             StringEx.Empty);
         }
 
         private static String getInfoWindowSnippet(QuondamPoint point, boolean adjusted, TtMetadata meta) {
-            return StringEx.format("%s -> %d %s%s",
+            return String.format(Locale.getDefault(), "%s -> %d %s%s",
                 point.getOp().toString(),
                 point.getParentPID(),
                 getInfoWindowSnippet(point.getParentPoint(), adjusted, meta),
                     !StringEx.isEmpty(point.getComment()) ?
-                            StringEx.format("\n\nComment: %s", point.getComment()) :
+                            String.format("\n\nComment: %s", point.getComment()) :
                             StringEx.Empty);
         }
 
@@ -1875,58 +1770,64 @@ public class TtUtils {
         }
     }
 
+    public static class Collections {
+        public static boolean areAllTrue(Collection<Boolean> collection) {
+            for (boolean item : collection) {
+                if (!item) return false;
+            }
+
+            return true;
+        }
+    }
+
 
     public static String getDeviceName() {
-        return StringEx.format("%s %s %s",
+        return String.format("%s %s %s",
                 Build.MANUFACTURER, Build.MODEL, Build.ID);
     }
 
-    public static String exportReport(TwoTrailsApp app, boolean addFile) {
-        String exportFile = StringEx.format("%s%sTwoTrailsReport_%s.zip",
-                TtUtils.getTtLogFileDir(),
-                File.separator,
-                DateTime.now().toString());
+    public static File exportReport(TwoTrailsApp app, boolean addFile) throws IOException {
+        File exportFile = new File(
+                app.getCacheDir(),
+                String.format("%sTwoTrailsReport_%s.zip",
+                        File.separator,
+                        DateTime.now().toString()));
 
-        List<String> files = new ArrayList<>();
-        files.add(app.getReport().getFilePath());
+
+        List<File> files = new ArrayList<>();
+        files.add(app.getLogFile());
 
         if (generateSettingsFile(app)) {
-            files.add(getSettingsFilePath());
+            files.add(app.getSettingsFile());
         }
 
-        if (app.getDAL() != null) {
-            files.add(app.getDAL().getFilePath());
+        if (addFile && app.hasDAL()) {
+            files.add(app.getDatabasePath(app.getDAL().getFileName()));
         }
 
         File gpsFile = null;
-        for (File file : new File(TtUtils.getTtLogFileDir()).listFiles()) {
-            if (file.getName().startsWith("TtGpsLog")) {
-                gpsFile = file;
+        for (File file : app.getCacheDir().listFiles()) {
+            if (file.getName().startsWith(Consts.Files.GPS_LOG_FILE_PREFIX)) {
+                files.add(file);
             }
         }
 
-        if (gpsFile != null) {
-            files.add(gpsFile.getPath());
-        }
+        FileUtils.zipFiles(exportFile, files.toArray(new File[0]));
 
-        String zipFile = FileUtils.zipFiles(exportFile, files.toArray(new String[0])) ? exportFile : null;
-
-        if (FileUtils.fileExists(getSettingsFilePath())) {
-            FileUtils.delete(getSettingsFilePath());
-        }
-
-        return zipFile;
+        return exportFile;
     }
 
     public static boolean generateSettingsFile(TwoTrailsApp app) {
         int generated = 0;
 
         try {
-            String sp = getSettingsFilePath();
+            File tcSettingsFile = app.getSettingsFile();
 
-            FileWriter fw = new FileWriter(sp, false);
+            FileWriter fw = new FileWriter(tcSettingsFile, false);
             JsonWriter js = new JsonWriter(fw);
             js.setIndent("    ");
+
+            //TODO add device software info, OS version, etc..
 
             try {
                 js.beginObject()
@@ -1986,38 +1887,39 @@ public class TtUtils {
         SendEmailToDev(activity, null, true);
     }
 
-    public static void SendEmailToDev(Activity activity, String reportPath, boolean addFile) {
-        TwoTrailsApp app = TwoTrailsApp.getInstance(activity);
+    public static void SendEmailToDev(Activity activity, File reportFile, boolean addFile) {
+        TwoTrailsApp app = (TwoTrailsApp) activity.getApplicationContext();
 
         boolean isCrash = false;
 
-        if (reportPath == null) {
+        if (reportFile == null) {
             isCrash = true;
-            reportPath = TtUtils.exportReport(app, addFile);
+            try {
+                reportFile = TtUtils.exportReport(app, addFile);
+            } catch (IOException e) {
+                Toast.makeText(activity, "Unable to generate report.", Toast.LENGTH_LONG).show();
+                return;
+            }
         }
 
-        if (reportPath != null) {
-            try {
-                Intent intent = new Intent(Intent.ACTION_SEND);
-                intent.setType("text/plain");
-                intent.putExtra(Intent.EXTRA_EMAIL, new String[] {app.getString(R.string.dev_email_addr)});
-                intent.putExtra(Intent.EXTRA_STREAM, AndroidUtils.Files.getUri(activity, BuildConfig.APPLICATION_ID, reportPath));
+        try {
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("text/plain");
+            intent.putExtra(Intent.EXTRA_EMAIL, new String[] {app.getString(R.string.dev_email_addr)});
+            intent.putExtra(Intent.EXTRA_STREAM, AndroidUtils.Files.getUri(activity, BuildConfig.APPLICATION_ID, reportFile));
 
-                if (isCrash) {
-                    intent.putExtra(Intent.EXTRA_SUBJECT, "TwoTrails Error Report");
-                    intent.putExtra(Intent.EXTRA_TEXT, "I have experienced a crash in TwoTrails Android and would like to report it to the development team. \n\nIssue: \n\nWhat happened before the crash: ");
-                    activity.startActivityForResult(Intent.createChooser(intent, "Send Error Report to Dev.."), Consts.Codes.Activites.SEND_EMAIL_TO_DEV);
-                } else {
-                    intent.putExtra(Intent.EXTRA_SUBJECT, "TwoTrails Report");
-                    intent.putExtra(Intent.EXTRA_TEXT, "I am experiencing issues in TwoTrails Android and would like to report it to the development team. \n\nNotes: ");
-                    activity.startActivityForResult(Intent.createChooser(intent, "Send Report to Dev.."), Consts.Codes.Activites.SEND_EMAIL_TO_DEV);
-                }
-
-            } catch (Exception e) {
-                Toast.makeText(activity, "Error Sending Email.", Toast.LENGTH_LONG).show();
+            if (isCrash) {
+                intent.putExtra(Intent.EXTRA_SUBJECT, "TwoTrails Error Report");
+                intent.putExtra(Intent.EXTRA_TEXT, "I have experienced a crash in TwoTrails Android and would like to report it to the development team. \n\nIssue: \n\nWhat happened before the crash: ");
+                activity.startActivityForResult(Intent.createChooser(intent, "Send Error Report to Dev.."), Consts.Codes.Activities.SEND_EMAIL_TO_DEV);
+            } else {
+                intent.putExtra(Intent.EXTRA_SUBJECT, "TwoTrails Report");
+                intent.putExtra(Intent.EXTRA_TEXT, "I am experiencing issues in TwoTrails Android and would like to report it to the development team. \n\nNotes: ");
+                activity.startActivityForResult(Intent.createChooser(intent, "Send Report to Dev.."), Consts.Codes.Activities.SEND_EMAIL_TO_DEV);
             }
-        } else {
-            Toast.makeText(activity, "Unable to generate report.", Toast.LENGTH_LONG).show();
+
+        } catch (Exception e) {
+            Toast.makeText(activity, "Error Sending Email.", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -2025,88 +1927,26 @@ public class TtUtils {
     public static String getApplicationVersion(Application context) {
         try {
             PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
-            return String.format("%s-%s", pInfo.versionName.substring(0, pInfo.versionName.indexOf('-')), pInfo.versionCode);
+            return String.format("ANDROID: %s-%s", pInfo.versionName.substring(0, pInfo.versionName.indexOf('-')), pInfo.getLongVersionCode());
         } catch (Exception ex) {
-            //
+            return "ANDROID: ???";
         }
-
-        return "???";
     }
 
-    //region Files
-    public static String getTtFilePath(String fileName) {
-        if(!fileName.endsWith(Consts.FILE_EXTENSION))
-            fileName += Consts.FILE_EXTENSION;
-
-        return getTtFileDir() + File.separator + fileName;
+    public static String projectToFileName(String projectName) {
+        return StringEx.sanitizeForFile(projectName.trim().replace(' ', '_'));
     }
 
-    public static String getDocumentsDir() {
-        return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).getAbsolutePath();
+    public static String projectToFileNameTTX(String projectName) {
+        return projectToFileName(projectName) + Consts.FILE_EXTENSION;
     }
 
-    private static String _OfflineMapsDir;
-    public static String getOfflineMapsDir() {
-        if (_OfflineMapsDir == null)
-            _OfflineMapsDir = String.format("%s%s%s", getDocumentsDir(), File.separator, "OfflineMaps");
-        return _OfflineMapsDir;
+    public static String projectToFileNameTTMPX(String projectName) {
+        return projectToFileName(projectName) + Consts.MEDIA_PACKAGE_EXTENSION;
     }
 
-    private static String _OfflineMapsRecoveryDir;
-    public static String getOfflineMapsRecoveryDir() {
-        if (_OfflineMapsRecoveryDir == null)
-            _OfflineMapsRecoveryDir = String.format("%s%s%s", getOfflineMapsDir(), File.separator, "Recovery");
-        return _OfflineMapsRecoveryDir;
+
+    public static Uri getResourceUri(Context context, int resourceId) {
+        return Uri.parse("android.resource://" + context.getPackageName() + "/" + resourceId);
     }
-
-    private static String _TtFileDir;
-    public static String getTtFileDir() {
-        if (_TtFileDir == null)
-            _TtFileDir = String.format("%s%s%s", getDocumentsDir(), File.separator, "TwoTrailsFiles");
-        return _TtFileDir;
-    }
-
-    private static String _TtMediaDir;
-    public static String getTtMediaDir() {
-        if (_TtMediaDir == null)
-            _TtMediaDir = String.format("%s%s%s", getTtFileDir(), File.separator, "Media");
-
-        return _TtMediaDir;
-    }
-    public static String getTtMediaDir(DataAccessLayer dal) throws RuntimeException {
-        _TtMediaDir = getTtMediaDir();
-
-        if (dal != null) {
-            String mdir = String.format("%s%s%s", _TtMediaDir, File.separator, dal.getFileName());
-
-            File dir = new File(mdir);
-            if (!dir.exists()) {
-                if (!dir.mkdirs()) {
-                    throw new RuntimeException("Unable to create Media Folder");
-                }
-            }
-
-            return mdir;
-        }
-
-        return _TtMediaDir;
-    }
-
-    public static String getTtLogFileDir() {
-        return getTtFileDir();
-    }
-
-    public static String getGpsLogFilePath() {
-        return String.format("%s%sTtGpsLog_%s.txt",
-                getTtLogFileDir(),
-                File.separator,
-                DateTime.now().toString());
-    }
-
-    public static String getSettingsFilePath() {
-        return String.format("%s%sTwoTrailsSettings.txt",
-                getTtLogFileDir(),
-                File.separator);
-    }
-    //endregion
 }

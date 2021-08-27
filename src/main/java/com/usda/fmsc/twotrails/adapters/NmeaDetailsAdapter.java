@@ -7,6 +7,8 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+
 import com.usda.fmsc.geospatial.nmea41.NmeaIDs;
 import com.usda.fmsc.twotrails.R;
 
@@ -31,8 +33,9 @@ public class NmeaDetailsAdapter extends ArrayAdapter<NmeaDetailsAdapter.NmeaDeta
     }
 
 
+    @NonNull
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(int position, View convertView,@NonNull ViewGroup parent) {
         ViewHolder holder;
         NmeaDetails details = getItem(position);
 
@@ -44,8 +47,10 @@ public class NmeaDetailsAdapter extends ArrayAdapter<NmeaDetailsAdapter.NmeaDeta
             holder = (ViewHolder)convertView.getTag();
         }
 
-        holder.talkerID.setText(details.getTalkerIdStr());
-        holder.nmeaIDs.setText(details.getNmeaIdsStr());
+        if (details != null) {
+            holder.talkerID.setText(details.getTalkerIdStr());
+            holder.nmeaIDs.setText(details.getNmeaIdsStr());
+        }
 
         return convertView;
     }

@@ -25,8 +25,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class GoogleMapsPolygonGrahpic implements IPolygonGraphic, IMarkerDataGraphic {
-    private GoogleMap map;
+public class GoogleMapsPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic {
+    private final GoogleMap map;
 
     private TtPolygon polygon;
     private PolygonDrawOptions drawOptions;
@@ -39,7 +39,7 @@ public class GoogleMapsPolygonGrahpic implements IPolygonGraphic, IMarkerDataGra
     private HashMap<String, MarkerData> _MarkerData;
 
 
-    public GoogleMapsPolygonGrahpic(GoogleMap map) {
+    public GoogleMapsPolygonGraphic(GoogleMap map) {
         this.map = map;
     }
 

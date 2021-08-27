@@ -3,23 +3,87 @@ package com.usda.fmsc.twotrails.data;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.utilities.StringEx;
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeFieldType;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.DateTimeFormatterBuilder;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Locale;
 
 public abstract class IDataLayer {
     protected static DateTimeFormatter dtf= DateTimeFormat.forPattern("yyyy-M-dd H:mm:ss");
     protected static DateTimeFormatter dtfAlt = DateTimeFormat.forPattern("yyyy-M-dd H:mm:ss.SSS"); //Alt Format, PC might be using it
 
-    protected SQLiteDatabase _db;
+    private final SQLiteDatabase _db;
+    private final TwoTrailsApp _Context;
+    private final String _FileName;
+    protected Listener _Listener;
+
+
+    public IDataLayer(TwoTrailsApp context, SQLiteDatabase db, String fileName) {
+        this(context, db, fileName, false);
+    }
+
+    protected IDataLayer(TwoTrailsApp context, SQLiteDatabase db, String fileName, boolean create) {
+        _Context = context;
+        _db = db;
+        _FileName = fileName;
+
+        if (create) {
+            onCreateDB(_db);
+        }
+
+        onOpenDB(_db);
+    }
+
+
+    protected void onCreateDB(SQLiteDatabase db) {}
+
+    protected void onOpenDB(SQLiteDatabase db) {}
+
+    protected void onCloseDB(SQLiteDatabase db) {}
+
+
+    protected SQLiteDatabase getDB() {
+        return _db;
+    }
+
+    protected TwoTrailsApp getTtAppContext() {
+        return _Context;
+    }
+
+    public String getFileName() {
+        return _FileName;
+    }
+
+    public void close() {
+        if (_db != null) {
+            onCloseDB(_db);
+        }
+    }
+
+
+    protected void logError(String msg, String codePage) {
+        getTtAppContext().getReport().writeError(msg, codePage);
+
+        if (_Listener != null) _Listener.onError(msg, codePage, null);
+    }
+
+    protected void logError(String msg, String codePage, StackTraceElement[] stack) {
+        getTtAppContext().getReport().writeError(msg, codePage, stack);
+
+        if (_Listener != null) _Listener.onError(msg, codePage, stack);
+    }
+
+
+    protected void onAction(int action) {
+        if (_Listener != null) _Listener.onAction(action);
+    }
+
 
     protected String createSelectQuery(String table, String items, String where) {
         return String.format("select %s from %s%s",
@@ -33,7 +97,7 @@ public abstract class IDataLayer {
     }
 
 
-    public int getItemCount(String tableName) {
+    public int getItemsCount(String tableName) {
         String countQuery = "SELECT COUNT (*) FROM " + tableName;
 
         Cursor cursor = _db.rawQuery(countQuery, null);
@@ -52,7 +116,7 @@ public abstract class IDataLayer {
 
     public int getItemsCount(String tableName, String column, int value) {
         return getItemsCount(tableName,
-                String.format("%s = %d",
+                String.format(Locale.getDefault(), "%s = %d",
                         column,
                         value)
         );
@@ -196,11 +260,23 @@ public abstract class IDataLayer {
     }
 
 
-    public abstract boolean open();
-
-    public abstract boolean isOpen();
-
-    public abstract void close();
-
     public abstract TtVersion getVersion();
+
+
+    public abstract boolean hasErrors();
+
+
+    public interface Listener {
+        void onAction(int action);
+        void onError(String msg, String codePage, StackTraceElement[] stack);
+    }
+
+    public void addListener(Listener listener) {
+        _Listener = listener;
+    }
+
+
+    public void removeListener() {
+        _Listener = null;
+    }
 }

@@ -2,10 +2,14 @@ package com.usda.fmsc.twotrails.data;
 
 public class TwoTrailsMediaSchema {
     //Old Schema Versions
-    public static final TtVersion OSV_2_0_0 = new TtVersion(2, 0, 0);
+    public static final TtVersion MAL_2_0_0 = new TtVersion(2, 0, 0);
+
+    public static final TtVersion MAL_2_1_0 = new TtVersion(2, 1, 0);
+    public static final int MAL_2_1_0_INT = 2;
 
     //Schema Version
-    public static final TtVersion SchemaVersion = OSV_2_0_0;
+    public static final TtVersion SchemaVersion = MAL_2_1_0;
+    public static final int SchemaVersionInt = MAL_2_1_0_INT;
 
 
     public static class SharedSchema {
@@ -35,7 +39,7 @@ public class TwoTrailsMediaSchema {
         public static final String PointCN = "PointCN";
         public static final String MediaType = "MediaType";
         public static final String Name = "Name";
-        public static final String FilePath = "FilePath";
+        public static final String FileName = "FilePath";
         public static final String CreationTime = "CreationTime";
         public static final String Comment = "Comment";
         public static final String IsExternal = "IsExternal";
@@ -46,7 +50,7 @@ public class TwoTrailsMediaSchema {
             PointCN         + " TEXT, " +
             MediaType       + " INTEGER, " +
             Name            + " TEXT, " +
-            FilePath        + " TEXT, " +
+                    FileName + " TEXT, " +
             CreationTime    + " TEXT, " +
             Comment         + " TEXT, " +
             IsExternal      + " BOOLEAN NOT NULL, " +
@@ -57,7 +61,7 @@ public class TwoTrailsMediaSchema {
                 PointCN + ", " +
                 MediaType + ", " +
                 Name + ", " +
-                FilePath + ", " +
+                        FileName + ", " +
                 CreationTime + ", " +
                 Comment + ", " +
                 IsExternal;
@@ -113,4 +117,8 @@ public class TwoTrailsMediaSchema {
             Roll;
     }
     //endregion
+
+
+    public static final String UPGRADE_MAL_2_1_0 =
+            "UPDATE " + Info.TableName + " SET " + Info.TtMediaDbSchemaVersion + " = '" + MAL_2_1_0 + "';";
 }

@@ -28,12 +28,11 @@ import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
 import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.data.TwoTrailsSchema;
-import com.usda.fmsc.twotrails.dialogs.EditableListDialog;
+import com.usda.fmsc.twotrails.dialogs.EditableListDialogTt;
 import com.usda.fmsc.twotrails.fragments.AnimationCardFragment;
 import com.usda.fmsc.twotrails.fragments.metadata.MetadataFragment;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.logic.PolygonAdjuster;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.units.Datum;
@@ -151,7 +150,7 @@ public class MetadataActivity extends CustomToolbarActivity {
         saveMetadata();
 
         if (adjust) {
-            PolygonAdjuster.adjust(getTtAppCtx(), true);
+            getTtAppCtx().adjustProject(true);
         }
     }
 
@@ -292,11 +291,11 @@ public class MetadataActivity extends CustomToolbarActivity {
     private void createMetadata() {
         saveMetadata();
 
-        int metaCount = getTtAppCtx().getDAL().getItemCount(TwoTrailsSchema.MetadataSchema.TableName);
+        int metaCount = getTtAppCtx().getDAL().getItemsCount(TwoTrailsSchema.MetadataSchema.TableName);
 
         TtMetadata newMetadata = getTtAppCtx().getMetadataSettings().getDefaultMetadata();
         newMetadata.setCN(java.util.UUID.randomUUID().toString());
-        newMetadata.setName(StringEx.format("Meta %d", metaCount + 1));
+        newMetadata.setName(String.format("Meta %d", metaCount + 1));
         getTtAppCtx().getDAL().insertMetadata(newMetadata);
 
         addedMeta = newMetadata.getCN();
@@ -754,7 +753,7 @@ public class MetadataActivity extends CustomToolbarActivity {
 
     public void btnGpsRecClick(View view) {
         if (!_MetaLocked) {
-            final EditableListDialog edialog = new EditableListDialog();
+            final EditableListDialogTt edialog = new EditableListDialogTt();
             edialog.setItems(Consts.DeviceNames.GPS_RECEIVERS);
             edialog.setDefaultValue(_CurrentMetadata.getGpsReceiver());
 
@@ -771,7 +770,7 @@ public class MetadataActivity extends CustomToolbarActivity {
 
     public void btnRangeFinderClick(View view) {
         if (!_MetaLocked) {
-            final EditableListDialog edialog = new EditableListDialog();
+            final EditableListDialogTt edialog = new EditableListDialogTt();
             edialog.setItems(Consts.DeviceNames.RANGE_FINDERS);
             edialog.setDefaultValue(_CurrentMetadata.getRangeFinder());
 

@@ -4,7 +4,6 @@ import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
-import androidx.fragment.app.DialogFragment;
 import androidx.appcompat.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,8 +13,6 @@ import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
 import com.usda.fmsc.geospatial.nmea41.NmeaIDs;
 import com.usda.fmsc.geospatial.nmea41.sentences.base.NmeaSentence;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.TwoTrailsApp;
-import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.adapters.NmeaDetailsAdapter;
 import com.usda.fmsc.twotrails.gps.GpsService;
 
@@ -23,22 +20,20 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class CheckNmeaDialog extends DialogFragment implements GpsService.Listener {
-    private boolean postAllStrings = false;
-
+public class CheckNmeaDialogTt extends TtBaseDialogFragment implements GpsService.Listener {
     private GpsService.GpsBinder binder;
     private ListView lvNmea;
 
     private NmeaDetailsAdapter adapter;
-    private List<NmeaDetailsAdapter.NmeaDetails> nmeaDetails;
-    private HashMap<String, NmeaDetailsAdapter.NmeaDetails> nmeaDetailsMap;
+    private final List<NmeaDetailsAdapter.NmeaDetails> nmeaDetails;
+    private final HashMap<String, NmeaDetailsAdapter.NmeaDetails> nmeaDetailsMap;
 
 
-    public static CheckNmeaDialog newInstance() {
-        return new CheckNmeaDialog();
+    public static CheckNmeaDialogTt newInstance() {
+        return new CheckNmeaDialogTt();
     }
 
-    public CheckNmeaDialog() {
+    public CheckNmeaDialogTt() {
         nmeaDetails = new ArrayList<>();
         nmeaDetailsMap = new HashMap<>();
     }
@@ -65,7 +60,7 @@ public class CheckNmeaDialog extends DialogFragment implements GpsService.Listen
     public void onStart() {
         super.onStart();
 
-        binder = TwoTrailsApp.getInstance(getActivity()).getGps();
+        binder = getTtAppCtx().getGps();
 
         binder.addListener(this);
         binder.startGps();
@@ -76,7 +71,7 @@ public class CheckNmeaDialog extends DialogFragment implements GpsService.Listen
         super.onStop();
 
         if (binder != null) {
-            if (!TwoTrailsApp.getInstance(getActivity()).getDeviceSettings().isGpsAlwaysOn()) {
+            if (!getTtAppCtx().getDeviceSettings().isGpsAlwaysOn()) {
                 binder.stopGps();
             }
 

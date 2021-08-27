@@ -9,7 +9,7 @@ import java.util.Map;
 public class DataDictionaryIterator implements Iterator<Tuple<String, Object>> {
     private int position = 0;
 
-    private ArrayList<Tuple<String, Object>> data = new ArrayList<>();
+    private final ArrayList<Tuple<String, Object>> data = new ArrayList<>();
 
     public DataDictionaryIterator(DataDictionary dataDictionary) {
         for (Map.Entry<String, Object> entry : dataDictionary.getData().entrySet()) {

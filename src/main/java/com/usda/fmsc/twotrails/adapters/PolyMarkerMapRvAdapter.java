@@ -5,6 +5,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -44,6 +45,7 @@ public class PolyMarkerMapRvAdapter extends RecyclerView.Adapter<PolyMarkerMapRv
         return markerMaps.size();
     }
 
+    @NonNull
     @Override
     public PolyMarkerMapViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.card_map_opts, parent, false);
@@ -276,7 +278,6 @@ public class PolyMarkerMapRvAdapter extends RecyclerView.Adapter<PolyMarkerMapRv
                     fcbUnAdjBndPts.setCheckedNoEvent(value);
                     break;
                 case ADJBNDCLOSE:
-                    break;
                 case UNADJBNDCLOSE:
                     break;
                 case ADJNAV:

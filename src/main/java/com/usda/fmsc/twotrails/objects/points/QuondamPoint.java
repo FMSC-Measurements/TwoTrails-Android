@@ -3,10 +3,14 @@ package com.usda.fmsc.twotrails.objects.points;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import androidx.annotation.NonNull;
+
 import com.usda.fmsc.android.utilities.ParcelTools;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.units.OpType;
 import com.usda.fmsc.utilities.StringEx;
+
+import java.util.Locale;
 
 public class QuondamPoint extends TtPoint implements TtPoint.IManualAccuracy {
     public static final Parcelable.Creator<QuondamPoint> CREATOR = new Parcelable.Creator<QuondamPoint>() {
@@ -65,6 +69,7 @@ public class QuondamPoint extends TtPoint implements TtPoint.IManualAccuracy {
     public QuondamPoint(QuondamPoint p) {
         super(p);
         _ParentPoint = p.getParentPoint();
+        _ManualAccuracy = p.getManualAccuracy();
     }
 
     public QuondamPoint(TtPoint p) {
@@ -180,8 +185,9 @@ public class QuondamPoint extends TtPoint implements TtPoint.IManualAccuracy {
 
 
     @Override
+    @NonNull
     public String toString() {
-        return String.format("%d: %s- %s", _PID, getOp(),
+        return String.format(Locale.getDefault(), "%d: %s- %s", _PID, getOp(),
             (_ParentPoint != null) ? _ParentPoint.getPID() : StringEx.Empty);
     }
 }

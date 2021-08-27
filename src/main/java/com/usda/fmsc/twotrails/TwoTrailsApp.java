@@ -1,6 +1,5 @@
 package com.usda.fmsc.twotrails;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.Application;
@@ -13,47 +12,67 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.documentfile.provider.DocumentFile;
+
 import com.esri.arcgisruntime.ArcGISRuntimeEnvironment;
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
 import com.usda.fmsc.geospatial.nmea41.sentences.base.NmeaSentence;
 import com.usda.fmsc.twotrails.activities.MainActivity;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
+import com.usda.fmsc.twotrails.data.DataAccessManager;
 import com.usda.fmsc.twotrails.data.MediaAccessLayer;
+import com.usda.fmsc.twotrails.data.MediaAccessManager;
+import com.usda.fmsc.twotrails.data.TwoTrailsSchema;
 import com.usda.fmsc.twotrails.devices.TtBluetoothManager;
 import com.usda.fmsc.twotrails.gps.GpsService;
+import com.usda.fmsc.twotrails.logic.AdjustingException;
+import com.usda.fmsc.twotrails.logic.Segment;
+import com.usda.fmsc.twotrails.logic.SegmentFactory;
+import com.usda.fmsc.twotrails.logic.SegmentList;
+import com.usda.fmsc.twotrails.objects.TtPolygon;
+import com.usda.fmsc.twotrails.objects.TwoTrailsProject;
+import com.usda.fmsc.twotrails.objects.points.QuondamPoint;
+import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.rangefinder.RangeFinderService;
 import com.usda.fmsc.twotrails.rangefinder.TtRangeFinderData;
+import com.usda.fmsc.twotrails.units.OpType;
 import com.usda.fmsc.twotrails.utilities.ArcGISTools;
 import com.usda.fmsc.twotrails.utilities.TtNotifyManager;
 import com.usda.fmsc.twotrails.utilities.TtReport;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 import com.usda.fmsc.utilities.FileUtils;
-import com.usda.fmsc.utilities.StringEx;
 
 import org.joda.time.DateTime;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Hashtable;
 
-@SuppressLint("MissingPermission")
 public class TwoTrailsApp extends Application {
-    private static TwoTrailsApp _AppContext;
+    private static final long ADJUSTING_SLOW_TIME = 30000;
 
-    private String _DALFile;
-    private DataAccessLayer _DAL;
-    private MediaAccessLayer _MAL;
+    private TwoTrailsProject _CurrentProject;
+    private DataAccessManager _DAM;
+    private MediaAccessManager _MAM;
 
     private TtReport _Report;
 
-    private Boolean _FoldersInitiated = false;
+    private DocumentFile _ExternalRootDir;
+    private Boolean _HasExternalDirAccess = false;
+
+    private DocumentFile _TwoTrailsExternalDir, _OfflineMapsDir, _ImportDir, _ImportedDir, _ExportDir;
+
     private Boolean silentConnectToExternalGps = false, scanningForGps = false;
 
     private TtBluetoothManager _BluetoothManager;
@@ -70,9 +89,10 @@ public class TwoTrailsApp extends Application {
     private GpsService.GpsBinder gpsServiceBinder;
     private RangeFinderService.RangeFinderBinder rfServiceBinder;
     private Activity _CurrentActivity;
+    private ProjectAdjusterListener _CurrentListener;
 
 
-    private ServiceConnection gpsServiceConnection = new ServiceConnection() {
+    private final ServiceConnection gpsServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             gpsServiceBinder = (GpsService.GpsBinder)service;
@@ -168,7 +188,7 @@ public class TwoTrailsApp extends Application {
         }
     };
 
-    private ServiceConnection rfServiceConnection = new ServiceConnection() {
+    private final ServiceConnection rfServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             rfServiceBinder = (RangeFinderService.RangeFinderBinder)service;
@@ -227,7 +247,7 @@ public class TwoTrailsApp extends Application {
         }
     };
 
-    private AppLifecycle.Listener appLifecycleListener = new AppLifecycle.Listener() {
+    private final AppLifecycle.Listener appLifecycleListener = new AppLifecycle.Listener() {
         @Override
         public void onBecameForeground(Activity activity) {
             Log.d(Consts.LOG_TAG, "Foreground: (" + activity.getClass().getSimpleName() + ")" + activity.getClass().getName());
@@ -245,6 +265,8 @@ public class TwoTrailsApp extends Application {
             } else {
                 Log.d(Consts.LOG_TAG, "Created: (" + activity.getClass().getSimpleName() + ")" + activity.getClass().getName());
             }
+
+
         }
 
         @Override
@@ -258,15 +280,23 @@ public class TwoTrailsApp extends Application {
             _CurrentActivity = activity;
 
             if (activity instanceof MainActivity) {
-                if (!AndroidUtils.App.isServiceRunning(_AppContext, GpsService.class) || gpsServiceBinder == null) {
+                if (!AndroidUtils.App.isServiceRunning(TwoTrailsApp.this, GpsService.class) || gpsServiceBinder == null) {
                     startGpsService();
                 } else if (getDeviceSettings().isGpsConfigured() && !scanningForGps) {
                     gpsServiceBinder.startGps();
                 }
 
-                if (!AndroidUtils.App.isServiceRunning(_AppContext, RangeFinderService.class) || rfServiceBinder == null) {
+                if (!AndroidUtils.App.isServiceRunning(TwoTrailsApp.this, RangeFinderService.class) || rfServiceBinder == null) {
                     startRangefinderService();
                 }
+
+                if (getDeviceSettings().isExternalSyncEnabled()) {
+                    syncExternalDir();
+                }
+            }
+
+            if (activity instanceof ProjectAdjusterListener) {
+                _CurrentListener = (ProjectAdjusterListener)activity;
             }
         }
 
@@ -281,13 +311,13 @@ public class TwoTrailsApp extends Application {
             if (activity instanceof MainActivity) {
                 if (gpsServiceBinder != null) {
                     gpsServiceBinder.stopService();
-                    stopService(new Intent(_AppContext, GpsService.class));
+                    stopService(new Intent(TwoTrailsApp.this, GpsService.class));
                     //gpsServiceBinder = null;
                 }
 
                 if (rfServiceBinder != null) {
                     rfServiceBinder.stopService();
-                    stopService(new Intent(_AppContext, RangeFinderService.class));
+                    stopService(new Intent(TwoTrailsApp.this, RangeFinderService.class));
                     //rfServiceBinder = null;
                 }
 
@@ -296,12 +326,13 @@ public class TwoTrailsApp extends Application {
                     _Report.closeReport();
                 }
 
-                _DAL = null;
-                _DALFile = null;
-                _MAL = null;
+                _CurrentProject = null;
+                _DAM = null;
+                _MAM = null;
             }
         }
     };
+
 
     //region Bluetooth Broadcast Receiver
     //The BroadcastReceiver that listens for bluetooth broadcasts
@@ -318,29 +349,20 @@ public class TwoTrailsApp extends Application {
                         new Handler().postDelayed(() -> getGps().startGps(), 1000);
                     }
                 }
-            } //else if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action)) {
-            //   delayAndSearchForGps.run();
-            //} else if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-            //Device found
-//            } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
-//                //Done searching
-//            } else if (BluetoothDevice.ACTION_ACL_DISCONNECT_REQUESTED.equals(action)) {
-//                //Device is about to disconnect
-//            }
+            }
         }
     };
     //endregion
 
     //region UncaughtExceptionHandler
-    private Thread.UncaughtExceptionHandler exceptionHandler = new Thread.UncaughtExceptionHandler() {
+    private final Thread.UncaughtExceptionHandler exceptionHandler = new Thread.UncaughtExceptionHandler() {
         @Override
-        public void uncaughtException(Thread errorThread, Throwable exception) {
+        public void uncaughtException(@NonNull Thread errorThread, @NonNull Throwable exception) {
             boolean restart = true;
 
             try {
-                if (!areFoldersInitiated()) {
-                    initFolders();
-                    _Report.changeDirectory(TtUtils.getTtFileDir());
+                if (_Report == null) {
+                    _Report = new TtReport(getLogFile());
                 }
 
                 _Report.writeError(exception.getMessage(), errorThread.getName(), exception.getStackTrace());
@@ -367,25 +389,22 @@ public class TwoTrailsApp extends Application {
             try
             {
                 if (restart) {
-                    Intent intent = new Intent(_AppContext, MainActivity.class);
+                    Intent intent = new Intent(TwoTrailsApp.this, MainActivity.class);
                     intent.putExtra(Consts.Codes.Data.CRASH, true);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
                             | Intent.FLAG_ACTIVITY_CLEAR_TASK
                             | Intent.FLAG_ACTIVITY_NEW_TASK);
-                    PendingIntent pendingIntent = PendingIntent.getActivity(getBaseContext(), 0, intent, PendingIntent.FLAG_ONE_SHOT);
+                    PendingIntent pendingIntent = PendingIntent.getActivity(getBaseContext(), 0, intent, PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE);
                     AlarmManager mgr = (AlarmManager)getBaseContext().getSystemService(Context.ALARM_SERVICE);
                     if (mgr != null) {
                         mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 1000, pendingIntent);
                     }
                 } else {
-                    new Thread() {
-                        @Override
-                        public void run() {
-                            Looper.prepare();
-                            Toast.makeText(getBaseContext(),"TwoTrails crashed twice in the past minute. Check Log for details and contact development team if needed.", Toast.LENGTH_LONG).show();
-                            Looper.loop();
-                        }
-                    }.start();
+                    new Thread(() -> {
+                        Looper.prepare();
+                        Toast.makeText(getBaseContext(),"TwoTrails crashed twice in the past minute. Check Log for details and contact development team if needed.", Toast.LENGTH_LONG).show();
+                        Looper.loop();
+                    }).start();
 
                     Thread.sleep(4000); // Let the Toast display before app will get shutdown
                 }
@@ -404,7 +423,7 @@ public class TwoTrailsApp extends Application {
     //endregion
 
     //region SearchForGps
-    private Runnable delayAndSearchForGps = new Runnable() {
+    private final Runnable delayAndSearchForGps = new Runnable() {
         @Override
         public void run() {
             if (Looper.getMainLooper() == null)
@@ -453,151 +472,26 @@ public class TwoTrailsApp extends Application {
     };
     //endregion
 
-    //region Get/Set
-    public boolean areFoldersInitiated() {
-        return _FoldersInitiated;
-    }
-
-    public DeviceSettings getDeviceSettings() {
-        //return _DeviceSettings;
-        return _DeviceSettings != null ? _DeviceSettings : (_DeviceSettings = new DeviceSettings(this));
-    }
-
-    public ProjectSettings getProjectSettings() {
-        //return _ProjectSettings;
-        return _ProjectSettings != null ? _ProjectSettings : (_ProjectSettings = new ProjectSettings(this));
-    }
-
-    public MetadataSettings getMetadataSettings() {
-        //return _MetadataSettings;
-        return _MetadataSettings != null ? _MetadataSettings : (_MetadataSettings = new MetadataSettings(this));
-    }
-
-    public MapSettings getMapSettings() {
-        return _MapSettings != null ? _MapSettings : (_MapSettings = new MapSettings(this));
-    }
-
-    public TtBluetoothManager getBluetoothManager(){
-        return _BluetoothManager != null ? _BluetoothManager : (_BluetoothManager = new TtBluetoothManager());
-    }
-
-    public TtNotifyManager getTtNotifyManager() {
-        return _TtNotifyManager != null ? _TtNotifyManager : (_TtNotifyManager = new TtNotifyManager(this));
-    }
-
-    public ArcGISTools getArcGISTools() {
-        return _ArcGISTools != null ? _ArcGISTools : (_ArcGISTools = new ArcGISTools(this));
-    }
-
-    public boolean hasReport() {
-        return _Report != null;
-    }
-
-    public TtReport getReport() {
-        if (!_FoldersInitiated)
-            initFolders();
-        
-        return _Report;
-    }
-
-    public boolean hasDAL() {
-        return _DAL != null;
-    }
-
-    public DataAccessLayer getDAL() {
-        if (!areFoldersInitiated()) {
-            throw new RuntimeException("Folders Not Initiated");
-        } else {
-            if (hasDAL())
-                return _DAL;
-
-            if (_DALFile != null) {
-                setDAL(new DataAccessLayer(_DALFile, this));
-                return _DAL;
-            }
-
-            if (getDeviceSettings().getLastOpenedProject() != null) {
-                _DALFile = getDeviceSettings().getLastOpenedProject();
-
-                if (FileUtils.fileExists(_DALFile)) {
-                    setDAL(new DataAccessLayer(_DALFile, this));
-                    return _DAL;
-                }
-
-                _DALFile = null;
-            }
-
-            throw new RuntimeException("DAL not set");
-        }
-    }
-
-    public void setDAL(DataAccessLayer dal) {
-        if (!areFoldersInitiated()) {
-            throw new RuntimeException("Folders Not Initiated");
-        } else {
-            _DAL = dal;
-            _MAL = null;
-
-            if (dal != null) {
-                _DALFile = dal.getFilePath();
-                getReport().writeEvent(StringEx.format("DAL Loaded: %s", _DALFile));
-                getMapSettings().reset();
-                getDeviceSettings().setLastOpenedProject(dal.getFilePath());
-            } else {
-                getReport().writeEvent("DAL Unloaded");
-            }
-        }
-    }
-
-    public MediaAccessLayer getMAL() {
-        if (!areFoldersInitiated()) {
-            throw new RuntimeException("Folders Not Initiated");
-        } else {
-            if (_MAL == null && hasDAL()) {
-                _MAL = new MediaAccessLayer(getMALFilename(getDAL()), this);
-                getReport().writeEvent(StringEx.format("MAL Loaded: %s", _MAL.getFilePath()));
-            }
-
-            return _MAL;
-        }
-    }
-
-    private String getMALFilename(DataAccessLayer dal) {
-        if (dal != null) {
-            String filename = dal.getFilePath();
-
-            return filename.substring(0, filename.length() - 3) + "ttmpx";
-        }
-
-        throw new NullPointerException("DAL does not exist");
-    }
-
-    public boolean hasMAL() {
-        return _MAL != null || (hasDAL() && FileUtils.fileExists(getMALFilename(_DAL)));
-    }
-
-    public void setMAL(MediaAccessLayer mal) {
-        _MAL = mal;
-    }
-    //endregion
-
 
     @Override
     public void onCreate() {
         super.onCreate();
 
-        _AppContext = this;
-
         Thread.setDefaultUncaughtExceptionHandler(exceptionHandler);
 
-        if (initFolders()) {
-            _Report.writeEvent(StringEx.format("TwoTrails Started (%s)", AndroidUtils.App.getAppVersion(this)));
+        try {
+            _Report = new TtReport(getLogFile());
+        } catch (IOException e) {
+            Log.e(Consts.LOG_TAG, "Unable to start log");
+            e.printStackTrace();
         }
 
-        //ArcGISRuntime.setClientId(this.getString(R.string.arcgis_client_id)); //100.2.9
-        ArcGISRuntimeEnvironment.setLicense(this.getString(R.string.arcgis_runtime_license)); //100.6.0
+        _Report.writeEvent(String.format("TwoTrails Started (%s)", AndroidUtils.App.getAppVersion(this)));
 
-        ImageLoader.getInstance().init(new ImageLoaderConfiguration.Builder(this).build());
+        //ArcGISRuntime.setClientId(this.getString(R.string.arcgis_client_id)); //100.2.9
+        ArcGISRuntimeEnvironment.setLicense(this.getString(R.string.arcgis_runtime_license)); //100.10.0
+
+//        ImageLoader.getInstance().init(new ImageLoaderConfiguration.Builder(this).build());
 
         AppLifecycle.get(this).addListener(appLifecycleListener);
 
@@ -610,39 +504,219 @@ public class TwoTrailsApp extends Application {
         filter.addAction(BluetoothDevice.ACTION_PAIRING_REQUEST);
         filter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
         this.registerReceiver(mReceiver, filter);
-    }
 
-    public boolean initFolders() {
-        _FoldersInitiated = false;
+        DeviceSettings ds = getDeviceSettings();
 
-        if (AndroidUtils.App.checkStoragePermission(_AppContext)) {
-            _FoldersInitiated = true;
+        if (ds.isExternalSyncEnabled()) {
+            String dir = ds.getExternalSyncDir();
 
-            File dir = new File(TtUtils.getTtFileDir());
-            if (!dir.exists()) {
-                _FoldersInitiated &= dir.mkdirs();
-            }
-
-            dir = new File(TtUtils.getOfflineMapsDir());
-            if (!dir.exists()) {
-                _FoldersInitiated &= dir.mkdirs();
-            }
-
-            dir = new File(TtUtils.getOfflineMapsRecoveryDir());
-            if (!dir.exists()) {
-                _FoldersInitiated &= dir.mkdirs();
+            if (dir != null) {
+                try {
+                    setExternalRootDir(Uri.parse(ds.getExternalSyncDir()));
+                } catch (Exception e) {
+                    ds.setExternalSyncEnabled(false);
+                }
+            } else {
+                //dir does not exist
+                ds.setExternalSyncEnabled(false);
             }
         }
+    }
 
-        if (_FoldersInitiated && _Report == null) {
-            _Report = new TtReport();
-            _Report.changeDirectory(TtUtils.getTtLogFileDir());
-        }
+    //region Settings / Tools
+    public DeviceSettings getDeviceSettings() {
+        return _DeviceSettings != null ? _DeviceSettings : (_DeviceSettings = new DeviceSettings(TwoTrailsApp.this));
+    }
 
-        return _FoldersInitiated;
+    public ProjectSettings getProjectSettings() {
+        return _ProjectSettings != null ? _ProjectSettings : (_ProjectSettings = new ProjectSettings(TwoTrailsApp.this));
+    }
+
+    public MetadataSettings getMetadataSettings() {
+        return _MetadataSettings != null ? _MetadataSettings : (_MetadataSettings = new MetadataSettings(TwoTrailsApp.this));
+    }
+
+    public MapSettings getMapSettings() {
+        return _MapSettings != null ? _MapSettings : (_MapSettings = new MapSettings(TwoTrailsApp.this));
     }
 
 
+    public ArcGISTools getArcGISTools() {
+        return _ArcGISTools != null ? _ArcGISTools : (_ArcGISTools = new ArcGISTools(TwoTrailsApp.this));
+    }
+
+
+    public boolean hasReport() {
+        return _Report != null;
+    }
+
+    public TtReport getReport() {
+        return _Report;
+    }
+    //endregion
+
+    //region DAL / MAL
+    public TwoTrailsProject getCurrentProject() {
+        return _CurrentProject;
+    }
+
+    public boolean hasDAL() {
+        return _DAM != null;
+    }
+
+    public DataAccessLayer getDAL() {
+        if (hasDAL())
+            return _DAM.getDAL();
+
+        if (_CurrentProject != null) {
+            setDAM(DataAccessManager.openDAL(TwoTrailsApp.this, _CurrentProject.TTXFile));
+            return _DAM.getDAL();
+        }
+
+        if (getDeviceSettings().getLastOpenedProject() != null) {
+            _CurrentProject = getDeviceSettings().getLastOpenedProject();
+
+            if (DataAccessManager.localDALExists(TwoTrailsApp.this, _CurrentProject.TTXFile)) {
+                setDAM(DataAccessManager.openDAL(TwoTrailsApp.this, _CurrentProject.TTXFile));
+                return _DAM.getDAL();
+            }
+
+            _DAM = null;
+        }
+
+        throw new RuntimeException("DAL not set");
+    }
+
+    public void setDAM(DataAccessManager dam) {
+        _DAM = dam;
+
+        if (dam != null) {
+            _CurrentProject = new TwoTrailsProject(
+                    dam.getDAL().getProjectDeviceID(),
+                    dam.getDatabaseName()
+            );
+
+            getReport().writeEvent(String.format("DAL Loaded: %s (%s)", _CurrentProject.Name, _CurrentProject.TTXFile));
+
+            getMapSettings().reset();
+            getProjectSettings().initProjectSettings(getDAL());
+
+            getProjectSettings().updateRecentProjects(_CurrentProject);
+            getDeviceSettings().setLastOpenedProject(_CurrentProject);
+        } else {
+            getReport().writeEvent("DAL Unloaded");
+        }
+    }
+
+    public DataAccessManager getDAM() {
+        return _DAM;
+    }
+
+    public MediaAccessLayer getMAL() {
+        if (_MAM == null && hasDAL()) {
+
+            if (_CurrentProject.TTMPXFile == null) {
+                //create TTMPX
+                _CurrentProject = new TwoTrailsProject(
+                        _CurrentProject.Name,
+                        _CurrentProject.TTXFile,
+                        _CurrentProject.TTXFile.replace(Consts.FILE_EXTENSION, Consts.MEDIA_PACKAGE_EXTENSION));
+
+                getProjectSettings().updateRecentProjects(_CurrentProject);
+                getDeviceSettings().setLastOpenedProject(_CurrentProject);
+            }
+
+            setMAM(MediaAccessManager.openMAL(TwoTrailsApp.this, _CurrentProject.TTMPXFile));
+        }
+
+        return _MAM.getMAL();
+    }
+
+    public boolean hasMAL() {
+        return _MAM != null || _CurrentProject.TTMPXFile != null ||
+            (hasDAL() && MediaAccessManager.localMALExists(TwoTrailsApp.this, _CurrentProject.TTXFile.replace(Consts.FILE_EXTENSION, Consts.MEDIA_PACKAGE_EXTENSION)));
+    }
+
+    public MediaAccessManager getMAM() {
+        return _MAM;
+    }
+
+    public void setMAM(MediaAccessManager mam) {
+        if (mam != null) {
+            _MAM = mam;
+            getReport().writeEvent(String.format("MAL Loaded: %s (%s)", _CurrentProject.Name, _CurrentProject.TTMPXFile));
+        } else {
+            getReport().writeEvent("MAL Unloaded");
+        }
+    }
+    //endregion
+
+    //region Storage Access
+
+    public boolean hasExternalDirAccess() {
+        return _HasExternalDirAccess || (_HasExternalDirAccess = (_ExternalRootDir != null && _ExternalRootDir.exists()));
+    }
+
+    public void setExternalRootDir(Uri externalFolder) throws Exception {
+        if (externalFolder != null) {
+            _ExternalRootDir = DocumentFile.fromTreeUri(this, externalFolder);
+
+            Uri externalRootDirUri;
+            if (_ExternalRootDir == null) {
+                getReport().writeError("Unable to create DocumentFile", "TwoTrailsApp:setExternalRootDir");
+                throw new Exception("Unable to create DocumentFile");
+            } else {
+                externalRootDirUri = _ExternalRootDir.getUri();
+            }
+
+            if (!hasExternalDirAccess()) {
+                getReport().writeError("No folder access permissions", "TwoTrailsApp:setExternalRootDir");
+                throw new Exception("No External Directory Access");
+            }
+
+            try {
+                _TwoTrailsExternalDir = FileUtils.getDocumentFromTree(TwoTrailsApp.this, externalRootDirUri, Consts.FolderLayout.External.TwoTrailsFolderPath);
+                if (_TwoTrailsExternalDir == null || !_TwoTrailsExternalDir.exists()) {
+                    _TwoTrailsExternalDir = _ExternalRootDir.createDirectory(Consts.FolderLayout.External.TwoTrailsFolderName);
+                    if (_TwoTrailsExternalDir == null) {
+                        throw new Exception("TwoTrails Root Dir not created");
+                    }
+                }
+
+                _OfflineMapsDir = FileUtils.getDocumentFromTree(TwoTrailsApp.this, _TwoTrailsExternalDir.getUri(), Consts.FolderLayout.External.OfflineMapsPath);
+                if (_OfflineMapsDir == null || !_OfflineMapsDir.exists()) {
+                    _OfflineMapsDir = _TwoTrailsExternalDir.createDirectory(Consts.FolderLayout.External.OfflineMapsName);
+                }
+
+                _ImportDir = FileUtils.getDocumentFromTree(TwoTrailsApp.this, _TwoTrailsExternalDir.getUri(), Consts.FolderLayout.External.ImportFolderPath);
+                if (_ImportDir == null || !_ImportDir.exists()) {
+                    _ImportDir = _TwoTrailsExternalDir.createDirectory(Consts.FolderLayout.External.ImportFolderName);
+                }
+
+                _ImportedDir = FileUtils.getDocumentFromTree(TwoTrailsApp.this, _TwoTrailsExternalDir.getUri(), Consts.FolderLayout.External.ImportedFolderPath);
+                if (_ImportedDir == null || !_ImportedDir.exists()) {
+                    _ImportedDir = _ImportDir.createDirectory(Consts.FolderLayout.External.ImportedFolderName);
+                }
+
+                _ExportDir = FileUtils.getDocumentFromTree(TwoTrailsApp.this, _TwoTrailsExternalDir.getUri(), Consts.FolderLayout.External.ExportFolderPath);
+                if (_ExportDir == null || !_ExportDir.exists()) {
+                    _ExportDir = _TwoTrailsExternalDir.createDirectory(Consts.FolderLayout.External.ExportFolderName);
+                }
+            } catch (Exception e) {
+                getReport().writeError(e.getMessage(), "TwoTrailsApp:setExternalRootDir", e.getStackTrace());
+                getDeviceSettings().setExternalSyncEnabled(false);
+            }
+
+            getDeviceSettings().setExternalSyncDir(externalRootDirUri.toString());
+            getDeviceSettings().setExternalSyncEnabled(true);
+        }
+    }
+
+    //endregion
+
+
+
+    //region GPS / RangeFinder
     public void startGpsService() {
         if (gpsServiceBinder == null && AndroidUtils.App.checkLocationPermission(this)) {
             this.startService(new Intent(this, GpsService.class));
@@ -658,6 +732,15 @@ public class TwoTrailsApp extends Application {
     }
 
 
+    public TtBluetoothManager getBluetoothManager(){
+        return _BluetoothManager != null ? _BluetoothManager : (_BluetoothManager = new TtBluetoothManager());
+    }
+
+    public TtNotifyManager getTtNotifyManager() {
+        return _TtNotifyManager != null ? _TtNotifyManager : (_TtNotifyManager = new TtNotifyManager(this));
+    }
+
+
     public GpsService.GpsBinder getGps() {
         return gpsServiceBinder;
     }
@@ -665,15 +748,17 @@ public class TwoTrailsApp extends Application {
     public RangeFinderService.RangeFinderBinder getRF() {
         return rfServiceBinder;
     }
+    //endregion
+
 
     //For use with logging only
-    public static synchronized TtReport getTtReport() {
-        return _AppContext.getReport();
-    }
-
-    public static TwoTrailsApp getInstance(Context baseContext) {
-        return (TwoTrailsApp)baseContext.getApplicationContext();
-    }
+//    public static synchronized TtReport getTtReport() {
+//        return _AppContext.getReport();
+//    }
+//
+//    public static TwoTrailsApp getInstance(Context baseContext) {
+//        return (TwoTrailsApp)baseContext.getApplicationContext();
+//    }
 
 //    @Override
 //    public void onConfigurationChanged(Configuration newConfig) {
@@ -685,4 +770,306 @@ public class TwoTrailsApp extends Application {
 //    public void onLowMemory() {
 //        super.onLowMemory();
 //    }
+
+
+    //region Syncing
+
+
+    public void syncExternalDir() {
+
+    }
+
+
+    //endregion
+
+
+    //region DAL Adjusting
+    private static boolean _adjusting = false;
+    private static boolean _cancelToken = false;
+
+    public ProjectAdjusterResult adjustProject() {
+        return adjustProject(false);
+    }
+
+    public ProjectAdjusterResult adjustProject(final boolean updateIndexes) {
+        final DataAccessLayer dal = getDAL();
+
+        if (!_adjusting) {
+            onAdjusterStarted();
+
+            _cancelToken = false;
+
+            //check for point issues
+            if (dal.getItemsCount(TwoTrailsSchema.PolygonSchema.TableName) < 1)
+                return ProjectAdjusterResult.NO_POLYS;
+            else {
+                for (TtPolygon poly : dal.getPolygons()) {
+                    TtPoint p = dal.getFirstPointInPolygon(poly.getCN());
+
+                    if (p != null) {
+                        if (p.isTravType() || (p.getOp() == OpType.Quondam &&
+                                ((QuondamPoint) p).getParentPoint().isTravType()))
+                            return ProjectAdjusterResult.STARTS_WITH_TRAV_TYPE;
+                    }
+                }
+            }
+
+            _adjusting = true;
+
+            new Thread(() -> {
+                ProjectAdjusterResult result = ProjectAdjusterResult.ADJUSTING;
+                boolean success = false;
+
+                AdjustingException.AdjustingError error = AdjustingException.AdjustingError.None;
+
+                try {
+
+                    if (updateIndexes)
+                        updatePointIndexes(dal);
+
+                    if (!_cancelToken) {
+                        success = adjustPoints(dal);
+                    }
+
+                    if (success) {
+                        result = ProjectAdjusterResult.SUCCESSFUL;
+                    } else {
+                        result = ProjectAdjusterResult.ERROR;
+                    }
+                } catch (AdjustingException ex) {
+                    getReport().writeError(ex.getMessage(), "PolygonAdjuster:adjust", ex.getStackTrace());
+                    result = ProjectAdjusterResult.ERROR;
+                    error = ex.getErrorType();
+                } catch (Exception ex) {
+                    getReport().writeError(ex.getMessage(), "PolygonAdjuster:adjust", ex.getStackTrace());
+                    result = ProjectAdjusterResult.ERROR;
+                } finally {
+                    _adjusting = false;
+
+                    if (_cancelToken) {
+                        result = ProjectAdjusterResult.CANCELED;
+                    }
+
+                    onAdjusterStopped(result, error);
+                }
+            }).start();
+        }
+
+        return ProjectAdjusterResult.ADJUSTING;
+    }
+
+
+    private void updatePointIndexes(DataAccessLayer dal) {
+        ArrayList<TtPoint> savePoints = new ArrayList<>();
+
+        for (TtPolygon poly : dal.getPolygons()) {
+            int index = 0;
+
+            for(TtPoint point : dal.getPointsInPolygon(poly.getCN())) {
+                if (point.getIndex() != index)
+                {
+                    point.setIndex(index);
+                    savePoints.add(point);
+                }
+
+                index++;
+            }
+        }
+
+        dal.updatePoints(savePoints, savePoints);
+    }
+
+    private boolean adjustPoints(DataAccessLayer dal) throws AdjustingException {
+        long startTime = System.currentTimeMillis();
+        boolean slowTimeTriggered = false;
+
+        SegmentFactory sf = new SegmentFactory(dal);
+
+        if(sf.hasNext()) {
+            SegmentList sl = new SegmentList();
+            ArrayList<Segment> adjusted = new ArrayList<>();
+
+            while (sf.hasNext()) {
+                sl.addSegment(sf.next());
+            }
+
+            Segment seg;
+            while (sl.hasNext()) {
+                if(_cancelToken)
+                    return false;
+
+                seg = sl.next();
+
+                if (seg.calculate()) {
+                    seg.adjust();
+                    adjusted.add(seg);
+                } else {
+                    seg.setWeight(seg.getWeight() - 1);
+                    sl.addSegment(seg);
+                }
+
+                if (!slowTimeTriggered && System.currentTimeMillis() - startTime > ADJUSTING_SLOW_TIME) {
+
+                    onAdjusterRunningSlow();
+
+                    slowTimeTriggered = true;
+                }
+            }
+
+            if (_cancelToken)
+                return false;
+
+            TtPoint p;
+            Hashtable<String, TtPoint> pointsTable = new Hashtable<>();
+
+            for (int s = 0; s < adjusted.size(); s++)
+            {
+                for (int i = 0; i < adjusted.get(s).getPointCount(); i++)
+                {
+                    p = adjusted.get(s).get(i);
+
+                    if (!pointsTable.containsKey(p.getCN()))
+                        pointsTable.put(p.getCN(), p);
+                }
+            }
+
+            ArrayList<TtPoint> points = new ArrayList<>(pointsTable.values());
+
+            dal.updatePoints(points);
+
+            calculateAreaAndPerimeter(dal);
+        }
+
+        return true;
+    }
+
+    private void calculateAreaAndPerimeter(DataAccessLayer dal) {
+        ArrayList<TtPolygon> polys = dal.getPolygons();
+
+        if (polys != null && polys.size() > 0) {
+            for (TtPolygon poly : polys) {
+                ArrayList<TtPoint> points = dal.getBoundaryPointsInPoly(poly.getCN());
+
+                if (points.size() > 2) {
+                    double perim = 0, area = 0;
+
+                    TtPoint p1, p2;
+                    for (int i = 0; i < points.size() - 1; i++) {
+                        p1 = points.get(i);
+                        p2 = points.get(i + 1);
+
+                        perim += TtUtils.Math.distance(p1, p2);
+                        area += ((p2.getAdjX() - p1.getAdjX()) * (p2.getAdjY() + p1.getAdjY()) / 2);
+                    }
+
+                    poly.setPerimeterLine(perim);
+
+                    p1 = points.get(points.size() - 1);
+                    p2 = points.get(0);
+                    perim += TtUtils.Math.distance(p1, p2);
+                    area += ((p2.getAdjX() - p1.getAdjX()) * (p2.getAdjY() + p1.getAdjY()) / 2);
+
+                    poly.setPerimeter(perim);
+                    poly.setArea(Math.abs(area));
+                } else {
+                    poly.setPerimeter(0);
+                    poly.setArea(0);
+                }
+
+                dal.updatePolygon(poly);
+            }
+        }
+    }
+
+
+    public void cancelAdjuster() {
+        _cancelToken = true;
+    }
+
+
+    public boolean isAdjusting() {
+        return false;
+    }
+
+
+    protected void onAdjusterStarted() {
+        if (_CurrentListener != null)
+            _CurrentListener.onAdjusterStarted();
+    }
+
+    protected void onAdjusterStopped(final ProjectAdjusterResult result, final AdjustingException.AdjustingError error) {
+        if (_CurrentListener != null)
+            _CurrentListener.onAdjusterStopped(result, error);
+
+        if (getDeviceSettings().isExternalSyncEnabled()) {
+            syncExternalDir();
+        }
+    }
+
+    protected void onAdjusterRunningSlow() {
+        if (_CurrentListener != null)
+            _CurrentListener.onAdjusterRunningSlow();
+    }
+
+
+    public interface ProjectAdjusterListener {
+        void onAdjusterStarted();
+        void onAdjusterStopped(final ProjectAdjusterResult result, final AdjustingException.AdjustingError error);
+        void onAdjusterRunningSlow();
+    }
+
+    public enum ProjectAdjusterResult {
+        ADJUSTING,
+        STARTS_WITH_TRAV_TYPE,
+        NO_POLYS,
+        BAD_POINT,
+        ERROR,
+        SUCCESSFUL,
+        CANCELED
+    }
+    //endregion
+
+
+    //region File / Folder Paths
+    private File _MediaDir;
+
+    public File getLogFile() {
+        return new File(getFilesDir(), Consts.Files.LOG_FILE);
+    }
+
+    public File getGpsLogFile() {
+        return new File(getCacheDir(), String.format("%s_%s", Consts.Files.GPS_LOG_FILE_PREFIX, DateTime.now().toString()));
+    }
+
+    public File getProjectMediaDir() {
+        if (!hasDAL()) throw new RuntimeException("Project not opened");
+        return _MediaDir != null ? _MediaDir : (_MediaDir = Paths.get(getFilesDir().getPath(), Consts.FolderLayout.Internal.MediaDir, FileUtils.getFileNameWoExt(getDAL().getFileName())).toFile());
+    }
+
+    public Uri getMediaFileByFileName(String fileName) {
+        return  Uri.parse(Paths.get(getProjectMediaDir().toString(), fileName).toString());
+    }
+
+    public File getSettingsFile() {
+        return new File(getCacheDir(), Consts.Files.SETTINGS_FILE);
+    }
+
+    public DocumentFile getTwoTrailsExternalDir() {
+        return _TwoTrailsExternalDir;
+    }
+
+    public DocumentFile getOfflineMapsDir() {
+        return _OfflineMapsDir;
+    }
+    public DocumentFile getImportDir() {
+        return _ImportDir;
+    }
+    public DocumentFile getImportedDir() {
+        return _ImportedDir;
+    }
+    public DocumentFile getExportDir() {
+        return _ExportDir;
+    }
+
+    //endregion
 }

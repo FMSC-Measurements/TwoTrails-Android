@@ -53,7 +53,7 @@ public class MetadataDetailsSpinnerAdapter extends BaseAdapter {
         ViewHolder mViewHolder;
 
         if(convertView == null) {
-            convertView = inflater.inflate(itemView, null);
+            convertView = inflater.inflate(itemView, parent, false);
             mViewHolder = new ViewHolder();
             convertView.setTag(mViewHolder);
 

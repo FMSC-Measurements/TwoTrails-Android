@@ -1,6 +1,5 @@
 package com.usda.fmsc.twotrails;
 
-import android.content.Context;
 import android.util.JsonWriter;
 
 import com.usda.fmsc.geospatial.UomElevation;
@@ -28,11 +27,12 @@ public class MetadataSettings extends Settings {
     private static final String META_CREW = "Crew";
 
 
-    public MetadataSettings(Context context) {
+    public MetadataSettings(TwoTrailsApp context) {
         super(context);
     }
 
     public void writeToFile(JsonWriter js) throws IOException {
+        //TODO Project Settings Export
     }
 
 

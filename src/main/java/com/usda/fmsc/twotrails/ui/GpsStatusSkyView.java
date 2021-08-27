@@ -21,19 +21,20 @@ import com.usda.fmsc.twotrails.R;
 
 public class GpsStatusSkyView extends GpsStatusView implements SensorEventListener {
     private PointF center;
-    private Paint paintCompass, paintVisSatellite, paintInvisSatellite, paintText, northPaint, southPaint;
-    private RectF outerCircle, innerCircle;
-    private int outerCircleRadius, innerCircleRadius, satRad;
+    private final Paint paintCompass, paintVisSatellite, paintInvisSatellite, paintText, northPaint, southPaint;
+    private final RectF outerCircle, innerCircle;
+    private int outerCircleRadius, innerCircleRadius;
+    private final int satRad;
     private float orientation = 0;
 
     private long lastUpdate = System.currentTimeMillis();
     private boolean compassLock = true, sensorsActive;
     private float[] mGravity, mGeomagnetic;
 
-    private Path northPath = new Path();
-    private Path southPath = new Path();
+    private final Path northPath = new Path();
+    private final Path southPath = new Path();
 
-    private Bitmap bmSatVis, bmSatUsed, bmSatSBAS;
+    private final Bitmap bmSatVis, bmSatUsed, bmSatSBAS;
 
     private SensorManager mSensorManager;
     private Sensor accelerometer, magnetometer;
@@ -186,8 +187,6 @@ public class GpsStatusSkyView extends GpsStatusView implements SensorEventListen
             float txtX = sat.getNmeaID() < 10 ? x - 7 : x - 12;
 
             canvas.drawText(String.valueOf(sat.getNmeaID()), txtX, y + 7, paintText);
-        } else {
-            Satellite s = sat;
         }
     }
 
@@ -195,7 +194,7 @@ public class GpsStatusSkyView extends GpsStatusView implements SensorEventListen
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
 
-        int shortSide = w < h ? w : h;
+        int shortSide = Math.min(w, h);
 
         center = new PointF(w / 2f, h / 2f);
 

@@ -12,12 +12,12 @@ import java.util.HashMap;
 import java.util.List;
 
 public class PolygonGraphicManager implements IGraphicManager {
-    private ArrayList<PolygonDrawOptions.Listener> polygonDrawListeners = new ArrayList<>();
-    private ArrayList<PolygonGraphicOptions.Listener> polygonGraphicListeners = new ArrayList<>();
+    private final ArrayList<PolygonDrawOptions.Listener> polygonDrawListeners = new ArrayList<>();
+    private final ArrayList<PolygonGraphicOptions.Listener> polygonGraphicListeners = new ArrayList<>();
 
-    private TtPolygon polygon;
-    private List<TtPoint> points;
-    private HashMap<String, TtMetadata> meta;
+    private final TtPolygon polygon;
+    private final List<TtPoint> points;
+    private final HashMap<String, TtMetadata> meta;
 
     private IPolygonGraphic polygonGraphic;
     private PolygonGraphicOptions graphicOptions;

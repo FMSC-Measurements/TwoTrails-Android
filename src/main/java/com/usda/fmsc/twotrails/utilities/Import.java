@@ -1,25 +1,26 @@
 package com.usda.fmsc.twotrails.utilities;
 
-import android.os.AsyncTask;
+import android.net.Uri;
 
+import com.usda.fmsc.android.utilities.TaskRunner;
 import com.usda.fmsc.geospatial.UomElevation;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.geospatial.utm.UTMTools;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
-import com.usda.fmsc.twotrails.units.Dist;
-import com.usda.fmsc.twotrails.units.OpType;
-import com.usda.fmsc.twotrails.units.Slope;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
 import com.usda.fmsc.twotrails.data.TwoTrailsSchema;
 import com.usda.fmsc.twotrails.logic.PointNamer;
+import com.usda.fmsc.twotrails.objects.TtGroup;
+import com.usda.fmsc.twotrails.objects.TtMetadata;
+import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.objects.points.GpsPoint;
 import com.usda.fmsc.twotrails.objects.points.QuondamPoint;
 import com.usda.fmsc.twotrails.objects.points.TravPoint;
-import com.usda.fmsc.twotrails.objects.TtGroup;
-import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
-import com.usda.fmsc.twotrails.objects.TtPolygon;
+import com.usda.fmsc.twotrails.units.Dist;
+import com.usda.fmsc.twotrails.units.OpType;
+import com.usda.fmsc.twotrails.units.Slope;
 import com.usda.fmsc.utilities.ParseEx;
 import com.usda.fmsc.utilities.StringEx;
 import com.usda.fmsc.utilities.gpx.GpxBaseTrack;
@@ -44,27 +45,23 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 
-import androidx.constraintlayout.widget.Guideline;
-
 public class Import {
     
     //region Text (CSV)
-    public static class TextImportTask extends ImportTask<TextImportTask.TextImportParams, Void> {
+    public static class TextImportTask extends ImportTask<TextImportTask.TextImportParams> {
 
         @Override
-        protected ImportResult doInBackground(TextImportParams... params) {
-            if (params.length < 1) {
+        protected ImportResult onBackgroundWork(TextImportParams params) {
+            if (params == null) {
                 return new ImportResult(ImportResultCode.InvalidParams);
             }
 
-            TextImportParams ip = params[0];
-
-            if (ip.getFilePath() == null) {
+            if (params.getFilePath() == null) {
                 return new ImportResult(ImportResultCode.InvalidParams, "No File selected");
             }
 
             try {
-                CSVParser parser = new CSVParser(new FileReader(ip.getFilePath()), CSVFormat.DEFAULT);
+                CSVParser parser = new CSVParser(new FileReader(params.getFilePath().toString()), CSVFormat.DEFAULT);
 
                 HashMap<String, TtPolygon> polygons = new HashMap<>();
                 HashMap<String, String> polyNameToCN = new HashMap<>();
@@ -81,11 +78,11 @@ public class Import {
                 TtPolygon tempPoly = null;
                 TtGroup tempGroup = null;
 
-                DataAccessLayer dal = ip.getDal();
+                DataAccessLayer dal = params.getDal();
 
-                List<String> toUsePolys = ip.getPolygonNames();
-                Map<TextFieldType, Integer> columnMap = ip.getColumnMap();
-                int polyCount = dal.getItemCount(TwoTrailsSchema.PolygonSchema.TableName);
+                List<String> toUsePolys = params.getPolygonNames();
+                Map<TextFieldType, Integer> columnMap = params.getColumnMap();
+                int polyCount = dal.getItemsCount(TwoTrailsSchema.PolygonSchema.TableName);
 
                 TtPoint point, prevPoint = null;
                 String temp;
@@ -122,8 +119,8 @@ public class Import {
 
                 int fPolyName = getFieldColumn(columnMap, TextFieldType.POLY_NAME, usePolyNames);
                 int fPID = getFieldColumn(columnMap, TextFieldType.PID, usePIDs);
-                int fCN = getFieldColumn(columnMap, TextFieldType.CN, ip.isAdvImport());
-                int fOp = getFieldColumn(columnMap, TextFieldType.OPTYPE, ip.isAdvImport());
+                int fCN = getFieldColumn(columnMap, TextFieldType.CN, params.isAdvImport());
+                int fOp = getFieldColumn(columnMap, TextFieldType.OPTYPE, params.isAdvImport());
                 int fGroupName = getFieldColumn(columnMap, TextFieldType.GROUP_NAME, hasGroups);
                 int fUnAjX = columnMap.get(TextFieldType.UNADJX);
                 int fUnAjY = columnMap.get(TextFieldType.UNADJY);
@@ -134,11 +131,11 @@ public class Import {
                 int fRmser = getFieldColumn(columnMap, TextFieldType.RMSER, hasRMSEr);
                 int fFwdAz = getFieldColumn(columnMap, TextFieldType.FWD_AZ, hasFwdAz);
                 int fBkAz = getFieldColumn(columnMap, TextFieldType.BK_AZ, hasBkAz);
-                int fSlopeDist = getFieldColumn(columnMap, TextFieldType.SLOPE_DIST, ip.isAdvImport());
-                int fSlopeDType = getFieldColumn(columnMap, TextFieldType.SLOPE_DIST_TYPE, ip.isAdvImport());
-                int fSlopeAng = getFieldColumn(columnMap, TextFieldType.SLOPE_ANG, ip.isAdvImport());
-                int fSlopeAngType = getFieldColumn(columnMap, TextFieldType.SLOPE_ANG_TYPE, ip.isAdvImport());
-                int fPCN = getFieldColumn(columnMap, TextFieldType.PARENT_CN, ip.isAdvImport());
+                int fSlopeDist = getFieldColumn(columnMap, TextFieldType.SLOPE_DIST, params.isAdvImport());
+                int fSlopeDType = getFieldColumn(columnMap, TextFieldType.SLOPE_DIST_TYPE, params.isAdvImport());
+                int fSlopeAng = getFieldColumn(columnMap, TextFieldType.SLOPE_ANG, params.isAdvImport());
+                int fSlopeAngType = getFieldColumn(columnMap, TextFieldType.SLOPE_ANG_TYPE, params.isAdvImport());
+                int fPCN = getFieldColumn(columnMap, TextFieldType.PARENT_CN, params.isAdvImport());
                 int fManAcc = getFieldColumn(columnMap, TextFieldType.MAN_ACC, hasManAcc);
                 int fTime = getFieldColumn(columnMap, TextFieldType.TIME, hasTime);
                 int fIndex = getFieldColumn(columnMap, TextFieldType.INDEX, hasIndex);
@@ -161,7 +158,7 @@ public class Import {
                         continue;
                     }
 
-                    if (ip.isAdvImport()) {
+                    if (params.isAdvImport()) {
                         OpType op = OpType.parse(record.get(fOp));
                         point = TtUtils.Points.createNewPointByOpType(op);
 
@@ -317,7 +314,7 @@ public class Import {
                         temp = record.get(fGroupName);
 
                         if (temp.equals(Consts.Defaults.MainGroupName)) {
-                            tempGroup = ip.getApp().getDAL().getGroupByCN(Consts.EmptyGuid);
+                            tempGroup = params.getApp().getDAL().getGroupByCN(Consts.EmptyGuid);
                         } else if (!groupNameToCN.containsKey(temp)) {
                             tempGroup = new TtGroup(temp);
                             groupNameToCN.put(tempGroup.getName(), tempGroup.getCN());
@@ -326,7 +323,7 @@ public class Import {
                             tempGroup = groups.get(groupNameToCN.get(temp));
                         }
                     } else if (tempGroup == null) {
-                        tempGroup = ip.getApp().getDAL().getGroupByCN(Consts.EmptyGuid);
+                        tempGroup = params.getApp().getDAL().getGroupByCN(Consts.EmptyGuid);
                     }
 
                     point.setGroupCN(tempGroup.getCN());
@@ -422,7 +419,7 @@ public class Import {
                     return new ImportResult(ImportResultCode.Cancelled);
                 }
             } catch (Exception ex) {
-                ip.getApp().getReport().writeError(ex.getMessage(), "Import:TextImportTask", ex.getStackTrace());
+                params.getApp().getReport().writeError(ex.getMessage(), "Import:TextImportTask", ex.getStackTrace());
                 return new ImportResult(ImportResultCode.ImportFailure, "Data error");
             }
         }
@@ -437,11 +434,11 @@ public class Import {
 
 
         public static class TextImportParams extends ImportParams {
-            private Map<TextFieldType, Integer> columnMap;
-            private boolean advImport;
-            private List<String> polygonNames;
+            private final Map<TextFieldType, Integer> columnMap;
+            private final boolean advImport;
+            private final List<String> polygonNames;
 
-            public TextImportParams(TwoTrailsApp app, String filePath, Map<TextFieldType, Integer> columnMap, List<String> polygonNames, boolean advImport) {
+            public TextImportParams(TwoTrailsApp app, Uri filePath, Map<TextFieldType, Integer> columnMap, List<String> polygonNames, boolean advImport) {
                 super(app, filePath);
                 this.columnMap = columnMap;
                 this.polygonNames = polygonNames;
@@ -650,30 +647,33 @@ public class Import {
 
 
     //region GPX
-    public static class GPXImportTask extends ImportTask<GPXImportTask.GPXImportParams, Void> {
+    public static class GPXImportTask extends ImportTask<GPXImportTask.GPXImportParams> {
 
         @Override
-        protected ImportResult doInBackground(GPXImportParams... params) {
-            GPXImportParams gip;
+        protected void onError(Exception exception) {
 
-            if (params.length < 1 || !validatePolyParams((gip = params[0]).getPolyParms())) {
+        }
+
+        @Override
+        protected ImportResult onBackgroundWork(GPXImportParams params) {
+            if (params == null || !validatePolyParams(params.getPolyParms())) {
                 return new ImportResult(ImportResultCode.InvalidParams);
             }
 
-            if (gip.getFilePath() == null) {
+            if (params.getFilePath() == null) {
                 return new ImportResult(ImportResultCode.InvalidParams, "No File selected");
             }
 
-            DataAccessLayer dal = gip.getDal();
+            DataAccessLayer dal = params.getDal();
 
             try {
                 ArrayList<TtPolygon> polygons = new ArrayList<>();
                 ArrayList<TtPoint> points = new ArrayList<>();
 
                 TtPolygon poly;
-                int polyCount = dal.getItemCount(TwoTrailsSchema.PolygonSchema.TableName);
+                int polyCount = dal.getItemsCount(TwoTrailsSchema.PolygonSchema.TableName);
 
-                for (GPXPolyParams gpp: gip.getPolyParms()) {
+                for (GPXPolyParams gpp: params.getPolyParms()) {
                     poly = new TtPolygon();
                     poly.setName(gpp.PolyName);
 
@@ -777,7 +777,7 @@ public class Import {
                     return new ImportResult(ImportResultCode.Cancelled);
                 }
             } catch (Exception ex) {
-                gip.getApp().getReport().writeError(ex.getMessage(), "Import:GPXImportTask", ex.getStackTrace());
+                params.getApp().getReport().writeError(ex.getMessage(), "Import:GPXImportTask", ex.getStackTrace());
                 return new ImportResult(ImportResultCode.ImportFailure, "Data error");
             }
         }
@@ -802,9 +802,9 @@ public class Import {
         }
 
         public static class GPXImportParams extends ImportParams {
-            private Collection<GPXPolyParams> polyParms;
+            private final Collection<GPXPolyParams> polyParms;
 
-            public GPXImportParams(TwoTrailsApp app, String filePath, Collection<GPXPolyParams> polyParms) {
+            public GPXImportParams(TwoTrailsApp app, Uri filePath, Collection<GPXPolyParams> polyParms) {
                 super(app, filePath);
                 this.polyParms = polyParms;
             }
@@ -840,30 +840,28 @@ public class Import {
 
 
     //region KML / KMZ
-    public static class KMLImportTask extends ImportTask<KMLImportTask.KMLImportParams, Void> {
+    public static class KMLImportTask extends ImportTask<KMLImportTask.KMLImportParams> {
 
         @Override
-        protected ImportResult doInBackground(KMLImportParams... params) {
-            KMLImportParams kip;
-
-            if (params.length < 1 || !validatePolyParams((kip = params[0]).getPolyParms())) {
+        protected ImportResult onBackgroundWork(KMLImportParams params) {
+            if (params == null || !validatePolyParams(params.getPolyParms())) {
                 return new ImportResult(ImportResultCode.InvalidParams);
             }
 
-            if (kip.getFilePath() == null) {
+            if (params.getFilePath() == null) {
                 return new ImportResult(ImportResultCode.InvalidParams, "No File selected");
             }
 
-            DataAccessLayer dal = kip.getDal();
+            DataAccessLayer dal = params.getDal();
 
             try {
                 ArrayList<TtPolygon> polygons = new ArrayList<>();
                 ArrayList<TtPoint> points = new ArrayList<>();
 
                 TtPolygon poly;
-                int polyCount = dal.getItemCount(TwoTrailsSchema.PolygonSchema.TableName);
+                int polyCount = dal.getItemsCount(TwoTrailsSchema.PolygonSchema.TableName);
 
-                for (KMLPolyParams gpp: kip.getPolyParms()) {
+                for (KMLPolyParams gpp: params.getPolyParms()) {
                     poly = new TtPolygon();
                     poly.setName(gpp.PolyName);
 
@@ -951,7 +949,7 @@ public class Import {
                     return new ImportResult(ImportResultCode.Cancelled);
                 }
             } catch (Exception ex) {
-                kip.getApp().getReport().writeError(ex.getMessage(), "Import:GPXImportTask", ex.getStackTrace());
+                params.getApp().getReport().writeError(ex.getMessage(), "Import:GPXImportTask", ex.getStackTrace());
                 return new ImportResult(ImportResultCode.ImportFailure, "Data error");
             }
         }
@@ -976,9 +974,9 @@ public class Import {
         }
 
         public static class KMLImportParams extends ImportParams {
-            private Collection<KMLPolyParams> polyParms;
+            private final Collection<KMLPolyParams> polyParms;
 
-            public KMLImportParams(TwoTrailsApp app, String filePath, Collection<KMLPolyParams> polyParms) {
+            public KMLImportParams(TwoTrailsApp app, Uri filePath, Collection<KMLPolyParams> polyParms) {
                 super(app, filePath);
                 this.polyParms = polyParms;
             }
@@ -1013,32 +1011,28 @@ public class Import {
     //endregion
 
     //region TTX
-    public static class TTXImportTask extends ImportTask<TTXImportTask.TTXImportParams, Void> {
+    public static class TTXImportTask extends ImportTask<TTXImportTask.TTXImportParams> {
 
         @Override
-        protected ImportResult doInBackground(TTXImportParams... params) {
-            TTXImportParams tip;
-
+        protected ImportResult onBackgroundWork(TTXImportParams params) {
             //check to make sure all quondams have parent polygons imported
-            if (params.length < 1) {
+            if (params == null) {
                 return new ImportResult(ImportResultCode.InvalidParams);
-            } else {
-                tip = params[0];
             }
 
-            if (tip.getFilePath() == null) {
+            if (params.getFilePath() == null) {
                 return new ImportResult(ImportResultCode.InvalidParams, "No File selected");
             }
 
-            DataAccessLayer dal = tip.getDal();
-            DataAccessLayer idal = tip.getImportDal();
+            DataAccessLayer dal = params.getDal();
+            DataAccessLayer idal = params.getImportDal();
 
             try {
                 ArrayList<TtPolygon> polygons = new ArrayList<>();
                 ArrayList<TtPoint> points = new ArrayList<>();
 
                 TtPolygon poly;
-                int polyCount = idal.getItemCount(TwoTrailsSchema.PolygonSchema.TableName);
+                //int polyCount = idal.getItemsCount(TwoTrailsSchema.PolygonSchema.TableName);
 
                 HashMap<String, String> polyCNCvt = new HashMap<>();
                 HashMap<String, TtPolygon> currPolys = dal.getPolygonsMap();
@@ -1056,11 +1050,11 @@ public class Import {
                     return fp;
                 };
 
-                for (TtPolygon polygon: tip.getPolygons()) {
+                for (TtPolygon polygon: params.getPolygons()) {
                     String oCN = polygon.getCN();
 
                     if (currPolys.containsKey(polygon.getCN())) {
-                        String newPolyUuid = java.util.UUID.randomUUID().toString();
+                        String newPolyUuid = UUID.randomUUID().toString();
                         polyCNCvt.put(oCN, newPolyUuid);
                         polygon.setCN(newPolyUuid);
                     }
@@ -1072,7 +1066,7 @@ public class Import {
                         String pointCNCvt = null;
 
                         if (cPoints.containsKey(point.getCN())) {
-                            pointCNCvt = java.util.UUID.randomUUID().toString();
+                            pointCNCvt = UUID.randomUUID().toString();
                             point.setCN(pointCNCvt);
                         }
 
@@ -1089,7 +1083,7 @@ public class Import {
                         points.add(point);
                     }
 
-                    polyCount++;
+                    //polyCount++;
                 }
 
                 if (!isCancelled()) {
@@ -1112,16 +1106,16 @@ public class Import {
                     return new ImportResult(ImportResultCode.Cancelled);
                 }
             } catch (Exception ex) {
-                tip.getApp().getReport().writeError(ex.getMessage(), "Import:GPXImportTask", ex.getStackTrace());
+                params.getApp().getReport().writeError(ex.getMessage(), "Import:GPXImportTask", ex.getStackTrace());
                 return new ImportResult(ImportResultCode.ImportFailure, "Data error");
             }
         }
 
         public static class TTXImportParams extends ImportParams {
-            private Collection<TtPolygon> polygons;
-            private DataAccessLayer idal;
+            private final Collection<TtPolygon> polygons;
+            private final DataAccessLayer idal;
 
-            public TTXImportParams(TwoTrailsApp app, String filePath, Collection<TtPolygon> polygons, DataAccessLayer idal) {
+            public TTXImportParams(TwoTrailsApp app, Uri filePath, Collection<TtPolygon> polygons, DataAccessLayer idal) {
                 super(app, filePath);
                 this.polygons = polygons;
                 this.idal = idal;
@@ -1139,14 +1133,19 @@ public class Import {
     //endregion
 
 
-    public static abstract class ImportTask<IP extends ImportParams, Progress> extends AsyncTask<IP, Progress, ImportResult> {
+    public static abstract class ImportTask<IP extends ImportParams> extends TaskRunner.Task<IP, ImportResult> {
         ImportTaskListener listener;
 
         @Override
-        protected void onPostExecute(ImportResult importResult) {
+        protected void onComplete(ImportResult result) {
             if (listener != null) {
-                listener.onTaskFinish(importResult);
+                listener.onTaskFinish(result);
             }
+        }
+
+        @Override
+        protected void onError(Exception exception) {
+
         }
 
         public void setListener(ImportTaskListener listener) {
@@ -1157,9 +1156,9 @@ public class Import {
 
     public static abstract class ImportParams {
         TwoTrailsApp app;
-        String filePath;
+        Uri filePath;
 
-        public ImportParams(TwoTrailsApp app, String filePath) {
+        public ImportParams(TwoTrailsApp app, Uri filePath) {
             this.filePath = filePath;
             this.app = app;
         }
@@ -1170,7 +1169,7 @@ public class Import {
 
         public  TwoTrailsApp getApp() { return app; }
 
-        public String getFilePath() {
+        public Uri getFilePath() {
             return filePath;
         }
     }
@@ -1182,8 +1181,8 @@ public class Import {
 
 
     public static class ImportResult {
-        private ImportResultCode code;
-        private String message;
+        private final ImportResultCode code;
+        private final String message;
 
         public ImportResult(ImportResultCode code) {
             this(code, null);

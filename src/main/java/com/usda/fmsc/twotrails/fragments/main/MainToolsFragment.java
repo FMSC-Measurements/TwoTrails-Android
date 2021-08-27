@@ -1,17 +1,16 @@
 package com.usda.fmsc.twotrails.fragments.main;
 
 import android.os.Bundle;
-import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.TwoTrailsApp;
+import com.usda.fmsc.twotrails.fragments.TtBaseFragment;
 
 
-public class MainToolsFragment extends Fragment {
+public class MainToolsFragment extends TtBaseFragment {
     private Button btnMap, btnGEarth, btnHAID, btnExport,
             btnPlotGrid, btnGpsLogger, btnGpsStatus, btnSAT;
     private View viewTest;
@@ -73,7 +72,7 @@ public class MainToolsFragment extends Fragment {
             //btnGpsLogger.setEnabled(enable);
             //btnGpsStatus.setEnabled(enable);
 
-            if (TwoTrailsApp.getInstance(getContext()).getDeviceSettings().isDeveloperOptionsEnabled()) {
+            if (getTtAppCtx().getDeviceSettings().isDeveloperOptionsEnabled()) {
                 viewTest.setVisibility(View.VISIBLE);
             } else {
                 viewTest.setVisibility(View.GONE);

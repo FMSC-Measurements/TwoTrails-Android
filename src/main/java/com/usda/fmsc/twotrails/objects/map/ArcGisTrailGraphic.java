@@ -22,7 +22,7 @@ import java.util.List;
 public class ArcGisTrailGraphic implements ITrailGraphic, IMarkerDataGraphic {
     private HashMap<String, MarkerData> _MarkerData;
 
-    private MapView map;
+    private final MapView map;
     private Extent polyBounds;
     private Extent.Builder eBuilder;
 

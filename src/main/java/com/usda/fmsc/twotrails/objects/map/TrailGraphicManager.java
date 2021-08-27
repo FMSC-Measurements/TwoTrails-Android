@@ -10,10 +10,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class TrailGraphicManager implements IGraphicManager {
-    private TtPolygon polygon;
-    private ArrayList<TtPoint> points;
-    private ArrayList<Position> positions;
-    private HashMap<String, TtMetadata> meta;
+    private final TtPolygon polygon;
+    private final ArrayList<TtPoint> points;
+    private final ArrayList<Position> positions;
+    private final HashMap<String, TtMetadata> meta;
 
     private ITrailGraphic trailGraphic;
     private TrailGraphicOptions graphicOptions;

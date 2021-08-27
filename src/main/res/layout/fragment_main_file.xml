@@ -10,9 +10,9 @@
         android:orientation="vertical">
 
         <Button
-            android:text="@string/str_new"
+            android:text="@string/str_create"
             android:id="@+id/mainFragFileBtnNew"
-            android:onClick="btnNewClick"
+            android:onClick="btnCreateClick"
             android:layout_marginTop="5dp"
             style="@style/MainActivityButtons"/>
 
@@ -27,31 +27,41 @@
         <View style="@style/Dividers"/>
 
         <Button
-            android:text="@string/main_btn_open_rec"
+            android:text="@string/main_btn_import_project"
             android:id="@+id/mainFragFileBtnOpenRecent"
-            android:onClick="btnOpenRecClick"
+            android:onClick="btnImportProjectClick"
             style="@style/MainActivityButtons"/>
 
 
         <View style="@style/Dividers"/>
 
         <Button
-            android:text="@string/main_btn_import"
+            android:text="@string/main_btn_export_project"
+            android:id="@+id/mainFragFileBtnExportProject"
+            android:onClick="btnExportProjectClick"
+            android:enabled="false"
+            style="@style/MainActivityButtons"/>
+
+        <View style="@style/Dividers"/>
+
+        <Button
+            android:text="@string/main_btn_import_data"
             android:id="@+id/mainFragFileBtnImport"
-            android:onClick="btnImportClick"
+            android:onClick="btnImportDataClick"
             android:enabled="false"
             style="@style/MainActivityButtons"/>
 
         <View style="@style/Dividers"/>
 
-        <Button
-            android:text="@string/main_btn_duplicate"
-            android:id="@+id/mainFragFileBtnDup"
-            android:onClick="btnDupClick"
-            android:enabled="false"
-            style="@style/MainActivityButtons"/>
+<!--        <Button-->
+<!--            android:text="@string/main_btn_duplicate"-->
+<!--            android:id="@+id/mainFragFileBtnDup"-->
+<!--            android:onClick="btnBackupClick"-->
+<!--            android:enabled="false"-->
+<!--            style="@style/MainActivityButtons"-->
+<!--            android:visibility="gone"/>-->
 
-        <View style="@style/Dividers"/>
+<!--        <View style="@style/Dividers"/>-->
 
         <LinearLayout
             android:id="@+id/mainFragFileCleanDb"

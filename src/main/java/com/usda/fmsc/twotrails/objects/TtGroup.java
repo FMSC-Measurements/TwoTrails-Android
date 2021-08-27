@@ -3,6 +3,8 @@ package com.usda.fmsc.twotrails.objects;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import androidx.annotation.NonNull;
+
 import com.usda.fmsc.utilities.StringEx;
 
 public class TtGroup extends TtObject {
@@ -121,6 +123,7 @@ public class TtGroup extends TtObject {
     }
 
     @Override
+    @NonNull
     public String toString()
     {
         return _Name;

@@ -69,10 +69,10 @@ public class MapActivity extends BaseMapActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenuEx(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_map, menu);
 
-        return super.onCreateOptionsMenu(menu);
+        return super.onCreateOptionsMenuEx(menu);
     }
 
     //endregion

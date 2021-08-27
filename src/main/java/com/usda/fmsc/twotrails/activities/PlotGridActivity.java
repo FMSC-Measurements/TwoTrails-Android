@@ -1,6 +1,5 @@
 package com.usda.fmsc.twotrails.activities;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -22,12 +21,12 @@ import android.widget.Toast;
 
 import com.usda.fmsc.android.dialogs.DontAskAgainDialog;
 import com.usda.fmsc.android.dialogs.InputDialog;
+import com.usda.fmsc.android.utilities.TaskRunner;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.DeviceSettings;
 import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.logic.PlotGenerator;
-import com.usda.fmsc.twotrails.logic.PolygonAdjuster;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
@@ -38,6 +37,7 @@ import com.usda.fmsc.twotrails.utilities.TtUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 
 import com.usda.fmsc.utilities.EnumEx;
@@ -48,8 +48,8 @@ import org.joda.time.DateTime;
 
 import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
 
-@SuppressLint("DefaultLocale")
 public class PlotGridActivity extends CustomToolbarActivity {
+    private final TaskRunner taskRunner = new TaskRunner();
     private Spinner spnPoints, spnPointLoc, spnSampleType;
     private EditText txtGridX, txtGridY, txtTilt, txtSubSample;
     private CheckBox chkSubSample;
@@ -86,7 +86,7 @@ public class PlotGridActivity extends CustomToolbarActivity {
             polygons.add(polygon);
             allPolys.add(polygon);
 
-            Toast.makeText(getBaseContext(), String.format("%d Plots created",
+            Toast.makeText(getBaseContext(), String.format(Locale.getDefault(), "%d Plots created",
                             getTtAppCtx().getDAL().getPointCountInPolygon(polygon.getCN())),
                     Toast.LENGTH_SHORT).show();
             hideProgress();
@@ -251,12 +251,12 @@ public class PlotGridActivity extends CustomToolbarActivity {
 
             dialog.setMessage("Plots are currently being generated. Do you want to cancel the plots?");
             dialog.setPositiveButton(R.string.str_yes, (dialog1, which) -> {
-                generator.cancel(true);
+                generator.cancel();
                 activity.onBackPressed();
             })
             .setNegativeButton(R.string.str_no, null);
 
-            generator.cancel(true);
+            generator.cancel();
             return;
         }
 
@@ -269,7 +269,7 @@ public class PlotGridActivity extends CustomToolbarActivity {
         super.onDestroy();
 
         if (adjust) {
-            PolygonAdjuster.adjust(getTtAppCtx(), true);
+            getTtAppCtx().adjustProject(true);
         }
     }
 
@@ -304,7 +304,7 @@ public class PlotGridActivity extends CustomToolbarActivity {
                             DeviceSettings.AUTO_OVERWRITE_PLOTGRID,
                             getTtAppCtx().getDeviceSettings().getPrefs());
 
-                    dialog.setMessage(String.format("The polygon name '%s' already exists. Would you like to rename or overwrite it?", polyName));
+                    dialog.setMessage(String.format(Locale.getDefault(), "The polygon name '%s' already exists. Would you like to rename or overwrite it?", polyName));
 
                     dialog.setPositiveButton("Overwrite", (dialogInterface, i, value) -> overwritePoly(poly), 2);
 
@@ -353,7 +353,9 @@ public class PlotGridActivity extends CustomToolbarActivity {
             }
 
             generator = new PlotGenerator(getTtAppCtx(), metadata, plotGenListener);
-            generator.execute(params);
+
+            taskRunner.executeAsync(generator, params);
+            
             layControls.setEnabled(false);
             progressBar.setVisibility(View.VISIBLE);
         } else {
@@ -366,7 +368,7 @@ public class PlotGridActivity extends CustomToolbarActivity {
         new Thread(() -> {
             InputDialog dialog = new InputDialog(getBaseContext());
 
-            dialog.setMessage(String.format("Rename PlotGrid %s.", oldName));
+            dialog.setMessage(String.format(Locale.getDefault(), "Rename PlotGrid %s.", oldName));
 
             dialog.setPositiveButton(R.string.str_rename, (dialog1, which) -> generatePoints(((InputDialog) dialog1).getText()));
 
@@ -461,7 +463,7 @@ public class PlotGridActivity extends CustomToolbarActivity {
 
     public void btnPlotCreateClick(View view) {
         if (!generating && areSettingsValid()) {
-            String polyName = String.format("%s_PltSample", selectedPoly.getName());
+            String polyName = String.format(Locale.getDefault(), "%s_PltSample", selectedPoly.getName());
             generatePoints(polyName);
         }
     }
@@ -469,12 +471,13 @@ public class PlotGridActivity extends CustomToolbarActivity {
 
 
     public static class PointDetailsSkip1SpinnerAdapter extends BaseAdapter {
-        private List<TtPoint> points;
-        private LayoutInflater inflater;
-        private Context context;
-        private AppUnits.IconColor iconColor;
-        private boolean showPolygon = false;
-        private int itemView;
+        private final boolean SHOW_POLYGON = false;
+
+        private final List<TtPoint> points;
+        private final LayoutInflater inflater;
+        private final Context context;
+        private final AppUnits.IconColor iconColor;
+        private final int itemView;
 
         private PointDetailsSkip1SpinnerAdapter(List<TtPoint> points, Context context, AppUnits.IconColor iconColor, int itemView) {
             this.points = points;
@@ -504,7 +507,7 @@ public class PlotGridActivity extends CustomToolbarActivity {
             PointDetailsSkip1SpinnerAdapter.ViewHolder mViewHolder;
 
             if(convertView == null) {
-                convertView = inflater.inflate(itemView, null);
+                convertView = inflater.inflate(itemView, parent, false);
                 mViewHolder = new PointDetailsSkip1SpinnerAdapter.ViewHolder();
                 convertView.setTag(mViewHolder);
 
@@ -516,7 +519,7 @@ public class PlotGridActivity extends CustomToolbarActivity {
             if (position > 0) {
                 TtPoint point = getItem(position);
 
-                mViewHolder.text.setText(String.format("%d", point.getPID()));
+                mViewHolder.text.setText(String.format(Locale.getDefault(), "%d", point.getPID()));
             } else {
                 mViewHolder.text.setText(R.string.str_rand);
             }
@@ -544,8 +547,8 @@ public class PlotGridActivity extends CustomToolbarActivity {
 
                 mViewHolder.image.setImageDrawable(TtUtils.UI.getTtOpDrawable(point.getOp(), iconColor, context));
                 mViewHolder.image.setVisibility(View.VISIBLE);
-                mViewHolder.text.setText(StringEx.format("%d%s", point.getPID(),
-                        showPolygon ? " - " + point.getPolyName() : StringEx.Empty));
+                mViewHolder.text.setText(String.format(Locale.getDefault(), "%d%s", point.getPID(),
+                        SHOW_POLYGON ? " - " + point.getPolyName() : StringEx.Empty));
             } else {
                 mViewHolder.image.setVisibility(View.INVISIBLE);
                 mViewHolder.text.setText(R.string.str_rand);

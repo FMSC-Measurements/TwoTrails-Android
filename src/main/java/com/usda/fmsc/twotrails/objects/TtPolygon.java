@@ -5,6 +5,7 @@ import android.os.Parcelable;
 import androidx.annotation.NonNull;
 
 import com.usda.fmsc.twotrails.Consts;
+import com.usda.fmsc.twotrails.units.UnitType;
 import com.usda.fmsc.utilities.StringEx;
 
 import org.joda.time.DateTime;
@@ -24,19 +25,19 @@ public class TtPolygon extends TtObject implements Comparable<TtPolygon>, Compar
         }
     };
 
-    private String Name;
-    private DateTime Time;
+    private String _Name;
+    private DateTime _Time;
 
-    private String Description;
+    private String _Description;
 
-    private int IncrementBy;
-    private int PointStartIndex;
+    private int _IncrementBy;
+    private int _PointStartIndex;
 
-    private double Accuracy;
+    private double _Accuracy;
 
-    private double Area;
-    private double Perimeter;
-    private double PerimeterLine;
+    private double _Area;
+    private double _Perimeter;
+    private double _PerimeterLine;
 
 
     //region Constructors
@@ -48,37 +49,37 @@ public class TtPolygon extends TtObject implements Comparable<TtPolygon>, Compar
     public TtPolygon(Parcel source) {
         super(source);
 
-        Name = source.readString();
-        Time = (DateTime) source.readSerializable();
-        Description = source.readString();
-        IncrementBy = source.readInt();
-        PointStartIndex = source.readInt();
-        Accuracy = source.readDouble();
-        Area = source.readDouble();
-        Perimeter = source.readDouble();
-        PerimeterLine = source.readDouble();
+        _Name = source.readString();
+        _Time = (DateTime) source.readSerializable();
+        _Description = source.readString();
+        _IncrementBy = source.readInt();
+        _PointStartIndex = source.readInt();
+        _Accuracy = source.readDouble();
+        _Area = source.readDouble();
+        _Perimeter = source.readDouble();
+        _PerimeterLine = source.readDouble();
     }
 
     public TtPolygon(TtPolygon p) {
         super(p);
 
-        Name = p.getName();
-        Description = p.getDescription();
-        Accuracy = p.getAccuracy();
-        Area = p.getArea();
-        Perimeter = p.getPerimeter();
-        PerimeterLine = p.getPerimeterLine();
-        IncrementBy = p.getIncrementBy();
-        PointStartIndex = p.getPointStartIndex();
-        Time = p.getTime();
+        _Name = p.getName();
+        _Description = p.getDescription();
+        _Accuracy = p.getAccuracy();
+        _Area = p.getArea();
+        _Perimeter = p.getPerimeter();
+        _PerimeterLine = p.getPerimeterLine();
+        _IncrementBy = p.getIncrementBy();
+        _PointStartIndex = p.getPointStartIndex();
+        _Time = p.getTime();
     }
 
     public TtPolygon(int pointStartIndex) {
-        this.Description = StringEx.Empty;
-        this.IncrementBy = 10;
-        this.PointStartIndex = pointStartIndex;
-        this.Accuracy = Consts.Default_Point_Accuracy;
-        this.Time = DateTime.now();
+        this._Description = StringEx.Empty;
+        this._IncrementBy = 10;
+        this._PointStartIndex = pointStartIndex;
+        this._Accuracy = Consts.Default_Point_Accuracy;
+        this._Time = DateTime.now();
     }
     //endregion
 
@@ -92,97 +93,102 @@ public class TtPolygon extends TtObject implements Comparable<TtPolygon>, Compar
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
 
-        dest.writeString(StringEx.getValueOrEmpty(Name));
-        dest.writeSerializable(Time);
-        dest.writeString(StringEx.getValueOrEmpty(Description));
-        dest.writeInt(IncrementBy);
-        dest.writeInt(PointStartIndex);
-        dest.writeDouble(Accuracy);
-        dest.writeDouble(Area);
-        dest.writeDouble(Perimeter);
-        dest.writeDouble(PerimeterLine);
+        dest.writeString(StringEx.getValueOrEmpty(_Name));
+        dest.writeSerializable(_Time);
+        dest.writeString(StringEx.getValueOrEmpty(_Description));
+        dest.writeInt(_IncrementBy);
+        dest.writeInt(_PointStartIndex);
+        dest.writeDouble(_Accuracy);
+        dest.writeDouble(_Area);
+        dest.writeDouble(_Perimeter);
+        dest.writeDouble(_PerimeterLine);
     }
 
     //region Get/Set
     public String getName() {
-        return Name;
+        return _Name;
     }
 
     public void setName(String Name) {
-        this.Name = Name;
+        this._Name = Name;
+    }
+
+
+    public UnitType getUnitType() {
+        return UnitType.General;
     }
 
 
     public String getDescription() {
-        return Description;
+        return _Description;
     }
 
     public void setDescription(String Description) {
-        this.Description = Description;
+        this._Description = Description;
     }
 
     public int getIncrementBy() {
-        return IncrementBy;
+        return _IncrementBy;
     }
 
     public void setIncrementBy(int IncrementBy) {
         if(IncrementBy < 1)
             throw new IllegalArgumentException("Increment must be greater than 0.");
 
-        this.IncrementBy = IncrementBy;
+        this._IncrementBy = IncrementBy;
     }
 
     public int getPointStartIndex() {
-        return PointStartIndex;
+        return _PointStartIndex;
     }
 
     public void setPointStartIndex(int PointStartIndex) {
         if(PointStartIndex < 1)
             throw new IllegalArgumentException("Start Index must be greater than 0.");
 
-        this.PointStartIndex = PointStartIndex;
+        this._PointStartIndex = PointStartIndex;
     }
 
 
     public double getAccuracy() {
-        return Accuracy;
+        return _Accuracy;
     }
 
     public void setAccuracy(double PolyAcc) {
-        this.Accuracy = PolyAcc;
+        this._Accuracy = PolyAcc;
     }
 
 
     public double getArea() {
-        return Area;
+        return _Area;
     }
 
     public void setArea(double Area) {
-        this.Area = Area;
+        this._Area = Area;
     }
 
     public double getPerimeter() {
-        return Perimeter;
+        return _Perimeter;
     }
 
     public void setPerimeter(double Perimeter) {
-        this.Perimeter = Perimeter;
+        this._Perimeter = Perimeter;
     }
 
     public void setPerimeterLine(double PerimeterLine) {
-        this.PerimeterLine = PerimeterLine;
+        this._PerimeterLine = PerimeterLine;
     }
 
     public double getPerimeterLine() {
-        return PerimeterLine;
+        return _PerimeterLine;
     }
 
     public DateTime getTime() {
-        return Time;
+        return _Time;
     }
 
     public void setTime(DateTime time) {
-        this.Time = time;
+        this._Time = time;
     }
 
 
@@ -209,7 +215,8 @@ public class TtPolygon extends TtObject implements Comparable<TtPolygon>, Compar
     }
 
     @Override
+    @NonNull
     public String toString() {
-        return Name;
+        return _Name;
     }
 }

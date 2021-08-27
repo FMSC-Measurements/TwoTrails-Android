@@ -89,19 +89,23 @@ public class MoveToPointDialog extends DialogFragment {
 
         final AlertDialog dialog = builder.create();
 
-        fButton.setOnClickListener(v -> {
-            if (onFirstClick != null) {
-                onFirstClick.onClick(dialog, 0);
-            }
-            dismiss();
-        });
+        if (fButton != null) {
+            fButton.setOnClickListener(v -> {
+                if (onFirstClick != null) {
+                    onFirstClick.onClick(dialog, 0);
+                }
+                dismiss();
+            });
+        }
 
-        lButton.setOnClickListener(v -> {
-            if (onLastClick != null) {
-                onLastClick.onClick(dialog, 0);
-            }
-            dismiss();
-        });
+        if (lButton != null) {
+            lButton.setOnClickListener(v -> {
+                if (onLastClick != null) {
+                    onLastClick.onClick(dialog, 0);
+                }
+                dismiss();
+            });
+        }
 
         return dialog;
     }

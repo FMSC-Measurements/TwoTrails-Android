@@ -8,6 +8,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.twotrails.activities.MetadataActivity;
 import com.usda.fmsc.twotrails.Consts;
@@ -87,27 +89,25 @@ public class MetadataFragment extends AnimationCardFragment implements MetadataA
     }
 
     @Override
-    public void onAttach(Context activity) {
+    public void onAttach(@NonNull Context activity) {
         super.onAttach(activity);
         try {
             this.activity = (MetadataActivity) activity;
 
-            if (activity != null) {
-                if (_MetaCN == null) {
-                    Bundle bundle = getArguments();
-                    if (bundle != null) {
-                        _MetaCN = bundle.getString(METADATA_CN);
-                    }
+            if (_MetaCN == null) {
+                Bundle bundle = getArguments();
+                if (bundle != null) {
+                    _MetaCN = bundle.getString(METADATA_CN);
                 }
-
-                if (_MetaCN != null) {
-                    _Metadata = this.activity.getMetadata(_MetaCN);
-                } else {
-                    this.activity.getTtAppCtx().getReport().writeError("Unable to get Metadata", "MetadataFragment");
-                }
-
-                this.activity.register(_MetaCN, this);
             }
+
+            if (_MetaCN != null) {
+                _Metadata = this.activity.getMetadata(_MetaCN);
+            } else {
+                this.activity.getTtAppCtx().getReport().writeError("Unable to get Metadata", "MetadataFragment");
+            }
+
+            this.activity.register(_MetaCN, this);
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
                     + " must implement Metadata PointMediaListener");

@@ -1,14 +1,20 @@
 package com.usda.fmsc.twotrails.utilities;
 
-import android.os.AsyncTask;
+import android.net.Uri;
 
+import androidx.documentfile.provider.DocumentFile;
+
+import com.usda.fmsc.android.utilities.TaskRunner;
 import com.usda.fmsc.geospatial.utm.UTMTools;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
+import com.usda.fmsc.twotrails.data.DataAccessManager;
 import com.usda.fmsc.twotrails.data.MediaAccessLayer;
+import com.usda.fmsc.twotrails.data.MediaAccessManager;
 import com.usda.fmsc.twotrails.objects.media.TtImage;
 import com.usda.fmsc.twotrails.units.Dist;
 import com.usda.fmsc.twotrails.units.Slope;
 import com.usda.fmsc.utilities.FileUtils;
+import com.usda.fmsc.utilities.MimeTypes;
 import com.usda.fmsc.utilities.gpx.GpxDocument;
 import com.usda.fmsc.utilities.gpx.GpxMetadata;
 import com.usda.fmsc.utilities.gpx.GpxPoint;
@@ -36,8 +42,10 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -51,15 +59,64 @@ import org.apache.commons.csv.CSVPrinter;
 import org.joda.time.DateTime;
 
 public class Export {
-    public static String points(DataAccessLayer dal, String dir) {
-        String pointsFilename = String.format("%s/Points.csv", dir);
-        String groupsFilename = String.format("%s/Groups.csv", dir);
+    public static File exportProjectPackage(TwoTrailsApp context, DataAccessLayer dal, MediaAccessLayer mal) {
+        String projectName = scrubProjectName(dal.getProjectID());
+
+        File tcProjDir = new File(context.getCacheDir(), projectName);
+
+        if (!tcProjDir.exists()) {
+            if (!tcProjDir.mkdirs())
+                throw new RuntimeException("Unable to create directories");
+        }
+
+        File tcZip = new File(context.getCacheDir(), String.format("%s_Export.zip", projectName));
+
+        try {
+            byte[] buffer = new byte[1024];
+            ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(tcZip));
+
+            zos.putNextEntry(new ZipEntry(dal.getFileName()));
+            FileInputStream fis = new FileInputStream(context.getDatabasePath(dal.getFileName()));
+
+            int len;
+            while ((len = fis.read(buffer)) > 0) {
+                zos.write(buffer, 0, len);
+            }
+
+            fis.close();
+
+            zos.closeEntry();
+
+            if (mal != null) {
+                zos.putNextEntry(new ZipEntry(FileUtils.getFileName(mal.getFileName())));
+                fis = new FileInputStream(context.getDatabasePath(mal.getFileName()));
+
+                while ((len = fis.read(buffer)) > 0) {
+                    zos.write(buffer, 0, len);
+                }
+
+                fis.close();
+
+                zos.closeEntry();
+            }
+
+            zos.close();
+
+            return tcZip;
+        } catch (Exception e) {
+            context.getReport().writeError(e.getMessage(), "Export:exportProjectPackage");
+            throw new RuntimeException("Error Exporting Project Package");
+        }
+    }
+
+    public static File points(TwoTrailsApp context, DataAccessLayer dal, File dir) {
+        File tcPointsFile = new File(dir != null ? dir : context.getCacheDir(), "Points.csv");
 
         try {
             HashMap<String, TtMetadata> metadata = dal.getMetadataMap();
 
             //region Point Headers
-            CSVPrinter printer = new CSVPrinter(new FileWriter(pointsFilename), CSVFormat.DEFAULT);
+            CSVPrinter printer = new CSVPrinter(new FileWriter(tcPointsFile), CSVFormat.DEFAULT);
 
             printer.printRecord(
                     "Point ID",
@@ -216,9 +273,19 @@ public class Export {
 
             printer.close();
             //endregion
+        } catch (Exception ex) {
+            context.getReport().writeError(ex.getMessage(), "Export:points", ex.getStackTrace());
+            throw new RuntimeException("Error Exporting Points");
+        }
 
-            //region Groups
-            printer = new CSVPrinter(new FileWriter(groupsFilename), CSVFormat.DEFAULT);
+        return tcPointsFile;
+    }
+
+    public static File groups(TwoTrailsApp context, DataAccessLayer dal, File dir) {
+        File tcGroupsFile = new File(dir != null ? dir : context.getCacheDir(), "Groups.csv");
+
+        try {
+            CSVPrinter printer = new CSVPrinter(new FileWriter(tcGroupsFile), CSVFormat.DEFAULT);
 
             printer.printRecord(
                     "Name",
@@ -227,8 +294,7 @@ public class Export {
                     "CN"
             );
 
-
-            values = new ArrayList<>(4);
+            ArrayList<String> values = new ArrayList<>(4);
 
             for (TtGroup group : dal.getGroups()) {
                 values.add(group.getName());
@@ -241,20 +307,19 @@ public class Export {
             }
 
             printer.close();
-            //endregion
         } catch (Exception ex) {
-            pointsFilename = null;
-            TwoTrailsApp.getTtReport().writeError(ex.getMessage(), "Export:points", ex.getStackTrace());
+            context.getReport().writeError(ex.getMessage(), "Export:groups", ex.getStackTrace());
+            throw new RuntimeException("Error Exporting Groups");
         }
 
-        return pointsFilename;
+        return tcGroupsFile;
     }
 
-    public static String polygons(DataAccessLayer dal, String dir) {
-        String polysFilename = String.format("%s/Polygons.csv", dir);
+    public static File polygons(TwoTrailsApp context, DataAccessLayer dal, File dir) {
+        File tcPolysFile = new File(dir != null ? dir : context.getCacheDir(), "Polygons.csv");
 
         try {
-            CSVPrinter printer = new CSVPrinter(new FileWriter(polysFilename), CSVFormat.DEFAULT);
+            CSVPrinter printer = new CSVPrinter(new FileWriter(tcPolysFile), CSVFormat.DEFAULT);
 
             printer.printRecord(
                     "Name",
@@ -286,19 +351,19 @@ public class Export {
             }
 
             printer.close();
-        } catch (Exception ex) {
-            polysFilename = null;
-            TwoTrailsApp.getTtReport().writeError(ex.getMessage(), "Export:polygons", ex.getStackTrace());
-        }
 
-        return polysFilename;
+            return tcPolysFile;
+        } catch (Exception ex) {
+            context.getReport().writeError(ex.getMessage(), "Export:polygons", ex.getStackTrace());
+            throw new RuntimeException("Error Exporting Polygons");
+        }
     }
 
-    public static String metadata(DataAccessLayer dal, String dir) {
-        String metaFilename = String.format("%s/Metadata.csv", dir);
+    public static File metadata(TwoTrailsApp context, DataAccessLayer dal, File dir) {
+        File tcMetaFile = new File(dir != null ? dir : context.getCacheDir(), "Metadata.csv");
 
         try {
-            CSVPrinter writer = new CSVPrinter(new FileWriter(metaFilename), CSVFormat.DEFAULT);
+            CSVPrinter writer = new CSVPrinter(new FileWriter(tcMetaFile), CSVFormat.DEFAULT);
 
             writer.printRecord(
                     "Name",
@@ -340,19 +405,19 @@ public class Export {
             }
 
             writer.close();
-        } catch (Exception ex) {
-            metaFilename = null;
-            TwoTrailsApp.getTtReport().writeError(ex.getMessage(), "Export:metadata", ex.getStackTrace());
-        }
 
-        return metaFilename;
+            return tcMetaFile;
+        } catch (Exception ex) {
+            context.getReport().writeError(ex.getMessage(), "Export:metadata", ex.getStackTrace());
+            throw new RuntimeException("Error Exporting Metadata");
+        }
     }
 
-    public static String project(DataAccessLayer dal, String dir) {
-        String projFilename = String.format("%s/Project.csv", dir);
+    public static File project(TwoTrailsApp context, DataAccessLayer dal, File dir) {
+        File tcProjectFile = new File(dir != null ? dir : context.getCacheDir(), "Project.csv");
 
         try {
-            CSVPrinter writer = new CSVPrinter(new FileWriter(projFilename), CSVFormat.DEFAULT);
+            CSVPrinter writer = new CSVPrinter(new FileWriter(tcProjectFile), CSVFormat.DEFAULT);
 
             writer.printRecord(
                     "Project Name",
@@ -381,19 +446,20 @@ public class Export {
             );
 
             writer.close();
-        } catch (Exception ex) {
-            projFilename = null;
-            TwoTrailsApp.getTtReport().writeError(ex.getMessage(), "Export:metadata", ex.getStackTrace());
-        }
 
-        return projFilename;
+            return tcProjectFile;
+        } catch (Exception ex) {
+            context.getReport().writeError(ex.getMessage(), "Export:metadata", ex.getStackTrace());
+            throw new RuntimeException("Error Exporting Project Info");
+        }
     }
 
-    public static String nmea(DataAccessLayer dal, String dir) {
-        String nmeaFilename = String.format("%s/TtNmea.csv", dir);
+    public static File nmea(TwoTrailsApp context, DataAccessLayer dal, File dir) {
+        File tcNmeaFile = new File(dir != null ? dir : context.getCacheDir(), "TtNmea.csv");
+
         try {
             //region NMEA Headers
-            CSVPrinter writer = new CSVPrinter(new FileWriter(nmeaFilename), CSVFormat.DEFAULT);
+            CSVPrinter writer = new CSVPrinter(new FileWriter(tcNmeaFile), CSVFormat.DEFAULT);
 
             writer.printRecord(
                     "Point CN",
@@ -476,17 +542,17 @@ public class Export {
 
             writer.close();
             //endregion
-        } catch (Exception ex) {
-            nmeaFilename = null;
-            TwoTrailsApp.getTtReport().writeError(ex.getMessage(), "Export:nmea", ex.getStackTrace());
-        }
 
-        return nmeaFilename;
+            return tcNmeaFile;
+        } catch (Exception ex) {
+            context.getReport().writeError(ex.getMessage(), "Export:nmea", ex.getStackTrace());
+            throw new RuntimeException("Error Exporting Nmea");
+        }
     }
 
-    public static String gpx(DataAccessLayer dal, String dir) {
+    public static File gpx(TwoTrailsApp context, DataAccessLayer dal, File dir) {
         String projName = dal.getProjectID();
-        String gpxPath = String.format("%s/%s.gpx", dir, scrubProjectName(projName));
+        File tcGpxFile = new File(dir != null ? dir : context.getCacheDir(), String.format("%s.gpx", scrubProjectName(projName)));
 
         GpxDocument doc = new GpxDocument();
         doc.setCreator(String.format("TwoTrails: %s", TtUtils.getDeviceName()));
@@ -585,18 +651,17 @@ public class Export {
         //endregion
 
         try {
-            GpxWriter.createFile(doc, gpxPath);
+            GpxWriter.create(tcGpxFile, doc);
+            return tcGpxFile;
         } catch (IOException e) {
-            gpxPath = null;
-            TwoTrailsApp.getTtReport().writeError(e.getMessage(), "Export:gpx");
+            context.getReport().writeError(e.getMessage(), "Export:gpx");
+            throw new RuntimeException("Error Exporting GPX");
         }
-
-        return gpxPath;
     }
 
-    public static String kml(DataAccessLayer dal, String dir) {
+    public static File kml(TwoTrailsApp context, DataAccessLayer dal, File dir) {
         String projName = dal.getProjectID();
-        String kmlPath = String.format("%s/%s.kml", dir, scrubProjectName(projName));
+        File tcKmlFile = new File(dir != null ? dir : context.getCacheDir(), String.format("%s.kml", scrubProjectName(projName)));
 
         //region Create Document
         KmlDocument doc = new KmlDocument(projName, dal.getProjectDescription());
@@ -849,7 +914,7 @@ public class Export {
 
                     //region Create Placemarks for Bound/Nav
                     Placemark adjPm = new Placemark(Integer.toString(point.getPID()),
-                            String.format("Point Operation: %s<br><div>\t     Adjusted<br>UtmX: %f<br>UtmY: %f</div><br>%s",
+                            String.format(Locale.getDefault(), "Point Operation: %s<br><div>\t     Adjusted<br>UtmX: %f<br>UtmY: %f</div><br>%s",
                                     point.getOp().toString(), point.getAdjX(), point.getAdjY(),
                                     point.getComment() != null ? point.getComment() : ""),
                             new View());
@@ -871,7 +936,7 @@ public class Export {
 
 
                     Placemark unAdjPm = new Placemark(Integer.toString(point.getPID()),
-                            String.format("Point Operation: %s<br><div>     Unadjusted<br>UtmX: %f<br>UtmY: %f</div><br>%s",
+                            String.format(Locale.getDefault(), "Point Operation: %s<br><div>     Unadjusted<br>UtmX: %f<br>UtmY: %f</div><br>%s",
                                     point.getOp().toString(), point.getUnAdjX(), point.getUnAdjY(), point.getComment() != null ? point.getComment() : ""),
                             new View());
 
@@ -1112,29 +1177,28 @@ public class Export {
         //endregion
 
         try {
-            KmlWriter.createFile(doc, kmlPath);
+            KmlWriter.write(tcKmlFile, doc);
+            return tcKmlFile;
         } catch (IOException e) {
-            kmlPath = null;
-            TwoTrailsApp.getTtReport().writeError(e.getMessage(), "Export:kml");
+            context.getReport().writeError(e.getMessage(), "Export:kml");
+            throw new RuntimeException("Error Exporting Kml");
         }
-
-        return kmlPath;
     }
 
-    public static String kmz(DataAccessLayer dal, String dir) {
-        String filename = scrubProjectName(dal.getProjectID());
-        String kmzPath = String.format("%s/%s.kmz", dir, filename);
+    public static File kmz(TwoTrailsApp context, DataAccessLayer dal, File dir) {
+        String projName = dal.getProjectID();
+        File tcKmzFile = new File(dir != null ? dir : context.getCacheDir(), String.format("%s.kmz", scrubProjectName(projName)));
 
         try {
             byte[] buffer = new byte[1024];
 
-            String kmlPath = kml(dal, dir);
+            File kmlFile = kml(context, dal, null);
 
-            if (!StringEx.isEmpty(kmlPath)) {
-                ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(kmzPath));
+            if (kmlFile != null) {
+                ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(tcKmzFile));
 
-                zos.putNextEntry(new ZipEntry(String.format("%s.kml", filename)));
-                FileInputStream fis = new FileInputStream(kmlPath);
+                zos.putNextEntry(new ZipEntry(kmlFile.getName()));
+                FileInputStream fis = new FileInputStream(kmlFile);
 
                 int len;
                 while ((len = fis.read(buffer)) > 0) {
@@ -1146,39 +1210,40 @@ public class Export {
                 zos.closeEntry();
                 zos.close();
 
-                new File(kmlPath).delete();
+                kmlFile.delete();
 
-                return kmzPath;
+                return kmlFile;
+            } else {
+                throw new RuntimeException("KML not created");
             }
         } catch (Exception e) {
-            TwoTrailsApp.getTtReport().writeError(e.getMessage(), "Export:kmz");
+            context.getReport().writeError(e.getMessage(), "Export:kmz");
+            throw new RuntimeException("Error Exporting KMZ");
         }
-
-        return kmzPath;
     }
 
-    public static String summary(TwoTrailsApp app, String dir) {
-        String summaryName = String.format("%s/%s_summary.txt", dir, scrubProjectName(app.getDAL().getProjectID()));
+    public static File summary(TwoTrailsApp context, DataAccessLayer dal, File dir) {
+        File tcSummaryFile = new File(dir != null ? dir : context.getCacheDir(), String.format("%s.txt", scrubProjectName(dal.getProjectDeviceID())));
 
         try {
-            FileWriter writer = new FileWriter(summaryName);
+            FileWriter writer = new FileWriter(tcSummaryFile);
 
-            writer.write(new HaidLogic(app).generateAllPolyStats(true, true));
+            writer.write(new HaidLogic(context).generateAllPolyStats(true, true));
 
             writer.close();
-        } catch (Exception ex) {
-            summaryName = null;
-            TwoTrailsApp.getTtReport().writeError(ex.getMessage(), "Export:summary", ex.getStackTrace());
-        }
 
-        return summaryName;
+            return tcSummaryFile;
+        } catch (Exception ex) {
+            context.getReport().writeError(ex.getMessage(), "Export:summary", ex.getStackTrace());
+            throw new RuntimeException("Error Exporting Summary");
+        }
     }
 
-    public static String imageInfo(MediaAccessLayer mal, String dir) {
-        String imagesFileName = String.format("%s/ImageInfo.csv", dir);
+    public static File imageInfo(TwoTrailsApp context, MediaAccessLayer mal, File dir) {
+        File tcImgInfoFile = new File(dir != null ? dir : context.getCacheDir(), "ImageInfo.csv");
 
         try {
-            CSVPrinter printer = new CSVPrinter(new FileWriter(imagesFileName), CSVFormat.DEFAULT);
+            CSVPrinter printer = new CSVPrinter(new FileWriter(tcImgInfoFile), CSVFormat.DEFAULT);
 
             printer.printRecord(
                     "Name",
@@ -1212,55 +1277,12 @@ public class Export {
             }
 
             printer.close();
+
+            return tcImgInfoFile;
         } catch (Exception ex) {
-            imagesFileName = null;
-            TwoTrailsApp.getTtReport().writeError(ex.getMessage(), "Export:imageInfo", ex.getStackTrace());
+            context.getReport().writeError(ex.getMessage(), "Export:imageInfo", ex.getStackTrace());
+            throw new RuntimeException("Error Exporting ImageInfo");
         }
-
-        return imagesFileName;
-    }
-
-    public static String exportPC(DataAccessLayer dal, MediaAccessLayer mal, String dir) {
-        String filename = scrubProjectName(dal.getProjectID());
-        String expPath = String.format("%s/%s_Export.zip", dir, filename);
-
-        try {
-            byte[] buffer = new byte[1024];
-            ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(expPath));
-
-            zos.putNextEntry(new ZipEntry(FileUtils.getFileName(dal.getFilePath())));
-            FileInputStream fis = new FileInputStream(dal.getFilePath());
-
-            int len;
-            while ((len = fis.read(buffer)) > 0) {
-                zos.write(buffer, 0, len);
-            }
-
-            fis.close();
-
-            zos.closeEntry();
-
-            if (mal != null) {
-                zos.putNextEntry(new ZipEntry(FileUtils.getFileName(mal.getFilePath())));
-                fis = new FileInputStream(mal.getFilePath());
-
-                while ((len = fis.read(buffer)) > 0) {
-                    zos.write(buffer, 0, len);
-                }
-
-                fis.close();
-
-                zos.closeEntry();
-            }
-
-            zos.close();
-
-                return expPath;
-        } catch (Exception e) {
-            TwoTrailsApp.getTtReport().writeError(e.getMessage(), "Export:kmz");
-        }
-
-        return null;
     }
 
 
@@ -1269,101 +1291,191 @@ public class Export {
     }
 
 
-    public static class ExportTask extends AsyncTask<ExportTask.ExportParams, Void, ExportResult> {
+    public static class ExportTask extends TaskRunner.Task<ExportTask.Params, ExportTask.Result> {
         private Listener listener;
 
         @Override
-        protected ExportResult doInBackground(ExportParams... params) {
-            if (params.length < 1) {
-                return new ExportResult(ExportResultCode.InvalidParams);
+        protected ExportTask.Result onBackgroundWork(Params params) {
+            if (params == null) {
+                return new Result(ResultCode.InvalidParams);
             }
 
-            ExportParams ep = params[0];
-
-            if (ep.getDirectory() == null) {
-                return new ExportResult(ExportResultCode.InvalidParams, "No directory selected");
+            if (params.getPath() == null) {
+                return new Result(ResultCode.InvalidParams, "No path or file selected");
             }
 
-            if (!ep.getDirectory().exists() && !ep.getDirectory().mkdirs()) {
-                return new ExportResult(ExportResultCode.ExportFailure, "Failed to create main directory");
+            String projectDirName = String.format(Locale.getDefault(), "%s_%s",
+                    scrubProjectName(params.getDal().getProjectDeviceID()), new Date().toString());
+
+            DocumentFile dir;
+            Uri file = null;
+
+            int filesCount = 0;
+
+            if (params.isSingleFile()) {
+                file = params.getPath();
+                dir = DocumentFile.fromFile(params.getContext().getCacheDir());
+            } else {
+                dir = DocumentFile.fromTreeUri(params.getContext(), params.getPath());
             }
 
-            String dirPath = ep.getDirectory().getAbsolutePath();
+            if (dir == null) {
+                return new Result(ResultCode.ExportFailure, "Export directory does not exist");
+            } else {
+                if (!FileUtils.fileOrFolderExistsInTree(params.getContext(), dir.getUri(), projectDirName))
+                    dir = dir.createDirectory(projectDirName);
 
-            try {
-                if (!isCancelled() && ep.isPoints()) {
-                    if (points(ep.getDal(), dirPath) == null) {
-                        return new ExportResult(ExportResultCode.ExportFailure, "Points");
-                    }
-                }
-
-                if (!isCancelled() && ep.isPolys()) {
-                    if (polygons(ep.getDal(), dirPath) == null) {
-                        return new ExportResult(ExportResultCode.ExportFailure, "Polygons");
-                    }
-                }
-
-                if (!isCancelled() && ep.isMeta()) {
-                    if (metadata(ep.getDal(), dirPath) == null) {
-                        return new ExportResult(ExportResultCode.ExportFailure, "Metadata");
-                    }
-                }
-
-                if (!isCancelled() && ep.isProj()) {
-                    if (project(ep.getDal(), dirPath) == null) {
-                        return new ExportResult(ExportResultCode.ExportFailure, "Project");
-                    }
-                }
-
-                if (!isCancelled() && ep.isNmea()) {
-                    if (nmea(ep.getDal(), dirPath) == null) {
-                        return new ExportResult(ExportResultCode.ExportFailure, "NMEA");
-                    }
-                }
-
-                if (!isCancelled() && ep.isKmz()) {
-                    if (kmz(ep.getDal(), dirPath) == null) {
-                        return new ExportResult(ExportResultCode.ExportFailure, "KMZ");
-                    }
-                }
-
-                if (!isCancelled() && ep.isGpx()) {
-                    if (gpx(ep.getDal(), dirPath) == null) {
-                        return new ExportResult(ExportResultCode.ExportFailure, "GPX");
-                    }
-                }
-
-                if (!isCancelled() && ep.isSummary()) {
-                    if (summary(ep.getApp(), dirPath) == null) {
-                        return new ExportResult(ExportResultCode.ExportFailure, "Summary");
-                    }
-                }
-
-                if (!isCancelled() && ep.isImgInfo() && ep.getMal() != null) {
-                    if (imageInfo(ep.getMal(), dirPath) == null) {
-                        return new ExportResult(ExportResultCode.ExportFailure, "ImageInfo");
-                    }
-                }
-
-                if (!isCancelled() && ep.isExportPC()) {
-                    if (exportPC(ep.getDal(), ep.getMal(), dirPath) == null) {
-                        return new ExportResult(ExportResultCode.ExportFailure, "ExportPC");
-                    }
-                }
-            } catch (Exception ex) {
-                TwoTrailsApp.getTtReport().writeError(ex.getMessage(), "Export:ExportTask", ex.getStackTrace());
-                return new ExportResult(ExportResultCode.ExportFailure, "Unknown failure");
+                if (dir == null)
+                    return new Result(ResultCode.ExportFailure, "Unable to create Export directory");
             }
 
-            return new ExportResult(isCancelled() ? ExportResultCode.Cancelled : ExportResultCode.Success);
+
+            if (!isCancelled() && params.isPoints()) {
+                try {
+                    File pointsFile = points(params.getContext(), params.getDal(), null);
+                    FileUtils.copyFile(params.getContext(), Uri.fromFile(pointsFile), dir.createFile(MimeTypes.Text.CSV, pointsFile.getName()).getUri());
+                    filesCount++;
+                } catch (Exception e) {
+                    params.getContext().getReport().writeError(e.getMessage(), "Export:ExportTask:onBackgroundWork:points", e.getStackTrace());
+                    return new Result(ResultCode.ExportFailure, "Points");
+                }
+
+                try {
+                    File groupsFile = groups(params.getContext(), params.getDal(), null);
+                    FileUtils.copyFile(params.getContext(), Uri.fromFile(groupsFile), dir.createFile(MimeTypes.Text.CSV, groupsFile.getName()).getUri());
+                    filesCount++;
+                } catch (Exception e) {
+                    params.getContext().getReport().writeError(e.getMessage(), "Export:ExportTask:onBackgroundWork:groups", e.getStackTrace());
+                    return new Result(ResultCode.ExportFailure, "Groups");
+                }
+            }
+
+            if (!isCancelled() && params.isPolys()) {
+                try {
+                    File polysFile = polygons(params.getContext(), params.getDal(), null);
+                    FileUtils.copyFile(params.getContext(), Uri.fromFile(polysFile), params.isSingleFile() ? file : dir.createFile(MimeTypes.Text.CSV, polysFile.getName()).getUri());
+                    filesCount++;
+                } catch (Exception e) {
+                    params.getContext().getReport().writeError(e.getMessage(), "Export:ExportTask:onBackgroundWork:polygons", e.getStackTrace());
+                    return new Result(ResultCode.ExportFailure, "Polygons");
+                }
+            }
+
+            if (!isCancelled() && params.isMeta()) {
+                try {
+                    File metaFile = metadata(params.getContext(), params.getDal(), null);
+                    FileUtils.copyFile(params.getContext(), Uri.fromFile(metaFile), params.isSingleFile() ? file : dir.createFile(MimeTypes.Text.CSV, metaFile.getName()).getUri());
+                    filesCount++;
+                } catch (Exception e) {
+                    params.getContext().getReport().writeError(e.getMessage(), "Export:ExportTask:onBackgroundWork:metadata", e.getStackTrace());
+                    return new Result(ResultCode.ExportFailure, "Metadata");
+                }
+            }
+
+            if (!isCancelled() && params.isProj()) {
+                try {
+                    File projFile = project(params.getContext(), params.getDal(), null);
+                    FileUtils.copyFile(params.getContext(), Uri.fromFile(projFile), params.isSingleFile() ? file : dir.createFile(MimeTypes.Text.CSV, projFile.getName()).getUri());
+                    filesCount++;
+                } catch (Exception e) {
+                    params.getContext().getReport().writeError(e.getMessage(), "Export:ExportTask:onBackgroundWork:project", e.getStackTrace());
+                    return new Result(ResultCode.ExportFailure, "Project");
+                }
+            }
+
+            if (!isCancelled() && params.isNmea()) {
+                try {
+                    File nmeaFile = metadata(params.getContext(), params.getDal(), null);
+                    FileUtils.copyFile(params.getContext(), Uri.fromFile(nmeaFile), params.isSingleFile() ? file : dir.createFile(MimeTypes.Text.CSV, nmeaFile.getName()).getUri());
+                    filesCount++;
+                } catch (Exception e) {
+                    params.getContext().getReport().writeError(e.getMessage(), "Export:ExportTask:onBackgroundWork:nmea", e.getStackTrace());
+                    return new Result(ResultCode.ExportFailure, "NMEA");
+                }
+            }
+
+            if (!isCancelled() && params.isKmz()) {
+                try {
+                    File kmzFile = kmz(params.getContext(), params.getDal(), null);
+                    FileUtils.copyFile(params.getContext(), Uri.fromFile(kmzFile),params.isSingleFile() ? file : dir.createFile(MimeTypes.Application.GOOGLE_EARTH_KMZ, kmzFile.getName()).getUri());
+                    filesCount++;
+                } catch (Exception e) {
+                    params.getContext().getReport().writeError(e.getMessage(), "Export:ExportTask:onBackgroundWork:kmz", e.getStackTrace());
+                    return new Result(ResultCode.ExportFailure, "KMZ");
+                }
+            }
+
+            if (!isCancelled() && params.isGpx()) {
+                try {
+                    File gpxFile = gpx(params.getContext(), params.getDal(), null);
+                    FileUtils.copyFile(params.getContext(), Uri.fromFile(gpxFile), params.isSingleFile() ? file : dir.createFile(MimeTypes.Application.GPS, gpxFile.getName()).getUri());
+                    filesCount++;
+                } catch (Exception e) {
+                    params.getContext().getReport().writeError(e.getMessage(), "Export:ExportTask:onBackgroundWork:gpx", e.getStackTrace());
+                    return new Result(ResultCode.ExportFailure, "GPX");
+                }
+            }
+
+            if (!isCancelled() && params.isSummary()) {
+                try {
+                    File summaryFile = summary(params.getContext(), params.getDal(), null);
+                    FileUtils.copyFile(params.getContext(), Uri.fromFile(summaryFile), params.isSingleFile() ? file : dir.createFile(MimeTypes.Text.PLAIN, summaryFile.getName()).getUri());
+                    filesCount++;
+                } catch (Exception e) {
+                    params.getContext().getReport().writeError(e.getMessage(), "Export:ExportTask:onBackgroundWork:summary", e.getStackTrace());
+                    return new Result(ResultCode.ExportFailure, "Summary");
+                }
+            }
+
+            if (!isCancelled() && params.isImgInfo()) {
+                try {
+                    File imgInfoFile = imageInfo(params.getContext(), params.getMal(), null);
+                    FileUtils.copyFile(params.getContext(), Uri.fromFile(imgInfoFile), params.isSingleFile() ? file : dir.createFile(MimeTypes.Text.CSV, imgInfoFile.getName()).getUri());
+                    filesCount++;
+                } catch (Exception e) {
+                    params.getContext().getReport().writeError(e.getMessage(), "Export:ExportTask:onBackgroundWork:imageinfo", e.getStackTrace());
+                    return new Result(ResultCode.ExportFailure, "ImageInfo");
+                }
+            }
+
+            if (!isCancelled() && params.isPcExp()) {
+                try {
+                    FileUtils.copyFile(params.getContext(), params.getDam().getDBUri(), dir.createFile(Consts.FILE_MIME, params.getDam().getDatabaseName()).getUri());
+                    filesCount++;
+
+                    if (params.getContext().hasMAL()) {
+                        FileUtils.copyFile(params.getContext(), params.getMam().getDBUri(), dir.createFile(Consts.MEDIA_FILE_MIME, params.getDam().getDatabaseName()).getUri());
+                        filesCount++;
+                    }
+                } catch (Exception e) {
+                    params.getContext().getReport().writeError(e.getMessage(), "Export:ExportTask:onBackgroundWork:pcPkg", e.getStackTrace());
+                    return new Result(ResultCode.ExportFailure, "pcPkg");
+                }
+
+                if (filesCount > 1 && params.isSingleFile()) {
+                    try {
+                        FileUtils.zipToFile(dir.getUri(), file);
+                    } catch (Exception e) {
+                        params.getContext().getReport().writeError(e.getMessage(), "Export:ExportTask:onBackgroundWork:zip", e.getStackTrace());
+                        return new Result(ResultCode.ExportFailure, "zip");
+                    }
+                }
+            }
+
+            return new Result(isCancelled() ? ResultCode.Cancelled : ResultCode.Success);
         }
 
         @Override
-        protected void onPostExecute(ExportResult exportResult) {
-            super.onPostExecute(exportResult);
-
+        public void onComplete(Result result) {
             if (listener != null) {
-                listener.onTaskFinish(exportResult);
+                listener.onTaskFinish(result);
+            }
+        }
+
+        @Override
+        public void onError(Exception exception) {
+            if (listener != null) {
+                listener.onTaskError(exception);
             }
         }
 
@@ -1371,17 +1483,21 @@ public class Export {
             this.listener = listener;
         }
 
-        public static class ExportParams {
-            private TwoTrailsApp app;
-            private File directory;
-            private boolean points, polys, meta, proj, nmea, kmz, gpx, summary, imgInfo, pcExp;
 
-            public ExportParams(TwoTrailsApp app, File directory, boolean points, boolean polys, boolean meta,
-                boolean imgInfo, boolean proj, boolean nmea, boolean kmz, boolean gpx, boolean summary, boolean pcExp) {
+        public static class Params {
+            private final TwoTrailsApp context;
+            private final Uri path;
+            private final boolean singleFile, points, polys, meta, proj, nmea, kmz, gpx, summary, imgInfo, pcExp;
 
-                this.app = app;
+            public Params(TwoTrailsApp context, Uri path, boolean singleFile, boolean points, boolean polys, boolean meta,
+                          boolean imgInfo, boolean proj, boolean nmea, boolean kmz, boolean gpx, boolean summary, boolean pcExp) {
 
-                this.directory = directory;
+                this.context = context;
+
+//                this.exportDir = exportDir;
+                this.path = path;
+
+                this.singleFile = singleFile;
 
                 this.points = points;
                 this.polys = polys;
@@ -1395,19 +1511,35 @@ public class Export {
                 this.pcExp = pcExp;
             }
 
-            public TwoTrailsApp getApp() { return app; }
+            public TwoTrailsApp getContext() { return context; }
 
             public DataAccessLayer getDal() {
-                return app.getDAL();
+                return context.getDAL();
+            }
+
+            public DataAccessManager getDam() {
+                return context.getDAM();
             }
 
             public MediaAccessLayer getMal() {
-                return app.hasMAL() ? app.getMAL() : null;
+                return context.hasMAL() ? context.getMAL() : null;
             }
 
-            public File getDirectory() {
-                return directory;
+            public MediaAccessManager getMam() {
+                return context.hasMAL() ? context.getMAM() : null;
             }
+
+            public Uri getPath() {
+                return path;
+            }
+
+            public boolean isSingleFile() {
+                return singleFile;
+            }
+
+//            public DocumentFile getExportDir() {
+//                return exportDir;
+//            }
 
             public boolean isPoints() {
                 return points;
@@ -1443,45 +1575,44 @@ public class Export {
                 return summary;
             }
 
-            public boolean isExportPC() {
-                return pcExp;
+            public boolean isPcExp() { return pcExp; }
+        }
+
+
+        public interface Listener {
+            void onTaskFinish(Result result);
+            void onTaskError(Exception e);
+        }
+
+
+        public static class Result {
+            private final ResultCode code;
+            private final String message;
+
+            public Result(ResultCode code) {
+                this(code, null);
+            }
+
+            public Result(ResultCode code, String message) {
+                this.code = code;
+                this.message = message;
+            }
+
+            public String getMessage() {
+                return message;
+            }
+
+            public ResultCode getCode() {
+                return code;
             }
         }
 
-        public interface Listener {
-            void onTaskFinish(ExportResult result);
+
+        public enum ResultCode {
+            Success,
+            Cancelled,
+            ExportFailure,
+            InvalidParams
         }
     }
-
-
-    public static class ExportResult {
-        private ExportResultCode code;
-        private String message;
-
-        public ExportResult(ExportResultCode code) {
-            this(code, null);
-        }
-
-        public ExportResult(ExportResultCode code, String message) {
-            this.code = code;
-            this.message = message;
-        }
-
-        public String getMessage() {
-            return message;
-        }
-
-        public ExportResultCode getCode() {
-            return code;
-        }
-    }
-
-
-    public enum ExportResultCode {
-        Success,
-        Cancelled,
-        ExportFailure,
-        InvalidParams
-    }
-
 }

@@ -7,18 +7,18 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-import com.usda.fmsc.twotrails.objects.RecentProject;
+import com.usda.fmsc.twotrails.objects.TwoTrailsProject;
 import com.usda.fmsc.twotrails.R;
 
 import java.io.File;
 import java.util.ArrayList;
 
 public class RecentProjectAdapter extends BaseAdapter {
-    private final ArrayList<RecentProject> projList;
+    private final ArrayList<TwoTrailsProject> projList;
     private final LayoutInflater inflater;
 
 
-    public RecentProjectAdapter(Context context, ArrayList<RecentProject> values) {
+    public RecentProjectAdapter(Context context, ArrayList<TwoTrailsProject> values) {
         projList = values;
         inflater = LayoutInflater.from(context);
     }
@@ -29,7 +29,7 @@ public class RecentProjectAdapter extends BaseAdapter {
     }
 
     @Override
-    public RecentProject getItem(int position) {
+    public TwoTrailsProject getItem(int position) {
         return projList.get(position);
     }
 
@@ -50,10 +50,10 @@ public class RecentProjectAdapter extends BaseAdapter {
             mViewHolder = (ViewHolder) convertView.getTag();
         }
 
-        RecentProject proj = projList.get(position);
+        TwoTrailsProject proj = projList.get(position);
 
         mViewHolder.Name = detail(convertView, R.id.recProjTvName, proj.Name);
-        mViewHolder.File  = detail(convertView, R.id.recFileTvName, new File(proj.File).getName());
+        mViewHolder.File  = detail(convertView, R.id.recFileTvName, new File(proj.TTXFile).getName());
 
         return convertView;
     }
@@ -65,7 +65,7 @@ public class RecentProjectAdapter extends BaseAdapter {
         return tv;
     }
 
-    private class ViewHolder {
+    private static class ViewHolder {
         TextView Name, File;
     }
 }

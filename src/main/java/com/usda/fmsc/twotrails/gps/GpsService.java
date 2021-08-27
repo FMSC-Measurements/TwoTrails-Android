@@ -1,5 +1,6 @@
 package com.usda.fmsc.twotrails.gps;
 
+import android.Manifest;
 import android.app.Service;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
@@ -15,6 +16,8 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 
+import androidx.annotation.NonNull;
+
 import com.google.android.gms.maps.LocationSource;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.utilities.PostDelayHandler;
@@ -26,7 +29,6 @@ import com.usda.fmsc.geospatial.nmea41.sentences.base.NmeaSentence;
 import com.usda.fmsc.twotrails.DeviceSettings;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.devices.BluetoothConnection;
-import com.usda.fmsc.twotrails.utilities.TtUtils;
 import com.usda.fmsc.utilities.StringEx;
 
 import org.joda.time.DateTime;
@@ -50,7 +52,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
     private boolean logging, logBurstDetails, receivingValidBursts;
     private Position lastPosition;
 
-    private ArrayList<Listener> listeners = new ArrayList<>();
+    private final ArrayList<Listener> listeners = new ArrayList<>();
     private final Binder binder = new GpsBinder();
 
     private BluetoothConnection btConn;
@@ -64,7 +66,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
     private PostDelayHandler nmeaReceived;
     private boolean receivingNmea;
 
-    private GnssStatus.Callback mGnssStatusCallback = new GnssStatus.Callback() {
+    private final GnssStatus.Callback mGnssStatusCallback = new GnssStatus.Callback() {
         @Override
         public void onStarted() {
             postGpsStart();
@@ -81,7 +83,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
         }
 
         @Override
-        public void onSatelliteStatusChanged(GnssStatus status) {
+        public void onSatelliteStatusChanged(@NonNull GnssStatus status) {
             //
         }
     };
@@ -119,7 +121,9 @@ public class GpsService extends Service implements LocationListener, LocationSou
             }
 
             if (TtAppCtx.getDeviceSettings().isGpsConfigured() && TtAppCtx.getDeviceSettings().isGpsAlwaysOn()) {
-                startGps();
+                if (_deviceUUID != null || AndroidUtils.App.checkPermission(TtAppCtx, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                    startGps();
+                }
             }
 
             logBurstDetails = TtAppCtx.getDeviceSettings().getGpsLogBurstDetails();
@@ -328,18 +332,18 @@ public class GpsService extends Service implements LocationListener, LocationSou
 
 
     //region Logging
-    public void startLogging(String fileName) {
+    public void startLogging(File logFile) {
         try {
             if (logging && logPrintWriter != null) {
                 logPrintWriter.close();
             }
 
-            File logFileDir = new File(TtUtils.getTtLogFileDir());
-            if (!logFileDir.exists()) {
-                logFileDir.mkdirs();
-            }
+//            File logFileDir = new File(TtUtils.getTtLogFileDir());
+//            if (!logFileDir.exists()) {
+//                logFileDir.mkdirs();
+//            }
 
-            logPrintWriter = new PrintWriter(fileName);
+            logPrintWriter = new PrintWriter(logFile);
 
             writeStartLog();
 
@@ -469,22 +473,23 @@ public class GpsService extends Service implements LocationListener, LocationSou
     }
 
     @Override
-    public void onLocationChanged(Location location) {
+    public void onLocationChanged(@NonNull Location location) {
         //
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
-        //
+        //not available after Android Q
     }
 
     @Override
-    public void onProviderEnabled(String provider) {
+    public void onProviderEnabled(@NonNull String provider) {
         //if gps or coarse loc gets turned on
     }
 
     @Override
-    public void onProviderDisabled(String provider) {
+    public void onProviderDisabled(@NonNull String provider) {
         //if gps or coarse loc gets turned off
     }
     //endregion
@@ -682,7 +687,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
 
     //region LocationSource for GMaps
     @Override
-    public void activate(OnLocationChangedListener onLocationChangedListener) {
+    public void activate(@NonNull OnLocationChangedListener onLocationChangedListener) {
         gmapListener = onLocationChangedListener;
 
         if (!isGpsRunning()) {
@@ -799,8 +804,8 @@ public class GpsService extends Service implements LocationListener, LocationSou
         }
 
         @Override
-        public void startLogging(String fileName) {
-            GpsService.this.startLogging(fileName);
+        public void startLogging(File logFile) {
+            GpsService.this.startLogging(logFile);
         }
 
         @Override
@@ -858,7 +863,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
 
         GpsProvider getGpsProvider();
 
-        void startLogging(String fileName);
+        void startLogging(File logFile);
 
         void stopLogging();
 

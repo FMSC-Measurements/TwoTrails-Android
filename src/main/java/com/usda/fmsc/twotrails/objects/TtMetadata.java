@@ -3,6 +3,8 @@ package com.usda.fmsc.twotrails.objects;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import androidx.annotation.NonNull;
+
 import com.usda.fmsc.geospatial.UomElevation;
 import com.usda.fmsc.twotrails.units.DeclinationType;
 import com.usda.fmsc.twotrails.units.Dist;
@@ -244,6 +246,7 @@ public class TtMetadata extends TtObject implements Parcelable {
     }
 
     @Override
+    @NonNull
     public String toString() {
         return Name != null ? Name : "[No Name]";
     }

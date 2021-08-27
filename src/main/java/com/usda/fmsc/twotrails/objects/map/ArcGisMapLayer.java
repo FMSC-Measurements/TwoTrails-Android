@@ -47,7 +47,7 @@ public class ArcGisMapLayer implements Parcelable, Comparable<ArcGisMapLayer> {
         online = in.readByte() == 1;
         minScale = in.readDouble();
         maxScale = in.readDouble();
-        levelsOfDetail = (DetailLevel[])in.createTypedArray(DetailLevel.CREATOR);
+        levelsOfDetail = in.createTypedArray(DetailLevel.CREATOR);
         north = in.readDouble();
         south = in.readDouble();
         east = in.readDouble();

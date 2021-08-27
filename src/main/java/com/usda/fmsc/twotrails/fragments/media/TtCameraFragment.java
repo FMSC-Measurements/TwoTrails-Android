@@ -2,6 +2,7 @@ package com.usda.fmsc.twotrails.fragments.media;
 
 import android.content.Context;
 import android.media.Image;
+import android.net.Uri;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
 
@@ -11,15 +12,17 @@ import com.usda.fmsc.android.utilities.DeviceOrientationEx;
 import com.usda.fmsc.twotrails.objects.media.TtImage;
 import com.usda.fmsc.twotrails.objects.media.TtPanorama;
 import com.usda.fmsc.twotrails.units.PictureType;
-import com.usda.fmsc.twotrails.utilities.TtUtils;
 import com.usda.fmsc.utilities.FileUtils;
 import com.usda.fmsc.utilities.StringEx;
 
 import org.joda.time.DateTime;
 
+import java.io.File;
+
 public class TtCameraFragment extends CameraFragment {
     private static final String POINT_CN = "PointCN";
     private static final String SAVE_IMAGE = "SaveImage";
+    private static final String SAVE_IMAGE_URI = "SaveImageUri";
 
     private TtCameraListener listener;
     private DeviceOrientationEx deviceOrientationEx;
@@ -31,12 +34,14 @@ public class TtCameraFragment extends CameraFragment {
     private DateTime captureTime;
     private int width, height;
     private boolean saveImage;
+    private Uri saveImageUri;
 
 
-    public static TtCameraFragment newInstance(String pointCN) {
+    public static TtCameraFragment newInstance(String pointCN, String saveFilePath) {
         TtCameraFragment fragment = new TtCameraFragment();
         Bundle args = new Bundle();
         args.putString(POINT_CN, pointCN);
+        args.putString(SAVE_IMAGE_URI, saveFilePath);
         args.putBoolean(SAVE_IMAGE, true);
         fragment.setArguments(args);
         return fragment;
@@ -64,6 +69,11 @@ public class TtCameraFragment extends CameraFragment {
         if (bundle != null && bundle.containsKey(POINT_CN)) {
             pointCN = bundle.getString(POINT_CN);
             saveImage = bundle.getBoolean(SAVE_IMAGE);
+
+            String siu = bundle.getString(SAVE_IMAGE_URI);
+            if (!StringEx.isEmpty(siu)) {
+                saveImageUri = Uri.parse(siu);
+            }
         } else {
             throw new IllegalArgumentException("Requires Point CN");
         }
@@ -95,21 +105,36 @@ public class TtCameraFragment extends CameraFragment {
     }
 
     @Override
-    protected void onImageSaved(String filePath) {
+    protected File getCreateImageFile() {
+        return saveImageUri != null ? new File(saveImageUri.getPath()) : super.getCreateImageFile();
+    }
+
+    @Override
+    protected void onImageSaved(Uri filePath) {
         super.onImageSaved(filePath);
 
-        String name = FileUtils.getFileNameWoExt(filePath);
+        String path = filePath.getPath();
+
+        String fileName, name;
+
+        if (path != null) {
+            fileName = FileUtils.getFileName(filePath.getPath());
+            name = FileUtils.getFileNameWoExt(fileName);
+        } else {
+            fileName = null;
+            name = "Untitled Image";
+        }
 
         PictureType type  = PictureType.Regular;
 
-        if (width / height > 1.5 || width / height < 0.66) {
+        if ((double)width / height > 1.5 || (double)width / height < 0.66) {
             type = PictureType.Panorama;
         }
 
         if (type == PictureType.Panorama) {
-            ttImage = new TtPanorama(name, filePath, null, captureTime, pointCN, true, orientation.getRationalAzimuth(), orientation.getPitch(), orientation.getRoll());
+            ttImage = new TtPanorama(name, fileName, null, captureTime, pointCN, true, orientation.getRationalAzimuth(), orientation.getPitch(), orientation.getRoll());
         } else {
-            ttImage = new TtImage(name, filePath, null, captureTime, pointCN, true, orientation.getRationalAzimuth(), orientation.getPitch(), orientation.getRoll());
+            ttImage = new TtImage(name, fileName, null, captureTime, pointCN, true, orientation.getRationalAzimuth(), orientation.getPitch(), orientation.getRoll());
         }
 
         if (listener != null) {
@@ -152,11 +177,6 @@ public class TtCameraFragment extends CameraFragment {
         super.onDetach();
 
         listener = null;
-    }
-
-    @Override
-    protected String getImageSaveDir() {
-        return TtUtils.getTtMediaDir();
     }
 
     public TtImage getLastTtImage() {

@@ -16,7 +16,7 @@ public class BluetoothConnection extends Thread {
 
     private boolean running, disconnect, receiving;
 
-    private ArrayList<Listener> listeners;
+    private final ArrayList<Listener> listeners;
 
     public BluetoothConnection(BluetoothSocket socket) {
         listeners = new ArrayList<>();

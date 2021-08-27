@@ -11,10 +11,10 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.usda.fmsc.twotrails.R;
+import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.logic.AdjustingException;
-import com.usda.fmsc.twotrails.logic.PolygonAdjuster;
 
-public abstract class TtAdjusterCustomToolbarActivity extends CustomToolbarActivity implements PolygonAdjuster.Listener {
+public abstract class TtProjectAdjusterActivity extends CustomToolbarActivity implements TwoTrailsApp.ProjectAdjusterListener {
     private ProgressDialog pd;
     private MenuItem miAdjust;
     private AnimationDrawable adAdjust;
@@ -28,22 +28,7 @@ public abstract class TtAdjusterCustomToolbarActivity extends CustomToolbarActiv
         pd = new ProgressDialog(this);
         pd.setMessage("Adjusting Polygons..");
         pd.setCancelable(false);
-        pd.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", (dialog, which) -> PolygonAdjuster.cancel());
-    }
-
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-        PolygonAdjuster.register(this);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-
-        PolygonAdjuster.unregister(this);
+        pd.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", (dialog, which) -> getTtAppCtx().cancelAdjuster());
     }
 
     @Override
@@ -74,7 +59,7 @@ public abstract class TtAdjusterCustomToolbarActivity extends CustomToolbarActiv
 
                 alert.setPositiveButton("Keep Adjusting", null);
 
-                alert.setNegativeButton(R.string.str_cancel, (dialogInterface, i) -> PolygonAdjuster.cancel());
+                alert.setNegativeButton(R.string.str_cancel, (dialogInterface, i) -> getTtAppCtx().cancelAdjuster());
 
                 alert.show();
                 return false;
@@ -83,7 +68,7 @@ public abstract class TtAdjusterCustomToolbarActivity extends CustomToolbarActiv
     }
 
     @Override
-    public final void adjusterStarted() {
+    public void onAdjusterStarted() {
         if (adAdjust == null) {
             setupMenu();
         }
@@ -104,7 +89,7 @@ public abstract class TtAdjusterCustomToolbarActivity extends CustomToolbarActiv
     }
 
     @Override
-    public final void adjusterStopped(final PolygonAdjuster.AdjustResult result, final AdjustingException.AdjustingError error){
+    public void onAdjusterStopped(final TwoTrailsApp.ProjectAdjusterResult result, final AdjustingException.AdjustingError error) {
         final Context ctx = this;
 
         this.runOnUiThread(() -> {
@@ -160,12 +145,12 @@ public abstract class TtAdjusterCustomToolbarActivity extends CustomToolbarActiv
         onAdjusterStopped(result);
     }
 
-    protected void onAdjusterStopped(PolygonAdjuster.AdjustResult result) {
+    protected void onAdjusterStopped(TwoTrailsApp.ProjectAdjusterResult result) {
 
     }
 
     @Override
-    public void adjusterRunningSlow() {
+    public void onAdjusterRunningSlow() {
         runOnUiThread(() -> {
             AlertDialog.Builder alert = new AlertDialog.Builder(getBaseContext());
 
@@ -174,7 +159,7 @@ public abstract class TtAdjusterCustomToolbarActivity extends CustomToolbarActiv
 
             alert.setPositiveButton("Wait", null);
 
-            alert.setNegativeButton(R.string.str_cancel, (dialogInterface, i) -> PolygonAdjuster.cancel());
+            alert.setNegativeButton(R.string.str_cancel, (dialogInterface, i) -> getTtAppCtx().cancelAdjuster());
 
             alert.show();
         });

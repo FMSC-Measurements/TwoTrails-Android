@@ -1,5 +1,7 @@
 package com.usda.fmsc.twotrails.activities;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -11,7 +13,9 @@ import androidx.appcompat.app.ActionBar;
 import android.view.MenuItem;
 
 import com.usda.fmsc.twotrails.R;
+import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
+import com.usda.fmsc.twotrails.activities.base.TtActivity;
 import com.usda.fmsc.twotrails.fragments.settings.DeviceSettingsFragment;
 import com.usda.fmsc.twotrails.fragments.settings.MiscSettingsFragment;
 
@@ -165,12 +169,18 @@ public class SettingsActivity extends CustomToolbarActivity {
                 Fragment frag = getSettingsFragment(preference.getKey());
 
                 if (frag != null){
-                    //TODO replace fragment manager
-                    getFragmentManager()
-                            .beginTransaction()
-                            .replace(R.id.content, frag)
-                            .addToBackStack(frag.getClass().getSimpleName())
-                            .commit();
+                    if (isAdded()) {
+                        getParentFragmentManager()
+                                .beginTransaction()
+                                .replace(R.id.content, frag)
+                                .addToBackStack(frag.getClass().getSimpleName())
+                                .commit();
+                    } else {
+                        TtActivity activity = (TtActivity) getActivity();
+                        if (activity != null) {
+                            activity.getTtAppCtx().getReport().writeError("FragmentManager not found", "SettingsActivity:onPreferenceTreeClick");
+                        }
+                    }
                 }
             }
 

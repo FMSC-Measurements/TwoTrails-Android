@@ -10,9 +10,9 @@ import org.joda.time.DateTime;
 import java.util.ArrayList;
 
 public class PositionTimeline implements Parcelable {
-    public final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+    public final Parcelable.Creator<PositionTimeline> CREATOR = new Parcelable.Creator<PositionTimeline>() {
         @Override
-        public Object createFromParcel(Parcel source) {
+        public PositionTimeline createFromParcel(Parcel source) {
             return new PositionTimeline(source);
         }
 
@@ -22,7 +22,7 @@ public class PositionTimeline implements Parcelable {
         }
     };
 
-    private ArrayList<FramePosition> _Timeline;
+    private final ArrayList<FramePosition> _Timeline;
 
 
     public PositionTimeline() {
@@ -100,10 +100,10 @@ public class PositionTimeline implements Parcelable {
     }
 
 
-    public class FramePosition implements TtOrientation, Parcelable {
-        public final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+    public static class FramePosition implements TtOrientation, Parcelable {
+        public final Parcelable.Creator<FramePosition> CREATOR = new Parcelable.Creator<FramePosition>() {
             @Override
-            public Object createFromParcel(Parcel source) {
+            public FramePosition createFromParcel(Parcel source) {
                 return new FramePosition(source);
             }
 
@@ -186,7 +186,7 @@ public class PositionTimeline implements Parcelable {
     }
 
 
-    public class OutOfTimelineException extends Exception {
+    public static class OutOfTimelineException extends Exception {
         public OutOfTimelineException() {
             super();
         }

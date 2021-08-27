@@ -17,12 +17,13 @@ import com.usda.fmsc.android.adapters.FragmentStatePagerAdapterEx;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.listeners.ComplexOnPageChangeListener;
 import com.usda.fmsc.twotrails.Consts;
-import com.usda.fmsc.twotrails.activities.base.TtAdjusterCustomToolbarActivity;
+import com.usda.fmsc.twotrails.TwoTrailsApp;
+import com.usda.fmsc.twotrails.activities.base.TtProjectAdjusterActivity;
 import com.usda.fmsc.twotrails.data.TwoTrailsSchema;
 import com.usda.fmsc.twotrails.fragments.AnimationCardFragment;
 import com.usda.fmsc.twotrails.fragments.polygon.PolygonFragment;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.logic.PolygonAdjuster;
+import com.usda.fmsc.twotrails.logic.AdjustingException;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
 
 import java.util.HashMap;
@@ -32,7 +33,7 @@ import java.util.List;
 import com.usda.fmsc.utilities.StringEx;
 
 @SuppressLint("DefaultLocale")
-public class PolygonsActivity extends TtAdjusterCustomToolbarActivity {
+public class PolygonsActivity extends TtProjectAdjusterActivity {
     private HashMap<String, Listener> listeners;
 
     private MenuItem miLock, miReset, miDelete, miAdjust;
@@ -125,7 +126,7 @@ public class PolygonsActivity extends TtAdjusterCustomToolbarActivity {
         savePolygon();
 
         if (adjust) {
-            PolygonAdjuster.adjust(getTtAppCtx(), true);
+            getTtAppCtx().adjustProject(true);
         }
     }
 
@@ -199,7 +200,7 @@ public class PolygonsActivity extends TtAdjusterCustomToolbarActivity {
         } else if (itemId == R.id.polyMenuReset) {
             resetPolygon();
         } else if (itemId == R.id.polyMenuAdjust) {
-            PolygonAdjuster.adjust(getTtAppCtx());
+            getTtAppCtx().adjustProject();
         } else if (itemId == android.R.id.home) {
             finish();
         }
@@ -216,10 +217,10 @@ public class PolygonsActivity extends TtAdjusterCustomToolbarActivity {
     }
 
     @Override
-    protected void onAdjusterStopped(PolygonAdjuster.AdjustResult result) {
-        super.onAdjusterStopped(result);
+    public void onAdjusterStopped(TwoTrailsApp.ProjectAdjusterResult result, AdjustingException.AdjustingError error) {
+        super.onAdjusterStopped(result, error);
 
-        if (result == PolygonAdjuster.AdjustResult.SUCCESSFUL) {
+        if (result == TwoTrailsApp.ProjectAdjusterResult.SUCCESSFUL) {
             final int index = _CurrentIndex;
 
             _Polygons = null;
@@ -295,7 +296,7 @@ public class PolygonsActivity extends TtAdjusterCustomToolbarActivity {
     private void createPolygon() {
         savePolygon();
 
-        int polyCount = getTtAppCtx().getDAL().getItemCount(TwoTrailsSchema.PolygonSchema.TableName);
+        int polyCount = getTtAppCtx().getDAL().getItemsCount(TwoTrailsSchema.PolygonSchema.TableName);
 
         TtPolygon newPolygon = new TtPolygon(polyCount * 1000 + 1010);
         newPolygon.setName(String.format("Poly %d", polyCount + 1));

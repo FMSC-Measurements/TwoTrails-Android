@@ -8,6 +8,7 @@ import org.joda.time.DateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 import com.usda.fmsc.android.utilities.ParcelTools;
 import com.usda.fmsc.twotrails.objects.TtObject;
@@ -294,7 +295,7 @@ public abstract class TtPoint extends TtObject implements Comparable<TtPoint>, C
     }
 
     public void addQuondamLink(String cn) {
-        if(_LinkedPoints.indexOf(cn) < 0)
+        if(!_LinkedPoints.contains(cn))
             _LinkedPoints.add(cn);
     }
 
@@ -407,8 +408,9 @@ public abstract class TtPoint extends TtObject implements Comparable<TtPoint>, C
     }
 
     @Override
+    @NonNull
     public String toString() {
-        return StringEx.format("%d: %s", _PID, getOp());
+        return String.format(Locale.getDefault(), "%d: %s", _PID, getOp());
     }
 
     @Override

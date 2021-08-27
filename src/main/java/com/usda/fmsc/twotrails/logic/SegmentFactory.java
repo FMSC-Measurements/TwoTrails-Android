@@ -15,8 +15,8 @@ import java.util.HashMap;
 import java.util.Hashtable;
 
 public class SegmentFactory {
-    private ArrayList<TtPoint> points;
-    private HashMap<String, TtPolygon> polys;
+    private final ArrayList<TtPoint> points;
+    private final HashMap<String, TtPolygon> polys;
 
     public SegmentFactory(DataAccessLayer dal) {
         HashMap<String, TtMetadata> meta = dal.getMetadataMap();

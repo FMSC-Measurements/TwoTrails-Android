@@ -5,14 +5,19 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
 public abstract class Settings {
-    private SharedPreferences prefs;
-    private SharedPreferences.Editor editor;
+    private final SharedPreferences prefs;
+    private final SharedPreferences.Editor editor;
+    private final TwoTrailsApp context;
 
-    public Settings(Context context) {
+    public Settings(TwoTrailsApp context) {
+        this.context = context;
         prefs = PreferenceManager.getDefaultSharedPreferences(context);
         editor = prefs.edit();
     }
 
+    protected TwoTrailsApp getContext() {
+        return context;
+    }
 
     public SharedPreferences getPrefs() {
         return  prefs;

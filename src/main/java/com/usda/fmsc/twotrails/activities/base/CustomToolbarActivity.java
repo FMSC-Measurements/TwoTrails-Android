@@ -1,10 +1,7 @@
 package com.usda.fmsc.twotrails.activities.base;
 
+import android.content.Intent;
 import android.os.Bundle;
-import androidx.annotation.MenuRes;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MotionEvent;
@@ -12,14 +9,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.MenuRes;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.widget.Toolbar;
+
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.TwoTrailsApp;
+import com.usda.fmsc.twotrails.activities.SettingsActivity;
 
-public abstract class CustomToolbarActivity extends AppCompatActivity {
+public abstract class CustomToolbarActivity extends TtActivity {
     private final String DEFAULT_EXIT_WARNING = "Press again to exit.";
-
-    private TwoTrailsApp TtAppCtx;
 
     private Toolbar toolbar;
     private boolean exit, useExitWarning;
@@ -145,8 +146,17 @@ public abstract class CustomToolbarActivity extends AppCompatActivity {
     }
 
 
-    public TwoTrailsApp getTtAppCtx() {
-        return TtAppCtx != null ? TtAppCtx : (TtAppCtx = (TwoTrailsApp)getApplicationContext());
+
+    private final ActivityResultLauncher<Intent> openSettingsForResult = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+        onSettingsUpdated();
+    });
+
+    protected void openSettings() {
+        openSettingsForResult.launch(new Intent(this, SettingsActivity.class));
+    }
+    protected void openSettings(String settingsPage) {
+        openSettingsForResult.launch(new Intent(this, SettingsActivity.class).putExtra(SettingsActivity.SETTINGS_PAGE, settingsPage));
     }
 
+    protected void onSettingsUpdated() { }
 }

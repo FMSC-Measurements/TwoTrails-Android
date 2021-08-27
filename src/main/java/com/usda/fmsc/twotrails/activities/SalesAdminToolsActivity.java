@@ -34,6 +34,8 @@ import com.usda.fmsc.twotrails.objects.PointD;
 import com.usda.fmsc.twotrails.objects.TtGroup;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
+import com.usda.fmsc.twotrails.objects.media.TtImage;
+import com.usda.fmsc.twotrails.objects.media.TtMedia;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.points.WayPoint;
 import com.usda.fmsc.twotrails.utilities.ClosestPositionCalculator;
@@ -136,12 +138,12 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenuEx(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_take5, menu);
 
         miHideGpsInfo = menu.findItem(R.id.satMenuGpsInfoToggle);
 
-        return super.onCreateOptionsMenu(menu);
+        return super.onCreateOptionsMenuEx(menu);
     }
 
     @Override
@@ -152,11 +154,11 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
         } else if (itemId == R.id.satMenuGps) {
             startActivityForResult(new Intent(this, SettingsActivity.class)
                             .putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.GPS_SETTINGS_PAGE),
-                    Consts.Codes.Activites.SETTINGS);
+                    Consts.Codes.Activities.SETTINGS);
         } else if (itemId == R.id.satMenuSatSettings) {
             startActivityForResult(new Intent(this, SettingsActivity.class)
                             .putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.POINT_TAKE5_SETTINGS_PAGE),
-                    Consts.Codes.Activites.SETTINGS);
+                    Consts.Codes.Activities.SETTINGS);
         } else if (itemId == R.id.satMenuGpsInfoToggle) {
             if (gpsInfoHidden) {
                 gpsInfoHidden = false;
@@ -173,18 +175,25 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
         return super.onOptionsItemSelected(item);
     }
 
+//    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        if (requestCode == Consts.Codes.Activities.SETTINGS) {
+//            getTtAppCtx().getGps().startGps();
+//
+//            getSettings();
+//        }
+//
+//        super.onActivityResult(requestCode, resultCode, data);
+//    }
+
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == Consts.Codes.Activites.SETTINGS) {
-            getTtAppCtx().getGps().startGps();
+    protected void onSettingsUpdated() {
+        getTtAppCtx().getGps().startGps();
 
-            getSettings();
-        }
-
-        super.onActivityResult(requestCode, resultCode, data);
+        getSettings();
     }
 
-//    @Override
+    //    @Override
 //    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 //        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 //    }
@@ -450,5 +459,4 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
         }
     }
     //endregion
-
 }

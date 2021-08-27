@@ -3,7 +3,6 @@ package com.usda.fmsc.twotrails.activities;
 import android.app.Activity;
 import android.content.Intent;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import android.os.Bundle;
 import android.view.Menu;
@@ -127,12 +126,10 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
                     logging = false;
                 }
             } else {
-                if (AndroidUtils.App.requestStoragePermission(GpsLoggerActivity.this, Consts.Codes.Requests.OPEN_FILE)) {
-                    item.setChecked(true);
+                item.setChecked(true);
 
-                    if (logging) {
-                        getTtAppCtx().getGps().startLogging(TtUtils.getGpsLogFilePath());
-                    }
+                if (logging) {
+                    getTtAppCtx().getGps().startLogging(getTtAppCtx().getLogFile());
                 }
             }
             return true;
@@ -151,17 +148,23 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+//    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        super.onActivityResult(requestCode, resultCode, data);
+//
+//        if (requestCode == Consts.Codes.Activities.SETTINGS) {
+//            if (getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
+//                binder.startGps();
+//            }
+//        }
+//    }
 
-        if (requestCode == Consts.Codes.Activites.SETTINGS) {
-            if (getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
-                binder.startGps();
-            }
+    @Override
+    protected void onSettingsUpdated() {
+        if (getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
+            binder.startGps();
         }
     }
-
 
     private void restoreState(Bundle savedInstanceState) {
         if (savedInstanceState.containsKey(STRINGS_KEY)) {
@@ -208,7 +211,7 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
 
         dialog.setMessage("The GPS is currently not configured. Would you like to configure it now?");
 
-        dialog.setPositiveButton("Configure", (dialog1, which) -> startActivityForResult(new Intent(getBaseContext(), SettingsActivity.class).putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.GPS_SETTINGS_PAGE), Consts.Codes.Activites.SETTINGS));
+        dialog.setPositiveButton("Configure", (dialog1, which) -> startActivityForResult(new Intent(getBaseContext(), SettingsActivity.class).putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.GPS_SETTINGS_PAGE), Consts.Codes.Activities.SETTINGS));
 
         dialog.setNeutralButton(R.string.str_cancel, null);
 
@@ -234,7 +237,7 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
                 btnLog.setText(R.string.aqr_log_pause);
 
                 if (miCheckLtf.isChecked()) {
-                    binder.startLogging(TtUtils.getGpsLogFilePath());
+                    binder.startLogging(getTtAppCtx().getGpsLogFile());
                 }
             } else {
                 logging = false;

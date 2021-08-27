@@ -1,13 +1,9 @@
 package com.usda.fmsc.twotrails.dialogs;
 
-import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.fragment.app.DialogFragment;
-import androidx.appcompat.app.AlertDialog;
 import android.text.Editable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,21 +12,26 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.DialogFragment;
+
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.animation.ViewAnimator;
 import com.usda.fmsc.android.listeners.SimpleTextWatcher;
+import com.usda.fmsc.geospatial.DMS;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.objects.points.GpsPoint;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
-
-import com.usda.fmsc.geospatial.DMS;
 import com.usda.fmsc.utilities.StringEx;
 
+import java.util.Locale;
+
 public class LatLonDialog extends DialogFragment {
-    private static String CN = "CN";
-    private static String PID = "PID";
-    private static String LAT = "LAT";
-    private static String LON = "LON";
+    private static final String CN = "CN";
+    private static final String PID = "PID";
+    private static final String LAT = "LAT";
+    private static final String LON = "LON";
 
     private OnEditedListener listener;
 
@@ -163,7 +164,7 @@ public class LatLonDialog extends DialogFragment {
         
         dialog.setView(view);
 
-        dialog.setTitle(String.format("Point %d", pid));
+        dialog.setTitle(String.format(Locale.getDefault(), "Point %d", pid));
 
         dialog.setPositiveButton(R.string.str_ok , (dialog1, which) -> {
             if (listener != null) {
@@ -209,7 +210,7 @@ public class LatLonDialog extends DialogFragment {
         this.listener = listener;
     }
 
-    private SimpleTextWatcher textWatcher = new SimpleTextWatcher() {
+    private final SimpleTextWatcher textWatcher = new SimpleTextWatcher() {
         @Override
         public void afterTextChanged(Editable s) {
             calc();

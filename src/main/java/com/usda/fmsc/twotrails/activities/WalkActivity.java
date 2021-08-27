@@ -31,9 +31,9 @@ import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.logic.PointNamer;
 import com.usda.fmsc.twotrails.objects.FilterOptions;
 import com.usda.fmsc.twotrails.objects.TtGroup;
-import com.usda.fmsc.twotrails.objects.TtMetadata;
+import com.usda.fmsc.twotrails.objects.media.TtImage;
+import com.usda.fmsc.twotrails.objects.media.TtMedia;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
-import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.objects.points.WalkPoint;
 import com.usda.fmsc.twotrails.units.MapTracking;
 import com.usda.fmsc.twotrails.units.OpType;
@@ -194,7 +194,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenuEx(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_walk, menu);
 
         miMode = menu.findItem(R.id.walkMenuMode);
@@ -206,7 +206,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
 
         menuCreated = true;
 
-        return super.onCreateOptionsMenu(menu);
+        return super.onCreateOptionsMenuEx(menu);
     }
 
     @Override
@@ -231,11 +231,11 @@ public class WalkActivity extends AcquireGpsMapActivity {
         } else if (itemId == R.id.walkMenuGps) {
             startActivityForResult(new Intent(this, SettingsActivity.class)
                             .putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.GPS_SETTINGS_PAGE),
-                    Consts.Codes.Activites.SETTINGS);
+                    Consts.Codes.Activities.SETTINGS);
         } else if (itemId == R.id.walkMenuWalkSettings) {
             startActivityForResult(new Intent(this, SettingsActivity.class)
                             .putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.POINT_WALK_SETTINGS_PAGE),
-                    Consts.Codes.Activites.SETTINGS);
+                    Consts.Codes.Activities.SETTINGS);
         } else if (itemId == R.id.walkMenuRenameGroup) {
             updateGroupName();
         } else if (itemId == R.id.walkMenuMode) {
@@ -252,14 +252,20 @@ public class WalkActivity extends AcquireGpsMapActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == Consts.Codes.Activites.SETTINGS) {
-            getTtAppCtx().getGps().startGps();
-            getSettings();
-        }
+//    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        if (requestCode == Consts.Codes.Activities.SETTINGS) {
+//            getTtAppCtx().getGps().startGps();
+//            getSettings();
+//        }
+//
+//        super.onActivityResult(requestCode, resultCode, data);
+//    }
 
-        super.onActivityResult(requestCode, resultCode, data);
+    @Override
+    protected void onSettingsUpdated() {
+        getTtAppCtx().getGps().startGps();
+        getSettings();
     }
 
     @Override

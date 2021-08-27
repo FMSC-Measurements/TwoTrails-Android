@@ -205,7 +205,7 @@ public class TraversePointFragment extends BasePointFragment {
             double diff = TtUtils.Math.azimuthDiff(_TravPoint.getFwdAz(), _TravPoint.getBkAz());
 
             if (diff >= 0.01) {
-                tvAzDiff.setText(StringEx.format("(%s)", StringEx.toStringRound(diff, 2)));
+                tvAzDiff.setText(String.format("(%s)", StringEx.toStringRound(diff, 2)));
                 tvAzDiff.setVisibility(View.VISIBLE);
                 return;
             }

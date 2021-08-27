@@ -31,7 +31,6 @@ import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import org.joda.time.DateTime;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -41,28 +40,11 @@ import java.util.Locale;
 import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.geospatial.nmea41.sentences.GGASentence;
 import com.usda.fmsc.geospatial.nmea41.sentences.GSASentence;
-import com.usda.fmsc.utilities.FileUtils;
 import com.usda.fmsc.utilities.ParseEx;
 import com.usda.fmsc.utilities.StringEx;
 
 @SuppressWarnings({"UnusedReturnValue", "unused", "WeakerAccess"})
 public class DataAccessLayer extends IDataLayer {
-    private TwoTrailsApp TtAppCtx;
-
-    public String getFilePath() {
-        return _FilePath;
-    }
-
-    private String _FileName;
-    public String getFileName() {
-        if (_FileName == null) {
-            _FileName = FileUtils.getFileNameWoExt(_FilePath);
-        }
-        return _FileName;
-    }
-
-    public File getDBFile() { return _dbFile; }
-
     public TtVersion getVersion() {
         if (_DalVersion == null)
             _DalVersion = new TtVersion(getTtDbVersion());
@@ -70,236 +52,206 @@ public class DataAccessLayer extends IDataLayer {
         return _DalVersion;
     }
 
-
     private TtVersion _DalVersion;
-    private String _FilePath;
-    private File _dbFile;
-
     private TtUserAction _Activity = null;
 
 
-    //region Constructors / Open / Close
-    public DataAccessLayer(String filePath, TwoTrailsApp context) {
-        TtAppCtx = context;
-
-        _FilePath = filePath;
-
-        if (FileUtils.fileExists(_FilePath))
-            open();
-        else
-            CreateDB();
+    //region Constructors / Open / Close / Create
+    public DataAccessLayer(TwoTrailsApp context, SQLiteDatabase db, String fileName) {
+        super(context, db, fileName);
     }
 
-    public boolean open() {
-        if (!isOpen() && FileUtils.fileExists(_FilePath)) {
-            _db = SQLiteDatabase.openDatabase(_FilePath, null, 0);
-
-            try {
-                _dbFile = new File(_FilePath);
-                _DalVersion = new TtVersion(getTtDbVersion());
-                _Activity = createUserActivty();
-            } catch (Exception ex) {
-                return false;
-            }
-
-            return true;
-        }
-        return false;
+    protected DataAccessLayer(TwoTrailsApp context, SQLiteDatabase db, String fileName, boolean create) {
+        super(context, db, fileName, create);
     }
 
-    public void close() {
-        if (isOpen()) {
-            if (_Activity != null)
-                insertUserActivity(_Activity);
+    
+    public static DataAccessLayer createDAL(TwoTrailsApp context, SQLiteDatabase db, String projectName, String fileName) {
+        DataAccessLayer dal = new DataAccessLayer(context, db, fileName, true);
 
-            _db.close();
+        dal.setupProjectInfo(projectName);
+        dal.insertMetadata(context.getMetadataSettings().getDefaultMetadata());
+        dal.insertGroup(Consts.Defaults.createDefaultGroup());
 
-            File f = new File(_FilePath + "-journal");
-            if (f.exists()) {
-                if (!f.delete()) {
-                    TtAppCtx.getReport().writeError("sql journal not deleted", "DataAccessLayer:close");
-                }
-            }
-        }
+        return dal;
     }
 
-    public boolean isOpen() {
-        return (_db != null && _db.isOpen());
-    }
-    //endregion
+    @Override
+    protected void onCreateDB(SQLiteDatabase db) {
+        _DalVersion = TwoTrailsSchema.SchemaVersion;
+        _Activity = createUserActivity();
 
-
-    //region Create DB
-    private void CreateDB() {
-        try {
-            _dbFile = new File(_FilePath);
-            _Activity = createUserActivty();
-
-            _db = SQLiteDatabase.openOrCreateDatabase(_dbFile, null);
-            _DalVersion = TwoTrailsSchema.SchemaVersion;
-
-            CreatePolygonTable();
-            CreateMetaDataTable();
-            CreatePointTable();
-            CreateGpsPointDataTable();
-            CreateTravPointDataTable();
-            CreateQuondamPointDataTable();
-            CreateProjectInfoDataTable();
-            CreateTtNmeaTable();
-            CreateGroupTable();
-            CreatePolygonAttrTable();
-            CreateActivityTable();
-            CreateDataDictionaryTable();
-            SetupProjInfo();
-            insertMetadata(TtAppCtx.getMetadataSettings().getDefaultMetadata());
-            insertGroup(Consts.Defaults.createDefaultGroup());
-
-        } catch (Exception ex) {
-            //say that db creation failed, specific tables have already been logged
-
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DataAccessLayer:CreateDB");
-        }
+        createPolygonTable(db);
+        createMetaDataTable(db);
+        createPointTable(db);
+        createGpsPointDataTable(db);
+        createTravPointDataTable(db);
+        createQuondamPointDataTable(db);
+        createProjectInfoDataTable(db);
+        createTtNmeaTable(db);
+        createGroupTable(db);
+        createPolygonAttrTable(db);
+        CreateActivityTable(db);
+        createDataDictionaryTable(db);
     }
 
 
-    private void CreatePointTable() {
+    private void createPointTable(SQLiteDatabase db) {
         try
         {
-            _db.execSQL(TwoTrailsSchema.PointSchema.CreateTable);
+            db.execSQL(TwoTrailsSchema.PointSchema.CreateTable);
         }
         catch (Exception ex)
         {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DataAccessLayer:CreatePointTable");
-            throw ex;
+            logError(ex.getMessage(), "DataAccessLayer:createPointTable");
+            throw new RuntimeException("DAL:createPointTable");
         }
     }
     
-    private void CreatePolygonTable() {
+    private void createPolygonTable(SQLiteDatabase db) {
         try
         {
-            _db.execSQL(TwoTrailsSchema.PolygonSchema.CreateTable);
+            db.execSQL(TwoTrailsSchema.PolygonSchema.CreateTable);
         }
         catch (Exception ex)
         {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DataAccessLayer:CreatePolygonTable");
-            throw ex;
+            logError(ex.getMessage(), "DataAccessLayer:createPolygonTable");
+            throw new RuntimeException("DAL:createPolygonTable");
         }
     }
 
-    private void CreateGroupTable() {
+    private void createGroupTable(SQLiteDatabase db) {
         try
         {
-            _db.execSQL(TwoTrailsSchema.GroupSchema.CreateTable);
+            db.execSQL(TwoTrailsSchema.GroupSchema.CreateTable);
         }
         catch (Exception ex)
         {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DataAccessLayer:CreatePolygonTable");
-            throw ex;
+            logError(ex.getMessage(), "DataAccessLayer:createPolygonTable");
+            throw new RuntimeException("DAL:createPolygonTable");
         }
 
     }
 
-    private void CreateMetaDataTable() {
+    private void createMetaDataTable(SQLiteDatabase db) {
         try
         {
-            _db.execSQL(TwoTrailsSchema.MetadataSchema.CreateTable);
+            db.execSQL(TwoTrailsSchema.MetadataSchema.CreateTable);
         }
         catch (Exception ex)
         {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DataAccessLayer:CreateMetaDataTable");
-            throw ex;
+            logError(ex.getMessage(), "DataAccessLayer:createMetaDataTable");
+            throw new RuntimeException("DAL:createMetaDataTable");
         }
     }
 
-    private void CreateGpsPointDataTable() {
+    private void createGpsPointDataTable(SQLiteDatabase db) {
         try
         {
-            _db.execSQL(TwoTrailsSchema.GpsPointSchema.CreateTable);
+            db.execSQL(TwoTrailsSchema.GpsPointSchema.CreateTable);
         }
         catch (Exception ex)
         {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DataAccessLayer:CreateGpsPointDataTable");
+            logError(ex.getMessage(), "DataAccessLayer:createGpsPointDataTable");
+            throw new RuntimeException("DAL:createGpsPointDataTable");
         }
     }
 
-    private void CreateTravPointDataTable() {
+    private void createTravPointDataTable(SQLiteDatabase db) {
         try
         {
-            _db.execSQL(TwoTrailsSchema.TravPointSchema.CreateTable);
+            db.execSQL(TwoTrailsSchema.TravPointSchema.CreateTable);
         }
         catch (Exception ex)
         {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DataAccessLayer:CreateTravPointDataTable");
+            logError(ex.getMessage(), "DataAccessLayer:createTravPointDataTable");
+            throw new RuntimeException("DAL:createTravPointDataTable");
         }
     }
 
-    private void CreateQuondamPointDataTable() {
+    private void createQuondamPointDataTable(SQLiteDatabase db) {
         try
         {
-            _db.execSQL(TwoTrailsSchema.QuondamPointSchema.CreateTable);
+            db.execSQL(TwoTrailsSchema.QuondamPointSchema.CreateTable);
         }
         catch (Exception ex)
         {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DataAccessLayer:CreateQuondamPointDataTable");
+            logError(ex.getMessage(), "DataAccessLayer:createQuondamPointDataTable");
+            throw new RuntimeException("DAL:createQuondamPointDataTable");
         }
     }
 
-    private void CreateProjectInfoDataTable() {
+    private void createProjectInfoDataTable(SQLiteDatabase db) {
         try
         {
-            _db.execSQL(TwoTrailsSchema.ProjectInfoSchema.CreateTable);
+            db.execSQL(TwoTrailsSchema.ProjectInfoSchema.CreateTable);
         }
         catch (Exception ex)
         {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DataAccessLayer:CreateProjectInfoDataTable");
+            logError(ex.getMessage(), "DataAccessLayer:createProjectInfoDataTable");
+            throw new RuntimeException("DAL:createProjectInfoDataTable");
         }
     }
 
-    private void CreateTtNmeaTable() {
+    private void createTtNmeaTable(SQLiteDatabase db) {
         try
         {
-            _db.execSQL(TwoTrailsSchema.TtNmeaSchema.CreateTable);
+            db.execSQL(TwoTrailsSchema.TtNmeaSchema.CreateTable);
         }
         catch (Exception ex)
         {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DataAccessLayer:CreateTtnmeaTable");
+            logError(ex.getMessage(), "DataAccessLayer:createTtnmeaTable");
+            throw new RuntimeException("DAL:createTtnmeaTable");
         }
     }
 
-    private void CreatePolygonAttrTable() {
+    private void createPolygonAttrTable(SQLiteDatabase db) {
         try
         {
-            _db.execSQL(TwoTrailsSchema.PolygonAttrSchema.CreateTable);
+            db.execSQL(TwoTrailsSchema.PolygonAttrSchema.CreateTable);
         }
         catch (Exception ex)
         {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DataAccessLayer:CreatePolygonAttrTable");
-            throw ex;
+            logError(ex.getMessage(), "DataAccessLayer:createPolygonAttrTable");
+            throw new RuntimeException("DAL:createPolygonAttrTable");
         }
     }
 
-    private void CreateActivityTable() {
+    private void CreateActivityTable(SQLiteDatabase db) {
         try
         {
-            _db.execSQL(TwoTrailsSchema.ActivitySchema.CreateTable);
+            db.execSQL(TwoTrailsSchema.ActivitySchema.CreateTable);
         }
         catch (Exception ex)
         {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DataAccessLayer:CreateActivityTable");
-            throw ex;
+            logError(ex.getMessage(), "DataAccessLayer:CreateActivityTable");
+            throw new RuntimeException("DAL:CreateActivityTable");
         }
     }
 
-    private  void CreateDataDictionaryTable() {
+    private  void createDataDictionaryTable(SQLiteDatabase db) {
         try
         {
-            _db.execSQL(TwoTrailsSchema.DataDictionarySchema.CreateTable);
+            db.execSQL(TwoTrailsSchema.DataDictionarySchema.CreateTable);
         }
         catch (Exception ex)
         {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DataAccessLayer:CreateDataDictionaryTable");
-            throw ex;
+            logError(ex.getMessage(), "DataAccessLayer:createDataDictionaryTable");
+            throw new RuntimeException("DAL:createDataDictionaryTable");
         }
+    }
+
+
+    @Override
+    protected void onOpenDB(SQLiteDatabase db) {
+        if (_DalVersion == null) _DalVersion = new TtVersion(getTtDbVersion());
+        if (_Activity == null) _Activity = createUserActivity();
+    }
+
+    @Override
+    protected void onCloseDB(SQLiteDatabase db) {
+        if (_Activity != null)
+            insertUserActivity(_Activity);
     }
     //endregion
 
@@ -326,7 +278,7 @@ public class DataAccessLayer extends IDataLayer {
     public TtPolygon getPolygonByCN(String cn) {
         ArrayList<TtPolygon> polys = getPolygons(String.format("%s = '%s'", TwoTrailsSchema.SharedSchema.CN, cn));
 
-        if (polys != null && polys.size() > 0)
+        if (polys.size() > 0)
             return polys.get(0);
         return null;
     }
@@ -342,7 +294,7 @@ public class DataAccessLayer extends IDataLayer {
                             where),
                     TwoTrailsSchema.PolygonSchema.TimeCreated);
 
-            Cursor c = _db.rawQuery(query, null);
+            Cursor c = getDB().rawQuery(query, null);
 
             TtPolygon poly;
 
@@ -377,7 +329,7 @@ public class DataAccessLayer extends IDataLayer {
 
             c.close();
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:getPolygons");
+            logError(ex.getMessage(), "DAL:getPolygons");
             throw new RuntimeException("DAL:getPolygons");
         }
 
@@ -390,7 +342,7 @@ public class DataAccessLayer extends IDataLayer {
         boolean success = false;
 
         try {
-            _db.beginTransaction();
+            getDB().beginTransaction();
 
             ContentValues cvs = new ContentValues();
             cvs.put(TwoTrailsSchema.SharedSchema.CN, poly.getCN());
@@ -404,16 +356,17 @@ public class DataAccessLayer extends IDataLayer {
             cvs.put(TwoTrailsSchema.PolygonSchema.IncrementBy, poly.getIncrementBy());
             cvs.put(TwoTrailsSchema.PolygonSchema.TimeCreated, dtf.print(poly.getTime()));
 
-            _db.insert(TwoTrailsSchema.PolygonSchema.TableName, null, cvs);
+            getDB().insert(TwoTrailsSchema.PolygonSchema.TableName, null, cvs);
 
-            _db.setTransactionSuccessful();
+            getDB().setTransactionSuccessful();
+
+            updateUserActivity(DataActionType.InsertedPolygons);
+
             success = true;
-
-            _Activity.updateAction(DataActionType.InsertedPolygons);
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:insertPolygon");
+            logError(ex.getMessage(), "DAL:insertPolygon");
         } finally {
-            _db.endTransaction();
+            getDB().endTransaction();
         }
 
         return success;
@@ -425,7 +378,7 @@ public class DataAccessLayer extends IDataLayer {
         int success = -1;
 
         try {
-            _db.beginTransaction();
+            getDB().beginTransaction();
 
             ContentValues cvs = new ContentValues();
             cvs.put(TwoTrailsSchema.PolygonSchema.Name, poly.getName());
@@ -437,16 +390,16 @@ public class DataAccessLayer extends IDataLayer {
             cvs.put(TwoTrailsSchema.PolygonSchema.PointStartIndex, poly.getPointStartIndex());
             cvs.put(TwoTrailsSchema.PolygonSchema.IncrementBy, poly.getIncrementBy());
 
-            success = _db.update(TwoTrailsSchema.PolygonSchema.TableName, cvs,
+            success = getDB().update(TwoTrailsSchema.PolygonSchema.TableName, cvs,
                 String.format("%s = '%s'", TwoTrailsSchema.SharedSchema.CN, poly.getCN()), null);
 
-            _db.setTransactionSuccessful();
+            getDB().setTransactionSuccessful();
 
-            _Activity.updateAction(DataActionType.ModifiedPolygons);
+            updateUserActivity(DataActionType.ModifiedPolygons);
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:updatePolygon");
+            logError(ex.getMessage(), "DAL:updatePolygon");
         } finally {
-            _db.endTransaction();
+            getDB().endTransaction();
         }
 
         return success > 0;
@@ -458,17 +411,17 @@ public class DataAccessLayer extends IDataLayer {
         boolean success = false;
 
         try {
-            success = _db.delete(TwoTrailsSchema.PolygonSchema.TableName,
+            success = getDB().delete(TwoTrailsSchema.PolygonSchema.TableName,
                     TwoTrailsSchema.SharedSchema.CN + "=?",
                     new String[] { cn }) > 0;
 
             if (success) {
                 deletePolygonGraphicOption(cn);
 
-                _Activity.updateAction(DataActionType.DeletedPolygons);
+                updateUserActivity(DataActionType.DeletedPolygons);
             }
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:deletePolygon");
+            logError(ex.getMessage(), "DAL:deletePolygon");
         }
 
         return success;
@@ -494,7 +447,7 @@ public class DataAccessLayer extends IDataLayer {
                 getPoints(String.format("%s = '%s'",
                         TwoTrailsSchema.PointSchema.PolyCN, polyCN), 1);
 
-        if (points != null && points.size() > 0)
+        if (points.size() > 0)
             return points.get(0);
         return null;
     }
@@ -527,7 +480,7 @@ public class DataAccessLayer extends IDataLayer {
                 TwoTrailsSchema.PointSchema.Operation, OpType.WayPoint.getValue(),
                 TwoTrailsSchema.PointSchema.OnBoundary);
 
-        Cursor cursor = _db.rawQuery(countQuery, null);
+        Cursor cursor = getDB().rawQuery(countQuery, null);
 
         int count = 0;
         if (null != cursor) {
@@ -585,7 +538,7 @@ public class DataAccessLayer extends IDataLayer {
                     TwoTrailsSchema.PointSchema.Order,
                     limit > 0 ? " limit " + limit : StringEx.Empty);
 
-            Cursor c = _db.rawQuery(query, null);
+            Cursor c = getDB().rawQuery(query, null);
 
             TtPoint point;
 
@@ -673,7 +626,7 @@ public class DataAccessLayer extends IDataLayer {
 
             c.close();
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:getPoints");
+            logError(ex.getMessage(), "DAL:getPoints");
             throw new RuntimeException("DAL:getPoints");
         }
 
@@ -704,7 +657,7 @@ public class DataAccessLayer extends IDataLayer {
                     TwoTrailsSchema.SharedSchema.CN,
                     g.getCN());
 
-            Cursor c = _db.rawQuery(query, null);
+            Cursor c = getDB().rawQuery(query, null);
 
             if (c.moveToFirst()) {
                 if (!c.isNull(1))
@@ -721,7 +674,8 @@ public class DataAccessLayer extends IDataLayer {
 
             c.close();
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:getGpsPointData");
+            logError(ex.getMessage(), "DAL:getGpsPointData");
+            throw new RuntimeException("DAL:getGpsPointData");
         }
     }
 
@@ -735,7 +689,7 @@ public class DataAccessLayer extends IDataLayer {
                     TwoTrailsSchema.SharedSchema.CN,
                     t.getCN());
 
-            Cursor c = _db.rawQuery(query, null);
+            Cursor c = getDB().rawQuery(query, null);
 
             if (c.moveToFirst()) {
                 if (!c.isNull(1))
@@ -750,7 +704,8 @@ public class DataAccessLayer extends IDataLayer {
 
             c.close();
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:getTravPointData");
+            logError(ex.getMessage(), "DAL:getTravPointData");
+            throw new RuntimeException("DAL:getTravPointData");
         }
     }
 
@@ -764,7 +719,7 @@ public class DataAccessLayer extends IDataLayer {
                     TwoTrailsSchema.SharedSchema.CN,
                     q.getCN());
 
-            Cursor c = _db.rawQuery(query, null);
+            Cursor c = getDB().rawQuery(query, null);
 
             if (c.moveToFirst()) {
                 if (!c.isNull(1)) {
@@ -779,7 +734,8 @@ public class DataAccessLayer extends IDataLayer {
 
             c.close();
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:getQuondamPointData");
+            logError(ex.getMessage(), "DAL:getQuondamPointData");
+            throw new RuntimeException("DAL:getQuondamPointData");
         }
     }
     //endregion
@@ -793,20 +749,20 @@ public class DataAccessLayer extends IDataLayer {
             return false;
 
         try {
-            _db.beginTransaction();
+            getDB().beginTransaction();
 
             success = insertBasePoint(point);
 
             if (success) {
-                _db.setTransactionSuccessful();
+                getDB().setTransactionSuccessful();
 
-                _Activity.updateAction(DataActionType.InsertedPoints);
+                updateUserActivity(DataActionType.InsertedPoints);
             }
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:insertPoint");
+            logError(ex.getMessage(), "DAL:insertPoint");
             success = false;
         } finally {
-            _db.endTransaction();
+            getDB().endTransaction();
         }
 
         return success;
@@ -819,7 +775,7 @@ public class DataAccessLayer extends IDataLayer {
             return false;
 
         try {
-            _db.beginTransaction();
+            getDB().beginTransaction();
 
             for(TtPoint point : points) {
                 if (!insertBasePoint(point)) {
@@ -829,15 +785,15 @@ public class DataAccessLayer extends IDataLayer {
             }
 
             if (success) {
-                _db.setTransactionSuccessful();
+                getDB().setTransactionSuccessful();
 
-                _Activity.updateAction(DataActionType.ModifiedPoints);
+                updateUserActivity(DataActionType.ModifiedPoints);
             }
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:insertPoints");
+            logError(ex.getMessage(), "DAL:insertPoints");
             success = false;
         } finally {
-            _db.endTransaction();
+            getDB().endTransaction();
         }
 
         return success;
@@ -881,7 +837,7 @@ public class DataAccessLayer extends IDataLayer {
                 cvs.put(TwoTrailsSchema.PointSchema.QuondamLinks, StringEx.Empty);
             }
 
-            _db.insert(TwoTrailsSchema.PointSchema.TableName, null, cvs);
+            getDB().insert(TwoTrailsSchema.PointSchema.TableName, null, cvs);
 
             switch (point.getOp()) {
                 case GPS:
@@ -899,7 +855,7 @@ public class DataAccessLayer extends IDataLayer {
                     break;
             }
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:insertBasePoint");
+            logError(ex.getMessage(), "DAL:insertBasePoint");
             return false;
         }
         return true;
@@ -916,10 +872,11 @@ public class DataAccessLayer extends IDataLayer {
             cvs.put(TwoTrailsSchema.GpsPointSchema.Longitude, point.getLongitude());
             cvs.put(TwoTrailsSchema.GpsPointSchema.Elevation, point.getElevation());
 
-            _db.insert(TwoTrailsSchema.GpsPointSchema.TableName, null, cvs);
+            getDB().insert(TwoTrailsSchema.GpsPointSchema.TableName, null, cvs);
 
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:insertGpsData");
+            logError(ex.getMessage(), "DAL:insertGpsData");
+            throw new RuntimeException("DAL:insertGpsData");
         }
     }
 
@@ -935,10 +892,11 @@ public class DataAccessLayer extends IDataLayer {
             cvs.put(TwoTrailsSchema.TravPointSchema.VerticalAngle, point.getSlopeAngle());
 
 
-            _db.insert(TwoTrailsSchema.TravPointSchema.TableName, null, cvs);
+            getDB().insert(TwoTrailsSchema.TravPointSchema.TableName, null, cvs);
 
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:insertTravData");
+            logError(ex.getMessage(), "DAL:insertTravData");
+            throw new RuntimeException("DAL:insertTravData");
         }
     }
 
@@ -950,11 +908,12 @@ public class DataAccessLayer extends IDataLayer {
             cvs.put(TwoTrailsSchema.QuondamPointSchema.ParentPointCN, point.getParentCN());
             cvs.put(TwoTrailsSchema.QuondamPointSchema.ManualAccuracy, point.getManualAccuracy());
 
-            _db.insert(TwoTrailsSchema.QuondamPointSchema.TableName, null, cvs);
+            getDB().insert(TwoTrailsSchema.QuondamPointSchema.TableName, null, cvs);
 
             updateQuondamLink(point);
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:insertQuondamData");
+            logError(ex.getMessage(), "DAL:insertQuondamData");
+            throw new RuntimeException("DAL:insertQuondamData");
         }
     }
     //endregion
@@ -972,19 +931,19 @@ public class DataAccessLayer extends IDataLayer {
         boolean success = false;
 
         try {
-            _db.beginTransaction();
+            getDB().beginTransaction();
 
             success = updateBasePoint(updatedPoint, updatedPoint);
 
             if (success) {
-                _db.setTransactionSuccessful();
+                getDB().setTransactionSuccessful();
 
-                _Activity.updateAction(DataActionType.ModifiedPoints);
+                updateUserActivity(DataActionType.ModifiedPoints);
             }
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:updatePoint");
+            logError(ex.getMessage(), "DAL:updatePoint");
         } finally {
-            _db.endTransaction();
+            getDB().endTransaction();
         }
         return success;
     }
@@ -993,19 +952,19 @@ public class DataAccessLayer extends IDataLayer {
         boolean success = false;
 
         try {
-            _db.beginTransaction();
+            getDB().beginTransaction();
 
             success = updateBasePoint(updatedPoint, oldPoint);
 
             if (success) {
-                _db.setTransactionSuccessful();
+                getDB().setTransactionSuccessful();
 
-                _Activity.updateAction(DataActionType.ModifiedPoints);
+                updateUserActivity(DataActionType.ModifiedPoints);
             }
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:updatePoint");
+            logError(ex.getMessage(), "DAL:updatePoint");
         } finally {
-            _db.endTransaction();
+            getDB().endTransaction();
         }
         return success;
     }
@@ -1014,7 +973,7 @@ public class DataAccessLayer extends IDataLayer {
         boolean success = false;
 
         try {
-            _db.beginTransaction();
+            getDB().beginTransaction();
 
             for(TtPoint point : updatedPoints) {
                 success = updateBasePoint(point, point);
@@ -1024,14 +983,14 @@ public class DataAccessLayer extends IDataLayer {
             }
 
             if (success) {
-                _db.setTransactionSuccessful();
+                getDB().setTransactionSuccessful();
 
-                _Activity.updateAction(DataActionType.ModifiedPoints);
+                updateUserActivity(DataActionType.ModifiedPoints);
             }
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:updatePoint");
+            logError(ex.getMessage(), "DAL:updatePoint");
         } finally {
-            _db.endTransaction();
+            getDB().endTransaction();
         }
         return success;
     }
@@ -1045,7 +1004,7 @@ public class DataAccessLayer extends IDataLayer {
             return false;
 
         try {
-            _db.beginTransaction();
+            getDB().beginTransaction();
 
             for (int i = 0; i < updatedPoints.size(); i++) {
                 success = updateBasePoint(updatedPoints.get(i), oldPoints.get(i));
@@ -1055,14 +1014,14 @@ public class DataAccessLayer extends IDataLayer {
             }
 
             if (success) {
-                _db.setTransactionSuccessful();
+                getDB().setTransactionSuccessful();
 
-                _Activity.updateAction(DataActionType.ModifiedPoints);
+                updateUserActivity(DataActionType.ModifiedPoints);
             }
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:updatePoint");
+            logError(ex.getMessage(), "DAL:updatePoint");
         } finally {
-            _db.endTransaction();
+            getDB().endTransaction();
         }
         return success;
     }
@@ -1108,7 +1067,7 @@ public class DataAccessLayer extends IDataLayer {
                 }
 
 
-                int rows =_db.update(TwoTrailsSchema.PointSchema.TableName, cvs,
+                int rows =getDB().update(TwoTrailsSchema.PointSchema.TableName, cvs,
                         TwoTrailsSchema.SharedSchema.CN + "=?", new String[] { updatedPoint.getCN() });
 
                 if (rows < 1)
@@ -1134,7 +1093,7 @@ public class DataAccessLayer extends IDataLayer {
                     }
                 }
             } catch (Exception ex) {
-                TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:updateBasePoint");
+                logError(ex.getMessage(), "DAL:updateBasePoint");
                 return false;
             }
         }
@@ -1187,7 +1146,7 @@ public class DataAccessLayer extends IDataLayer {
         cvs.put(TwoTrailsSchema.GpsPointSchema.Longitude, updatedPoint.getLongitude());
         cvs.put(TwoTrailsSchema.GpsPointSchema.Elevation, updatedPoint.getElevation());
 
-        _db.update(TwoTrailsSchema.GpsPointSchema.TableName, cvs,
+        getDB().update(TwoTrailsSchema.GpsPointSchema.TableName, cvs,
                 TwoTrailsSchema.SharedSchema.CN + "=?", new String[]{updatedPoint.getCN()});
     }
 
@@ -1201,7 +1160,7 @@ public class DataAccessLayer extends IDataLayer {
         cvs.put(TwoTrailsSchema.TravPointSchema.SlopeDistance, updatedPoint.getSlopeDistance());
         cvs.put(TwoTrailsSchema.TravPointSchema.VerticalAngle, updatedPoint.getSlopeAngle());
 
-        _db.update(TwoTrailsSchema.TravPointSchema.TableName, cvs,
+        getDB().update(TwoTrailsSchema.TravPointSchema.TableName, cvs,
                 TwoTrailsSchema.SharedSchema.CN + "=?", new String[]{ updatedPoint.getCN() });
     }
 
@@ -1218,7 +1177,7 @@ public class DataAccessLayer extends IDataLayer {
             updateQuondamLink(updatedPoint);
         }
 
-        _db.update(TwoTrailsSchema.QuondamPointSchema.TableName, cvs,
+        getDB().update(TwoTrailsSchema.QuondamPointSchema.TableName, cvs,
                 TwoTrailsSchema.SharedSchema.CN + "=?", new String[]{updatedPoint.getCN()});
     }
 
@@ -1254,7 +1213,7 @@ public class DataAccessLayer extends IDataLayer {
         String pointCN = point.getCN();
 
         try {
-            success = _db.delete(TwoTrailsSchema.PointSchema.TableName,
+            success = getDB().delete(TwoTrailsSchema.PointSchema.TableName,
                     TwoTrailsSchema.SharedSchema.CN + "=?",
                     new String[] { pointCN }) > 0;
 
@@ -1275,10 +1234,10 @@ public class DataAccessLayer extends IDataLayer {
                         break;
                 }
 
-                _Activity.updateAction(DataActionType.DeletedPoints);
+                updateUserActivity(DataActionType.DeletedPoints);
             }
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:deletePoint");
+            logError(ex.getMessage(), "DAL:deletePoint");
         }
 
         return success;
@@ -1305,9 +1264,9 @@ public class DataAccessLayer extends IDataLayer {
             success = deletePoint(point);
 
             if (success)
-                _Activity.updateAction(DataActionType.DeletedPoints);
+                updateUserActivity(DataActionType.DeletedPoints);
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:deletePointSafe");
+            logError(ex.getMessage(), "DAL:deletePointSafe");
         }
 
         return success;
@@ -1333,10 +1292,10 @@ public class DataAccessLayer extends IDataLayer {
                 if (!success)
                     return false;
 
-                _Activity.updateAction(DataActionType.DeletedPoints);
+                updateUserActivity(DataActionType.DeletedPoints);
             }
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:deletePoints");
+            logError(ex.getMessage(), "DAL:deletePoints");
             success = false;
         }
 
@@ -1346,35 +1305,38 @@ public class DataAccessLayer extends IDataLayer {
 
     private void removeGpsData(GpsPoint point) {
         try {
-            _db.delete(TwoTrailsSchema.GpsPointSchema.TableName,
+            getDB().delete(TwoTrailsSchema.GpsPointSchema.TableName,
                     TwoTrailsSchema.SharedSchema.CN + "=?",
                     new String[] { point.getCN() });
 
             deleteNmeaByPointCN(point.getCN());
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:removeGpsData");
+            logError(ex.getMessage(), "DAL:removeGpsData");
+            throw new RuntimeException("DAL:removeGpsData");
         }
     }
 
     private void removeTravData(TravPoint point) {
         try {
-            _db.delete(TwoTrailsSchema.TravPointSchema.TableName,
+            getDB().delete(TwoTrailsSchema.TravPointSchema.TableName,
                     TwoTrailsSchema.SharedSchema.CN + "=?",
                     new String[] { point.getCN() });
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:removeTravData");
+            logError(ex.getMessage(), "DAL:removeTravData");
+            throw new RuntimeException("DAL:removeTravData");
         }
     }
 
     private void removeQuondamData(QuondamPoint point) {
         try {
-            _db.delete(TwoTrailsSchema.QuondamPointSchema.TableName,
+            getDB().delete(TwoTrailsSchema.QuondamPointSchema.TableName,
                     TwoTrailsSchema.SharedSchema.CN + "=?",
                     new String[] { point.getCN() });
 
             removeQuondamLink(point);
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:removeQuondamData");
+            logError(ex.getMessage(), "DAL:removeQuondamData");
+            throw new RuntimeException("DAL:removeQuondamData");
         }
     }
     //endregion
@@ -1394,7 +1356,7 @@ public class DataAccessLayer extends IDataLayer {
     public TtMetadata getMetadataByCN(String cn) {
         ArrayList<TtMetadata> metas = getMetadata(String.format("%s = '%s'", TwoTrailsSchema.SharedSchema.CN, cn));
 
-        if (metas != null && metas.size() > 0)
+        if (metas.size() > 0)
             return metas.get(0);
         return null;
     }
@@ -1408,8 +1370,7 @@ public class DataAccessLayer extends IDataLayer {
                     TwoTrailsSchema.MetadataSchema.SelectItems,
                     where);
 
-
-            Cursor c = _db.rawQuery(query, null);
+            Cursor c = getDB().rawQuery(query, null);
 
             TtMetadata meta;
 
@@ -1453,7 +1414,7 @@ public class DataAccessLayer extends IDataLayer {
 
             c.close();
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:getMetadata");
+            logError(ex.getMessage(), "DAL:getMetadata");
             throw new RuntimeException("DAL:getMetadata ");
         }
 
@@ -1480,7 +1441,7 @@ public class DataAccessLayer extends IDataLayer {
         boolean success = false;
 
         try {
-            _db.beginTransaction();
+            getDB().beginTransaction();
 
             ContentValues cvs = new ContentValues();
             cvs.put(TwoTrailsSchema.SharedSchema.CN, meta.getCN());
@@ -1499,16 +1460,16 @@ public class DataAccessLayer extends IDataLayer {
             cvs.put(TwoTrailsSchema.MetadataSchema.Crew, meta.getCrew());
             cvs.put(TwoTrailsSchema.MetadataSchema.UtmZone, meta.getZone());
 
-            _db.insert(TwoTrailsSchema.MetadataSchema.TableName, null, cvs);
+            getDB().insert(TwoTrailsSchema.MetadataSchema.TableName, null, cvs);
 
-            _db.setTransactionSuccessful();
+            getDB().setTransactionSuccessful();
             success = true;
 
-            _Activity.updateAction(DataActionType.InsertedMetadata);
+            updateUserActivity(DataActionType.InsertedMetadata);
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:insertMetadata");
+            logError(ex.getMessage(), "DAL:insertMetadata");
         } finally {
-            _db.endTransaction();
+            getDB().endTransaction();
         }
 
         return success;
@@ -1520,7 +1481,7 @@ public class DataAccessLayer extends IDataLayer {
         int success = -1;
 
         try {
-            _db.beginTransaction();
+            getDB().beginTransaction();
 
             ContentValues cvs = new ContentValues();
             cvs.put(TwoTrailsSchema.MetadataSchema.Name, meta.getName());
@@ -1538,16 +1499,16 @@ public class DataAccessLayer extends IDataLayer {
             cvs.put(TwoTrailsSchema.MetadataSchema.Crew, meta.getCrew());
             cvs.put(TwoTrailsSchema.MetadataSchema.UtmZone, meta.getZone());
 
-            success = _db.update(TwoTrailsSchema.MetadataSchema.TableName, cvs,
+            success = getDB().update(TwoTrailsSchema.MetadataSchema.TableName, cvs,
                     String.format("%s = '%s'", TwoTrailsSchema.SharedSchema.CN, meta.getCN()), null);
 
-            _db.setTransactionSuccessful();
+            getDB().setTransactionSuccessful();
 
-            _Activity.updateAction(DataActionType.ModifiedMetadata);
+            updateUserActivity(DataActionType.ModifiedMetadata);
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:updateMetadata");
+            logError(ex.getMessage(), "DAL:updateMetadata");
         } finally {
-            _db.endTransaction();
+            getDB().endTransaction();
         }
 
         return success > 0;
@@ -1559,23 +1520,23 @@ public class DataAccessLayer extends IDataLayer {
         boolean success;
 
         try {
-            _db.beginTransaction();
+            getDB().beginTransaction();
 
             ContentValues cvs = new ContentValues();
             cvs.put(TwoTrailsSchema.PointSchema.MetadataCN, Consts.EmptyGuid);
 
-            _db.update(TwoTrailsSchema.PointSchema.TableName, cvs,
+            getDB().update(TwoTrailsSchema.PointSchema.TableName, cvs,
                     String.format("%s = '%s'", TwoTrailsSchema.PointSchema.MetadataCN, cn), null);
 
             success = deleteMetadata(cn);
 
 
             if (success) {
-                _db.setTransactionSuccessful();
-                _Activity.updateAction(DataActionType.DeletedMetadata);
+                getDB().setTransactionSuccessful();
+                updateUserActivity(DataActionType.DeletedMetadata);
             }
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:deleteMetadataSafe");
+            logError(ex.getMessage(), "DAL:deleteMetadataSafe");
             success = false;
         }
 
@@ -1586,14 +1547,14 @@ public class DataAccessLayer extends IDataLayer {
         boolean success = false;
 
         try {
-            success = _db.delete(TwoTrailsSchema.MetadataSchema.TableName,
+            success = getDB().delete(TwoTrailsSchema.MetadataSchema.TableName,
                     TwoTrailsSchema.SharedSchema.CN + "=?",
                     new String[] { cn }) > 0;
 
             if (success)
-                _Activity.updateAction(DataActionType.DeletedMetadata);
+                updateUserActivity(DataActionType.DeletedMetadata);
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:deleteMetadata");
+            logError(ex.getMessage(), "DAL:deleteMetadata");
         }
 
         return success;
@@ -1619,7 +1580,7 @@ public class DataAccessLayer extends IDataLayer {
         ArrayList<TtGroup> groups = getGroups(String.format("%s = '%s'",
                 TwoTrailsSchema.SharedSchema.CN, cn));
 
-        if (groups != null && groups.size() > 0)
+        if (groups.size() > 0)
             return groups.get(0);
         else
             return null;
@@ -1629,13 +1590,12 @@ public class DataAccessLayer extends IDataLayer {
         ArrayList<TtGroup> groups = new ArrayList<>();
 
         try {
-
             String query = createSelectQuery(
                             TwoTrailsSchema.GroupSchema.TableName,
                             TwoTrailsSchema.GroupSchema.SelectItems,
                             where);
 
-            Cursor c = _db.rawQuery(query, null);
+            Cursor c = getDB().rawQuery(query, null);
 
             TtGroup group;
 
@@ -1659,7 +1619,7 @@ public class DataAccessLayer extends IDataLayer {
 
             c.close();
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:getGroups");
+            logError(ex.getMessage(), "DAL:getGroups");
             throw new RuntimeException("DAL:getGroups");
         }
 
@@ -1686,7 +1646,7 @@ public class DataAccessLayer extends IDataLayer {
         boolean success = false;
 
         try {
-            _db.beginTransaction();
+            getDB().beginTransaction();
 
             ContentValues cvs = new ContentValues();
             cvs.put(TwoTrailsSchema.SharedSchema.CN, group.getCN());
@@ -1694,16 +1654,16 @@ public class DataAccessLayer extends IDataLayer {
             cvs.put(TwoTrailsSchema.GroupSchema.Description, group.getDescription());
             cvs.put(TwoTrailsSchema.GroupSchema.Type, group.getGroupType().getValue());
 
-            _db.insert(TwoTrailsSchema.GroupSchema.TableName, null, cvs);
+            getDB().insert(TwoTrailsSchema.GroupSchema.TableName, null, cvs);
 
-            _db.setTransactionSuccessful();
+            getDB().setTransactionSuccessful();
             success = true;
 
-            _Activity.updateAction(DataActionType.InsertedGroups);
+            updateUserActivity(DataActionType.InsertedGroups);
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:insertGroup");
+            logError(ex.getMessage(), "DAL:insertGroup");
         } finally {
-            _db.endTransaction();
+            getDB().endTransaction();
         }
 
         return success;
@@ -1715,26 +1675,26 @@ public class DataAccessLayer extends IDataLayer {
         int success = -1;
 
         try {
-            _db.beginTransaction();
+            getDB().beginTransaction();
 
             ContentValues cvs = new ContentValues();
             cvs.put(TwoTrailsSchema.GroupSchema.Name, group.getName());
             cvs.put(TwoTrailsSchema.GroupSchema.Description, group.getDescription());
             cvs.put(TwoTrailsSchema.GroupSchema.Type, group.getGroupType().getValue());
 
-            success = _db.update(TwoTrailsSchema.GroupSchema.TableName, cvs,
+            success = getDB().update(TwoTrailsSchema.GroupSchema.TableName, cvs,
                     String.format("%s = '%s'", TwoTrailsSchema.SharedSchema.CN, group.getCN()), null);
 
 
             if (success > 0) {
-                _Activity.updateAction(DataActionType.ModifiedGroups);
+                updateUserActivity(DataActionType.ModifiedGroups);
             }
 
-            _db.setTransactionSuccessful();
+            getDB().setTransactionSuccessful();
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:updateGroup");
+            logError(ex.getMessage(), "DAL:updateGroup");
         } finally {
-            _db.endTransaction();
+            getDB().endTransaction();
         }
 
         return success > 0;
@@ -1746,14 +1706,14 @@ public class DataAccessLayer extends IDataLayer {
         boolean success = false;
 
         try {
-            success = _db.delete(TwoTrailsSchema.GroupSchema.TableName,
+            success = getDB().delete(TwoTrailsSchema.GroupSchema.TableName,
                     TwoTrailsSchema.SharedSchema.CN + "=?",
                     new String[] { cn }) > 0;
 
             if (success)
-                _Activity.updateAction(DataActionType.DeletedGroups);
+                updateUserActivity(DataActionType.DeletedGroups);
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:deleteGroup");
+            logError(ex.getMessage(), "DAL:deleteGroup");
         }
 
         return success;
@@ -1794,7 +1754,7 @@ public class DataAccessLayer extends IDataLayer {
                     TwoTrailsSchema.TtNmeaSchema.SelectItems,
                     where);
 
-            Cursor c = _db.rawQuery(query, null);
+            Cursor c = getDB().rawQuery(query, null);
 
             if (c.moveToFirst()) {
                 do {
@@ -1978,7 +1938,7 @@ public class DataAccessLayer extends IDataLayer {
 
             c.close();
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:getNmeaBursts");
+            logError(ex.getMessage(), "DAL:getNmeaBursts");
             throw new RuntimeException("DAL:getNmeaBursts");
         }
 
@@ -1989,7 +1949,7 @@ public class DataAccessLayer extends IDataLayer {
     //region Insert
     public boolean insertNmeaBursts(Collection<TtNmeaBurst> bursts) {
         try {
-            _db.beginTransaction();
+            getDB().beginTransaction();
 
             for (TtNmeaBurst burst : bursts) {
                 if (!insertNmeaBurstNoTrans(burst)) {
@@ -1997,31 +1957,33 @@ public class DataAccessLayer extends IDataLayer {
                 }
             }
 
-            _db.setTransactionSuccessful();
+            getDB().setTransactionSuccessful();
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:insertNmeaBursts");
+            logError(ex.getMessage(), "DAL:insertNmeaBursts");
+            throw new RuntimeException("DAL:insertNmeaBursts");
         } finally {
-            _db.endTransaction();
+            getDB().endTransaction();
         }
 
         return true;
     }
 
     public boolean insertNmeaBurst(TtNmeaBurst burst) {
-        boolean success = false;
+        boolean success;
 
         try {
-            _db.beginTransaction();
+            getDB().beginTransaction();
 
             success = insertNmeaBurstNoTrans(burst);
 
             if (success) {
-                _db.setTransactionSuccessful();
+                getDB().setTransactionSuccessful();
             }
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:insertNmeaBurst");
+            logError(ex.getMessage(), "DAL:insertNmeaBurst");
+            throw new RuntimeException("DAL:insertNmeaBurst");
         } finally {
-            _db.endTransaction();
+            getDB().endTransaction();
         }
 
         return success;
@@ -2068,11 +2030,13 @@ public class DataAccessLayer extends IDataLayer {
 
             cvs.put(TwoTrailsSchema.TtNmeaSchema.SatellitesInView, burst.getSatellitesInViewString());
 
-            _db.insert(TwoTrailsSchema.TtNmeaSchema.TableName, null, cvs);
+            getDB().insert(TwoTrailsSchema.TtNmeaSchema.TableName, null, cvs);
 
             success = true;
+
+            updateUserActivity(DataActionType.InsertedNmea);
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:insertGroup");
+            logError(ex.getMessage(), "DAL:insertGroup");
         }
 
         return success;
@@ -2083,17 +2047,18 @@ public class DataAccessLayer extends IDataLayer {
 
     public void updateNmeaBursts(Collection<TtNmeaBurst> bursts) {
         try {
-            _db.beginTransaction();
+            getDB().beginTransaction();
 
             for (TtNmeaBurst burst : bursts) {
                 updateNmeaBurst(burst);
             }
 
-            _db.setTransactionSuccessful();
+            getDB().setTransactionSuccessful();
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:updateNmeaBursts");
+            logError(ex.getMessage(), "DAL:updateNmeaBursts");
+            throw new RuntimeException("DAL:updateNmeaBursts");
         } finally {
-            _db.endTransaction();
+            getDB().endTransaction();
         }
     }
 
@@ -2101,15 +2066,15 @@ public class DataAccessLayer extends IDataLayer {
         int success = -1;
 
         try {
-            _db.beginTransaction();
+            getDB().beginTransaction();
 
             success = updateNmeaBurstNoTrans(burst);
 
-            _db.setTransactionSuccessful();
+            getDB().setTransactionSuccessful();
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:updateNmeaBurst");
+            logError(ex.getMessage(), "DAL:updateNmeaBurst");
         } finally {
-            _db.endTransaction();
+            getDB().endTransaction();
         }
 
         return success;
@@ -2156,11 +2121,11 @@ public class DataAccessLayer extends IDataLayer {
 
             cvs.put(TwoTrailsSchema.TtNmeaSchema.SatellitesInView, burst.getSatellitesInViewString());
 
-            success = _db.update(TwoTrailsSchema.TtNmeaSchema.TableName, cvs,
+            success = getDB().update(TwoTrailsSchema.TtNmeaSchema.TableName, cvs,
                     String.format("%s = '%s'", TwoTrailsSchema.SharedSchema.CN, burst.getCN()), null);
 
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:updateNmea");
+            logError(ex.getMessage(), "DAL:updateNmea");
         }
 
         return success;
@@ -2171,21 +2136,25 @@ public class DataAccessLayer extends IDataLayer {
     //region Delete
     public void deleteNmeaByCN(String cn) {
         try {
-            _db.delete(TwoTrailsSchema.TtNmeaSchema.TableName,
-                    TwoTrailsSchema.SharedSchema.CN + "=?",
-                    new String[] { cn });
+            getDB().delete(TwoTrailsSchema.TtNmeaSchema.TableName,
+                    TwoTrailsSchema.SharedSchema.CN + "=?", new String[] { cn });
+
+            updateUserActivity(DataActionType.DeletedNmea);
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:deleteNmea");
+            logError(ex.getMessage(), "DAL:deleteNmea");
+            throw new RuntimeException("DAL:deleteNmea");
         }
     }
 
     public void deleteNmeaByPointCN(String pointCN) {
         try {
-        _db.delete(TwoTrailsSchema.TtNmeaSchema.TableName,
-                TwoTrailsSchema.TtNmeaSchema.PointCN + "=?",
-                new String[] { pointCN });
+            getDB().delete(TwoTrailsSchema.TtNmeaSchema.TableName,
+                TwoTrailsSchema.TtNmeaSchema.PointCN + "=?", new String[] { pointCN });
+
+            updateUserActivity(DataActionType.DeletedNmea);
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:deleteNmea");
+            logError(ex.getMessage(), "DAL:deleteNmea");
+            throw new RuntimeException("DAL:deleteNmea");
         }
     }
     //endregion
@@ -2239,13 +2208,14 @@ public class DataAccessLayer extends IDataLayer {
         String getQuery = String.format("select %s from %s",
                 columnName, TwoTrailsSchema.ProjectInfoSchema.TableName);
 
-        try (Cursor c = _db.rawQuery(getQuery, null)) {
+        try (Cursor c = getDB().rawQuery(getQuery, null)) {
             if (c.moveToFirst()) {
                 if (!c.isNull(0))
                     retString = c.getString(0);
             }
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DataAccessLayer:getProjectInfoField");
+            logError(ex.getMessage(), "DataAccessLayer:getProjectInfoField");
+            throw new RuntimeException("DAL:getProjectInfoField");
         }
 
         return retString;
@@ -2253,7 +2223,7 @@ public class DataAccessLayer extends IDataLayer {
     //endregion
 
     //region Set
-    private void SetupProjInfo() {
+    private void setupProjectInfo(String projectName) {
         try
         {
             ContentValues cvs = new ContentValues();
@@ -2261,8 +2231,8 @@ public class DataAccessLayer extends IDataLayer {
             cvs.put(TwoTrailsSchema.ProjectInfoSchema.TtDbSchemaVersion,
                     TwoTrailsSchema.SchemaVersion.toString());
 
-            String version = String.format("ANDROID: %s", TtUtils.getApplicationVersion(TtAppCtx));
-            ProjectSettings ps = TtAppCtx.getProjectSettings();
+            String version = TtUtils.getApplicationVersion(getTtAppContext());
+            ProjectSettings ps = getTtAppContext().getProjectSettings();
 
             cvs.put(TwoTrailsSchema.ProjectInfoSchema.TtVersion, version);
 
@@ -2270,7 +2240,7 @@ public class DataAccessLayer extends IDataLayer {
 
             cvs.put(TwoTrailsSchema.ProjectInfoSchema.Region, StringEx.Empty);
 
-            cvs.put(TwoTrailsSchema.ProjectInfoSchema.ID, getFileName());
+            cvs.put(TwoTrailsSchema.ProjectInfoSchema.ID, projectName);
 
             cvs.put(TwoTrailsSchema.ProjectInfoSchema.DeviceID, TtUtils.getDeviceName());
 
@@ -2284,11 +2254,12 @@ public class DataAccessLayer extends IDataLayer {
 
             cvs.put(TwoTrailsSchema.ProjectInfoSchema.DeviceID, TtUtils.getDeviceName());
 
-            _db.insert(TwoTrailsSchema.ProjectInfoSchema.TableName, null, cvs);
+            getDB().insert(TwoTrailsSchema.ProjectInfoSchema.TableName, null, cvs);
         }
         catch (Exception ex)
         {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DataAccessLayer:SetupProjInfo");
+            logError(ex.getMessage(), "DataAccessLayer:SetupProjectInfo");
+            throw new RuntimeException("DAL:SetupProjectInfo");
         }
     }
 
@@ -2332,13 +2303,14 @@ public class DataAccessLayer extends IDataLayer {
 
         try
         {
-            _db.execSQL(updateQuery);
+            getDB().execSQL(updateQuery);
 
-            _Activity.updateAction(DataActionType.ModifiedProject);
+            updateUserActivity(DataActionType.ModifiedProject);
         }
         catch (Exception ex)
         {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DataAccessLayer:SetProjectInfoField");
+            logError(ex.getMessage(), "DataAccessLayer:SetProjectInfoField");
+            throw new RuntimeException("DAL:SetProjectInfoField");
         }
     }
     //endregion
@@ -2355,7 +2327,7 @@ public class DataAccessLayer extends IDataLayer {
         ArrayList<PolygonGraphicOptions> groups = getPolygonGraphicOptions(String.format("%s = '%s'",
                 TwoTrailsSchema.SharedSchema.CN, cn));
 
-        if (groups != null && groups.size() > 0)
+        if (groups.size() > 0)
             return groups.get(0);
         else
             return null;
@@ -2370,11 +2342,12 @@ public class DataAccessLayer extends IDataLayer {
                     TwoTrailsSchema.PolygonAttrSchema.SelectItems,
                     where);
 
-            Cursor c = _db.rawQuery(query, null);
+            Cursor c = getDB().rawQuery(query, null);
             String cn;
             int adjbnd, unadjbnd, adjnav, unadjnav, adjpts, unadjpts, waypts;
 
-            MapSettings ms = TtAppCtx.getMapSettings();
+            TwoTrailsApp ctx = getTtAppContext();
+            MapSettings ms = ctx.getMapSettings();
 
             if (c.moveToFirst()) {
                 do {
@@ -2422,15 +2395,15 @@ public class DataAccessLayer extends IDataLayer {
                     graphicOptions.add(
                             new PolygonGraphicOptions(cn,
                                     adjbnd, unadjbnd, adjnav, unadjnav, adjpts, unadjpts, waypts,
-                                    TtAppCtx.getDeviceSettings().getMapAdjLineWidth(),
-                                    TtAppCtx.getDeviceSettings().getMapUnAdjLineWidth())
+                                    ctx.getDeviceSettings().getMapAdjLineWidth(),
+                                    ctx.getDeviceSettings().getMapUnAdjLineWidth())
                     );
                 } while (c.moveToNext());
             }
 
             c.close();
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:getPolygonGraphicOptions");
+            logError(ex.getMessage(), "DAL:getPolygonGraphicOptions");
             throw new RuntimeException("DAL:getPolygonGraphicOptions");
         }
 
@@ -2457,7 +2430,7 @@ public class DataAccessLayer extends IDataLayer {
         boolean success = false;
 
         try {
-            _db.beginTransaction();
+            getDB().beginTransaction();
 
             ContentValues cvs = new ContentValues();
             cvs.put(TwoTrailsSchema.SharedSchema.CN, pgo.getCN());
@@ -2469,14 +2442,14 @@ public class DataAccessLayer extends IDataLayer {
             cvs.put(TwoTrailsSchema.PolygonAttrSchema.UnAdjPtsColor, pgo.getUnAdjPtsColor());
             cvs.put(TwoTrailsSchema.PolygonAttrSchema.WayPtsColor, pgo.getWayPtsColor());
 
-            _db.insert(TwoTrailsSchema.PolygonAttrSchema.TableName, null, cvs);
+            getDB().insert(TwoTrailsSchema.PolygonAttrSchema.TableName, null, cvs);
 
-            _db.setTransactionSuccessful();
+            getDB().setTransactionSuccessful();
             success = true;
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:insertPolygonGraphicOption");
+            logError(ex.getMessage(), "DAL:insertPolygonGraphicOption");
         } finally {
-            _db.endTransaction();
+            getDB().endTransaction();
         }
 
         return success;
@@ -2488,7 +2461,7 @@ public class DataAccessLayer extends IDataLayer {
         int success = -1;
 
         try {
-            _db.beginTransaction();
+            getDB().beginTransaction();
 
             ContentValues cvs = new ContentValues();
             cvs.put(TwoTrailsSchema.PolygonAttrSchema.AdjBndColor, pgo.getAdjBndColor());
@@ -2499,14 +2472,14 @@ public class DataAccessLayer extends IDataLayer {
             cvs.put(TwoTrailsSchema.PolygonAttrSchema.UnAdjPtsColor, pgo.getUnAdjPtsColor());
             cvs.put(TwoTrailsSchema.PolygonAttrSchema.WayPtsColor, pgo.getWayPtsColor());
 
-            success = _db.update(TwoTrailsSchema.PolygonAttrSchema.TableName, cvs,
+            success = getDB().update(TwoTrailsSchema.PolygonAttrSchema.TableName, cvs,
                     String.format("%s = '%s'", TwoTrailsSchema.SharedSchema.CN, pgo.getCN()), null);
 
-            _db.setTransactionSuccessful();
+            getDB().setTransactionSuccessful();
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:updatePolygonGraphicOption");
+            logError(ex.getMessage(), "DAL:updatePolygonGraphicOption");
         } finally {
-            _db.endTransaction();
+            getDB().endTransaction();
         }
 
         return success > 0;
@@ -2518,11 +2491,11 @@ public class DataAccessLayer extends IDataLayer {
         boolean success = false;
 
         try {
-            success = _db.delete(TwoTrailsSchema.PolygonAttrSchema.TableName,
+            success = getDB().delete(TwoTrailsSchema.PolygonAttrSchema.TableName,
                     TwoTrailsSchema.SharedSchema.CN + "=?",
                     new String[] { cn }) > 0;
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:deletePolygonGraphicOption");
+            logError(ex.getMessage(), "DAL:deletePolygonGraphicOption");
         }
 
         return success;
@@ -2532,10 +2505,20 @@ public class DataAccessLayer extends IDataLayer {
 
 
     //region Activity
-    private TtUserAction createUserActivty() {
-        return new TtUserAction("Android User", TtUtils.getDeviceName());
+    private TtUserAction createUserActivity() {
+        return new TtUserAction("Android User", TtUtils.getDeviceName(), TtUtils.getApplicationVersion(getTtAppContext()));
     }
 
+    public void updateUserActivity(int actionType) {
+        _Activity.updateAction(actionType);
+        onAction(actionType);
+    }
+
+    public void updateUserActivity(int actionType, String notes) {
+        _Activity.updateAction(actionType, notes);
+        onAction(actionType);
+    }
+    
     //region Get
     private ArrayList<TtUserAction> getUserActivity() {
         ArrayList<TtUserAction> activities = new ArrayList<>();
@@ -2546,22 +2529,23 @@ public class DataAccessLayer extends IDataLayer {
                     TwoTrailsSchema.ActivitySchema.SelectItems,
                     TwoTrailsSchema.ActivitySchema.TableName);
 
-            Cursor c = _db.rawQuery(query, null);
+            Cursor c = getDB().rawQuery(query, null);
 
             if (c.moveToFirst()) {
                 do {
                     activities.add(new TtUserAction(
                             c.getString(0),
                             c.getString(1),
-                            parseDateTime(c.getString(2)),
-                            new DataActionType(c.getInt(3)),
-                            c.getString(4)));
+                            c.getString(2),
+                            parseDateTime(c.getString(3)),
+                            new DataActionType(c.getInt(4)),
+                            c.getString(5)));
                 } while (c.moveToNext());
             }
 
             c.close();
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:getUserActivity");
+            logError(ex.getMessage(), "DAL:getUserActivity");
             throw new RuntimeException("DAL:getUserActivity");
         }
 
@@ -2573,18 +2557,22 @@ public class DataAccessLayer extends IDataLayer {
     public boolean updateUserSession() {
         if (_Activity != null && _Activity.getAction().getValue() != 0) {
             insertUserActivity(_Activity);
-            _Activity = createUserActivty();
+            _Activity = createUserActivity();
             return true;
         }
 
         return false;
     }
 
-    public boolean insertUserActivity(TtUserAction activity) {
-        boolean success = false;
+    protected boolean insertUserActivity(TtUserAction activity) {
+        boolean success = false, inTrans = false;
 
         try {
-            _db.beginTransaction();
+            if (getDB().inTransaction()) {
+                inTrans = true;
+            } else {
+                getDB().beginTransaction();
+            }
 
             ContentValues cvs = new ContentValues();
             cvs.put(TwoTrailsSchema.ActivitySchema.UserName, activity.getUserName());
@@ -2592,15 +2580,17 @@ public class DataAccessLayer extends IDataLayer {
             cvs.put(TwoTrailsSchema.ActivitySchema.ActivityDate, dtf.print(activity.getDate()));
             cvs.put(TwoTrailsSchema.ActivitySchema.DataActivity, activity.getAction().getValue());
             cvs.put(TwoTrailsSchema.ActivitySchema.ActivityNotes, activity.getNotes());
+            cvs.put(TwoTrailsSchema.ActivitySchema.AppVersion, TtUtils.getApplicationVersion(getTtAppContext()));
 
-            _db.insert(TwoTrailsSchema.ActivitySchema.TableName, null, cvs);
+            getDB().insert(TwoTrailsSchema.ActivitySchema.TableName, null, cvs);
 
-            _db.setTransactionSuccessful();
+            if (!inTrans)
+                getDB().setTransactionSuccessful();
             success = true;
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:insertUserActivity");
+            logError(ex.getMessage(), "DAL:insertUserActivity");
         } finally {
-            _db.endTransaction();
+            getDB().endTransaction();
         }
 
         return success;
@@ -2616,54 +2606,54 @@ public class DataAccessLayer extends IDataLayer {
 
     //region DbTools
     public boolean hasPolygons() {
-        return getItemCount(TwoTrailsSchema.PolygonSchema.TableName) > 0;
+        return getItemsCount(TwoTrailsSchema.PolygonSchema.TableName) > 0;
     }
 
-    public boolean duplicate(String duplicateFileName) {
-        try {
-            DataAccessLayer dDal = new DataAccessLayer(duplicateFileName, TtAppCtx);
-
-            dDal.setProjectID(getProjectID());
-            dDal.setProjectDescription(getProjectDescription());
-            dDal.setProjectRegion(getProjectRegion());
-            dDal.setProjectForest(getProjectForest());
-            dDal.setProjectDistrict(getProjectDistrict());
-            dDal.setProjectDateCreated(getProjectDateCreated());
-            dDal.setProjectDeviceID(getProjectDeviceID());
-            dDal.setProjectCreatedTtVersion(getProjectCreatedTtVersion());
-
-            for (TtMetadata meta : getMetadata()) {
-                if (meta.getCN().equals(Consts.EmptyGuid)) {
-                    dDal.updateMetadata(meta);
-                } else {
-                    dDal.insertMetadata(meta);
-                }
-            }
-
-            for (TtGroup group : getGroups()) {
-                if (group.getCN().equals(Consts.EmptyGuid)) {
-                    dDal.updateGroup(group);
-                } else {
-                    dDal.insertGroup(group);
-                }
-            }
-
-            for (TtPolygon poly : getPolygons()) {
-                dDal.insertPolygon(poly);
-            }
-
-            dDal.insertPoints(getPoints());
-
-            dDal.insertNmeaBursts(getNmeaBursts());
-
-            dDal.close();
-        } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:duplicate", ex.getStackTrace());
-            return false;
-        }
-
-        return true;
-    }
+//    public boolean duplicate(String duplicateFileName) {
+//        try {
+//            DataAccessLayer dDal = new DataAccessLayer(Uri.fromFile(new File(duplicateFileName)), TtAppCtx);
+//
+//            dDal.setProjectID(getProjectID());
+//            dDal.setProjectDescription(getProjectDescription());
+//            dDal.setProjectRegion(getProjectRegion());
+//            dDal.setProjectForest(getProjectForest());
+//            dDal.setProjectDistrict(getProjectDistrict());
+//            dDal.setProjectDateCreated(getProjectDateCreated());
+//            dDal.setProjectDeviceID(getProjectDeviceID());
+//            dDal.setProjectCreatedTtVersion(getProjectCreatedTtVersion());
+//
+//            for (TtMetadata meta : getMetadata()) {
+//                if (meta.getCN().equals(Consts.EmptyGuid)) {
+//                    dDal.updateMetadata(meta);
+//                } else {
+//                    dDal.insertMetadata(meta);
+//                }
+//            }
+//
+//            for (TtGroup group : getGroups()) {
+//                if (group.getCN().equals(Consts.EmptyGuid)) {
+//                    dDal.updateGroup(group);
+//                } else {
+//                    dDal.insertGroup(group);
+//                }
+//            }
+//
+//            for (TtPolygon poly : getPolygons()) {
+//                dDal.insertPolygon(poly);
+//            }
+//
+//            dDal.insertPoints(getPoints());
+//
+//            dDal.insertNmeaBursts(getNmeaBursts());
+//
+//            dDal.close();
+//        } catch (Exception ex) {
+//            logError(ex.getMessage(), "DAL:duplicate", ex.getStackTrace());
+//            return false;
+//        }
+//
+//        return true;
+//    }
 
     public boolean needsAdjusting() {
         String countQuery = String.format("SELECT COUNT (*) FROM %s where %s IS NULL OR %s IS NULL OR %s IS NULL OR %s IS NULL",
@@ -2673,7 +2663,7 @@ public class DataAccessLayer extends IDataLayer {
                 TwoTrailsSchema.PointSchema.AdjZ,
                 TwoTrailsSchema.PointSchema.Accuracy);
 
-        Cursor cursor = _db.rawQuery(countQuery, null);
+        Cursor cursor = getDB().rawQuery(countQuery, null);
 
         int count = 0;
         if (null != cursor) {
@@ -2688,8 +2678,13 @@ public class DataAccessLayer extends IDataLayer {
         return count > 0;
     }
 
+    //TODO implement error checking
+    public boolean hasErrors() {
+        return false;
+    }
 
-    public void clean() {
+
+    public boolean clean() {
         StringBuilder sbPoly = new StringBuilder();
         StringBuilder sbPoint = new StringBuilder();
         StringBuilder sbNmea = new StringBuilder();
@@ -2739,46 +2734,32 @@ public class DataAccessLayer extends IDataLayer {
         try {
             for (int i = 0; i < pointDeleteQuerys.size(); i++) {
                 String wherePointCN = pointDeleteQuerys.get(i);
-                _db.delete(TwoTrailsSchema.PointSchema.TableName, wherePointCN, null);
-                _db.delete(TwoTrailsSchema.GpsPointSchema.TableName, wherePointCN, null);
-                _db.delete(TwoTrailsSchema.TravPointSchema.TableName, wherePointCN, null);
-                _db.delete(TwoTrailsSchema.QuondamPointSchema.TableName, wherePointCN, null);
+                getDB().delete(TwoTrailsSchema.PointSchema.TableName, wherePointCN, null);
+                getDB().delete(TwoTrailsSchema.GpsPointSchema.TableName, wherePointCN, null);
+                getDB().delete(TwoTrailsSchema.TravPointSchema.TableName, wherePointCN, null);
+                getDB().delete(TwoTrailsSchema.QuondamPointSchema.TableName, wherePointCN, null);
 
-                _db.delete(TwoTrailsSchema.TtNmeaSchema.TableName, nmeaDeleteQuerys.get(i), null);
+                getDB().delete(TwoTrailsSchema.TtNmeaSchema.TableName, nmeaDeleteQuerys.get(i), null);
             }
         } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:clean");
+            logError(ex.getMessage(), "DAL:clean");
+            return false;
         }
+
+        return true;
     }
 
 
-    public boolean Upgrade(DataAccessUpgrader.Upgrade upgrade) {
-        boolean success = false;
+    public void upgrade(Upgrade upgrade) {
+        int dbVersion = getVersion().toIntVersion();
 
-        try {
-            _db.beginTransaction();
-
-            int dbVersion = getVersion().toIntVersion();
-
-            if (dbVersion < upgrade.Version.toIntVersion()) {
-                _db.execSQL(upgrade.SQL);
-            }
-
-            _db.setTransactionSuccessful();
-
-            _Activity.updateAction(DataActionType.ProjectUpgraded, "Upgrade " + getVersion().toString() + " -> " + upgrade.Version.toString());
-            insertUserActivity(_Activity);
-            _Activity = createUserActivty();
-
-            success = true;
-        } catch (Exception ex) {
-            TtAppCtx.getReport().writeError(ex.getMessage(), "DAL:Upgrade");
-        } finally {
-            _db.endTransaction();
-            _DalVersion = null;
+        if (dbVersion < upgrade.Version.toIntVersion()) {
+            getDB().execSQL(upgrade.SQL);
         }
 
-        return success;
+        updateUserActivity(DataActionType.ProjectUpgraded, "Upgrade " + getVersion().toString() + " -> " + upgrade.Version.toString());
+        insertUserActivity(_Activity);
+        _Activity = createUserActivity();
     }
     //endregion
 }

@@ -32,7 +32,7 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
     private PolygonGraphicOptions graphicOptions;
     private HashMap<String, MarkerData> _MarkerData;
 
-    private MapView map;
+    private final MapView map;
     private Extent polyBounds;
 
     private GraphicsOverlay _AdjBndPts, _UnadjBndPts, _AdjNavPts, _UnadjNavPts, _WayPts, _AdjMiscPts, _UnadjMiscPts;

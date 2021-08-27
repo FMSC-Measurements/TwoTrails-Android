@@ -64,7 +64,6 @@ import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment;
 import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment.MarkerData;
 import com.usda.fmsc.twotrails.fragments.map.ManagedSupportMapFragment;
 import com.usda.fmsc.twotrails.gps.GpsService;
-import com.usda.fmsc.twotrails.logic.PolygonAdjuster;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
@@ -96,7 +95,7 @@ import static androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_UNDEFINED;
 import static androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_UNLOCKED;
 
 @SuppressWarnings({"SameParameterValue"})
-public abstract class BaseMapActivity extends CustomToolbarActivity implements IMultiMapFragment.MultiMapListener, GpsService.Listener,
+public abstract class BaseMapActivity extends TtProjectAdjusterActivity implements IMultiMapFragment.MultiMapListener, GpsService.Listener,
         SensorEventListener, PolyMarkerMapRvAdapter.Listener {
 
     //region Lock and Gravity Defs
@@ -358,9 +357,9 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     @Override
     public void setContentView(int layoutResID) {
         LayoutInflater inflater = LayoutInflater.from(this);
-
-        View view = inflater.inflate(layoutResID, null);
         FrameLayout container = findViewById(R.id.contentContainer);
+
+        View view = inflater.inflate(layoutResID, container, false);
 
         if (view != null) {
             if (container != null) {
@@ -389,7 +388,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
 
         if (getMapRightDrawerLayoutId() != 0) {
             FrameLayout rightDrawer = findViewById(R.id.mapRightDrawer);
-            view = inflater.inflate(getMapRightDrawerLayoutId(), null);
+            view = inflater.inflate(getMapRightDrawerLayoutId(), container, false);
             if (view != null) {
                 rightDrawer.addView(view);
             } else {
@@ -438,7 +437,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
                     startGMap();
                 }
             }
-            case Consts.Codes.Activites.SETTINGS: {
+            case Consts.Codes.Activities.SETTINGS: {
                 getMapSettings();
                 break;
             }
@@ -446,7 +445,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenuEx(Menu menu) {
         miResetBounds = menu.findItem(R.id.mapMenuResetBounds);
         if (miResetBounds != null) {
             miResetBounds.setVisible(getMapTracking() != MapTracking.FOLLOW);
@@ -478,101 +477,79 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
             miMapMaxBounds.setVisible(mapHasMaxExtents);
         }
 
-        return super.onCreateOptionsMenu(menu);
+        return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int itemId = item.getItemId();
-        switch (itemId) {
-            case R.id.mapMenuShowMyPos: {
-                showMyPos = !showMyPos;
-                getTtAppCtx().getDeviceSettings().setMapShowMyPos(showMyPos);
-                miShowMyPos.setChecked(showMyPos);
+        if (itemId == R.id.mapMenuShowMyPos) {
+            showMyPos = !showMyPos;
+            getTtAppCtx().getDeviceSettings().setMapShowMyPos(showMyPos);
+            miShowMyPos.setChecked(showMyPos);
 
-                if (getShowMyPos()) {
-                    if (!getTtAppCtx().getGps().isGpsRunning()) {
-                        startGps();
-                    }
-                } else {
-                    if (!getTtAppCtx().getDeviceSettings().isGpsAlwaysOn()) {
-                        stopGps();
-                    }
+            if (getShowMyPos()) {
+                if (!getTtAppCtx().getGps().isGpsRunning()) {
+                    startGps();
                 }
-
-                setLocationEnabled(getShowMyPos());
-                break;
-            }
-            case R.id.mmMenuSelectMap: {
-                selectMapType();
-                break;
-            }
-            case R.id.mapMenuGps: {
-                startActivityForResult(new Intent(this, SettingsActivity.class).
-                                putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.GPS_SETTINGS_PAGE),
-                        Consts.Codes.Activites.SETTINGS);
-                break;
-            }
-            case R.id.mmMenuMapSettings: {
-                startActivityForResult(new Intent(this, SettingsActivity.class).
-                                putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.MAP_SETTINGS_PAGE),
-                        Consts.Codes.Activites.SETTINGS);
-                break;
-            }
-            case R.id.mapMenuWhereIs: {
-                calculateDir();
-                slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
-                break;
-            }
-            case R.id.mmMenuMoveToMaxBounds: {
-                if (mmFrag != null) {
-                    mmFrag.moveToMapMaxExtents(true);
+            } else {
+                if (!getTtAppCtx().getDeviceSettings().isGpsAlwaysOn()) {
+                    stopGps();
                 }
-                break;
             }
-            case R.id.mapMenuResetBounds: {
-                resetMapBounds(true);
-                break;
+
+            setLocationEnabled(getShowMyPos());
+        } else if (itemId == R.id.mmMenuSelectMap) {
+            selectMapType();
+        } else if (itemId == R.id.mapMenuGps) {
+            openSettings(SettingsActivity.GPS_SETTINGS_PAGE);
+        } else if (itemId == R.id.mmMenuMapSettings) {
+            openSettings(SettingsActivity.MAP_SETTINGS_PAGE);
+        } else if (itemId == R.id.mapMenuWhereIs) {
+            calculateDir();
+            slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
+        } else if (itemId == R.id.mmMenuMoveToMaxBounds) {
+            if (mmFrag != null) {
+                mmFrag.moveToMapMaxExtents(true);
             }
-            case R.id.mapMenuZoomToPoly: {
-                int gSize = getPolyGraphicManagers().size();
-                if (gSize > 0) {
-                    if (gSize > 1) {
-                        final String[] polyStrs = new String[polyPoints.size()];
+        } else if (itemId == R.id.mapMenuResetBounds) {
+            resetMapBounds(true);
+        } else if (itemId == R.id.mapMenuZoomToPoly) {
+            int gSize = getPolyGraphicManagers().size();
+            if (gSize > 0) {
+                if (gSize > 1) {
+                    final String[] polyStrs = new String[polyPoints.size()];
 
-                        for (int i = 0; i < gSize; i++) {
-                            polyStrs[i] = getPolyGraphicManagers().get(i).getPolyName();
-                        }
+                    for (int i = 0; i < gSize; i++) {
+                        polyStrs[i] = getPolyGraphicManagers().get(i).getPolyName();
+                    }
 
-                        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+                    AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
 
-                        dialogBuilder.setTitle("Track Polygon");
+                    dialogBuilder.setTitle("Track Polygon");
 
-                        dialogBuilder.setItems(polyStrs, (dialog, which) -> {
-                            PolygonGraphicManager pmm = getPolyGraphicManagers().get(which);
-                            trackedPoly = pmm.getExtents();
-                            getTtAppCtx().getProjectSettings().setTrackedPolyCN(pmm.getPolygonCN());
-                            mapMoved = true;
-                            moveToLocation(pmm.getExtents(), Consts.Location.PADDING, true);
-                        });
-
-                        dialogBuilder.setNegativeButton(R.string.str_cancel, null);
-
-                        final AlertDialog dialog = dialogBuilder.create();
-
-                        dialog.show();
-                    } else {
-                        PolygonGraphicManager pmm = getPolyGraphicManagers().get(0);
+                    dialogBuilder.setItems(polyStrs, (dialog, which) -> {
+                        PolygonGraphicManager pmm = getPolyGraphicManagers().get(which);
                         trackedPoly = pmm.getExtents();
                         getTtAppCtx().getProjectSettings().setTrackedPolyCN(pmm.getPolygonCN());
                         mapMoved = true;
                         moveToLocation(pmm.getExtents(), Consts.Location.PADDING, true);
-                    }
-                } else {
-                    Toast.makeText(this, "No Polygons", Toast.LENGTH_SHORT).show();
-                }
+                    });
 
-                break;
+                    dialogBuilder.setNegativeButton(R.string.str_cancel, null);
+
+                    final AlertDialog dialog = dialogBuilder.create();
+
+                    dialog.show();
+                } else {
+                    PolygonGraphicManager pmm = getPolyGraphicManagers().get(0);
+                    trackedPoly = pmm.getExtents();
+                    getTtAppCtx().getProjectSettings().setTrackedPolyCN(pmm.getPolygonCN());
+                    mapMoved = true;
+                    moveToLocation(pmm.getExtents(), Consts.Location.PADDING, true);
+                }
+            } else {
+                Toast.makeText(this, "No Polygons", Toast.LENGTH_SHORT).show();
             }
         }
 
@@ -786,7 +763,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     }
 
     protected void moveToLocation(Extent extents, int padding, boolean animate) {
-        if (mapFragment != null) {
+        if (mmFrag != null) {
             if (extents != null) {
                 mmFrag.moveToLocation(extents, padding, animate);
             } else {
@@ -876,7 +853,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
                 new AlertDialog.Builder(this)
                         .setMessage("An error occurred trying to add a polygon. Please try readjusting your Polygons.")
                         .setPositiveButton("Adjust Polygons", (dialog, which) -> {
-                            PolygonAdjuster.adjust(getTtAppCtx());
+                            getTtAppCtx().adjustProject();
                             finish();
                         })
                         .setNeutralButton(R.string.str_cancel, (dialog, which) -> finish())
@@ -1685,8 +1662,8 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
 
                 tvNavDistFt.setText(StringEx.toString(distInFt, 2));
                 tvNavDistMt.setText(StringEx.toString(distInMt, 2));
-                tvNavAzTrue.setText(StringEx.format("%.2f\u00B0", azimuth));
-                tvNavAzMag.setText(StringEx.format("%.2f\u00B0", azMag));
+                tvNavAzTrue.setText(String.format("%.2f\u00B0", azimuth));
+                tvNavAzMag.setText(String.format("%.2f\u00B0", azMag));
                 return;
             }
         }

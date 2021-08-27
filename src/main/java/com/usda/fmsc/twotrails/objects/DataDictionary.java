@@ -1,5 +1,7 @@
 package com.usda.fmsc.twotrails.objects;
 
+import androidx.annotation.NonNull;
+
 import com.usda.fmsc.utilities.Tuple;
 
 import java.util.Collection;
@@ -8,8 +10,8 @@ import java.util.Iterator;
 
 public class DataDictionary implements Iterable<Tuple<String, Object>> {
 
-    private HashMap<String, Object> _Data = new HashMap<>();
-    private String _PointCN;
+    private final HashMap<String, Object> _Data = new HashMap<>();
+    private final String _PointCN;
 
 
     public DataDictionary(String pointCN, Collection<Tuple<String, Object>> data) {
@@ -53,8 +55,7 @@ public class DataDictionary implements Iterable<Tuple<String, Object>> {
     }
 
     public void ClearValues() {
-        for (String id : _Data.keySet())
-            _Data.put(id, null);
+        _Data.replaceAll((i, v) -> null);
     }
 
     public void update(String cn, Object value) {
@@ -92,6 +93,7 @@ public class DataDictionary implements Iterable<Tuple<String, Object>> {
     }
 
     @Override
+    @NonNull
     public Iterator<Tuple<String, Object>> iterator() {
         return new DataDictionaryIterator(this);
     }

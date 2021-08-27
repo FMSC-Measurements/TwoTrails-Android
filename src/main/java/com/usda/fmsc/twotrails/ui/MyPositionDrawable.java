@@ -15,11 +15,13 @@ public class MyPositionDrawable extends Drawable {
     private static final int DEFAULT_RADIUS = 10;
     private static final int DEFAULT_STROKE_WIDTH = 1;
 
-    private Paint paintColor, paintInnerStroke, paintColorOuter, paintOuterStroke;
+    private final Paint paintColor, paintInnerStroke, paintColorOuter, paintOuterStroke;
 
-    private float radius, outerRadius;
+    private final float radius;
+    private float outerRadius;
 
-    private int innerXY, outerXY, size;
+    private final int innerXY, size;
+    private int outerXY;
 
 
     public MyPositionDrawable(Context context) {

@@ -16,12 +16,12 @@ import com.usda.fmsc.twotrails.R;
 import java.util.HashMap;
 
 public class GpsStatusSatView extends GpsStatusView {
-    private Context context;
+    private final Context context;
 
-    private Paint paintVis, paintVisOld, paintUsed, paintUsedOld, paintWaas, paintWassOld, paintBackground, flagPaint, paintText;
+    private final Paint paintVis, paintVisOld, paintUsed, paintUsedOld, paintWaas, paintWassOld, flagPaint, paintText;
 
-    private HashMap<GnssType, Bitmap> flags;
-    private HashMap<GnssType, Integer> flagsSize;
+    private final HashMap<GnssType, Bitmap> flags;
+    private final HashMap<GnssType, Integer> flagsSize;
 
     private int lastFlagWidth = 0;
 
@@ -39,7 +39,7 @@ public class GpsStatusSatView extends GpsStatusView {
 
         this.context = context;
 
-        paintBackground = new Paint();
+        Paint paintBackground = new Paint();
         paintBackground.setColor(Color.LTGRAY);
         paintBackground.setStyle(Paint.Style.FILL);
         paintBackground.setAntiAlias(true);

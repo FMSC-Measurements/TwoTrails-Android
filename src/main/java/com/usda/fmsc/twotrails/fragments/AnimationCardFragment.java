@@ -1,14 +1,15 @@
 package com.usda.fmsc.twotrails.fragments;
 
 import android.os.Bundle;
-import androidx.fragment.app.Fragment;
+
+import androidx.annotation.NonNull;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
 import com.usda.fmsc.twotrails.R;
 
-public class AnimationCardFragment extends Fragment {
+public class AnimationCardFragment extends TtBaseFragment {
     public static final String HIDDEN = "Hidden";
 
     private VisibilityListener listener;
@@ -32,7 +33,33 @@ public class AnimationCardFragment extends Fragment {
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
+    public void onResume() {
+        super.onResume();
+
+        if (isCardHidden()) {
+            showCard();
+        }
+
+        infocus = true;
+
+        if (view != null) {
+            onCardFocused();
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        infocus = false;
+
+        if (view != null) {
+            onCardUnfocused();
+        }
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         this.view = view;
@@ -48,29 +75,29 @@ public class AnimationCardFragment extends Fragment {
         }
     }
 
-    @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
-
-        if (isVisibleToUser) {
-            if (isCardHidden()) {
-                showCard();
-            }
-
-            infocus = true;
-
-            if (view != null) {
-                onCardFocused();
-            }
-        } else {
-            infocus = false;
-
-            if (view != null) {
-                onCardUnFocused();
-            }
-        }
-    }
-
+    //Moved to onResume & onPause
+//    @Override
+//    public void setUserVisibleHint(boolean isVisibleToUser) {
+//        super.setUserVisibleHint(isVisibleToUser);
+//
+//        if (isVisibleToUser) {
+//            if (isCardHidden()) {
+//                showCard();
+//            }
+//
+//            infocus = true;
+//
+//            if (view != null) {
+//                onCardFocused();
+//            }
+//        } else {
+//            infocus = false;
+//
+//            if (view != null) {
+//                onCardUnFocused();
+//            }
+//        }
+//    }
 
     public void hideCard() {
         hideCard(true);
@@ -178,7 +205,7 @@ public class AnimationCardFragment extends Fragment {
 
     protected void onCardFocused() { }
 
-    protected void onCardUnFocused() { }
+    protected void onCardUnfocused() { }
 
     public void setVisibilityListener(VisibilityListener listener) {
         this.listener = listener;

@@ -82,9 +82,10 @@
             android:id="@+id/mainFragToolsBtnSAT"
             android:onClick="btnSATClick"
             android:enabled="true"
+            android:visibility="gone"
             style="@style/MainActivityButtons"/>
 
-        <View style="@style/Dividers"/>
+        <View style="@style/Dividers" android:visibility="gone"/>
 
         <Button
             android:text="@string/main_btn_gps_log"

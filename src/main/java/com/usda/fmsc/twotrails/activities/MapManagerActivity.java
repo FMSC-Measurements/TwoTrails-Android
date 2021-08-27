@@ -27,23 +27,20 @@ import com.usda.fmsc.android.widget.layoutmanagers.LinearLayoutManagerWithSmooth
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
-import com.usda.fmsc.twotrails.dialogs.NewArcMapDialog;
-import com.usda.fmsc.twotrails.dialogs.SelectMapTypeDialog;
+import com.usda.fmsc.twotrails.dialogs.NewArcMapDialogTt;
 import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
 import com.usda.fmsc.twotrails.ui.MSFloatingActionButton;
 import com.usda.fmsc.twotrails.utilities.ArcGISTools;
 import com.usda.fmsc.utilities.IListener;
-import com.usda.fmsc.utilities.StringEx;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
 import jp.wasabeef.recyclerview.animators.SlideInLeftAnimator;
 
 public class MapManagerActivity extends CustomToolbarActivity implements ArcGISTools.IArcToolsListener {
     private static final String SELECT_MAP = "SelectMap";
 
-    private SheetFab fabSheet;
+    private SheetFab<MSFloatingActionButton> fabSheet;
 
     private ArcGisMapAdapter adapter;
     private ArrayList<ArcGisMapLayer> maps, visibleMaps;
@@ -128,7 +125,7 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == Consts.Codes.Activites.MAP_DETAILS) {
+        if (requestCode == Consts.Codes.Activities.MAP_DETAILS) {
             if (data != null && data.hasExtra(Consts.Codes.Data.MAP_DATA)) {
                 ArcGisMapLayer layer = data.getParcelableExtra(Consts.Codes.Data.MAP_DATA);
 
@@ -234,11 +231,11 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
 
     public void btnMmAddOfflineClick(View view) {
         fabSheet.hideSheet();
-        createMap(null, null, NewArcMapDialog.CreateMode.OFFLINE_FROM_FILE); //addOfflineMap();
+        createMap(null, null, NewArcMapDialogTt.CreateMode.OFFLINE_FROM_FILE); //addOfflineMap();
     }
 
-    private void createMap(String name, String uri, NewArcMapDialog.CreateMode mode) {
-        NewArcMapDialog.newInstance(name, uri, mode)
+    private void createMap(String name, String uri, NewArcMapDialogTt.CreateMode mode) {
+        NewArcMapDialogTt.newInstance(name, uri, mode)
             .show(getSupportFragmentManager(), SELECT_MAP);
     }
 
@@ -258,7 +255,7 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
 
         @Override
         public RecyclerViewEx.ViewHolderEx onCreateViewHolderEx(ViewGroup parent, int viewType) {
-            return new MapViewHolder(inflater.inflate(R.layout.content_map_info, null));
+            return new MapViewHolder(inflater.inflate(R.layout.content_map_info, parent, false));
         }
 
         @Override
@@ -328,12 +325,10 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
             Intent i = new Intent(MapManagerActivity.this, MapDetailsActivity.class);
             i.putExtra(Consts.Codes.Data.MAP_DATA, agml);
 
-            Pair<View, String>[] transitionPairs = new Pair[2];
-            transitionPairs[0] = Pair.create(findViewById(R.id.toolbar), getString(R.string.trans_toolbar));
-            transitionPairs[1] = Pair.create(view, getString(R.string.trans_map_details));
-
             inDetails = true;
-            ElevationTransition.startTransition(MapManagerActivity.this, i, Consts.Codes.Activites.MAP_DETAILS, transitionPairs);
+            ElevationTransition.startTransition(MapManagerActivity.this, i, Consts.Codes.Activities.MAP_DETAILS,
+                    Pair.create(findViewById(R.id.toolbar), getString(R.string.trans_toolbar)),
+                    Pair.create(view, getString(R.string.trans_map_details)));
         }
     }
 }

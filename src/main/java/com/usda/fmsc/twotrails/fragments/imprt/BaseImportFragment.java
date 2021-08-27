@@ -1,14 +1,15 @@
 package com.usda.fmsc.twotrails.fragments.imprt;
 
+import android.net.Uri;
 import android.os.Bundle;
+
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 
 import com.usda.fmsc.twotrails.TwoTrailsApp;
-import com.usda.fmsc.twotrails.data.DataAccessLayer;
+import com.usda.fmsc.twotrails.fragments.TtBaseFragment;
 import com.usda.fmsc.twotrails.utilities.Import;
 
-public abstract class BaseImportFragment extends Fragment {
+public abstract class BaseImportFragment extends TtBaseFragment {
     private Listener listener;
 
     @Override
@@ -33,7 +34,7 @@ public abstract class BaseImportFragment extends Fragment {
 
     public abstract boolean validate(boolean useMessage);
 
-    public abstract void updateFileName(String filename);
+    public abstract void updateFilePath(Uri filePath);
 
 
     public void setListener(Listener listener) {

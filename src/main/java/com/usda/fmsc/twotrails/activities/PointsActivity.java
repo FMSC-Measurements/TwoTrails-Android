@@ -1,16 +1,16 @@
 package com.usda.fmsc.twotrails.activities;
 
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import androidx.annotation.NonNull;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.viewpager.widget.ViewPager;
@@ -41,22 +41,22 @@ import com.usda.fmsc.android.adapters.SelectableAdapterEx;
 import com.usda.fmsc.android.dialogs.DontAskAgainDialog;
 import com.usda.fmsc.android.listeners.ComplexOnPageChangeListener;
 import com.usda.fmsc.android.utilities.BitmapManager;
-import com.usda.fmsc.android.utilities.DeviceOrientationEx;
 import com.usda.fmsc.android.utilities.PostDelayHandler;
+import com.usda.fmsc.android.utilities.ResourceBitmapProvider;
 import com.usda.fmsc.android.widget.PopupMenuButton;
 import com.usda.fmsc.android.widget.RecyclerViewEx;
 import com.usda.fmsc.android.widget.SheetFab;
 import com.usda.fmsc.android.widget.SheetLayoutEx;
 import com.usda.fmsc.android.widget.layoutmanagers.LinearLayoutManagerWithSmoothScroller;
 import com.usda.fmsc.twotrails.DeviceSettings;
-import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
+import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.activities.base.PointMediaController;
 import com.usda.fmsc.twotrails.activities.base.PointMediaListener;
+import com.usda.fmsc.twotrails.activities.base.TtPointCollectionActivity;
 import com.usda.fmsc.twotrails.adapters.MediaPagerAdapter;
 import com.usda.fmsc.twotrails.adapters.MediaRvAdapter;
 import com.usda.fmsc.twotrails.adapters.PointDetailsAdapter;
 import com.usda.fmsc.twotrails.Consts;
-import com.usda.fmsc.twotrails.data.MediaAccessLayer;
 import com.usda.fmsc.twotrails.data.TwoTrailsMediaSchema;
 import com.usda.fmsc.twotrails.dialogs.LatLonDialog;
 import com.usda.fmsc.twotrails.dialogs.MoveToPointDialog;
@@ -70,7 +70,6 @@ import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.logic.AdjustingException;
 import com.usda.fmsc.twotrails.logic.PointNamer;
-import com.usda.fmsc.twotrails.logic.PolygonAdjuster;
 import com.usda.fmsc.twotrails.objects.media.TtMedia;
 import com.usda.fmsc.twotrails.objects.media.TtImage;
 import com.usda.fmsc.twotrails.objects.points.GpsPoint;
@@ -89,12 +88,12 @@ import com.usda.fmsc.twotrails.units.Slope;
 import com.usda.fmsc.twotrails.utilities.AppUnits;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.Semaphore;
 
 import com.usda.fmsc.geospatial.utm.UTMCoords;
@@ -104,7 +103,7 @@ import com.usda.fmsc.utilities.StringEx;
 import jp.wasabeef.recyclerview.animators.FadeInAnimator;
 
 @SuppressWarnings({"unused", "RestrictedApi"})
-public class PointsActivity extends CustomToolbarActivity implements PointMediaController, RangeFinderService.Listener {
+public class PointsActivity extends TtPointCollectionActivity implements PointMediaController, RangeFinderService.Listener {
     private final HashMap<String, PointMediaListener> listeners = new HashMap<>();
 
     private MenuItem miLock, miLink, miReset, miEnterLatLon, miNmeaRecalc, miDelete, miGoto;//, miMovePoint;
@@ -141,6 +140,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
     private boolean autoSetTrav, autoSetAzFwd, autoSetAz, warnedTravNotFinished;
 
+
     private BitmapManager bitmapManager;
     private final BitmapManager.ScaleOptions scaleOptions = new BitmapManager.ScaleOptions();
 
@@ -151,8 +151,6 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
     private boolean mediaLoaded;
     private int mediaCount, mediaSelectionIndex;
 
-    private Uri captureImageUri;
-
     private final Semaphore semaphore = new Semaphore(1);
     private final PostDelayHandler mediaLoaderDelayedHandler = new PostDelayHandler(500);
 
@@ -160,6 +158,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
     public HashMap<String, TtPolygon> getPolygons() {
         if (_Polygons == null && getTtAppCtx().hasDAL()) {
             _Polygons = getTtAppCtx().getDAL().getPolygonsMap();
+            if (_Polygons == null) throw new RuntimeException("getPolygons Failed");
         }
 
         return _Polygons;
@@ -168,6 +167,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
     public HashMap<String, TtMetadata> getMetadata() {
         if (_Metadata == null || _Metadata.size() == 0) {
             _Metadata = getTtAppCtx().getDAL().getMetadataMap();
+            if (_Metadata == null) throw new RuntimeException("getMetadataMap Failed");
         }
 
         return _Metadata;
@@ -220,11 +220,11 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                     dialog.setTitle("Invalid Point");
 
                     if (halfFinishedTrav) {
-                        dialog.setMessage(StringEx.format("The %s point %d has a partial value. Would you like to finish or delete the point.",
+                        dialog.setMessage(String.format(Locale.getDefault(), "The %s point %d has a partial value. Would you like to finish or delete the point.",
                                 _deletePoint.getOp().toString(),
                                 _deletePoint.getPID()));
                     } else {
-                        dialog.setMessage(StringEx.format("The point %d has no value. Would you like to edit or delete the point.",
+                        dialog.setMessage(String.format(Locale.getDefault(), "The point %d has no value. Would you like to edit or delete the point.",
                                 _deletePoint.getPID()));
                     }
 
@@ -335,10 +335,11 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         public boolean onMenuItemClick(MenuItem item) {
             int itemId = item.getItemId();
             if (itemId == R.id.ctx_menu_add) {
-                Intent intent = new Intent(Intent.ACTION_PICK);
-                intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-                intent.setType("image/*");
-                startActivityForResult(intent, Consts.Codes.Requests.ADD_IMAGES);
+//                Intent intent = new Intent(Intent.ACTION_PICK);
+//                intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+//                intent.setType("image/*");
+//                startActivityForResult(intent, Consts.Codes.Requests.ADD_IMAGES);
+                pickImages();
             } else if (itemId == R.id.ctx_menu_capture) {
                 if (AndroidUtils.Device.isFullOrientationAvailable(PointsActivity.this)) {
                     if (getTtAppCtx().getDeviceSettings().getUseTtCameraAsk()) {
@@ -348,19 +349,19 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                                 getTtAppCtx().getDeviceSettings().getPrefs());
 
                         dialog.setMessage(PointsActivity.this.getString(R.string.points_camera_diag))
-                                .setPositiveButton("TwoTrails", (dialogInterface, i, value) -> captureImageUri = TtUtils.Media.captureImage(PointsActivity.this, true, _CurrentPoint), 2)
-                                .setNegativeButton("Android", (dialogInterface, i, value) -> captureImageUri = TtUtils.Media.captureImage(PointsActivity.this, false, _CurrentPoint), 1)
+                                .setPositiveButton("TwoTrails", (dialogInterface, i, value) -> captureImage(true, _CurrentPoint), 2)
+                                .setNegativeButton("Android", (dialogInterface, i, value) -> captureImage(false, _CurrentPoint), 1)
                                 .setNeutralButton(getString(R.string.str_cancel), null, 0)
                                 .show();
                     } else {
-                        captureImageUri = TtUtils.Media.captureImage(PointsActivity.this, getTtAppCtx().getDeviceSettings().getUseTtCamera() == 2, _CurrentPoint);
+                        captureImage(getTtAppCtx().getDeviceSettings().getUseTtCamera() == 2, _CurrentPoint);
                     }
                 } else {
-                    captureImageUri = TtUtils.Media.captureImage(PointsActivity.this, false, _CurrentPoint);
+                    captureImage(false, _CurrentPoint);
                 }
             } else if (itemId == R.id.ctx_menu_update_orientation) {
                 if (_CurrentMedia != null && _CurrentMedia.getMediaType() == MediaType.Picture) {
-                    TtUtils.Media.updateImageOrientation(PointsActivity.this, (TtImage) _CurrentMedia);
+                    updateImageOrientation((TtImage) _CurrentMedia);
                 }
             } else if (itemId == R.id.ctx_menu_reset) {
                 resetMedia();
@@ -371,6 +372,127 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
             return false;
         }
     };
+    //endregion
+
+
+    //region Requests
+//    private final ActivityResultLauncher<String> requestImagesForResult = registerForActivityResult(new ActivityResultContracts.GetMultipleContents(), results -> {
+//        try {
+//            List<TtImage> images = TtUtils.Media.getPicturesFromUris(getTtAppCtx(), results, _CurrentPoint.getCN());
+//
+//            if (images.size() == 1) {
+//                askAndUpdateImageOrientation(images.get(0));
+//            }
+//
+//            addImages(images);
+//        } catch (IOException e) {
+//            getTtAppCtx().getReport().writeError(e.getMessage(), "PointsActivity:oAR:ADD_IMAGES");
+//            Toast.makeText(PointsActivity.this, "Error adding Images, check log for details.", Toast.LENGTH_LONG).show();
+//        }
+//    });
+//    protected void requestImages() {
+//        requestImagesForResult.launch("image/*");
+//    }
+//
+//    private final ActivityResultLauncher<Intent> openSettingsForResult = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+//        if (getTtAppCtx().getDeviceSettings().isRangeFinderConfigured()) {
+//            getTtAppCtx().getRF().startRangeFinder();
+//        }
+//
+//        if (getTtAppCtx().getRF() != null) {
+//            getTtAppCtx().getRF().addListener(this);
+//        }
+//    });
+//    protected void openSettings() {
+//        openSettingsForResult.launch(new Intent(PointsActivity.this, SettingsActivity.class));
+//    }
+//
+//    private final ActivityResultLauncher<Intent> updateImageOrientationForResult = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+//        Intent intent = result.getData();
+//
+//        if (result.getResultCode() != RESULT_CANCELED) {
+//            if (intent != null && intent.hasExtra(Consts.Codes.Data.ORIENTATION)) {
+//                DeviceOrientationEx.Orientation orientation = intent.getParcelableExtra(Consts.Codes.Data.ORIENTATION);
+//
+//                if (_CurrentMedia != null && _CurrentMedia.getMediaType() == MediaType.Picture) {
+//                    TtImage image = (TtImage)_CurrentMedia;
+//                    image.setAzimuth(orientation.getRationalAzimuth());
+//                    image.setPitch(orientation.getPitch());
+//                    image.setRoll(orientation.getRoll());
+//                    onMediaUpdate();
+//                }
+//            }
+//
+//        }
+//    });
+//    protected void updateImageOrientation(TtImage image) {
+//        Intent intent = new Intent(PointsActivity.this, GetDirectionActivity.class);
+//
+//        if (image != null) {
+//            intent.putExtra(Consts.Codes.Data.ORIENTATION, new DeviceOrientationEx.Orientation(image.getAzimuth(), image.getPitch(), image.getRoll()));
+//        }
+//
+//        updateImageOrientationForResult.launch(intent);
+//    }
+//
+//    protected void askAndUpdateImageOrientation(TtImage image) {
+//        new AlertDialog.Builder(PointsActivity.this)
+//                .setMessage("Would you like to update the orientation (Azimuth) to this image?")
+//                .setPositiveButton(R.string.str_yes, (dialog, which) -> updateImageOrientation(image))
+//                .setNegativeButton(R.string.str_no, null)
+//                .show();
+//    }
+
+
+    private final ActivityResultLauncher<Intent> addInsertPointsOnResult = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+
+        slexCreate.contractFab();
+
+        if (result.getResultCode() == Consts.Codes.Results.POINT_CREATED) {
+            _Points = getTtAppCtx().getDAL().getPointsInPolygon(_CurrentPolygon.getCN());
+
+            onPointsChanged();
+
+            int numberOfPoints = _Points.size();
+
+            if (numberOfPoints > 0 && menuCreated) {
+                AndroidUtils.UI.enableMenuItem(miGoto);
+                AndroidUtils.UI.enableMenuItem(miLock);
+            }
+
+            moveToPoint(numberOfPoints - 1);
+
+            adjust = true;
+        }
+    });
+
+    private void addOrInsertPoints(Intent data) {
+        addInsertPointsOnResult.launch(data);
+    }
+
+
+    private final ActivityResultLauncher<Intent> acquireAndCalculateOnResult = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+
+        slexAqr.contractFab();
+
+        if (result.getResultCode() == Consts.Codes.Results.POINT_CREATED) {
+            if (result.getData() != null && result.getData().hasExtra(Consts.Codes.Data.POINT_DATA)) {
+                GpsPoint point = result.getData().getParcelableExtra(Consts.Codes.Data.POINT_DATA);
+
+                updatePoint(point);
+                onPointUpdate();
+            }
+//            else {
+//                Toast.makeText(PointsActivity.this, "Point does not have extras", Toast.LENGTH_LONG).show();
+//            }
+        }
+
+
+    });
+
+    private void acquireAndOrCalculate(Intent data) {
+        acquireAndCalculateOnResult.launch(data);
+    }
     //endregion
 
 
@@ -409,7 +531,9 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
             pointViewPager.addOnPageChangeListener(onPointPageChangeListener);
         }
 
-        bitmapManager = new BitmapManager(getResources());
+
+
+        bitmapManager = new BitmapManager(new ResourceBitmapProvider(getTtAppCtx()), getTtAppCtx().getMAL());
 
         //region Main Buttons
         fabAqr = findViewById(R.id.pointsFabAqr);
@@ -621,7 +745,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                 if (_CurrentMedia != null && _CurrentMedia.getMediaType() == MediaType.Picture && _CurrentMedia.isExternal() &&
                         (slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED ||
                                 slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.ANCHORED)) {
-                    TtUtils.Media.openInImageViewer(PointsActivity.this, _CurrentMedia.getFilePath());
+                    TtUtils.Media.openInImageViewer(PointsActivity.this, _CurrentMedia.getFilePath(getTtAppCtx()));
                 }
             });
 
@@ -667,10 +791,9 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
             saveMedia();
 
             if (adjust) {
-                PolygonAdjuster.adjust(getTtAppCtx(), true);
+                getTtAppCtx().adjustProject(true);
             }
         }
-
 
         if (getTtAppCtx().getRF() != null) {
             getTtAppCtx().getRF().removeListener(this);
@@ -679,12 +802,10 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                 getTtAppCtx().getRF().stopRangeFinder();
             }
         }
-
-
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenuEx(Menu menu) {
         super.onCreateOptionsMenu(menu);
 
         inflateMenu(R.menu.menu_points, menu);
@@ -717,7 +838,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         } else if (itemId == R.id.pointsMenuLock) {
             lockPoint(!_PointLocked);
         } else if (itemId == R.id.pointsMenuSettings) {
-            startActivityForResult(new Intent(this, SettingsActivity.class), Consts.Codes.Activites.SETTINGS);
+            openSettings();
         } else if (itemId == R.id.pointsMenuGotoPoint) {
             if (_Points.size() > 0) {
                 MoveToPointDialog mdialog = new MoveToPointDialog();
@@ -742,7 +863,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                 anchorMediaIfExpanded();
 
                 AlertDialog.Builder alert = new AlertDialog.Builder(this);
-                alert.setMessage(StringEx.format("Delete Point %d", _CurrentPoint.getPID()));
+                alert.setMessage(String.format("Delete Point %d", _CurrentPoint.getPID()));
 
                 alert.setPositiveButton(R.string.str_delete, (dialog, which) -> {
                     overrideHalfTrav = true;
@@ -845,161 +966,168 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         return super.dispatchTouchEvent(event);
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if (requestCode == Consts.Codes.Requests.CAMERA && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            Intent intent = new Intent(PointsActivity.this, TtCameraActivity.class);
-
-            if (_CurrentPoint != null) {
-                intent.putExtra(Consts.Codes.Data.POINT_CN, _CurrentPoint.getCN());
-            }
-
-            startActivityForResult(intent, Consts.Codes.Activites.TTCAMERA);
-        }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        switch (requestCode) {
-            case Consts.Codes.Activites.ACQUIRE:
-            case Consts.Codes.Activites.CALCULATE: {
-                slexAqr.contractFab();
-                calculateResult(resultCode, data);
-                break;
-            }
-            case Consts.Codes.Activites.TAKE5:
-            case Consts.Codes.Activites.WALK: {
-                slexCreate.contractFab();
-                addInsertPointsResult(resultCode, data);
-                break;
-            }
-            case Consts.Codes.Requests.ADD_IMAGES: {
-                if (data != null) {
-                    List<TtImage> images = TtUtils.Media.getPicturesFromImageIntent(getTtAppCtx(), data, _CurrentPoint.getCN());
-
-                    if (images.size() == 1) {
-                        TtUtils.Media.askAndUpdateImageOrientation(PointsActivity.this, null);
-                    }
-
-                    addImages(images);
-
-                    new Thread(() -> {
-                        getTtAppCtx().getMAL().internalizeImages(null);
-                    }).start();
-                }
-                break;
-            }
-            case Consts.Codes.Activites.TTCAMERA: {
-                if (data != null) {
-                    TtImage image = TtUtils.Media.getPictureFromTtCameraIntent(data);
-
-                    if (image == null) {
-                        Toast.makeText(PointsActivity.this, "Unable to add Image", Toast.LENGTH_LONG).show();
-                    } else {
-                        addImage(image);
-
-                        new Thread(() -> {
-                            getTtAppCtx().getMAL().internalizeImages(null);
-                        }).start();
-                    }
-                }
-                break;
-            }
-            case Consts.Codes.Requests.CAPTURE_IMAGE: {
-                if (resultCode != RESULT_CANCELED) {
-                    TtImage image = TtUtils.Media.createPictureFromUri(captureImageUri, _CurrentPoint.getCN());
-
-                    if (image == null) {
-                        Toast.makeText(PointsActivity.this, "Unable to add Image", Toast.LENGTH_LONG).show();
-                    } else {
-                        TtUtils.Media.askAndUpdateImageOrientation(PointsActivity.this, null);
-                        addImage(image);
-
-                        new Thread(() -> {
-                            getTtAppCtx().getMAL().internalizeImages(null);
-                        }).start();
-                    }
-                }
-                break;
-            }
-            case Consts.Codes.Requests.UPDATE_ORIENTATION: {
-                if (resultCode != RESULT_CANCELED) {
-                    if (data != null && data.hasExtra(Consts.Codes.Data.ORIENTATION)) {
-                        DeviceOrientationEx.Orientation orientation = data.getParcelableExtra(Consts.Codes.Data.ORIENTATION);
-
-                        if (_CurrentMedia != null && _CurrentMedia.getMediaType() == MediaType.Picture) {
-                            TtImage image = (TtImage)_CurrentMedia;
-                            image.setAzimuth(orientation.getRationalAzimuth());
-                            image.setPitch(orientation.getPitch());
-                            image.setRoll(orientation.getRoll());
-                            onMediaUpdate();
-                        }
-                    }
-
-                }
-                break;
-            }
-            case Consts.Codes.Activites.SETTINGS: {
-                if (getTtAppCtx().getDeviceSettings().isRangeFinderConfigured()) {
-                    getTtAppCtx().getRF().startRangeFinder();
-                }
-
-                if (getTtAppCtx().getRF() != null) {
-                    getTtAppCtx().getRF().addListener(this);
-                }
-            }
-        }
-    }
-
-    private void calculateResult(int resultCode, Intent data) {
-        if (resultCode == Consts.Codes.Results.POINT_CREATED) {
-            GpsPoint point = data.getParcelableExtra(Consts.Codes.Data.POINT_DATA);
-
-            updatePoint(point);
-            onPointUpdate();
-        }
-    }
-
-    private void addInsertPointsResult(int resultCode, Intent data) {
-        if (resultCode == Consts.Codes.Results.POINT_CREATED) {
-//            Bundle bundle = data.getExtras();
-//            int created = 1;
+//    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+//        super.onActivityResult(requestCode, resultCode, intent);
 //
-//            if (bundle != null && bundle.containsKey(Consts.Codes.Data.NUMBER_OF_CREATED_POINTS)) {
-//                created = bundle.getInt(Consts.Codes.Data.NUMBER_OF_CREATED_POINTS);
+//        switch (requestCode) {
+//            case Consts.Codes.Activities.ACQUIRE:
+//            case Consts.Codes.Activities.CALCULATE: {
+//                slexAqr.contractFab();
+//                calculateResult(resultCode, intent);
+//                break;
 //            }
-
-//            if (_CurrentIndex < _Points.size() - 1) {
-//                ArrayList<TtPoint> updatePoints = new ArrayList<>();
-//                TtPoint tmpPoint;
+//            case Consts.Codes.Activities.TAKE5:
+//            case Consts.Codes.Activities.WALK: {
+//                slexCreate.contractFab();
+//                addInsertPointsResult(resultCode, intent);
+//                break;
+//            }
+//            case Consts.Codes.Requests.ADD_IMAGES: {
+//                if (intent != null) {
+//                    try {
+//                        List<TtImage> images = TtUtils.Media.getPicturesFromImageIntent(getTtAppCtx(), intent, _CurrentPoint.getCN());
 //
-//                for (int i = _CurrentIndex + 1; i < _Points.size(); i++) {
-//                    tmpPoint = _Points.get(i);
-//                    tmpPoint.setIndex(tmpPoint.getIndex() + created);
-//                    updatePoints.add(tmpPoint);
+//                        if (images.size() == 1) {
+//                            TtUtils.Media.askAndUpdateImageOrientation(PointsActivity.this, null);
+//                        }
+//
+//                        addImages(images);
+//                    } catch (IOException e) {
+//                        getTtAppCtx().getReport().writeError(e.getMessage(), "PointsActivity:oAR:ADD_IMAGES");
+//                        Toast.makeText(PointsActivity.this, "Error adding Images, check log for details.", Toast.LENGTH_LONG).show();
+//                    }
+//
+//
+////                    new Thread(() -> {
+////                        getTtAppCtx().getMAL().internalizeImages(null);
+////                    }).start();
+//                }
+//                break;
+//            }
+//            case Consts.Codes.Activities.TTCAMERA: {
+//                if (intent != null) {
+//                    TtImage image = TtUtils.Media.getPictureFromTtCameraIntent(intent);
+//
+//                    if (image == null) {
+//                        Toast.makeText(PointsActivity.this, "Unable to add Image", Toast.LENGTH_LONG).show();
+//                    } else {
+//                        addImage(image);
+//
+////                        new Thread(() -> {
+////                            getTtAppCtx().getMAL().internalizeImages(null);
+////                        }).start();
+//                    }
+//                }
+//                break;
+//            }
+//            case Consts.Codes.Requests.CAPTURE_IMAGE: {
+//                if (resultCode != RESULT_CANCELED) {
+//                    try {
+//                        TtImage image = TtUtils.Media.createImageFromFile(captureImageUri, _CurrentPoint.getCN(), getTtAppCtx());
+//
+//                        if (image == null) {
+//                            Toast.makeText(PointsActivity.this, "Unable to add Image", Toast.LENGTH_LONG).show();
+//                        } else {
+//                            TtUtils.Media.askAndUpdateImageOrientation(PointsActivity.this, null);
+//                            addImage(image);
+//
+////                            new Thread(() -> {
+////                                getTtAppCtx().getMAL().internalizeImages(null);
+////                            }).start();
+//                        }
+//                    } catch (IOException e) {
+//                        getTtAppCtx().getReport().writeError(e.getMessage(), "PointsActivity:oAR:CAPTURE_IMAGE");
+//                        Toast.makeText(PointsActivity.this, "Error adding Images, check log for details.", Toast.LENGTH_LONG).show();
+//                    }
+//                }
+//                break;
+//            }
+//            case Consts.Codes.Requests.UPDATE_ORIENTATION: {
+//                if (resultCode != RESULT_CANCELED) {
+//                    if (intent != null && intent.hasExtra(Consts.Codes.Data.ORIENTATION)) {
+//                        DeviceOrientationEx.Orientation orientation = intent.getParcelableExtra(Consts.Codes.Data.ORIENTATION);
+//
+//                        if (_CurrentMedia != null && _CurrentMedia.getMediaType() == MediaType.Picture) {
+//                            TtImage image = (TtImage)_CurrentMedia;
+//                            image.setAzimuth(orientation.getRationalAzimuth());
+//                            image.setPitch(orientation.getPitch());
+//                            image.setRoll(orientation.getRoll());
+//                            onMediaUpdate();
+//                        }
+//                    }
+//
+//                }
+//                break;
+//            }
+//            case Consts.Codes.Activities.SETTINGS: {
+//                if (getTtAppCtx().getDeviceSettings().isRangeFinderConfigured()) {
+//                    getTtAppCtx().getRF().startRangeFinder();
 //                }
 //
-//                getTtAppCtx().getDAL().updatePoints(updatePoints);
+//                if (getTtAppCtx().getRF() != null) {
+//                    getTtAppCtx().getRF().addListener(this);
+//                }
 //            }
+//        }
+//    }
 
-            _Points = getTtAppCtx().getDAL().getPointsInPolygon(_CurrentPolygon.getCN());
+//    private void calculateResult(int resultCode, Intent data) {
+//        if (resultCode == Consts.Codes.Results.POINT_CREATED) {
+//            GpsPoint point = data.getParcelableExtra(Consts.Codes.Data.POINT_DATA);
+//
+//            updatePoint(point);
+//            onPointUpdate();
+//        }
+//    }
 
-            onPointsChanged();
+//    private void addInsertPointsOnResult(int resultCode, Intent data) {
+//        if (resultCode == Consts.Codes.Results.POINT_CREATED) {
+////            Bundle bundle = data.getExtras();
+////            int created = 1;
+////
+////            if (bundle != null && bundle.containsKey(Consts.Codes.Data.NUMBER_OF_CREATED_POINTS)) {
+////                created = bundle.getInt(Consts.Codes.Data.NUMBER_OF_CREATED_POINTS);
+////            }
+//
+////            if (_CurrentIndex < _Points.size() - 1) {
+////                ArrayList<TtPoint> updatePoints = new ArrayList<>();
+////                TtPoint tmpPoint;
+////
+////                for (int i = _CurrentIndex + 1; i < _Points.size(); i++) {
+////                    tmpPoint = _Points.get(i);
+////                    tmpPoint.setIndex(tmpPoint.getIndex() + created);
+////                    updatePoints.add(tmpPoint);
+////                }
+////
+////                getTtAppCtx().getDAL().updatePoints(updatePoints);
+////            }
+//
+//            _Points = getTtAppCtx().getDAL().getPointsInPolygon(_CurrentPolygon.getCN());
+//
+//            onPointsChanged();
+//
+//            int numberOfPoints = _Points.size();
+//
+//            if (numberOfPoints > 0 && menuCreated) {
+//                AndroidUtils.UI.enableMenuItem(miGoto);
+//                AndroidUtils.UI.enableMenuItem(miLock);
+//            }
+//
+//            moveToPoint(numberOfPoints - 1);
+//
+//            adjust = true;
+//        }
+//    }
 
-            int numberOfPoints = _Points.size();
+    @Override
+    protected void onSettingsUpdated() {
+        if (getTtAppCtx().getDeviceSettings().isRangeFinderConfigured()) {
+            getTtAppCtx().getRF().startRangeFinder();
+        }
 
-            if (numberOfPoints > 0 && menuCreated) {
-                AndroidUtils.UI.enableMenuItem(miGoto);
-                AndroidUtils.UI.enableMenuItem(miLock);
-            }
-
-            moveToPoint(numberOfPoints - 1);
-
-            adjust = true;
+        if (getTtAppCtx().getRF() != null) {
+            getTtAppCtx().getRF().addListener(this);
         }
     }
     //endregion
@@ -1042,6 +1170,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                             onPointUpdate(tmp);
 
                             if (updated) {
+                                //remove link from old linked point in list
                                 //remove link from old linked point in list
                                 tmp = getPoint(oldQndm.getParentCN());
 
@@ -1172,7 +1301,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                 }
             } else if (_CurrentPoint.isGpsType() && op.isTravType()) {
                 Toast.makeText(PointsActivity.this,
-                        StringEx.format("A %s cannot be the first point in a polygon. You must have a valid GPS Type point before it.", op.toString()),
+                        String.format("A %s cannot be the first point in a polygon. You must have a valid GPS Type point before it.", op.toString()),
                         Toast.LENGTH_LONG).show();
             } else {
                 _deletePoint = _CurrentPoint;
@@ -1221,7 +1350,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
             if (op.isTravType() && _CurrentIndex < 0) {
                 Toast.makeText(PointsActivity.this,
-                        StringEx.format("A %s cannot be the first point in a polygon. Take a GPS Type point first.", op.toString()),
+                        String.format("A %s cannot be the first point in a polygon. Take a GPS Type point first.", op.toString()),
                         Toast.LENGTH_LONG).show();
                 return;
             }
@@ -1328,7 +1457,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
     private void resetPoint() {
         if (_PointUpdated) {
             new AlertDialog.Builder(this)
-            .setTitle(StringEx.format("Reset Point %d", _CurrentPoint.getPID()))
+            .setTitle(String.format(Locale.getDefault(), "Reset Point %d", _CurrentPoint.getPID()))
             .setMessage(getString(R.string.points_reset_diag))
             .setPositiveButton("Reset", (dialogInterface, i) -> {
                 _CurrentPoint = getPointAtIndex(_CurrentIndex);
@@ -1347,7 +1476,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         if (_MediaUpdated && _CurrentMedia != null) {
             if (!getTtAppCtx().getMAL().updateMedia(_CurrentMedia)) {
                 Toast.makeText(PointsActivity.this,
-                        StringEx.format("Unable to save %s", _CurrentMedia.getMediaType().toString()),
+                        String.format("Unable to save %s", _CurrentMedia.getMediaType().toString()),
                         Toast.LENGTH_LONG
                 ).show();
             } else {
@@ -1362,10 +1491,10 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
         getTtAppCtx().getMAL().deleteMedia(media);
 
-        if (delete) {
-            File file = new File(media.getFilePath());
-            file.deleteOnExit();
-        }
+//        if (delete) {
+//            File file = new File(media.getPath());
+//            file.deleteOnExit();
+//        }
 
         mediaCount--;
         TtMedia changeTo = null;
@@ -1389,11 +1518,14 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         setCurrentMedia(changeTo);
     }
 
+
+
+
     private void addImage(final TtImage picture) {
         if (picture != null) {
-            if (getTtAppCtx().getMAL().insertMedia(picture)) {
+            if (getTtAppCtx().getMAL().insertImage(picture)) {
                 mediaSelectionIndex = TtUtils.Media.getMediaIndex(picture, rvMediaAdapter.getItems());
-                loadImageToList(picture);
+                loadImageToAdapter(picture);
             } else {
                 Toast.makeText(PointsActivity.this, "Error saving picture", Toast.LENGTH_LONG).show();
             }
@@ -1407,7 +1539,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
             pictures.sort(TtUtils.Media.PictureTimeComparator);
 
             for (int i = 0; i <pictures.size(); i++) {
-                if (!getTtAppCtx().getMAL().insertMedia(pictures.get(i))) {
+                if (!getTtAppCtx().getMAL().insertImage(pictures.get(i))) {
                     pictures.remove(i--);
                     error++;
                 }
@@ -1416,11 +1548,11 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
             mediaSelectionIndex = TtUtils.Media.getMediaIndex(pictures.get(0), rvMediaAdapter.getItems());
 
             for (TtImage p : pictures) {
-                loadImageToList(p);
+                loadImageToAdapter(p);
             }
 
             if (error > 0) {
-                Toast.makeText(PointsActivity.this, StringEx.format("Error saving %d pictures", pictures.size()), Toast.LENGTH_LONG).show();
+                Toast.makeText(PointsActivity.this, String.format(Locale.getDefault(), "Error saving %d picture%s", pictures.size(), pictures.size() > 1 ? "s" : ""), Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -1428,12 +1560,12 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
     private void resetMedia() {
         if (_MediaUpdated) {
             new AlertDialog.Builder(this)
-                    .setTitle(StringEx.format("Reset Media %s", _CurrentMedia.getName()))
-                    .setMessage(StringEx.format("This will reset this %s back to its original values.",
+                    .setTitle(String.format("Reset Media %s", _CurrentMedia.getName()))
+                    .setMessage(String.format("This will reset this %s back to its original values.",
                             _CurrentMedia.getMediaType().toString().toLowerCase()))
                     .setPositiveButton("Reset", (dialogInterface, i) -> {
                         _CurrentMedia = TtUtils.Media.cloneMedia(_BackupMedia);
-                        onMediaUpdate();
+                        onMediaUpdated();
                         setMediaUpdated(false);
                     })
                     .setNeutralButton(getString(R.string.str_cancel), null)
@@ -1443,20 +1575,38 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
     private void deleteMedia() {
         if (!_PointLocked && _CurrentMedia != null) {
-            new AlertDialog.Builder(PointsActivity.this)
-                    .setMessage(StringEx.format(
-                            "Would you like to delete %s '%s' from storage or only remove its association with the point?",
-                            _CurrentMedia.getMediaType().toString().toLowerCase(),
-                            _CurrentMedia.getName()))
-                    .setPositiveButton(R.string.str_remove, (dialog, which) -> removeMedia(_CurrentMedia, false))
-                    .setNegativeButton(R.string.str_delete, (dialog, which) -> new AlertDialog.Builder(PointsActivity.this)
-                            .setMessage(StringEx.format("You are about to delete file '%s'.", _CurrentMedia.getFilePath()))
-                            .setPositiveButton(R.string.str_delete, (dialog1, which1) -> removeMedia(_CurrentMedia, true))
-                            .setNeutralButton(R.string.str_cancel, null)
-                            .show())
-                    .setNeutralButton(R.string.str_cancel, null)
-                    .show();
+            removeMedia(_CurrentMedia, false);
+//            new AlertDialog.Builder(PointsActivity.this)
+//                    .setMessage(String.format(
+//                            "Would you like to delete %s '%s' from storage or only remove its association with the point?",
+//                            _CurrentMedia.getMediaType().toString().toLowerCase(),
+//                            _CurrentMedia.getName()))
+//                    .setPositiveButton(R.string.str_remove, (dialog, which) -> removeMedia(_CurrentMedia, false))
+//                    .setNegativeButton(R.string.str_delete, (dialog, which) -> new AlertDialog.Builder(PointsActivity.this)
+//                            .setMessage(String.format("You are about to delete file '%s'.", _CurrentMedia.getPath()))
+//                            .setPositiveButton(R.string.str_delete, (dialog1, which1) -> removeMedia(_CurrentMedia, true))
+//                            .setNeutralButton(R.string.str_cancel, null)
+//                            .show())
+//                    .setNeutralButton(R.string.str_cancel, null)
+//                    .show();
         }
+    }
+
+
+
+    @Override
+    protected void onImageOrientationUpdated(TtImage image) {
+        onMediaUpdated(image);
+    }
+
+    @Override
+    protected void onImageCaptured(TtImage image) {
+        addImage(image);
+    }
+
+    @Override
+    protected void onImagesSelected(List<TtImage> images) {
+        addImages(images);
     }
     //endregion
 
@@ -1472,7 +1622,8 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         return point;
     }
 
-    private TtPoint getPoint(String cn) {
+
+    protected TtPoint getPoint(String cn) {
         for (TtPoint point : _Points) {
             if (point.getCN().equals(cn)) {
                 return TtUtils.Points.clonePoint(point);
@@ -1607,7 +1758,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
                 TtPolygon linkedPoly = getPolygons().get(linkedPoint.getPolyCN());
                 if (linkedPoly != null) {
-                    dialog.setMessage(StringEx.format("Move to Quondam %d in polygon %s.",
+                    dialog.setMessage(String.format(Locale.getDefault(), "Move to Quondam %d in polygon %s.",
                             linkedPoint.getPID(), linkedPoly.getName()));
 
                     dialog.setPositiveButton(R.string.str_move, (dialogInterface, i) -> moveToPoint(linkedPoint));
@@ -1843,7 +1994,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                         if (pictures != null) {
                             pictures.sort(TtUtils.Media.PictureTimeComparator);
                             for (final TtImage p : pictures) {
-                                loadImageToList(p);
+                                loadImageToAdapter(p);
                             }
 
                             if (mediaCount > 0) {
@@ -1873,36 +2024,45 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
     }
 
 
-    private void loadImageToList(final TtImage picture) {
+    private void loadImageToAdapter(final TtImage picture) {
         mediaCount++;
 
-        getTtAppCtx().getMAL().loadImage(picture, new MediaAccessLayer.SimpleMalListener() {
-            @Override
-            public void imageLoaded(TtImage image, View view, Bitmap bitmap) {
-                addImageToList(picture, true, bitmap);
-            }
+        try {
+            Bitmap bmp = bitmapManager.get(getTtAppCtx().getMAL().getProviderId(), picture.getCN());
 
-            @Override
-            public void loadingFailed(TtImage image, View view, String reason) {
-                addInvalidImagesToList(picture);
-            }
-        });
+            addImageToAdapter(picture, true, bmp);
+        } catch (Exception e) {
+            getTtAppCtx().getReport().writeError(e.getMessage(), "PointsActivity:loadImageToList", e.getStackTrace());
+            addInvalidImagesToAdapter(picture);
+        }
+//
+//        getTtAppCtx().getMAL().loadImage(picture, new MediaAccessLayer.SimpleMalListener() {
+//            @Override
+//            public void imageLoaded(TtImage image, View view, Bitmap bitmap) {
+//                addImageToList(picture, true, bitmap);
+//            }
+//
+//            @Override
+//            public void loadingFailed(TtImage image, View view, String reason) {
+//                addInvalidImagesToList(picture);
+//            }
+//        });
     }
 
-    private void addInvalidImagesToList(final TtImage picture) {
+    private void addInvalidImagesToAdapter(final TtImage picture) {
         Bitmap bitmap = BitmapFactory.decodeResource(PointsActivity.this.getResources(), R.drawable.ic_error_outline_black_48dp);
         if (bitmap != null) {
-            addImageToList(picture, false, bitmap);
+            addImageToAdapter(picture, false, bitmap);
         }
     }
 
-    private void addImageToList(final TtImage picture, boolean isValid, final Bitmap loadedImage) {
+    private void addImageToAdapter(final TtImage picture, boolean isValid, final Bitmap loadedImage) {
         if (picture.getPointCN().equals(_CurrentPoint.getCN())) {
-            if (isValid) {
-                bitmapManager.put(picture.getCN(), picture.getFilePath(), AndroidUtils.UI.scaleMinBitmap(loadedImage, bitmapHeight, false), scaleOptions);
-            } else {
-                bitmapManager.put(picture.getCN(), Integer.toString(R.drawable.ic_error_outline_black_48dp), AndroidUtils.UI.scaleMinBitmap(loadedImage, bitmapHeight, false), scaleOptions, true);
-            }
+//            if (isValid) {
+//                bitmapManager.put(picture.getCN(), picture.getPath(), AndroidUtils.UI.scaleMinBitmap(loadedImage, bitmapHeight, false), scaleOptions);
+//            } else {
+//                bitmapManager.put(picture.getCN(), TtUtils.getResourceUri(getTtAppCtx(), R.drawable.ic_error_outline_black_48dp), AndroidUtils.UI.scaleMinBitmap(loadedImage, bitmapHeight, false), scaleOptions, true);
+//            }
 
             try {
                 semaphore.acquire();
@@ -1980,7 +2140,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         if (title != null) {
             tvPmdTitle.setText(title);
         } else {
-            tvPmdTitle.setText(StringEx.format("Media (%d)", mediaCount));
+            tvPmdTitle.setText(String.format(Locale.getDefault(), "Media (%d)", mediaCount));
         }
     }
 
@@ -2044,7 +2204,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         }
     }
 
-    private void onMediaUpdate() {
+    private void onMediaUpdated() {
         setMediaUpdated(true);
 
         if (listeners.containsKey(_CurrentMedia.getCN())) {
@@ -2057,7 +2217,11 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         }
     }
 
-    private void onMediaUpdate(TtMedia media) {
+    protected void onMediaUpdated(TtMedia media) {
+        if (media.getCN().equals(_CurrentMedia.getCN())) {
+            setMediaUpdated(true);
+        }
+
         if (listeners.containsKey(media.getCN())) {
             PointMediaListener listener = listeners.get(media.getCN());
             if (listener != null) {
@@ -2067,7 +2231,6 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
             }
         }
     }
-
 
     public void updatePoint(TtPoint point) {
         //only update if current point
@@ -2087,6 +2250,12 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
             setCurrentMedia(media);
             setMediaUpdated(true);
         }
+    }
+
+
+    @Override
+    protected TtMedia getCurrentMedia() {
+        return _CurrentMedia;
     }
 
 
@@ -2125,33 +2294,40 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         if (!getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
             configGps();
         } else if (getTtAppCtx().getDAL().needsAdjusting()) {
-            PolygonAdjuster.adjust(getTtAppCtx(), false, new PolygonAdjuster.Listener() {
-                @Override
-                public void adjusterStarted() {
-                    runOnUiThread(() -> Toast.makeText(PointsActivity.this, "Adjusting Points. Starting Acquire soon.", Toast.LENGTH_SHORT).show());
-                }
 
-                @Override
-                public void adjusterStopped(final PolygonAdjuster.AdjustResult result, AdjustingException.AdjustingError error) {
-                    runOnUiThread(() -> {
-                        if (result == PolygonAdjuster.AdjustResult.SUCCESSFUL) {
-                            startAcquireGpsActivity(point, bursts);
-                        } else if (result != PolygonAdjuster.AdjustResult.ADJUSTING) {
-                            Toast.makeText(PointsActivity.this, "Adjusting Failed. See error log for details", Toast.LENGTH_LONG).show();
-                        }
-                    });
-                }
+            startActivityAfterAdjustment = GpsTypeActivity.Gps;
+            startPoint = point;
+            startBursts = bursts;
 
-                @Override
-                public void adjusterRunningSlow() {
-                    runOnUiThread(() -> new AlertDialog.Builder(getBaseContext())
-                    .setTitle(R.string.diag_slow_adjusting_title)
-                    .setMessage(R.string.diag_slow_adjusting)
-                    .setPositiveButton("Wait", null)
-                    .setNegativeButton(R.string.str_cancel, (dialogInterface, i) -> PolygonAdjuster.cancel())
-                    .show());
-                }
-            });
+            handleStartAdjustingResult(getTtAppCtx().adjustProject());
+
+//            PolygonAdjuster.adjust(getTtAppCtx(), false, new PolygonAdjuster.Listener() {
+//                @Override
+//                public void adjusterStarted() {
+//                    runOnUiThread(() -> Toast.makeText(PointsActivity.this, "Adjusting Points. Starting Acquire soon.", Toast.LENGTH_SHORT).show());
+//                }
+//
+//                @Override
+//                public void adjusterStopped(final PolygonAdjuster.AdjustResult result, AdjustingException.AdjustingError error) {
+//                    runOnUiThread(() -> {
+//                        if (result == PolygonAdjuster.AdjustResult.SUCCESSFUL) {
+//                            startAcquireGpsActivity(point, bursts);
+//                        } else if (result != PolygonAdjuster.AdjustResult.ADJUSTING) {
+//                            Toast.makeText(PointsActivity.this, "Adjusting Failed. See error log for details", Toast.LENGTH_LONG).show();
+//                        }
+//                    });
+//                }
+//
+//                @Override
+//                public void adjusterRunningSlow() {
+//                    runOnUiThread(() -> new AlertDialog.Builder(getBaseContext())
+//                    .setTitle(R.string.diag_slow_adjusting_title)
+//                    .setMessage(R.string.diag_slow_adjusting)
+//                    .setPositiveButton("Wait", null)
+//                    .setNegativeButton(R.string.str_cancel, (dialogInterface, i) -> PolygonAdjuster.cancel())
+//                    .show());
+//                }
+//            });
         } else {
             startAcquireGpsActivity(point, bursts);
         }
@@ -2175,7 +2351,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
             }
         }
 
-        startActivityForResult(intent, Consts.Codes.Activites.ACQUIRE);
+        acquireAndOrCalculate(intent);
     }
 
 
@@ -2183,37 +2359,44 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         if (!getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
             configGps();
         } else if (getTtAppCtx().getDAL().needsAdjusting()) {
-            PolygonAdjuster.AdjustResult result = PolygonAdjuster.adjust(getTtAppCtx(), false, new PolygonAdjuster.Listener() {
-                @Override
-                public void adjusterStarted() {
-                    runOnUiThread(() -> Toast.makeText(PointsActivity.this, "Adjusting Points. Starting Acquire soon.", Toast.LENGTH_SHORT).show());
-                }
 
-                @Override
-                public void adjusterStopped(final PolygonAdjuster.AdjustResult result, AdjustingException.AdjustingError error) {
-                    runOnUiThread(() -> {
-                        if (result == PolygonAdjuster.AdjustResult.SUCCESSFUL) {
-                            startTake5Activity(point);
-                        } else if (result != PolygonAdjuster.AdjustResult.ADJUSTING) {
-                            Toast.makeText(PointsActivity.this, "Adjusting Failed. See error log for details", Toast.LENGTH_LONG).show();
-                        }
-                    });
-                }
+            startActivityAfterAdjustment = GpsTypeActivity.Take5;
 
-                @Override
-                public void adjusterRunningSlow() {
-                    runOnUiThread(() -> new AlertDialog.Builder(getBaseContext())
-                            .setTitle(R.string.diag_slow_adjusting_title)
-                            .setMessage(R.string.diag_slow_adjusting)
-                            .setPositiveButton("Wait", null)
-                            .setNegativeButton(R.string.str_cancel, (dialogInterface, i) -> PolygonAdjuster.cancel())
-                            .show());
-                }
-            });
+            startPoint = point;
 
-            if (result != PolygonAdjuster.AdjustResult.ADJUSTING) {
-                startTake5Activity(point);
-            }
+            handleStartAdjustingResult(getTtAppCtx().adjustProject());
+
+//            PolygonAdjuster.AdjustResult result = PolygonAdjuster.adjust(getTtAppCtx(), false, new PolygonAdjuster.Listener() {
+//                @Override
+//                public void adjusterStarted() {
+//                    runOnUiThread(() -> Toast.makeText(PointsActivity.this, "Adjusting Points. Starting Acquire soon.", Toast.LENGTH_SHORT).show());
+//                }
+//
+//                @Override
+//                public void adjusterStopped(final PolygonAdjuster.AdjustResult result, AdjustingException.AdjustingError error) {
+//                    runOnUiThread(() -> {
+//                        if (result == PolygonAdjuster.AdjustResult.SUCCESSFUL) {
+//                            startTake5Activity(point);
+//                        } else if (result != PolygonAdjuster.AdjustResult.ADJUSTING) {
+//                            Toast.makeText(PointsActivity.this, "Adjusting Failed. See error log for details", Toast.LENGTH_LONG).show();
+//                        }
+//                    });
+//                }
+//
+//                @Override
+//                public void adjusterRunningSlow() {
+//                    runOnUiThread(() -> new AlertDialog.Builder(getBaseContext())
+//                            .setTitle(R.string.diag_slow_adjusting_title)
+//                            .setMessage(R.string.diag_slow_adjusting)
+//                            .setPositiveButton("Wait", null)
+//                            .setNegativeButton(R.string.str_cancel, (dialogInterface, i) -> PolygonAdjuster.cancel())
+//                            .show());
+//                }
+//            });
+//
+//            if (result != PolygonAdjuster.AdjustResult.ADJUSTING) {
+//                startTake5Activity(point);
+//            }
         } else {
             startTake5Activity(point);
         }
@@ -2241,7 +2424,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
             intent.putExtra(Consts.Codes.Data.POINT_PACKAGE, bundle);
 
-            startActivityForResult(intent, Consts.Codes.Activites.TAKE5);
+            addOrInsertPoints(intent);
         }
     }
 
@@ -2250,37 +2433,44 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
         if (!getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
             configGps();
         } else if (getTtAppCtx().getDAL().needsAdjusting()) {
-             PolygonAdjuster.AdjustResult result = PolygonAdjuster.adjust(getTtAppCtx(), false, new PolygonAdjuster.Listener() {
-                @Override
-                public void adjusterStarted() {
-                    runOnUiThread(() -> Toast.makeText(PointsActivity.this, "Adjusting Points. Starting Acquire soon.", Toast.LENGTH_SHORT).show());
-                }
 
-                @Override
-                public void adjusterStopped(final PolygonAdjuster.AdjustResult result, AdjustingException.AdjustingError error) {
-                    runOnUiThread(() -> {
-                        if (result == PolygonAdjuster.AdjustResult.SUCCESSFUL) {
-                            startWalkActivity(point);
-                        } else if (result != PolygonAdjuster.AdjustResult.ADJUSTING) {
-                            Toast.makeText(PointsActivity.this, "Adjusting Failed. See error log for details", Toast.LENGTH_LONG).show();
-                        }
-                    });
-                }
+            startActivityAfterAdjustment = GpsTypeActivity.Walk;
 
-                @Override
-                public void adjusterRunningSlow() {
-                    runOnUiThread(() -> new AlertDialog.Builder(getBaseContext())
-                            .setTitle(R.string.diag_slow_adjusting_title)
-                            .setMessage(R.string.diag_slow_adjusting)
-                            .setPositiveButton("Wait", null)
-                            .setNegativeButton(R.string.str_cancel, (dialogInterface, i) -> PolygonAdjuster.cancel())
-                            .show());
-                }
-            });
+            startPoint = point;
 
-            if (result != PolygonAdjuster.AdjustResult.ADJUSTING) {
-                startTake5Activity(point);
-            }
+            handleStartAdjustingResult(getTtAppCtx().adjustProject());
+
+//             PolygonAdjuster.AdjustResult result = PolygonAdjuster.adjust(getTtAppCtx(), false, new PolygonAdjuster.Listener() {
+//                @Override
+//                public void adjusterStarted() {
+//                    runOnUiThread(() -> Toast.makeText(PointsActivity.this, "Adjusting Points. Starting Acquire soon.", Toast.LENGTH_SHORT).show());
+//                }
+//
+//                @Override
+//                public void adjusterStopped(final PolygonAdjuster.AdjustResult result, AdjustingException.AdjustingError error) {
+//                    runOnUiThread(() -> {
+//                        if (result == PolygonAdjuster.AdjustResult.SUCCESSFUL) {
+//                            startWalkActivity(point);
+//                        } else if (result != PolygonAdjuster.AdjustResult.ADJUSTING) {
+//                            Toast.makeText(PointsActivity.this, "Adjusting Failed. See error log for details", Toast.LENGTH_LONG).show();
+//                        }
+//                    });
+//                }
+//
+//                @Override
+//                public void adjusterRunningSlow() {
+//                    runOnUiThread(() -> new AlertDialog.Builder(getBaseContext())
+//                            .setTitle(R.string.diag_slow_adjusting_title)
+//                            .setMessage(R.string.diag_slow_adjusting)
+//                            .setPositiveButton("Wait", null)
+//                            .setNegativeButton(R.string.str_cancel, (dialogInterface, i) -> PolygonAdjuster.cancel())
+//                            .show());
+//                }
+//            });
+//
+//            if (result != PolygonAdjuster.AdjustResult.ADJUSTING) {
+//                startWalkActivity(point);
+//            }
         } else {
             startWalkActivity(point);
         }
@@ -2308,7 +2498,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
 
             intent.putExtra(Consts.Codes.Data.POINT_PACKAGE, bundle);
 
-            startActivityForResult(intent, Consts.Codes.Activites.WALK);
+            addOrInsertPoints(intent);
         }
     }
 
@@ -2334,7 +2524,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                     e.printStackTrace();
                 }
 
-                startActivityForResult(intent, Consts.Codes.Activites.CALCULATE);
+                acquireAndOrCalculate(intent);
             } else {
                 AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
@@ -2347,7 +2537,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                     intent.putExtra(Consts.Codes.Data.METADATA_DATA, getMetadata().get(_CurrentPoint.getMetadataCN()));
                     intent.putExtra(AcquireAndCalculateGpsActivity.CALCULATE_ONLY_MODE, false);
 
-                    startActivityForResult(intent, Consts.Codes.Activites.ACQUIRE);
+                    acquireAndOrCalculate(intent);
                 });
 
                 alert.setNeutralButton(R.string.str_cancel, null);
@@ -2515,7 +2705,7 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
                     DeviceSettings.AUTO_FILL_FROM_RANGE_FINDER,
                     getTtAppCtx().getDeviceSettings().getPrefs());
 
-            dialog.setMessage(StringEx.format("Would You like to set the compass value to Forward or Backwards?"))
+            dialog.setMessage(String.format("Would You like to set the compass value to Forward or Backwards?"))
                     .setPositiveButton("Fwd", (dialogInterface, i, value) -> {
                         if (dialog.isDontAskAgainChecked()) {
                             autoSetTrav = true;
@@ -2608,6 +2798,57 @@ public class PointsActivity extends CustomToolbarActivity implements PointMediaC
     }
     //endregion
 
+
+    //region Adjuster
+    private GpsTypeActivity startActivityAfterAdjustment = GpsTypeActivity.None;
+    private TtPoint startPoint = null;
+    private ArrayList<TtNmeaBurst> startBursts = null;
+
+    @Override
+    public void onAdjusterStarted() {
+        //super.onAdjusterStarted();
+
+        runOnUiThread(() -> Toast.makeText(PointsActivity.this, "Adjusting Points. Starting Acquire soon.", Toast.LENGTH_SHORT).show());
+    }
+
+    @Override
+    public void onAdjusterStopped(TwoTrailsApp.ProjectAdjusterResult result, AdjustingException.AdjustingError error) {
+        super.onAdjusterStopped(result, error);
+
+        runOnUiThread(() -> {
+            if (result == TwoTrailsApp.ProjectAdjusterResult.SUCCESSFUL) {
+                switch (startActivityAfterAdjustment) {
+                    case Gps: startAcquireGpsActivity(startPoint, startBursts); break;
+                    case Take5: startTake5Activity(startPoint); break;
+                    case Walk: startWalkActivity(startPoint); break;
+                }
+            }
+
+            startPoint = null;
+            startBursts = null;
+
+            startActivityAfterAdjustment = GpsTypeActivity.None;
+        });
+    }
+
+    private void handleStartAdjustingResult(TwoTrailsApp.ProjectAdjusterResult result) {
+        switch (result) {
+            case STARTS_WITH_TRAV_TYPE:
+                Toast.makeText(PointsActivity.this, "Project failed to adjust. Polygon started with Traverse or Sideshot.", Toast.LENGTH_LONG).show();
+                break;
+            case BAD_POINT:
+                Toast.makeText(PointsActivity.this, "Project failed to adjust. There is a bad point in a polygon.", Toast.LENGTH_LONG).show();
+                break;
+        }
+    }
+
+    private enum GpsTypeActivity {
+        None,
+        Gps,
+        Take5,
+        Walk
+    }
+    //endregion
 
     public void register(String pointCN, PointMediaListener listener) {
         if (listener != null && !listeners.containsKey(pointCN)) {

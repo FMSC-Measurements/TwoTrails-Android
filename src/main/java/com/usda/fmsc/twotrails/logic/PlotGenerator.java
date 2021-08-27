@@ -2,6 +2,7 @@ package com.usda.fmsc.twotrails.logic;
 
 import android.os.AsyncTask;
 
+import com.usda.fmsc.android.utilities.TaskRunner;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
@@ -17,14 +18,17 @@ import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 
-public class PlotGenerator extends AsyncTask<PlotGenerator.PlotParams, Void, TtPolygon> {
-    private PlotGenListener listener;
-    private TwoTrailsApp app;
+//public class PlotGenerator extends AsyncTask<PlotGenerator.PlotParams, Void, TtPolygon> {
+public class PlotGenerator extends TaskRunner.Task<PlotGenerator.PlotParams, TtPolygon> {
+    
+    private final PlotGenListener listener;
+    private final TwoTrailsApp app;
     private Exception ex;
     private Map<String, TtMetadata> metadata;
 
@@ -46,60 +50,57 @@ public class PlotGenerator extends AsyncTask<PlotGenerator.PlotParams, Void, TtP
         this.listener = listener;
     }
 
-
     @Override
-    protected TtPolygon doInBackground(PlotParams... params) {
-        PlotParams pp = params[0];
-
+    protected TtPolygon onBackgroundWork(PlotParams params) {
         DataAccessLayer dal = app.getDAL();
 
         if (metadata == null)
             metadata = dal.getMetadataMap();
 
         TtPolygon poly = new TtPolygon();
-        poly.setName(pp.PolyName);
-        poly.setPointStartIndex(dal.getItemCount(TwoTrailsSchema.PolygonSchema.TableName) * 1000 + 1010);
+        poly.setName(params.PolyName);
+        poly.setPointStartIndex(dal.getItemsCount(TwoTrailsSchema.PolygonSchema.TableName) * 1000 + 1010);
         poly.setIncrementBy(1);
         poly.setAccuracy(Consts.Default_Point_Accuracy);
 
         //start progress
 
         try {
-            double gridX = pp.GridX;
-            double gridY = pp.GridY;
+            double gridX = params.GridX;
+            double gridY = params.GridY;
 
-            if (pp.DistUom != Dist.Meters) {
-                gridX = TtUtils.Convert.distance(gridX, Dist.Meters, pp.DistUom);
-                gridY = TtUtils.Convert.distance(gridY, Dist.Meters, pp.DistUom);
+            if (params.DistUom != Dist.Meters) {
+                gridX = TtUtils.Convert.distance(gridX, Dist.Meters, params.DistUom);
+                gridY = TtUtils.Convert.distance(gridY, Dist.Meters, params.DistUom);
             }
 
             double angle;
 
-            if (pp.Angle == null) {
+            if (params.Angle == null) {
                 Random random = new Random();
                 angle = random.nextInt(45) - 45;
             } else {
-                angle = pp.Angle;
+                angle = params.Angle;
             }
 
-            poly.setDescription(String.format("Angle: %f, GridX(Mt): %f, GridY(Mt): %f", angle, gridX, gridY));
+            poly.setDescription(String.format(Locale.getDefault(), "Angle: %f, GridX(Mt): %f, GridY(Mt): %f", angle, gridX, gridY));
 
             //convert to radians
             angle = TtUtils.Convert.degreesToRadians(angle * -1);
 
             List<PointD> points = new ArrayList<>();
 
-            boolean allMatchMeta = TtUtils.Points.allPointsHaveSameMetadata(pp.Points);
+            boolean allMatchMeta = TtUtils.Points.allPointsHaveSameMetadata(params.Points);
 
             if (isCancelled())
                 return null;
 
-            for (TtPoint point : pp.Points) {
+            for (TtPoint point : params.Points) {
                 if (point.isOnBnd()) {
                     if (allMatchMeta)
                         points.add(new PointD(point.getAdjX(), point.getAdjY()));
                     else {
-                        UTMCoords coords = TtUtils.Points.forcePointZone(point, pp.Metadata.getZone(), metadata.get(point.getMetadataCN()).getZone(), true);
+                        UTMCoords coords = TtUtils.Points.forcePointZone(point, params.Metadata.getZone(), metadata.get(point.getMetadataCN()).getZone(), true);
                         points.add(new PointD(coords.getX(), coords.getY()));
                     }
                 }
@@ -111,10 +112,10 @@ public class PlotGenerator extends AsyncTask<PlotGenerator.PlotParams, Void, TtP
             double startX, startY;
 
             if (allMatchMeta) {
-                startX = pp.StartPoint.getAdjX();
-                startY = pp.StartPoint.getAdjY();
+                startX = params.StartPoint.getAdjX();
+                startY = params.StartPoint.getAdjY();
             } else {
-                UTMCoords coords = TtUtils.Points.forcePointZone(pp.StartPoint, pp.Metadata.getZone(), metadata.get(pp.StartPoint.getMetadataCN()).getZone(), true);
+                UTMCoords coords = TtUtils.Points.forcePointZone(params.StartPoint, params.Metadata.getZone(), metadata.get(params.StartPoint.getMetadataCN()).getZone(), true);
                 startX = coords.getX();
                 startY = coords.getY();
             }
@@ -168,7 +169,7 @@ public class PlotGenerator extends AsyncTask<PlotGenerator.PlotParams, Void, TtP
 
                         _point = TtUtils.Math.RotatePoint(i, j, angle, startX, startY);
 
-                        if (pp.Inside) {
+                        if (params.Inside) {
                             //add if point inside the polygon
                             if (polyCalc.pointInPolygon(_point.X, _point.Y))
                                 dblPts.add(_point);
@@ -187,8 +188,8 @@ public class PlotGenerator extends AsyncTask<PlotGenerator.PlotParams, Void, TtP
                     j = farTop;
                 }
 
-                if (pp.Sample) {
-                    int maxPoints = pp.SamplePercent ? (int)((pp.SampleValue / 100.0) * dblPts.size()) : pp.SampleValue;
+                if (params.Sample) {
+                    int maxPoints = params.SamplePercent ? (int)((params.SampleValue / 100.0) * dblPts.size()) : params.SampleValue;
 
                     Random rand = new Random();
 
@@ -223,7 +224,7 @@ public class PlotGenerator extends AsyncTask<PlotGenerator.PlotParams, Void, TtP
                     else
                         way.setPID(PointNamer.namePoint(lastWay, poly));
 
-                    way.setMetadataCN(pp.Metadata.getCN());
+                    way.setMetadataCN(params.Metadata.getCN());
 
                     _NewPoints.add(way);
 
@@ -249,12 +250,13 @@ public class PlotGenerator extends AsyncTask<PlotGenerator.PlotParams, Void, TtP
 
         return null;
     }
-    @Override
-    protected void onPostExecute(TtPolygon polygon) {
-        super.onPostExecute(polygon);
 
+    @Override
+    protected void onComplete(TtPolygon polygon) {
         if (listener != null) {
-            if (polygon == null)
+            if (isCancelled()) {
+                listener.onCanceled();
+            } else if (polygon == null)
                 listener.onError(ex);
             else
                 listener.onGenerated(polygon);
@@ -262,22 +264,23 @@ public class PlotGenerator extends AsyncTask<PlotGenerator.PlotParams, Void, TtP
     }
 
     @Override
-    protected void onCancelled() {
-        super.onCancelled();
-
+    protected void onError(Exception exception) {
         if (listener != null)
-            listener.onCanceled();
+            listener.onError(exception);
     }
 
+
     public static class PlotParams {
-        private String PolyName;
-        private TtPoint StartPoint;
-        private List<TtPoint> Points;
-        private int GridX, GridY;
-        private Integer Angle, SampleValue;
-        private TtMetadata Metadata;
-        private boolean Inside, Sample, SamplePercent;
-        private Dist DistUom;
+        private final String PolyName;
+        private final TtPoint StartPoint;
+        private final List<TtPoint> Points;
+        private final int GridX, GridY;
+        private final Integer Angle;
+        private Integer SampleValue;
+        private final TtMetadata Metadata;
+        private final boolean Inside, Sample;
+        private boolean SamplePercent;
+        private final Dist DistUom;
 
         public PlotParams(String polyName, TtPoint startPoint, List<TtPoint> points, Dist distUom,
                           int gridX, int gridY, Integer angle, TtMetadata metadata, boolean inside, boolean sample) {

@@ -112,7 +112,7 @@ public class MapDetailsActivity extends CustomToolbarActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == Consts.Codes.Dialogs.REQUEST_FILE && data != null && data.getData() != null) {
+        if (requestCode == Consts.Codes.Dialogs.IMPORT_PROJECT_FILE && data != null && data.getData() != null) {
             arcGisMapLayer.setFilePath(data.getData().toString());
 
             tvFile.setText(arcGisMapLayer.getFilePath());
@@ -189,7 +189,7 @@ public class MapDetailsActivity extends CustomToolbarActivity {
     }
 
     private void updatePath() {
-        AndroidUtils.App.openFileIntent(this, Consts.FileExtensions.TPK, Consts.Codes.Dialogs.REQUEST_FILE);
+        AndroidUtils.App.openFileIntent(this, Consts.FileExtensions.TPK, Consts.Codes.Dialogs.IMPORT_PROJECT_FILE);
     }
 
 

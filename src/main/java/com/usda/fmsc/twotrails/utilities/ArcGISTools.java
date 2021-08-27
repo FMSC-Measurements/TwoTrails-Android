@@ -38,20 +38,20 @@ import java.util.List;
 public class ArcGISTools {
     private static ArcGISTools _ArcGISTools;
 
-    private TwoTrailsApp TtAppCtx;
+    private final TwoTrailsApp TtAppCtx;
 
-    private SpatialReference LatLonSpatialReference = SpatialReferences.getWgs84();
-    private GeographicTransformation LatLonSpatialTransformation = GeographicTransformation.create(GeographicTransformationStep.create(15855));
+    private final SpatialReference LatLonSpatialReference = SpatialReferences.getWgs84();
+    private final GeographicTransformation LatLonSpatialTransformation = GeographicTransformation.create(GeographicTransformationStep.create(15855));
 
     //private UserCredentials userCredentials;
 
     private HashMap<Integer, ArcGisMapLayer> mapLayers;
     private int idCounter = 0;
 
-    private List<IArcToolsListener> listeners = new ArrayList<>();
+    private final List<IArcToolsListener> listeners = new ArrayList<>();
 
     //private HashMap<Integer, DownloadOfflineArcGISMapTask> tasks = new HashMap<>();
-    private long lastUpdate = System.currentTimeMillis();
+    private final long lastUpdate = System.currentTimeMillis();
 
     private WebRequest webRequest;
 

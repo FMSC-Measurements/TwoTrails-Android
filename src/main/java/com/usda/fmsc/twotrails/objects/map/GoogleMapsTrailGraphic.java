@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public class GoogleMapsTrailGraphic implements ITrailGraphic, IMarkerDataGraphic {
-    private GoogleMap map;
+    private final GoogleMap map;
 
     private ArrayList<Marker> _Markers;
     private Extent polyBounds;

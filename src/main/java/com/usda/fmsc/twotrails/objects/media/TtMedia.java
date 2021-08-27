@@ -1,8 +1,11 @@
 package com.usda.fmsc.twotrails.objects.media;
 
+import android.content.Context;
+import android.net.Uri;
 import android.os.Parcel;
 
 import com.usda.fmsc.android.utilities.ParcelTools;
+import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.objects.TtObject;
 import com.usda.fmsc.twotrails.units.MediaType;
 import com.usda.fmsc.utilities.FileUtils;
@@ -10,9 +13,11 @@ import com.usda.fmsc.utilities.StringEx;
 
 import org.joda.time.DateTime;
 
+import java.nio.file.Paths;
+
 public abstract class TtMedia extends TtObject {
     private String _Name;
-    private String _FilePath;
+    private String _FileName;
     private String _Comment;
     private DateTime _TimeCreated;
     private String _PointCN;
@@ -25,18 +30,18 @@ public abstract class TtMedia extends TtObject {
         super(source);
 
         _Name = source.readString();
-        _FilePath = source.readString();
+        _FileName = source.readString();
         _Comment = source.readString();
         _TimeCreated = (DateTime)source.readSerializable();
         _PointCN = source.readString();
         _IsExternal = ParcelTools.readBool(source);
     }
 
-    public TtMedia(String Name, String FilePath, String Comment, DateTime TimeCreated, String PointCN, boolean IsExternal) {
-        this._Name = Name;
-        this._FilePath = FilePath;
-        this._Comment = Comment;
-        this._TimeCreated = TimeCreated;
+    public TtMedia(String name, String filename, String comment, DateTime timeCreated, String PointCN, boolean IsExternal) {
+        this._Name = name;
+        this._FileName = filename;
+        this._Comment = comment;
+        this._TimeCreated = timeCreated;
         this._PointCN = PointCN;
         this._IsExternal = IsExternal;
     }
@@ -44,10 +49,11 @@ public abstract class TtMedia extends TtObject {
     public TtMedia(TtMedia media) {
         super(media);
         this._Name = media._Name;
-        this._FilePath = media._FilePath;
+        this._FileName = media._FileName;
         this._Comment = media._Comment;
         this._TimeCreated = media._TimeCreated;
         this._PointCN = media._PointCN;
+        this._IsExternal = media._IsExternal;
     }
 
     public abstract MediaType getMediaType();
@@ -61,16 +67,22 @@ public abstract class TtMedia extends TtObject {
     }
 
 
-    public String getFilePath() {
-        return _FilePath;
+    public String getFileName() {
+        return _FileName;
     }
 
-    public void setFilePath(String filePath) {
-        _FilePath = filePath;
+    public void setFileName(String fileName) {
+        _FileName = fileName;
     }
 
-    public boolean externalFileExists() {
-        return _IsExternal && FileUtils.fileExists(_FilePath);
+
+    public boolean externalFileExists(TwoTrailsApp app) {
+        return _IsExternal && _FileName != null && FileUtils.fileExists(app, app.getMediaFileByFileName(_FileName));
+    }
+
+    public Uri getFilePath(TwoTrailsApp app) {
+        if (_FileName == null) throw new RuntimeException("No External File");
+        return app.getMediaFileByFileName(_FileName);
     }
 
 
@@ -113,7 +125,7 @@ public abstract class TtMedia extends TtObject {
         super.writeToParcel(dest, flags);
 
         dest.writeString(StringEx.getValueOrEmpty(_Name));
-        dest.writeString(StringEx.getValueOrEmpty(_FilePath));
+        dest.writeString(_FileName);
         dest.writeString(StringEx.getValueOrEmpty(_Comment));
         dest.writeSerializable(_TimeCreated);
         dest.writeString(StringEx.getValueOrEmpty(_PointCN));

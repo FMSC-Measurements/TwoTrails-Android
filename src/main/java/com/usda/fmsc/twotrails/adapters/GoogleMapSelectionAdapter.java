@@ -64,7 +64,7 @@ public class GoogleMapSelectionAdapter extends BaseAdapter {
         MapViewHolder holder;
 
         if (convertView == null) {
-            convertView = inflater.inflate(R.layout.content_map_header, null);
+            convertView = inflater.inflate(R.layout.content_map_header, parent, false);
 
             holder = new MapViewHolder(convertView);
             convertView.setTag(holder);

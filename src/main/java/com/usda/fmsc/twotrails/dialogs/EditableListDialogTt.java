@@ -5,13 +5,11 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
-import androidx.fragment.app.DialogFragment;
 import androidx.appcompat.app.AlertDialog;
 import android.text.Editable;
 import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -23,13 +21,13 @@ import java.util.List;
 
 import com.usda.fmsc.utilities.StringEx;
 
-public class EditableListDialog extends DialogFragment {
+public class EditableListDialogTt extends TtBaseDialogFragment {
     private String[] items;
     private String selectedItem = StringEx.Empty;
 
     private String posBtnText, negBtnText, title;
 
-    public EditableListDialog() {
+    public EditableListDialogTt() {
         posBtnText = negBtnText = StringEx.Empty;
     }
 

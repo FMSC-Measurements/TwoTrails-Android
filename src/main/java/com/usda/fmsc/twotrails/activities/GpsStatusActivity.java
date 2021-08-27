@@ -116,7 +116,7 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == Consts.Codes.Activites.SETTINGS) {
+        if (requestCode == Consts.Codes.Activities.SETTINGS) {
             if (getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
                 binder.startGps();
             }
@@ -206,7 +206,7 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
 
         dialog.setMessage("The GPS is currently not configured. Would you like to configure it now?");
 
-        dialog.setPositiveButton("Configure", (dialog1, which) -> startActivityForResult(new Intent(getBaseContext(), SettingsActivity.class).putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.GPS_SETTINGS_PAGE), Consts.Codes.Activites.SETTINGS));
+        dialog.setPositiveButton("Configure", (dialog1, which) -> startActivityForResult(new Intent(getBaseContext(), SettingsActivity.class).putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.GPS_SETTINGS_PAGE), Consts.Codes.Activities.SETTINGS));
 
         dialog.setNeutralButton(R.string.str_cancel, null);
 

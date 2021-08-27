@@ -15,7 +15,6 @@ import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.devices.BluetoothConnection;
 import com.usda.fmsc.twotrails.units.Dist;
 import com.usda.fmsc.twotrails.units.Slope;
-import com.usda.fmsc.twotrails.utilities.TtUtils;
 import com.usda.fmsc.utilities.ParseEx;
 
 import org.joda.time.DateTime;
@@ -31,7 +30,7 @@ public class RangeFinderService extends Service implements BluetoothConnection.L
     private boolean postAllRFStrings = true, logging;
     private TtRangeFinderData lastRFData;
 
-    private ArrayList<Listener> listeners = new ArrayList<>();
+    private final ArrayList<Listener> listeners = new ArrayList<>();
     private final Binder binder = new RangeFinderBinder();
 
     private BluetoothConnection btConn;
@@ -188,18 +187,18 @@ public class RangeFinderService extends Service implements BluetoothConnection.L
 
 
     //region Logging
-    public void startLogging(String fileName) {
+    public void startLogging(File logFile) {
         try {
             if (logging && logPrintWriter != null) {
                 logPrintWriter.close();
             }
 
-            File logFileDir = new File(TtUtils.getTtLogFileDir());
-            if (!logFileDir.exists()) {
-                logFileDir.mkdirs();
-            }
+//            File logFileDir = new File(TtUtils.getTtLogFileDir());
+//            if (!logFileDir.exists()) {
+//                logFileDir.mkdirs();
+//            }
 
-            logPrintWriter = new PrintWriter(fileName);
+            logPrintWriter = new PrintWriter(logFile);
 
             writeStartLog();
 
@@ -537,8 +536,8 @@ public class RangeFinderService extends Service implements BluetoothConnection.L
         }
 
         @Override
-        public void startLogging(String fileName) {
-            RangeFinderService.this.startLogging(fileName);
+        public void startLogging(File logFile) {
+            RangeFinderService.this.startLogging(logFile);
         }
 
         @Override
@@ -583,7 +582,7 @@ public class RangeFinderService extends Service implements BluetoothConnection.L
 
         boolean isRangeFinderRunning();
 
-        void startLogging(String fileName);
+        void startLogging(File logFile);
 
         void stopLogging();
 

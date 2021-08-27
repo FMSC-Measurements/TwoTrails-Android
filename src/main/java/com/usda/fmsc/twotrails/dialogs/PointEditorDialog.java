@@ -28,10 +28,10 @@ import java.util.HashMap;
 import com.usda.fmsc.utilities.StringEx;
 
 public class PointEditorDialog extends DialogFragment {
-    private static String CN = "CN";
-    private static String PID = "PID";
-    private static String META_CN = "META_CN";
-    private static String META = "META";
+    private static final String CN = "CN";
+    private static final String PID = "PID";
+    private static final String META_CN = "META_CN";
+    private static final String META = "META";
     private int ds = -1;
 
     private View lastSelected;

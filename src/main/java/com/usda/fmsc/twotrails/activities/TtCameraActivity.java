@@ -14,6 +14,7 @@ import com.usda.fmsc.twotrails.objects.media.TtImage;
 public class TtCameraActivity extends AppCompatActivity implements TtCameraFragment.TtCameraListener {
     private TtImage image;
     private boolean error = false;
+    private String savedImageUri = "";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -25,9 +26,16 @@ public class TtCameraActivity extends AppCompatActivity implements TtCameraFragm
             Bundle bundle = intent.getExtras();
 
             if (bundle.containsKey(Consts.Codes.Data.POINT_CN)) {
+                if (bundle.containsKey(Consts.Codes.Data.TTIMAGE_URI)) {
+                    savedImageUri = bundle.getString(Consts.Codes.Data.TTIMAGE_URI);
+                }
+
+
                 getSupportFragmentManager()
                         .beginTransaction()
-                        .replace(android.R.id.content, TtCameraFragment.newInstance(bundle.getString(Consts.Codes.Data.POINT_CN)))
+                        .replace(android.R.id.content, TtCameraFragment.newInstance(
+                                bundle.getString(Consts.Codes.Data.POINT_CN),
+                                savedImageUri))
                         .commit();
 
                 if (!AndroidUtils.Device.isFullOrientationAvailable(TtCameraActivity.this)) {
@@ -50,6 +58,8 @@ public class TtCameraActivity extends AppCompatActivity implements TtCameraFragm
             setResult(Consts.Codes.Results.ERROR);
         } else if (image == null) {
             setResult(RESULT_CANCELED);
+        } else {
+            setResult(RESULT_OK);
         }
     }
 
@@ -58,6 +68,7 @@ public class TtCameraActivity extends AppCompatActivity implements TtCameraFragm
         this.image = image;
         Bundle bundle = new Bundle();
         bundle.putParcelable(Consts.Codes.Data.TTIMAGE, image);
+        bundle.putString(Consts.Codes.Data.TTIMAGE_URI, savedImageUri);
         setResult(Consts.Codes.Results.IMAGE_CAPTURED, new Intent().putExtras(bundle));
         finish();
     }

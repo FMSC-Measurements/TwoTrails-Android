@@ -19,6 +19,14 @@ public class Consts {
     public static final String FILE_EXTENSION = ".ttx";
     public static final String MEDIA_PACKAGE_EXTENSION = ".ttmpx";
 
+    public static final String FILE_MIME = "application/ttx";
+    public static final String MEDIA_FILE_MIME = "application/ttmpx";
+
+    public static class FileExtensions {
+        public static final String TWO_TRAILS = "file/*" + FILE_EXTENSION;
+        public static final String TPK = "file/*.tpk";
+    }
+
     public static final String EmptyGuid = "00000000-0000-0000-0000-000000000000";
 
     public static final double RMSEr95_Coeff = 1.7308;
@@ -38,7 +46,6 @@ public class Consts {
     public static final String ServiceContent = "GPS Running";
     public static final String ServiceAcquiringPoint = "Acquiring Point";
     public static final String ServiceWalking = "Walking";
-
 
     public static class DeviceNames {
         public static final String[] GPS_RECEIVERS = new String[]{
@@ -74,13 +81,8 @@ public class Consts {
         public static final long[] VIB_ERROR = new long[] { 0, 1000 };
     }
 
-    public static class FileExtensions {
-        public static final String TWO_TRAILS = "file/*" + FILE_EXTENSION;
-        public static final String TPK = "file/*.tpk";
-    }
-
     public static class Codes {
-        public static class Activites {
+        public static class Activities {
             public static final int MAIN = 1000;
             public static final int ACQUIRE = 1001;
             public static final int CALCULATE = 1002;
@@ -107,8 +109,9 @@ public class Consts {
         }
 
         public static class Dialogs {
-            public static final int REQUEST_FILE = 4001;
-            public static final int NEW_ARC_MAP = 4002;
+            public static final int IMPORT_PROJECT_FILE = 4001;
+            public static final int EXPORT_PROJECT_FILE = 4002;
+            public static final int NEW_ARC_MAP = 4003;
         }
 
         public static class Results {
@@ -146,6 +149,8 @@ public class Consts {
             public static final String NUMBER_OF_CREATED_POINTS = "NumOfCreatedPoints";
             public static final String MAP_DATA = "MapData";
             public static final String TTIMAGE = "TtImage";
+            public static final String TTIMAGE_CN = "TtImageCN";
+            public static final String TTIMAGE_URI = "TtImageUri";
             public static final String ORIENTATION = "Orientation";
             public static final String CRASH = "AppCrash";
             public static final String CRASH_NO_RESET = "AppCrashNoReset";
@@ -166,6 +171,7 @@ public class Consts {
             public static final int FOLDER = 5010;
             public static final int CAMERA = 5011;
             public static final int UPDATE_ORIENTATION = 5012;
+            public static final int ACCESS_FOLDER = 5013;
         }
     }
 
@@ -209,5 +215,34 @@ public class Consts {
 
             return group;
         }
+    }
+
+    public static class FolderLayout {
+        public static class External {
+            public static final String TwoTrailsFolderName = "TwoTrails";
+            public static final String TwoTrailsFolderPath = TwoTrailsFolderName;
+
+            public static final String OfflineMapsName = "OfflineMaps";
+            public static final String OfflineMapsPath = TwoTrailsFolderPath + "/" + OfflineMapsName;
+
+            public static final String ImportFolderName = "Import";
+            public static final String ImportFolderPath = TwoTrailsFolderPath + "/" + ImportFolderName;
+
+            public static final String ImportedFolderName = "Imported";
+            public static final String ImportedFolderPath = ImportFolderPath + "/" + ImportedFolderName;
+
+            public static final String ExportFolderName = "Export";
+            public static final String ExportFolderPath = TwoTrailsFolderPath + "/" + ExportFolderName;
+        }
+
+        public static class Internal {
+            public static final String MediaDir = "media";
+        }
+    }
+
+    public static class Files {
+        public static final String LOG_FILE = "TwoTrailsLog.txt";
+        public static final String GPS_LOG_FILE_PREFIX = "GPSLog";
+        public static final String SETTINGS_FILE = "Settings.txt";
     }
 }

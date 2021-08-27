@@ -16,9 +16,9 @@ public class PolygonGraphicOptions {
         WAYPTS_COLOR
     }
 
-    private ArrayList<Listener> listeners = new ArrayList<>();
+    private final ArrayList<Listener> listeners = new ArrayList<>();
 
-    private String CN;
+    private final String CN;
     private @ColorInt int AdjBndColor, UnAdjBndColor;
     private @ColorInt int AdjNavColor, UnAdjNavColor;
     private @ColorInt int AdjPtsColor, UnAdjPtsColor, WayPtsColor;

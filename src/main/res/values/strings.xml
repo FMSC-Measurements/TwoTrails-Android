@@ -144,6 +144,10 @@
     <string name="op_qndm">Quondam</string>
 
 
+    <!-- Requests -->
+    <string name="str_gps_request">This app collects location data to enable point creation during point collection or navigation operations. It may also collect location while the app is being run in the background.</string>
+
+
     <!-- Measurements -->
     <string name="meas_feet">Feet</string>
     <string name="meas_meters">Meters</string>
@@ -353,6 +357,9 @@
     <string name="main_tab_devices">GPS/RangeFinder</string>
 
     <string name="main_btn_open_rec">Opened Recently</string>
+    <string name="main_btn_import_project">Import Project</string>
+    <string name="main_btn_export_project">Export Project</string>
+    <string name="main_btn_import_data">Import Data</string>
     <string name="main_btn_import">Import</string>
     <string name="main_btn_duplicate">Duplicate</string>
     <string name="main_btn_exit">Exit</string>

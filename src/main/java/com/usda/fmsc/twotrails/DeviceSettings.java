@@ -1,6 +1,5 @@
 package com.usda.fmsc.twotrails;
 
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.JsonWriter;
 
@@ -8,6 +7,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.usda.fmsc.geospatial.nmea41.sentences.GGASentence;
 import com.usda.fmsc.geospatial.nmea41.sentences.GSASentence;
+import com.usda.fmsc.twotrails.objects.TwoTrailsProject;
 import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
 import com.usda.fmsc.twotrails.units.DopType;
 import com.usda.fmsc.twotrails.units.MapTracking;
@@ -28,6 +28,10 @@ public class DeviceSettings extends Settings {
     private static final String DEVELOPER_OPTIONS = "DeveloperOptions";
     private static final String DEBUG_MODE = "DebugMode";
     private static final String LAST_CRASH_TIME = "LastCrashTime";
+
+    public static final String EXTERNAL_SYNC_ENABLED = "ExternalSync";
+    public static final String EXTERNAL_SYNC_ENABLED_ASK = "ExternalSyncAsk";
+    public static final String EXTERNAL_SYNC_DIR = "ExternalSyncDir";
 
     public static final String DROP_ZERO = "DropZero";
     public static final String ROUND_POINTS = "RoundPoints";
@@ -106,7 +110,9 @@ public class DeviceSettings extends Settings {
     public static final String USE_TTCAMERA_ASK = "UseTtCameraAsk";
 
     public static final String AUTO_OPEN_LAST_PROJECT = "AutoOpenLastProject";
-    public static final String LAST_OPENED_PROJECT = "LastOpenedProject";
+    public static final String LAST_OPENED_PROJECT_NAME = "LastOpenedProjectName";
+    public static final String LAST_OPENED_PROJECT_FILE_TTX = "LastOpenedProjectFileTTX";
+    public static final String LAST_OPENED_PROJECT_FILE_TTMPX = "LastOpenedProjectFileTTMPX";
 
     public static final String MAP_TRACKING_OPTION = "MapTrackingOption";
     public static final String MAP_COMPASS_ENABLED = "MapCompassEnabled";
@@ -124,6 +130,9 @@ public class DeviceSettings extends Settings {
     public static final String MAP_CHOOSE_OFFLINE = "MapChooseOffline";
     public static final String MAP_CHOOSE_OFFLINE_ASK = "MapChooseOfflineAsk";
 
+    public static final String EXPORT_MODE = "MapChooseOffline";
+    public static final String EXPORT_MODE_ASK = "MapChooseOfflineAsk";
+
     public static final String ARC_CREDENTIALS = "ArcCredentials";
 
     public static final String MEDIA_COPY_TO_PROJECT = "CopyToProject";
@@ -132,6 +141,10 @@ public class DeviceSettings extends Settings {
     //region Default Values
     public final boolean DEFAULT_DROP_ZERO = true;
     public final boolean DEFAULT_ROUND_POINTS = true;
+
+    public final boolean DEFAULT_EXTERNAL_SYNC_ENABLED = false;
+    public final boolean DEFAULT_EXTERNAL_SYNC_ENABLED_ASK = false;
+    public final String DEFAULT_EXTERNAL_SYNC_DIR = StringEx.Empty;
 
     public final DopType DEFAULT_GPS_DOP_TYPE = DopType.HDOP;
     public final GGASentence.GpsFixType DEFAULT_GPS_FIX_TYPE = GGASentence.GpsFixType.GPS;
@@ -173,7 +186,9 @@ public class DeviceSettings extends Settings {
     public final boolean DEFAULT_WALK_SHOW_ALL_POINTS_ON_MAP = true;
 
     public final boolean DEFAULT_AUTO_OPEN_LAST_PROJECT = true;
-    public final String DEFAULT_LAST_OPENED_PROJECT = null;
+    public final String DEFAULT_LAST_OPENED_PROJECT_NAME = null;
+    public final String DEFAULT_LAST_OPENED_PROJECT_FILE_TTX = null;
+    public final String DEFAULT_LAST_OPENED_PROJECT_FILE_TTMPX = null;
 
     public final boolean DEFAULT_GPS_LOG_BURST_DETAILS = false;
 
@@ -208,18 +223,16 @@ public class DeviceSettings extends Settings {
     public final int DEFAULT_MAP_CHOOSE_OFFLINE = 0;
     public final boolean DEFAULT_MAP_CHOOSE_OFFLINE_ASK = true;
 
+    public static final int DEFAULT_EXPORT_MODE = 2;
+    public static final boolean DEFAULT_EXPORT_MODE_ASK = true;
+
     public final boolean DEFAULT_MEDIA_COPY_TO_PROJECT = true;
     //endregion
 
 
-    public DeviceSettings(Context context) {
+    public DeviceSettings(TwoTrailsApp context) {
         super(context);
 
-        init();
-    }
-
-
-    public void init() {
         if (!getBool(SETTINGS_CREATED, false)) {
             reset();
         }
@@ -230,6 +243,10 @@ public class DeviceSettings extends Settings {
 
         editor.putBoolean(DEVELOPER_OPTIONS, false);
         editor.putBoolean(DEBUG_MODE, false);
+
+        editor.putBoolean(EXTERNAL_SYNC_ENABLED, DEFAULT_EXTERNAL_SYNC_ENABLED);
+        editor.putBoolean(EXTERNAL_SYNC_ENABLED_ASK, DEFAULT_EXTERNAL_SYNC_ENABLED_ASK);
+        editor.putString(EXTERNAL_SYNC_DIR, DEFAULT_EXTERNAL_SYNC_DIR);
 
         editor.putString(LAST_CRASH_TIME, StringEx.Empty);
 
@@ -297,7 +314,9 @@ public class DeviceSettings extends Settings {
 
 
         editor.putBoolean(AUTO_OPEN_LAST_PROJECT, DEFAULT_AUTO_OPEN_LAST_PROJECT);
-        editor.putString(LAST_OPENED_PROJECT, DEFAULT_LAST_OPENED_PROJECT);
+        editor.putString(LAST_OPENED_PROJECT_NAME, DEFAULT_LAST_OPENED_PROJECT_NAME);
+        editor.putString(LAST_OPENED_PROJECT_FILE_TTX, DEFAULT_LAST_OPENED_PROJECT_FILE_TTX);
+        editor.putString(LAST_OPENED_PROJECT_FILE_TTMPX, DEFAULT_LAST_OPENED_PROJECT_FILE_TTX);
 
         editor.putInt(MAP_TRACKING_OPTION, DEFAULT_MAP_TRACKING_OPTION.getValue());
         editor.putBoolean(MAP_MY_POS_BUTTON, DEFAULT_MAP_MYPOS_BUTTON);
@@ -316,6 +335,9 @@ public class DeviceSettings extends Settings {
 
         editor.putBoolean(MEDIA_COPY_TO_PROJECT, DEFAULT_MEDIA_COPY_TO_PROJECT);
 
+        editor.putInt(EXPORT_MODE, DEFAULT_EXPORT_MODE);
+        editor.putBoolean(EXPORT_MODE_ASK, DEFAULT_EXPORT_MODE_ASK);
+
         editor.putString(ARC_CREDENTIALS, StringEx.Empty);
 
         editor.putBoolean(SETTINGS_CREATED, true);
@@ -327,6 +349,10 @@ public class DeviceSettings extends Settings {
     public void writeToFile(JsonWriter js) throws IOException {
         js.name(DEVELOPER_OPTIONS).value(isDeveloperOptionsEnabled());
         js.name(LAST_CRASH_TIME).value(getLastCrashTime().toString());
+
+        js.name(EXTERNAL_SYNC_ENABLED).value(isExternalSyncEnabled());
+        js.name(EXTERNAL_SYNC_ENABLED_ASK).value(isExternalSyncEnabledAsked());
+        js.name(EXTERNAL_SYNC_DIR).value(getExternalSyncDir());
 
         js.name(DROP_ZERO).value(getDropZeros());
         js.name(ROUND_POINTS).value(getRoundPoints());
@@ -396,7 +422,10 @@ public class DeviceSettings extends Settings {
         js.name(USE_TTCAMERA_ASK).value(getUseTtCameraAsk());
 
         js.name(AUTO_OPEN_LAST_PROJECT).value(getAutoOpenLastProject());
-        js.name(LAST_OPENED_PROJECT).value(getLastOpenedProject());
+
+        TwoTrailsProject rp =getLastOpenedProject();
+        js.name(LAST_OPENED_PROJECT_NAME).value(rp.Name);
+        js.name(LAST_OPENED_PROJECT_FILE_TTX).value(rp.TTXFile);
 
         js.name(MAP_TRACKING_OPTION).value(getMapTrackingOption().toString());
         js.name(MAP_COMPASS_ENABLED).value(getMapCompassEnabled());
@@ -1011,6 +1040,25 @@ public class DeviceSettings extends Settings {
     //endregion
 
     //endregion
+    public int getExportMode() {
+        return getInt(EXPORT_MODE, DEFAULT_EXPORT_MODE);
+    }
+
+    public void setExportMode(int value) {
+        setInt(EXPORT_MODE, value);
+    }
+
+    public boolean getExportModeAsk() {
+        return getBool(EXPORT_MODE_ASK, DEFAULT_EXPORT_MODE_ASK);
+    }
+
+    public void setExportModeAsk(boolean value) {
+        setBool(EXPORT_MODE_ASK, value);
+    }
+    //region Export
+
+
+    //endregion
 
     //region Other
     public boolean isDeveloperOptionsEnabled() {
@@ -1158,12 +1206,18 @@ public class DeviceSettings extends Settings {
 
 
 
-    public String getLastOpenedProject() {
-        return getString(LAST_OPENED_PROJECT);
+    public TwoTrailsProject getLastOpenedProject() {
+        return new TwoTrailsProject(
+                getString(LAST_OPENED_PROJECT_NAME),
+                getString(LAST_OPENED_PROJECT_FILE_TTX, null),
+                getString(LAST_OPENED_PROJECT_FILE_TTMPX, null)
+        );
     }
 
-    public void setLastOpenedProject(String value) {
-        setString(LAST_OPENED_PROJECT, value);
+    public void setLastOpenedProject(TwoTrailsProject twoTrailsProject) {
+        setString(LAST_OPENED_PROJECT_NAME, twoTrailsProject.Name);
+        setString(LAST_OPENED_PROJECT_FILE_TTX, twoTrailsProject.TTXFile);
+        setString(LAST_OPENED_PROJECT_FILE_TTX, twoTrailsProject.TTMPXFile);
     }
 
 
@@ -1222,6 +1276,31 @@ public class DeviceSettings extends Settings {
         setBool(KEEP_SCREEN_ON, value);
     }
 
+
+
+    public boolean isExternalSyncEnabled() {
+        return getBool(EXTERNAL_SYNC_ENABLED, DEFAULT_EXTERNAL_SYNC_ENABLED);
+    }
+
+    public void setExternalSyncEnabled(boolean value) {
+        setBool(EXTERNAL_SYNC_ENABLED, value);
+    }
+
+    public boolean isExternalSyncEnabledAsked() {
+        return getBool(EXTERNAL_SYNC_ENABLED_ASK, DEFAULT_EXTERNAL_SYNC_ENABLED_ASK);
+    }
+
+    public void setExternalSyncEnabledAsk(boolean value) {
+        setBool(EXTERNAL_SYNC_ENABLED_ASK, value);
+    }
+
+    public String getExternalSyncDir() {
+        return getString(EXTERNAL_SYNC_DIR, DEFAULT_EXTERNAL_SYNC_DIR);
+    }
+
+    public void setExternalSyncDir(String value) {
+        setString(EXTERNAL_SYNC_DIR, value);
+    }
     //endregion
 
 }

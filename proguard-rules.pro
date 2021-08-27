@@ -13,8 +13,8 @@
 -keep public class * extends android.app.Service
 -keep public class * extends android.content.ContentProvider
 -keep public class * extends android.preference.Preference
--keep public class * extends android.support.v4.app.Fragment
--keep public class * extends android.support.v4.app.DialogFragment
+-keep public class * extends androidx.fragment.app.Fragment
+-keep public class * extends androidx.fragment.app.DialogFragment
 -keep public class * extends android.app.Fragment
 
 # For native methods, see http://proguard.sourceforge.net/manual/examples.html#native

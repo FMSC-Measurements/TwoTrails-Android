@@ -13,11 +13,6 @@ package com.usda.fmsc.twotrails.ui;
  *
  */
 
-import com.esri.arcgisruntime.mapping.view.MapRotationChangedEvent;
-import com.esri.arcgisruntime.mapping.view.MapRotationChangedListener;
-import com.esri.arcgisruntime.mapping.view.MapView;
-import com.usda.fmsc.twotrails.R;
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -27,6 +22,9 @@ import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.esri.arcgisruntime.mapping.view.MapView;
+import com.usda.fmsc.twotrails.R;
 
 public class ArcMapCompass extends View implements View.OnClickListener {
     float mAngle = 0;

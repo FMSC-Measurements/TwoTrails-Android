@@ -13,11 +13,11 @@ import com.usda.fmsc.twotrails.gps.GpsService;
 
 public class GpsInfoControl implements GpsService.Listener {
 
-    private View viewGpsInfoLaySatInfo;
-    private GpsStatusSkyView skyView;
-    private GpsStatusSatView statusView;
+    private final View viewGpsInfoLaySatInfo;
+    private final GpsStatusSkyView skyView;
+    private final GpsStatusSatView statusView;
 
-    private TwoTrailsApp app;
+    private final TwoTrailsApp app;
 
     private boolean gpsExtraVisable = true, animating, gpsExtraLayoutSet;
 
