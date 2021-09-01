@@ -281,7 +281,7 @@
         <activity
             android:name=".activities.GetDirectionActivity"
             android:label="@string/title_activity_get_direction"
-            android:theme="@style/AppTheme" />
+            android:theme="@style/AppTheme"/>
         <activity android:name=".activities.GpsStatusActivity"
             android:label="@string/title_activity_gps_status"
             android:screenOrientation="portrait"/>

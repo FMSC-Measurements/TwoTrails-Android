@@ -193,7 +193,7 @@ public class MapDetailsActivity extends CustomToolbarActivity {
     }
 
 
-    String[] messages = new String[] {
+    private final String[] messages = new String[] {
             "A description already exists. Would you like to overwrite it?",
             "Scale Levels already exists. Would you like to overwrite them?",
             "Detail Levels already exists. Would you like to overwrite them?"

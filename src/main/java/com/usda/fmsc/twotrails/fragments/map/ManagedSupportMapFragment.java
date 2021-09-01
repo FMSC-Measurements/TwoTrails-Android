@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
@@ -42,7 +43,7 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
         OnMapReadyCallback, GoogleMap.OnMapLoadedCallback, GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener,
         GoogleMap.OnCameraMoveStartedListener, GoogleMap.OnCameraMoveListener, GoogleMap.OnCameraIdleListener {
 
-    TwoTrailsApp TtAppCtx;
+    private TwoTrailsApp _TtAppCtx;
 
     private MultiMapListener mmlistener;
 
@@ -106,6 +107,11 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
     }
 
 
+    protected TwoTrailsApp getTtAppCtx() {
+        return _TtAppCtx != null ? _TtAppCtx : (_TtAppCtx = (TwoTrailsApp) getActivity().getApplicationContext());
+    }
+
+
     @Override
     public void setMap(int mapId) {
         if (map != null) {
@@ -126,16 +132,25 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
         if (act == null) {
             throw new RuntimeException("Activity not found");
         }
-        
-        Context ctx = act.getApplicationContext();
-        
-        TtAppCtx = (TwoTrailsApp)ctx;
 
-        if (TtAppCtx.getDeviceSettings().isGpsConfigured() && TtAppCtx.getDeviceSettings().getGpsExternal()) {
-            GpsService.GpsBinder binder = TtAppCtx.getGps();
-            GpsService service = binder.getService();
+        if (getTtAppCtx().getDeviceSettings().isGpsConfigured() && getTtAppCtx().getDeviceSettings().getGpsExternal()) {
+            if (getTtAppCtx().isGpsServiceStarted()) {
+                map.setLocationSource(getTtAppCtx().getGps().getService());
+            } else {
+                getTtAppCtx().startGpsService();
 
-            map.setLocationSource(service);
+                new Thread(() -> {
+                    try {
+                        Thread.sleep(2000);
+
+                        if (getTtAppCtx().isGpsServiceStarted()) {
+                            map.setLocationSource(getTtAppCtx().getGps().getService());
+                        }
+                    } catch (InterruptedException e) {
+                        //
+                    }
+                });
+            }
         }
 
         map.setOnMapLoadedCallback(this);
@@ -248,10 +263,10 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
             {
                 moveToLocation(CameraUpdateFactory.newLatLng(new LatLng(lat, lon)), animate);
             } catch (Exception ex) {
-                TtAppCtx.getReport().writeError(ex.getMessage(), "ManagedSupportMapFragment:moveToLocation(f,f,b)", ex.getStackTrace());
+                getTtAppCtx().getReport().writeError(ex.getMessage(), "ManagedSupportMapFragment:moveToLocation(f,f,b)", ex.getStackTrace());
             }
         } else {
-            TtAppCtx.getReport().writeWarn("Map not ready", "ManagedSupportMapFragment:moveToLocation(f,f,b)");
+            getTtAppCtx().getReport().writeWarn("Map not ready", "ManagedSupportMapFragment:moveToLocation(f,f,b)");
         }
     }
 
@@ -264,10 +279,10 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
                         zoomLevel
                 ), animate);
             } catch (Exception ex) {
-                TtAppCtx.getReport().writeError(ex.getMessage(), "ManagedSupportMapFragment:moveToLocation(f,f,f,b)", ex.getStackTrace());
+                getTtAppCtx().getReport().writeError(ex.getMessage(), "ManagedSupportMapFragment:moveToLocation(f,f,f,b)", ex.getStackTrace());
             }
         } else {
-            TtAppCtx.getReport().writeWarn("Map not ready", "ManagedSupportMapFragment:moveToLocation(f,f,f,b)");
+            getTtAppCtx().getReport().writeWarn("Map not ready", "ManagedSupportMapFragment:moveToLocation(f,f,f,b)");
         }
     }
 
@@ -283,10 +298,10 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
                         padding
                 ), animate);
             } catch (Exception ex) {
-                TtAppCtx.getReport().writeError(ex.getMessage(), "ManagedSupportMapFragment:moveToLocation(e,i,b)", ex.getStackTrace());
+                getTtAppCtx().getReport().writeError(ex.getMessage(), "ManagedSupportMapFragment:moveToLocation(e,i,b)", ex.getStackTrace());
             }
         } else {
-            TtAppCtx.getReport().writeWarn("Map not ready", "ManagedSupportMapFragment:moveToLocation(e,i,b)");
+            getTtAppCtx().getReport().writeWarn("Map not ready", "ManagedSupportMapFragment:moveToLocation(e,i,b)");
         }
     }
 

@@ -70,7 +70,7 @@ public class PlotGridActivity extends CustomToolbarActivity {
     private final Random random = new Random(DateTime.now().getMillis());
 
 
-    PlotGenerator.PlotGenListener plotGenListener = new PlotGenerator.PlotGenListener() {
+    private final PlotGenerator.PlotGenListener plotGenListener = new PlotGenerator.PlotGenListener() {
         @Override
         public void onCanceled() {
             //hide progress

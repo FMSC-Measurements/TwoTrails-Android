@@ -1,14 +1,14 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.usda.fmsc.twotrails.activities.PointsActivityOld">
+    tools:context=".activities.PointsActivity">
 
     <item
         android:id="@+id/pointsMenuLink"
         android:title="@string/str_link"
         app:showAsAction="always"
         android:icon="@drawable/ic_link"
-        android:visible="false"/>
+        android:visible="false" />
 
     <item
         android:id="@+id/pointsMenuLock"
@@ -16,50 +16,60 @@
         app:showAsAction="always"
         android:icon="@drawable/ic_action_lock_closed_white_36dp" />
 
-    <item
-        android:id="@+id/pointsMenuSettings"
-        android:title="@string/str_settings"
-        android:icon="@drawable/ic_settings_black_36dp"
-        app:showAsAction="never"/>
 
     <item
-        android:id="@+id/pointsMenuGotoPoint"
-        android:title="@string/menu_points_jump"
-        android:icon="@drawable/ic_redo_black_36dp"
-        app:showAsAction="never"/>
+        android:id="@+id/overflowMenu"
+        android:icon="@drawable/ic_action_overflow_white"
+        android:title=""
+        app:showAsAction="always">
 
-    <item
-        android:id="@+id/pointsMenuMovePoint"
-        android:title="@string/menu_points_move"
-        android:icon="@drawable/ic_move_black_36dp"
-        app:showAsAction="never"
-        android:visible="false"/>
+        <menu>
+            <item
+                android:id="@+id/pointsMenuSettings"
+                android:icon="@drawable/ic_settings_black_36dp"
+                android:title="@string/str_settings"
+                app:showAsAction="never"/>
 
-    <item
-        android:id="@+id/pointsMenuDelete"
-        android:title="@string/menu_points_delete"
-        android:icon="@drawable/ic_delete_black_36dp"
-        app:showAsAction="never"
-        android:enabled="false"/>
+            <item
+                android:id="@+id/pointsMenuGotoPoint"
+                android:icon="@drawable/ic_redo_black_36dp"
+                android:title="@string/menu_points_jump"
+                app:showAsAction="never" />
 
-    <item
-        android:id="@+id/pointsMenuReset"
-        android:title="@string/menu_points_reset"
-        android:icon="@drawable/ic_refresh_black_36dp"
-        app:showAsAction="never"
-        android:enabled="false"/>
+            <item
+                android:id="@+id/pointsMenuMovePoint"
+                android:icon="@drawable/ic_move_black_36dp"
+                android:title="@string/menu_points_move"
+                android:visible="false"
+                app:showAsAction="never" />
 
-    <item
-        android:id="@+id/pointsMenuEnterLatLon"
-        android:title="@string/menu_points_enter_latlon"
-        android:icon="@drawable/ic_edit_black_36dp"
-        app:showAsAction="never"
-        android:visible="false"/>
+            <item
+                android:id="@+id/pointsMenuDelete"
+                android:enabled="false"
+                android:icon="@drawable/ic_delete_black_36dp"
+                android:title="@string/menu_points_delete"
+                app:showAsAction="never" />
 
-    <item
-        android:id="@+id/pointsMenuRecalcNmea"
-        android:title="@string/menu_points_recalc"
-        android:icon="@drawable/ic_renew_black_36dp"
-        app:showAsAction="never"
-        android:visible="false"/>
+            <item
+                android:id="@+id/pointsMenuReset"
+                android:enabled="false"
+                android:icon="@drawable/ic_refresh_black_36dp"
+                android:title="@string/menu_points_reset"
+                app:showAsAction="never" />
+
+            <item
+                android:id="@+id/pointsMenuEnterLatLon"
+                android:icon="@drawable/ic_edit_black_36dp"
+                android:title="@string/menu_points_enter_latlon"
+                android:visible="false"
+                app:showAsAction="never" />
+
+            <item
+                android:id="@+id/pointsMenuRecalcNmea"
+                android:icon="@drawable/ic_renew_black_36dp"
+                android:title="@string/menu_points_recalc"
+                android:visible="false"
+                app:showAsAction="never" />
+        </menu>
+    </item>
 </menu>

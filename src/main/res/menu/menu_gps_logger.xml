@@ -1,13 +1,23 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.usda.fmsc.twotrails.activities.GpsLoggerActivity">
+    tools:context=".activities.GpsLoggerActivity">
 
-    <!--<item android:id="@+id/action_settings"-->
-        <!--android:title="@string/str_settings"-->
-        <!--app:showAsAction="never" />-->
+    <item
+        android:id="@+id/overflowMenu"
+        android:icon="@drawable/ic_action_overflow_white"
+        android:title=""
+        app:showAsAction="always">
 
-    <item android:id="@+id/loggerMenuLtf"
-        android:title="@string/logger_ltf"
-        app:showAsAction="never"/>
+        <menu>
+            <!--<item android:id="@+id/action_settings"-->
+                <!--android:title="@string/str_settings"-->
+                <!--app:showAsAction="never" />-->
+
+            <item android:id="@+id/loggerMenuLtf"
+                android:title="@string/logger_ltf"
+                app:showAsAction="never"/>
+        </menu>
+    </item>
 </menu>
+

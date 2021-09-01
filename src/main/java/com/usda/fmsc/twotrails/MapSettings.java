@@ -142,12 +142,9 @@ public class MapSettings extends Settings {
         }
     }
 
-    private PolygonGraphicOptions.Listener updateListener = new PolygonGraphicOptions.Listener() {
-        @Override
-        public void onOptionChanged(PolygonGraphicOptions pgo, PolygonGraphicOptions.GraphicCode code, @ColorInt int value) {
-            if (getContext().hasDAL() && _PolyGraphicOptions.containsKey(pgo.getCN())) {
-                getContext().getDAL().updatePolygonGraphicOption(pgo);
-            }
+    private final PolygonGraphicOptions.Listener updateListener = (pgo, code, value) -> {
+        if (getContext().hasDAL() && _PolyGraphicOptions.containsKey(pgo.getCN())) {
+            getContext().getDAL().updatePolygonGraphicOption(pgo);
         }
     };
 }

@@ -51,6 +51,7 @@ public class MainFileFragment extends TtBaseFragment {
 
         tblInfo = view.findViewById(R.id.mainFragFileTblInfo);
 
+        //TODO add version info
         tvDate = view.findViewById(R.id.mainFragFileTvDate);
         tvPolys = view.findViewById(R.id.mainFragFileTvPolys);
         tvPoints = view.findViewById(R.id.mainFragFileTvPoints);
@@ -81,7 +82,7 @@ public class MainFileFragment extends TtBaseFragment {
     public void enableButtons(boolean enable) {
         enabled = enable;
 
-        if (viewExists) {
+        if (isViewCreated()) {
             btnImport.setEnabled(enable);
             //btnDup.setEnabled(enable);
             btnCleanDb.setEnabled(enable);
@@ -100,7 +101,7 @@ public class MainFileFragment extends TtBaseFragment {
         DataAccessManager dam = getTtAppCtx().getDAM();
         DataAccessLayer dal = dam.getDAL();
 
-        if (viewExists) {
+        if (isViewCreated()) {
             File dbFile = dam.getDBFile();
 
             tvDate.setText(new Date(dbFile.lastModified()).toString());

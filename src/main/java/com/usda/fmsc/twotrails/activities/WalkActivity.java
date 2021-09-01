@@ -31,8 +31,6 @@ import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.logic.PointNamer;
 import com.usda.fmsc.twotrails.objects.FilterOptions;
 import com.usda.fmsc.twotrails.objects.TtGroup;
-import com.usda.fmsc.twotrails.objects.media.TtImage;
-import com.usda.fmsc.twotrails.objects.media.TtMedia;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.points.WalkPoint;
 import com.usda.fmsc.twotrails.units.MapTracking;
@@ -178,8 +176,8 @@ public class WalkActivity extends AcquireGpsMapActivity {
     }
 
     @Override
-    protected void getSettings() {
-        super.getSettings();
+    protected void updateSettings() {
+        super.updateSettings();
 
         options.Fix = getTtAppCtx().getDeviceSettings().getWalkFilterFix();
         options.FixType = getTtAppCtx().getDeviceSettings().getWalkFilterFixType();
@@ -252,20 +250,9 @@ public class WalkActivity extends AcquireGpsMapActivity {
         return super.onOptionsItemSelected(item);
     }
 
-//    @Override
-//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        if (requestCode == Consts.Codes.Activities.SETTINGS) {
-//            getTtAppCtx().getGps().startGps();
-//            getSettings();
-//        }
-//
-//        super.onActivityResult(requestCode, resultCode, data);
-//    }
-
     @Override
     protected void onSettingsUpdated() {
-        getTtAppCtx().getGps().startGps();
-        getSettings();
+        updateSettings();
     }
 
     @Override

@@ -21,6 +21,7 @@ public class DataAccessManager extends AccessManager<DataAccessLayer>  {
 
     @Override
     public void onConfigure(SQLiteDatabase db) {
+        super.onConfigure(db);
         if (db.getVersion() == 0) {
             Cursor cursor = db.rawQuery("SELECT name FROM sqlite_master WHERE type='table' AND name='" + TwoTrailsSchema.ProjectInfoSchema.TableName + "';", null);
 
@@ -90,6 +91,10 @@ public class DataAccessManager extends AccessManager<DataAccessLayer>  {
 
     public static DataAccessManager openDAL(TwoTrailsApp context, String fileName) {
         return new DataAccessManager(context, fileName, null);
+    }
+
+    public static DataAccessManager openDAL(TwoTrailsApp context, String fileName, String projectName) {
+        return new DataAccessManager(context, fileName, projectName);
     }
 
 

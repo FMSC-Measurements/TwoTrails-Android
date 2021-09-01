@@ -4,6 +4,7 @@ import android.net.Uri;
 
 import androidx.documentfile.provider.DocumentFile;
 
+import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.utilities.TaskRunner;
 import com.usda.fmsc.geospatial.utm.UTMTools;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
@@ -1194,7 +1195,7 @@ public class Export {
 
             File kmlFile = kml(context, dal, null);
 
-            if (kmlFile != null) {
+            if (kmlFile != null && kmlFile.exists()) {
                 ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(tcKmzFile));
 
                 zos.putNextEntry(new ZipEntry(kmlFile.getName()));
@@ -1212,7 +1213,7 @@ public class Export {
 
                 kmlFile.delete();
 
-                return kmlFile;
+                return tcKmzFile;
             } else {
                 throw new RuntimeException("KML not created");
             }
@@ -1223,7 +1224,7 @@ public class Export {
     }
 
     public static File summary(TwoTrailsApp context, DataAccessLayer dal, File dir) {
-        File tcSummaryFile = new File(dir != null ? dir : context.getCacheDir(), String.format("%s.txt", scrubProjectName(dal.getProjectDeviceID())));
+        File tcSummaryFile = new File(dir != null ? dir : context.getCacheDir(), String.format("%s.txt", scrubProjectName(dal.getProjectID())));
 
         try {
             FileWriter writer = new FileWriter(tcSummaryFile);
@@ -1305,45 +1306,61 @@ public class Export {
             }
 
             String projectDirName = String.format(Locale.getDefault(), "%s_%s",
-                    scrubProjectName(params.getDal().getProjectDeviceID()), new Date().toString());
+                    scrubProjectName(params.getDal().getProjectID()), TtUtils.Date.toStringDateMillis(new DateTime()));
 
-            DocumentFile dir;
+            DocumentFile dfDir = null;
+            File zfDir = null;
             Uri file = null;
-
-            int filesCount = 0;
 
             if (params.isSingleFile()) {
                 file = params.getPath();
-                dir = DocumentFile.fromFile(params.getContext().getCacheDir());
+                if (file == null) {
+                    return new Result(ResultCode.ExportFailure, "No File Selected");
+                }
+
+                if (params.isZipFile()) {
+                    zfDir = new File(params.getContext().getCacheDir(), projectDirName);
+
+                    if (zfDir.exists() && !zfDir.delete()) {
+                        return new Result(ResultCode.ExportFailure, "Unable to delete ZipFile directory");
+                    }
+
+                    if (!zfDir.mkdirs())
+                        return new Result(ResultCode.ExportFailure, "Unable to create ZipFile directory");
+                }
             } else {
-                dir = DocumentFile.fromTreeUri(params.getContext(), params.getPath());
+                dfDir = DocumentFile.fromTreeUri(params.getContext(), params.getPath());
+
+                if (dfDir != null) {
+                    if (!AndroidUtils.Files.fileOrFolderExistsInTree(params.getContext(), dfDir.getUri(), projectDirName))
+                        dfDir = dfDir.createDirectory(projectDirName);
+
+                    if (dfDir == null)
+                        return new Result(ResultCode.ExportFailure, "Unable to create Export directory");
+                }
             }
-
-            if (dir == null) {
-                return new Result(ResultCode.ExportFailure, "Export directory does not exist");
-            } else {
-                if (!FileUtils.fileOrFolderExistsInTree(params.getContext(), dir.getUri(), projectDirName))
-                    dir = dir.createDirectory(projectDirName);
-
-                if (dir == null)
-                    return new Result(ResultCode.ExportFailure, "Unable to create Export directory");
-            }
-
 
             if (!isCancelled() && params.isPoints()) {
                 try {
-                    File pointsFile = points(params.getContext(), params.getDal(), null);
-                    FileUtils.copyFile(params.getContext(), Uri.fromFile(pointsFile), dir.createFile(MimeTypes.Text.CSV, pointsFile.getName()).getUri());
-                    filesCount++;
+                    if (params.isZipFile()) {
+                        points(params.getContext(), params.getDal(), zfDir);
+                    } else {
+                        File pointsFile = points(params.getContext(), params.getDal(), null);
+                        AndroidUtils.Files.copyFile(params.getContext(), Uri.fromFile(pointsFile), dfDir.createFile(MimeTypes.Text.CSV, pointsFile.getName()).getUri());
+                    }
                 } catch (Exception e) {
                     params.getContext().getReport().writeError(e.getMessage(), "Export:ExportTask:onBackgroundWork:points", e.getStackTrace());
                     return new Result(ResultCode.ExportFailure, "Points");
                 }
 
                 try {
-                    File groupsFile = groups(params.getContext(), params.getDal(), null);
-                    FileUtils.copyFile(params.getContext(), Uri.fromFile(groupsFile), dir.createFile(MimeTypes.Text.CSV, groupsFile.getName()).getUri());
-                    filesCount++;
+
+                    if (params.isZipFile()) {
+                        groups(params.getContext(), params.getDal(), zfDir);
+                    } else {
+                        File groupsFile = groups(params.getContext(), params.getDal(), null);
+                        AndroidUtils.Files.copyFile(params.getContext(), Uri.fromFile(groupsFile), dfDir.createFile(MimeTypes.Text.CSV, groupsFile.getName()).getUri());
+                    }
                 } catch (Exception e) {
                     params.getContext().getReport().writeError(e.getMessage(), "Export:ExportTask:onBackgroundWork:groups", e.getStackTrace());
                     return new Result(ResultCode.ExportFailure, "Groups");
@@ -1352,9 +1369,12 @@ public class Export {
 
             if (!isCancelled() && params.isPolys()) {
                 try {
-                    File polysFile = polygons(params.getContext(), params.getDal(), null);
-                    FileUtils.copyFile(params.getContext(), Uri.fromFile(polysFile), params.isSingleFile() ? file : dir.createFile(MimeTypes.Text.CSV, polysFile.getName()).getUri());
-                    filesCount++;
+                    if (params.isZipFile()) {
+                        polygons(params.getContext(), params.getDal(), zfDir);
+                    } else {
+                        File polysFile = polygons(params.getContext(), params.getDal(), null);
+                        AndroidUtils.Files.copyFile(params.getContext(), Uri.fromFile(polysFile), params.isSingleFile() ? file : dfDir.createFile(MimeTypes.Text.CSV, polysFile.getName()).getUri());
+                    }
                 } catch (Exception e) {
                     params.getContext().getReport().writeError(e.getMessage(), "Export:ExportTask:onBackgroundWork:polygons", e.getStackTrace());
                     return new Result(ResultCode.ExportFailure, "Polygons");
@@ -1363,9 +1383,12 @@ public class Export {
 
             if (!isCancelled() && params.isMeta()) {
                 try {
-                    File metaFile = metadata(params.getContext(), params.getDal(), null);
-                    FileUtils.copyFile(params.getContext(), Uri.fromFile(metaFile), params.isSingleFile() ? file : dir.createFile(MimeTypes.Text.CSV, metaFile.getName()).getUri());
-                    filesCount++;
+                    if (params.isZipFile()) {
+                        metadata(params.getContext(), params.getDal(), zfDir);
+                    } else {
+                        File metaFile = metadata(params.getContext(), params.getDal(), null);
+                        AndroidUtils.Files.copyFile(params.getContext(), Uri.fromFile(metaFile), params.isSingleFile() ? file : dfDir.createFile(MimeTypes.Text.CSV, metaFile.getName()).getUri());
+                    }
                 } catch (Exception e) {
                     params.getContext().getReport().writeError(e.getMessage(), "Export:ExportTask:onBackgroundWork:metadata", e.getStackTrace());
                     return new Result(ResultCode.ExportFailure, "Metadata");
@@ -1374,9 +1397,12 @@ public class Export {
 
             if (!isCancelled() && params.isProj()) {
                 try {
-                    File projFile = project(params.getContext(), params.getDal(), null);
-                    FileUtils.copyFile(params.getContext(), Uri.fromFile(projFile), params.isSingleFile() ? file : dir.createFile(MimeTypes.Text.CSV, projFile.getName()).getUri());
-                    filesCount++;
+                    if (params.isZipFile()) {
+                        project(params.getContext(), params.getDal(), zfDir);
+                    } else {
+                        File projFile = project(params.getContext(), params.getDal(), null);
+                        AndroidUtils.Files.copyFile(params.getContext(), Uri.fromFile(projFile), params.isSingleFile() ? file : dfDir.createFile(MimeTypes.Text.CSV, projFile.getName()).getUri());
+                    }
                 } catch (Exception e) {
                     params.getContext().getReport().writeError(e.getMessage(), "Export:ExportTask:onBackgroundWork:project", e.getStackTrace());
                     return new Result(ResultCode.ExportFailure, "Project");
@@ -1385,9 +1411,12 @@ public class Export {
 
             if (!isCancelled() && params.isNmea()) {
                 try {
-                    File nmeaFile = metadata(params.getContext(), params.getDal(), null);
-                    FileUtils.copyFile(params.getContext(), Uri.fromFile(nmeaFile), params.isSingleFile() ? file : dir.createFile(MimeTypes.Text.CSV, nmeaFile.getName()).getUri());
-                    filesCount++;
+                    if (params.isZipFile()) {
+                        nmea(params.getContext(), params.getDal(), zfDir);
+                    } else {
+                        File nmeaFile = nmea(params.getContext(), params.getDal(), null);
+                        AndroidUtils.Files.copyFile(params.getContext(), Uri.fromFile(nmeaFile), params.isSingleFile() ? file : dfDir.createFile(MimeTypes.Text.CSV, nmeaFile.getName()).getUri());
+                    }
                 } catch (Exception e) {
                     params.getContext().getReport().writeError(e.getMessage(), "Export:ExportTask:onBackgroundWork:nmea", e.getStackTrace());
                     return new Result(ResultCode.ExportFailure, "NMEA");
@@ -1396,9 +1425,12 @@ public class Export {
 
             if (!isCancelled() && params.isKmz()) {
                 try {
-                    File kmzFile = kmz(params.getContext(), params.getDal(), null);
-                    FileUtils.copyFile(params.getContext(), Uri.fromFile(kmzFile),params.isSingleFile() ? file : dir.createFile(MimeTypes.Application.GOOGLE_EARTH_KMZ, kmzFile.getName()).getUri());
-                    filesCount++;
+                    if (params.isZipFile()) {
+                        kmz(params.getContext(), params.getDal(), zfDir);
+                    } else {
+                        File kmzFile = kmz(params.getContext(), params.getDal(), null);
+                        AndroidUtils.Files.copyFile(params.getContext(), Uri.fromFile(kmzFile),params.isSingleFile() ? file : dfDir.createFile(MimeTypes.Application.GOOGLE_EARTH_KMZ, kmzFile.getName()).getUri());
+                    }
                 } catch (Exception e) {
                     params.getContext().getReport().writeError(e.getMessage(), "Export:ExportTask:onBackgroundWork:kmz", e.getStackTrace());
                     return new Result(ResultCode.ExportFailure, "KMZ");
@@ -1407,9 +1439,12 @@ public class Export {
 
             if (!isCancelled() && params.isGpx()) {
                 try {
-                    File gpxFile = gpx(params.getContext(), params.getDal(), null);
-                    FileUtils.copyFile(params.getContext(), Uri.fromFile(gpxFile), params.isSingleFile() ? file : dir.createFile(MimeTypes.Application.GPS, gpxFile.getName()).getUri());
-                    filesCount++;
+                    if (params.isZipFile()) {
+                        gpx(params.getContext(), params.getDal(), zfDir);
+                    } else {
+                        File gpxFile = gpx(params.getContext(), params.getDal(), null);
+                        AndroidUtils.Files.copyFile(params.getContext(), Uri.fromFile(gpxFile), params.isSingleFile() ? file : dfDir.createFile(MimeTypes.Application.GPS, gpxFile.getName()).getUri());
+                    }
                 } catch (Exception e) {
                     params.getContext().getReport().writeError(e.getMessage(), "Export:ExportTask:onBackgroundWork:gpx", e.getStackTrace());
                     return new Result(ResultCode.ExportFailure, "GPX");
@@ -1418,9 +1453,12 @@ public class Export {
 
             if (!isCancelled() && params.isSummary()) {
                 try {
-                    File summaryFile = summary(params.getContext(), params.getDal(), null);
-                    FileUtils.copyFile(params.getContext(), Uri.fromFile(summaryFile), params.isSingleFile() ? file : dir.createFile(MimeTypes.Text.PLAIN, summaryFile.getName()).getUri());
-                    filesCount++;
+                    if (params.isZipFile()) {
+                        summary(params.getContext(), params.getDal(), zfDir);
+                    } else {
+                        File summaryFile = summary(params.getContext(), params.getDal(), null);
+                        AndroidUtils.Files.copyFile(params.getContext(), Uri.fromFile(summaryFile), params.isSingleFile() ? file : dfDir.createFile(MimeTypes.Text.PLAIN, summaryFile.getName()).getUri());
+                    }
                 } catch (Exception e) {
                     params.getContext().getReport().writeError(e.getMessage(), "Export:ExportTask:onBackgroundWork:summary", e.getStackTrace());
                     return new Result(ResultCode.ExportFailure, "Summary");
@@ -1429,9 +1467,12 @@ public class Export {
 
             if (!isCancelled() && params.isImgInfo()) {
                 try {
-                    File imgInfoFile = imageInfo(params.getContext(), params.getMal(), null);
-                    FileUtils.copyFile(params.getContext(), Uri.fromFile(imgInfoFile), params.isSingleFile() ? file : dir.createFile(MimeTypes.Text.CSV, imgInfoFile.getName()).getUri());
-                    filesCount++;
+                    if (params.isZipFile()) {
+                        imageInfo(params.getContext(), params.getMal(), zfDir);
+                    } else {
+                        File imgInfoFile = imageInfo(params.getContext(), params.getMal(), null);
+                        AndroidUtils.Files.copyFile(params.getContext(), Uri.fromFile(imgInfoFile), params.isSingleFile() ? file : dfDir.createFile(MimeTypes.Text.CSV, imgInfoFile.getName()).getUri());
+                    }
                 } catch (Exception e) {
                     params.getContext().getReport().writeError(e.getMessage(), "Export:ExportTask:onBackgroundWork:imageinfo", e.getStackTrace());
                     return new Result(ResultCode.ExportFailure, "ImageInfo");
@@ -1440,25 +1481,34 @@ public class Export {
 
             if (!isCancelled() && params.isPcExp()) {
                 try {
-                    FileUtils.copyFile(params.getContext(), params.getDam().getDBUri(), dir.createFile(Consts.FILE_MIME, params.getDam().getDatabaseName()).getUri());
-                    filesCount++;
+                    if (params.isZipFile()) {
+                        AndroidUtils.Files.copyFile(params.getContext(), params.getDam().getDBUri(), Uri.fromFile(new File(zfDir, params.getDam().getDatabaseName())));
 
-                    if (params.getContext().hasMAL()) {
-                        FileUtils.copyFile(params.getContext(), params.getMam().getDBUri(), dir.createFile(Consts.MEDIA_FILE_MIME, params.getDam().getDatabaseName()).getUri());
-                        filesCount++;
+                        if (params.getContext().hasMAL()) {
+                            AndroidUtils.Files.copyFile(params.getContext(), params.getMam().getDBUri(), Uri.fromFile(new File(zfDir, params.getMam().getDatabaseName())));
+                        }
+                    } else {
+                        AndroidUtils.Files.copyFile(params.getContext(), params.getDam().getDBUri(), dfDir.createFile(Consts.FILE_MIME, params.getDam().getDatabaseName()).getUri());
+
+                        if (params.getContext().hasMAL()) {
+                            AndroidUtils.Files.copyFile(params.getContext(), params.getMam().getDBUri(), dfDir.createFile(Consts.MEDIA_FILE_MIME, params.getMam().getDatabaseName()).getUri());
+                        }
                     }
                 } catch (Exception e) {
                     params.getContext().getReport().writeError(e.getMessage(), "Export:ExportTask:onBackgroundWork:pcPkg", e.getStackTrace());
                     return new Result(ResultCode.ExportFailure, "pcPkg");
                 }
 
-                if (filesCount > 1 && params.isSingleFile()) {
-                    try {
-                        FileUtils.zipToFile(dir.getUri(), file);
-                    } catch (Exception e) {
-                        params.getContext().getReport().writeError(e.getMessage(), "Export:ExportTask:onBackgroundWork:zip", e.getStackTrace());
-                        return new Result(ResultCode.ExportFailure, "zip");
-                    }
+            }
+
+            if (params.isZipFile()) {
+                try {
+                    File tmpZip = new File(params.getContext().getCacheDir(), FileUtils.getFileName(file.getPath()));
+                    FileUtils.zipToFile(zfDir, tmpZip);
+                    AndroidUtils.Files.copyFile(params.getContext(), Uri.fromFile(tmpZip), file);
+                } catch (Exception e) {
+                    params.getContext().getReport().writeError(e.getMessage(), "Export:ExportTask:onBackgroundWork:zip", e.getStackTrace());
+                    return new Result(ResultCode.ExportFailure, "zip");
                 }
             }
 
@@ -1487,17 +1537,16 @@ public class Export {
         public static class Params {
             private final TwoTrailsApp context;
             private final Uri path;
-            private final boolean singleFile, points, polys, meta, proj, nmea, kmz, gpx, summary, imgInfo, pcExp;
+            private final boolean singleFile, zipFile, points, polys, meta, proj, nmea, kmz, gpx, summary, imgInfo, pcExp;
 
-            public Params(TwoTrailsApp context, Uri path, boolean singleFile, boolean points, boolean polys, boolean meta,
+            public Params(TwoTrailsApp context, Uri path, boolean singleFile, boolean zipFile, boolean points, boolean polys, boolean meta,
                           boolean imgInfo, boolean proj, boolean nmea, boolean kmz, boolean gpx, boolean summary, boolean pcExp) {
 
                 this.context = context;
-
-//                this.exportDir = exportDir;
                 this.path = path;
 
                 this.singleFile = singleFile;
+                this.zipFile = zipFile;
 
                 this.points = points;
                 this.polys = polys;
@@ -1537,9 +1586,7 @@ public class Export {
                 return singleFile;
             }
 
-//            public DocumentFile getExportDir() {
-//                return exportDir;
-//            }
+            public boolean isZipFile() { return zipFile; }
 
             public boolean isPoints() {
                 return points;

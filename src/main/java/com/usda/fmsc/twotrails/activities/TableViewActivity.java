@@ -511,10 +511,10 @@ public class TableViewActivity extends CustomToolbarActivity {
 
 
     private class PointsTableAdapter extends BaseTableAdapter {
-        Context context;
-        LayoutInflater inflater;
+        private final Context context;
+        private final LayoutInflater inflater;
 
-        int pidHeaderSize, cellHeight;
+        private final int pidHeaderSize, cellHeight;
 
         private PointsTableAdapter(Context context) {
             this.context = context;

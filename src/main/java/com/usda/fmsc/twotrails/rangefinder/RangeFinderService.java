@@ -24,10 +24,11 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 
 public class RangeFinderService extends Service implements BluetoothConnection.Listener, SharedPreferences.OnSharedPreferenceChangeListener {
+    private final static boolean POST_ALL_RF_STRINGS = true;
 
     private TwoTrailsApp TtAppCtx;
 
-    private boolean postAllRFStrings = true, logging;
+    private boolean logging;
     private TtRangeFinderData lastRFData;
 
     private final ArrayList<Listener> listeners = new ArrayList<>();
@@ -278,7 +279,7 @@ public class RangeFinderService extends Service implements BluetoothConnection.L
 
             boolean valid = false;
 
-            if ((validateChecksum(rfString) && (valid = parseRFData(rfString))) || postAllRFStrings) {
+            if ((validateChecksum(rfString) && (valid = parseRFData(rfString))) || POST_ALL_RF_STRINGS) {
                 postRFStringReceived(rfString, valid);
             }
 
@@ -532,7 +533,7 @@ public class RangeFinderService extends Service implements BluetoothConnection.L
         }
 
         public boolean postsAllRFStrings() {
-            return RangeFinderService.this.postAllRFStrings;
+            return RangeFinderService.this.POST_ALL_RF_STRINGS;
         }
 
         @Override

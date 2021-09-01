@@ -51,10 +51,6 @@ public class MapActivity extends BaseMapActivity {
 
         setDisplayLocInfoVisible();
 
-        if (getTtAppCtx().getDeviceSettings().isGpsConfigured() && shouldStartGps()) {
-            getTtAppCtx().getGps().startGps();
-        }
-
         created = true;
     }
 
@@ -78,8 +74,8 @@ public class MapActivity extends BaseMapActivity {
     //endregion
 
     @Override
-    protected void getSettings() {
-        super.getSettings();
+    protected void updateSettings() {
+        super.updateSettings();
 
         myPosBtn = getTtAppCtx().getDeviceSettings().getMapMyPosBtns();
         dispLoc = getTtAppCtx().getDeviceSettings().getMapDisplayGpsLocation();
@@ -190,11 +186,6 @@ public class MapActivity extends BaseMapActivity {
                 tvLocY.setText(StringEx.toString(lastPosition.getLongitudeSignedDecimal(), 6));
             }
         }
-    }
-
-    @Override
-    public boolean shouldStartGps() {
-        return true; //for position bar
     }
     //endregion
 }

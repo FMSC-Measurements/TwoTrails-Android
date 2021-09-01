@@ -12,6 +12,7 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import androidx.annotation.ColorInt;
 import androidx.annotation.IntDef;
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -86,6 +87,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Locale;
 
 import jp.wasabeef.recyclerview.animators.SlideInUpAnimator;
 
@@ -159,6 +161,12 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
     private final int[] dpc = new int[12];
     //endregion
 
+    @Override
+    public boolean requiresGpsService() {
+        return true;
+    }
+
+
     //region get/set
     
     protected HashMap<String, TtMetadata> getMetadata() {
@@ -231,12 +239,6 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
 
         setCompassEnabled(getShowCompass());
         setLocationEnabled(getShowMyPos());
-
-        getTtAppCtx().getGps().addListener(this);
-
-        if (getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
-            getTtAppCtx().getGps().startGps();
-        }
 
         if (AndroidUtils.Device.isFullOrientationAvailable(this)) {
             mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
@@ -488,16 +490,6 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
             getTtAppCtx().getDeviceSettings().setMapShowMyPos(showMyPos);
             miShowMyPos.setChecked(showMyPos);
 
-            if (getShowMyPos()) {
-                if (!getTtAppCtx().getGps().isGpsRunning()) {
-                    startGps();
-                }
-            } else {
-                if (!getTtAppCtx().getDeviceSettings().isGpsAlwaysOn()) {
-                    stopGps();
-                }
-            }
-
             setLocationEnabled(getShowMyPos());
         } else if (itemId == R.id.mmMenuSelectMap) {
             selectMapType();
@@ -601,13 +593,6 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
     }
 
     @Override
-    protected void onDestroy() {
-        getTtAppCtx().getGps().removeListener(this);
-
-        super.onDestroy();
-    }
-
-    @Override
     public void onBackPressed() {
         if (baseMapDrawer.isDrawerOpen(GravityCompat.START)) {
             baseMapDrawer.closeDrawer(GravityCompat.START);
@@ -643,7 +628,7 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
 
         if (mapFragment != null) {
@@ -926,14 +911,10 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
             miTrackedPoly.setVisible(true);//getMapTracking() == MapTracking.POLY_BOUNDS);
         }
 
-        if (getShowMyPos()) {
-            startGps();
-        }
-
-        getSettings();
+        updateSettings();
     }
 
-    protected void getSettings() {
+    protected void updateSettings() {
 
     }
 
@@ -1027,11 +1008,9 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
             if (mmFrag != null) {
                 mmFrag.updateLocation(nmeaBurst.getPosition());
             }
-
-            onNmeaBurstReceived(nmeaBurst);
-        } else {
-            onNmeaBurstReceived(nmeaBurst);
         }
+
+        onNmeaBurstReceived(nmeaBurst);
 
         receivingNmea = true;
     }
@@ -1238,7 +1217,7 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
 
     private boolean masterCardExpanded;
 
-    PostDelayHandler[] postDelayHandlers = new PostDelayHandler[12];
+    private final PostDelayHandler[] postDelayHandlers = new PostDelayHandler[12];
 
     private void setupMasterPolyControl() {
         for (int i = 0; i < 12; i++) {
@@ -1662,8 +1641,8 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
 
                 tvNavDistFt.setText(StringEx.toString(distInFt, 2));
                 tvNavDistMt.setText(StringEx.toString(distInMt, 2));
-                tvNavAzTrue.setText(String.format("%.2f\u00B0", azimuth));
-                tvNavAzMag.setText(String.format("%.2f\u00B0", azMag));
+                tvNavAzTrue.setText(String.format(Locale.getDefault(), "%.2f\u00B0", azimuth));
+                tvNavAzMag.setText(String.format(Locale.getDefault(), "%.2f\u00B0", azMag));
                 return;
             }
         }
@@ -1710,27 +1689,6 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
 
     protected ArrayList<TrailGraphicManager> getTrailGraphicManagers() {
         return trailGraphicManagers;
-    }
-
-
-    protected final void startGps() {
-        if (shouldStartGps()) {
-            getTtAppCtx().getGps().startGps();
-        }
-    }
-
-    public boolean shouldStartGps() {
-        return getShowMyPos();
-    }
-
-    protected final void stopGps() {
-        if (shouldStopGps()) {
-            getTtAppCtx().getGps().stopGps();
-        }
-    }
-
-    public boolean shouldStopGps() {
-        return !getShowMyPos();
     }
 
     protected Collection<TtPolygon> getPolygonsToMap() {

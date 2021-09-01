@@ -211,16 +211,16 @@ public class PolyMarkerMapRvAdapter extends RecyclerView.Adapter<PolyMarkerMapRv
     }
 
 
-    public class PolyMarkerMapViewHolder extends RecyclerView.ViewHolder implements PolygonDrawOptions.Listener {
-        TextView tvPolyName;
-        View layHeader, layContent;
-        MultiStateTouchCheckBox tcbPoly;
-        PopupMenuButton pmbOptions;
-        FlipCheckBoxEx fcbAdjBnd, fcbAdjNav, fcbUnAdjBnd, fcbUnAdjNav,
+    public static class PolyMarkerMapViewHolder extends RecyclerView.ViewHolder implements PolygonDrawOptions.Listener {
+        public final TextView tvPolyName;
+        public final View layHeader, layContent;
+        public final MultiStateTouchCheckBox tcbPoly;
+        public final PopupMenuButton pmbOptions;
+        public final FlipCheckBoxEx fcbAdjBnd, fcbAdjNav, fcbUnAdjBnd, fcbUnAdjNav,
                 fcbAdjBndPts, fcbAdjNavPts, fcbUnAdjBndPts, fcbUnAdjNavPts,
                 fcbAdjMiscPts, fcbUnAdjMiscPts, fcbWayPts;
 
-        boolean cardExpanded = false;
+        private boolean cardExpanded = false;
 
 
         PolyMarkerMapViewHolder(View itemView) {

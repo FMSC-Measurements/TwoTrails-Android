@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -40,24 +41,20 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
 
     private boolean logging;
 
-    private GpsService.GpsBinder binder;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (getTtAppCtx().getDeviceSettings().getKeepScreenOn()) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        }
+
         setContentView(R.layout.activity_gps_logger);
 
         lvNmea = findViewById(R.id.logLvNmea);
 
         if (lvNmea != null) {
             lvNmea.setFadingEdgeLength(0);
-
-            binder = getTtAppCtx().getGps();
-            binder.addListener(this);
-
-            if (getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
-                binder.startGps();
-            }
 
             btnLog = findViewById(R.id.loggerBtnLog);
 
@@ -71,7 +68,7 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
 
                 lvNmea.setAdapter(a);
 
-                if (binder.isLogging()) {
+                if (getTtAppCtx().isGpsServiceStartedAndRunning() && getTtAppCtx().getGps().isLogging()) {
                     btnLog.setText(R.string.aqr_log_pause);
                     logging = true;
                 }
@@ -81,31 +78,30 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
 
     @Override
     public void onBackPressed() {
-        final GpsService.GpsBinder binder = getTtAppCtx().getGps();
-        final Activity activity = this;
+        if (getTtAppCtx().isGpsServiceStarted()) {
+            final GpsService.GpsBinder binder = getTtAppCtx().getGps();
+            final Activity activity = this;
 
-        if (binder.isLogging()) {
-            AlertDialog.Builder alert = new AlertDialog.Builder(this);
+            if (binder.isLogging()) {
+                AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
-            alert.setTitle("GPS Logging");
-            alert.setMessage("The GPS is currently logging data to a file. Would you like to keep logging in the background?");
+                alert.setTitle("GPS Logging");
+                alert.setMessage("The GPS is currently logging data to a file. Would you like to keep logging in the background?");
 
-            alert.setPositiveButton("Continue", (dialogInterface, i) -> activity.onBackPressed());
+                alert.setPositiveButton("Continue", (dialogInterface, i) -> activity.onBackPressed());
 
-            alert.setNegativeButton("Stop", (dialogInterface, i) -> {
-                if (!getTtAppCtx().getDeviceSettings().isGpsAlwaysOn()) {
-                    binder.stopGps();
-                }
-                activity.onBackPressed();
-            });
+                alert.setNegativeButton("Stop", (dialogInterface, i) -> {
+                    if (!getTtAppCtx().getDeviceSettings().isGpsAlwaysOn()) {
+                        binder.stopGps();
+                    }
+                    activity.onBackPressed();
+                });
 
-            alert.setNeutralButton(R.string.str_cancel, null);
-        } else {
-            if (!getTtAppCtx().getDeviceSettings().isGpsAlwaysOn()) {
-                binder.stopGps();
+                alert.setNeutralButton(R.string.str_cancel, null);
             }
-            super.onBackPressed();
         }
+
+        super.onBackPressed();
     }
 
     @Override
@@ -148,7 +144,13 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
         return super.onOptionsItemSelected(item);
     }
 
-//    @Override
+    @Override
+    public boolean requiresGpsService() {
+        return true;
+    }
+
+
+    //    @Override
 //    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 //        super.onActivityResult(requestCode, resultCode, data);
 //
@@ -158,13 +160,6 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
 //            }
 //        }
 //    }
-
-    @Override
-    protected void onSettingsUpdated() {
-        if (getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
-            binder.startGps();
-        }
-    }
 
     private void restoreState(Bundle savedInstanceState) {
         if (savedInstanceState.containsKey(STRINGS_KEY)) {
@@ -229,7 +224,7 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
 
         if (logging) {
             if (getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
-                if (!binder.isGpsRunning()) {
+                if (!getTtAppCtx().isGpsServiceStartedAndRunning()) {
                     Toast.makeText(GpsLoggerActivity.this, "GPS is not Receiving", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -237,7 +232,7 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
                 btnLog.setText(R.string.aqr_log_pause);
 
                 if (miCheckLtf.isChecked()) {
-                    binder.startLogging(getTtAppCtx().getGpsLogFile());
+                    getTtAppCtx().getGps().startLogging(getTtAppCtx().getGpsLogFile());
                 }
             } else {
                 logging = false;
@@ -245,7 +240,9 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
             }
         } else {
             btnLog.setText(R.string.aqr_log);
-            binder.stopLogging();
+            if (!getTtAppCtx().isGpsServiceStartedAndRunning()) {
+                getTtAppCtx().getGps().stopLogging();
+            }
         }
     }
 

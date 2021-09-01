@@ -31,11 +31,6 @@ public abstract class CustomToolbarActivity extends TtActivity {
     protected static final int INVALID_INDEX = -1;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
-    @Override
     public void setContentView(int layoutResID) {
         super.setContentView(layoutResID);
         setupToolbar(findViewById(android.R.id.content));
@@ -53,16 +48,16 @@ public abstract class CustomToolbarActivity extends TtActivity {
         setupToolbar(view);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        boolean result = super.onCreateOptionsMenu(menu);
-
-        if (result) {
-            AndroidUtils.UI.addIconsToMenu(menu);
-        }
-
-        return result;
-    }
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//        boolean result = super.onCreateOptionsMenu(menu);
+//
+//        if (result) {
+//            AndroidUtils.UI.addIconsToMenu(menu);
+//        }
+//
+//        return result;
+//    }
 
     protected final void inflateMenu(@MenuRes int menuRes, Menu menu) {
         getMenuInflater().inflate(menuRes, menu);

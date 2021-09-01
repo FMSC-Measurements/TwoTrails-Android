@@ -61,8 +61,6 @@ public interface IMultiMapFragment {
         void onMapTypeChanged(MapType mapType, int mapId, boolean isOnline);
         void onMapClick(Position position);
         void onMarkerClick(MarkerData markerData);
-        boolean shouldStartGps();
-        boolean shouldStopGps();
     }
 
 

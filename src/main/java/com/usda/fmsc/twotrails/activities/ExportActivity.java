@@ -20,9 +20,13 @@ import com.usda.fmsc.android.widget.MultiStateTouchCheckBox;
 import com.usda.fmsc.twotrails.DeviceSettings;
 import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.R;
+import com.usda.fmsc.twotrails.activities.contracts.CreateDocumentWType;
 import com.usda.fmsc.twotrails.utilities.Export;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 import com.usda.fmsc.utilities.MimeTypes;
+import com.usda.fmsc.utilities.Tuple;
+
+import org.joda.time.DateTime;
 
 import java.util.Date;
 import java.util.Locale;
@@ -35,10 +39,20 @@ public class ExportActivity extends CustomToolbarActivity {
     private int checkedCount = 0;
 
     private final ActivityResultLauncher<Uri> getDirForExport = registerForActivityResult(new ActivityResultContracts.OpenDocumentTree(), result -> {
-
+        if (result != null) {
+            DocumentFile dir = DocumentFile.fromTreeUri(getTtAppCtx(), result);
+            if (dir != null) {
+                startExportDir(dir);
+            } else {
+                getTtAppCtx().getReport().writeError("Unable to get folder", "ExportActivity:getDirForExport");
+                Toast.makeText(ExportActivity.this, "Unable to get folder", Toast.LENGTH_LONG).show();
+            }
+        }
     });
-    private final ActivityResultLauncher<String> getFilePathForExport = registerForActivityResult(new ActivityResultContracts.CreateDocument(), result -> {
-
+    private final ActivityResultLauncher<Tuple<String, String>> getFilePathForExport = registerForActivityResult(new CreateDocumentWType(), result -> {
+        if (result != null) {
+            startExportFile(result);
+        }
     });
 
 
@@ -135,7 +149,7 @@ public class ExportActivity extends CustomToolbarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-//    @Override
+    //    @Override
 //    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 //        if (requestCode == Consts.Codes.Requests.FOLDER && resultCode == RESULT_OK) {
 //
@@ -204,10 +218,12 @@ public class ExportActivity extends CustomToolbarActivity {
 
     private String getFileNameWPrefix(String prefix) {
         return String.format(Locale.getDefault(), "%s%s_%s%s",
-                prefix != null ? String.format(Locale.getDefault(), "%s_(", prefix) : "",
+                prefix != null ?
+                        String.format(Locale.getDefault(), "%s_(", prefix) : "",
                 TtUtils.projectToFileName(getTtAppCtx().getDAL().getProjectID()),
-                new Date(getTtAppCtx().getDAM().getDBFile().lastModified()).toString(),
-                prefix != null ? "%)" : ""
+                TtUtils.Date.toStringDateMillis(new DateTime(getTtAppCtx().getDAM().getDBFile().lastModified())),
+                prefix != null ?
+                        ")" : ""
         );
     }
 
@@ -301,9 +317,9 @@ public class ExportActivity extends CustomToolbarActivity {
 
                 dialog.setPositiveButton("Zip File", (dialogInterface, i, value) -> { if(hasExportDir) startZipExport(); else startZipExportRequest(); }, 2);
 
-                dialog.setNeutralButton("Individually", (dialogInterface, i, value) -> { if (hasExportDir) startMultiExport(); else startMultiExportRequest(); } , 1);
+                dialog.setNegativeButton("Individually", (dialogInterface, i, value) -> { if (hasExportDir) startMultiExport(); else startMultiExportRequest(); } , 1);
 
-                dialog.setNegativeButton("Cancel", null);
+                dialog.setNeutralButton("Cancel", null);
 
                 dialog.show();
             } else {
@@ -327,7 +343,7 @@ public class ExportActivity extends CustomToolbarActivity {
     }
 
     private void startSingleExportRequest() {
-        getFilePathForExport.launch(String.format(Locale.getDefault(), "%s.%s", getSingleFileName(), getSingleFileType()));
+        getFilePathForExport.launch(new Tuple<>(getSingleFileName(), getSingleFileMeme()));
     }
 
     private void startZipExport() {
@@ -341,13 +357,18 @@ public class ExportActivity extends CustomToolbarActivity {
     }
 
     private void startZipExportRequest() {
-        getFilePathForExport.launch(String.format(Locale.getDefault(), "%s.zip",
+        getFilePathForExport.launch(new Tuple<>(
                 getFileNameWPrefix(
                         checkedCount == 1 ?
-                                chkPoints.isChecked() ? "Points" : chkPc.isChecked() ? null : "Export" :
+                                chkPoints.isChecked() ?
+                                    "Points" :
+                                    chkPc.isChecked() ?
+                                            null :
+                                            "Export" :
                                 "Export"
-                )
-        ));
+                ),
+                MimeTypes.Application.ZIP)
+        );
     }
 
     private void startMultiExport() {
@@ -360,15 +381,15 @@ public class ExportActivity extends CustomToolbarActivity {
 
 
     private void startExportFile(Uri file) {
-        startExport(file, true);
+        startExport(file, true, file.getPath().contains(".zip"));
     }
 
     private void startExportDir(DocumentFile dir) {
-        startExport(dir.getUri(), false);
+        startExport(dir.getUri(), false, false);
     }
 
 
-    private void startExport(Uri path, boolean isSingleFile) {
+    private void startExport(Uri path, boolean isSingleFile, boolean isZipFile) {
         if (exportTask == null || exportTask.getStatus() != TaskRunner.Status.RUNNING) {
             progCircle.show();
 
@@ -444,7 +465,11 @@ public class ExportActivity extends CustomToolbarActivity {
 
                 @Override
                 public void onTaskError(Exception e) {
+                    progCircle.beginFinalAnimation();
+
                     getTtAppCtx().getReport().writeError(e.getMessage(), "ExportActivity:startDirExport:onTaskError", e.getStackTrace());
+
+                    Toast.makeText(ExportActivity.this, "Error exporting. See log for details", Toast.LENGTH_LONG).show();
                 }
             });
 
@@ -453,6 +478,7 @@ public class ExportActivity extends CustomToolbarActivity {
                             getTtAppCtx(),
                             path,
                             isSingleFile,
+                            isZipFile,
                             chkPoints.isChecked(),
                             chkPolys.isChecked(),
                             chkMeta.isChecked(),
@@ -469,8 +495,6 @@ public class ExportActivity extends CustomToolbarActivity {
             Toast.makeText(this, "Export in progress", Toast.LENGTH_SHORT).show();
         }
     }
-
-
 
 
 //    private void startExport(final Uri directory, boolean checkExternalMedia) {

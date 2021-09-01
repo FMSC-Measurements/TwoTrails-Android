@@ -17,6 +17,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.util.Log;
+import android.util.Range;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -27,6 +28,7 @@ import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
 import com.usda.fmsc.geospatial.nmea41.sentences.base.NmeaSentence;
 import com.usda.fmsc.twotrails.activities.MainActivity;
+import com.usda.fmsc.twotrails.activities.base.TtActivity;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
 import com.usda.fmsc.twotrails.data.DataAccessManager;
 import com.usda.fmsc.twotrails.data.MediaAccessLayer;
@@ -125,7 +127,7 @@ public class TwoTrailsApp extends Application {
 
                 @Override
                 public void gpsStarted() {
-                    if (silentConnectToExternalGps && getGps().isExternalGpsUsed()) {
+                    if (silentConnectToExternalGps && TwoTrailsApp.this.isGpsServiceStarted() && getGps().isExternalGpsUsed()) {
                         silentConnectToExternalGps = false;
                         _CurrentActivity.runOnUiThread(() -> Toast.makeText(_CurrentActivity, "External GPS Connected", Toast.LENGTH_LONG).show());
                     }
@@ -138,7 +140,7 @@ public class TwoTrailsApp extends Application {
 
                 @Override
                 public void gpsServiceStarted() {
-                    if (getDeviceSettings().isGpsAlwaysOn()) {
+                    if (getDeviceSettings().isGpsAlwaysOn() && TwoTrailsApp.this.isGpsServiceStarted()) {
                         getGps().startGps();
                     }
                 }
@@ -164,7 +166,7 @@ public class TwoTrailsApp extends Application {
                                     msg = "Error creating connection to external GPS.";
                                     break;
                                 case FailedToConnect:
-                                    msg = "Failed to connected to external GPS.";
+                                    msg = "Failed to connect to external GPS.";
                                     delayAndSearchForGps.run();
                                     break;
                                 //case Unknown:
@@ -180,6 +182,18 @@ public class TwoTrailsApp extends Application {
                     }
                 }
             });
+
+
+            if (_CurrentActivity instanceof TtActivity) {
+                TtActivity act = (TtActivity) _CurrentActivity;
+                if (act.requiresGpsService()) {
+                    getGps().startGps();
+                }
+
+                if (act instanceof GpsService.Listener) {
+                    getGps().addListener((GpsService.Listener)act);
+                }
+            }
         }
 
         @Override
@@ -239,6 +253,14 @@ public class TwoTrailsApp extends Application {
 
                 }
             });
+
+            if (_CurrentActivity instanceof TtActivity) {
+                TtActivity act = (TtActivity) _CurrentActivity;
+
+                if (act.requiresRFService() && isRFServiceStarted()) {
+                    getRF().addListener((RangeFinderService.Listener)act);
+                }
+            }
         }
 
         @Override
@@ -266,7 +288,29 @@ public class TwoTrailsApp extends Application {
                 Log.d(Consts.LOG_TAG, "Created: (" + activity.getClass().getSimpleName() + ")" + activity.getClass().getName());
             }
 
+            if (activity instanceof TtActivity) {
+                TtActivity act = (TtActivity) activity;
 
+                if (isGpsServiceStarted()) {
+                    if (act.requiresGpsService()) {
+                        getGps().startGps();
+                    }
+
+                    if (act instanceof GpsService.Listener) {
+                        getGps().addListener((GpsService.Listener)act);
+                    }
+                }
+
+                if (isRFServiceStarted()) {
+                    if (act.requiresRFService()) {
+                        getRF().startRangeFinder();
+                    }
+
+                    if (act instanceof RangeFinderService.Listener) {
+                        getRF().addListener((RangeFinderService.Listener)act);
+                    }
+                }
+            }
         }
 
         @Override
@@ -280,13 +324,13 @@ public class TwoTrailsApp extends Application {
             _CurrentActivity = activity;
 
             if (activity instanceof MainActivity) {
-                if (!AndroidUtils.App.isServiceRunning(TwoTrailsApp.this, GpsService.class) || gpsServiceBinder == null) {
+                if (!AndroidUtils.App.isServiceRunning(TwoTrailsApp.this, GpsService.class) || !isGpsServiceStarted()) {
                     startGpsService();
                 } else if (getDeviceSettings().isGpsConfigured() && !scanningForGps) {
                     gpsServiceBinder.startGps();
                 }
 
-                if (!AndroidUtils.App.isServiceRunning(TwoTrailsApp.this, RangeFinderService.class) || rfServiceBinder == null) {
+                if (!AndroidUtils.App.isServiceRunning(TwoTrailsApp.this, RangeFinderService.class) || !isRFServiceStarted()) {
                     startRangefinderService();
                 }
 
@@ -308,15 +352,39 @@ public class TwoTrailsApp extends Application {
                 Log.d(Consts.LOG_TAG, "Destroyed: (" + activity.getClass().getSimpleName() + ")" + activity.getClass().getName());
             }
 
+            if (activity instanceof TtActivity) {
+                TtActivity act = (TtActivity) activity;
+
+                if (isGpsServiceStarted()) {
+                    if (act.requiresGpsService()) {
+                        getGps().removeListener((GpsService.Listener)act);
+                    }
+
+                    if (!(getDeviceSettings().isGpsAlwaysOn() || getGps().isLogging())) {
+                        getGps().stopGps();
+                    }
+                }
+
+                if (isRFServiceStarted()) {
+                    if (act.requiresRFService()) {
+                        getRF().removeListener((RangeFinderService.Listener)act);
+                    }
+
+                    if (!(getDeviceSettings().isRangeFinderAlwaysOn() || getRF().isLogging())) {
+                        getRF().stopRangeFinder();
+                    }
+                }
+            }
+
             if (activity instanceof MainActivity) {
-                if (gpsServiceBinder != null) {
-                    gpsServiceBinder.stopService();
+                if (isGpsServiceStarted()) {
+                    getGps().stopService();
                     stopService(new Intent(TwoTrailsApp.this, GpsService.class));
                     //gpsServiceBinder = null;
                 }
 
-                if (rfServiceBinder != null) {
-                    rfServiceBinder.stopService();
+                if (isRFServiceStarted()) {
+                    getRF().stopService();
                     stopService(new Intent(TwoTrailsApp.this, RangeFinderService.class));
                     //rfServiceBinder = null;
                 }
@@ -343,7 +411,7 @@ public class TwoTrailsApp extends Application {
             BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 
             if (BluetoothDevice.ACTION_ACL_CONNECTED.equals(action)) {
-                if (!getGps().isGpsRunning() && getDeviceSettings().isGpsConfigured()) {
+                if (isGpsServiceStarted() && !getGps().isGpsRunning() && getDeviceSettings().isGpsConfigured()) {
                     if (device != null && device.getAddress().equals(getDeviceSettings().getGpsDeviceID())) {
                         silentConnectToExternalGps = true;
                         new Handler().postDelayed(() -> getGps().startGps(), 1000);
@@ -367,8 +435,8 @@ public class TwoTrailsApp extends Application {
 
                 _Report.writeError(exception.getMessage(), errorThread.getName(), exception.getStackTrace());
 
-                if (gpsServiceBinder != null) {
-                    gpsServiceBinder.stopService();
+                if (isGpsServiceStarted()) {
+                    getGps().stopService();
                 }
             } catch (Exception e) {
                 Log.e(Consts.LOG_TAG, "Error in TwoTrailsApp:uncaughtException");
@@ -433,10 +501,10 @@ public class TwoTrailsApp extends Application {
         }
     };
 
-    Runnable searchForGps = new Runnable() {
+    private final Runnable searchForGps = new Runnable() {
         @Override
         public void run() {
-            if (!scanningForGps && !getGps().isGpsRunning() && getDeviceSettings().isGpsConfigured()) {
+            if (!scanningForGps && isGpsServiceStarted() && !getGps().isGpsRunning() && getDeviceSettings().isGpsConfigured()) {
                 final BluetoothAdapter adapter = getBluetoothManager().getAdapter();
 
                 if (adapter != null) {
@@ -448,7 +516,7 @@ public class TwoTrailsApp extends Application {
                         adapter.cancelDiscovery();
                         Log.d(Consts.LOG_TAG, "Stopped scan for BT devices.");
 
-                        if (!silentConnectToExternalGps && !getGps().isGpsRunning() && getDeviceSettings().isGpsConfigured()) {
+                        if (!silentConnectToExternalGps && isGpsServiceStarted() && !getGps().isGpsRunning() && getDeviceSettings().isGpsConfigured()) {
                             for (BluetoothDevice device : adapter.getBondedDevices()) {
                                 if (device.getAddress().equals(getDeviceSettings().getGpsDeviceID())) {
                                     silentConnectToExternalGps = true;
@@ -633,8 +701,12 @@ public class TwoTrailsApp extends Application {
     }
 
     public boolean hasMAL() {
-        return _MAM != null || _CurrentProject.TTMPXFile != null ||
-            (hasDAL() && MediaAccessManager.localMALExists(TwoTrailsApp.this, _CurrentProject.TTXFile.replace(Consts.FILE_EXTENSION, Consts.MEDIA_PACKAGE_EXTENSION)));
+        return _MAM != null ||
+                (_CurrentProject != null &&
+                        (_CurrentProject.TTMPXFile != null ||
+                            (hasDAL() &&
+                    MediaAccessManager.localMALExists(TwoTrailsApp.this, _CurrentProject.TTXFile.replace(Consts.FILE_EXTENSION, Consts.MEDIA_PACKAGE_EXTENSION))))
+                );
     }
 
     public MediaAccessManager getMAM() {
@@ -675,7 +747,7 @@ public class TwoTrailsApp extends Application {
             }
 
             try {
-                _TwoTrailsExternalDir = FileUtils.getDocumentFromTree(TwoTrailsApp.this, externalRootDirUri, Consts.FolderLayout.External.TwoTrailsFolderPath);
+                _TwoTrailsExternalDir = AndroidUtils.Files.getDocumentFromTree(TwoTrailsApp.this, externalRootDirUri, Consts.FolderLayout.External.TwoTrailsFolderPath);
                 if (_TwoTrailsExternalDir == null || !_TwoTrailsExternalDir.exists()) {
                     _TwoTrailsExternalDir = _ExternalRootDir.createDirectory(Consts.FolderLayout.External.TwoTrailsFolderName);
                     if (_TwoTrailsExternalDir == null) {
@@ -683,22 +755,22 @@ public class TwoTrailsApp extends Application {
                     }
                 }
 
-                _OfflineMapsDir = FileUtils.getDocumentFromTree(TwoTrailsApp.this, _TwoTrailsExternalDir.getUri(), Consts.FolderLayout.External.OfflineMapsPath);
+                _OfflineMapsDir = AndroidUtils.Files.getDocumentFromTree(TwoTrailsApp.this, _TwoTrailsExternalDir.getUri(), Consts.FolderLayout.External.OfflineMapsPath);
                 if (_OfflineMapsDir == null || !_OfflineMapsDir.exists()) {
                     _OfflineMapsDir = _TwoTrailsExternalDir.createDirectory(Consts.FolderLayout.External.OfflineMapsName);
                 }
 
-                _ImportDir = FileUtils.getDocumentFromTree(TwoTrailsApp.this, _TwoTrailsExternalDir.getUri(), Consts.FolderLayout.External.ImportFolderPath);
+                _ImportDir = AndroidUtils.Files.getDocumentFromTree(TwoTrailsApp.this, _TwoTrailsExternalDir.getUri(), Consts.FolderLayout.External.ImportFolderPath);
                 if (_ImportDir == null || !_ImportDir.exists()) {
                     _ImportDir = _TwoTrailsExternalDir.createDirectory(Consts.FolderLayout.External.ImportFolderName);
                 }
 
-                _ImportedDir = FileUtils.getDocumentFromTree(TwoTrailsApp.this, _TwoTrailsExternalDir.getUri(), Consts.FolderLayout.External.ImportedFolderPath);
+                _ImportedDir = AndroidUtils.Files.getDocumentFromTree(TwoTrailsApp.this, _TwoTrailsExternalDir.getUri(), Consts.FolderLayout.External.ImportedFolderPath);
                 if (_ImportedDir == null || !_ImportedDir.exists()) {
                     _ImportedDir = _ImportDir.createDirectory(Consts.FolderLayout.External.ImportedFolderName);
                 }
 
-                _ExportDir = FileUtils.getDocumentFromTree(TwoTrailsApp.this, _TwoTrailsExternalDir.getUri(), Consts.FolderLayout.External.ExportFolderPath);
+                _ExportDir = AndroidUtils.Files.getDocumentFromTree(TwoTrailsApp.this, _TwoTrailsExternalDir.getUri(), Consts.FolderLayout.External.ExportFolderPath);
                 if (_ExportDir == null || !_ExportDir.exists()) {
                     _ExportDir = _TwoTrailsExternalDir.createDirectory(Consts.FolderLayout.External.ExportFolderName);
                 }
@@ -718,14 +790,14 @@ public class TwoTrailsApp extends Application {
 
     //region GPS / RangeFinder
     public void startGpsService() {
-        if (gpsServiceBinder == null && AndroidUtils.App.checkLocationPermission(this)) {
+        if (!isGpsServiceStarted()) {
             this.startService(new Intent(this, GpsService.class));
             this.bindService(new Intent(this, GpsService.class), gpsServiceConnection, Context.BIND_AUTO_CREATE);
         }
     }
 
     public void startRangefinderService() {
-        if (rfServiceBinder == null && AndroidUtils.App.checkBluetoothPermission(this)) {
+        if (!isRFServiceStarted() && AndroidUtils.App.checkBluetoothPermission(this)) {
             this.startService(new Intent(this, RangeFinderService.class));
             this.bindService(new Intent(this, RangeFinderService.class), rfServiceConnection, Context.BIND_AUTO_CREATE);
         }
@@ -741,11 +813,25 @@ public class TwoTrailsApp extends Application {
     }
 
 
+    public boolean isGpsServiceStarted() {
+        return gpsServiceBinder != null;
+    }
+
+    public boolean isGpsServiceStartedAndRunning() {
+        return gpsServiceBinder != null && getGps().isGpsRunning();
+    }
+
     public GpsService.GpsBinder getGps() {
+        if (gpsServiceBinder == null) throw new RuntimeException("Not bound to GpsService");
         return gpsServiceBinder;
     }
 
+    public boolean isRFServiceStarted() {
+        return rfServiceBinder != null;
+    }
+
     public RangeFinderService.RangeFinderBinder getRF() {
+        if (rfServiceBinder == null) throw new RuntimeException("Not bound to RfService");
         return rfServiceBinder;
     }
     //endregion

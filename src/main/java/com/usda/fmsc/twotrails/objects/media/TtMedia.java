@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Parcel;
 
+import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.utilities.ParcelTools;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.objects.TtObject;
@@ -77,7 +78,7 @@ public abstract class TtMedia extends TtObject {
 
 
     public boolean externalFileExists(TwoTrailsApp app) {
-        return _IsExternal && _FileName != null && FileUtils.fileExists(app, app.getMediaFileByFileName(_FileName));
+        return _IsExternal && _FileName != null && AndroidUtils.Files.fileExists(app, app.getMediaFileByFileName(_FileName));
     }
 
     public Uri getFilePath(TwoTrailsApp app) {

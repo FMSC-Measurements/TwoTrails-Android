@@ -1,7 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.usda.fmsc.twotrails.activities.WalkActivity">
+    tools:context=".activities.WalkActivity">
 
     <item
         android:id="@+id/walkMenuWalking"
@@ -19,36 +19,45 @@
         android:visible="true"/>
 
     <item
-        android:id="@+id/mmMenuSelectMap"
-        android:title="@string/menu_map_select_type"
-        app:showAsAction="never"/>
+        android:id="@+id/overflowMenu"
+        android:icon="@drawable/ic_action_overflow_white"
+        android:title=""
+        app:showAsAction="always">
 
-    <item
-        android:id="@+id/mmMenuMapSettings"
-        android:title="@string/menu_map_settings"
-        app:showAsAction="never"/>
+        <menu>
+            <item
+                android:id="@+id/mmMenuSelectMap"
+                android:title="@string/menu_map_select_type"
+                app:showAsAction="never"/>
 
-    <item
-        android:id="@+id/walkMenuGps"
-        android:title="@string/menu_x_gps_settings"
-        app:showAsAction="never"
-        android:visible="true"/>
+            <item
+                android:id="@+id/mmMenuMapSettings"
+                android:title="@string/menu_map_settings"
+                app:showAsAction="never"/>
 
-    <item
-        android:id="@+id/walkMenuWalkSettings"
-        android:title="@string/menu_walk_settings"
-        app:showAsAction="never"
-        android:visible="true"/>
+            <item
+                android:id="@+id/walkMenuGps"
+                android:title="@string/menu_x_gps_settings"
+                app:showAsAction="never"
+                android:visible="true"/>
 
-    <item
-        android:id="@+id/walkMenuRenameGroup"
-        android:title="@string/menu_rename_group"
-        app:showAsAction="never"
-        android:visible="true"/>
+            <item
+                android:id="@+id/walkMenuWalkSettings"
+                android:title="@string/menu_walk_settings"
+                app:showAsAction="never"
+                android:visible="true"/>
 
-    <item
-        android:id="@+id/mapMenuZoomToPoly"
-        android:title="@string/menu_map_zoom_to_poly"
-        app:showAsAction="never"
-        android:visible="false"/>
+            <item
+                android:id="@+id/walkMenuRenameGroup"
+                android:title="@string/menu_rename_group"
+                app:showAsAction="never"
+                android:visible="true"/>
+
+            <item
+                android:id="@+id/mapMenuZoomToPoly"
+                android:title="@string/menu_map_zoom_to_poly"
+                app:showAsAction="never"
+                android:visible="false"/>
+        </menu>
+    </item>
 </menu>

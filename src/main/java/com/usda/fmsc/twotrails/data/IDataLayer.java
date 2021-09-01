@@ -15,8 +15,8 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 public abstract class IDataLayer {
-    protected static DateTimeFormatter dtf= DateTimeFormat.forPattern("yyyy-M-dd H:mm:ss");
-    protected static DateTimeFormatter dtfAlt = DateTimeFormat.forPattern("yyyy-M-dd H:mm:ss.SSS"); //Alt Format, PC might be using it
+    protected static final DateTimeFormatter dtf= DateTimeFormat.forPattern("yyyy-M-dd H:mm:ss");
+    protected static final DateTimeFormatter dtfAlt = DateTimeFormat.forPattern("yyyy-M-dd H:mm:ss.SSS"); //Alt Format, PC might be using it
 
     private final SQLiteDatabase _db;
     private final TwoTrailsApp _Context;

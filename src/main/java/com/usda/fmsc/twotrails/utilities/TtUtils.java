@@ -942,7 +942,7 @@ public class TtUtils {
     }
 
     public static class Media {
-        public static Comparator<TtMedia> PictureTimeComparator =
+        public static final Comparator<TtMedia> PictureTimeComparator =
                 (lhs, rhs) -> lhs.getTimeCreated().isAfter(rhs.getTimeCreated()) ? 1 :
                         (lhs.getTimeCreated().equals(rhs.getTimeCreated()) ? 0 : -1);
 
@@ -1000,14 +1000,14 @@ public class TtUtils {
 
 
         public static TtImage createImageFromFile(TwoTrailsApp app, Uri uri, String pointCN) throws IOException {
-            if (uri != null && uri.getPath() != null && FileUtils.fileExists(app, uri)) {
+            if (uri != null && uri.getPath() != null && AndroidUtils.Files.fileExists(app, uri)) {
                 DateTime time = null;
                 Integer width, height;
 
                 Uri internalImage = app.getMediaFileByFileName(FileUtils.getFileName(uri.getPath()));
                 InputStream fileStream = app.getContentResolver().openInputStream(internalImage);
 
-                FileUtils.copyFile(app, uri, internalImage);
+                AndroidUtils.Files.copyFile(app, uri, internalImage);
 
                 if (fileStream != null) {
                     ExifInterface exifInterface = new ExifInterface(fileStream);
@@ -1767,6 +1767,18 @@ public class TtUtils {
                         .setPositiveButton(R.string.str_ok, null)
                         .show();
             }
+        }
+    }
+
+    public static class Date {
+        public static String toString(DateTime dateTime) {
+            return String.format(Locale.getDefault(), "%d%02d%02d_%02d-%02d-%02d",
+                    dateTime.getYear(), dateTime.getMonthOfYear(), dateTime.getDayOfMonth(), dateTime.getHourOfDay(), dateTime.getMinuteOfDay(), dateTime.getSecondOfDay());
+        }
+
+        public static String toStringDateMillis(DateTime dateTime) {
+            return String.format(Locale.getDefault(), "%d%02d%02d_%d",
+                    dateTime.getYear(), dateTime.getMonthOfYear(), dateTime.getDayOfMonth(), dateTime.getMillisOfDay());
         }
     }
 

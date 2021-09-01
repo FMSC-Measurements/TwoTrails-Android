@@ -8,6 +8,7 @@ import androidx.appcompat.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
 import com.usda.fmsc.geospatial.nmea41.NmeaIDs;
@@ -60,10 +61,14 @@ public class CheckNmeaDialogTt extends TtBaseDialogFragment implements GpsServic
     public void onStart() {
         super.onStart();
 
-        binder = getTtAppCtx().getGps();
+        if (getTtAppCtx().isGpsServiceStarted()) {
+            binder = getTtAppCtx().getGps();
 
-        binder.addListener(this);
-        binder.startGps();
+            binder.addListener(this);
+        } else {
+            getTtAppCtx().startGpsService();
+            Toast.makeText(getTtAppCtx(), "Gps Service Not Started. Please try again.", Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override
@@ -71,7 +76,7 @@ public class CheckNmeaDialogTt extends TtBaseDialogFragment implements GpsServic
         super.onStop();
 
         if (binder != null) {
-            if (!getTtAppCtx().getDeviceSettings().isGpsAlwaysOn()) {
+            if (!(getTtAppCtx().getDeviceSettings().isGpsAlwaysOn() || binder.isLogging())) {
                 binder.stopGps();
             }
 

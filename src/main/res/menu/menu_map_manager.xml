@@ -1,8 +1,18 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.usda.fmsc.twotrails.activities.HaidActivity">
+    tools:context=".activities.MapManagerActivity">
 
-    <item android:id="@+id/mmMenuLogin" android:title="@string/menu_map_manager_login"
-          android:orderInCategory="100" app:showAsAction="never" android:visible="false" />
+    <item
+        android:id="@+id/overflowMenu"
+        android:icon="@drawable/ic_action_overflow_white"
+        android:title=""
+        app:showAsAction="always"
+        android:visible="false">
+
+        <menu>
+            <item android:id="@+id/mmMenuLogin" android:title="@string/menu_map_manager_login"
+                  android:orderInCategory="100" app:showAsAction="never" android:visible="false" />
+        </menu>
+    </item>
 </menu>

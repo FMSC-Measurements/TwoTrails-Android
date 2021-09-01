@@ -5,7 +5,9 @@ import android.Manifest;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Bundle;
 import android.provider.OpenableColumns;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -107,7 +109,7 @@ public abstract class TtPointCollectionActivity extends TtProjectAdjusterActivit
 
     private final ActivityResultLauncher<Uri> captureImageForResult = registerForActivityResult(new ActivityResultContracts.TakePicture(), picTaken -> {
         if (picTaken) {
-            if (FileUtils.fileExists(getTtAppCtx(), _CapturedImageUri)) {
+            if (AndroidUtils.Files.fileExists(getTtAppCtx(), _CapturedImageUri)) {
 
                 try {
                     onImageCaptured(createImageFromFile(_CapturedImageUri, _CapturedImagePointCN));
@@ -154,8 +156,7 @@ public abstract class TtPointCollectionActivity extends TtProjectAdjusterActivit
 
         _CapturedImageUri = Uri.parse(Paths.get(
                 getTtAppCtx().getProjectMediaDir().toString(),
-                String.format(Locale.getDefault(), "IMG_%d%d%d_%d.jpg",
-                    dateTime.getYear(), dateTime.getMonthOfYear(), dateTime.getDayOfMonth(), dateTime.getMillisOfDay())).toString());
+                String.format(Locale.getDefault(), "IMG_%s_%d.jpg", TtUtils.Date.toStringDateMillis(dateTime))).toString());
         _CapturedImagePointCN = currentPoint.getCN();
 
         if (useTtCamera) {

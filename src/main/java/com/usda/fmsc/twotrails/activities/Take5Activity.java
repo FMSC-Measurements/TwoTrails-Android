@@ -546,8 +546,8 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
     }
 
     @Override
-    protected void getSettings() {
-        super.getSettings();
+    protected void updateSettings() {
+        super.updateSettings();
 
         options.Fix = getTtAppCtx().getDeviceSettings().getTake5FilterFix();
         options.FixType = getTtAppCtx().getDeviceSettings().getTake5FilterFixType();
@@ -649,106 +649,11 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
         return super.onOptionsItemSelected(item);
     }
 
-//    @Override
-//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        switch (requestCode) {
-//            case Consts.Codes.Activities.SETTINGS: {
-//                getTtAppCtx().getGps().startGps();
-//
-//                getSettings();
-//                break;
-//            }
-//            case Consts.Codes.Requests.ADD_IMAGES: {
-//                if (data != null) {
-//                    try {
-//                        List<TtImage> images = TtUtils.Media.getPicturesFromImageIntent(getTtAppCtx(), data, _CurrentPoint.getCN());
-//
-//                        if (images.size() == 1) {
-//                            TtUtils.Media.askAndUpdateImageOrientation(Take5Activity.this, null);
-//                        }
-//
-//                        addImages(images);
-//                    } catch (IOException e) {
-//                        Toast.makeText(Take5Activity.this, "Unable to add Image", Toast.LENGTH_LONG).show();
-//                        getTtAppCtx().getReport().writeError(e.getMessage(), "Take5Activity:oAR:ADD_IMAGE");
-//                    }
-//                }
-//                break;
-//            }
-//            case Consts.Codes.Activities.TTCAMERA: {
-//                if (data != null) {
-//                    TtImage image = TtUtils.Media.getPictureFromTtCameraIntent(data);
-//
-//                    if (image == null) {
-//                        Toast.makeText(Take5Activity.this, "Unable to add Image", Toast.LENGTH_LONG).show();
-//                    } else {
-//                        addImage(image);
-//                    }
-//                }
-//                break;
-//            }
-//            case Consts.Codes.Requests.CAPTURE_IMAGE: {
-//                if (resultCode != RESULT_CANCELED) {
-//                    try {
-//                        TtImage image = TtUtils.Media.createImageFromFile(captureImageUri, _CurrentPoint.getCN(), getTtAppCtx());
-//
-//                        if (image == null) {
-//                            Toast.makeText(Take5Activity.this, "Unable to add Image", Toast.LENGTH_LONG).show();
-//                        } else {
-//                            TtUtils.Media.askAndUpdateImageOrientation(Take5Activity.this, null);
-//                            addImage(image);
-//                        }
-//                    } catch (IOException e) {
-//                        Toast.makeText(Take5Activity.this, "Unable to add Image", Toast.LENGTH_LONG).show();
-//                        getTtAppCtx().getReport().writeError(e.getMessage(), "Take5Activity:oAR:CAPTURE_IMAGE");
-//                    }
-//                }
-//                break;
-//            }
-//            case Consts.Codes.Requests.UPDATE_ORIENTATION: {
-//                if (resultCode != RESULT_CANCELED) {
-//                    if (data != null && data.hasExtra(Consts.Codes.Data.ORIENTATION)) {
-//                        DeviceOrientationEx.Orientation orientation = data.getParcelableExtra(Consts.Codes.Data.ORIENTATION);
-//
-//                        if (_CurrentMedia != null && _CurrentMedia.getMediaType() == MediaType.Picture) {
-//                            TtImage image = (TtImage)_CurrentMedia;
-//                            image.setAzimuth(orientation.getRationalAzimuth());
-//                            image.setPitch(orientation.getPitch());
-//                            image.setRoll(orientation.getRoll());
-//                            onMediaUpdate();
-//                        }
-//                    }
-//
-//                }
-//                break;
-//            }
-//        }
-//
-//        super.onActivityResult(requestCode, resultCode, data);
-//    }
-
-
     @Override
     protected void onSettingsUpdated() {
-        getTtAppCtx().getGps().startGps();
-
-        getSettings();
+        updateSettings();
     }
 
-//    @Override
-//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-//
-//        if (requestCode == Consts.Codes.Requests.CAMERA && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//            Intent intent = new Intent(Take5Activity.this, TtCameraActivity.class);
-//
-//            if (_CurrentPoint != null) {
-//                intent.putExtra(Consts.Codes.Data.POINT_CN, _CurrentPoint.getCN());
-//            }
-//
-//            startActivityForResult(intent, Consts.Codes.Activities.TTCAMERA);
-//        }
-//    }
 
     @Override
     public void onBackPressed() {

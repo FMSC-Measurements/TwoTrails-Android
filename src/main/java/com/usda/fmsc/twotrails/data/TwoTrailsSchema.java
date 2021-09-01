@@ -224,6 +224,7 @@ public class TwoTrailsSchema {
             PerimeterLine + ", " +
             IncrementBy + ", " +
             PointStartIndex + ", " +
+            ParentUnitCN + ", " +
             TimeCreated;
     }
     //endregion

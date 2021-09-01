@@ -1,11 +1,7 @@
 package com.usda.fmsc.twotrails.activities;
 
 import android.content.Intent;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.appcompat.app.ActionBar;
 import android.os.Bundle;
-import androidx.appcompat.widget.Toolbar;
 import android.text.Editable;
 import android.view.View;
 import android.widget.AdapterView;
@@ -17,13 +13,19 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.listeners.SimpleTextWatcher;
 import com.usda.fmsc.android.widget.SheetLayoutEx;
 import com.usda.fmsc.geospatial.GeoTools;
 import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
-import com.usda.fmsc.geospatial.nmea41.sentences.*;
+import com.usda.fmsc.geospatial.nmea41.sentences.GGASentence;
+import com.usda.fmsc.geospatial.nmea41.sentences.GSASentence;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.DeviceSettings;
 import com.usda.fmsc.twotrails.R;
@@ -31,8 +33,6 @@ import com.usda.fmsc.twotrails.activities.base.AcquireGpsMapActivity;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
 import com.usda.fmsc.twotrails.objects.FilterOptions;
-import com.usda.fmsc.twotrails.objects.media.TtImage;
-import com.usda.fmsc.twotrails.objects.media.TtMedia;
 import com.usda.fmsc.twotrails.objects.points.GpsPoint;
 import com.usda.fmsc.twotrails.ui.NmeaPointsView;
 import com.usda.fmsc.twotrails.units.DopType;
@@ -42,7 +42,6 @@ import com.usda.fmsc.utilities.ParseEx;
 import com.usda.fmsc.utilities.StringEx;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -837,7 +836,7 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
     public void btnMyLocClick(View view) {
         Position lastPosition = getLastPosition();
 
-        if (lastPosition == null) {
+        if (lastPosition == null && getTtAppCtx().isGpsServiceStarted()) {
             lastPosition = getTtAppCtx().getGps().getLastPosition();
         }
 
@@ -853,8 +852,8 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
 
 
     @Override
-    public boolean shouldStartGps() {
-        return !calcOnlyMode && super.shouldStartGps();
+    public boolean requiresGpsService() {
+        return !calcOnlyMode && super.requiresGpsService();
     }
 
     @Override

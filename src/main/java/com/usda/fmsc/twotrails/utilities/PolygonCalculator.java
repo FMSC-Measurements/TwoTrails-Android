@@ -105,7 +105,7 @@ public class PolygonCalculator {
     }
 
     public static class Boundaries {
-        public PointD TopLeft, BottomRight;
+        public final PointD TopLeft, BottomRight;
 
         public Boundaries(PointD topLeft, PointD bottomRight) {
             TopLeft = topLeft;

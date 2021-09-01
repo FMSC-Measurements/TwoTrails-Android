@@ -134,9 +134,9 @@ public class GoogleMapSelectionAdapter extends BaseAdapter {
     }
 
     private static class MapViewHolder {
-        TextView tvName;
-        PopupMenuButton ofmbMenu;
-        ImageView ivMhIcon;
+        public final TextView tvName;
+        public final PopupMenuButton ofmbMenu;
+        public final ImageView ivMhIcon;
 
         private MapViewHolder(View view) {
             tvName = view.findViewById(R.id.mhName);

@@ -142,7 +142,7 @@ public class DeviceSettingsFragment extends TtBasePrefFragment {
         }
 
         if (getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
-            if (getTtAppCtx().getGps().isGpsRunning()) {
+            if (getTtAppCtx().isGpsServiceStartedAndRunning()) {
                 prefGpsCheck.setSummary(R.string.ds_gps_connected);
             } else {
                 prefGpsCheck.setSummary(R.string.ds_dev_configured);
@@ -194,22 +194,47 @@ public class DeviceSettingsFragment extends TtBasePrefFragment {
     }
 
 
-    private final ActivityResultLauncher<String[]> requestInternalGpsPermissionOnResult = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result ->
-            onGpsRequestResult(TtUtils.Collections.areAllTrue(result.values())));
+    private final ActivityResultLauncher<String[]> requestInternalLocationPermissionOnResult = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result ->
+            onLocationRequestResult(TtUtils.Collections.areAllTrue(result.values())));
 
-    private void onGpsRequestResult(boolean hasPermissions) {
+//    private final ActivityResultLauncher<String> requestBackgroundLocationPermissionOnResult = registerForActivityResult(new ActivityResultContracts.RequestPermission(), this::onBackgroundLocationRequestResult);
+
+
+//    private final ActivityResultLauncher<String[]> requestBackgroundLocationPermissionOnResult = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result ->
+//            onBackgroundLocationRequestResult(TtUtils.Collections.areAllTrue(result.values())));
+
+    private final ActivityResultLauncher<String> requestBackgroundLocationPermissionOnResult = registerForActivityResult(new ActivityResultContracts.RequestPermission(), this::onBackgroundLocationRequestResult);
+
+
+
+    private void onLocationRequestResult(boolean hasPermissions) {
         if (hasPermissions) {
             swtUseExGpsDev.setChecked(false);
             switchToInternal();
+
+            AndroidUtils.App.requestBackgroundLocationPermission(getActivity(),
+                    requestBackgroundLocationPermissionOnResult,
+                    getString(R.string.diag_back_loc));
         } else {
             Toast.makeText(getActivity(), "Requires GPS permissions to use the internal GPS receiver", Toast.LENGTH_LONG).show();
         }
     }
+    private void onBackgroundLocationRequestResult(boolean hasPermissions) {
+        if (!(hasPermissions || getTtAppCtx().getDeviceSettings().getKeepScreenOn())) {
+            new AlertDialog.Builder(getActivity())
+                    .setMessage(R.string.diag_keep_on_req)
+                    .setPositiveButton(R.string.str_ok, (dialog, which) -> {
+                        getTtAppCtx().getDeviceSettings().setKeepScreenOn(true);
+                    })
+                    .setNeutralButton(R.string.str_cancel, null)
+                    .show();
+        }
+    }
 
     private boolean requestInternalGpsPermission() {
-        return AndroidUtils.App.requestBackgroundLocationPermission(getActivity(),
-                requestInternalGpsPermissionOnResult,
-                "TwoTrails requires location permissions in order to collection point data. It may use the devices location even when the app is running in the background.");
+        return AndroidUtils.App.requestLocationPermission(getActivity(),
+                requestInternalLocationPermissionOnResult,
+                getString(R.string.diag_loc));
     }
 
     private void setBTValues(ListPreference lstPref) {
@@ -246,7 +271,15 @@ public class DeviceSettingsFragment extends TtBasePrefFragment {
                     final Activity activity = getActivity();
 
                     if (activity == null) {
-                        getTtAppCtx().getReport().writeError("null Activity", "DeviceSettingsFragment:gpsCheckListener");
+                        Toast.makeText(getActivity(), "An error has occurred. Please see log for details.", Toast.LENGTH_LONG).show();
+                        getTtAppCtx().getReport().writeError("Null Activity", "DeviceSettingsFragment:gpsCheckListener");
+                        return false;
+                    }
+
+                    if (!getTtAppCtx().isGpsServiceStarted()) {
+                        getTtAppCtx().startGpsService();
+                        Toast.makeText(getActivity(), "GPS Service not available. Please try again.", Toast.LENGTH_LONG).show();
+                        getTtAppCtx().getReport().writeError("GPS Service Not Started", "DeviceSettingsFragment:gpsCheckListener");
                         return false;
                     }
 
@@ -268,7 +301,7 @@ public class DeviceSettingsFragment extends TtBasePrefFragment {
                             getTtAppCtx().getDeviceSettings().setGpsConfigured(true);
 
                             activity.runOnUiThread(() -> {
-                                Toast.makeText(activity, activity.getString(R.string.ds_gps_connected), Toast.LENGTH_LONG).show();
+                                Toast.makeText(activity, activity.getString(R.string.ds_gps_connected), Toast.LENGTH_SHORT).show();
                                 //pd.setMessage(activity.getString(R.string.ds_gps_connected));
 
                                 if (getTtAppCtx().getDeviceSettings().isGpsAlwaysOn()) {
@@ -328,7 +361,7 @@ public class DeviceSettingsFragment extends TtBasePrefFragment {
                         public void gpsStarted() {
                             if (gps.isExternalGpsUsed()) {
                                 activity.runOnUiThread(() -> {
-                                    Toast.makeText(activity, "External GPS Connected. Listening for data.", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(activity, "External GPS Connected. Listening for data.", Toast.LENGTH_SHORT).show();
                                     //pd.setMessage("External GPS Connected. Listening for data."));
                                 });
                             }
@@ -387,7 +420,7 @@ public class DeviceSettingsFragment extends TtBasePrefFragment {
 
                         switch (gps.startGps()) {
                             case InternalGpsStarted: {
-                                Toast.makeText(activity, "Internal GPS started. Listening for data.", Toast.LENGTH_LONG).show();
+                                Toast.makeText(activity, "Internal GPS started. Listening for data.", Toast.LENGTH_SHORT).show();
                                 //activity.runOnUiThread(() -> {
                                     //pd.setMessage("Internal GPS started. Listening for data.")
                                 //});
@@ -416,7 +449,7 @@ public class DeviceSettingsFragment extends TtBasePrefFragment {
                                 break;
                             }
                             case ExternalGpsConnecting: {
-                                Toast.makeText(activity, "Connecting to external GPS.", Toast.LENGTH_LONG).show();
+                                Toast.makeText(activity, "Connecting to external GPS.", Toast.LENGTH_SHORT).show();
                                 //activity.runOnUiThread(() -> {
                                     //pd.setMessage("Connecting to external GPS.")
                                 //});
@@ -439,7 +472,7 @@ public class DeviceSettingsFragment extends TtBasePrefFragment {
                             }
                             case GpsAlreadyStarted: {
                                 //hideDialog.run();
-                                Toast.makeText(activity,"GPS started. Listening for data.", Toast.LENGTH_LONG).show();
+                                Toast.makeText(activity,"GPS started. Listening for data.", Toast.LENGTH_SHORT).show();
                                 break;
                             }
                             //default: hideDialog.run();
@@ -678,6 +711,13 @@ public class DeviceSettingsFragment extends TtBasePrefFragment {
     }
 
     private void switchToInternal() {
+        if (!getTtAppCtx().isGpsServiceStarted()) {
+            getTtAppCtx().startGpsService();
+            Toast.makeText(getActivity(), "GPS Service not available. Please try again.", Toast.LENGTH_LONG).show();
+            getTtAppCtx().getReport().writeError("GPS Service Not Started", "DeviceSettingsFragment:switchToInternal");
+            return;
+        }
+
         if (!getTtAppCtx().getGps().isInternalGpsEnabled()) {
             requestInternalGpsPermission();
         } else {
@@ -736,7 +776,7 @@ public class DeviceSettingsFragment extends TtBasePrefFragment {
     //endregion
 
     //region RangeFinder Selection
-    Preference.OnPreferenceChangeListener btnRFList = new Preference.OnPreferenceChangeListener() {
+    private final Preference.OnPreferenceChangeListener btnRFList = new Preference.OnPreferenceChangeListener() {
         public boolean onPreferenceChange(Preference preference, Object newValue) {
 
             try {

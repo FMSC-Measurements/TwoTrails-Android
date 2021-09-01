@@ -7,8 +7,8 @@ import android.util.AttributeSet;
 import com.usda.fmsc.android.preferences.EnumPreference;
 
 public class GpsFixTypePreference extends EnumPreference {
-    private static int[] itemValues = new int[] { 0, 1, 2, 3, 5, 4 };
-    private static CharSequence[] itemNames = new String[] { "None", "3D", "3D+DIFF", "PPS", "Float RTK", "RTK"};
+    private static final int[] itemValues = new int[] { 0, 1, 2, 3, 5, 4 };
+    private static final CharSequence[] itemNames = new String[] { "None", "3D", "3D+DIFF", "PPS", "Float RTK", "RTK"};
 
     public GpsFixTypePreference(Context context, AttributeSet attrs) {
         super(context, attrs);

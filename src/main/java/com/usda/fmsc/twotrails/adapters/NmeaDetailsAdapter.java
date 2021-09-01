@@ -117,9 +117,9 @@ public class NmeaDetailsAdapter extends ArrayAdapter<NmeaDetailsAdapter.NmeaDeta
     }
 
 
-    private class ViewHolder {
-        TextView talkerID;
-        TextView nmeaIDs;
+    private static class ViewHolder {
+        public final TextView talkerID;
+        public final TextView nmeaIDs;
 
         public ViewHolder(View view)
         {

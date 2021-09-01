@@ -7,6 +7,7 @@ import android.net.Uri;
 
 import androidx.annotation.Nullable;
 
+import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.utilities.FileUtils;
 
@@ -48,9 +49,9 @@ public abstract class AccessManager<DL extends IDataLayer> extends SQLiteOpenHel
 
     protected abstract DL getDataLayer();
 
-    public boolean checkDB() {
+    public boolean dbHasErrors() {
         DL dl = getDataLayer();
-        return !dl.hasErrors();
+        return dl.hasErrors();
     }
 
 
@@ -68,7 +69,7 @@ public abstract class AccessManager<DL extends IDataLayer> extends SQLiteOpenHel
             String fileName = newFileName != null ? newFileName : FileUtils.getFileName(filePath.getPath());
             Uri localDB = Uri.fromFile(context.getDatabasePath(fileName));
 
-            FileUtils.copyFile(context, filePath, localDB);
+            AndroidUtils.Files.copyFile(context, filePath, localDB);
             return fileName;
         } else {
             throw new RuntimeException("Invalid filePath");
@@ -79,7 +80,7 @@ public abstract class AccessManager<DL extends IDataLayer> extends SQLiteOpenHel
     public void export(Uri extFilePath) throws IOException {
         if (extFilePath != null && extFilePath.getPath() != null) {
             Uri localDB = getDBUri();
-            FileUtils.copyFile(_Context, localDB, extFilePath);
+            AndroidUtils.Files.copyFile(_Context, localDB, extFilePath);
         } else {
             throw new RuntimeException("Invalid External File Path");
         }
@@ -90,7 +91,7 @@ public abstract class AccessManager<DL extends IDataLayer> extends SQLiteOpenHel
         if (exportFilePath != null && exportFilePath.getPath() != null) {
             if (localFileExists(context, fileName)) {
                 Uri localDB = Uri.fromFile(context.getDatabasePath(fileName));
-                FileUtils.copyFile(context, localDB, exportFilePath);
+                AndroidUtils.Files.copyFile(context, localDB, exportFilePath);
             } else {
                 throw new FileNotFoundException("Database Name: " + fileName);
             }

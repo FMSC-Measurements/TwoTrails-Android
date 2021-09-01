@@ -18,12 +18,12 @@ import java.util.List;
 public class ClosestPositionCalculator {
     public static final int BLOCK_SIZE = 10; //in meters
 
-    MultiKeyMap<Integer, List<CalcPoint>> _PointMap = new MultiKeyMap<>();
-    HashMap<String, TtMetadata> _Metadata;
-    HashMap<String, List<TtPoint>> _PointsByPoly = new HashMap<>();
-    HashMap<String, TtPolygon> _Polygons = new HashMap<>();
-    HashMap<String, PolygonCalculator> _PolygonsCalcs = new HashMap<>();
-    int _DefaultZone;
+    private final MultiKeyMap<Integer, List<CalcPoint>> _PointMap = new MultiKeyMap<>();
+    private final HashMap<String, TtMetadata> _Metadata;
+    private final HashMap<String, List<TtPoint>> _PointsByPoly = new HashMap<>();
+    private final HashMap<String, TtPolygon> _Polygons = new HashMap<>();
+    private final HashMap<String, PolygonCalculator> _PolygonsCalcs = new HashMap<>();
+    private final int _DefaultZone;
 
     public ClosestPositionCalculator(List<TtPolygon> polygons, int defaultZone, DataAccessLayer dal) {
         _DefaultZone = defaultZone;
@@ -64,9 +64,14 @@ public class ClosestPositionCalculator {
         int by = (int)(y / BLOCK_SIZE);
 
         List<CalcPoint> points = _PointMap.get(bx, by);
-        if (points == null) points = new ArrayList<>();
+        if (points == null)  {
+            points = new ArrayList<>();
+            points.add(new CalcPoint(bx, by, x, y, point));
 
-        points.add(new CalcPoint(bx, by, x, y, point));
+            _PointMap.put(bx, by, points);
+        } else {
+            points.add(new CalcPoint(bx, by, x, y, point));
+        }
     }
 
 

@@ -7,6 +7,7 @@ import android.os.Bundle;
 import androidx.appcompat.app.AlertDialog;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,6 +20,8 @@ import com.usda.fmsc.geospatial.nmea41.sentences.base.NmeaSentence;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
+import com.usda.fmsc.twotrails.Settings;
+import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
@@ -29,8 +32,6 @@ import com.usda.fmsc.utilities.StringEx;
 @SuppressLint("DefaultLocale")
 public class GpsStatusActivity extends CustomToolbarActivity implements GpsService.Listener {
     private static final String nVal = "*";
-
-    private GpsService.GpsBinder binder;
 
     private Integer zone = null;
 
@@ -44,6 +45,11 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (getTtAppCtx().getDeviceSettings().getKeepScreenOn()) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        }
+
         setContentView(R.layout.activity_gps_status);
 
         if (getTtAppCtx().hasDAL()) {
@@ -52,22 +58,6 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
             if (metadata != null) {
                 zone = metadata.getZone();
             }
-        }
-
-        binder = getTtAppCtx().getGps();
-        binder.addListener(this);
-
-        if (getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
-            binder.startGps();
-        }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        if (!getTtAppCtx().getDeviceSettings().isGpsAlwaysOn()) {
-            binder.stopGps();
         }
     }
 
@@ -107,20 +97,14 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
     protected void onStart() {
         super.onStart();
 
-        if (!binder.isGpsRunning()) {
+        if (!getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
             configGPS();
         }
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == Consts.Codes.Activities.SETTINGS) {
-            if (getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
-                binder.startGps();
-            }
-        }
+    public boolean requiresGpsService() {
+        return true;
     }
 
     protected void setNmeaData(final NmeaBurst burst) {
@@ -206,13 +190,12 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
 
         dialog.setMessage("The GPS is currently not configured. Would you like to configure it now?");
 
-        dialog.setPositiveButton("Configure", (dialog1, which) -> startActivityForResult(new Intent(getBaseContext(), SettingsActivity.class).putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.GPS_SETTINGS_PAGE), Consts.Codes.Activities.SETTINGS));
+        dialog.setPositiveButton("Configure", (dialog1, which) -> openSettings(SettingsActivity.GPS_SETTINGS_PAGE));
 
         dialog.setNeutralButton(R.string.str_cancel, null);
 
         dialog.show();
     }
-
 
     @Override
     public void nmeaBurstReceived(NmeaBurst burst) {
@@ -270,7 +253,7 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
             dialog.setTitle("GPS Connection Lost");
             dialog.setMessage("The GPS bluetooth connection has been broken. Would you like to try and reestablish the connection?");
             dialog.setPositiveButton("Connect", (d, which) -> {
-                GpsService.GpsDeviceStatus status = binder.startGps();
+                GpsService.GpsDeviceStatus status = getTtAppCtx().getGps().startGps();
 
                 if (status != GpsService.GpsDeviceStatus.ExternalGpsStarted &&
                         status != GpsService.GpsDeviceStatus.InternalGpsStarted) {

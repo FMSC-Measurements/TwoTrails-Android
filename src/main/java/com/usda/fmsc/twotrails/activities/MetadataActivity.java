@@ -44,6 +44,7 @@ import com.usda.fmsc.twotrails.utilities.TtUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 import com.usda.fmsc.geospatial.nmea41.sentences.base.NmeaSentence;
 import com.usda.fmsc.utilities.StringEx;
@@ -79,6 +80,11 @@ public class MetadataActivity extends CustomToolbarActivity {
 
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private ViewPager mViewPager;
+
+    @Override
+    public boolean requiresGpsService() {
+        return true;
+    }
 
     private final ComplexOnPageChangeListener onPageChangeListener = new ComplexOnPageChangeListener() {
         @Override
@@ -295,7 +301,7 @@ public class MetadataActivity extends CustomToolbarActivity {
 
         TtMetadata newMetadata = getTtAppCtx().getMetadataSettings().getDefaultMetadata();
         newMetadata.setCN(java.util.UUID.randomUUID().toString());
-        newMetadata.setName(String.format("Meta %d", metaCount + 1));
+        newMetadata.setName(String.format(Locale.getDefault(), "Meta %d", metaCount + 1));
         getTtAppCtx().getDAL().insertMetadata(newMetadata);
 
         addedMeta = newMetadata.getCN();
@@ -485,6 +491,7 @@ public class MetadataActivity extends CustomToolbarActivity {
                 final Integer zone = inputDialog.getInt();
 
                 if (zone != null && zone >= 0) {
+                    //TODO fix progress
                     final ProgressDialog progressDialog = new ProgressDialog(MetadataActivity.this);
                     progressDialog.setMessage("Recalculating Positions");
                     progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
@@ -534,21 +541,15 @@ public class MetadataActivity extends CustomToolbarActivity {
                     if (getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
                         gotNmea = false;
 
-                        getTtAppCtx().getGps().startGps();
-
                         listener = new GpsService.Listener() {
                             @Override
                             public void nmeaBurstReceived(NmeaBurst nmeaBurst) {
-                                if (!getTtAppCtx().getDeviceSettings().isGpsAlwaysOn()) {
-                                    getTtAppCtx().getGps().stopGps();
-                                }
-
                                 inputDialog.getInput().setText(StringEx.toString(nmeaBurst.getTrueUTM().getZone()));
 
                                 gotNmea = true;
 
                                 if (listener != null) {
-                                    getTtAppCtx().getGps().addListener(listener);
+                                    getTtAppCtx().getGps().removeListener(listener);
                                 }
                             }
 
@@ -592,12 +593,8 @@ public class MetadataActivity extends CustomToolbarActivity {
 
                             @Override
                             public void gpsError(GpsService.GpsError error) {
-                                if (!getTtAppCtx().getDeviceSettings().isGpsAlwaysOn()) {
-                                    getTtAppCtx().getGps().stopGps();
-                                }
-
                                 if (listener != null) {
-                                    getTtAppCtx().getGps().addListener(listener);
+                                    getTtAppCtx().getGps().removeListener(listener);
                                 }
                             }
                         };
@@ -609,10 +606,6 @@ public class MetadataActivity extends CustomToolbarActivity {
                         final Runnable notifyIfFail = () -> {
                             try {
                                 Thread.sleep(10000);
-
-                                if (!getTtAppCtx().getDeviceSettings().isGpsAlwaysOn()) {
-                                    getTtAppCtx().getGps().stopGps();
-                                }
 
                                 if (!gotNmea) {
                                     Toast.makeText(mContext, "GPS timed out.", Toast.LENGTH_SHORT).show();

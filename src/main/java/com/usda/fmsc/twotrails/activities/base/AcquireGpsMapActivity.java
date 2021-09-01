@@ -591,18 +591,6 @@ public abstract class AcquireGpsMapActivity extends BaseMapActivity {
         return trailGraphicManager.getPositionsCount();
     }
 
-
-    @Override
-    public boolean shouldStartGps() {
-        return true;
-    }
-
-    @Override
-    public boolean shouldStopGps() {
-        return false;
-    }
-
-
     @Override
     protected boolean getShowMyPos() {
         return true;
@@ -698,7 +686,7 @@ public abstract class AcquireGpsMapActivity extends BaseMapActivity {
 
     private final ActivityResultLauncher<Uri> captureImageForResult = registerForActivityResult(new ActivityResultContracts.TakePicture(), picTaken -> {
         if (picTaken) {
-            if (FileUtils.fileExists(getTtAppCtx(), _CapturedImageUri)) {
+            if (AndroidUtils.Files.fileExists(getTtAppCtx(), _CapturedImageUri)) {
 
                 try {
                     onImageCaptured(createImageFromFile(_CapturedImageUri, _CapturedImagePointCN));
@@ -737,8 +725,7 @@ public abstract class AcquireGpsMapActivity extends BaseMapActivity {
 
         _CapturedImageUri = Uri.parse(Paths.get(
                 getTtAppCtx().getProjectMediaDir().toString(),
-                String.format(Locale.getDefault(), "IMG_%d%d%d_%d.jpg",
-                        dateTime.getYear(), dateTime.getMonthOfYear(), dateTime.getDayOfMonth(), dateTime.getMillisOfDay())).toString());
+                String.format(Locale.getDefault(), "IMG_%s.jpg", TtUtils.Date.toStringDateMillis(dateTime))).toString());
         _CapturedImagePointCN = currentPoint.getCN();
 
         if (useTtCamera) {

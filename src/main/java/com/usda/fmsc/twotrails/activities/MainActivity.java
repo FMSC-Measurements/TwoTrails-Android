@@ -48,6 +48,7 @@ import com.usda.fmsc.twotrails.utilities.Export;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 import com.usda.fmsc.utilities.FileUtils;
 import com.usda.fmsc.utilities.MimeTypes;
+import com.usda.fmsc.utilities.StringEx;
 
 import java.io.File;
 import java.io.IOException;
@@ -67,6 +68,14 @@ public class MainActivity extends TtProjectAdjusterActivity {
     private ViewPager2 mViewPager;
 
     private boolean openingProject, exitOnAdjusted, showedCrashed;
+
+    @Override
+    public boolean requiresGpsService() { return false; }
+
+    @Override
+    public boolean requiresRFService() { return false; }
+
+
 
     //region Main Activity Functions
     @Override
@@ -367,18 +376,26 @@ public class MainActivity extends TtProjectAdjusterActivity {
     }
 
 
-    private final ActivityResultLauncher<String[]> requestInternalLocationPermission = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result ->
-            onGpsRequestResult(TtUtils.Collections.areAllTrue(result.values())));
+    private final ActivityResultLauncher<String[]> requestInternalLocationPermissionOnResult = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result ->
+            onLocationRequestResult(TtUtils.Collections.areAllTrue(result.values())));
 
-    private boolean requestGpsAccess() {
-        return AndroidUtils.App.requestBackgroundLocationPermission(MainActivity.this,
-                requestInternalLocationPermission,
-                "TwoTrails requires location permissions in order to collection point data. It may use the devices location even when the app is running in the background.");
-    }
+//    private final ActivityResultLauncher<String[]> requestBackgroundLocationPermissionOnResult = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result ->
+//            onBackgroundLocationRequestResult(TtUtils.Collections.areAllTrue(result.values())));
 
-    private void onGpsRequestResult(boolean hasPermissions) {
+    private final ActivityResultLauncher<String> requestBackgroundLocationPermissionOnResult = registerForActivityResult(new ActivityResultContracts.RequestPermission(), this::onBackgroundLocationRequestResult);
+
+
+    private void onLocationRequestResult(boolean hasPermissions) {
         if (hasPermissions) {
-            getTtAppCtx().getGps().startGps();
+            if (getTtAppCtx().isGpsServiceStarted()) {
+                getTtAppCtx().getGps().startGps();
+            } else {
+                getTtAppCtx().startGpsService();
+            }
+
+            AndroidUtils.App.requestBackgroundLocationPermission(MainActivity.this,
+                    requestBackgroundLocationPermissionOnResult,
+                    getString(R.string.diag_back_loc));
         } else {
             Toast.makeText(MainActivity.this, "Cannot use GPS without permissions", Toast.LENGTH_LONG).show();
         }
@@ -388,11 +405,29 @@ public class MainActivity extends TtProjectAdjusterActivity {
         }
     }
 
+    private void onBackgroundLocationRequestResult(boolean hasPermissions) {
+        if (!(hasPermissions || getTtAppCtx().getDeviceSettings().getKeepScreenOn())) {
+            new AlertDialog.Builder(MainActivity.this)
+                    .setMessage(R.string.diag_keep_on_req)
+                    .setPositiveButton(R.string.str_ok, (dialog, which) -> {
+                        getTtAppCtx().getDeviceSettings().setKeepScreenOn(true);
+                    })
+                    .setNeutralButton(R.string.str_cancel, null)
+                    .show();
+        }
+    }
+
+    private boolean requestGpsAccess() {
+        return AndroidUtils.App.requestLocationPermission(MainActivity.this,
+                requestInternalLocationPermissionOnResult,
+                getString(R.string.diag_loc));
+    }
+
     private void checkGpsOnResume() {
         if (resuming) {
             DeviceSettings ds = getTtAppCtx().getDeviceSettings();
 
-            if (ds.isGpsConfigured() && ds.getGpsDeviceID() == null && ds.isGpsAlwaysOn()) {
+            if (StringEx.isEmpty(ds.getGpsDeviceID()) && ds.isGpsAlwaysOn()) {
                 if (requestGpsAccess()) {
                     openProjectOnResume();
                 }//else wait for callback
@@ -454,9 +489,9 @@ public class MainActivity extends TtProjectAdjusterActivity {
                     projectFileName = TtUtils.projectToFileNameTTX(projectName);
                 }
 
-                DataAccessManager dam = DataAccessManager.openDAL(app, projectFileName);
+                DataAccessManager dam = DataAccessManager.openDAL(app, projectFileName, projectName);
 
-                if (dam.checkDB()) {
+                if (dam.dbHasErrors()) {
                     //TODO has errors
                     Toast.makeText(MainActivity.this, "Database has Errors", Toast.LENGTH_LONG).show();
                 } else {
@@ -515,17 +550,17 @@ public class MainActivity extends TtProjectAdjusterActivity {
                 MediaAccessManager mam = MediaAccessManager.openMAL(app,
                         app.getCurrentProject().TTXFile.replace(Consts.FILE_EXTENSION, Consts.MEDIA_PACKAGE_EXTENSION));
 
-                if (!mam.checkDB()) {
+                if (mam.dbHasErrors()) {
                     //TODO has errors
-                    Toast.makeText(MainActivity.this, "Media Database has Errors", Toast.LENGTH_LONG).show();
+                    runOnUiThread(() -> Toast.makeText(MainActivity.this, "Media Database has Errors", Toast.LENGTH_LONG).show());
                 }
 
                 app.setMAM(mam);
             } catch (UpgradeException ue) {
-                app.getReport().writeError(ue.getMessage(), "MainActivity:onProjectOpened:upgradeFailed", ue.getStackTrace());
+                runOnUiThread(() -> app.getReport().writeError(ue.getMessage(), "MainActivity:onProjectOpened:upgradeFailed", ue.getStackTrace()));
             } catch (Exception e) {
                 app.getReport().writeError(e.getMessage(), "MainActivity:onProjectOpened", e.getStackTrace());
-                Toast.makeText(MainActivity.this, "Failed to Open Media Package", Toast.LENGTH_SHORT).show();
+                runOnUiThread(() -> Toast.makeText(MainActivity.this, "Failed to Open Media Package", Toast.LENGTH_SHORT).show());
             }
         }
     }
@@ -669,7 +704,7 @@ public class MainActivity extends TtProjectAdjusterActivity {
                 DocumentFile extPcPkgFile = df.createFile(MimeTypes.Application.ZIP, pcPkgFile.getName());
 
                 if (extPcPkgFile != null) {
-                    FileUtils.copyFile(getTtAppCtx(), Uri.fromFile(pcPkgFile), extPcPkgFile.getUri());
+                    AndroidUtils.Files.copyFile(getTtAppCtx(), Uri.fromFile(pcPkgFile), extPcPkgFile.getUri());
                 } else {
                     throw new Exception("Unable to create file");
                 }

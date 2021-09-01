@@ -32,6 +32,7 @@
         android:src="@drawable/ic_add_white"
         android:layout_margin="@dimen/fab_margin"
         app:layout_anchor="@id/lay1"
-        android:onClick="btnNewClick" />
+        android:onClick="btnNewClick"
+        android:contentDescription="@string/str_create_poly" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

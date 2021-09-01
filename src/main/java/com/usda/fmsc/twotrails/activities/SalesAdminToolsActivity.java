@@ -34,8 +34,6 @@ import com.usda.fmsc.twotrails.objects.PointD;
 import com.usda.fmsc.twotrails.objects.TtGroup;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
-import com.usda.fmsc.twotrails.objects.media.TtImage;
-import com.usda.fmsc.twotrails.objects.media.TtMedia;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.points.WayPoint;
 import com.usda.fmsc.twotrails.utilities.ClosestPositionCalculator;
@@ -126,8 +124,8 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
 //    }
 
     @Override
-    protected void getSettings() {
-        super.getSettings();
+    protected void updateSettings() {
+        super.updateSettings();
 
         options.Fix = getTtAppCtx().getDeviceSettings().getSATFilterFix();
         options.FixType = getTtAppCtx().getDeviceSettings().getSATFilterFixType();
@@ -175,28 +173,10 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
         return super.onOptionsItemSelected(item);
     }
 
-//    @Override
-//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        if (requestCode == Consts.Codes.Activities.SETTINGS) {
-//            getTtAppCtx().getGps().startGps();
-//
-//            getSettings();
-//        }
-//
-//        super.onActivityResult(requestCode, resultCode, data);
-//    }
-
     @Override
     protected void onSettingsUpdated() {
-        getTtAppCtx().getGps().startGps();
-
-        getSettings();
+        updateSettings();
     }
-
-    //    @Override
-//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-//    }
 
     @Override
     public void onBackPressed() {
@@ -208,21 +188,11 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
         }
     }
 
-//    @Override
-//    protected void onResume() {
-//        super.onResume();
-//    }
-
     @Override
     protected void onPause() {
         SheetLayoutEx.exitToBottomAnimation(this);
         super.onPause();
     }
-
-//    @Override
-//    public void finish() {
-//        super.finish();
-//    }
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {

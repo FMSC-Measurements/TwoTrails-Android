@@ -815,13 +815,13 @@ public class Import {
         }
 
         public static class GPXPolyParams {
-            public String PolyName;
-            public String Description;
-            public Integer PointStartIndex;
-            public Integer IncrementAmount;
-            public Double Accuracy;
-            public GpxBaseTrack Polygon;
-            public TtMetadata Metadata;
+            public final String PolyName;
+            public final String Description;
+            public final Integer PointStartIndex;
+            public final Integer IncrementAmount;
+            public final Double Accuracy;
+            public final GpxBaseTrack Polygon;
+            public final TtMetadata Metadata;
 
             public GPXPolyParams(String polyName, String description, Integer pointStartIndex,
                                  Integer incrementAmount, Double accuracy, GpxBaseTrack polygon,

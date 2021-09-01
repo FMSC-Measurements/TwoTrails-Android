@@ -212,10 +212,10 @@ public class Take5PointsEditRvAdapter extends RecyclerViewEx.BaseAdapterEx {
         public boolean hidden;
 
         public CardView parent;
-        public TextView tvPID;
-        public EditText txtCmt;
-        public ImageButton ibBnd;
-        public ImageView ivOp;
+        public final TextView tvPID;
+        public final EditText txtCmt;
+        public final ImageButton ibBnd;
+        public final ImageView ivOp;
 
 
         public PointViewHolderEx(View itemView) {
@@ -240,7 +240,7 @@ public class Take5PointsEditRvAdapter extends RecyclerViewEx.BaseAdapterEx {
     }
 
     public class Take5ViewHolderEx extends PointViewHolderEx {
-        TextView tvX, tvY, tvElev, tvElevType;
+        public final TextView tvX, tvY, tvElev, tvElevType;
 
         public Take5ViewHolderEx(View itemView) {
             super(itemView);
@@ -255,8 +255,8 @@ public class Take5PointsEditRvAdapter extends RecyclerViewEx.BaseAdapterEx {
     }
 
     public class SideShotViewHolderEx extends PointViewHolderEx {
-        EditText txtFwdAz, txtBkAz, txtSlpDist, txtSlpAng;
-        TextView tvDiff, tvMagDec;
+        public final EditText txtFwdAz, txtBkAz, txtSlpDist, txtSlpAng;
+        public final TextView tvDiff, tvMagDec;
 
         public SideShotViewHolderEx(View itemView) {
             super(itemView);

@@ -171,9 +171,6 @@ public class ArcGisMapFragment extends TtBaseFragment implements IMultiMapFragme
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (mmListener != null && mmListener.shouldStopGps()) {
-            binder.stopGps();
-        }
 
         // Release MapView resources
         if (mapView != null) {
@@ -465,22 +462,6 @@ public class ArcGisMapFragment extends TtBaseFragment implements IMultiMapFragme
 //
 //        return new Envelope(nw.getX(), nw.getY(), se.getX(), se.getY());
 //    }
-
-
-    @Override
-    public void onAttach(@NonNull Context context) {
-        super.onAttach(context);
-        if (context instanceof MultiMapListener) {
-
-            mmListener = (MultiMapListener) context;
-
-            if (mmListener.shouldStartGps()) {
-                if (binder == null)
-                    binder = getTtAppCtx().getGps();
-                binder.startGps();
-            }
-        }
-    }
 
     @Override
     public void onDetach() {

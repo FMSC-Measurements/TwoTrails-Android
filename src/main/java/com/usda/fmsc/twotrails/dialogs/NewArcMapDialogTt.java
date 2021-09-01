@@ -282,7 +282,7 @@ public class NewArcMapDialogTt extends TtBaseDialogFragment {
     }
 
 
-    SimpleTextWatcher stwUri = new SimpleTextWatcher() {
+    private final SimpleTextWatcher stwUri = new SimpleTextWatcher() {
         @Override
         public void afterTextChanged(final Editable s) {
             validUri = false;

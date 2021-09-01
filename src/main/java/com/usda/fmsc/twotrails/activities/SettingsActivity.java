@@ -54,6 +54,16 @@ public class SettingsActivity extends CustomToolbarActivity {
     }
 
     @Override
+    public boolean requiresGpsService() {
+        return true;
+    }
+
+    @Override
+    public boolean requiresRFService() {
+        return true;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
             onBackPressed();

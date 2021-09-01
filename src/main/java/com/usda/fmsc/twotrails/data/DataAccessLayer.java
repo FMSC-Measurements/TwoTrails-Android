@@ -306,22 +306,24 @@ public class DataAccessLayer extends IDataLayer {
                         poly.setCN(c.getString(0));
                     if (!c.isNull(1))
                         poly.setName(c.getString(1));
-                    if (!c.isNull(2))
-                        poly.setAccuracy(c.getDouble(2));
+                    //Unit Type (int to enum)
                     if (!c.isNull(3))
-                        poly.setDescription(c.getString(3));
+                        poly.setAccuracy(c.getDouble(3));
                     if (!c.isNull(4))
-                        poly.setArea(c.getDouble(4));
+                        poly.setDescription(c.getString(4));
                     if (!c.isNull(5))
-                        poly.setPerimeter(c.getDouble(5));
+                        poly.setArea(c.getDouble(5));
                     if (!c.isNull(6))
-                        poly.setPerimeterLine(c.getDouble(6));
+                        poly.setPerimeter(c.getDouble(6));
                     if (!c.isNull(7))
-                        poly.setIncrementBy(c.getInt(7));
+                        poly.setPerimeterLine(c.getDouble(7));
                     if (!c.isNull(8))
-                        poly.setPointStartIndex(c.getInt(8));
+                        poly.setIncrementBy(c.getInt(8));
                     if (!c.isNull(9))
-                        poly.setTime(parseDateTime(c.getString(9)));
+                        poly.setPointStartIndex(c.getInt(9));
+                    //ParentUnitCN
+                    if (!c.isNull(11))
+                        poly.setTime(parseDateTime(c.getString(11)));
 
                     polys.add(poly);
                 } while (c.moveToNext());
@@ -355,6 +357,9 @@ public class DataAccessLayer extends IDataLayer {
             cvs.put(TwoTrailsSchema.PolygonSchema.PointStartIndex, poly.getPointStartIndex());
             cvs.put(TwoTrailsSchema.PolygonSchema.IncrementBy, poly.getIncrementBy());
             cvs.put(TwoTrailsSchema.PolygonSchema.TimeCreated, dtf.print(poly.getTime()));
+
+//            cvs.put(TwoTrailsSchema.PolygonSchema.UnitType, poly.getUnitType().getValue());
+//            cvs.put(TwoTrailsSchema.PolygonSchema.ParentUnitCN, poly.getParentUnitCN());
 
             getDB().insert(TwoTrailsSchema.PolygonSchema.TableName, null, cvs);
 

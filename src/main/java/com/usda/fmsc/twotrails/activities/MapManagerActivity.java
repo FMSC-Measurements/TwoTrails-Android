@@ -241,8 +241,8 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
 
 
     private class ArcGisMapAdapter extends RecyclerViewEx.BaseAdapterEx {
-        private Drawable dOffline, dOnline, dOfflineInvalid;
-        private LayoutInflater inflater;
+        private final Drawable dOffline, dOnline, dOfflineInvalid;
+        private final LayoutInflater inflater;
 
         private ArcGisMapAdapter(Context context) {
             super(context);
@@ -269,10 +269,10 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
         }
 
         private class MapViewHolder extends RecyclerViewEx.ViewHolderEx {
-            ImageView ivStatusIcon;
-            PopupMenuButton ofmbMenu;
-            TextView tvName;
-            View lay;
+            public final ImageView ivStatusIcon;
+            public final PopupMenuButton ofmbMenu;
+            public final TextView tvName;
+            private final View lay;
 
             private MapViewHolder(View view) {
                 super(view);
