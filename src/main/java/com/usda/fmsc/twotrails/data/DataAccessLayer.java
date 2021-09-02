@@ -79,7 +79,7 @@ public class DataAccessLayer extends IDataLayer {
     @Override
     protected void onCreateDB(SQLiteDatabase db) {
         _DalVersion = TwoTrailsSchema.SchemaVersion;
-        _Activity = createUserActivity();
+        _Activity = createUserAction();
 
         createPolygonTable(db);
         createMetaDataTable(db);
@@ -245,7 +245,7 @@ public class DataAccessLayer extends IDataLayer {
     @Override
     protected void onOpenDB(SQLiteDatabase db) {
         if (_DalVersion == null) _DalVersion = new TtVersion(getTtDbVersion());
-        if (_Activity == null) _Activity = createUserActivity();
+        if (_Activity == null) _Activity = createUserAction();
     }
 
     @Override
@@ -792,7 +792,7 @@ public class DataAccessLayer extends IDataLayer {
             if (success) {
                 getDB().setTransactionSuccessful();
 
-                updateUserActivity(DataActionType.ModifiedPoints);
+                updateUserActivity(DataActionType.InsertedPoints);
             }
         } catch (Exception ex) {
             logError(ex.getMessage(), "DAL:insertPoints");
@@ -1294,10 +1294,8 @@ public class DataAccessLayer extends IDataLayer {
             for (TtPoint point : points) {
                 success = deletePointSafe(point);
 
-                if (!success)
-                    return false;
-
-                updateUserActivity(DataActionType.DeletedPoints);
+                if (success)
+                    updateUserActivity(DataActionType.DeletedPoints);
             }
         } catch (Exception ex) {
             logError(ex.getMessage(), "DAL:deletePoints");
@@ -2129,6 +2127,9 @@ public class DataAccessLayer extends IDataLayer {
             success = getDB().update(TwoTrailsSchema.TtNmeaSchema.TableName, cvs,
                     String.format("%s = '%s'", TwoTrailsSchema.SharedSchema.CN, burst.getCN()), null);
 
+            if (success > 0) {
+                updateUserActivity(DataActionType.ModifiedNmea);
+            }
         } catch (Exception ex) {
             logError(ex.getMessage(), "DAL:updateNmea");
         }
@@ -2510,16 +2511,18 @@ public class DataAccessLayer extends IDataLayer {
 
 
     //region Activity
-    private TtUserAction createUserActivity() {
+    private TtUserAction createUserAction() {
         return new TtUserAction("Android User", TtUtils.getDeviceName(), TtUtils.getApplicationVersion(getTtAppContext()));
     }
 
     public void updateUserActivity(int actionType) {
+        if (_Activity == null) _Activity = createUserAction();
         _Activity.updateAction(actionType);
         onAction(actionType);
     }
 
     public void updateUserActivity(int actionType, String notes) {
+        if (_Activity == null) _Activity = createUserAction();
         _Activity.updateAction(actionType, notes);
         onAction(actionType);
     }
@@ -2562,7 +2565,7 @@ public class DataAccessLayer extends IDataLayer {
     public boolean updateUserSession() {
         if (_Activity != null && _Activity.getAction().getValue() != 0) {
             insertUserActivity(_Activity);
-            _Activity = createUserActivity();
+            _Activity = createUserAction();
             return true;
         }
 
@@ -2764,7 +2767,7 @@ public class DataAccessLayer extends IDataLayer {
 
         updateUserActivity(DataActionType.ProjectUpgraded, "Upgrade " + getVersion().toString() + " -> " + upgrade.Version.toString());
         insertUserActivity(_Activity);
-        _Activity = createUserActivity();
+        _Activity = createUserAction();
     }
     //endregion
 }

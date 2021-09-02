@@ -79,6 +79,10 @@ public class MediaAccessManager extends AccessManager<MediaAccessLayer> {
         return new MediaAccessManager(context, importAL(context, filePath, null));
     }
 
+    public static MediaAccessManager importAndRenameMAL(TwoTrailsApp context, Uri filePath, String newFileName) throws IOException {
+        return new MediaAccessManager(context, importAL(context, filePath, newFileName));
+    }
+
 
     public static void exportMAL(TwoTrailsApp context, String fileName, Uri exportFilePath) throws IOException {
         exportFile(context, fileName, exportFilePath);

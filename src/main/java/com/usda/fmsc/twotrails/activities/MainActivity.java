@@ -35,6 +35,7 @@ import com.usda.fmsc.twotrails.activities.base.TtProjectAdjusterActivity;
 import com.usda.fmsc.twotrails.activities.contracts.CreateZipDocument;
 import com.usda.fmsc.twotrails.activities.contracts.OpenDocumentTreePersistent;
 import com.usda.fmsc.twotrails.adapters.RecentProjectAdapter;
+import com.usda.fmsc.twotrails.data.DataAccessLayer;
 import com.usda.fmsc.twotrails.data.DataAccessManager;
 import com.usda.fmsc.twotrails.data.MediaAccessManager;
 import com.usda.fmsc.twotrails.data.TwoTrailsSchema;
@@ -54,6 +55,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Locale;
 
 
 public class MainActivity extends TtProjectAdjusterActivity {
@@ -204,13 +206,6 @@ public class MainActivity extends TtProjectAdjusterActivity {
         }
     }
 
-//    @Override
-//    protected void onDestroy() {
-//        super.onDestroy();
-//        //closeFile();
-//        //finishAndRemoveTask();
-//    }
-
     @Override
     public boolean onCreateOptionsMenuEx(Menu menu) {
         inflateMenu(R.menu.menu_main, menu);
@@ -339,9 +334,6 @@ public class MainActivity extends TtProjectAdjusterActivity {
 
 
     //region Actions
-    //public final int UPDATE_INFO = 101;
-    //public final int UPDATE_INFO_AND_GOTO_DATA_TAB = 102;
-    //public final int GOTO_DATA_TAB = 103;
 
     private final ActivityResultLauncher<Uri> requestExternalDirectoryAccess = registerForActivityResult(new OpenDocumentTreePersistent(), dir ->  {
         if (dir != null) {
@@ -652,20 +644,36 @@ public class MainActivity extends TtProjectAdjusterActivity {
     });
 
 
-    private final ActivityResultLauncher<String> importFileLauncher = registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
+    private final ActivityResultLauncher<String> importFileOnResult = registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
         if (uri != null) {
             importProject(uri);
-        } else {
-            Toast.makeText(MainActivity.this, "Error opening file for import", Toast.LENGTH_LONG).show();
         }
     });
     private void importProject(Uri filePath) {
+        String fp = filePath.getPath();
+        if (fp == null)
+            throw new RuntimeException("Invalid Filepath");
+
+        if (fp.toLowerCase().endsWith(Consts.FILE_EXTENSION)) {
+            importTTX(filePath);
+        } else if (fp.toLowerCase().endsWith(Consts.MEDIA_PACKAGE_EXTENSION)) {
+            importTTMPX(filePath);
+        } else if (fp.toLowerCase().endsWith(".zip")) {
+            importTtPackage(filePath);
+        } else {
+
+            Toast.makeText(MainActivity.this, "Invalid File Type", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void importTTX(Uri filePath) {
         try {
             String fp = filePath.getPath();
             if (fp == null)
                 throw new RuntimeException("Invalid Filepath");
 
-            //TODO option for zip files (ttx & ttmpx & media dir)
+            if (!fp.endsWith(Consts.FILE_EXTENSION))
+                throw new RuntimeException("Invalid File Type");
 
             String fileName = FileUtils.getFileName(fp);
 
@@ -679,12 +687,38 @@ public class MainActivity extends TtProjectAdjusterActivity {
 
                 openProject(projectName, fileName);
             }
-        } catch (IOException e) {
-            getTtAppCtx().getReport().writeError(e.getMessage(), "MainActivity:importProject", e.getStackTrace());
+        } catch (Exception e) {
+            getTtAppCtx().getReport().writeError(e.getMessage(), "MainActivity:importTTX", e.getStackTrace());
             Toast.makeText(MainActivity.this, "Error Importing Project", Toast.LENGTH_LONG).show();
         }
     }
 
+    private void importTTMPX(Uri filePath) {
+        try {
+            String fp = filePath.getPath();
+            if (fp == null)
+                throw new RuntimeException("Invalid Filepath");
+
+            if (!fp.endsWith(Consts.MEDIA_PACKAGE_EXTENSION))
+                throw new RuntimeException("Invalid File Type");
+
+            String fileName = FileUtils.getFileName(fp);
+
+            if (MediaAccessManager.localMALExists(getTtAppCtx(), fileName)) {
+                overwriteLocalMediaPackageByImportDialog(fileName, filePath);
+            } else {
+                MediaAccessManager mam = MediaAccessManager.importMAL(getTtAppCtx(), filePath);
+                getTtAppCtx().setMAM(mam);
+            }
+        } catch (Exception e) {
+            getTtAppCtx().getReport().writeError(e.getMessage(), "MainActivity:importTTMPX", e.getStackTrace());
+            Toast.makeText(MainActivity.this, "Error Importing Media Package", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void importTtPackage(Uri filePath) {
+        //ToDO Implement Package Import
+    }
 
     private final ActivityResultLauncher<String> exportProjectLauncher = registerForActivityResult(new CreateZipDocument(),
             uri -> {
@@ -774,21 +808,22 @@ public class MainActivity extends TtProjectAdjusterActivity {
         alert.show();
     }
 
-    private void overwriteLocalProjectByImportDialog(final String fileName, Uri file) {
+    private void overwriteLocalProjectByImportDialog(final String fileName, Uri filePath) {
         AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
         alert.setTitle("Project Exists");
-        alert.setMessage(String.format("The current file '%s' already exists. Do you want to overwrite or rename the project?", fileName));
+        alert.setMessage(String.format(Locale.getDefault(), "The current file '%s' already exists. Do you want to overwrite or rename the project?", fileName));
 
         alert.setPositiveButton("Overwrite", (dialog, which) -> {
             try {
-                DataAccessManager dam = DataAccessManager.importDAL(getTtAppCtx(), file);
+                DataAccessManager dam = DataAccessManager.importDAL(getTtAppCtx(), filePath);
 
                 String projectName = dam.getDAL().getProjectID();
                 dam.close();
 
                 openProject(projectName, fileName);
             } catch (IOException e) {
-                e.printStackTrace();
+                getTtAppCtx().getReport().writeError(e.getMessage(), "MainActivity:overwriteLocalProjectByImportDialog:overwrite");
+                Toast.makeText(MainActivity.this, "Error Overwriting Project", Toast.LENGTH_LONG).show();
             }
         });
 
@@ -804,14 +839,15 @@ public class MainActivity extends TtProjectAdjusterActivity {
                         newFileName += Consts.FILE_EXTENSION;
                     }
 
-                    DataAccessManager dam = DataAccessManager.importDAL(getTtAppCtx(), file, newFileName);
+                    DataAccessManager dam = DataAccessManager.importAndRenameDAL(getTtAppCtx(), filePath, newFileName);
 
                     String projectName = dam.getDAL().getProjectID();
                     dam.close();
 
                     openProject(projectName, fileName);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    getTtAppCtx().getReport().writeError(e.getMessage(), "MainActivity:overwriteLocalProjectByImportDialog:rename");
+                    Toast.makeText(MainActivity.this, "Error Renaming Project", Toast.LENGTH_LONG).show();
                 }
             });
 
@@ -824,6 +860,102 @@ public class MainActivity extends TtProjectAdjusterActivity {
         alert.show();
     }
 
+    private void overwriteLocalMediaPackageByImportDialog(final String fileName, Uri filePath) {
+        AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
+        alert.setTitle("Media File Exists");
+        alert.setMessage(String.format("The current file '%s' already exists. Do you want to overwrite or rename it?", fileName));
+
+        alert.setPositiveButton("Overwrite", (dialog, which) -> {
+            try {
+                MediaAccessManager mam = MediaAccessManager.importMAL(getTtAppCtx(), filePath);
+                getTtAppCtx().setMAM(mam);
+            } catch (IOException e) {
+                getTtAppCtx().getReport().writeError(e.getMessage(), "MainActivity:overwriteLocalMediaPackageByImportDialog:overwrite");
+                Toast.makeText(MainActivity.this, "Error Overwriting Media Package", Toast.LENGTH_LONG).show();
+            }
+        });
+
+        alert.setNegativeButton("Rename", (dialog, which) -> {
+            final InputDialog inputDialog = new InputDialog(MainActivity.this);
+            inputDialog.setTitle("New File Name");
+
+            inputDialog.setPositiveButton("Rename", (d2, wb2) -> {
+                try {
+                    String newFileName = inputDialog.getText();
+
+                    if (!newFileName.endsWith(Consts.MEDIA_FILE_MIME)) {
+                        newFileName += Consts.FILE_EXTENSION;
+                    }
+
+                    MediaAccessManager mam = MediaAccessManager.importAndRenameMAL(getTtAppCtx(), filePath, newFileName);
+                    getTtAppCtx().setMAM(mam);
+                } catch (IOException e) {
+                    getTtAppCtx().getReport().writeError(e.getMessage(), "MainActivity:overwriteLocalMediaPackageByImportDialog:rename");
+                    Toast.makeText(MainActivity.this, "Error Renaming Media Package", Toast.LENGTH_LONG).show();
+                }
+            });
+
+            inputDialog.setNegativeButton("Cancel", null);
+
+            inputDialog.show();
+        });
+
+        alert.setNeutralButton(R.string.str_cancel, null);
+        alert.show();
+    }
+
+    private void overwriteLocalProjectAndMediaPackageByImportDialog(String baseFileName, Uri ttxFilePath, Uri ttmpxFilePath) {
+        AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
+        alert.setTitle("Project Exists");
+        alert.setMessage(String.format(Locale.getDefault(), "The project files '%s' already exist. Do you want to overwrite or rename the project?", baseFileName));
+
+        alert.setPositiveButton("Overwrite", (dialog, which) -> {
+            try {
+                DataAccessManager dam = DataAccessManager.importDAL(getTtAppCtx(), ttxFilePath);
+                MediaAccessManager.importMAL(getTtAppCtx(), ttmpxFilePath).close();
+
+                String projectID = dam.getDAL().getProjectID();
+                String fileName = dam.getDatabaseName();
+                dam.close();
+
+                openProject(projectID, fileName);
+            } catch (IOException e) {
+                getTtAppCtx().getReport().writeError(e.getMessage(), "MainActivity:overwriteLocalProjectAndMediaPackageByImportDialog:overwrite");
+                Toast.makeText(MainActivity.this, "Error Overwriting Project", Toast.LENGTH_LONG).show();
+            }
+        });
+
+        alert.setNegativeButton("Rename", (dialog, which) -> {
+            final InputDialog inputDialog = new InputDialog(MainActivity.this);
+            inputDialog.setTitle("New File Name");
+
+            inputDialog.setPositiveButton("Rename", (d2, wb2) -> {
+                try {
+                    String newTtxFileName = inputDialog.getText(), newTtmpxFileName;
+                    String newBaseFileName = newTtxFileName.substring(0, newTtxFileName.lastIndexOf("."));
+
+                    newTtxFileName = newBaseFileName + Consts.FILE_EXTENSION;
+                    newTtmpxFileName = newBaseFileName + Consts.MEDIA_PACKAGE_EXTENSION;
+
+                    DataAccessManager dam = DataAccessManager.importAndRenameDAL(getTtAppCtx(), ttxFilePath, newTtxFileName);
+                    MediaAccessManager.importAndRenameMAL(getTtAppCtx(), ttmpxFilePath, newTtmpxFileName).close();
+                    dam.close();
+
+                    openProject(newBaseFileName, newTtmpxFileName);
+                } catch (IOException e) {
+                    getTtAppCtx().getReport().writeError(e.getMessage(), "MainActivity:overwriteLocalProjectAndMediaPackageByImportDialog:rename");
+                    Toast.makeText(MainActivity.this, "Error Renaming Project", Toast.LENGTH_LONG).show();
+                }
+            });
+
+            inputDialog.setNegativeButton("Cancel", null);
+
+            inputDialog.show();
+        });
+
+        alert.setNeutralButton(R.string.str_cancel, null);
+        alert.show();
+    }
 
     private void askToAdjust() {
         new AlertDialog.Builder(MainActivity.this)
@@ -851,6 +983,25 @@ public class MainActivity extends TtProjectAdjusterActivity {
 
         ArrayList<TwoTrailsProject> twoTrailsProjects = getTtAppCtx().getProjectSettings().getRecentProjects();
 
+        if (twoTrailsProjects.size() < 1) {
+            for (String file : databaseList()) {
+                if (file.toLowerCase().endsWith(Consts.FILE_EXTENSION)) {
+                    DataAccessManager dam = DataAccessManager.openDAL(getTtAppCtx(), file);
+                    String projId = dam.getDAL().getProjectID();
+                    String mediaFile = file.toLowerCase().replace(Consts.FILE_EXTENSION, Consts.MEDIA_PACKAGE_EXTENSION);
+                    if (!MediaAccessManager.localMALExists(getTtAppCtx(), mediaFile)) {
+                        mediaFile = null;
+                    }
+                    TwoTrailsProject proj = new TwoTrailsProject(projId, file, mediaFile);
+                    twoTrailsProjects.add(proj);
+                }
+            }
+
+            if (twoTrailsProjects.size() > 0) {
+                getTtAppCtx().getProjectSettings().setRecentProjects(twoTrailsProjects);
+            }
+        }
+
         if (twoTrailsProjects.size() > 0) {
             final RecentProjectAdapter adapter = new RecentProjectAdapter(MainActivity.this, twoTrailsProjects);
 
@@ -874,8 +1025,7 @@ public class MainActivity extends TtProjectAdjusterActivity {
 
     public void btnImportProjectClick(View view) {
         if (continueIfNotProcessing()) {
-            //TODO option for zip files (ttx & ttmpx & media dir)
-            importFileLauncher.launch(Consts.FILE_MIME);
+            importFileOnResult.launch("*/*");
         }
     }
 

@@ -381,7 +381,11 @@ public class ExportActivity extends CustomToolbarActivity {
 
 
     private void startExportFile(Uri file) {
-        startExport(file, true, file.getPath().contains(".zip"));
+        startExport(file, true,
+                file.getPath().contains(".zip") ||
+                    checkedCount > 1 ||
+                    chkPoints.isChecked() ||
+                    chkPc.isChecked());
     }
 
     private void startExportDir(DocumentFile dir) {
@@ -398,11 +402,12 @@ public class ExportActivity extends CustomToolbarActivity {
             exportTask.setListener(new Export.ExportTask.Listener() {
                 @Override
                 public void onTaskFinish(Export.ExportTask.Result result) {
+                    progCircle.beginFinalAnimation();
+
                     switch (result.getCode()) {
                         case Success: {
                             //MediaScannerConnection.scanFile(ExportActivity.this, new String[]{directory.getAbsolutePath()}, null, null);
 
-                            progCircle.beginFinalAnimation();
 
                             Toast.makeText(ExportActivity.this, "Files Exported", Toast.LENGTH_LONG).show();
 
@@ -451,15 +456,17 @@ public class ExportActivity extends CustomToolbarActivity {
 //                        }
                             break;
                         }
-                        case Cancelled:
-                            progCircle.hide();
-                            break;
                         case ExportFailure:
                         case InvalidParams:
                             progCircle.hide();
                             Toast.makeText(getBaseContext(), "Export error, See log for details", Toast.LENGTH_SHORT).show();
                             getTtAppCtx().getReport().writeError(result.getMessage(), "ExportActivity:startDirExport:invalidParams");
                             break;
+                        case Cancelled:
+                        default:
+                            progCircle.hide();
+                            break;
+
                     }
                 }
 

@@ -99,10 +99,10 @@ public class DataAccessManager extends AccessManager<DataAccessLayer>  {
 
 
     public static DataAccessManager importDAL(TwoTrailsApp context, Uri filePath) throws IOException {
-        return importDAL(context, filePath, null);
+        return importAndRenameDAL(context, filePath, null);
     }
 
-    public static DataAccessManager importDAL(TwoTrailsApp context, Uri filePath, String newFileName) throws IOException {
+    public static DataAccessManager importAndRenameDAL(TwoTrailsApp context, Uri filePath, String newFileName) throws IOException {
         return new DataAccessManager(context, importAL(context, filePath, newFileName), null);
     }
 

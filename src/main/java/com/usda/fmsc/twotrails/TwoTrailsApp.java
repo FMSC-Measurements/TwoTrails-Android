@@ -443,6 +443,18 @@ public class TwoTrailsApp extends Application {
             }
 
             try {
+                if (_DAM != null) {
+                    _DAM.close();
+                }
+
+                if (_MAM != null) {
+                    _MAM.close();
+                }
+            } catch (Exception e) {
+                Log.e(Consts.LOG_TAG, "Error in TwoTrailsApp:uncaughtException:db");
+            }
+
+            try {
                 DateTime lastCrash = getDeviceSettings().getLastCrashTime();
                 DateTime currentCrash = DateTime.now();
                 getDeviceSettings().setLastCrashTime(currentCrash);
@@ -484,7 +496,6 @@ public class TwoTrailsApp extends Application {
             }
 
             _CurrentActivity.finishAndRemoveTask();
-            //_CurrentActivity.finish();
             System.exit(2);
         }
     };

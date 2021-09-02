@@ -1506,6 +1506,9 @@ public class Export {
                     File tmpZip = new File(params.getContext().getCacheDir(), FileUtils.getFileName(file.getPath()));
                     FileUtils.zipToFile(zfDir, tmpZip);
                     AndroidUtils.Files.copyFile(params.getContext(), Uri.fromFile(tmpZip), file);
+                    if (tmpZip.delete()) {
+                        zfDir.delete();
+                    }
                 } catch (Exception e) {
                     params.getContext().getReport().writeError(e.getMessage(), "Export:ExportTask:onBackgroundWork:zip", e.getStackTrace());
                     return new Result(ResultCode.ExportFailure, "zip");

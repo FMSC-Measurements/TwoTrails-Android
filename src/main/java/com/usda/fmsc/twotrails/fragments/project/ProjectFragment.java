@@ -76,22 +76,26 @@ public class ProjectFragment extends TtBasePrefFragment implements SharedPrefere
             pref.setSummary(value);
         }
 
-        switch (key) {
-            case ProjectSettings.PROJECT_ID:
-                getTtAppCtx().getDAL().setProjectID(value);
-                break;
-            case ProjectSettings.DESCRIPTION:
-                getTtAppCtx().getDAL().setProjectDescription(value);
-                break;
-            case ProjectSettings.DISTRICT:
-                getTtAppCtx().getDAL().setProjectDistrict(value);
-                break;
-            case ProjectSettings.FOREST:
-                getTtAppCtx().getDAL().setProjectForest(value);
-                break;
-            case ProjectSettings.REGION:
-                getTtAppCtx().getDAL().setProjectRegion(value);
-                break;
+        try {
+            switch (key) {
+                case ProjectSettings.PROJECT_ID:
+                    getTtAppCtx().getDAL().setProjectID(value);
+                    break;
+                case ProjectSettings.DESCRIPTION:
+                    getTtAppCtx().getDAL().setProjectDescription(value);
+                    break;
+                case ProjectSettings.DISTRICT:
+                    getTtAppCtx().getDAL().setProjectDistrict(value);
+                    break;
+                case ProjectSettings.FOREST:
+                    getTtAppCtx().getDAL().setProjectForest(value);
+                    break;
+                case ProjectSettings.REGION:
+                    getTtAppCtx().getDAL().setProjectRegion(value);
+                    break;
+            }
+        } catch (Exception e) {
+            getTtAppCtx().getReport().writeError(e.getMessage(), "ProjectFragment:onSharedPreferenceChanged");
         }
     }
 }

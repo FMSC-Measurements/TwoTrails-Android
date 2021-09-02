@@ -29,6 +29,7 @@ public class DataActionType {
     public static final int InsertedNmea        = 1 << 24;
     public static final int DeletedNmea         = 1 << 25;
     public static final int RezonedPoints       = 1 << 26;
+    public static final int ModifiedNmea        = 1 << 27;
             
 
     private int value;
