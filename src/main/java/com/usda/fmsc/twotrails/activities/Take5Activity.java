@@ -1,6 +1,5 @@
 package com.usda.fmsc.twotrails.activities;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -75,6 +74,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.Semaphore;
 
 import com.usda.fmsc.geospatial.Position;
@@ -83,7 +83,6 @@ import com.usda.fmsc.geospatial.GeoTools;
 import jp.wasabeef.recyclerview.animators.BaseItemAnimator;
 import jp.wasabeef.recyclerview.animators.FadeInAnimator;
 
-@SuppressLint({"RestrictedApi", "unused"})
 public class Take5Activity extends AcquireGpsMapActivity implements PointMediaController {
     private static final boolean enableCardFading = true;
 
@@ -1380,7 +1379,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
             }
 
             if (error > 0) {
-                Toast.makeText(Take5Activity.this, String.format("Error saving %d pictures", pictures.size()), Toast.LENGTH_LONG).show();
+                Toast.makeText(Take5Activity.this, String.format(Locale.getDefault(), "Error saving %d pictures", pictures.size()), Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -1559,7 +1558,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
         if (title != null) {
             toolbarMedia.setTitle(title);
         } else {
-            toolbarMedia.setTitle(String.format("Media (%d)", mediaCount));
+            toolbarMedia.setTitle(String.format(Locale.getDefault(), "Media (%d)", mediaCount));
         }
     }
 
