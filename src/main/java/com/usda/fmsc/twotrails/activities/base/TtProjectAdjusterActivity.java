@@ -1,7 +1,6 @@
 package com.usda.fmsc.twotrails.activities.base;
 
 import androidx.appcompat.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.drawable.AnimationDrawable;
@@ -10,12 +9,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.usda.fmsc.android.dialogs.ProgressDialogEx;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.logic.AdjustingException;
 
 public abstract class TtProjectAdjusterActivity extends CustomToolbarActivity implements TwoTrailsApp.ProjectAdjusterListener {
-    private ProgressDialog pd;
+    private ProgressDialogEx pd;
     private MenuItem miAdjust;
     private AnimationDrawable adAdjust;
     private boolean isAdjusting = false;
@@ -25,7 +25,7 @@ public abstract class TtProjectAdjusterActivity extends CustomToolbarActivity im
         super.onCreate(savedInstanceState);
 
         //create progress dialog
-        pd = new ProgressDialog(this);
+        pd = new ProgressDialogEx(this);
         pd.setMessage("Adjusting Polygons..");
         pd.setCancelable(false);
         pd.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", (dialog, which) -> getTtAppCtx().cancelAdjuster());

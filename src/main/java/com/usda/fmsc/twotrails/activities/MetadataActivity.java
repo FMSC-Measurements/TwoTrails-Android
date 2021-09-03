@@ -1,7 +1,6 @@
 package com.usda.fmsc.twotrails.activities;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import androidx.appcompat.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -15,6 +14,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.usda.fmsc.android.adapters.FragmentStatePagerAdapterEx;
@@ -53,6 +53,7 @@ public class MetadataActivity extends CustomToolbarActivity {
     private HashMap<String, Listener> listeners;
 
     private GpsService.Listener listener;
+    private ProgressBar progressBar;
 
     private MenuItem miLock, miReset, miDelete;
 
@@ -140,6 +141,8 @@ public class MetadataActivity extends CustomToolbarActivity {
             mViewPager.setAdapter(mSectionsPagerAdapter);
             mViewPager.addOnPageChangeListener(onPageChangeListener);
         }
+
+        progressBar = findViewById(R.id.progress);
 
         lockMetadata(true);
     }
@@ -491,29 +494,37 @@ public class MetadataActivity extends CustomToolbarActivity {
                 final Integer zone = inputDialog.getInt();
 
                 if (zone != null && zone >= 0) {
-                    //TODO fix progress
-                    final ProgressDialog progressDialog = new ProgressDialog(MetadataActivity.this);
-                    progressDialog.setMessage("Recalculating Positions");
-                    progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-                    progressDialog.show();
+                    runOnUiThread(() -> {
+                        Toast.makeText(MetadataActivity.this, "Recalculating Positions", Toast.LENGTH_SHORT).show();
+                    });
+
+                    progressBar.setProgress(0);
+                    progressBar.setVisibility(View.VISIBLE);
 
                     new Thread(() -> {
                         ArrayList<TtPoint> points = getTtAppCtx().getDAL().getGpsTypePointsWithMeta(_CurrentMetadata.getCN());
-                        progressDialog.setMax(points.size() * 2);
+                        progressBar.setMax(points.size() * 2);
 
                         if (points.size() > 0) {
                             for (int i = 0; i < points.size(); i++) {
                                 points.set(i, TtUtils.Points.reCalculateGps(points.get(i), zone, getTtAppCtx().getDAL(), null));
 
-                                progressDialog.setProgress(i);
+                                final int prog = i;
+
+                                runOnUiThread(() -> progressBar.setProgress(prog));
                             }
 
                             getTtAppCtx().getDAL().updatePoints(points);
 
-                            progressDialog.setProgress(points.size() * 2);
+                            runOnUiThread(() -> progressBar.setProgress(points.size() * 2));
                         }
 
-                        progressDialog.dismiss();
+                        progressBar.setVisibility(View.INVISIBLE);
+                        progressBar.setProgress(0);
+
+                        runOnUiThread(() -> {
+                            Toast.makeText(MetadataActivity.this, "Positions Recalculated", Toast.LENGTH_LONG).show();
+                        });
                     }).start();
 
                     _CurrentMetadata.setZone(zone);
