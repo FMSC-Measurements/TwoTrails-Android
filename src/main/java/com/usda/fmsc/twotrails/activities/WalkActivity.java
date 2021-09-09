@@ -227,13 +227,9 @@ public class WalkActivity extends AcquireGpsMapActivity {
                 finish();
             }
         } else if (itemId == R.id.walkMenuGps) {
-            startActivityForResult(new Intent(this, SettingsActivity.class)
-                            .putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.GPS_SETTINGS_PAGE),
-                    Consts.Codes.Activities.SETTINGS);
+            openSettings(SettingsActivity.GPS_SETTINGS_PAGE);
         } else if (itemId == R.id.walkMenuWalkSettings) {
-            startActivityForResult(new Intent(this, SettingsActivity.class)
-                            .putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.POINT_WALK_SETTINGS_PAGE),
-                    Consts.Codes.Activities.SETTINGS);
+            openSettings(SettingsActivity.POINT_WALK_SETTINGS_PAGE);
         } else if (itemId == R.id.walkMenuRenameGroup) {
             updateGroupName();
         } else if (itemId == R.id.walkMenuMode) {

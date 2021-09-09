@@ -45,6 +45,15 @@
         <View style="@style/Dividers"/>
 
         <Button
+            android:text="@string/main_btn_remove_project"
+            android:id="@+id/mainFragFileBtnRemove"
+            android:onClick="btnRemoveProjectClick"
+            android:enabled="false"
+            style="@style/MainActivityButtons" android:visibility="gone"/>
+
+        <View style="@style/Dividers" android:visibility="gone"/>
+
+        <Button
             android:text="@string/main_btn_import_data"
             android:id="@+id/mainFragFileBtnImport"
             android:onClick="btnImportDataClick"
@@ -98,6 +107,19 @@
 
                 <TextView
                     android:id="@+id/mainFragFileTvDate"
+                    android:gravity="end"
+                    android:padding="5dip"/>
+            </TableRow>
+
+            <TableRow>
+
+                <TextView
+                    android:layout_column="1"
+                    android:text="@string/main_tv_dal_version"
+                    android:padding="5dip"/>
+
+                <TextView
+                    android:id="@+id/mainFragFileTvVersion"
                     android:gravity="end"
                     android:padding="5dip"/>
             </TableRow>

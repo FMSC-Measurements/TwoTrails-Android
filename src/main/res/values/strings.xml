@@ -364,6 +364,7 @@
     <string name="main_btn_open_rec">Opened Recently</string>
     <string name="main_btn_import_project">Import Project</string>
     <string name="main_btn_export_project">Export Project</string>
+    <string name="main_btn_remove_project">Remove Project</string>
     <string name="main_btn_import_data">Import Data</string>
     <string name="main_btn_import">Import</string>
     <string name="main_btn_duplicate">Duplicate</string>
@@ -388,7 +389,7 @@
     <string name="main_btn_sat">Sales Admin Tools</string>
 
     <string name="main_tv_edited">Last Edited</string>
-
+    <string name="main_tv_dal_version">DAL Version</string>
 
     <!-- Polygon -->
     <string name="poly_acc">Accuracy</string>

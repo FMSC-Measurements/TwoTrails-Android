@@ -50,6 +50,8 @@ import com.usda.fmsc.utilities.FileUtils;
 import com.usda.fmsc.utilities.MimeTypes;
 import com.usda.fmsc.utilities.StringEx;
 
+import org.joda.time.DateTime;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -729,22 +731,29 @@ public class MainActivity extends TtProjectAdjusterActivity {
         File tmpInternalZipDir = new File(getTtAppCtx().getCacheDir(), FileUtils.getFileNameWoExt(fp));
 
         try {
+            if (tmpInternalZipDir.exists()) {
+                if (!FileUtils.deleteDirectory(tmpInternalZipDir)) {
+                    throw new RuntimeException("Unable to delete unzipped folder");
+                }
+            }
+
             AndroidUtils.Files.copyFile(getTtAppCtx(), filePath, Uri.fromFile(tmpInternalZip));
 
             FileUtils.unzip(tmpInternalZip, tmpInternalZipDir);
 
-            for (String path : tmpInternalZipDir.list()) {
-                importFromFile(new File(path));
+            for (File file : tmpInternalZipDir.listFiles()) {
+                importFromFile(file);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            getTtAppCtx().getReport().writeError(e.getMessage(), "MainActivity:importTtPackage");
+            Toast.makeText(MainActivity.this, "Error Importing Project. See Log for details.", Toast.LENGTH_LONG).show();
         }
     }
 
     private void importFromFile(File item) {
         if (item.isDirectory()) {
-            for (String subItem : item.list()) {
-                importFromFile(new File(subItem));
+            for (File subItem : item.listFiles()) {
+                importFromFile(subItem);
             }
         } else if (item.getPath().toLowerCase().endsWith(Consts.FileExtensions.TWO_TRAILS)) {
             importTTX(Uri.fromFile(item));
@@ -763,17 +772,13 @@ public class MainActivity extends TtProjectAdjusterActivity {
             });
     private void exportProject(Uri filePath) {
         try {
-            File pcPkgFile = Export.exportProjectPackage(getTtAppCtx(), getTtAppCtx().getDAL(), getTtAppCtx().getMAL());
+            if (filePath != null) {
+                File pcPkgFile = Export.exportProjectPackage(getTtAppCtx(), getTtAppCtx().getDAL(), getTtAppCtx().getMAL());
 
-            DocumentFile df = DocumentFile.fromSingleUri(getTtAppCtx(), filePath);
-
-            if (df != null) {
-                DocumentFile extPcPkgFile = df.createFile(MimeTypes.Application.ZIP, pcPkgFile.getName());
-
-                if (extPcPkgFile != null) {
-                    AndroidUtils.Files.copyFile(getTtAppCtx(), Uri.fromFile(pcPkgFile), extPcPkgFile.getUri());
+                if (pcPkgFile != null) {
+                    AndroidUtils.Files.copyFile(getTtAppCtx(), Uri.fromFile(pcPkgFile), filePath);
                 } else {
-                    throw new Exception("Unable to create file");
+                    throw new Exception("Unable to create export file");
                 }
             } else {
                 throw new Exception("Unable to get file path from uri");
@@ -783,25 +788,6 @@ public class MainActivity extends TtProjectAdjusterActivity {
             Toast.makeText(MainActivity.this, "Error Exporting Project", Toast.LENGTH_LONG).show();
         }
     }
-
-
-//    private void duplicateFile(final String fileName) {
-//        if (getTtAppCtx().getDAL().duplicate(fileName)) {
-//            View view = findViewById(R.id.parent);
-//            if (view != null) {
-//                Snackbar snackbar = Snackbar.make(view, "File duplicated", Snackbar.LENGTH_LONG).setAction("Open", v -> openFile(fileName))
-//                .setActionTextColor(AndroidUtils.UI.getColor(getBaseContext(), R.color.primaryLighter));
-//
-//                AndroidUtils.UI.setSnackbarTextColor(snackbar, Color.WHITE);
-//
-//                snackbar.show();
-//            } else {
-//                Toast.makeText(this, "File duplicated", Toast.LENGTH_SHORT).show();
-//            }
-//        } else {
-//            Toast.makeText(this, "File failed to duplicate", Toast.LENGTH_SHORT).show();
-//        }
-//    }
     //endregion
 
 
@@ -1069,9 +1055,9 @@ public class MainActivity extends TtProjectAdjusterActivity {
     public void btnExportProjectClick(View view) {
         if (continueIfNotProcessing()) {
 
-            String filename = String.format("%s_%s.zip", TtUtils.projectToFileName(
-                    getTtAppCtx().getDAL().getProjectID()),
-                    new Date(getTtAppCtx().getDAM().getDBFile().lastModified()).toString()
+            String filename = String.format(Locale.getDefault(), "%s_%s.zip",
+                    TtUtils.projectToFileName(getTtAppCtx().getDAL().getProjectID()),
+                    TtUtils.Date.toStringDateMillis(new DateTime(getTtAppCtx().getDAM().getDBFile().lastModified()))
             );
 
             exportProjectLauncher.launch(filename);
@@ -1082,49 +1068,10 @@ public class MainActivity extends TtProjectAdjusterActivity {
         updateAppInfoOnResult.launch(new Intent(this, ImportActivity.class));
     }
 
-    public void btnRemoveProject(View view) {
+    public void btnRemoveProjectClick(View view) {
         //TODO remove project
         //ask to export first
     }
-
-
-//    public void btnBackupClick(View view) {
-        //ask for new file name, copy project and open, auto export if avail
-
-
-
-//        if (!AndroidUtils.App.checkStoragePermission(MainActivity.this)) {
-//            getFilePermissions();
-//        } else {
-//            if (PolygonAdjuster.isProcessing()) {
-//                Toast.makeText(this, "Currently Adjusting Polygons.", Toast.LENGTH_LONG).show();
-//            } else {
-//                AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-//
-//                String filepath = getTtAppCtx().getDAL().getFilePath();
-//
-//                String dupFile = String.format("%s_bk%s", FileUtils.getFilePathWoExt(filepath), Consts.FILE_EXTENSION);
-//                int inc = 2;
-//
-//                while (true) {
-//                    if (FileUtils.fileExists(dupFile, MainActivity.this)) {
-//                        dupFile = String.format("%s_bk%d%s", FileUtils.getFilePathWoExt(filepath), inc, Consts.FILE_EXTENSION);
-//                        inc++;
-//                        continue;
-//                    }
-//                    break;
-//                }
-//
-//                final String filename = dupFile;
-//
-//                dialog.setMessage(String.format("Duplicate File to: %s", dupFile.substring(dupFile.lastIndexOf("/") + 1)));
-//
-//                dialog.setPositiveButton(R.string.main_btn_duplicate, (dialog1, which) -> duplicateFile(filename))
-//                        .setNeutralButton(R.string.str_cancel, null)
-//                        .show();
-//            }
-//        }
-//    }
 
     public void btnCleanDb(View view) {
         AlertDialog.Builder dialog = new AlertDialog.Builder(this);

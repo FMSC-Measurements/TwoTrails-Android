@@ -149,31 +149,6 @@ public class ExportActivity extends CustomToolbarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    //    @Override
-//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        if (requestCode == Consts.Codes.Requests.FOLDER && resultCode == RESULT_OK) {
-//
-//
-//            Uri directoryUri = data.getData();
-//
-//            boolean noDir = true;
-//            if (directoryUri != null) {
-//                DocumentFile dir = DocumentFile.fromTreeUri(this, directoryUri);
-//
-//                if (dir != null && dir.isDirectory()) {
-//                    startExport(dir.getUri(), true);
-//                    noDir = false;
-//                }
-//            }
-//
-//            if (noDir) {
-//                Toast.makeText(ExportActivity.this, "Unable to find Directory", Toast.LENGTH_LONG).show();
-//            }
-//        }
-//
-//        super.onActivityResult(requestCode, resultCode, data);
-//    }
-
     public void chkOnChange(View view, boolean isChecked, MultiStateTouchCheckBox.CheckedState state) {
         checkedCount = 0;
 

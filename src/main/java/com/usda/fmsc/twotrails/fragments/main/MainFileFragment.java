@@ -20,10 +20,9 @@ import java.util.Date;
 
 
 public class MainFileFragment extends TtBaseFragment {
-    private Button btnImport, btnCleanDb;//, btnDup;
+    private Button btnImport, btnCleanDb, btnExport;//, btnDup;
     private TableLayout tblInfo;
-    private TextView tvDate, tvPolys, tvPoints, tvGroups, tvMeta;
-    private DataAccessLayer _dal;
+    private TextView tvDate, tvPolys, tvPoints, tvGroups, tvMeta, tvDalVersion;
     private View viewCleanDb;
 
     private boolean enabled = false, viewExists = false;
@@ -51,7 +50,7 @@ public class MainFileFragment extends TtBaseFragment {
 
         tblInfo = view.findViewById(R.id.mainFragFileTblInfo);
 
-        //TODO add version info
+        tvDalVersion = view.findViewById(R.id.mainFragFileTvVersion);
         tvDate = view.findViewById(R.id.mainFragFileTvDate);
         tvPolys = view.findViewById(R.id.mainFragFileTvPolys);
         tvPoints = view.findViewById(R.id.mainFragFileTvPoints);
@@ -61,11 +60,13 @@ public class MainFileFragment extends TtBaseFragment {
         btnImport = view.findViewById(R.id.mainFragFileBtnImport);
         //btnDup = view.findViewById(R.id.mainFragFileBtnDup);
         btnCleanDb = view.findViewById(R.id.mainFragFileBtnCleanDb);
+        btnExport = view.findViewById(R.id.mainFragFileBtnExportProject);
+
         viewCleanDb = view.findViewById(R.id.mainFragFileCleanDb);
 
         enableButtons(enabled);
 
-        if(_dal != null) {
+        if(getTtAppCtx().hasDAL()) {
             updateInfo();
         }
 
@@ -86,6 +87,7 @@ public class MainFileFragment extends TtBaseFragment {
             btnImport.setEnabled(enable);
             //btnDup.setEnabled(enable);
             btnCleanDb.setEnabled(enable);
+            btnExport.setEnabled(enabled);
 
             tblInfo.setVisibility(enable ? View.VISIBLE : View.INVISIBLE);
 
@@ -104,14 +106,13 @@ public class MainFileFragment extends TtBaseFragment {
         if (isViewCreated()) {
             File dbFile = dam.getDBFile();
 
+            tvDalVersion.setText(dal.getVersion().toString());
             tvDate.setText(new Date(dbFile.lastModified()).toString());
             tvPolys.setText(StringEx.toString(dal.getItemsCount(TwoTrailsSchema.PolygonSchema.TableName)));
             tvPoints.setText(StringEx.toString(dal.getItemsCount(TwoTrailsSchema.PointSchema.TableName)));
             tvGroups.setText(StringEx.toString(dal.getItemsCount(TwoTrailsSchema.GroupSchema.TableName)));
             tvMeta.setText(StringEx.toString(dal.getItemsCount(TwoTrailsSchema.MetadataSchema.TableName)));
         }
-
-        _dal = dal;
     }
 
 }
