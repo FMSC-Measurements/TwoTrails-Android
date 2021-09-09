@@ -113,9 +113,9 @@ public class MapDetailsActivity extends CustomToolbarActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == Consts.Codes.Dialogs.IMPORT_PROJECT_FILE && data != null && data.getData() != null) {
-            arcGisMapLayer.setFilePath(data.getData().toString());
+            arcGisMapLayer.setFileName(data.getData().toString());
 
-            tvFile.setText(arcGisMapLayer.getFilePath());
+            tvFile.setText(arcGisMapLayer.getFileName());
 
             tvFile.setTextColor(AndroidUtils.UI.getColor(this,
                     arcGisMapLayer.hasValidFile() ?
@@ -137,7 +137,7 @@ public class MapDetailsActivity extends CustomToolbarActivity {
 
         tvUrl.setText(agml.getUrl());
 
-        tvFile.setText(agml.getFilePath());
+        tvFile.setText(agml.getFileName());
 
         tvFile.setTextColor(AndroidUtils.UI.getColor(this,
                 agml.hasValidFile() ?
@@ -189,7 +189,7 @@ public class MapDetailsActivity extends CustomToolbarActivity {
     }
 
     private void updatePath() {
-        AndroidUtils.App.openFileIntent(this, Consts.FileExtensions.TPK, Consts.Codes.Dialogs.IMPORT_PROJECT_FILE);
+        AndroidUtils.App.openFileIntent(this, Consts.FileMimes.TPK, Consts.Codes.Dialogs.IMPORT_PROJECT_FILE);
     }
 
 

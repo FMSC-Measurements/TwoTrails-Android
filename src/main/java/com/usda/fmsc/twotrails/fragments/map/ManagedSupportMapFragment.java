@@ -32,6 +32,7 @@ import com.usda.fmsc.twotrails.objects.map.IMarkerDataGraphic;
 import com.usda.fmsc.twotrails.objects.map.PolygonDrawOptions;
 import com.usda.fmsc.twotrails.objects.map.PolygonGraphicManager;
 import com.usda.fmsc.twotrails.objects.map.TrailGraphicManager;
+import com.usda.fmsc.twotrails.units.GoogleMapType;
 import com.usda.fmsc.twotrails.units.MapType;
 
 import java.util.ArrayDeque;
@@ -49,6 +50,8 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
 
     private GoogleMap map;
 
+    private MapOptions startUpMapOptions;
+
     private final ArrayList<IMarkerDataGraphic> _MarkerDataGraphics = new ArrayList<>();
     private final HashMap<String, GoogleMapsPolygonGraphic> polygonGraphics = new HashMap<>();
     private final HashMap<String, GoogleMapsTrailGraphic> trailGraphics = new HashMap<>();
@@ -59,7 +62,7 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
 
     private final Queue<CameraUpdate> cameraQueue = new ArrayDeque<>();
 
-    private boolean isMoving, cameraQueueEnabled = false;
+    private boolean isMoving, cameraQueueEnabled = false, initialLoad = true;
 
 
     public static ManagedSupportMapFragment newInstance() {
@@ -86,7 +89,6 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
 
         Bundle bundle = getArguments();
 
-        MapOptions startUpMapOptions;
         if (bundle != null && bundle.containsKey(MAP_OPTIONS_EXTRA)) {
             startUpMapOptions = bundle.getParcelable(MAP_OPTIONS_EXTRA);
         } else {
@@ -169,38 +171,6 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
 
         setMapPadding(0, (int) (getResources().getDimension(R.dimen.toolbar_height)), 0, 0);
 
-//        if (startUpMapOptions != null && startUpMapOptions.getMapId() != GoogleMapType.MAP_TYPE_NONE.getValue()) {
-//            try {
-//                if (startUpMapOptions.hasExtents()) {
-//                    map.moveCamera(CameraUpdateFactory.newLatLngBounds(
-//                            new LatLngBounds(
-//                                    new LatLng(startUpMapOptions.getSouth(), startUpMapOptions.getWest()),
-//                                    new LatLng(startUpMapOptions.getNorth(), startUpMapOptions.getEast())
-//                            ),
-//                            //fragWidth - startUpMapOptions.getPadding() / 2,
-//                            //fragHeight - startUpMapOptions.getPadding() / 2,
-//                            startUpMapOptions.getPadding()
-//                    ));
-//                } else if (startUpMapOptions.hasLocation()) {
-//                    map.moveCamera(CameraUpdateFactory.newLatLngZoom(
-//                            new LatLng(
-//                                    startUpMapOptions.getLatitude(),
-//                                    startUpMapOptions.getLongitide()
-//                            ),
-//                            startUpMapOptions.getZoomLevel() != null ? startUpMapOptions.getZoomLevel() : Consts.Location.ZOOM_GENERAL));
-//                } else {
-//                    map.moveCamera(CameraUpdateFactory.newLatLngBounds(
-//                            Consts.Location.GoogleMaps.USA_BOUNDS,
-//                            fragWidth,
-//                            fragHeight,
-//                            Consts.Location.PADDING
-//                    ));
-//                }
-//            } catch (Exception e) {
-//                TtAppCtx.getReport().writeError("ManagedSupportMapFragment:onMapReady", e.getMessage(), e.getStackTrace());
-//            }
-//        }
-
         if (mmlistener != null) {
             mmlistener.onMapReady();
             mmlistener.onMapTypeChanged(MapType.Google, map.getMapType(), true);
@@ -209,6 +179,43 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
 
     @Override
     public void onMapLoaded() {
+//        if (initialLoad && startUpMapOptions != null && startUpMapOptions.getMapId() != GoogleMapType.MAP_TYPE_NONE.getValue()) {
+//            try {
+//                if (startUpMapOptions.hasExtents()) {
+//                    moveToLocation(CameraUpdateFactory.newLatLngBounds(
+//                            new LatLngBounds(
+//                                    new LatLng(startUpMapOptions.getSouth(), startUpMapOptions.getWest()),
+//                                    new LatLng(startUpMapOptions.getNorth(), startUpMapOptions.getEast())
+//                            ),
+//                            //fragWidth - startUpMapOptions.getPadding() / 2,
+//                            //fragHeight - startUpMapOptions.getPadding() / 2,
+//                            startUpMapOptions.getPadding()
+//                        ),
+//                    false);
+//                } else if (startUpMapOptions.hasLocation()) {
+//                    moveToLocation(CameraUpdateFactory.newLatLngZoom(
+//                            new LatLng(
+//                                    startUpMapOptions.getLatitude(),
+//                                    startUpMapOptions.getLongitude()
+//                            ),
+//                            startUpMapOptions.getZoomLevel() != null ? startUpMapOptions.getZoomLevel() : Consts.Location.ZOOM_GENERAL),
+//                    false);
+//                } else {
+//                    moveToLocation(CameraUpdateFactory.newLatLngBounds(
+//                            Consts.Location.GoogleMaps.USA_BOUNDS,
+//                            fragWidth,
+//                            fragHeight,
+//                            Consts.Location.PADDING
+//                    ), false);
+//                }
+//            } catch (Exception e) {
+//                getTtAppCtx().getReport().writeError("ManagedSupportMapFragment:onMapReady", e.getMessage(), e.getStackTrace());
+//            }
+//
+//            initialLoad = false;
+//        }
+
+
         if (mmlistener != null) {
             mmlistener.onMapLoaded();
         }

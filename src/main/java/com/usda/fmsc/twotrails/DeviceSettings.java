@@ -450,7 +450,7 @@ public class DeviceSettings extends Settings {
             js.name("Description").value(layer.getDescription());
             js.name("Location").value(layer.getLocation());
             js.name("URL").value(layer.getUrl());
-            js.name("FilePath").value(layer.getFilePath());
+            js.name("FilePath").value(layer.getFileName());
             js.name("HasValidFile").value(layer.hasValidFile());
             js.name("Online").value(layer.isOnline());
             js.name("MinScale").value(layer.getMinScale());

@@ -1798,12 +1798,16 @@ public class TtUtils {
                 Build.MANUFACTURER, Build.MODEL, Build.ID);
     }
 
-    public static File exportReport(TwoTrailsApp app, boolean addFile) throws IOException {
+    public static File exportReport(TwoTrailsApp app, String fileName, boolean addFile) throws IOException {
+        if (fileName == null) {
+            fileName = String.format("%sTwoTrailsReport_%s.zip",
+                    File.separator,
+                    DateTime.now().toString());
+        }
+
         File exportFile = new File(
                 app.getCacheDir(),
-                String.format("%sTwoTrailsReport_%s.zip",
-                        File.separator,
-                        DateTime.now().toString()));
+                fileName);
 
 
         List<File> files = new ArrayList<>();
@@ -1907,7 +1911,7 @@ public class TtUtils {
         if (reportFile == null) {
             isCrash = true;
             try {
-                reportFile = TtUtils.exportReport(app, addFile);
+                reportFile = TtUtils.exportReport(app, null, addFile);
             } catch (IOException e) {
                 Toast.makeText(activity, "Unable to generate report.", Toast.LENGTH_LONG).show();
                 return;
@@ -1950,11 +1954,11 @@ public class TtUtils {
     }
 
     public static String projectToFileNameTTX(String projectName) {
-        return projectToFileName(projectName) + Consts.FILE_EXTENSION;
+        return projectToFileName(projectName) + Consts.FileExtensions.TWO_TRAILS;
     }
 
     public static String projectToFileNameTTMPX(String projectName) {
-        return projectToFileName(projectName) + Consts.MEDIA_PACKAGE_EXTENSION;
+        return projectToFileName(projectName) + Consts.FileExtensions.TWO_TRAILS_MEDIA_PACKAGE;
     }
 
 

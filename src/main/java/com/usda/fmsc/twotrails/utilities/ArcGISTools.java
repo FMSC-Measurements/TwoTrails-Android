@@ -1,6 +1,8 @@
 package com.usda.fmsc.twotrails.utilities;
 
+import android.app.Activity;
 import android.content.Context;
+import android.net.Uri;
 
 import androidx.appcompat.app.AlertDialog;
 
@@ -29,6 +31,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -38,7 +41,7 @@ import java.util.List;
 public class ArcGISTools {
     private static ArcGISTools _ArcGISTools;
 
-    private final TwoTrailsApp TtAppCtx;
+    private final TwoTrailsApp _TtAppCtx;
 
     private final SpatialReference LatLonSpatialReference = SpatialReferences.getWgs84();
     private final GeographicTransformation LatLonSpatialTransformation = GeographicTransformation.create(GeographicTransformationStep.create(15855));
@@ -58,10 +61,10 @@ public class ArcGISTools {
 
 
     public ArcGISTools(TwoTrailsApp context) {
-        TtAppCtx = context;
+        _TtAppCtx = context;
         
         mapLayers = new HashMap<>();
-        for (ArcGisMapLayer layer : TtAppCtx.getDeviceSettings().getArcGisMayLayers()) {
+        for (ArcGisMapLayer layer : getTtAppCtx().getDeviceSettings().getArcGisMayLayers()) {
             mapLayers.put(layer.getId(), layer);
         }
 
@@ -75,10 +78,10 @@ public class ArcGISTools {
 
         layer = new ArcGisMapLayer(
                 0,
-                TtAppCtx.getString(R.string.agmap_World_Imagery_name),
-                TtAppCtx.getString(R.string.agmap_World_Imagery_desc),
-                TtAppCtx.getString(R.string.str_world_map),
-                TtAppCtx.getString(R.string.agmap_World_Imagery_url),
+                getTtAppCtx().getString(R.string.agmap_World_Imagery_name),
+                getTtAppCtx().getString(R.string.agmap_World_Imagery_desc),
+                getTtAppCtx().getString(R.string.str_world_map),
+                getTtAppCtx().getString(R.string.agmap_World_Imagery_url),
                 null,
                 true);
 
@@ -86,10 +89,10 @@ public class ArcGISTools {
 
         layer = new ArcGisMapLayer(
                 getId(),
-                TtAppCtx.getString(R.string.agmap_NatGeo_World_Map_name),
-                TtAppCtx.getString(R.string.agmap_NatGeo_World_Map_desc),
-                TtAppCtx.getString(R.string.str_world_map),
-                TtAppCtx.getString(R.string.agmap_NatGeo_World_Map_url),
+                getTtAppCtx().getString(R.string.agmap_NatGeo_World_Map_name),
+                getTtAppCtx().getString(R.string.agmap_NatGeo_World_Map_desc),
+                getTtAppCtx().getString(R.string.str_world_map),
+                getTtAppCtx().getString(R.string.agmap_NatGeo_World_Map_url),
                 null,
                 true);
 
@@ -97,10 +100,10 @@ public class ArcGISTools {
 
         layer = new ArcGisMapLayer(
                 getId(),
-                TtAppCtx.getString(R.string.agmap_NGS_Topo_US_2D_name),
-                TtAppCtx.getString(R.string.agmap_NGS_Topo_US_2D_desc),
-                TtAppCtx.getString(R.string.str_world_map),
-                TtAppCtx.getString(R.string.agmap_NGS_Topo_US_2D_url),
+                getTtAppCtx().getString(R.string.agmap_NGS_Topo_US_2D_name),
+                getTtAppCtx().getString(R.string.agmap_NGS_Topo_US_2D_desc),
+                getTtAppCtx().getString(R.string.str_world_map),
+                getTtAppCtx().getString(R.string.agmap_NGS_Topo_US_2D_url),
                 null,
                 true);
 
@@ -108,10 +111,10 @@ public class ArcGISTools {
 
         layer = new ArcGisMapLayer(
                 getId(),
-                TtAppCtx.getString(R.string.agmap_Ocean_Basemap_name),
-                TtAppCtx.getString(R.string.agmap_Ocean_Basemap_desc),
-                TtAppCtx.getString(R.string.str_world_map),
-                TtAppCtx.getString(R.string.agmap_Ocean_Basemap_url),
+                getTtAppCtx().getString(R.string.agmap_Ocean_Basemap_name),
+                getTtAppCtx().getString(R.string.agmap_Ocean_Basemap_desc),
+                getTtAppCtx().getString(R.string.str_world_map),
+                getTtAppCtx().getString(R.string.agmap_Ocean_Basemap_url),
                 null,
                 true);
 
@@ -119,10 +122,10 @@ public class ArcGISTools {
 
         layer = new ArcGisMapLayer(
                 getId(),
-                TtAppCtx.getString(R.string.agmap_USA_Topo_Maps_name),
-                TtAppCtx.getString(R.string.agmap_USA_Topo_Maps_desc),
-                TtAppCtx.getString(R.string.str_world_map),
-                TtAppCtx.getString(R.string.agmap_USA_Topo_Maps_url),
+                getTtAppCtx().getString(R.string.agmap_USA_Topo_Maps_name),
+                getTtAppCtx().getString(R.string.agmap_USA_Topo_Maps_desc),
+                getTtAppCtx().getString(R.string.str_world_map),
+                getTtAppCtx().getString(R.string.agmap_USA_Topo_Maps_url),
                 null,
                 true);
 
@@ -130,10 +133,10 @@ public class ArcGISTools {
 
         layer = new ArcGisMapLayer(
                 getId(),
-                TtAppCtx.getString(R.string.agmap_World_Physical_Map_name),
-                TtAppCtx.getString(R.string.agmap_World_Physical_Map_desc),
-                TtAppCtx.getString(R.string.str_world_map),
-                TtAppCtx.getString(R.string.agmap_World_Physical_Map_url),
+                getTtAppCtx().getString(R.string.agmap_World_Physical_Map_name),
+                getTtAppCtx().getString(R.string.agmap_World_Physical_Map_desc),
+                getTtAppCtx().getString(R.string.str_world_map),
+                getTtAppCtx().getString(R.string.agmap_World_Physical_Map_url),
                 null,
                 true);
 
@@ -141,10 +144,10 @@ public class ArcGISTools {
 
         layer = new ArcGisMapLayer(
                 getId(),
-                TtAppCtx.getString(R.string.agmap_World_Shaded_Relief_name),
-                TtAppCtx.getString(R.string.agmap_World_Shaded_Relief_desc),
-                TtAppCtx.getString(R.string.str_world_map),
-                TtAppCtx.getString(R.string.agmap_World_Shaded_Relief_url),
+                getTtAppCtx().getString(R.string.agmap_World_Shaded_Relief_name),
+                getTtAppCtx().getString(R.string.agmap_World_Shaded_Relief_desc),
+                getTtAppCtx().getString(R.string.str_world_map),
+                getTtAppCtx().getString(R.string.agmap_World_Shaded_Relief_url),
                 null,
                 true);
 
@@ -152,10 +155,10 @@ public class ArcGISTools {
 
         layer = new ArcGisMapLayer(
                 getId(),
-                TtAppCtx.getString(R.string.agmap_World_Street_Map_name),
-                TtAppCtx.getString(R.string.agmap_World_Street_Map_desc),
-                TtAppCtx.getString(R.string.str_world_map),
-                TtAppCtx.getString(R.string.agmap_World_Street_Map_url),
+                getTtAppCtx().getString(R.string.agmap_World_Street_Map_name),
+                getTtAppCtx().getString(R.string.agmap_World_Street_Map_desc),
+                getTtAppCtx().getString(R.string.str_world_map),
+                getTtAppCtx().getString(R.string.agmap_World_Street_Map_url),
                 null,
                 true);
 
@@ -163,10 +166,10 @@ public class ArcGISTools {
 
         layer = new ArcGisMapLayer(
                 getId(),
-                TtAppCtx.getString(R.string.agmap_World_Terrain_Base_name),
-                TtAppCtx.getString(R.string.agmap_World_Terrain_Base_desc),
-                TtAppCtx.getString(R.string.str_world_map),
-                TtAppCtx.getString(R.string.agmap_World_Terrain_Base_url),
+                getTtAppCtx().getString(R.string.agmap_World_Terrain_Base_name),
+                getTtAppCtx().getString(R.string.agmap_World_Terrain_Base_desc),
+                getTtAppCtx().getString(R.string.str_world_map),
+                getTtAppCtx().getString(R.string.agmap_World_Terrain_Base_url),
                 null,
                 true);
 
@@ -174,23 +177,27 @@ public class ArcGISTools {
 
         layer = new ArcGisMapLayer(
                 getId(),
-                TtAppCtx.getString(R.string.agmap_World_Topo_Map_name),
-                TtAppCtx.getString(R.string.agmap_World_Topo_Map_desc),
-                TtAppCtx.getString(R.string.str_world_map),
-                TtAppCtx.getString(R.string.agmap_World_Topo_Map_url),
+                getTtAppCtx().getString(R.string.agmap_World_Topo_Map_name),
+                getTtAppCtx().getString(R.string.agmap_World_Topo_Map_desc),
+                getTtAppCtx().getString(R.string.str_world_map),
+                getTtAppCtx().getString(R.string.agmap_World_Topo_Map_url),
                 null,
                 true);
 
         mapLayers.put(layer.getId(), layer);
 
-        TtAppCtx.getDeviceSettings().setArcGisMayLayers(mapLayers.values());
+        getTtAppCtx().getDeviceSettings().setArcGisMayLayers(mapLayers.values());
     }
 
     public void reset() {
         idCounter = 0;
-        TtAppCtx.getDeviceSettings().setArcGisMapIdCounter(idCounter);
+        getTtAppCtx().getDeviceSettings().setArcGisMapIdCounter(idCounter);
         mapLayers = new HashMap<>();
         createDefaultMaps();
+    }
+    
+    private TwoTrailsApp getTtAppCtx() {
+        return _TtAppCtx;
     }
 
 
@@ -208,7 +215,7 @@ public class ArcGISTools {
 
     private int getId() {
         if (idCounter == 0) {
-            idCounter = TtAppCtx.getDeviceSettings().getArcGisIdCounter();
+            idCounter = getTtAppCtx().getDeviceSettings().getArcGisIdCounter();
         }
 
         if (idCounter < mapLayers.size()) {
@@ -219,13 +226,13 @@ public class ArcGISTools {
             idCounter++;
         }
 
-        TtAppCtx.getDeviceSettings().setArcGisMapIdCounter(++idCounter);
+        getTtAppCtx().getDeviceSettings().setArcGisMapIdCounter(++idCounter);
         return idCounter;
     }
 
 
-    public ArcGisMapLayer createMapLayer(String name, String description, String location, String uri, String filePath, boolean online) {
-        return new ArcGisMapLayer(getId(), name, description, location, uri, filePath, online);
+    public ArcGisMapLayer createMapLayer(String name, String description, String location, String uri, String fileName, boolean online) {
+        return new ArcGisMapLayer(getId(), name, description, location, uri, fileName, online);
     }
 
 
@@ -238,27 +245,24 @@ public class ArcGISTools {
     }
 
 
-    public ArcGISMap getBaseLayer(Context context, int id) throws FileNotFoundException {
-        return getBaseLayer(context, mapLayers.get(id));
+    public ArcGISMap getBaseLayer(int id) throws FileNotFoundException {
+        return getBaseLayer(mapLayers.get(id));
     }
 
-    public ArcGISMap getBaseLayer(Context context, ArcGisMapLayer agml) throws FileNotFoundException {
-        return getBaseLayer(context, agml, agml.isOnline());
+    public ArcGISMap getBaseLayer(ArcGisMapLayer agml) throws FileNotFoundException {
+        return getBaseLayer(agml, agml.isOnline());
     }
 
-    public ArcGISMap getBaseLayer(Context context, ArcGisMapLayer agml, boolean isOnline) throws FileNotFoundException {
-        ArcGISTiledLayer tiledLayer = null;
+    public ArcGISMap getBaseLayer(ArcGisMapLayer agml, boolean isOnline) throws FileNotFoundException {
+        ArcGISTiledLayer tiledLayer;
 
         if (isOnline) {
             tiledLayer = new ArcGISTiledLayer(agml.getUrl());
         } else {
-            if (FileUtils.fileOrFolderExists(agml.getFilePath())) {
-                try {
-                    TileCache tileCache = new TileCache(agml.getFilePath());
-                    tiledLayer = new ArcGISTiledLayer(tileCache);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+            File filePath = new File(getTtAppCtx().getOfflineMapsDir(), agml.getFileName());
+            if (FileUtils.fileOrFolderExists(filePath.getPath())) {
+                TileCache tileCache = new TileCache(filePath.getPath());
+                tiledLayer = new ArcGISTiledLayer(tileCache);
             } else {
                 throw new FileNotFoundException("Tile Package Not Found");
             }
@@ -270,7 +274,7 @@ public class ArcGISTools {
 
     public void addMapLayer(ArcGisMapLayer layer) {
         mapLayers.put(layer.getId(), layer);
-        TtAppCtx.getDeviceSettings().setArcGisMayLayers(mapLayers.values());
+        getTtAppCtx().getDeviceSettings().setArcGisMayLayers(mapLayers.values());
 
         for (IArcToolsListener l : listeners) {
             if (l != null)
@@ -278,22 +282,20 @@ public class ArcGISTools {
         }
     }
 
-    public void deleteMapLayer(Context context, int id) {
-        deleteMapLayer(context, id, false, null);
+    public void deleteMapLayer(Activity activity, int id) {
+        deleteMapLayer(activity, id, false, null);
     }
 
-    public void deleteMapLayer(Context context, int id, boolean askDeleteFile, final IListener event) {
+    public void deleteMapLayer(Activity activity, int id, boolean askDeleteFile, final IListener event) {
         final ArcGisMapLayer layer = mapLayers.remove(id);
-        TtAppCtx.getDeviceSettings().setArcGisMayLayers(mapLayers.values());
+        getTtAppCtx().getDeviceSettings().setArcGisMayLayers(mapLayers.values());
 
         if (askDeleteFile && layer != null && !layer.isOnline()) {
-            new AlertDialog.Builder(context)
+            new AlertDialog.Builder(activity)
                     .setMessage("Would you like to delete the offline map file as well?")
                     .setPositiveButton(R.string.str_yes, (dialog, which) -> {
-                        String filename = layer.getFilePath();
-
-                        if (!StringEx.isEmpty(filename)) {
-                            FileUtils.delete(filename);
+                        if (!StringEx.isEmpty(layer.getFileName())) {
+                            FileUtils.delete(new File(getTtAppCtx().getOfflineMapsDir(), layer.getFileName()));
                         }
 
                         if (event != null)
@@ -314,7 +316,7 @@ public class ArcGISTools {
     public void updateMapLayer(ArcGisMapLayer layer) {
         if (mapLayers.containsKey(layer.getId())) {
             mapLayers.put(layer.getId(), layer);
-            TtAppCtx.getDeviceSettings().setArcGisMayLayers(mapLayers.values());
+            getTtAppCtx().getDeviceSettings().setArcGisMayLayers(mapLayers.values());
         } else {
             throw new RuntimeException("Map does not exist to update.");
         }
@@ -368,9 +370,9 @@ public class ArcGISTools {
 
 
 
-    public String getOfflineUrlFromOnlineUrl(String onlineUrl) {
-        if (onlineUrl.contains("services.arcgisonline")) {
-            onlineUrl = onlineUrl.replace("services.arcgisonline", "tiledbasemaps.arcgis");
+    public Uri getOfflineUrlFromOnlineUrl(Uri onlineUrl) {
+        if (onlineUrl.getPath().contains("services.arcgisonline")) {
+            onlineUrl = Uri.parse(onlineUrl.getPath().replace("services.arcgisonline", "tiledbasemaps.arcgis"));
         }
 
         return onlineUrl;
@@ -469,14 +471,14 @@ public class ArcGISTools {
 //
 //        tasks.put(task.getLayer().getId(), task);
 //
-//        TtAppCtx.getTtNotifyManager().startMapDownload(layer.getId(), layer.getName());
+//        getTtAppCtx().getTtNotifyManager().startMapDownload(layer.getId(), layer.getName());
 //
 //        task.startDownload(new DownloadOfflineArcGISMapTask.DownloadListener() {
 //            @Override
 //            public void onMapDownloaded(final ArcGisMapLayer layer) {
 //                addMapLayer(layer);
-//                TtAppCtx.getTtNotifyManager().endMapDownload(layer.getId());
-//                Toast.makeText(TtAppCtx, String.format("%s Downloaded", layer.getName()), Toast.LENGTH_LONG).show();
+//                getTtAppCtx().getTtNotifyManager().endMapDownload(layer.getId());
+//                Toast.makeText(getTtAppCtx(), String.format("%s Downloaded", layer.getName()), Toast.LENGTH_LONG).show();
 //            }
 //
 //            @Override
@@ -486,28 +488,28 @@ public class ArcGISTools {
 //
 //                    if (now > lastUpdate + 250) {
 //                        final int progress = status.getDownloadSize() > 0 ? (int) (100 * status.getTotalBytesDownloaded() / status.getDownloadSize()) : 0;
-//                        TtAppCtx.getTtNotifyManager().updateMapDownload(layer.getId(), progress);
+//                        getTtAppCtx().getTtNotifyManager().updateMapDownload(layer.getId(), progress);
 //
 //                        lastUpdate = now;
 //                    }
 //                } else if (status.getStatus() == GPJobResource.JobStatus.FAILED) {
-//                    TtAppCtx.getTtNotifyManager().endMapDownload(layer.getId());
-//                    Toast.makeText(TtAppCtx, "Failed to download offline map", Toast.LENGTH_LONG).show();
+//                    getTtAppCtx().getTtNotifyManager().endMapDownload(layer.getId());
+//                    Toast.makeText(getTtAppCtx(), "Failed to download offline map", Toast.LENGTH_LONG).show();
 //                }
 //            }
 //
 //            @Override
 //            public void onStatusError(String message) {
 //                tasks.remove(layer.getId());
-//                TtAppCtx.getTtNotifyManager().endMapDownload(layer.getId());
-//                Toast.makeText(TtAppCtx, "Error creating offline map", Toast.LENGTH_LONG).show();
+//                getTtAppCtx().getTtNotifyManager().endMapDownload(layer.getId());
+//                Toast.makeText(getTtAppCtx(), "Error creating offline map", Toast.LENGTH_LONG).show();
 //            }
 //
 //            @Override
 //            public void onDownloadError(String message) {
 //                tasks.remove(layer.getId());
-//                TtAppCtx.getTtNotifyManager().endMapDownload(layer.getId());
-//                Toast.makeText(TtAppCtx, "Error downloading offline map", Toast.LENGTH_LONG).show();
+//                getTtAppCtx().getTtNotifyManager().endMapDownload(layer.getId());
+//                Toast.makeText(getTtAppCtx(), "Error downloading offline map", Toast.LENGTH_LONG).show();
 //            }
 //        });
 //    }
@@ -533,7 +535,7 @@ public class ArcGISTools {
 //    }
 
 //    public UserCredentials getCredentials(Context context) {
-//        String credStr = TtAppCtx.getDeviceSettings().getArcCredentials();
+//        String credStr = getTtAppCtx().getDeviceSettings().getArcCredentials();
 //
 //        if (userCredentials != null)
 //            return userCredentials;
@@ -549,7 +551,7 @@ public class ArcGISTools {
 //                userCredentials = (UserCredentials) SerializationTools.bytesToObject(decoded);
 //                return userCredentials;
 //            } catch (Exception e) {
-//                TtAppCtx.getReport().writeError("ArcGISTools:getCredentials", e.getMessage(), e.getStackTrace());
+//                getTtAppCtx().getReport().writeError("ArcGISTools:getCredentials", e.getMessage(), e.getStackTrace());
 //            }
 //        }
 //
@@ -567,18 +569,18 @@ public class ArcGISTools {
 //
 //            userCredentials = credentials;
 //
-//            TtAppCtx.getDeviceSettings().setArcCredentials(Base64.encodeToString(encoded, Base64.DEFAULT));
+//            getTtAppCtx().getDeviceSettings().setArcCredentials(Base64.encodeToString(encoded, Base64.DEFAULT));
 //
 //            return true;
 //        } catch (Exception e) {
-//            TtAppCtx.getReport().writeError("ArcGISTools:setCredentials", e.getMessage(), e.getStackTrace());
+//            getTtAppCtx().getReport().writeError("ArcGISTools:setCredentials", e.getMessage(), e.getStackTrace());
 //        }
 //
 //        return false;
 //    }
 
 //    public void deleteCredentials() {
-//        TtAppCtx.getDeviceSettings().setArcCredentials(StringEx.Empty);
+//        getTtAppCtx().getDeviceSettings().setArcCredentials(StringEx.Empty);
 //        userCredentials = null;
 //    }
 

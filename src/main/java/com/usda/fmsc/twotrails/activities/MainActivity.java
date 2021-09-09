@@ -35,7 +35,6 @@ import com.usda.fmsc.twotrails.activities.base.TtProjectAdjusterActivity;
 import com.usda.fmsc.twotrails.activities.contracts.CreateZipDocument;
 import com.usda.fmsc.twotrails.activities.contracts.OpenDocumentTreePersistent;
 import com.usda.fmsc.twotrails.adapters.RecentProjectAdapter;
-import com.usda.fmsc.twotrails.data.DataAccessLayer;
 import com.usda.fmsc.twotrails.data.DataAccessManager;
 import com.usda.fmsc.twotrails.data.MediaAccessManager;
 import com.usda.fmsc.twotrails.data.TwoTrailsSchema;
@@ -540,7 +539,7 @@ public class MainActivity extends TtProjectAdjusterActivity {
         if (getTtAppCtx().hasMAL()) {
             try {
                 MediaAccessManager mam = MediaAccessManager.openMAL(app,
-                        app.getCurrentProject().TTXFile.replace(Consts.FILE_EXTENSION, Consts.MEDIA_PACKAGE_EXTENSION));
+                        app.getCurrentProject().TTXFile.replace(Consts.FileExtensions.TWO_TRAILS, Consts.FileExtensions.TWO_TRAILS_MEDIA_PACKAGE));
 
                 if (mam.dbHasErrors()) {
                     //TODO has errors
@@ -654,14 +653,13 @@ public class MainActivity extends TtProjectAdjusterActivity {
         if (fp == null)
             throw new RuntimeException("Invalid Filepath");
 
-        if (fp.toLowerCase().endsWith(Consts.FILE_EXTENSION)) {
+        if (fp.toLowerCase().endsWith(Consts.FileExtensions.TWO_TRAILS)) {
             importTTX(filePath);
-        } else if (fp.toLowerCase().endsWith(Consts.MEDIA_PACKAGE_EXTENSION)) {
+        } else if (fp.toLowerCase().endsWith(Consts.FileExtensions.TWO_TRAILS_MEDIA_PACKAGE)) {
             importTTMPX(filePath);
         } else if (fp.toLowerCase().endsWith(".zip")) {
             importTtPackage(filePath);
         } else {
-
             Toast.makeText(MainActivity.this, "Invalid File Type", Toast.LENGTH_LONG).show();
         }
     }
@@ -672,7 +670,7 @@ public class MainActivity extends TtProjectAdjusterActivity {
             if (fp == null)
                 throw new RuntimeException("Invalid Filepath");
 
-            if (!fp.endsWith(Consts.FILE_EXTENSION))
+            if (!fp.endsWith(Consts.FileExtensions.TWO_TRAILS))
                 throw new RuntimeException("Invalid File Type");
 
             String fileName = FileUtils.getFileName(fp);
@@ -699,7 +697,7 @@ public class MainActivity extends TtProjectAdjusterActivity {
             if (fp == null)
                 throw new RuntimeException("Invalid Filepath");
 
-            if (!fp.endsWith(Consts.MEDIA_PACKAGE_EXTENSION))
+            if (!fp.endsWith(Consts.FileExtensions.TWO_TRAILS_MEDIA_PACKAGE))
                 throw new RuntimeException("Invalid File Type");
 
             String fileName = FileUtils.getFileName(fp);
@@ -708,7 +706,10 @@ public class MainActivity extends TtProjectAdjusterActivity {
                 overwriteLocalMediaPackageByImportDialog(fileName, filePath);
             } else {
                 MediaAccessManager mam = MediaAccessManager.importMAL(getTtAppCtx(), filePath);
-                getTtAppCtx().setMAM(mam);
+
+                if (fileName.equals(getTtAppCtx().getDAM().getDBFile().getName())) {
+                    getTtAppCtx().setMAM(mam);
+                }
             }
         } catch (Exception e) {
             getTtAppCtx().getReport().writeError(e.getMessage(), "MainActivity:importTTMPX", e.getStackTrace());
@@ -717,7 +718,39 @@ public class MainActivity extends TtProjectAdjusterActivity {
     }
 
     private void importTtPackage(Uri filePath) {
-        //ToDO Implement Package Import
+        String fp = filePath.getPath();
+        if (fp == null)
+            throw new RuntimeException("Invalid Filepath");
+
+        if (!fp.endsWith(".zip"))
+            throw new RuntimeException("Invalid File Type");
+
+        File tmpInternalZip = new File(getTtAppCtx().getCacheDir(), FileUtils.getFileName(fp));
+        File tmpInternalZipDir = new File(getTtAppCtx().getCacheDir(), FileUtils.getFileNameWoExt(fp));
+
+        try {
+            AndroidUtils.Files.copyFile(getTtAppCtx(), filePath, Uri.fromFile(tmpInternalZip));
+
+            FileUtils.unzip(tmpInternalZip, tmpInternalZipDir);
+
+            for (String path : tmpInternalZipDir.list()) {
+                importFromFile(new File(path));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void importFromFile(File item) {
+        if (item.isDirectory()) {
+            for (String subItem : item.list()) {
+                importFromFile(new File(subItem));
+            }
+        } else if (item.getPath().toLowerCase().endsWith(Consts.FileExtensions.TWO_TRAILS)) {
+            importTTX(Uri.fromFile(item));
+        } else if (item.getPath().toLowerCase().endsWith(Consts.FileExtensions.TWO_TRAILS_MEDIA_PACKAGE)) {
+            importTTMPX(Uri.fromFile(item));
+        }
     }
 
     private final ActivityResultLauncher<String> exportProjectLauncher = registerForActivityResult(new CreateZipDocument(),
@@ -835,8 +868,8 @@ public class MainActivity extends TtProjectAdjusterActivity {
                 try {
                     String newFileName = inputDialog.getText();
 
-                    if (!newFileName.endsWith(Consts.FILE_EXTENSION)) {
-                        newFileName += Consts.FILE_EXTENSION;
+                    if (!newFileName.endsWith(Consts.FileExtensions.TWO_TRAILS)) {
+                        newFileName += Consts.FileExtensions.TWO_TRAILS;
                     }
 
                     DataAccessManager dam = DataAccessManager.importAndRenameDAL(getTtAppCtx(), filePath, newFileName);
@@ -868,7 +901,9 @@ public class MainActivity extends TtProjectAdjusterActivity {
         alert.setPositiveButton("Overwrite", (dialog, which) -> {
             try {
                 MediaAccessManager mam = MediaAccessManager.importMAL(getTtAppCtx(), filePath);
-                getTtAppCtx().setMAM(mam);
+                if (fileName.equals(getTtAppCtx().getDAM().getDBFile().getName())) {
+                    getTtAppCtx().setMAM(mam);
+                }
             } catch (IOException e) {
                 getTtAppCtx().getReport().writeError(e.getMessage(), "MainActivity:overwriteLocalMediaPackageByImportDialog:overwrite");
                 Toast.makeText(MainActivity.this, "Error Overwriting Media Package", Toast.LENGTH_LONG).show();
@@ -883,12 +918,14 @@ public class MainActivity extends TtProjectAdjusterActivity {
                 try {
                     String newFileName = inputDialog.getText();
 
-                    if (!newFileName.endsWith(Consts.MEDIA_FILE_MIME)) {
-                        newFileName += Consts.FILE_EXTENSION;
+                    if (!newFileName.endsWith(Consts.FileExtensions.TWO_TRAILS)) {
+                        newFileName += Consts.FileExtensions.TWO_TRAILS;
                     }
 
                     MediaAccessManager mam = MediaAccessManager.importAndRenameMAL(getTtAppCtx(), filePath, newFileName);
-                    getTtAppCtx().setMAM(mam);
+                    if (FileUtils.getFileName(newFileName).equals(getTtAppCtx().getDAM().getDBFile().getName())) {
+                        getTtAppCtx().setMAM(mam);
+                    }
                 } catch (IOException e) {
                     getTtAppCtx().getReport().writeError(e.getMessage(), "MainActivity:overwriteLocalMediaPackageByImportDialog:rename");
                     Toast.makeText(MainActivity.this, "Error Renaming Media Package", Toast.LENGTH_LONG).show();
@@ -934,8 +971,8 @@ public class MainActivity extends TtProjectAdjusterActivity {
                     String newTtxFileName = inputDialog.getText(), newTtmpxFileName;
                     String newBaseFileName = newTtxFileName.substring(0, newTtxFileName.lastIndexOf("."));
 
-                    newTtxFileName = newBaseFileName + Consts.FILE_EXTENSION;
-                    newTtmpxFileName = newBaseFileName + Consts.MEDIA_PACKAGE_EXTENSION;
+                    newTtxFileName = newBaseFileName + Consts.FileExtensions.TWO_TRAILS;
+                    newTtmpxFileName = newBaseFileName + Consts.FileExtensions.TWO_TRAILS_MEDIA_PACKAGE;
 
                     DataAccessManager dam = DataAccessManager.importAndRenameDAL(getTtAppCtx(), ttxFilePath, newTtxFileName);
                     MediaAccessManager.importAndRenameMAL(getTtAppCtx(), ttmpxFilePath, newTtmpxFileName).close();
@@ -985,10 +1022,10 @@ public class MainActivity extends TtProjectAdjusterActivity {
 
         if (twoTrailsProjects.size() < 1) {
             for (String file : databaseList()) {
-                if (file.toLowerCase().endsWith(Consts.FILE_EXTENSION)) {
+                if (file.toLowerCase().endsWith(Consts.FileExtensions.TWO_TRAILS)) {
                     DataAccessManager dam = DataAccessManager.openDAL(getTtAppCtx(), file);
                     String projId = dam.getDAL().getProjectID();
-                    String mediaFile = file.toLowerCase().replace(Consts.FILE_EXTENSION, Consts.MEDIA_PACKAGE_EXTENSION);
+                    String mediaFile = file.toLowerCase().replace(Consts.FileExtensions.TWO_TRAILS, Consts.FileExtensions.TWO_TRAILS_MEDIA_PACKAGE);
                     if (!MediaAccessManager.localMALExists(getTtAppCtx(), mediaFile)) {
                         mediaFile = null;
                     }

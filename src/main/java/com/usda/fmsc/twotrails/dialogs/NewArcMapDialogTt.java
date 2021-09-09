@@ -1,14 +1,15 @@
 package com.usda.fmsc.twotrails.dialogs;
 
 import android.app.Dialog;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
-import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -17,16 +18,16 @@ import androidx.appcompat.app.AlertDialog;
 
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.listeners.SimpleTextWatcher;
-import com.usda.fmsc.android.utilities.PostDelayHandler;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
 import com.usda.fmsc.twotrails.ui.CheckMarkAnimatedView;
-import com.usda.fmsc.twotrails.utilities.ArcGISTools;
+import com.usda.fmsc.twotrails.utilities.TtUtils;
 import com.usda.fmsc.utilities.FileUtils;
 import com.usda.fmsc.utilities.StringEx;
 
-import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
+import java.io.File;
+import java.io.IOException;
 
 public class NewArcMapDialogTt extends TtBaseDialogFragment {
     private static final String CREATE_MODE = "CreateMode";
@@ -36,26 +37,34 @@ public class NewArcMapDialogTt extends TtBaseDialogFragment {
     private EditText txtName, txtUri, txtDesc, txtLoc;
     private CheckMarkAnimatedView chkmkavUrlStatus;
     private Button btnPos;
-    private MaterialProgressBar progressBar;
     private ImageView ivBadUri;
+    private Uri tpkPath, defaultUri;
 
     private int enabledColor, disabledColor;
 
     private boolean hasName, validUri;
 
-    private String defaultName, defaultUri;
+    private String defaultName;
 
     private CreateMode mode;
-
-    private PostDelayHandler twDelayHandler;
 
     private ArcGisMapLayer aLayer;
 
 
     private final ActivityResultLauncher<String> getTpkFile = registerForActivityResult(new ActivityResultContracts.GetContent(), result -> {
         if (result != null && result.getPath() != null) {
-            txtUri.setText(result.getPath());
-            txtUri.setSelection(result.getPath().length());
+            String filePath = result.getPath();
+
+            if (filePath.toLowerCase().endsWith(Consts.FileExtensions.TPK)) {
+                tpkPath = result;
+                String filename = FileUtils.getFileName(filePath);
+                txtUri.setText(filename);
+                txtName.requestFocus();
+                txtName.setSelection(txtName.getText().toString().length());
+                validate();
+            } else {
+                Toast.makeText(getActivity(), "Invalid TPK File", Toast.LENGTH_LONG).show();
+            }
         }
     });
 
@@ -77,7 +86,7 @@ public class NewArcMapDialogTt extends TtBaseDialogFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        twDelayHandler = new PostDelayHandler(1000);
+//        twDelayHandler = new PostDelayHandler(1000);
 
         enabledColor = AndroidUtils.UI.getColor(getContext(), R.color.primary);
         disabledColor = AndroidUtils.UI.getColor(getContext(), R.color.grey_400);
@@ -88,7 +97,13 @@ public class NewArcMapDialogTt extends TtBaseDialogFragment {
             mode = CreateMode.parse(bundle.getInt(CREATE_MODE));
 
             defaultName = bundle.getString(DEFAULT_NAME, StringEx.Empty);
-            defaultUri = bundle.getString(DEFAULT_URI, StringEx.Empty);
+
+            if (bundle.containsKey(DEFAULT_URI)) {
+                String dus = bundle.getString(DEFAULT_URI);
+                if (dus != null && dus.length() > 0) {
+                    defaultUri = Uri.parse(dus);
+                }
+            }
 
             if (mode == CreateMode.OFFLINE_FROM_OFFLINE_URL || mode == CreateMode.OFFLINE_FROM_ONLINE_URL && defaultUri != null)
                 defaultUri = getTtAppCtx().getArcGISTools().getOfflineUrlFromOnlineUrl(defaultUri);
@@ -107,24 +122,24 @@ public class NewArcMapDialogTt extends TtBaseDialogFragment {
         txtLoc = view.findViewById(R.id.txtLocation);
         txtDesc = view.findViewById(R.id.txtDesc);
         chkmkavUrlStatus = view.findViewById(R.id.chkmkavUrlStatus);
-        progressBar = view.findViewById(R.id.progress);
         ivBadUri = view.findViewById(R.id.ivBadUri);
 
         txtUri.setHint(mode != CreateMode.OFFLINE_FROM_FILE ? "Url" : "File");
 
         txtName.setText(defaultName);
-        txtUri.setText(defaultUri);
+        if (defaultUri != null)
+            txtUri.setText(defaultUri.getPath());
 
         if (!StringEx.isEmpty(defaultName)) {
             hasName = true;
         }
 
-        if (!StringEx.isEmpty(defaultUri)) {
-            if (mode != CreateMode.OFFLINE_FROM_FILE) {
-                validateUrl(defaultUri);
-            } else {
+        if (defaultUri != null) {
+//            if (mode != CreateMode.OFFLINE_FROM_FILE) {
+//                validateUrl(defaultUri);
+//            } else {
                 validateFile(defaultUri);
-            }
+//            }
         }
 
         txtName.addTextChangedListener(new SimpleTextWatcher() {
@@ -135,37 +150,55 @@ public class NewArcMapDialogTt extends TtBaseDialogFragment {
             }
         });
 
-        txtUri.addTextChangedListener(stwUri);
-
         db.setTitle("Create Map")
                 .setView(view)
                 .setPositiveButton(R.string.str_create, (dialog, which) -> {
+
                     if (aLayer == null) {
                         aLayer = getTtAppCtx().getArcGISTools().createMapLayer(
-                                txtName.getText().toString(),
-                                txtDesc.getText().toString(),
-                                txtLoc.getText().toString(),
-                                mode == CreateMode.OFFLINE_FROM_FILE ? null : txtUri.getText().toString(),
-                                mode == CreateMode.OFFLINE_FROM_FILE ? txtUri.getText().toString() : null,
+                                txtName.getText().toString().trim(),
+                                txtDesc.getText().toString().trim(),
+                                txtLoc.getText().toString().trim(),
+                                mode == CreateMode.OFFLINE_FROM_FILE ? "" : tpkPath.getPath(),
+                                mode == CreateMode.OFFLINE_FROM_FILE ?  FileUtils.getFileName(tpkPath.getPath()) : "",
                                 mode == CreateMode.NEW_ONLINE);
+
+
                     } else {
-                        aLayer.setName(txtName.getText().toString());
-                        aLayer.setDescription(txtDesc.getText().toString());
-                        aLayer.setLocation(txtLoc.getText().toString());
-                        aLayer.setUrl(txtUri.getText().toString());
+                        aLayer.setName(txtName.getText().toString().trim());
+                        aLayer.setDescription(txtDesc.getText().toString().trim());
+                        aLayer.setLocation(txtLoc.getText().toString().trim());
+
+                        if (mode == CreateMode.OFFLINE_FROM_FILE) {
+                            aLayer.setFileName(FileUtils.getFileName(tpkPath.getPath()));
+                        } else {
+                            aLayer.setUrl(tpkPath != null ? tpkPath.getPath() : "");
+                        }
                     }
 
                     if (mode == CreateMode.NEW_ONLINE || mode == CreateMode.OFFLINE_FROM_FILE) {
+
+                        if (mode == CreateMode.OFFLINE_FROM_FILE) {
+                            File offlineMapsDir = getTtAppCtx().getOfflineMapsDir();
+                            File internalCopy = new File(offlineMapsDir, aLayer.getFileName());
+
+                            if (!FileUtils.fileOrFolderExists(offlineMapsDir.getPath())) {
+                                if (!offlineMapsDir.mkdirs()) {
+                                    getTtAppCtx().getReport().writeError("Unable to create OfflineMapsDir", "NewArcMapDialogTt:CreateMap");
+                                }
+                            }
+
+                            try {
+                                AndroidUtils.Files.copyFile(getActivity(), tpkPath, Uri.fromFile(internalCopy));
+                            } catch (IOException e) {
+                                getTtAppCtx().getReport().writeError("Unable to copy tpk to internal folder", "NewArcMapDialogTt:CreateMap");
+                                Toast.makeText(getActivity(), "Unable to create map. Please see log for details", Toast.LENGTH_LONG).show();
+                                return;
+                            }
+                        }
+
                         getTtAppCtx().getArcGISTools().addMapLayer(aLayer);
-                    } //else {
-//                        Intent intent = new Intent(getContext(), GetMapExtentsActivity.class);
-//
-//                        Bundle bundle = new Bundle();
-//                        bundle.putParcelable(GetMapExtentsActivity.MAP_LAYER, aLayer);
-//                        intent.putExtras(bundle);
-//
-//                        startActivity(intent);
-//                    }
+                    }
                 })
                 .setNeutralButton(R.string.str_cancel, null);
 
@@ -186,10 +219,7 @@ public class NewArcMapDialogTt extends TtBaseDialogFragment {
             Button btnNeg = d.getButton(Dialog.BUTTON_NEGATIVE);
 
             if (btnNeg != null) {
-                btnNeg.setOnClickListener(v -> {
-                    getTpkFile.launch(Consts.FileExtensions.TPK);
-//                    AndroidUtils.App.openFileIntentFromFragment(NewArcMapDialogTt.this, Consts.FileExtensions.TPK, Consts.Codes.Dialogs.IMPORT_PROJECT_FILE);
-                });
+                btnNeg.setOnClickListener(v -> getTpkFile.launch("*/*"));
             }
             validate();
         }
@@ -201,68 +231,8 @@ public class NewArcMapDialogTt extends TtBaseDialogFragment {
         btnPos.setTextColor(enable ? enabledColor : disabledColor);
     }
 
-
-    private void validateUrl(String url) {
-        progressBar.setVisibility(View.VISIBLE);
-        chkmkavUrlStatus.setVisibility(View.INVISIBLE);
-        ivBadUri.setVisibility(View.INVISIBLE);
-
-        if (Patterns.WEB_URL.matcher(url).matches()) {
-            if (!url.startsWith("http")) {
-                url = String.format("http://%s", url);
-            }
-
-            if (mode == CreateMode.OFFLINE_FROM_ONLINE_URL || mode == CreateMode.OFFLINE_FROM_OFFLINE_URL) {
-                url = getTtAppCtx().getArcGISTools().getOfflineUrlFromOnlineUrl(url);
-            }
-
-            final String fUrl = url;
-
-            new Thread(() -> getTtAppCtx().getArcGISTools().getLayerFromUrl(fUrl, getContext(), new ArcGISTools.IGetArcMapLayerListener() {
-                @Override
-                public void onComplete(ArcGisMapLayer layer) {
-                    if (txtDesc.getText().length() < 1 && layer.getDescription().length() > 0) {
-                        txtDesc.setText(layer.getDescription());
-                    }
-
-                    if (mode == CreateMode.OFFLINE_FROM_ONLINE_URL || mode == CreateMode.OFFLINE_FROM_OFFLINE_URL) {
-                        txtUri.removeTextChangedListener(stwUri);
-                        txtUri.setText(layer.getUrl());
-                        txtUri.addTextChangedListener(stwUri);
-                    }
-
-                    aLayer = layer;
-
-                    validUri = true;
-
-                    getActivity().runOnUiThread(() -> {
-                        chkmkavUrlStatus.reset();
-
-                        progressBar.setVisibility(View.INVISIBLE);
-                        chkmkavUrlStatus.setVisibility(View.VISIBLE);
-
-                        chkmkavUrlStatus.start();
-
-                        validate();
-                    });
-                }
-
-                @Override
-                public void onBadUrl(String error) {
-                    getActivity().runOnUiThread(() -> {
-                        progressBar.setVisibility(View.INVISIBLE);
-                        ivBadUri.setVisibility(View.VISIBLE);
-                    });
-                }
-            })).start();
-        } else {
-            progressBar.setVisibility(View.INVISIBLE);
-            ivBadUri.setVisibility(View.VISIBLE);
-        }
-    }
-
-    private void validateFile(String filePath) {
-        if (filePath.endsWith(".tpk") && FileUtils.fileOrFolderExists(filePath)) {
+    private boolean validateFile(Uri filePath) {
+        if (filePath != null && filePath.getPath() != null && filePath.getPath().endsWith(".tpk") && AndroidUtils.Files.fileExists(getContext(), filePath)) {
             ivBadUri.setVisibility(View.INVISIBLE);
             chkmkavUrlStatus.reset();
             chkmkavUrlStatus.setVisibility(View.VISIBLE);
@@ -274,38 +244,12 @@ public class NewArcMapDialogTt extends TtBaseDialogFragment {
             validUri = false;
         }
 
-        validate();
+        return validUri;
     }
 
     private void validate() {
-        enablePosButton(hasName && validUri);
+        enablePosButton(hasName && validateFile(tpkPath));
     }
-
-
-    private final SimpleTextWatcher stwUri = new SimpleTextWatcher() {
-        @Override
-        public void afterTextChanged(final Editable s) {
-            validUri = false;
-
-            if (s.length() > 10) {
-                final String uri = s.toString();
-
-                twDelayHandler.post(() -> {
-                    if (mode == CreateMode.OFFLINE_FROM_FILE) {
-                        validateFile(uri);
-                    } else {
-                        validateUrl(uri);
-                    }
-                });
-            } else {
-                ivBadUri.setVisibility(View.INVISIBLE);
-                progressBar.setVisibility(View.INVISIBLE);
-                chkmkavUrlStatus.setVisibility(View.INVISIBLE);
-            }
-
-            validate();
-        }
-    };
 
 
     public enum CreateMode {

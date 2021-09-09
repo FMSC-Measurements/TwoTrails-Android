@@ -48,7 +48,7 @@ public abstract class TtPointCollectionActivity extends TtProjectAdjusterActivit
     //region Requests
     private final ActivityResultLauncher<String> requestImagesForResult = registerForActivityResult(new GetImages(), results -> {
         try {
-            List<TtImage> images =getImagesFromUris(results, _CapturedImagePointCN);
+            List<TtImage> images = getImagesFromUris(results, _CapturedImagePointCN);
 
             onImagesSelected(images);
 

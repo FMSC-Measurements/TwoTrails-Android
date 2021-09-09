@@ -17,7 +17,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.util.Log;
-import android.util.Range;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -699,7 +698,7 @@ public class TwoTrailsApp extends Application {
                 _CurrentProject = new TwoTrailsProject(
                         _CurrentProject.Name,
                         _CurrentProject.TTXFile,
-                        _CurrentProject.TTXFile.replace(Consts.FILE_EXTENSION, Consts.MEDIA_PACKAGE_EXTENSION));
+                        _CurrentProject.TTXFile.replace(Consts.FileExtensions.TWO_TRAILS, Consts.FileExtensions.TWO_TRAILS_MEDIA_PACKAGE));
 
                 getProjectSettings().updateRecentProjects(_CurrentProject);
                 getDeviceSettings().setLastOpenedProject(_CurrentProject);
@@ -716,7 +715,7 @@ public class TwoTrailsApp extends Application {
                 (_CurrentProject != null &&
                         (_CurrentProject.TTMPXFile != null ||
                             (hasDAL() &&
-                    MediaAccessManager.localMALExists(TwoTrailsApp.this, _CurrentProject.TTXFile.replace(Consts.FILE_EXTENSION, Consts.MEDIA_PACKAGE_EXTENSION))))
+                    MediaAccessManager.localMALExists(TwoTrailsApp.this, _CurrentProject.TTXFile.replace(Consts.FileExtensions.TWO_TRAILS, Consts.FileExtensions.TWO_TRAILS_MEDIA_PACKAGE))))
                 );
     }
 
@@ -768,7 +767,7 @@ public class TwoTrailsApp extends Application {
 
                 _OfflineMapsDir = AndroidUtils.Files.getDocumentFromTree(TwoTrailsApp.this, _TwoTrailsExternalDir.getUri(), Consts.FolderLayout.External.OfflineMapsPath);
                 if (_OfflineMapsDir == null || !_OfflineMapsDir.exists()) {
-                    _OfflineMapsDir = _TwoTrailsExternalDir.createDirectory(Consts.FolderLayout.External.OfflineMapsName);
+                    _OfflineMapsDir = _TwoTrailsExternalDir.createDirectory(Consts.FolderLayout.External.OfflineMapsFolderName);
                 }
 
                 _ImportDir = AndroidUtils.Files.getDocumentFromTree(TwoTrailsApp.this, _TwoTrailsExternalDir.getUri(), Consts.FolderLayout.External.ImportFolderPath);
@@ -796,7 +795,6 @@ public class TwoTrailsApp extends Application {
     }
 
     //endregion
-
 
 
     //region GPS / RangeFinder
@@ -1155,7 +1153,11 @@ public class TwoTrailsApp extends Application {
         return _TwoTrailsExternalDir;
     }
 
-    public DocumentFile getOfflineMapsDir() {
+    public File getOfflineMapsDir() {
+        return new File(getDataDir(), Consts.FolderLayout.Internal.OfflineMapsFolderName);
+    }
+
+    public DocumentFile getExternalOfflineMapsDir() {
         return _OfflineMapsDir;
     }
     public DocumentFile getImportDir() {

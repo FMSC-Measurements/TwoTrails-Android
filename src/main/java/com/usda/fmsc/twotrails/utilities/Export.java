@@ -43,7 +43,6 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -1488,10 +1487,10 @@ public class Export {
                             AndroidUtils.Files.copyFile(params.getContext(), params.getMam().getDBUri(), Uri.fromFile(new File(zfDir, params.getMam().getDatabaseName())));
                         }
                     } else {
-                        AndroidUtils.Files.copyFile(params.getContext(), params.getDam().getDBUri(), dfDir.createFile(Consts.FILE_MIME, params.getDam().getDatabaseName()).getUri());
+                        AndroidUtils.Files.copyFile(params.getContext(), params.getDam().getDBUri(), dfDir.createFile(Consts.FileMimes.TPK, params.getDam().getDatabaseName()).getUri());
 
                         if (params.getContext().hasMAL()) {
-                            AndroidUtils.Files.copyFile(params.getContext(), params.getMam().getDBUri(), dfDir.createFile(Consts.MEDIA_FILE_MIME, params.getMam().getDatabaseName()).getUri());
+                            AndroidUtils.Files.copyFile(params.getContext(), params.getMam().getDBUri(), dfDir.createFile(Consts.FileMimes.TWO_TRAILS_MEDIA_PACKAGE, params.getMam().getDatabaseName()).getUri());
                         }
                     }
                 } catch (Exception e) {

@@ -130,6 +130,7 @@
     <string name="str_uom">UOM</string>
     <string name="str_rand">Random</string>
     <string name="str_create_poly">Create Polygon</string>
+    <string name="str_create_map_layer">Create Map Layer</string>
 
     <string name="zero">0</string>
     <string name="str_x">X</string>

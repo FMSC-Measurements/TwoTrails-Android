@@ -255,9 +255,10 @@ public class ImportActivity extends TtProjectAdjusterActivity {
     });
 
 
+    //TODO fix import select
     public void btnImportSelect(View view) {
         //String[] extraMimes = {"text/*.txt", "file/*.csv", "file/*.gpx", "file/*.ttx"};
-        String[] extraMimes = { MimeTypes.Text.PLAIN, MimeTypes.Text.CSV, MimeTypes.Application.GPS, Consts.FILE_MIME, MimeTypes.Application.GOOGLE_EARTH };
+        String[] extraMimes = { MimeTypes.Text.PLAIN, MimeTypes.Text.CSV, MimeTypes.Application.GPS, Consts.FileMimes.TPK, MimeTypes.Application.GOOGLE_EARTH };
         onFileSelected.launch(extraMimes);
     }
 }

@@ -247,7 +247,7 @@ public interface IMultiMapFragment {
         }
 
         public Extent getExtents() {
-            return new Extent(North, South, East, West);
+            return new Extent(North, East, South, West);
         }
     }
 

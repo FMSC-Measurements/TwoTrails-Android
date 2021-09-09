@@ -17,6 +17,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.util.Pair;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.Transitions.ElevationTransition;
 import com.usda.fmsc.android.dialogs.InputDialog;
@@ -40,7 +41,7 @@ import jp.wasabeef.recyclerview.animators.SlideInLeftAnimator;
 public class MapManagerActivity extends CustomToolbarActivity implements ArcGISTools.IArcToolsListener {
     private static final String SELECT_MAP = "SelectMap";
 
-    private SheetFab<MSFloatingActionButton> fabSheet;
+//    private SheetFab<MSFloatingActionButton> fabSheet;
 
     private ArcGisMapAdapter adapter;
     private ArrayList<ArcGisMapLayer> maps, visibleMaps;
@@ -93,7 +94,7 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
 
         visibleMaps.addAll(maps);
 
-        RecyclerViewEx rvMaps = findViewById(R.id.mmRvMaps);
+        RecyclerViewEx<RecyclerViewEx.ViewHolderEx> rvMaps = findViewById(R.id.mmRvMaps);
 
         if (rvMaps != null) {
             rvMaps.setViewHasFooter(true);
@@ -105,14 +106,14 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
             rvMaps.setAdapter(adapter);
         }
 
-        MSFloatingActionButton fabMenu = findViewById(R.id.mmFabMenu);
-        View overlay = findViewById(R.id.overlay);
-        View sheetView = findViewById(R.id.fab_sheet);
+//        MSFloatingActionButton fabMenu = findViewById(R.id.mmFabMenu);
+//        View overlay = findViewById(R.id.overlay);
+//        View sheetView = findViewById(R.id.fab_sheet);
 
-        int bc = AndroidUtils.UI.getColor(this, R.color.background_card_view);
-        int fc = AndroidUtils.UI.getColor(this, R.color.primaryLight);
+//        int bc = AndroidUtils.UI.getColor(this, R.color.background_card_view);
+//        int fc = AndroidUtils.UI.getColor(this, R.color.primaryLight);
 
-        fabSheet = new SheetFab<>(fabMenu, sheetView, overlay, bc, fc);
+//        fabSheet = new SheetFab<>(fabMenu, sheetView, overlay, bc, fc);
 
         getTtAppCtx().getArcGISTools().addListener(this);
     }
@@ -219,18 +220,18 @@ public class MapManagerActivity extends CustomToolbarActivity implements ArcGIST
     }
 
 
-    public void btnMmAddClick(View view) {
-        fabSheet.showSheet();
-    }
+//    public void btnMmAddClick(View view) {
+//        fabSheet.showSheet();
+//    }
 
-    public void btnMmAddOnlineClick(View view) {
-        fabSheet.hideSheet();
-
-        Toast.makeText(MapManagerActivity.this, "Adding custom online maps is currently not supported.", Toast.LENGTH_LONG).show();
-    }
+//    public void btnMmAddOnlineClick(View view) {
+//        fabSheet.hideSheet();
+//
+//        Toast.makeText(MapManagerActivity.this, "Adding custom online maps is currently not supported.", Toast.LENGTH_LONG).show();
+//    }
 
     public void btnMmAddOfflineClick(View view) {
-        fabSheet.hideSheet();
+//        fabSheet.hideSheet();
         createMap(null, null, NewArcMapDialogTt.CreateMode.OFFLINE_FROM_FILE); //addOfflineMap();
     }
 

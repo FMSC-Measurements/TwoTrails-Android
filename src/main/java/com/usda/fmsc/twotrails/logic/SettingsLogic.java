@@ -2,6 +2,8 @@ package com.usda.fmsc.twotrails.logic;
 
 import android.app.Activity;
 import androidx.appcompat.app.AlertDialog;
+
+import android.net.Uri;
 import android.widget.Toast;
 
 import com.usda.fmsc.android.AndroidUtils;
@@ -48,22 +50,24 @@ public class SettingsLogic {
         alert.show();
     }
 
-    public static void exportReport(final TtActivity activity) {
+    public static void exportReport(final TtActivity activity, Uri externalReportPath) {
         AlertDialog.Builder dialog = new AlertDialog.Builder(activity);
+
+        String fileName = FileUtils.getFileName(externalReportPath.getPath());
 
         try {
             if (activity.getTtAppCtx().hasDAL()) {
                 dialog.setMessage("Would you like to include the current project into the report?")
                         .setPositiveButton(R.string.str_yes, (dialog1, which) -> {
                             try {
-                                onExportReportComplete(activity, TtUtils.exportReport(activity.getTtAppCtx(),true));
+                                onExportReportComplete(activity, TtUtils.exportReport(activity.getTtAppCtx(), fileName, true), externalReportPath);
                             } catch (IOException e) {
                                 throw new RuntimeException(e.getMessage());
                             }
                         })
                         .setNegativeButton(R.string.str_no, (dialog12, which) -> {
                             try {
-                                onExportReportComplete(activity, TtUtils.exportReport(activity.getTtAppCtx(),false));
+                                onExportReportComplete(activity, TtUtils.exportReport(activity.getTtAppCtx(), fileName,false), externalReportPath);
                             } catch (IOException e) {
                                 throw new RuntimeException(e.getMessage());
                             }
@@ -71,47 +75,36 @@ public class SettingsLogic {
                         .setNeutralButton(R.string.str_cancel, null)
                         .show();
             } else {
-                onExportReportComplete(activity, TtUtils.exportReport(activity.getTtAppCtx(), false));
+                onExportReportComplete(activity, TtUtils.exportReport(activity.getTtAppCtx(), fileName, false), externalReportPath);
             }
         } catch (IOException e) {
             //
         }
     }
 
-//    private static Snackbar snackbar;
-    private static void onExportReportComplete(final Activity activity, final File filepath) {
-        if (filepath != null) {
+    private static void onExportReportComplete(final TtActivity activity, final File reportPath, final Uri externalReportPath) {
+        if (reportPath != null) {
+            if (externalReportPath != null) {
+                try {
+                    AndroidUtils.Files.copyFile(activity.getTtAppCtx(), Uri.fromFile(reportPath), externalReportPath);
+                } catch (IOException e) {
+                    activity.getTtAppCtx().getReport().writeError("Unable to copy report", "SettingsLogic:onExportReportComplete");
+                    Toast.makeText(activity, "Unable to export Report", Toast.LENGTH_LONG).show();
+                    return;
+                }
+            }
+
             activity.runOnUiThread(() -> {
                 if (AndroidUtils.Device.isInternetAvailable(activity)) {
                     new AlertDialog.Builder(activity)
                             .setMessage("Would you like to send the report to the developer team to help prevent future crashes?")
-                            .setPositiveButton("Send", (dialog, which) -> TtUtils.SendEmailToDev(activity, filepath, true))
+                            .setPositiveButton("Send", (dialog, which) -> TtUtils.SendEmailToDev(activity, reportPath, true))
                             .setNeutralButton("Don't Send", null)
                             .show();
                 } else {
-                    Toast.makeText(activity, "Report Exported to Documents/TwoTrailsFiles/" + FileUtils.getFileName(filepath.getName()), Toast.LENGTH_LONG).show();
+                    Toast.makeText(activity, "Report Exported", Toast.LENGTH_LONG).show();
                 }
             });
-
-//            snackbar = Snackbar.make(activity.findViewById(android.R.id.content), "Report Exported", Snackbar.LENGTH_LONG)
-//                    .setAction("View", new View.OnClickListener() {
-//
-//                        @Override
-//                        public void onClick(View v) {
-//                            Intent intent = new Intent(Intent.ACTION_VIEW);
-//                            intent.setDataAndType(Uri.parseNmea(TtUtils.getTtFileDir()), "resource/folder");
-//
-//                            if (snackbar != null)
-//                                snackbar.dismiss();
-//
-//                            activity.startActivity(Intent.createChooser(intent, "Open folder"));
-//                        }
-//                    })
-//                    .setActionTextColor(AndroidUtils.UI.getColor(activity, R.color.primaryLighter));
-//
-//            AndroidUtils.UI.setSnackbarTextColor(snackbar, Color.WHITE);
-//
-//            snackbar.show();
         } else {
             Toast.makeText(activity, "Report failed to export", Toast.LENGTH_LONG).show();
         }

@@ -4,7 +4,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.usda.fmsc.geospatial.Extent;
-import com.usda.fmsc.utilities.FileUtils;
 import com.usda.fmsc.utilities.StringEx;
 
 import java.util.Comparator;
@@ -27,7 +26,7 @@ public class ArcGisMapLayer implements Parcelable, Comparable<ArcGisMapLayer> {
     private String description;
     private String location;
     private String url;
-    private String filePath;
+    private String fileName;
     private boolean online;
     private double minScale;
     private double maxScale;
@@ -43,7 +42,7 @@ public class ArcGisMapLayer implements Parcelable, Comparable<ArcGisMapLayer> {
         description = in.readString();
         location = in.readString();
         url = in.readString();
-        setFilePath(in.readString());
+        setFileName(in.readString());
         online = in.readByte() == 1;
         minScale = in.readDouble();
         maxScale = in.readDouble();
@@ -60,7 +59,7 @@ public class ArcGisMapLayer implements Parcelable, Comparable<ArcGisMapLayer> {
         this.description = agml.getDescription();
         this.location = agml.getLocation();
         this.url = agml.getUrl();
-        this.filePath = agml.getFilePath();
+        this.fileName = agml.getFileName();
         this.online = agml.isOnline();
         this.minScale = agml.getMinScale();
         this.maxScale = agml.getMaxScale();
@@ -69,11 +68,11 @@ public class ArcGisMapLayer implements Parcelable, Comparable<ArcGisMapLayer> {
         setExtent(agml.getExtent());
     }
 
-    public ArcGisMapLayer(int id, String name, String description, String location, String url, String filePath, boolean online) {
-        this(id, name, description, location, url, filePath, -1, -1, null, null, online);
+    public ArcGisMapLayer(int id, String name, String description, String location, String url, String fileName, boolean online) {
+        this(id, name, description, location, url, fileName, -1, -1, null, null, online);
     }
 
-    public ArcGisMapLayer(int id, String name, String description, String location, String url, String filePath, double minScale,
+    public ArcGisMapLayer(int id, String name, String description, String location, String url, String fileName, double minScale,
                           double maxScale, DetailLevel[] levelsOfDetail, Extent extent, boolean online) {
         if (name == null)
             description = StringEx.Empty;
@@ -84,12 +83,6 @@ public class ArcGisMapLayer implements Parcelable, Comparable<ArcGisMapLayer> {
         if (location == null)
             location = StringEx.Empty;
 
-        if (url == null)
-            url = StringEx.Empty;
-
-        if (filePath == null)
-            filePath = StringEx.Empty;
-
         if (levelsOfDetail == null)
             levelsOfDetail = new DetailLevel[0];
 
@@ -98,7 +91,7 @@ public class ArcGisMapLayer implements Parcelable, Comparable<ArcGisMapLayer> {
         this.description = description;
         this.location = location;
         this.url = url;
-        setFilePath(filePath);
+        setFileName(fileName);
         this.online = online;
         this.minScale = minScale;
         this.maxScale = maxScale;
@@ -119,7 +112,7 @@ public class ArcGisMapLayer implements Parcelable, Comparable<ArcGisMapLayer> {
         dest.writeString(description);
         dest.writeString(location);
         dest.writeString(url);
-        dest.writeString(filePath);
+        dest.writeString(fileName);
         dest.writeByte((byte) (online ? 1 : 0));
         dest.writeDouble(minScale);
         dest.writeDouble(maxScale);
@@ -186,14 +179,14 @@ public class ArcGisMapLayer implements Parcelable, Comparable<ArcGisMapLayer> {
     }
 
 
-    public String getFilePath() {
-        return filePath;
+    public String getFileName() {
+        return fileName;
     }
 
-    public void setFilePath(String filePath) {
-        this.filePath = filePath;
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
 
-        hasValidFile = !StringEx.isEmpty(this.filePath) && filePath.endsWith(".tpk") && FileUtils.fileOrFolderExists(filePath);
+        hasValidFile = this.fileName != null && fileName.endsWith(".tpk");
     }
 
     public boolean hasValidFile() {
@@ -265,7 +258,7 @@ public class ArcGisMapLayer implements Parcelable, Comparable<ArcGisMapLayer> {
         this.description = layer.getDescription();
         this.location = layer.getLocation();
         this.url = layer.getUrl();
-        this.filePath = layer.getFilePath();
+        this.fileName = layer.getFileName();
         this.online = layer.isOnline();
         this.minScale = layer.getMinScale();
         this.maxScale = layer.getMaxScale();
@@ -283,7 +276,7 @@ public class ArcGisMapLayer implements Parcelable, Comparable<ArcGisMapLayer> {
                 this.description.equals(agml.getDescription()) &&
                 this.location.equals(agml.getLocation()) &&
                 this.url.equals(agml.getUrl()) &&
-                this.filePath.equals(agml.getFilePath()) &&
+                this.fileName.equals(agml.getFileName()) &&
                 this.online == agml.isOnline() &&
                 this.minScale == agml.getMinScale() &&
                 this.maxScale == agml.getMaxScale() &&

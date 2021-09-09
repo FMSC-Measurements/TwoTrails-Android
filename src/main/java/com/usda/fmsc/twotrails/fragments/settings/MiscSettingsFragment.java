@@ -3,6 +3,8 @@ package com.usda.fmsc.twotrails.fragments.settings;
 
 import android.os.Bundle;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.ActionBar;
 import androidx.preference.Preference;
 
@@ -12,7 +14,19 @@ import com.usda.fmsc.twotrails.activities.base.TtActivity;
 import com.usda.fmsc.twotrails.fragments.TtBasePrefFragment;
 import com.usda.fmsc.twotrails.logic.SettingsLogic;
 
+import org.joda.time.DateTime;
+
+import java.io.File;
+import java.util.Locale;
+
 public class MiscSettingsFragment extends TtBasePrefFragment {
+
+    private final ActivityResultLauncher<String> exportFileOnResult = registerForActivityResult(new ActivityResultContracts.CreateDocument(), result -> {
+        if (result != null) {
+            SettingsLogic.exportReport((TtActivity) getActivity(), result);
+        }
+    });
+
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -39,7 +53,12 @@ public class MiscSettingsFragment extends TtBasePrefFragment {
         pref = findPreference(getString(R.string.set_EXPORT_REPORT));
         if (pref != null) {
             pref.setOnPreferenceClickListener(preference -> {
-                SettingsLogic.exportReport((TtActivity) getActivity());
+                exportFileOnResult.launch(
+                    String.format(Locale.getDefault(),
+                            "%sTwoTrailsReport_%s.zip",
+                                File.separator,
+                                DateTime.now().toString())
+                    );
                 return false;
             });
         }

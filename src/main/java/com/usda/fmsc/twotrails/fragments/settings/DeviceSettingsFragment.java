@@ -659,6 +659,10 @@ public class DeviceSettingsFragment extends TtBasePrefFragment {
                 requestBluetoothPermission();
             } else {
                 success = requestInternalGpsPermission();
+
+                if (success) {
+                    switchToInternal();
+                }
             }
 
             if (success) {

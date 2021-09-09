@@ -16,15 +16,16 @@ public class Consts {
 
     public static final String LOG_TAG = "TT";
 
-    public static final String FILE_EXTENSION = ".ttx";
-    public static final String MEDIA_PACKAGE_EXTENSION = ".ttmpx";
-
-    public static final String FILE_MIME = "application/ttx";
-    public static final String MEDIA_FILE_MIME = "application/ttmpx";
-
     public static class FileExtensions {
-        public static final String TWO_TRAILS = "file/*" + FILE_EXTENSION;
-        public static final String TPK = "file/*.tpk";
+        public static final String TWO_TRAILS = ".ttx";
+        public static final String TWO_TRAILS_MEDIA_PACKAGE = ".ttmpx";
+        public static final String TPK = ".tpk";
+    }
+
+    public static class FileMimes {
+        public static final String TWO_TRAILS = "file/*" + FileExtensions.TWO_TRAILS;
+        public static final String TWO_TRAILS_MEDIA_PACKAGE = "file/*" + FileExtensions.TWO_TRAILS_MEDIA_PACKAGE;
+        public static final String TPK = "file/*" + FileExtensions.TPK;
     }
 
     public static final String EmptyGuid = "00000000-0000-0000-0000-000000000000";
@@ -222,8 +223,8 @@ public class Consts {
             public static final String TwoTrailsFolderName = "TwoTrails";
             public static final String TwoTrailsFolderPath = TwoTrailsFolderName;
 
-            public static final String OfflineMapsName = "OfflineMaps";
-            public static final String OfflineMapsPath = TwoTrailsFolderPath + "/" + OfflineMapsName;
+            public static final String OfflineMapsFolderName = "OfflineMaps";
+            public static final String OfflineMapsPath = TwoTrailsFolderPath + "/" + OfflineMapsFolderName;
 
             public static final String ImportFolderName = "Import";
             public static final String ImportFolderPath = TwoTrailsFolderPath + "/" + ImportFolderName;
@@ -237,6 +238,7 @@ public class Consts {
 
         public static class Internal {
             public static final String MediaDir = "media";
+            public static final String OfflineMapsFolderName = "offline_maps";
         }
     }
 

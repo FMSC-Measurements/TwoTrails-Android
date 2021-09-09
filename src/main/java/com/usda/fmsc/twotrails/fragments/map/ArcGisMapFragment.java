@@ -261,7 +261,7 @@ public class ArcGisMapFragment extends TtBaseFragment implements IMultiMapFragme
         ArcGISMap mBasemapLayer;
         if (mapView != null) {
             try {
-                ArcGISMap baseMap = getTtAppCtx().getArcGISTools().getBaseLayer(getContext(), agml);
+                ArcGISMap baseMap = getTtAppCtx().getArcGISTools().getBaseLayer(agml);
 
                 baseMap.addBasemapChangedListener(this);
                 baseMap.addLoadStatusChangedListener(this);
@@ -401,8 +401,8 @@ public class ArcGisMapFragment extends TtBaseFragment implements IMultiMapFragme
             Envelope envelope = vp.getTargetGeometry().getExtent();
 
             if (envelope != null) {
-                Point ne = getTtAppCtx().getArcGISTools().mapPointToLatLng((int)envelope.getYMax(), (int)envelope.getXMin(), mapView);
-                Point sw = getTtAppCtx().getArcGISTools().mapPointToLatLng((int)envelope.getYMin(), (int)envelope.getXMax(), mapView);
+                Point ne = getTtAppCtx().getArcGISTools().mapPointToLatLng((int)envelope.getYMax(), (int)envelope.getXMax(), mapView);
+                Point sw = getTtAppCtx().getArcGISTools().mapPointToLatLng((int)envelope.getYMin(), (int)envelope.getXMin(), mapView);
 
                 return new Extent(sw.getY(), ne.getX(), ne.getY(), sw.getX());
             }
@@ -462,6 +462,19 @@ public class ArcGisMapFragment extends TtBaseFragment implements IMultiMapFragme
 //
 //        return new Envelope(nw.getX(), nw.getY(), se.getX(), se.getY());
 //    }
+
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+
+        if (context instanceof MultiMapListener) {
+            mmListener = (MultiMapListener) context;
+            if (currentGisMapLayer != null && mapReady) {
+                mmListener.onMapTypeChanged(MapType.ArcGIS, this.basemapId, currentGisMapLayer.isOnline());
+            }
+        }
+    }
 
     @Override
     public void onDetach() {

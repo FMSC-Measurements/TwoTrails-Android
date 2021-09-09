@@ -669,7 +669,7 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
     }
 
     protected IMultiMapFragment.MapOptions getMapStartLocation(MapType mapType, int terrainType) {
-        return new IMultiMapFragment.MapOptions(terrainType, Consts.Location.USA_BOUNDS, Consts.Location.PADDING);
+        return new IMultiMapFragment.MapOptions(terrainType, mmFrag != null ? mmFrag.getExtents() : Consts.Location.USA_BOUNDS, Consts.Location.PADDING);
     }
 
 
@@ -704,7 +704,9 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
                 finish();
             } else {
                 mapReady = false;
-                mapFragment = createMapFragment(mapType, getMapOptions(mapType, mapId));
+                mapTypeChanging = true;
+                startOptions = getMapStartLocation(mapType, mapId);
+                mapFragment = createMapFragment(mapType, startOptions);
                 mmFrag = (IMultiMapFragment) mapFragment;
                 getSupportFragmentManager().beginTransaction().replace(R.id.mapContainer, mapFragment).commit();
 
@@ -781,8 +783,6 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
                 }
             }
 
-            resetMapBounds(true);
-
             setupPolygonOptionsUI();
         }
     }
@@ -801,9 +801,17 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
         mapMoved = false;
     }
 
+    boolean mapTypeChanging;
+    IMultiMapFragment.MapOptions startOptions;
+
     @Override
     public void onMapLoaded() {
-
+        if (mapTypeChanging) {
+            moveToLocation(startOptions.getExtents(), startOptions.getPadding(), false);
+            mapTypeChanging = false;
+        } else {
+            resetMapBounds(true);
+        }
     }
 
     @Override
