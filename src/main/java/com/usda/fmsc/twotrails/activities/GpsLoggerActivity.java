@@ -1,9 +1,14 @@
 package com.usda.fmsc.twotrails.activities;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
+
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,15 +23,20 @@ import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
+import com.usda.fmsc.twotrails.activities.contracts.CreateZipDocument;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.R;
 
 import org.joda.time.DateTime;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Locale;
 
 import com.usda.fmsc.geospatial.nmea41.sentences.base.NmeaSentence;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
+import com.usda.fmsc.utilities.FileUtils;
 
 public class GpsLoggerActivity extends CustomToolbarActivity implements GpsService.Listener {
     private final String STRINGS_KEY = "strings";
@@ -40,6 +50,40 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
     private MenuItem miCheckLtf;
 
     private boolean logging;
+    private File _CurrentLogFile;
+    private final ArrayList<File> _AllGpsLogFiles = new ArrayList<>();
+
+
+    private final ActivityResultLauncher<String> exportAllGpsLogs = registerForActivityResult(new CreateZipDocument(),
+            uri -> {
+                if (uri != null) {
+                    try {
+                        File tmpZip = new File(getTtAppCtx().getCacheDir(), "tmpZip.zip");
+                        FileUtils.zipFiles(tmpZip, _AllGpsLogFiles.toArray(new File[_AllGpsLogFiles.size()]));
+                        AndroidUtils.Files.copyFile(getTtAppCtx(), Uri.fromFile(tmpZip), uri);
+                        tmpZip.delete();
+                    } catch (Exception e) {
+                        getTtAppCtx().getReport().writeError(e.getMessage(), "GpsLoggerActivity:exportAllGpsLogs");
+                        Toast.makeText(GpsLoggerActivity.this, "Error exporting GPS Logs. See log file for details.", Toast.LENGTH_LONG).show();
+                    }
+                } else {
+                    Toast.makeText(GpsLoggerActivity.this, "Error selecting file for export", Toast.LENGTH_LONG).show();
+                }
+            });
+
+    private final ActivityResultLauncher<String> exportGpsLog = registerForActivityResult(new ActivityResultContracts.CreateDocument(),
+            uri -> {
+                if (uri != null) {
+                    try {
+                        AndroidUtils.Files.copyFile(GpsLoggerActivity.this, Uri.fromFile(_CurrentLogFile), uri);
+                    } catch (IOException e) {
+                        getTtAppCtx().getReport().writeError(e.getMessage(), "GpsLoggerActivity:exportGpsLog");
+                        Toast.makeText(GpsLoggerActivity.this, "Error exporting GPS Log. See log file for details.", Toast.LENGTH_LONG).show();
+                    }
+                } else {
+                    Toast.makeText(GpsLoggerActivity.this, "Error selecting file for export", Toast.LENGTH_LONG).show();
+                }
+            });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -125,7 +169,9 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
                 item.setChecked(true);
 
                 if (logging) {
-                    getTtAppCtx().getGps().startLogging(getTtAppCtx().getLogFile());
+                    getTtAppCtx().getGps().stopLogging();
+                    _CurrentLogFile = getTtAppCtx().getGpsLogFile();
+                    getTtAppCtx().getGps().startLogging(_CurrentLogFile);
                 }
             }
             return true;
@@ -136,8 +182,38 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.loggerMenuExportLog) {
+            _AllGpsLogFiles.clear();
+            for (File file : getTtAppCtx().getCacheDir().listFiles()) {
+                if (file.getName().contains(Consts.Files.GPS_LOG_FILE_PREFIX)) {
+                    _AllGpsLogFiles.add(file);
+                }
+            }
 
-        if (item.getItemId() == android.R.id.home) {
+            Runnable exportCurrent = () -> exportGpsLog.launch(_CurrentLogFile.getName());
+            Runnable exportAll = () -> exportAllGpsLogs.launch("TwoTrailsGPSLogFiles.zip");
+
+            if (_CurrentLogFile != null) {
+                if (_AllGpsLogFiles.size() > 1) {
+                    new AlertDialog.Builder(GpsLoggerActivity.this)
+                        .setMessage("Would you like to export the current GPS log or all the GPS logs?")
+                        .setPositiveButton("Current", (dialog, which) -> {
+                            exportCurrent.run();
+                        })
+                        .setNeutralButton("All", (dialog, which) -> {
+                            exportAll.run();
+                        })
+                        .setNegativeButton(R.string.str_cancel, null)
+                        .show();
+                } else {
+                    exportCurrent.run();
+                }
+            } else if (_AllGpsLogFiles.size() > 0) {
+                exportAll.run();
+            } else {
+                Toast.makeText(GpsLoggerActivity.this, "There are no GPS Log files found to export", Toast.LENGTH_LONG).show();
+            }
+        } else if (item.getItemId() == android.R.id.home) {
             onBackPressed();
         }
 
@@ -221,7 +297,8 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
                 btnLog.setText(R.string.aqr_log_pause);
 
                 if (miCheckLtf.isChecked()) {
-                    getTtAppCtx().getGps().startLogging(getTtAppCtx().getGpsLogFile());
+                    _CurrentLogFile = getTtAppCtx().getGpsLogFile();
+                    getTtAppCtx().getGps().startLogging(_CurrentLogFile);
                 }
             } else {
                 logging = false;

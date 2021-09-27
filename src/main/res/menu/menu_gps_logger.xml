@@ -17,6 +17,10 @@
             <item android:id="@+id/loggerMenuLtf"
                 android:title="@string/logger_ltf"
                 app:showAsAction="never"/>
+
+            <item android:id="@+id/loggerMenuExportLog"
+                android:title="@string/logger_export"
+                app:showAsAction="never"/>
         </menu>
     </item>
 </menu>

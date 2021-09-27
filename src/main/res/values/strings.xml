@@ -483,6 +483,7 @@
 
     <!-- GPS Logger -->
     <string name="logger_ltf">Log to File</string>
+    <string name="logger_export">Export Log</string>
 
     <!-- Map -->
     <string name="map_adj_bnd">Adjusted Boundary Polygon</string>

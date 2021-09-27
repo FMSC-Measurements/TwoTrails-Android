@@ -348,7 +348,8 @@ public class DeviceSettings extends Settings {
 
     public void writeToFile(JsonWriter js) throws IOException {
         js.name(DEVELOPER_OPTIONS).value(isDeveloperOptionsEnabled());
-        js.name(LAST_CRASH_TIME).value(getLastCrashTime().toString());
+        DateTime lastCrash = getLastCrashTime();
+        js.name(LAST_CRASH_TIME).value(lastCrash != null ? lastCrash.toString() : "");
 
         js.name(EXTERNAL_SYNC_ENABLED).value(isExternalSyncEnabled());
         js.name(EXTERNAL_SYNC_ENABLED_ASK).value(isExternalSyncEnabledAsked());

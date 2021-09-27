@@ -34,6 +34,7 @@ import com.usda.fmsc.utilities.StringEx;
 import org.joda.time.DateTime;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -343,7 +344,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
 //                logFileDir.mkdirs();
 //            }
 
-            logPrintWriter = new PrintWriter(logFile);
+            logPrintWriter = new PrintWriter(new FileWriter(logFile, true));
 
             writeStartLog();
 

@@ -1823,7 +1823,7 @@ public class TtUtils {
 
         File gpsFile = null;
         for (File file : app.getCacheDir().listFiles()) {
-            if (file.getName().startsWith(Consts.Files.GPS_LOG_FILE_PREFIX)) {
+            if (file.getName().contains(Consts.Files.GPS_LOG_FILE_PREFIX)) {
                 files.add(file);
             }
         }
