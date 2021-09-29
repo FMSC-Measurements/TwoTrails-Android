@@ -106,7 +106,6 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
                 restoreState(savedInstanceState);
             } else {
                 strings = new ArrayList<>();
-                strings.add(DateTime.now().toString());
 
                 a = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, strings);
 
@@ -288,6 +287,8 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
         logging = !logging;
 
         if (logging) {
+            strings.add(DateTime.now().toString());
+
             if (getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
                 if (!getTtAppCtx().isGpsServiceStartedAndRunning()) {
                     Toast.makeText(GpsLoggerActivity.this, "GPS is not Receiving", Toast.LENGTH_SHORT).show();

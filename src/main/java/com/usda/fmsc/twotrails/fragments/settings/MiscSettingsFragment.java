@@ -13,6 +13,7 @@ import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
 import com.usda.fmsc.twotrails.activities.base.TtActivity;
 import com.usda.fmsc.twotrails.fragments.TtBasePrefFragment;
 import com.usda.fmsc.twotrails.logic.SettingsLogic;
+import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import org.joda.time.DateTime;
 
@@ -57,7 +58,7 @@ public class MiscSettingsFragment extends TtBasePrefFragment {
                     String.format(Locale.getDefault(),
                             "%sTwoTrailsReport_%s.zip",
                                 File.separator,
-                                DateTime.now().toString())
+                                TtUtils.Date.nowToString())
                     );
                 return false;
             });

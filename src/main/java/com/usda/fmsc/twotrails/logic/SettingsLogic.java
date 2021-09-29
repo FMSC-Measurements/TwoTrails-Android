@@ -91,6 +91,8 @@ public class SettingsLogic {
                     activity.getTtAppCtx().getReport().writeError("Unable to copy report", "SettingsLogic:onExportReportComplete");
                     Toast.makeText(activity, "Unable to export Report", Toast.LENGTH_LONG).show();
                     return;
+                } finally {
+                    reportPath.deleteOnExit();
                 }
             }
 

@@ -1771,6 +1771,10 @@ public class TtUtils {
     }
 
     public static class Date {
+        public static String nowToString() {
+            return toString(DateTime.now());
+        }
+
         public static String toString(DateTime dateTime) {
             return String.format(Locale.getDefault(), "%d%02d%02d_%02d-%02d-%02d",
                     dateTime.getYear(), dateTime.getMonthOfYear(), dateTime.getDayOfMonth(), dateTime.getHourOfDay(), dateTime.getMinuteOfDay(), dateTime.getSecondOfDay());
@@ -1802,7 +1806,7 @@ public class TtUtils {
         if (fileName == null) {
             fileName = String.format("%sTwoTrailsReport_%s.zip",
                     File.separator,
-                    DateTime.now().toString());
+                    TtUtils.Date.nowToString());
         }
 
         File exportFile = new File(
@@ -1906,12 +1910,13 @@ public class TtUtils {
     public static void SendEmailToDev(Activity activity, File reportFile, boolean addFile) {
         TwoTrailsApp app = (TwoTrailsApp) activity.getApplicationContext();
 
-        boolean isCrash = false;
+        boolean isCrash = false, reportedCreated = false;
 
         if (reportFile == null) {
             isCrash = true;
             try {
                 reportFile = TtUtils.exportReport(app, null, addFile);
+                reportedCreated = true;
             } catch (IOException e) {
                 Toast.makeText(activity, "Unable to generate report.", Toast.LENGTH_LONG).show();
                 return;
@@ -1936,6 +1941,10 @@ public class TtUtils {
 
         } catch (Exception e) {
             Toast.makeText(activity, "Error Sending Email.", Toast.LENGTH_LONG).show();
+        } finally {
+            if (reportedCreated) {
+                reportFile.deleteOnExit();
+            }
         }
     }
 

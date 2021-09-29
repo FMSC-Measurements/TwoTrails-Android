@@ -1133,7 +1133,7 @@ public class TwoTrailsApp extends Application {
     }
 
     public File getGpsLogFile() {
-        return new File(getCacheDir(), String.format("%s_%s.txt", Consts.Files.GPS_LOG_FILE_PREFIX, DateTime.now().toString()));
+        return new File(getCacheDir(), String.format("%s_%s.txt", Consts.Files.GPS_LOG_FILE_PREFIX, TtUtils.Date.nowToString()));
     }
 
     public File getProjectMediaDir() {
