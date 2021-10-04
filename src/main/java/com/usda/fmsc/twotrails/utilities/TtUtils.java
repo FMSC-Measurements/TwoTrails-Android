@@ -1804,9 +1804,7 @@ public class TtUtils {
 
     public static File exportReport(TwoTrailsApp app, String fileName, boolean addFile) throws IOException {
         if (fileName == null) {
-            fileName = String.format("%sTwoTrailsReport_%s.zip",
-                    File.separator,
-                    TtUtils.Date.nowToString());
+            fileName = String.format("TwoTrailsReport_%s.zip", TtUtils.Date.nowToString());
         }
 
         File exportFile = new File(

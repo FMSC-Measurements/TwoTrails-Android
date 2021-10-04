@@ -55,10 +55,7 @@ public class MiscSettingsFragment extends TtBasePrefFragment {
         if (pref != null) {
             pref.setOnPreferenceClickListener(preference -> {
                 exportFileOnResult.launch(
-                    String.format(Locale.getDefault(),
-                            "%sTwoTrailsReport_%s.zip",
-                                File.separator,
-                                TtUtils.Date.nowToString())
+                    String.format(Locale.getDefault(), "TwoTrailsReport_%s.zip", TtUtils.Date.nowToString())
                     );
                 return false;
             });
