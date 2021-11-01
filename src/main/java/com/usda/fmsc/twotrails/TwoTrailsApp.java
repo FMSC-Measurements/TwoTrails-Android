@@ -564,7 +564,7 @@ public class TwoTrailsApp extends Application {
             e.printStackTrace();
         }
 
-        _Report.writeEvent(String.format("TwoTrails Started (%s)", AndroidUtils.App.getAppVersion(this)));
+        _Report.writeEvent(String.format("TwoTrails Started (%s)", TtUtils.getAndroidApplicationVersion(this)));
 
         //ArcGISRuntime.setClientId(this.getString(R.string.arcgis_client_id)); //100.2.9
         ArcGISRuntimeEnvironment.setLicense(this.getString(R.string.arcgis_runtime_license)); //100.10.0
