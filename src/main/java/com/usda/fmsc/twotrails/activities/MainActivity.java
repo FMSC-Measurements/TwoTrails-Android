@@ -228,7 +228,7 @@ public class MainActivity extends TtProjectAdjusterActivity {
         } else if (itemId == R.id.mainMenuAbout) {
             new AlertDialog.Builder(MainActivity.this)
                     .setTitle(R.string.app_name)
-                    .setMessage(String.format("App: %s\nData: %s", TtUtils.getApplicationVersion(getTtAppCtx()), TwoTrailsSchema.SchemaVersion))
+                    .setMessage(String.format("App: %s\nData: %s", TtUtils.getAndroidApplicationVersion(getTtAppCtx()), TwoTrailsSchema.SchemaVersion))
                     .show();
         }
 

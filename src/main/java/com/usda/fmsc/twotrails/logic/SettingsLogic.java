@@ -18,15 +18,17 @@ import java.io.File;
 import java.io.IOException;
 
 public class SettingsLogic {
-    public static void reset(final TwoTrailsApp context) {
+    public static void reset(final TtActivity context) {
         AlertDialog.Builder alert = new AlertDialog.Builder(context);
 
         alert.setTitle("Reset Settings");
         alert.setMessage("Do you want to reset all the settings in TwoTrails?");
 
         alert.setPositiveButton("Reset", (dialogInterface, i) -> {
-            context.getDeviceSettings().reset();
-            context.getArcGISTools().reset();
+            TwoTrailsApp app = context.getTtAppCtx();
+            app.getProjectSettings().clearRecentProjects();
+            app.getDeviceSettings().reset();
+            app.getArcGISTools().reset();
         });
 
         alert.setNeutralButton(R.string.str_cancel, null);

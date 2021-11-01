@@ -15,9 +15,6 @@ import com.usda.fmsc.twotrails.fragments.TtBasePrefFragment;
 import com.usda.fmsc.twotrails.logic.SettingsLogic;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
-import org.joda.time.DateTime;
-
-import java.io.File;
 import java.util.Locale;
 
 public class MiscSettingsFragment extends TtBasePrefFragment {
@@ -38,7 +35,7 @@ public class MiscSettingsFragment extends TtBasePrefFragment {
         Preference pref = findPreference(getString(R.string.set_RESET));
         if (pref != null) {
             pref.setOnPreferenceClickListener(preference -> {
-                SettingsLogic.reset(getTtAppCtx());
+                SettingsLogic.reset((TtActivity) getActivity());
                 return false;
             });
         }
@@ -54,9 +51,7 @@ public class MiscSettingsFragment extends TtBasePrefFragment {
         pref = findPreference(getString(R.string.set_EXPORT_REPORT));
         if (pref != null) {
             pref.setOnPreferenceClickListener(preference -> {
-                exportFileOnResult.launch(
-                    String.format(Locale.getDefault(), "TwoTrailsReport_%s.zip", TtUtils.Date.nowToString())
-                    );
+                exportFileOnResult.launch(String.format(Locale.getDefault(), "TwoTrailsReport_%s.zip", TtUtils.Date.nowToString()));
                 return false;
             });
         }

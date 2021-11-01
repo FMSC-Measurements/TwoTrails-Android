@@ -65,6 +65,7 @@ import com.usda.fmsc.twotrails.units.Slope;
 import com.usda.fmsc.utilities.FileUtils;
 import com.usda.fmsc.utilities.ParseEx;
 import com.usda.fmsc.utilities.StringEx;
+import com.usda.fmsc.utilities.Tuple;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -1804,7 +1805,7 @@ public class TtUtils {
 
     public static File exportReport(TwoTrailsApp app, String fileName, boolean addFile) throws IOException {
         if (fileName == null) {
-            fileName = String.format("TwoTrailsReport_%s.zip", TtUtils.Date.nowToString());
+            fileName = String.format(Locale.getDefault(),"TwoTrailsReport_%s.zip", DateTime.now().toString());
         }
 
         File exportFile = new File(
@@ -1812,25 +1813,29 @@ public class TtUtils {
                 fileName);
 
 
-        List<File> files = new ArrayList<>();
-        files.add(app.getLogFile());
+        List<Tuple<File, File>> files = new ArrayList<>();
+        files.add(new Tuple<>(app.getLogFile(), null));
 
         if (generateSettingsFile(app)) {
-            files.add(app.getSettingsFile());
+            files.add(new Tuple<>(app.getSettingsFile(), null));
         }
 
         if (addFile && app.hasDAL()) {
-            files.add(app.getDatabasePath(app.getDAL().getFileName()));
-        }
+            files.add(new Tuple<>(app.getDatabasePath(app.getDAL().getFileName()), null));
 
-        File gpsFile = null;
-        for (File file : app.getCacheDir().listFiles()) {
-            if (file.getName().contains(Consts.Files.GPS_LOG_FILE_PREFIX)) {
-                files.add(file);
+            if (app.hasMAL()) {
+                files.add(new Tuple<>(app.getDatabasePath(app.getMAL().getFileName()), null));
             }
         }
 
-        FileUtils.zipFiles(exportFile, files.toArray(new File[0]));
+        File gpsLogs = new File("GPS_Logs");
+        for (File file : app.getCacheDir().listFiles()) {
+            if (file.getName().contains(Consts.Files.GPS_LOG_FILE_PREFIX)) {
+                files.add(new Tuple<>(file, gpsLogs));
+            }
+        }
+
+        FileUtils.zipFiles(exportFile, files.toArray(new Tuple[0]));
 
         return exportFile;
     }
@@ -1946,14 +1951,20 @@ public class TtUtils {
         }
     }
 
-
-    public static String getApplicationVersion(Application context) {
+    public static String getAndroidApplicationVersion(Application context) {
         try {
             PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
-            return String.format("ANDROID: %s-%s", pInfo.versionName.substring(0, pInfo.versionName.indexOf('-')), pInfo.getLongVersionCode());
+
+            return String.format("%s (%s)",
+                    pInfo.versionName,
+                    pInfo.getLongVersionCode());
         } catch (Exception ex) {
-            return "ANDROID: ???";
+            return "???";
         }
+    }
+
+    public static String getApplicationVersion(Application context) {
+        return String.format(Locale.getDefault(), "ANDROID: %s", getAndroidApplicationVersion(context));
     }
 
     public static String projectToFileName(String projectName) {

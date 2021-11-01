@@ -670,7 +670,7 @@ public class TwoTrailsApp extends Application {
 
         if (dam != null) {
             _CurrentProject = new TwoTrailsProject(
-                    dam.getDAL().getProjectDeviceID(),
+                    dam.getDAL().getProjectID(),
                     dam.getDatabaseName()
             );
 
@@ -694,14 +694,7 @@ public class TwoTrailsApp extends Application {
         if (_MAM == null && hasDAL()) {
 
             if (_CurrentProject.TTMPXFile == null) {
-                //create TTMPX
-                _CurrentProject = new TwoTrailsProject(
-                        _CurrentProject.Name,
-                        _CurrentProject.TTXFile,
-                        _CurrentProject.TTXFile.replace(Consts.FileExtensions.TWO_TRAILS, Consts.FileExtensions.TWO_TRAILS_MEDIA_PACKAGE));
-
-                getProjectSettings().updateRecentProjects(_CurrentProject);
-                getDeviceSettings().setLastOpenedProject(_CurrentProject);
+                updateCurrentProjectWithTTMPX();
             }
 
             setMAM(MediaAccessManager.openMAL(TwoTrailsApp.this, _CurrentProject.TTMPXFile));
@@ -726,11 +719,28 @@ public class TwoTrailsApp extends Application {
     public void setMAM(MediaAccessManager mam) {
         if (mam != null) {
             _MAM = mam;
+
+            if (_CurrentProject.TTMPXFile == null) {
+                updateCurrentProjectWithTTMPX();
+            }
+
             getReport().writeEvent(String.format("MAL Loaded: %s (%s)", _CurrentProject.Name, _CurrentProject.TTMPXFile));
         } else {
             getReport().writeEvent("MAL Unloaded");
         }
     }
+
+
+    private void updateCurrentProjectWithTTMPX() {
+        _CurrentProject = new TwoTrailsProject(
+                _CurrentProject.Name,
+                _CurrentProject.TTXFile,
+                _CurrentProject.TTXFile.replace(Consts.FileExtensions.TWO_TRAILS, Consts.FileExtensions.TWO_TRAILS_MEDIA_PACKAGE));
+
+        getProjectSettings().updateRecentProjects(_CurrentProject);
+        getDeviceSettings().setLastOpenedProject(_CurrentProject);
+    }
+
     //endregion
 
     //region Storage Access

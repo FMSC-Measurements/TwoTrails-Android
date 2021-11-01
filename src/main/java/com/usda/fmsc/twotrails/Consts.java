@@ -244,7 +244,7 @@ public class Consts {
 
     public static class Files {
         public static final String LOG_FILE = "TwoTrailsLog.txt";
-        public static final String GPS_LOG_FILE_PREFIX = "GPSLog";
+        public static final String GPS_LOG_FILE_PREFIX = "GPS_Log";
         public static final String SETTINGS_FILE = "Settings.txt";
     }
 }
