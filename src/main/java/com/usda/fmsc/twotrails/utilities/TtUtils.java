@@ -1777,8 +1777,8 @@ public class TtUtils {
         }
 
         public static String toString(DateTime dateTime) {
-            return String.format(Locale.getDefault(), "%d%02d%02d_%02d-%02d-%02d",
-                    dateTime.getYear(), dateTime.getMonthOfYear(), dateTime.getDayOfMonth(), dateTime.getHourOfDay(), dateTime.getMinuteOfDay(), dateTime.getSecondOfDay());
+            return String.format(Locale.getDefault(), "%d%-02d-%02d_%02d-%02d-%02d",
+                    dateTime.getYear(), dateTime.getMonthOfYear(), dateTime.getDayOfMonth(), dateTime.getHourOfDay(), dateTime.getMinuteOfHour(), dateTime.getSecondOfMinute());
         }
 
         public static String toStringDateMillis(DateTime dateTime) {
@@ -1805,7 +1805,7 @@ public class TtUtils {
 
     public static File exportReport(TwoTrailsApp app, String fileName, boolean addFile) throws IOException {
         if (fileName == null) {
-            fileName = String.format(Locale.getDefault(),"TwoTrailsReport_%s.zip", DateTime.now().toString());
+            fileName = String.format(Locale.getDefault(),"TwoTrailsReport_%s.zip", Date.nowToString());
         }
 
         File exportFile = new File(
@@ -1955,7 +1955,7 @@ public class TtUtils {
         try {
             PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
 
-            return String.format("%s (%s)",
+            return String.format(Locale.getDefault(), "%s %s",
                     pInfo.versionName,
                     pInfo.getLongVersionCode());
         } catch (Exception ex) {

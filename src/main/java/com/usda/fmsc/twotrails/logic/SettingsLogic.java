@@ -99,14 +99,14 @@ public class SettingsLogic {
             }
 
             activity.runOnUiThread(() -> {
+                Toast.makeText(activity, "Report Exported", Toast.LENGTH_LONG).show();
+
                 if (AndroidUtils.Device.isInternetAvailable(activity)) {
                     new AlertDialog.Builder(activity)
                             .setMessage("Would you like to send the report to the developer team to help prevent future crashes?")
                             .setPositiveButton("Send", (dialog, which) -> TtUtils.SendEmailToDev(activity, reportPath, true))
                             .setNeutralButton("Don't Send", null)
                             .show();
-                } else {
-                    Toast.makeText(activity, "Report Exported", Toast.LENGTH_LONG).show();
                 }
             });
         } else {
