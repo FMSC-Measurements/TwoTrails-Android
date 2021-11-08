@@ -2598,7 +2598,8 @@ public class DataAccessLayer extends IDataLayer {
         } catch (Exception ex) {
             logError(ex.getMessage(), "DAL:insertUserActivity");
         } finally {
-            getDB().endTransaction();
+            if (!inTrans)
+                getDB().endTransaction();
         }
 
         return success;
@@ -2762,7 +2763,10 @@ public class DataAccessLayer extends IDataLayer {
         int dbVersion = getVersion().toIntVersion();
 
         if (dbVersion < upgrade.Version.toIntVersion()) {
-            getDB().execSQL(upgrade.SQL);
+            SQLiteDatabase db = getDB();
+            for (String sql : upgrade.SQL_Statements) {
+                db.execSQL(sql);
+            }
         }
 
         updateUserActivity(DataActionType.ProjectUpgraded, "Upgrade " + getVersion().toString() + " -> " + upgrade.Version.toString());

@@ -22,7 +22,7 @@ public class HaidLogic {
     private static final String INFINITE_SYMBOL = "\u221E";
 
     private final StringBuilder pointStats;
-    private double travLength, totalTravError, totalGpsError;
+    private double travLength, totalTravError, totalGpsError, polyPerim;
     private boolean traversing;
     private int traverseSegments, lastGpsPtPID;
 
@@ -56,6 +56,13 @@ public class HaidLogic {
     public synchronized String generatePolyStats(TtPolygon polygon, boolean showPoints, boolean save) {
         StringBuilder sb = new StringBuilder();
 
+        _Legs.clear();
+        totalTravError = totalGpsError = polyPerim = 0;
+        traversing = false;
+        traverseSegments = 0;
+
+        _LastTtPoint = _LastTtBndPt = null;
+
         try {
             List<TtPoint> points = app.getDAL().getPointsInPolygon(polygon.getCN());
 
@@ -71,6 +78,7 @@ public class HaidLogic {
                 if (points.size() > 2) {
                     points = TtUtils.Points.filterOut(points, OpType.WayPoint);
 
+
                     if (points.size() > 0) {
                         if (points.size() > 2) {
                             for (TtPoint point : points) {
@@ -85,12 +93,13 @@ public class HaidLogic {
                                 }
                             }
 
-                            if (!pt.sameAdjLocation(_LastTtPoint)) {
-                                _Legs.add(new Leg(_LastTtPoint, pt));
+                            if (!pt.sameAdjLocation(_LastTtBndPt)) {
+                                _Legs.add(new Leg(_LastTtBndPt, pt));
                             }
 
                             for (Leg leg : _Legs) {
                                 totalGpsError += leg.getAreaError();
+                                polyPerim += leg.getDistance();
                             }
 
                             sb.append(getPolygonSummary(polygon, save));
@@ -291,8 +300,10 @@ public class HaidLogic {
 
             sb.append(String.format(Locale.getDefault(), "The polygon exterior perimeter is: %s%.2f M (%.0f ft).%s%s",
                 save ? "     " : "",
-                TtUtils.Math.round(polygon.getPerimeter(), 2),
-                TtUtils.Math.round(TtUtils.Convert.toFeetTenths(polygon.getPerimeter(), Dist.Meters), 2),
+                TtUtils.Math.round(polyPerim, 2),
+//                    TtUtils.Math.round(polygon.getPerimeter(), 2),
+                TtUtils.Math.round(TtUtils.Convert.toFeetTenths(polyPerim, Dist.Meters), 2),
+//                    TtUtils.Math.round(TtUtils.Convert.toFeetTenths(polygon.getPerimeter(), Dist.Meters), 2),
                 Consts.NewLine, Consts.NewLine));
         }
 

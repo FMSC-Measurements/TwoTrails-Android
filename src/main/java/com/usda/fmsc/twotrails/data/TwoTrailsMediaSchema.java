@@ -119,6 +119,7 @@ public class TwoTrailsMediaSchema {
     //endregion
 
 
-    public static final String UPGRADE_MAL_2_1_0 =
-            "UPDATE " + Info.TableName + " SET " + Info.TtMediaDbSchemaVersion + " = '" + MAL_2_1_0 + "';";
+    public static final String[] UPGRADE_MAL_2_1_0 = new String[] {
+            "UPDATE " + Info.TableName + " SET " + Info.TtMediaDbSchemaVersion + " = '" + MAL_2_1_0 + "';"
+    };
 }

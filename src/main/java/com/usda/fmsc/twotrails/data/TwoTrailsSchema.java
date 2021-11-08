@@ -551,12 +551,15 @@ public class TwoTrailsSchema {
     //endregion
 
 
-    public static final String UPGRADE_DAL_2_0_3 = "UPDATE " + TtNmeaSchema.TableName + " SET " + TtNmeaSchema.Fix + " = " + TtNmeaSchema.Fix + " + 1; " +
-        "UPDATE " + ProjectInfoSchema.TableName + " SET " + ProjectInfoSchema.TtDbSchemaVersion + " = '" + DAL_2_0_3 + "';";
+    public static final String[] UPGRADE_DAL_2_0_3 = new String[] {
+            "UPDATE " + TtNmeaSchema.TableName + " SET " + TtNmeaSchema.Fix + " = " + TtNmeaSchema.Fix + " + 1; ",
+            "UPDATE " + ProjectInfoSchema.TableName + " SET " + ProjectInfoSchema.TtDbSchemaVersion + " = '" + DAL_2_0_3 + "';"
+    };
 
-    public static final String UPGRADE_DAL_2_1_0 =
-            "ALTER TABLE " + PolygonSchema.TableName +" ADD COLUMN " + PolygonSchema.ParentUnitCN + " TEXT; " +
-            "ALTER TABLE " + PolygonSchema.TableName + " ADD COLUMN " + PolygonSchema.UnitType + " INTEGER; " +
-            "ALTER TABLE " + ActivitySchema.TableName + " ADD COLUMN " + ActivitySchema.AppVersion + " TEXT; " +
-            "UPDATE " + ProjectInfoSchema.TableName + " SET " + ProjectInfoSchema.TtDbSchemaVersion + " = '" + DAL_2_1_0 + "';";
+    public static final String[] UPGRADE_DAL_2_1_0 = new String[] {
+            "ALTER TABLE " + PolygonSchema.TableName +" ADD COLUMN " + PolygonSchema.ParentUnitCN + " TEXT; ",
+            "ALTER TABLE " + PolygonSchema.TableName + " ADD COLUMN " + PolygonSchema.UnitType + " INTEGER; ",
+            "ALTER TABLE " + ActivitySchema.TableName + " ADD COLUMN " + ActivitySchema.AppVersion + " TEXT; ",
+            "UPDATE " + ProjectInfoSchema.TableName + " SET " + ProjectInfoSchema.TtDbSchemaVersion + " = '" + DAL_2_1_0 + "';"
+    };
 }

@@ -665,7 +665,10 @@ public class MediaAccessLayer extends IDataLayer implements BitmapManager.IBitma
         int dbVersion = getVersion().toIntVersion();
 
         if (dbVersion < upgrade.Version.toIntVersion()) {
-            getDB().execSQL(upgrade.SQL);
+            SQLiteDatabase db = getDB();
+            for (String sql : upgrade.SQL_Statements) {
+                db.execSQL(sql);
+            }
         }
 
         getDB().setTransactionSuccessful();

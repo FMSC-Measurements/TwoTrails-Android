@@ -86,14 +86,14 @@ public abstract class IDataLayer {
 
 
     protected String createSelectQuery(String table, String items, String where) {
-        return String.format("select %s from %s%s",
-                items, table, StringEx.isEmpty(where) ? StringEx.Empty : String.format(" where %s", where));
+        return String.format(Locale.getDefault(), "select %s from %s%s",
+                items, table, StringEx.isEmpty(where) ? StringEx.Empty : String.format(Locale.getDefault(), " where %s", where));
     }
 
     protected String createSelectAllQuery(String table, String where) {
-        return String.format("select * from %s%s",
+        return String.format(Locale.getDefault(), "select * from %s%s",
                 table, StringEx.isEmpty(where) ?
-                        StringEx.Empty : String.format(" where %s", where));
+                        StringEx.Empty : String.format(Locale.getDefault(), " where %s", where));
     }
 
 
@@ -124,14 +124,14 @@ public abstract class IDataLayer {
 
     public int getItemsCount(String tableName, String column, String value) {
         return getItemsCount(tableName,
-                String.format("%s = '%s'",
+                String.format(Locale.getDefault(), "%s = '%s'",
                     column,
                     value)
         );
     }
 
     public int getItemsCount(String tableName, String where) {
-        String countQuery = String.format("select count(*) from %s where %s", tableName, where);
+        String countQuery = String.format(Locale.getDefault(), "select count(*) from %s where %s", tableName, where);
 
         Cursor cursor = _db.rawQuery(countQuery, null);
 
@@ -169,10 +169,10 @@ public abstract class IDataLayer {
         ArrayList<String> cns = new ArrayList<>();
 
         try {
-            String query = String.format("select %s from %s%s",
+            String query = String.format(Locale.getDefault(), "select %s from %s%s",
                     TwoTrailsSchema.SharedSchema.CN,
                     tableName,
-                    StringEx.isEmpty(where) ? StringEx.Empty : String.format(" where %s", where));
+                    StringEx.isEmpty(where) ? StringEx.Empty : String.format(Locale.getDefault(), " where %s", where));
 
             Cursor c = _db.rawQuery(query, null);
 
@@ -196,9 +196,9 @@ public abstract class IDataLayer {
         final int MAX_BLOB_SIZE = 1000000;
         byte[] data = null;
 
-        String query = String.format("select length(%s) from %s%s",
+        String query = String.format(Locale.getDefault(), "select length(%s) from %s%s",
                 column, tableName,
-                where != null ? String.format(" where %s", where) : null);
+                where != null ? String.format(Locale.getDefault(), " where %s", where) : null);
 
         Cursor cursor = _db.rawQuery(query, null);
         if (cursor.moveToFirst()){
@@ -211,13 +211,13 @@ public abstract class IDataLayer {
 
                 ByteArrayOutputStream baos = new ByteArrayOutputStream(size);
                 while (size > 0) {
-                    query = String.format("select substr(%s,       %d, %d) from %s%s",
+                    query = String.format(Locale.getDefault(), "select substr(%s,       %d, %d) from %s%s",
                             column, start, length, tableName,
-                            where != null ? String.format(" where %s", where) : null);
+                            where != null ? String.format(Locale.getDefault(), " where %s", where) : null);
 
                     size -= MAX_BLOB_SIZE;
                     start += MAX_BLOB_SIZE;
-                    length = size > MAX_BLOB_SIZE ? MAX_BLOB_SIZE : size;
+                    length = Math.min(size, MAX_BLOB_SIZE);
 
                     cursor = _db.rawQuery(query, null);
 
@@ -235,9 +235,9 @@ public abstract class IDataLayer {
 
                 data = baos.toByteArray();
             } else {
-                query = String.format("select %s from %s%s",
+                query = String.format(Locale.getDefault(), "select %s from %s%s",
                         column, tableName,
-                        where != null ? String.format(" where %s", where) : null);
+                        where != null ? String.format(Locale.getDefault(), " where %s", where) : null);
 
                 cursor = _db.rawQuery(query, null);
 
