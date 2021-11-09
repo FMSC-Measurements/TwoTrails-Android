@@ -90,6 +90,7 @@ android {
 
     buildFeatures {
         dataBinding true
+        viewBinding true
     }
 
     productFlavors {
@@ -151,6 +152,9 @@ dependencies {
     implementation 'me.zhanghai.android.materialprogressbar:library:1.1.4'
     implementation 'org.apache.commons:commons-csv:1.2'
     implementation 'org.apache.commons:commons-collections4:4.4'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.1'
     implementation 'androidx.preference:preference:1.1.1'
+    implementation 'androidx.navigation:navigation-fragment:2.3.5'
+    implementation 'androidx.navigation:navigation-ui:2.3.5'
+    implementation 'com.github.mukeshsolanki:MarkdownView-Android:1.1.1'
 }

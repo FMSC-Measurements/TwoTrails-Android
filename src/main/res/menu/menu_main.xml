@@ -33,6 +33,11 @@
                   app:showAsAction="never"
                   android:icon="@drawable/ic_my_location_black_36dp" />
 
+            <item android:id="@+id/mainMenuPrivacyPolicy"
+                android:title="@string/menu_main_privacy_policy"
+                app:showAsAction="never"
+                android:icon="@drawable/ic_file_document_outline_black_36dp"/>
+
             <item android:id="@+id/mainMenuAbout"
                   android:title="@string/menu_main_about"
                   app:showAsAction="never"

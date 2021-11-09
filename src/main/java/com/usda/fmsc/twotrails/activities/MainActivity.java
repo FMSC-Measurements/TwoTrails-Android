@@ -217,7 +217,6 @@ public class MainActivity extends TtProjectAdjusterActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int itemId = item.getItemId();
         if (itemId == R.id.mainMenuSettings) {
-            //startActivityForResult(new Intent(this, SettingsActivity.class), Consts.Codes.Activities.SETTINGS);
             updateAppInfoOnResult.launch(new Intent(this, SettingsActivity.class));
         } else if (itemId == R.id.mainMenuGpsSettings) {
             startActivity(new Intent(this, SettingsActivity.class).
@@ -225,7 +224,9 @@ public class MainActivity extends TtProjectAdjusterActivity {
         } else if (itemId == R.id.mainMenuRangeFinderSettings) {
             startActivity(new Intent(this, SettingsActivity.class).
                     putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.LASER_SETTINGS_PAGE));
-        } else if (itemId == R.id.mainMenuAbout) {
+        } else if (itemId == R.id.mainMenuPrivacyPolicy) {
+            startActivity(new Intent(this, PrivacyPolicyActivity.class));
+        }else if (itemId == R.id.mainMenuAbout) {
             new AlertDialog.Builder(MainActivity.this)
                     .setTitle(R.string.app_name)
                     .setMessage(String.format("App: %s\nData: %s", TtUtils.getAndroidApplicationVersion(getTtAppCtx()), TwoTrailsSchema.SchemaVersion))
