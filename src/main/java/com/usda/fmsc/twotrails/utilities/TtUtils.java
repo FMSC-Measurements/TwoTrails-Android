@@ -1050,7 +1050,10 @@ public class TtUtils {
                     if (internalImage.getScheme().equals("content")) {
                         try (Cursor cursor = app.getContentResolver().query(uri, null, null, null, null)) {
                             if (cursor != null && cursor.moveToFirst()) {
-                                name = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+                                int index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                                if (index >= 0) {
+                                    name = cursor.getString(index);
+                                }
                             }
                         }
                     }
@@ -1777,7 +1780,7 @@ public class TtUtils {
         }
 
         public static String toString(DateTime dateTime) {
-            return String.format(Locale.getDefault(), "%d%-02d-%02d_%02d-%02d-%02d",
+            return String.format(Locale.getDefault(), "%d-%02d-%02d_%02d-%02d-%02d",
                     dateTime.getYear(), dateTime.getMonthOfYear(), dateTime.getDayOfMonth(), dateTime.getHourOfDay(), dateTime.getMinuteOfHour(), dateTime.getSecondOfMinute());
         }
 
