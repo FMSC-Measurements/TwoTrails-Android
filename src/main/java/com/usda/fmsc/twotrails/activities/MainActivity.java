@@ -663,6 +663,7 @@ public class MainActivity extends TtProjectAdjusterActivity {
         } else if (fp.toLowerCase().endsWith(".zip")) {
             importTtPackage(filePath);
         } else {
+            getTtAppCtx().getReport().writeWarn(String.format(Locale.getDefault(), "Invalid import type: '%s'", fp), "MainActivity:importProject");
             Toast.makeText(MainActivity.this, "Invalid File Type", Toast.LENGTH_LONG).show();
         }
     }
