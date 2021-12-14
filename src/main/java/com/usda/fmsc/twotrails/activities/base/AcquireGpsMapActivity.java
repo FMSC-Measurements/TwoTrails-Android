@@ -466,7 +466,6 @@ public abstract class AcquireGpsMapActivity extends BaseMapActivity {
                 }
 
                 if (burst.isValid(NmeaIDs.SentenceID.GSV)) {
-
                     tvSat.setText(String.format("%d/%d/%d",
                             burst.getUsedSatellitesCount(),
                             burst.isValid(NmeaIDs.SentenceID.GGA) ? burst.getTrackedSatellitesCount() : 0,
