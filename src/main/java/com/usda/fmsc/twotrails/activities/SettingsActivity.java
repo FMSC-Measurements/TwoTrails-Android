@@ -36,6 +36,7 @@ public class SettingsActivity extends CustomToolbarActivity {
     public static final String POINT_GPS_SETTINGS_PAGE = "gpsPointSetup";
     public static final String POINT_WALK_SETTINGS_PAGE = "walkPointSetup";
     public static final String POINT_TAKE5_SETTINGS_PAGE = "take5PointSetup";
+    public static final String POINT_SAT_SETTINGS_PAGE = "satPointSetup"; //todo setup settings
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

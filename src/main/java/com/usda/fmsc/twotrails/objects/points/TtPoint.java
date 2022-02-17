@@ -353,14 +353,23 @@ public abstract class TtPoint extends TtObject implements Comparable<TtPoint>, C
 
     //region Point Locations
     public boolean sameAdjLocation(TtPoint point) {
-        return (this._AdjX.equals(point.getAdjX()) &&
-                this._AdjY.equals(point.getAdjY()) &&
-                this._AdjZ.equals(point.getAdjZ()));
+        return sameAdjLocation(point._AdjX, point._AdjY, point._AdjZ);
+    }
+
+    public boolean sameAdjLocation(Double x, Double y, Double z) {
+        return (this._AdjX.equals(x) &&
+                this._AdjY.equals(y) &&
+                this._AdjZ.equals(z));
     }
 
     public boolean sameUnAdjLocation(TtPoint point) {
-        return  (this._UnAdjX == point.getUnAdjX() && this._UnAdjY == point.getUnAdjY() &&
-                this._UnAdjZ == point.getUnAdjZ());
+        return sameUnAdjLocation(point._UnAdjX, point._UnAdjY, point._UnAdjZ);
+    }
+
+    public boolean sameUnAdjLocation(Double x, Double y, Double z) {
+        return (this._AdjX.equals(x) &&
+                this._AdjY.equals(y) &&
+                this._AdjZ.equals(z));
     }
     //endregion
 

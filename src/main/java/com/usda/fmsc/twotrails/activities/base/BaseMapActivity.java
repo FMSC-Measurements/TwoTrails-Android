@@ -9,6 +9,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.location.Location;
 import android.os.Bundle;
 import androidx.annotation.ColorInt;
 import androidx.annotation.IntDef;
@@ -39,6 +40,8 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.maps.MapsInitializer;
+import com.google.android.gms.maps.OnMapsSdkInitializedCallback;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.animation.ViewAnimator;
@@ -65,6 +68,7 @@ import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment;
 import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment.MarkerData;
 import com.usda.fmsc.twotrails.fragments.map.ManagedSupportMapFragment;
 import com.usda.fmsc.twotrails.gps.GpsService;
+import com.usda.fmsc.twotrails.objects.PointD;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
@@ -78,8 +82,10 @@ import com.usda.fmsc.twotrails.units.GoogleMapType;
 import com.usda.fmsc.twotrails.units.MapTracking;
 import com.usda.fmsc.twotrails.units.MapType;
 import com.usda.fmsc.twotrails.utilities.AppUnits;
+import com.usda.fmsc.twotrails.utilities.ClosestPositionCalculator;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 import com.usda.fmsc.utilities.StringEx;
+import com.usda.fmsc.utilities.Tuple;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -98,7 +104,7 @@ import static androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_UNLOCKED;
 
 @SuppressWarnings({"SameParameterValue"})
 public abstract class BaseMapActivity extends TtProjectAdjusterActivity implements IMultiMapFragment.MultiMapListener, GpsService.Listener,
-        SensorEventListener, PolyMarkerMapRvAdapter.Listener {
+        SensorEventListener, PolyMarkerMapRvAdapter.Listener, OnMapsSdkInitializedCallback {
 
     //region Lock and Gravity Defs
     @IntDef({LOCK_MODE_UNLOCKED, LOCK_MODE_LOCKED_CLOSED, LOCK_MODE_LOCKED_OPEN,
@@ -137,11 +143,12 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
     private SlidingUpPanelLayout slidingLayout;
     private TextView tvNavPid, tvNavPoly, tvNavDistMt, tvNavDistFt, tvNavAzTrue, tvNavAzMag;
     private ImageView ivArrow;
-    private Button btnFromPoly, btnFromPoint, btnToPoly, btnToPoint;
+    private Button btnFromPoly, btnFromPoint, btnToPoly, btnToPoint, btnToPoly2, btnToPoint2;
+    private View layToLine;
 
-    private TtPolygon fromPoly, toPoly;
-    private TtPoint fromPoint, toPoint;
-    private boolean fromMyLoc = true, receivingNmea;
+    private TtPolygon _FromPoly, _ToPoly, _ToPoly2;
+    private TtPoint _FromPoint, _ToPoint, _ToPoint2;
+    private boolean _NavFromMyLoc = true, _NavToPoint = true, _ReceivingNmea;
 
     private boolean showCompass, mapMoved = true, showMyPos, polysCreated, mapHasMaxExtents, mapReady;
     private MapTracking mapTracking = MapTracking.FOLLOW;
@@ -189,6 +196,9 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        //setup new renderer
+        MapsInitializer.initialize(getTtAppCtx(), MapsInitializer.Renderer.LATEST, this);
 
         if (savedInstanceState != null && savedInstanceState.containsKey(FRAGMENT) && savedInstanceState.containsKey(MAP_TYPE)) {
             mapType = MapType.parse(savedInstanceState.getInt(MAP_TYPE));
@@ -805,6 +815,16 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
     IMultiMapFragment.MapOptions startOptions;
 
     @Override
+    public void onMapsSdkInitialized(@NonNull MapsInitializer.Renderer renderer) {
+        switch (renderer) {
+            case LEGACY:
+                break;
+            case LATEST:
+                break;
+        }
+    }
+
+    @Override
     public void onMapLoaded() {
         if (mapTypeChanging) {
             moveToLocation(startOptions.getExtents(), startOptions.getPadding(), false);
@@ -829,10 +849,10 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
         tvNavPid.setText(StringEx.toString(currentPoint.getPID()));
         tvNavPoly.setText(currentPoint.getPolyName());
 
-        toPoint = currentPoint;
-        toPoly = getPolygons().get(currentPoint.getPolyCN());
-        btnToPoint.setText(StringEx.toString(toPoint.getPID()));
-        btnToPoly.setText(toPoly.getName());
+        _ToPoint = currentPoint;
+        _ToPoly = getPolygons().get(currentPoint.getPolyCN());
+        btnToPoint.setText(StringEx.toString(_ToPoint.getPID()));
+        btnToPoly.setText(_ToPoly.getName());
         calculateDir();
 
         slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
@@ -883,6 +903,14 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
 
             trailGraphicManagers.remove(graphicManager);
         }
+    }
+
+    protected void addGraphic() {
+        //todo add graphic
+    }
+
+    private void removeGraphic() {
+        //todo remove graphic
     }
 
     @Override
@@ -1009,7 +1037,7 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
 
             lastPosition = position;
 
-            if (fromMyLoc && slidingLayout != null && slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
+            if (_NavFromMyLoc && slidingLayout != null && slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
                 calculateDir();
             }
 
@@ -1020,7 +1048,7 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
 
         onNmeaBurstReceived(nmeaBurst);
 
-        receivingNmea = true;
+        _ReceivingNmea = true;
     }
 
     protected void onNmeaBurstReceived(NmeaBurst nmeaBurst) {
@@ -1032,7 +1060,7 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
         switch (error) {
             case LostDeviceConnection:
                 Toast.makeText(BaseMapActivity.this, "Lost GPS Connection", Toast.LENGTH_LONG).show();
-                receivingNmea = false;
+                _ReceivingNmea = false;
                 break;
             case NoExternalGpsSocket:
                 break;
@@ -1054,7 +1082,7 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
 
     @Override
     public void nmeaBurstValidityChanged(boolean burstsValid) {
-        receivingNmea = burstsValid;
+        _ReceivingNmea = burstsValid;
     }
 
     @Override
@@ -1085,7 +1113,7 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
     }
 
     protected boolean isReceivingNmea() {
-        return receivingNmea;
+        return _ReceivingNmea;
     }
     //endregion
 
@@ -1444,12 +1472,12 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
         if (((RadioButton) view).isChecked()) {
             int id = view.getId();
             if (id == R.id.mapNavRadPoint) {
-                fromMyLoc = false;
+                _NavFromMyLoc = false;
 
                 btnFromPoint.setEnabled(true);
                 btnFromPoly.setEnabled(true);
             } else if (id == R.id.mapNavRadMyLoc) {
-                fromMyLoc = true;
+                _NavFromMyLoc = true;
 
                 btnFromPoint.setEnabled(false);
                 btnFromPoly.setEnabled(false);
@@ -1459,128 +1487,180 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
         }
     }
 
-    public void btnFromPolyClick(View view) {
-        if (polyPoints.size() > 0) {
-            final String[] polyStrs = new String[polyPoints.size()];
-            final ArrayList<TtPolygon> polys = getSortedPolys();
-
-            int i = 0;
-            for(TtPolygon poly : polys) {
-                polyStrs[i] = poly.getName();
-                i++;
+    public void radToClick(View view) {
+        if (((RadioButton) view).isChecked()) {
+            int id = view.getId();
+            if (id == R.id.mapNavRadToPoint) {
+                _NavToPoint = true;
+                layToLine.setVisibility(View.GONE);
+            } else if (id == R.id.mapNavRadToPoly) {
+                _NavToPoint = false;
+                layToLine.setVisibility(View.VISIBLE);
             }
 
-            AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
-
-            dialogBuilder.setTitle("From Polygon");
-
-
-            dialogBuilder.setItems(polyStrs, (dialog, which) -> {
-                fromPoly = polys.get(which);
-                fromPoint = null;
-                btnFromPoly.setText(fromPoly.getName());
-                btnFromPoint.setText(R.string.str_point);
-            });
-
-            dialogBuilder.setNegativeButton(R.string.str_cancel, null);
-
-            final AlertDialog dialog = dialogBuilder.create();
-
-            dialog.show();
-        } else {
-            Toast.makeText(this, "No Polygons", Toast.LENGTH_SHORT).show();
+            calculateDir();
         }
+    }
+
+    public void btnFromPolyClick(View view) {
+        showPolySelectDialog("From Polygon", polygon -> {
+            _FromPoly = polygon;
+            _FromPoint = null;
+            btnFromPoly.setText(_FromPoly.getName());
+            btnFromPoint.setText(R.string.str_point);
+        });
     }
 
     public void btnFromPointClick(View view) {
-        if (fromPoly == null || !polyPoints.containsKey(fromPoly.getCN())) {
-            Toast.makeText(this, "Select polygon first", Toast.LENGTH_SHORT).show();
-        } else {
-            ArrayList<TtPoint> points = polyPoints.get(fromPoly.getCN());
-
-            if (points != null && points.size() > 0) {
-                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
-
-                dialogBuilder.setTitle(String.format("From Point in %s", fromPoly.getName()));
-                ListView listView = new ListView(this);
-                listView.setBackgroundColor(AndroidUtils.UI.getColor(BaseMapActivity.this, android.R.color.white));
-
-                final PointDetailsAdapter pda = new PointDetailsAdapter(this, points, AppUnits.IconColor.Primary);
-                pda.setShowPolygonName(true);
-                @ColorInt int transparent = AndroidUtils.UI.getColor(BaseMapActivity.this, android.R.color.transparent);
-                pda.setSelectedColor(transparent);
-                pda.setNonSelectedColor(transparent);
-
-                listView.setAdapter(pda);
-
-                dialogBuilder.setView(listView);
-                dialogBuilder.setNegativeButton(R.string.str_cancel, null);
-
-                final AlertDialog dialog = dialogBuilder.create();
-
-                listView.setOnItemClickListener((adapterView, view1, i, l) -> {
-                    fromPoint = pda.getItem(i);
-                    if (fromPoint != null) {
-                        btnFromPoint.setText(StringEx.toString(fromPoint.getPID()));
-                    }
-                    calculateDir();
-                    dialog.dismiss();
-                });
-
-                dialog.show();
-            } else {
-                fromPoint = null;
-                calculateDir();
-
-                Toast.makeText(this, "No Points in Polygon", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
-    public void btnToPolyClick(View view) {
-        if (polyPoints.size() > 0) {
-            final String[] polyStrs = new String[polyPoints.size()];
-            final ArrayList<TtPolygon> polys = getSortedPolys();
-
-            int i = 0;
-            for(TtPolygon poly : polys) {
-                polyStrs[i] = poly.getName();
-                i++;
-            }
-
-            AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
-
-            dialogBuilder.setTitle("To Polygon");
-
-            dialogBuilder.setItems(polyStrs, (dialog, which) -> {
-                toPoly = polys.get(which);
-                toPoint = null;
-                btnToPoly.setText(toPoly.getName());
-                btnToPoint.setText(R.string.str_point);
-            });
-
-            dialogBuilder.setNegativeButton(R.string.str_cancel, null);
-
-            final AlertDialog dialog = dialogBuilder.create();
-
-            dialog.show();
-        } else {
-            Toast.makeText(this, "No Polygons", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    public void btnToPointClick(View view) {
-        if (toPoly == null || !polyPoints.containsKey(toPoly.getCN())) {
+        if (_FromPoly == null || !polyPoints.containsKey(_FromPoly.getCN())) {
             Toast.makeText(this, "Select polygon first", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        ArrayList<TtPoint> points = polyPoints.get(toPoly.getCN());
+        showPointSelectDialog(_FromPoly, new onPointSelectClickListener() {
+            @Override
+            public void onClick(TtPoint point) {
+                _FromPoint = point;
+                if (_FromPoint != null) {
+                    btnFromPoint.setText(StringEx.toString(_FromPoint.getPID()));
+                }
+                calculateDir();
+            }
+
+            @Override
+            public void onNoPoints() {
+                _FromPoint = null;
+                calculateDir();
+            }
+        });
+    }
+
+    public void btnToPolyClick(View view) {
+        showPolySelectDialog("To Polygon", polygon -> {
+            _ToPoly = polygon;
+            _ToPoint = null;
+            btnToPoly.setText(_ToPoly.getName());
+            btnToPoint.setText(R.string.str_point);
+        });
+    }
+
+    public void btnToPointClick(View view) {
+        if (_ToPoly == null || !polyPoints.containsKey(_ToPoly.getCN())) {
+            Toast.makeText(this, "Select polygon first", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        showPointSelectDialog(_ToPoly, new onPointSelectClickListener() {
+            @Override
+            public void onClick(TtPoint point) {
+                _ToPoint = point;
+                if (_ToPoint != null) {
+                    onTargetPointSelected();
+                }
+            }
+
+            @Override
+            public void onNoPoints() {
+                _ToPoint = null;
+                calculateDir();
+            }
+        });
+    }
+
+    public void btnToPoly2Click(View view) {
+        showPolySelectDialog("To Polygon 2", polygon -> {
+            _ToPoly2 = polygon;
+            _ToPoint2 = null;
+            btnToPoly2.setText(_ToPoly.getName());
+            btnToPoint2.setText(R.string.str_point);
+        });
+    }
+
+    public void btnToPoint2Click(View view) {
+        if (_ToPoly == null || !polyPoints.containsKey(_ToPoly.getCN())) {
+            Toast.makeText(this, "Select polygon first", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        showPointSelectDialog(_ToPoly2, new onPointSelectClickListener() {
+            @Override
+            public void onClick(TtPoint point) {
+                _ToPoint2 = point;
+                if (_ToPoint2 != null) {
+                    onTargetPointSelected();
+                }
+            }
+
+            @Override
+            public void onNoPoints() {
+                _ToPoint2 = null;
+                calculateDir();
+            }
+        });
+    }
+
+    private void onTargetPointSelected() {
+        if (_ToPoly != null && _ToPoint != null && _ToPoly2 != null && _ToPoint2 != null) {
+            tvNavPid.setText(String.format(Locale.getDefault(), "%s + %s", _ToPoint.getPID(), _ToPoint2.getPID()));
+            tvNavPoly.setText((_ToPoly.getCN().equals(_ToPoly2.getCN())) ?
+                    _ToPoly.getName() :
+                    String.format(Locale.getDefault(), "%s + %s", _ToPoly.getName(), _ToPoly2.getName()));
+
+
+        } else if (_ToPoint != null) {
+            tvNavPid.setText(StringEx.toString(_ToPoint.getPID()));
+            tvNavPoly.setText(_ToPoint.getPolyName());
+        } else {
+            tvNavPid.setText("Point");
+            tvNavPoly.setText("Polygon");
+        }
+
+        calculateDir();
+
+        hideSelectedMarkerInfo();
+    }
+
+    private void showPolySelectDialog(String title, onPolySelectClickListener opscl) {
+        if (polyPoints.size() > 0) {
+            final String[] polyStrs = new String[polyPoints.size()];
+            final ArrayList<TtPolygon> polys = getSortedPolys();
+
+            int i = 0;
+            for(TtPolygon poly : polys) {
+                polyStrs[i] = poly.getName();
+                i++;
+            }
+
+            AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+
+            dialogBuilder.setTitle(title);
+
+            dialogBuilder.setItems(polyStrs, (dialog, which) -> {
+                opscl.onClick(polys.get(which));
+            });
+
+            dialogBuilder.setNegativeButton(R.string.str_cancel, null);
+
+            final AlertDialog dialog = dialogBuilder.create();
+
+            dialog.show();
+        } else {
+            Toast.makeText(this, "No Polygons", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void showPointSelectDialog(TtPolygon poly, onPointSelectClickListener opscl) {
+        if (poly == null || !polyPoints.containsKey(poly.getCN())) {
+            Toast.makeText(this, "Select polygon first", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        ArrayList<TtPoint> points = polyPoints.get(poly.getCN());
 
         if (points != null && points.size() > 0) {
             AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
 
-            dialogBuilder.setTitle(String.format("To Point in %s", toPoly.getName()));
+            dialogBuilder.setTitle(String.format("To Point in %s", poly.getName()));
             ListView listView = new ListView(this);
             listView.setBackgroundColor(AndroidUtils.UI.getColor(BaseMapActivity.this, android.R.color.white));
 
@@ -1598,26 +1678,29 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
             final AlertDialog dialog = dialogBuilder.create();
 
             listView.setOnItemClickListener((adapterView, view1, i, l) -> {
-                toPoint = pda.getItem(i);
-                if (toPoint != null) {
-                    btnToPoint.setText(StringEx.toString(toPoint.getPID()));
-                    tvNavPid.setText(StringEx.toString(toPoint.getPID()));
-                    tvNavPoly.setText(toPoint.getPolyName());
-                }
+                opscl.onClick(pda.getItem(i));
 
-                calculateDir();
-
-                hideSelectedMarkerInfo();
-
-                targetLocation = TtUtils.Points.getPointLocation(toPoint, false, getMetadata());
+//                _ToPoint = pda.getItem(i);
+//                if (_ToPoint != null) {
+//                    btnToPoint.setText(StringEx.toString(_ToPoint.getPID()));
+//                    tvNavPid.setText(StringEx.toString(_ToPoint.getPID()));
+//                    tvNavPoly.setText(_ToPoint.getPolyName());
+//                }
+//
+//                calculateDir();
+//
+//                hideSelectedMarkerInfo();
+//
+//                targetLocation = TtUtils.Points.getPointLocation(_ToPoint, false, getMetadata());
 
                 dialog.dismiss();
             });
 
             dialog.show();
         } else {
-            toPoint = null;
-            calculateDir();
+            opscl.onNoPoints();
+//            _ToPoint = null;
+//            calculateDir();
 
             Toast.makeText(this, "No Points in Polygon", Toast.LENGTH_SHORT).show();
         }
@@ -1626,31 +1709,55 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
 
 
     private void calculateDir() {
-        if (toPoint != null) {
+        if (_ToPoint != null) {
             UTMCoords currPos = null;
 
-            if (fromMyLoc && lastPosition != null) {
+            if (_NavFromMyLoc && lastPosition != null) {
                 currPos = UTMTools.convertLatLonSignedDecToUTM(lastPosition.getLatitudeSignedDecimal(), lastPosition.getLongitudeSignedDecimal(), zone);
-            } else if (!fromMyLoc && fromPoint != null){
-                currPos = new UTMCoords(fromPoint.getUnAdjX(), fromPoint.getUnAdjY(), zone);
+            } else if (!_NavFromMyLoc && _FromPoint != null){
+                currPos = new UTMCoords(_FromPoint.getUnAdjX(), _FromPoint.getUnAdjY(), zone);
             }
 
             if (currPos != null) {
-                double distInMt = TtUtils.Math.distance(currPos.getX(), currPos.getY(), toPoint.getUnAdjX(), toPoint.getUnAdjY());
-                double distInFt = TtUtils.Convert.toFeetTenths(distInMt, Dist.Meters);
+                PointD toPoint;
+                double magDec;
 
-                double azimuth = TtUtils.Math.azimuthOfPoint(currPos.getX(), currPos.getY(), toPoint.getUnAdjX(), toPoint.getUnAdjY());
-
-                TtMetadata meta = getMetadata().get(toPoint.getMetadataCN());
+                TtMetadata meta = getMetadata().get(_ToPoint.getMetadataCN());
                 if (meta == null)
                     throw new RuntimeException("Metadata not found");
+                else
+                    magDec = meta.getMagDec();
 
-                double azMag = azimuth - meta.getMagDec();
+
+                if (_NavToPoint) {
+                    toPoint = new PointD(_ToPoint.getAdjX(), _ToPoint.getAdjY());
+                    targetLocation = TtUtils.Points.getPointLocation(_ToPoint, true, getMetadata());
+                } else {
+                    Tuple<PointD, Double> closestPosition = ClosestPositionCalculator.getClosestPointAndDistance(
+                            new PointD(currPos.getX(), currPos.getY()),
+                            new PointD(_ToPoint.getAdjX(), _ToPoint.getAdjY()),
+                            new PointD(_ToPoint2.getAdjX(), _ToPoint2.getAdjY()));
+
+                    toPoint = closestPosition.Item1;
+                    targetLocation = new Location("");
+
+                    Position position = UTMTools.convertUTMtoLatLonSignedDec(toPoint.X, toPoint.Y, getZone());
+                    targetLocation.setLatitude(position.getLatitudeSignedDecimal());
+                    targetLocation.setLongitude(position.getLongitudeSignedDecimal());
+                    targetLocation.setAltitude(_ToPoint.getAdjZ());
+                }
+
+                double distInMt = TtUtils.Math.distance(currPos.getX(), currPos.getY(), toPoint.X, toPoint.Y);
+                double distInFt = TtUtils.Convert.toFeetTenths(distInMt, Dist.Meters);
+
+                double azimuth = TtUtils.Math.azimuthOfPoint(currPos.getX(), currPos.getY(), toPoint.X, toPoint.Y);
+                double azMag = azimuth - magDec;
 
                 tvNavDistFt.setText(StringEx.toString(distInFt, 2));
                 tvNavDistMt.setText(StringEx.toString(distInMt, 2));
                 tvNavAzTrue.setText(String.format(Locale.getDefault(), "%.2f\u00B0", azimuth));
                 tvNavAzMag.setText(String.format(Locale.getDefault(), "%.2f\u00B0", azMag));
+
                 return;
             }
         }
@@ -1725,5 +1832,16 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
 
     protected MapTracking getMapTracking() {
         return mapTracking;
+    }
+
+
+
+    private interface onPolySelectClickListener {
+        void onClick(TtPolygon polygon);
+    }
+
+    private interface onPointSelectClickListener {
+        void onClick(TtPoint point);
+        void onNoPoints();
     }
 }

@@ -13,6 +13,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.provider.OpenableColumns;
 import android.util.JsonWriter;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
@@ -38,12 +39,16 @@ import com.usda.fmsc.twotrails.BuildConfig;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
+import com.usda.fmsc.twotrails.activities.base.TtActivity;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
+import com.usda.fmsc.twotrails.data.DataAccessManager;
+import com.usda.fmsc.twotrails.data.MediaAccessManager;
 import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment;
 import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
 import com.usda.fmsc.twotrails.objects.FilterOptions;
 import com.usda.fmsc.twotrails.objects.PointD;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
+import com.usda.fmsc.twotrails.objects.TwoTrailsProject;
 import com.usda.fmsc.twotrails.objects.media.TtImage;
 import com.usda.fmsc.twotrails.objects.media.TtMedia;
 import com.usda.fmsc.twotrails.objects.media.TtPanorama;
@@ -715,8 +720,7 @@ public class TtUtils {
         public static Location getPointLocation(TtPoint point, boolean adjusted, HashMap<String, TtMetadata> metadata) {
             Location location = new Location(StringEx.Empty);
 
-            //if (!adjusted && point.isGpsType() && ((GpsPoint)point).hasLatLon()) {
-            if (point.isGpsType() && ((GpsPoint)point).hasLatLon()) { //ignore adjusted since gps types dont adjust to new values
+            if (point.isGpsType() && ((GpsPoint)point).hasLatLon()) { //ignore adjusted since gps types don't adjust to new values
                 GpsPoint gps = ((GpsPoint)point);
 
                 location.setLatitude(gps.getLatitude());
@@ -1906,6 +1910,96 @@ public class TtUtils {
         }
 
         return generated > 0;
+    }
+
+    public static boolean exportProjects(final TwoTrailsApp app, Uri externalProjectFilesPath) {
+        String fileName = FileUtils.getFileName(externalProjectFilesPath.getPath());
+
+        File exportFile = new File(
+                app.getCacheDir(),
+                fileName);
+
+        List<Tuple<File, File>> files = new ArrayList<>();
+
+        files.add(new Tuple<>(app.getProjectMediaDir(), null));
+
+        for (String file : app.databaseList()) {
+            String fileLC = file.toLowerCase();
+            if (fileLC.endsWith(Consts.FileExtensions.TWO_TRAILS) || fileLC.endsWith(Consts.FileExtensions.TWO_TRAILS_MEDIA_PACKAGE)) {
+                files.add(new Tuple<>(app.getDatabasePath(file), null));
+            }
+        }
+
+        try {
+            FileUtils.zipFiles(exportFile, files.toArray(new Tuple[0]));
+
+            AndroidUtils.Files.copyFile(app, Uri.fromFile(exportFile), externalProjectFilesPath);
+
+            if (exportFile.exists()) {
+                exportFile.delete();
+                exportFile = null;
+            }
+
+            return true;
+        } catch (Exception e) {
+            app.getReport().writeError(e.getMessage(), "TtUtils:exportProjects", e.getStackTrace());
+            return false;
+        } finally {
+            if (exportFile.exists()) {
+                exportFile.delete();
+            }
+        }
+    }
+
+    public static boolean dataDump(final TwoTrailsApp app, Uri externalDataDumpPath) {
+        String fileName = FileUtils.getFileName(externalDataDumpPath.getPath());
+
+        List<Tuple<File, File>> files = new ArrayList<>();
+        files.add(new Tuple<>(app.getLogFile(), null));
+        files.add(new Tuple<>(app.getOfflineMapsDir(), null));
+        files.add(new Tuple<>(app.getProjectMediaDir(), null));
+
+        if (generateSettingsFile(app)) {
+            files.add(new Tuple<>(app.getSettingsFile(), null));
+        }
+
+        File cache = new File("Cache");
+        for (File file : app.getCacheDir().listFiles()) {
+            if (!file.getPath().toLowerCase().contains("datadump")) {
+                files.add(new Tuple<>(file, cache));
+            }
+        }
+
+        File dbs = new File("Databases");
+        for (String file : app.databaseList()) {
+            files.add(new Tuple<>(app.getDatabasePath(file), dbs));
+        }
+
+        File exportFile = null;
+
+        try {
+           exportFile = new File(
+                    app.getCacheDir(),
+                    fileName);
+
+            FileUtils.zipFiles(exportFile, files.toArray(new Tuple[0]));
+
+            AndroidUtils.Files.copyFile(app, Uri.fromFile(exportFile), externalDataDumpPath);
+
+            if (exportFile.exists()) {
+                exportFile.delete();
+                exportFile = null;
+            }
+
+            return true;
+        } catch (IOException e) {
+            app.getReport().writeError(e.getMessage(), "TtUtils:dataDump", e.getStackTrace());
+            return false;
+        } finally {
+            if (exportFile != null && exportFile.exists()) {
+                exportFile.delete();
+            }
+        }
     }
 
 

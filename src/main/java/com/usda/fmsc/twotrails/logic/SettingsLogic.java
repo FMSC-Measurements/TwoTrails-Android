@@ -8,14 +8,18 @@ import android.widget.Toast;
 
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.dialogs.InputDialog;
+import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.activities.base.TtActivity;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 import com.usda.fmsc.utilities.FileUtils;
+import com.usda.fmsc.utilities.Tuple;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SettingsLogic {
     public static void reset(final TtActivity context) {
@@ -94,7 +98,7 @@ public class SettingsLogic {
                     Toast.makeText(activity, "Unable to export Report", Toast.LENGTH_LONG).show();
                     return;
                 } finally {
-                    reportPath.deleteOnExit();
+                    reportPath.delete();
                 }
             }
 
@@ -113,7 +117,6 @@ public class SettingsLogic {
             Toast.makeText(activity, "Report failed to export", Toast.LENGTH_LONG).show();
         }
     }
-
 
     public static void enterCode(final TwoTrailsApp context) {
         final InputDialog idialog = new InputDialog(context);

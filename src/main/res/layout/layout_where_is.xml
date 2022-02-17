@@ -18,8 +18,7 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:orientation="vertical"
-            android:layout_marginStart="5dp"
-            android:layout_marginLeft="5dp">
+            android:layout_marginStart="5dp">
 
             <TextView
                 android:id="@+id/mapNavTvPid"
@@ -34,7 +33,6 @@
                 android:layout_height="wrap_content"
                 android:textSize="14sp"
                 android:layout_alignParentBottom="true"
-                android:layout_marginLeft="2dp"
                 android:layout_marginStart="2dp"
                 android:layout_marginBottom="5dp"/>
         </RelativeLayout>
@@ -51,7 +49,6 @@
             android:src="@drawable/ic_navigation_dark"
             android:layout_gravity="center"
             android:layout_marginEnd="5dp"
-            android:layout_marginRight="5dp"
             android:contentDescription="@string/str_navigate"
             android:background="@android:color/transparent"/>
     </LinearLayout>
@@ -78,31 +75,63 @@
                 android:gravity="center_horizontal"/>
         </TableRow>
 
-        <RadioGroup
+        <RelativeLayout
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:layout_height="wrap_content">
 
-            <RadioButton
-                android:id="@+id/mapNavRadMyLoc"
+            <RadioGroup
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/str_my_loc"
-                android:checked="true"
-                android:onClick="radFromClick"/>
+                android:orientation="horizontal"
+                android:layout_alignParentStart="true">
 
-            <RadioButton
-                android:id="@+id/mapNavRadPoint"
+                <RadioButton
+                    android:id="@+id/mapNavRadMyLoc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/str_my_loc"
+                    android:checked="true"
+                    android:onClick="radFromClick" />
+
+                <RadioButton
+                    android:id="@+id/mapNavRadPoint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/str_point"
+                    android:checked="false"
+                    android:onClick="radFromClick" />
+            </RadioGroup>
+
+            <RadioGroup
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/str_point"
-                android:checked="false"
-                android:onClick="radFromClick"/>
-        </RadioGroup>
+                android:orientation="horizontal"
+                android:layout_alignParentEnd="true"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp">
 
-        <TableRow android:layout_width="0dp" android:layout_marginBottom="5dp">
+                <RadioButton
+                    android:id="@+id/mapNavRadToPoint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/str_point"
+                    android:checked="true"
+                    android:onClick="radToClick" />
+
+                <RadioButton
+                    android:id="@+id/mapNavRadToPoly"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/str_line"
+                    android:checked="false"
+                    android:onClick="radToClick" />
+            </RadioGroup>
+        </RelativeLayout>
+
+        <TableRow android:layout_width="0dp"
+            android:layout_marginBottom="5dp">
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
@@ -124,23 +153,54 @@
             </LinearLayout>
 
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="horizontal"
+                android:baselineAligned="false">
 
-                <Button
-                    android:id="@+id/mapNavBtnToPoly"
-                    android:layout_width="match_parent"
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_weight="50"
                     android:layout_height="wrap_content"
-                    android:text="@string/str_polygon"
-                    android:onClick="btnToPolyClick"/>
+                    android:orientation="vertical">
 
-                <Button
-                    android:id="@+id/mapNavBtnToPoint"
-                    android:layout_width="match_parent"
+                    <Button
+                        android:id="@+id/mapNavBtnToPoly"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/str_polygon"
+                        android:onClick="btnToPolyClick" />
+
+                    <Button
+                        android:id="@+id/mapNavBtnToPoint"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/str_point"
+                        android:onClick="btnToPointClick" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_weight="50"
                     android:layout_height="wrap_content"
-                    android:text="@string/str_point"
-                    android:onClick="btnToPointClick"/>
+                    android:orientation="vertical"
+                    android:id="@+id/layToLine"
+                    android:visibility="gone">
+
+                    <Button
+                        android:id="@+id/mapNavBtnToPoly2"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/str_polygon"
+                        android:onClick="btnToPoly2Click" />
+
+                    <Button
+                        android:id="@+id/mapNavBtnToPoint2"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/str_point"
+                        android:onClick="btnToPoint2Click" />
+                </LinearLayout>
             </LinearLayout>
         </TableRow>
 
@@ -169,19 +229,15 @@
                         android:text="@string/meas_feet"
                         android:layout_gravity="center_vertical"
                         android:textSize="18sp"
-                        android:layout_alignParentStart="true"
-                        android:layout_alignParentLeft="true"/>
+                        android:layout_alignParentStart="true" />
 
                     <TextView
                         android:id="@+id/mapNavTvDistFeet"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
-                        android:layout_alignParentRight="true"
-                        android:layout_toRightOf="@id/text2"
                         android:layout_toEndOf="@id/text2"
                         android:layout_marginEnd="10dp"
-                        android:layout_marginRight="10dp"
                         android:layout_gravity="center_vertical"
                         android:gravity="end"
                         android:textSize="18sp" />
@@ -198,19 +254,15 @@
                         android:text="@string/meas_meters"
                         android:layout_gravity="center_vertical"
                         android:textSize="18sp"
-                        android:layout_alignParentStart="true"
-                        android:layout_alignParentLeft="true"/>
+                        android:layout_alignParentStart="true" />
 
                     <TextView
                         android:id="@+id/mapNavTvDistMeters"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
-                        android:layout_alignParentRight="true"
                         android:layout_toEndOf="@id/text1"
-                        android:layout_toRightOf="@id/text1"
                         android:layout_marginEnd="10dp"
-                        android:layout_marginRight="10dp"
                         android:layout_gravity="center_vertical"
                         android:gravity="end"
                         android:textSize="18sp"/>
@@ -242,7 +294,6 @@
                         android:text="@string/str_true"
                         android:layout_gravity="center_vertical"
                         android:textSize="18sp"
-                        android:layout_alignParentLeft="true"
                         android:layout_alignParentStart="true"/>
 
                     <TextView
@@ -250,11 +301,8 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
-                        android:layout_alignParentRight="true"
                         android:layout_toEndOf="@id/text3"
-                        android:layout_toRightOf="@id/text3"
                         android:layout_marginEnd="10dp"
-                        android:layout_marginRight="10dp"
                         android:layout_gravity="center_vertical"
                         android:gravity="end"
                         android:textSize="18sp"/>
@@ -271,19 +319,15 @@
                         android:text="@string/str_mag"
                         android:layout_gravity="center_vertical"
                         android:textSize="18sp"
-                        android:layout_alignParentStart="true"
-                        android:layout_alignParentLeft="true"/>
+                        android:layout_alignParentStart="true" />
 
                     <TextView
                         android:id="@+id/mapNavTvAzMag"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
-                        android:layout_alignParentRight="true"
                         android:layout_toEndOf="@id/text4"
-                        android:layout_toRightOf="@id/text4"
                         android:layout_marginEnd="10dp"
-                        android:layout_marginRight="10dp"
                         android:layout_gravity="center_vertical"
                         android:gravity="end"
                         android:textSize="18sp"/>

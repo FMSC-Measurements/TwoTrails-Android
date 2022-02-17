@@ -21,6 +21,14 @@
         android:key="@string/set_EXPORT_REPORT"/>
 
     <Preference
+        android:title="Export All Projects"
+        android:key="@string/set_EXPORT_PROJECTS"/>
+
+    <Preference
+        android:title="App Data Dump"
+        android:key="@string/set_APP_DATA_DUMP"/>
+
+    <Preference
         android:title="Clear Log"
         android:key="@string/set_CLEAR_LOG"/>
 

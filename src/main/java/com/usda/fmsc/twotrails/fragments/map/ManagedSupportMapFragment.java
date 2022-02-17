@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
@@ -25,14 +24,12 @@ import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
-import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.objects.map.GoogleMapsPolygonGraphic;
 import com.usda.fmsc.twotrails.objects.map.GoogleMapsTrailGraphic;
 import com.usda.fmsc.twotrails.objects.map.IMarkerDataGraphic;
 import com.usda.fmsc.twotrails.objects.map.PolygonDrawOptions;
 import com.usda.fmsc.twotrails.objects.map.PolygonGraphicManager;
 import com.usda.fmsc.twotrails.objects.map.TrailGraphicManager;
-import com.usda.fmsc.twotrails.units.GoogleMapType;
 import com.usda.fmsc.twotrails.units.MapType;
 
 import java.util.ArrayDeque;
@@ -65,6 +62,7 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
     private boolean isMoving, cameraQueueEnabled = false, initialLoad = true;
 
 
+    @NonNull
     public static ManagedSupportMapFragment newInstance() {
         return new ManagedSupportMapFragment();
     }

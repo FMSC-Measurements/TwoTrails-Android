@@ -14,7 +14,6 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
-import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Lifecycle;
@@ -55,7 +54,6 @@ import org.joda.time.DateTime;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Locale;
 
 
@@ -721,6 +719,7 @@ public class MainActivity extends TtProjectAdjusterActivity {
         }
     }
 
+    //Todo add import of media files, option to not open project after import if multiple projects detected
     private void importTtPackage(Uri filePath) {
         String fp = filePath.getPath();
         if (fp == null)
@@ -1123,6 +1122,14 @@ public class MainActivity extends TtProjectAdjusterActivity {
             Toast.makeText(this, "No Points in Project", Toast.LENGTH_SHORT).show();
         }
     }
+
+    public void btnSATClick(View view) {
+        if(getTtAppCtx().getDAL().hasPolygons()) {
+            startActivity(new Intent(this, SalesAdminToolsActivity.class));
+        } else {
+            Toast.makeText(this, "No Polygons in Project", Toast.LENGTH_SHORT).show();
+        }
+    }
     //endregion
 
     //region Tools
@@ -1214,14 +1221,6 @@ public class MainActivity extends TtProjectAdjusterActivity {
 
     public void btnMapManagerClick(View view) {
         startActivity(new Intent(this, MapManagerActivity.class));
-    }
-
-    public void btnSATClick(View view) {
-        if(getTtAppCtx().getDAL().hasPolygons()) {
-            startActivity(new Intent(this, SalesAdminToolsActivity.class));
-        } else {
-            Toast.makeText(this, "No Polygons in Project", Toast.LENGTH_SHORT).show();
-        }
     }
 
     public void btnTest(View view) {

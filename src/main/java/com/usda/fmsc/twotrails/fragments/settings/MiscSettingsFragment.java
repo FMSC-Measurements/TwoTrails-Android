@@ -2,6 +2,7 @@ package com.usda.fmsc.twotrails.fragments.settings;
 
 
 import android.os.Bundle;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -19,9 +20,33 @@ import java.util.Locale;
 
 public class MiscSettingsFragment extends TtBasePrefFragment {
 
-    private final ActivityResultLauncher<String> exportFileOnResult = registerForActivityResult(new ActivityResultContracts.CreateDocument(), result -> {
+    private final ActivityResultLauncher<String> exportReportFileOnResult = registerForActivityResult(new ActivityResultContracts.CreateDocument(), result -> {
         if (result != null) {
             SettingsLogic.exportReport((TtActivity) getActivity(), result);
+        }
+    });
+
+    private final ActivityResultLauncher<String> exportProjectsOnResult = registerForActivityResult(new ActivityResultContracts.CreateDocument(), result -> {
+        if (result != null) {
+            if (TtUtils.exportProjects(getTtAppCtx(), result)) {
+                Toast.makeText(getActivity(), "All Projects Exported.", Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(getActivity(), "Error exporting all projects.", Toast.LENGTH_LONG).show();
+            }
+        }
+    });
+
+    private final ActivityResultLauncher<String> dataDumpOnResult = registerForActivityResult(new ActivityResultContracts.CreateDocument(), result -> {
+        if (result != null) {
+            Toast.makeText(getActivity(), "Dumping.. This could take a while.", Toast.LENGTH_LONG).show();
+
+//            new Thread(() -> {
+                if (TtUtils.dataDump(getTtAppCtx(), result)) {
+                    getTtAppCtx().runOnCurrentUIThread(() -> Toast.makeText(getActivity(), "App Data Dumped.", Toast.LENGTH_LONG).show());
+                } else {
+                    getTtAppCtx().runOnCurrentUIThread(() -> Toast.makeText(getActivity(), "Error dumping app data.", Toast.LENGTH_LONG).show());
+                }
+//            }).start();
         }
     });
 
@@ -51,7 +76,7 @@ public class MiscSettingsFragment extends TtBasePrefFragment {
         pref = findPreference(getString(R.string.set_EXPORT_REPORT));
         if (pref != null) {
             pref.setOnPreferenceClickListener(preference -> {
-                exportFileOnResult.launch(String.format(Locale.getDefault(), "TwoTrailsReport_%s.zip", TtUtils.Date.nowToString()));
+                exportReportFileOnResult.launch(String.format(Locale.getDefault(), "TwoTrailsReport_%s.zip", TtUtils.Date.nowToString()));
                 return false;
             });
         }
@@ -60,6 +85,22 @@ public class MiscSettingsFragment extends TtBasePrefFragment {
         if (pref != null) {
             pref.setOnPreferenceClickListener(preference -> {
                 SettingsLogic.enterCode(getTtAppCtx());
+                return false;
+            });
+        }
+
+        pref = findPreference(getString(R.string.set_EXPORT_PROJECTS));
+        if (pref != null) {
+            pref.setOnPreferenceClickListener(preference -> {
+                exportProjectsOnResult.launch(String.format(Locale.getDefault(), "TwoTrailsProjects_%s.zip", TtUtils.Date.nowToString()));
+                return false;
+            });
+        }
+
+        pref = findPreference(getString(R.string.set_APP_DATA_DUMP));
+        if (pref != null) {
+            pref.setOnPreferenceClickListener(preference -> {
+                    dataDumpOnResult.launch(String.format(Locale.getDefault(), "TwoTrailsDataDump_%s.zip", TtUtils.Date.nowToString()));
                 return false;
             });
         }

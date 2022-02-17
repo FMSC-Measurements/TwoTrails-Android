@@ -514,6 +514,11 @@ public class TwoTrailsApp extends Application {
     private final Runnable searchForGps = new Runnable() {
         @Override
         public void run() {
+            if (!AndroidUtils.App.checkBluetoothPermission(TwoTrailsApp.this)) {
+                getReport().writeDebug("Bluetooth Permission not granted", "TwoTrailsApp:searchForGps");
+                return;
+            }
+
             if (!scanningForGps && isGpsServiceStarted() && !getGps().isGpsRunning() && getDeviceSettings().isGpsConfigured()) {
                 final BluetoothAdapter adapter = getBluetoothManager().getAdapter();
 
@@ -1180,5 +1185,16 @@ public class TwoTrailsApp extends Application {
         return _ExportDir;
     }
 
+    //endregion
+
+
+    //region Other
+    public void runOnCurrentUIThread(Runnable runnable) {
+        if (_CurrentActivity != null) {
+            _CurrentActivity.runOnUiThread(runnable);
+        } else {
+            throw new RuntimeException("No Current Activity");
+        }
+    }
     //endregion
 }

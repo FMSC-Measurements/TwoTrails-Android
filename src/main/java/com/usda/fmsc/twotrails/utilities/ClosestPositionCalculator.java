@@ -74,6 +74,9 @@ public class ClosestPositionCalculator {
         }
     }
 
+    public ClosestPosition getClosestPosition(UTMCoords coords) {
+        return getClosestPosition(coords.getX(), coords.getY());
+    }
 
     public ClosestPosition getClosestPosition(Double utmX, Double utmY) {
         int bx = (int)(utmX / BLOCK_SIZE);
@@ -126,6 +129,7 @@ public class ClosestPositionCalculator {
     private ClosestPosition getPosition(Double utmX, Double utmY, CalcPoint calcPoint) {
         TtPoint point = calcPoint.getTtPoint();
         TtPolygon polygon = _Polygons.get(point.getPolyCN());
+        PointD currPos = new PointD(utmX, utmY);
         List<TtPoint> points = _PointsByPoly.get(polygon.getCN());
         PolygonCalculator polyCalc = _PolygonsCalcs.get(polygon.getCN());
 
@@ -134,21 +138,40 @@ public class ClosestPositionCalculator {
                 points.get(point.getIndex() - 1) :
                 points.get(points.size() - 1);
 
-        int prevMetaZone = _Metadata.get(prevTtPoint.getMetadataCN()).getZone();
+        int oMetaZone = _Metadata.get(prevTtPoint.getMetadataCN()).getZone();
 
 
-        if (prevMetaZone != _DefaultZone) {
-            UTMCoords coords = TtUtils.Points.forcePointZone(prevTtPoint, _DefaultZone, prevMetaZone);
+        if (oMetaZone != _DefaultZone) {
+            UTMCoords coords = TtUtils.Points.forcePointZone(prevTtPoint, _DefaultZone, oMetaZone);
             prevPoint = new PointD(coords.getX(), coords.getY());
         } else {
             prevPoint = new PointD(prevTtPoint.getAdjX(), prevTtPoint.getAdjY());
         }
 
-        Tuple<PointD, Double> cd = getClosestPointAndDistance(new PointD(utmX, utmY), calcPoint.getPoint(), prevPoint);
-        return new ClosestPosition(cd.Item1, cd.Item2, point, prevTtPoint, polyCalc.pointInPolygon(utmX, utmY));
+        Tuple<PointD, Double> cdPrev = getClosestPointAndDistance(currPos, calcPoint.getPoint(), prevPoint);
+
+        PointD nextPoint;
+        TtPoint nextTtPoint = (point.getIndex() < points.size() - 1) ?
+                points.get(point.getIndex() + 1) :
+                points.get(0);
+
+        oMetaZone = _Metadata.get(prevTtPoint.getMetadataCN()).getZone();
+
+        if (oMetaZone != _DefaultZone) {
+            UTMCoords coords = TtUtils.Points.forcePointZone(nextTtPoint, _DefaultZone, oMetaZone);
+            nextPoint = new PointD(coords.getX(), coords.getY());
+        } else {
+            nextPoint = new PointD(nextTtPoint.getAdjX(), nextTtPoint.getAdjY());
+        }
+
+        Tuple<PointD, Double> cdNext = getClosestPointAndDistance(currPos, calcPoint.getPoint(), nextPoint);
+
+        return (cdPrev.Item2 < cdNext.Item2) ?
+                new ClosestPosition(cdPrev.Item1, cdPrev.Item2, point, prevTtPoint, polygon, polyCalc.pointInPolygon(utmX, utmY)) :
+                new ClosestPosition(cdNext.Item1, cdNext.Item2, point, nextTtPoint, polygon, polyCalc.pointInPolygon(utmX, utmY));
     }
 
-    private Tuple<PointD, Double> getClosestPointAndDistance(PointD cp, PointD p1, PointD p2) {
+    public static Tuple<PointD, Double> getClosestPointAndDistance(PointD cp, PointD p1, PointD p2) {
         double slope = (p2.Y - p1.Y) / (p2.X - p1.X);
         double b = p1.Y - slope * p1.X;
         double invSlope =  -1 / slope;
@@ -198,34 +221,76 @@ public class ClosestPositionCalculator {
 
     public static class ClosestPosition {
         private final TtPoint Point1, Point2;
-        private final PointD ClosestPoint;
+        private final PointD ClosestPosition;
+        private final TtPolygon Polygon;
         private final double Distance;
         private final boolean InsidePoly;
+        private final boolean PositionIsPoint1;
 
-        public ClosestPosition(PointD closestPoint, double distance, TtPoint point1, TtPoint point2, boolean insidePoly) {
-            this.ClosestPoint = closestPoint;
+        /**
+         * @param closestPosition Closest position to the initial position
+         * @param distance Distance from the initial position to the closest one on the polygon
+         * @param point1 Point 1 of the line the closest position is on
+         * @param point2 Point 2 of the line the closest position is on
+         * @param polygon Polygon the closest position is on
+         * @param insidePoly Whether or not the initial position was inside the polygon
+         */
+        public ClosestPosition(PointD closestPosition, double distance, TtPoint point1, TtPoint point2, TtPolygon polygon, boolean insidePoly) {
+            this.ClosestPosition = closestPosition;
             this.Distance = distance;
             this.Point1 = point1;
             this.Point2 = point2;
+            this.Polygon = polygon;
             this.InsidePoly = insidePoly;
+
+            this.PositionIsPoint1 = this.Point1.sameAdjLocation(this.ClosestPosition.X, this.ClosestPosition.Y, this.Point1.getAdjZ());
         }
 
+        /**
+         * @return First Point in closest line to the closest position
+         */
         public TtPoint getPoint1() {
             return Point1;
         }
 
+        /**
+         * @return Second Point in closest line to the closest position
+         */
         public TtPoint getPoint2() {
             return Point2;
         }
 
-        public PointD getClosestPoint() {
-            return ClosestPoint;
+        /**
+         * @return Polygon of the closest position
+         */
+        public TtPolygon getPolygon() {
+            return Polygon;
         }
 
+        /**
+         * @return Closest position on the polygon
+         */
+        public PointD getClosestPosition() {
+            return ClosestPosition;
+        }
+
+        /**
+         * @return Distance to the closest position
+         */
         public double getDistance() {
             return Distance;
         }
 
+        /**
+         * @return Whether or not the initial position is inside the polygon
+         */
         public boolean isInsidePoly() { return InsidePoly; }
+
+        /**
+         * @return Whether Point 1 is closest (same and poly) distance from the initial position
+         */
+        public boolean IsPositionPoint1() {
+            return PositionIsPoint1;
+        }
     }
 }

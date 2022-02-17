@@ -17,12 +17,10 @@
         app:showAsAction="always">
 
         <menu>
-
             <item
                 android:id="@+id/satMenuSatSettings"
                 android:title="@string/menu_map_select_type"
                 app:showAsAction="never"/>
-
 
             <item
                 android:id="@+id/mmMenuSelectMap"

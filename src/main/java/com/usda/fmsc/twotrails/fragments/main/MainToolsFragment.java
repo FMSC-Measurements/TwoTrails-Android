@@ -44,7 +44,7 @@ public class MainToolsFragment extends TtBaseFragment {
         btnPlotGrid = view.findViewById(R.id.mainFragToolsBtnPlotGrid);
         btnGpsLogger = view.findViewById(R.id.mainFragToolsBtnGpsLogger);
         btnGpsStatus = view.findViewById(R.id.mainFragToolsBtnGpsStatus);
-        btnSAT = view.findViewById(R.id.mainFragToolsBtnSAT);
+        btnSAT = view.findViewById(R.id.mainFragDataBtnSAT);
         viewTest = view.findViewById(R.id.mainFragToolsTest);
 
         enableButtons(enabled);
@@ -69,8 +69,6 @@ public class MainToolsFragment extends TtBaseFragment {
             btnExport.setEnabled(enable);
             btnPlotGrid.setEnabled(enable);
             btnSAT.setEnabled(enabled);
-            //btnGpsLogger.setEnabled(enable);
-            //btnGpsStatus.setEnabled(enable);
 
             if (getTtAppCtx().getDeviceSettings().isDeveloperOptionsEnabled()) {
                 viewTest.setVisibility(View.VISIBLE);
