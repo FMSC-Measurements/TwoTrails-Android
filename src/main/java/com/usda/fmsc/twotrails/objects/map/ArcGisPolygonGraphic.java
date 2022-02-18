@@ -290,6 +290,11 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
     }
 
     @Override
+    public Position getPosition() {
+        return polyBounds.getCenter();
+    }
+
+    @Override
     public PolygonGraphicOptions getGraphicOptions() {
         return graphicOptions;
     }

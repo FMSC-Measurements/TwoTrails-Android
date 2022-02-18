@@ -118,6 +118,10 @@ public class GoogleMapsTrailGraphic implements ITrailGraphic, IMarkerDataGraphic
         return polyBounds;
     }
 
+    @Override
+    public Position getPosition() {
+        return polyBounds.getCenter();
+    }
 
     @Override
     public void setVisible(boolean visible) {

@@ -16,6 +16,7 @@ public interface ITrailGraphic {
     void deleteLastPoint();
 
     Extent getExtents();
+    Position getPosition();
 
 
     void setVisible(boolean visible);

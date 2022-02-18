@@ -14,6 +14,7 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.geospatial.Extent;
+import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment.MarkerData;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
@@ -550,6 +551,11 @@ public class GoogleMapsPolygonGraphic implements IPolygonGraphic, IMarkerDataGra
     @Override
     public Extent getExtents() {
         return polyBounds;
+    }
+
+    @Override
+    public Position getPosition() {
+        return polyBounds.getCenter();
     }
 
     @Override

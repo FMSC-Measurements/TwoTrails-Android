@@ -1611,8 +1611,8 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
             tvNavPid.setText(StringEx.toString(_ToPoint.getPID()));
             tvNavPoly.setText(_ToPoint.getPolyName());
         } else {
-            tvNavPid.setText("Point");
-            tvNavPoly.setText("Polygon");
+            tvNavPid.setText(R.string.str_point);
+            tvNavPoly.setText(R.string.str_polygon);
         }
 
         calculateDir();
@@ -1679,29 +1679,12 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
 
             listView.setOnItemClickListener((adapterView, view1, i, l) -> {
                 opscl.onClick(pda.getItem(i));
-
-//                _ToPoint = pda.getItem(i);
-//                if (_ToPoint != null) {
-//                    btnToPoint.setText(StringEx.toString(_ToPoint.getPID()));
-//                    tvNavPid.setText(StringEx.toString(_ToPoint.getPID()));
-//                    tvNavPoly.setText(_ToPoint.getPolyName());
-//                }
-//
-//                calculateDir();
-//
-//                hideSelectedMarkerInfo();
-//
-//                targetLocation = TtUtils.Points.getPointLocation(_ToPoint, false, getMetadata());
-
                 dialog.dismiss();
             });
 
             dialog.show();
         } else {
             opscl.onNoPoints();
-//            _ToPoint = null;
-//            calculateDir();
-
             Toast.makeText(this, "No Points in Polygon", Toast.LENGTH_SHORT).show();
         }
     }

@@ -9,7 +9,7 @@ import com.usda.fmsc.twotrails.objects.TtPolygon;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class TrailGraphicManager implements IGraphicManager {
+public class TrailGraphicManager implements IPolygonGraphicManager {
     private final TtPolygon polygon;
     private final ArrayList<TtPoint> points;
     private final ArrayList<Position> positions;
@@ -58,6 +58,10 @@ public class TrailGraphicManager implements IGraphicManager {
         return trailGraphic.getExtents();
     }
 
+    @Override
+    public Position getPosition() {
+        return trailGraphic.getPosition();
+    }
 
     public ITrailGraphic getTrailGraphic() {
         return trailGraphic;
