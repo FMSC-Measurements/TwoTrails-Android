@@ -8,9 +8,15 @@ import com.esri.arcgisruntime.geometry.SpatialReferences;
 import com.esri.arcgisruntime.mapping.view.Graphic;
 import com.esri.arcgisruntime.mapping.view.GraphicsOverlay;
 import com.esri.arcgisruntime.mapping.view.MapView;
+import com.esri.arcgisruntime.symbology.LineSymbol;
 import com.esri.arcgisruntime.symbology.SimpleLineSymbol;
+import com.google.android.gms.maps.model.Dash;
+import com.google.android.gms.maps.model.Dot;
+import com.google.android.gms.maps.model.Gap;
 import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.geospatial.Position;
+
+import java.util.Arrays;
 
 public class ArcGisLineGraphic implements ILineGraphic {
    private final MapView map;
@@ -33,7 +39,7 @@ public class ArcGisLineGraphic implements ILineGraphic {
 
       int drawSize = (int)(graphicOptions.getLineWidth() / 2);
 
-      _LineOutline = new SimpleLineSymbol(SimpleLineSymbol.Style.SOLID, graphicOptions.getLineColor(), drawSize);
+      _LineOutline = new SimpleLineSymbol(getLineSymbolStyle(graphicOptions.getLineStyle()), graphicOptions.getLineColor(), drawSize);
 
       update(point1, point2);
 
@@ -82,5 +88,15 @@ public class ArcGisLineGraphic implements ILineGraphic {
    @Override
    public boolean isVisible() {
       return this.visible;
+   }
+
+
+   private SimpleLineSymbol.Style getLineSymbolStyle(LineGraphicOptions.LineStyle style) {
+      switch (style) {
+         case Dashed: return SimpleLineSymbol.Style.DASH;
+         case Dotted: return SimpleLineSymbol.Style.DOT;
+         case Solid:
+         default: return SimpleLineSymbol.Style.SOLID;
+      }
    }
 }

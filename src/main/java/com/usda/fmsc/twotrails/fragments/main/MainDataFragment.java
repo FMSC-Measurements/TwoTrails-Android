@@ -11,7 +11,7 @@ import com.usda.fmsc.twotrails.R;
 
 
 public class MainDataFragment extends Fragment {
-    private Button btnPoint, btnPoly, btnMeta, btnProj, btnTable;
+    private Button btnPoint, btnPoly, btnMeta, btnProj, btnTable, btnSAT;
 
     private boolean enabled = false, viewExists = false;
 
@@ -41,6 +41,7 @@ public class MainDataFragment extends Fragment {
         btnMeta = view.findViewById(R.id.mainFragDataBtnMetadata);
         btnProj = view.findViewById(R.id.mainFragDataBtnProjectInfo);
         btnTable = view.findViewById(R.id.mainFragDataBtnPointTable);
+        btnSAT = view.findViewById(R.id.mainFragDataBtnSAT);
 
         enableButtons(enabled);
 
@@ -63,6 +64,7 @@ public class MainDataFragment extends Fragment {
             btnMeta.setEnabled(enable);
             btnProj.setEnabled(enable);
             btnTable.setEnabled(enable);
+            btnSAT.setEnabled(enabled);
         }
     }
 }

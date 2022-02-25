@@ -359,6 +359,7 @@
     <string name="title_activity_edit_arc_map">Map Details</string>
     <string name="title_activity_get_direction">Get Direction</string>
     <string name="title_activity_privacy_policy">Privacy Policy</string>
+    <string name="title_activity_sales_admin_tools">Sales Admin Tools</string>
 
     <!-- Main -->
     <string name="main_tab_file">FILE</string>

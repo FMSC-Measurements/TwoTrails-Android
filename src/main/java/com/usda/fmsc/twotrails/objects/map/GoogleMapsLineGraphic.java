@@ -2,14 +2,20 @@ package com.usda.fmsc.twotrails.objects.map;
 
 
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.Dash;
+import com.google.android.gms.maps.model.Dot;
+import com.google.android.gms.maps.model.Gap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.PatternItem;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.geospatial.Position;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class GoogleMapsLineGraphic implements ILineGraphic {
     private final GoogleMap map;
@@ -26,11 +32,14 @@ public class GoogleMapsLineGraphic implements ILineGraphic {
 
     @Override
     public void build(Position point1, Position point2, LineGraphicOptions graphicOptions) {
-
-
         PolylineOptions plo = new PolylineOptions();
         plo.width(graphicOptions.getLineWidth());
         plo.color(graphicOptions.getLineColor());
+        plo.pattern(getLinePattern(graphicOptions.getLineStyle()));
+
+        if (polyline != null) {
+            polyline.remove();
+        }
 
         polyline = map.addPolyline(plo);
 
@@ -55,6 +64,7 @@ public class GoogleMapsLineGraphic implements ILineGraphic {
         polyline.setPoints(latLngs);
     }
 
+
     @Override
     public Extent getExtents() {
         return lineBounds;
@@ -65,6 +75,7 @@ public class GoogleMapsLineGraphic implements ILineGraphic {
         return lineBounds.getCenter();
     }
 
+
     @Override
     public void setVisible(boolean visible) {
         this.visible = visible;
@@ -74,5 +85,17 @@ public class GoogleMapsLineGraphic implements ILineGraphic {
     @Override
     public boolean isVisible() {
         return this.visible;
+    }
+
+
+    private List<PatternItem> getLinePattern(LineGraphicOptions.LineStyle style) {
+        List<PatternItem> pattern = null;
+
+        switch (style) {
+            case Dashed: pattern = Arrays.asList(new Dash(30), new Gap(10)); break;
+            case Dotted: pattern = Arrays.asList(new Dot(), new Gap(10));
+        }
+
+        return  pattern;
     }
 }

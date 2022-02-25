@@ -355,7 +355,7 @@ public class TwoTrailsApp extends Application {
                 TtActivity act = (TtActivity) activity;
 
                 if (isGpsServiceStarted()) {
-                    if (act.requiresGpsService()) {
+                    if (act.requiresGpsService() && act instanceof GpsService.Listener) {
                         getGps().removeListener((GpsService.Listener)act);
                     }
 
@@ -365,7 +365,7 @@ public class TwoTrailsApp extends Application {
                 }
 
                 if (isRFServiceStarted()) {
-                    if (act.requiresRFService()) {
+                    if (act.requiresRFService() && act instanceof RangeFinderService.Listener) {
                         getRF().removeListener((RangeFinderService.Listener)act);
                     }
 

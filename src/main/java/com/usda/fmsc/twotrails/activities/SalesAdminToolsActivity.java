@@ -22,6 +22,7 @@ import com.usda.fmsc.geospatial.GeoTools;
 import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
+import com.usda.fmsc.geospatial.utm.UTMTools;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.activities.base.AcquireGpsMapActivity;
@@ -29,16 +30,18 @@ import com.usda.fmsc.twotrails.data.DataAccessLayer;
 import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
 import com.usda.fmsc.twotrails.logic.PointNamer;
 import com.usda.fmsc.twotrails.objects.FilterOptions;
-import com.usda.fmsc.twotrails.objects.PointD;
 import com.usda.fmsc.twotrails.objects.TtGroup;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
+import com.usda.fmsc.twotrails.objects.map.LineGraphicManager;
+import com.usda.fmsc.twotrails.objects.map.LineGraphicOptions;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.points.WayPoint;
 import com.usda.fmsc.twotrails.utilities.ClosestPositionCalculator;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -56,8 +59,6 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
     private MenuItem miHideGpsInfo;
     private boolean gpsInfoHidden;
 
-
-
     private List<TtPoint> _Points;
     private ArrayList<TtNmeaBurst> _Bursts, _UsedBursts;
     private TtPoint _CurrentPoint;
@@ -66,14 +67,14 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
 
     private boolean isPointSetup, cancelVisible, pauseDistLine;
 
-    private int increment, takeAmount, nmeaCount = 0;
+    private int increment, takeAmount;
 
+    DataAccessLayer _DAL;
     private TtPolygon _ValidationPolygon;
     private TtMetadata _DefaultMeta;
     private ClosestPositionCalculator _ClosestPositionCalc;
-    private ClosestPositionCalculator.ClosestPosition _ClosestPositionToValidationPoint = null;
 
-    private DataAccessLayer _DAL;
+    private LineGraphicManager connectionLine;
 
     private final FilterOptions options = new FilterOptions();
 
@@ -104,7 +105,7 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
-            actionBar.setTitle(""); //TODO SET TITLE
+            actionBar.setTitle(R.string.title_activity_sales_admin_tools);
             actionBar.setDisplayShowTitleEnabled(true);
 
             AndroidUtils.UI.createToastForToolbarTitle(SalesAdminToolsActivity.this, getToolbar());
@@ -117,6 +118,10 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
 
         fabCancel = findViewById(R.id.take5FabCancel);
         fabTakePoint = findViewById(R.id.satFabTakePoint);
+
+        connectionLine = new LineGraphicManager(null, null,
+                new LineGraphicOptions(0, getTtAppCtx().getDeviceSettings().getMapUnAdjLineWidth(), LineGraphicOptions.LineStyle.Dashed));
+        connectionLine.setVisible(false);
     }
 
 //    @Override
@@ -134,6 +139,10 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
         options.DopValue = getTtAppCtx().getDeviceSettings().getSATFilterDopValue();
         increment = getTtAppCtx().getDeviceSettings().getSATIncrement();
         takeAmount = getTtAppCtx().getDeviceSettings().getSATNmeaAmount();
+
+
+
+        _ClosestPositionCalc = new ClosestPositionCalculator(Arrays.asList(), getZone(), _DAL);
     }
 
     @Override
@@ -213,6 +222,12 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
         super.onMapReady();
         setMapGesturesEnabled(true);
     }
+
+    @Override
+    public void onMapLoaded() {
+        super.onMapLoaded();
+        addLineGraphic(connectionLine);
+    }
     //endregion
 
 
@@ -244,17 +259,17 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
         showCancel();
     }
 
-    private void showValidationPoint() {
+    private void showValidationPoint(UTMCoords currentCoords, ClosestPositionCalculator.ClosestPosition closestPosition) {
         hideCancel();
         fabTakePoint.setEnabled(true);
         pauseDistLine = true;
 
+        updateDirPathUI(closestPosition.getCoords(), currentCoords);
+
         //TODO show msgbox with point information and whether to save
 
         //save
-        if (_ClosestPositionToValidationPoint != null) {
-            saveValidationPoint(_ClosestPositionToValidationPoint);
-        }
+        //saveValidationPoint(closestPosition);
 
         //cancel
         _Bursts.clear();
@@ -270,7 +285,6 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
             getTtAppCtx().getDAL().insertPoint(_ValidationPoint);
             getTtAppCtx().getDAL().insertNmeaBursts(_Bursts);
 
-
             _CurrentPoint = _ValidationPoint;
 
             isPointSetup = false;
@@ -281,14 +295,15 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
     //endregion
 
     //region UI
-    private void updateDirPathUI(PointD to, PointD from) {
+    private void updateDirPathUI(UTMCoords to, UTMCoords from) {
+        connectionLine.updateGraphic(
+                UTMTools.convertUTMtoLatLonSignedDec(to),
+                UTMTools.convertUTMtoLatLonSignedDec(from)
+        );
 
-
-        setDirPath(to, from);
-    }
-
-    private void setDirPath(PointD to, PointD from) {
-        //TODO at MapBase
+        if (!connectionLine.isVisible()) {
+            connectionLine.setVisible(true);
+        }
     }
 
 
@@ -354,9 +369,6 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
     protected void onNmeaBurstReceived(NmeaBurst nmeaBurst) {
         super.onNmeaBurstReceived(nmeaBurst);
 
-        UTMCoords currentCoords = null;
-        ClosestPositionCalculator.ClosestPosition closestPosition = null;
-
         if (nmeaBurst.hasPosition()) {
             if (isLogging() && nmeaBurst.isValid()) {
                 TtNmeaBurst burst = TtNmeaBurst.create(_ValidationPoint.getCN(), false, nmeaBurst);
@@ -402,24 +414,15 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
                         _ValidationPoint.setRMSEr(dRMSEr);
                         _ValidationPoint.setAndCalc(x, y, position.getElevation(), getPolygon());
 
-                        currentCoords = new UTMCoords(x, y, zone);
-                        closestPosition = _ClosestPositionCalc.getClosestPosition(currentCoords);
-                        _ClosestPositionToValidationPoint = closestPosition;
-
-                        showValidationPoint();
+                        UTMCoords calcCoords = new UTMCoords(x, y, zone);
+                        showValidationPoint(calcCoords, _ClosestPositionCalc.getClosestPosition(calcCoords));
                     }
                 }
             }
 
             if (!pauseDistLine) {
-                if (currentCoords == null) {
-                    currentCoords = nmeaBurst.getUTM(_DefaultMeta.getZone());
-                }
-
-                if (closestPosition == null) {
-                    closestPosition = _ClosestPositionCalc.getClosestPosition(currentCoords);
-                }
-                updateDirPathUI(closestPosition.getClosestPosition(), new PointD(currentCoords.getX(), currentCoords.getY()));
+                UTMCoords currentCoords = nmeaBurst.getUTM(_DefaultMeta.getZone());
+                updateDirPathUI(_ClosestPositionCalc.getClosestPosition(currentCoords).getCoords(), currentCoords);
             }
         }
     }
@@ -445,6 +448,7 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
             stopLogging();
             _Bursts.clear();
             _UsedBursts.clear();
+            pauseDistLine = false;
 
             fabTakePoint.setEnabled(true);
         }

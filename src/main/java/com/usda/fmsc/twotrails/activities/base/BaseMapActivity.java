@@ -70,6 +70,7 @@ import com.usda.fmsc.twotrails.fragments.map.ManagedSupportMapFragment;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.objects.PointD;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
+import com.usda.fmsc.twotrails.objects.map.LineGraphicManager;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
@@ -273,6 +274,9 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
         btnFromPoint = findViewById(R.id.mapNavBtnFromPoint);
         btnToPoly = findViewById(R.id.mapNavBtnToPoly);
         btnToPoint = findViewById(R.id.mapNavBtnToPoint);
+        btnToPoly2 = findViewById(R.id.mapNavBtnToPoly2);
+        btnToPoint2 = findViewById(R.id.mapNavBtnToPoint2);
+        layToLine = findViewById(R.id.mapNavLayToLine);
 
         tvNavDistFt = findViewById(R.id.mapNavTvDistFeet);
         tvNavDistMt = findViewById(R.id.mapNavTvDistMeters);
@@ -905,11 +909,11 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
         }
     }
 
-    protected void addGraphic() {
+    protected void addLineGraphic(LineGraphicManager graphicManager) {
         //todo add graphic
     }
 
-    private void removeGraphic() {
+    private void removeLineGraphic(LineGraphicManager graphicManager) {
         //todo remove graphic
     }
 
@@ -1556,6 +1560,7 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
                 _ToPoint = point;
                 if (_ToPoint != null) {
                     onTargetPointSelected();
+                    btnToPoint.setText(String.format(Locale.getDefault(), "%s",  _ToPoint.getPID()));
                 }
             }
 
@@ -1571,7 +1576,7 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
         showPolySelectDialog("To Polygon 2", polygon -> {
             _ToPoly2 = polygon;
             _ToPoint2 = null;
-            btnToPoly2.setText(_ToPoly.getName());
+            btnToPoly2.setText(_ToPoly2.getName());
             btnToPoint2.setText(R.string.str_point);
         });
     }
@@ -1588,6 +1593,7 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
                 _ToPoint2 = point;
                 if (_ToPoint2 != null) {
                     onTargetPointSelected();
+                    btnToPoint2.setText(String.format(Locale.getDefault(), "%s",  _ToPoint2.getPID()));
                 }
             }
 
@@ -1601,10 +1607,10 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
 
     private void onTargetPointSelected() {
         if (_ToPoly != null && _ToPoint != null && _ToPoly2 != null && _ToPoint2 != null) {
-            tvNavPid.setText(String.format(Locale.getDefault(), "%s + %s", _ToPoint.getPID(), _ToPoint2.getPID()));
+            tvNavPid.setText(String.format(Locale.getDefault(), "%s \u21F9 %s", _ToPoint.getPID(), _ToPoint2.getPID()));
             tvNavPoly.setText((_ToPoly.getCN().equals(_ToPoly2.getCN())) ?
                     _ToPoly.getName() :
-                    String.format(Locale.getDefault(), "%s + %s", _ToPoly.getName(), _ToPoly2.getName()));
+                    String.format(Locale.getDefault(), "%s - %s", _ToPoly.getName(), _ToPoly2.getName()));
 
 
         } else if (_ToPoint != null) {
@@ -1702,7 +1708,7 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
             }
 
             if (currPos != null) {
-                PointD toPoint;
+                UTMCoords toCoords = null;
                 double magDec;
 
                 TtMetadata meta = getMetadata().get(_ToPoint.getMetadataCN());
@@ -1713,35 +1719,41 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
 
 
                 if (_NavToPoint) {
-                    toPoint = new PointD(_ToPoint.getAdjX(), _ToPoint.getAdjY());
-                    targetLocation = TtUtils.Points.getPointLocation(_ToPoint, true, getMetadata());
+                    if (_ToPoint != null) {
+                        toCoords = new UTMCoords(_ToPoint.getAdjX(), _ToPoint.getAdjY(), meta.getZone());
+                        targetLocation = TtUtils.Points.getPointLocation(_ToPoint, true, getMetadata());
+                    }
                 } else {
-                    Tuple<PointD, Double> closestPosition = ClosestPositionCalculator.getClosestPointAndDistance(
-                            new PointD(currPos.getX(), currPos.getY()),
-                            new PointD(_ToPoint.getAdjX(), _ToPoint.getAdjY()),
-                            new PointD(_ToPoint2.getAdjX(), _ToPoint2.getAdjY()));
+                    if (_ToPoint != null && _ToPoint2 != null) {
+                        Tuple<UTMCoords, Double> closestPosition = ClosestPositionCalculator.getClosestPointAndDistance(
+                                currPos,
+                                new UTMCoords(_ToPoint.getAdjX(), _ToPoint.getAdjY(), meta.getZone()),
+                                new UTMCoords(_ToPoint2.getAdjX(), _ToPoint2.getAdjY(), meta.getZone()));
 
-                    toPoint = closestPosition.Item1;
-                    targetLocation = new Location("");
+                        toCoords = closestPosition.Item1;
+                        targetLocation = new Location("");
 
-                    Position position = UTMTools.convertUTMtoLatLonSignedDec(toPoint.X, toPoint.Y, getZone());
-                    targetLocation.setLatitude(position.getLatitudeSignedDecimal());
-                    targetLocation.setLongitude(position.getLongitudeSignedDecimal());
-                    targetLocation.setAltitude(_ToPoint.getAdjZ());
+                        Position position = UTMTools.convertUTMtoLatLonSignedDec(toCoords);
+                        targetLocation.setLatitude(position.getLatitudeSignedDecimal());
+                        targetLocation.setLongitude(position.getLongitudeSignedDecimal());
+                        targetLocation.setAltitude(_ToPoint.getAdjZ());
+                    }
                 }
 
-                double distInMt = TtUtils.Math.distance(currPos.getX(), currPos.getY(), toPoint.X, toPoint.Y);
-                double distInFt = TtUtils.Convert.toFeetTenths(distInMt, Dist.Meters);
+                if (toCoords != null) {
+                    double distInMt = TtUtils.Math.distance(currPos, toCoords);
+                    double distInFt = TtUtils.Convert.toFeetTenths(distInMt, Dist.Meters);
 
-                double azimuth = TtUtils.Math.azimuthOfPoint(currPos.getX(), currPos.getY(), toPoint.X, toPoint.Y);
-                double azMag = azimuth - magDec;
+                    double azimuth = TtUtils.Math.azimuthOfPoint(currPos.getX(), currPos.getY(), toCoords.getX(), toCoords.getY());
+                    double azMag = azimuth - magDec;
 
-                tvNavDistFt.setText(StringEx.toString(distInFt, 2));
-                tvNavDistMt.setText(StringEx.toString(distInMt, 2));
-                tvNavAzTrue.setText(String.format(Locale.getDefault(), "%.2f\u00B0", azimuth));
-                tvNavAzMag.setText(String.format(Locale.getDefault(), "%.2f\u00B0", azMag));
+                    tvNavDistFt.setText(StringEx.toString(distInFt, 2));
+                    tvNavDistMt.setText(StringEx.toString(distInMt, 2));
+                    tvNavAzTrue.setText(String.format(Locale.getDefault(), "%.2f\u00B0", azimuth));
+                    tvNavAzMag.setText(String.format(Locale.getDefault(), "%.2f\u00B0", azMag));
 
-                return;
+                    return;
+                }
             }
         }
 

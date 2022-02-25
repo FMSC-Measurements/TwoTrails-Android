@@ -44,11 +44,11 @@ public class ClosestPositionCalculator {
 
                         if (currMeta == null) throw new RuntimeException("Metadata Not Found");
                         if (currMeta.getZone() == defaultZone) {
-                            addToMap(point.getAdjX(), point.getAdjY(), point);
+                            addToMap(new UTMCoords(point.getAdjX(), point.getAdjY(), currMeta.getZone()), point);
                             apoints.add(new PointD(point.getAdjX(), point.getAdjY()));
                         } else {
                             UTMCoords coords = TtUtils.Points.forcePointZone(point, defaultZone, currMeta.getZone());
-                            addToMap(coords.getX(), coords.getY(), point);
+                            addToMap(coords, point);
                             apoints.add(new PointD(coords.getX(), coords.getY()));
                         }
                     }
@@ -59,18 +59,18 @@ public class ClosestPositionCalculator {
         }
     }
 
-    private void addToMap(Double x, Double y, TtPoint point) {
-        int bx = (int)(x / BLOCK_SIZE);
-        int by = (int)(y / BLOCK_SIZE);
+    private void addToMap(UTMCoords coords, TtPoint point) {
+        int bx = (int)(coords.getX() / BLOCK_SIZE);
+        int by = (int)(coords.getY() / BLOCK_SIZE);
 
         List<CalcPoint> points = _PointMap.get(bx, by);
         if (points == null)  {
             points = new ArrayList<>();
-            points.add(new CalcPoint(bx, by, x, y, point));
+            points.add(new CalcPoint(bx, by, coords, point));
 
             _PointMap.put(bx, by, points);
         } else {
-            points.add(new CalcPoint(bx, by, x, y, point));
+            points.add(new CalcPoint(bx, by, coords, point));
         }
     }
 
@@ -129,11 +129,11 @@ public class ClosestPositionCalculator {
     private ClosestPosition getPosition(Double utmX, Double utmY, CalcPoint calcPoint) {
         TtPoint point = calcPoint.getTtPoint();
         TtPolygon polygon = _Polygons.get(point.getPolyCN());
-        PointD currPos = new PointD(utmX, utmY);
+        UTMCoords currCoords = new UTMCoords(utmX, utmY, calcPoint.getCoords().getZone());
         List<TtPoint> points = _PointsByPoly.get(polygon.getCN());
         PolygonCalculator polyCalc = _PolygonsCalcs.get(polygon.getCN());
 
-        PointD prevPoint;
+        UTMCoords prevCoords;
         TtPoint prevTtPoint = (point.getIndex() > 0) ?
                 points.get(point.getIndex() - 1) :
                 points.get(points.size() - 1);
@@ -142,15 +142,14 @@ public class ClosestPositionCalculator {
 
 
         if (oMetaZone != _DefaultZone) {
-            UTMCoords coords = TtUtils.Points.forcePointZone(prevTtPoint, _DefaultZone, oMetaZone);
-            prevPoint = new PointD(coords.getX(), coords.getY());
+            prevCoords = TtUtils.Points.forcePointZone(prevTtPoint, _DefaultZone, oMetaZone);
         } else {
-            prevPoint = new PointD(prevTtPoint.getAdjX(), prevTtPoint.getAdjY());
+            prevCoords = new UTMCoords(prevTtPoint.getAdjX(), prevTtPoint.getAdjY(), oMetaZone);
         }
 
-        Tuple<PointD, Double> cdPrev = getClosestPointAndDistance(currPos, calcPoint.getPoint(), prevPoint);
+        Tuple<UTMCoords, Double> cdPrev = getClosestPointAndDistance(currCoords, calcPoint.getCoords(), prevCoords);
 
-        PointD nextPoint;
+        UTMCoords nextPoint;
         TtPoint nextTtPoint = (point.getIndex() < points.size() - 1) ?
                 points.get(point.getIndex() + 1) :
                 points.get(0);
@@ -158,41 +157,39 @@ public class ClosestPositionCalculator {
         oMetaZone = _Metadata.get(prevTtPoint.getMetadataCN()).getZone();
 
         if (oMetaZone != _DefaultZone) {
-            UTMCoords coords = TtUtils.Points.forcePointZone(nextTtPoint, _DefaultZone, oMetaZone);
-            nextPoint = new PointD(coords.getX(), coords.getY());
+            nextPoint = TtUtils.Points.forcePointZone(nextTtPoint, _DefaultZone, oMetaZone);
         } else {
-            nextPoint = new PointD(nextTtPoint.getAdjX(), nextTtPoint.getAdjY());
+            nextPoint = new UTMCoords(nextTtPoint.getAdjX(), nextTtPoint.getAdjY(), oMetaZone);
         }
 
-        Tuple<PointD, Double> cdNext = getClosestPointAndDistance(currPos, calcPoint.getPoint(), nextPoint);
+        Tuple<UTMCoords, Double> cdNext = getClosestPointAndDistance(currCoords, calcPoint.getCoords(), nextPoint);
 
         return (cdPrev.Item2 < cdNext.Item2) ?
                 new ClosestPosition(cdPrev.Item1, cdPrev.Item2, point, prevTtPoint, polygon, polyCalc.pointInPolygon(utmX, utmY)) :
                 new ClosestPosition(cdNext.Item1, cdNext.Item2, point, nextTtPoint, polygon, polyCalc.pointInPolygon(utmX, utmY));
     }
 
-    public static Tuple<PointD, Double> getClosestPointAndDistance(PointD cp, PointD p1, PointD p2) {
-        double slope = (p2.Y - p1.Y) / (p2.X - p1.X);
-        double b = p1.Y - slope * p1.X;
+    public static Tuple<UTMCoords, Double> getClosestPointAndDistance(UTMCoords cp, UTMCoords p1, UTMCoords p2) {
+        double slope = (p2.getY() - p1.getY()) / (p2.getX() - p1.getX());
+        double b = p1.getY() - slope * p1.getX();
         double invSlope =  -1 / slope;
-        double pb = cp.Y - invSlope * cp.X;
+        double pb = cp.getY() - invSlope * cp.getX();
         double x = (b - pb) / (invSlope - slope);
         double y = invSlope * x + pb;
-        PointD intersection = new PointD(x, y);
+        UTMCoords intersection = new UTMCoords(x, y, cp.getZone());
         return new Tuple<>(intersection, TtUtils.Math.distance(cp, intersection));
     }
 
 
     private static class CalcPoint {
         private final int bx, by;
-        private final double x, y;
+        private final UTMCoords coords;
         private final TtPoint point;
 
-        public CalcPoint(int bx, int by, double x, double y, TtPoint point) {
-            this.x = x;
-            this.y = y;
+        public CalcPoint(int bx, int by, UTMCoords coords, TtPoint point) {
             this.bx = bx;
             this.by = by;
+            this.coords = coords;
             this.point = point;
         }
 
@@ -204,15 +201,7 @@ public class ClosestPositionCalculator {
             return by;
         }
 
-        public double getX() {
-            return x;
-        }
-
-        public double getY() {
-            return y;
-        }
-
-        public PointD getPoint() { return new PointD(x, y); }
+        public UTMCoords getCoords() { return coords; }
 
         public TtPoint getTtPoint() {
             return point;
@@ -221,7 +210,7 @@ public class ClosestPositionCalculator {
 
     public static class ClosestPosition {
         private final TtPoint Point1, Point2;
-        private final PointD ClosestPosition;
+        private final UTMCoords ClosestPosition;
         private final TtPolygon Polygon;
         private final double Distance;
         private final boolean InsidePoly;
@@ -235,7 +224,7 @@ public class ClosestPositionCalculator {
          * @param polygon Polygon the closest position is on
          * @param insidePoly Whether or not the initial position was inside the polygon
          */
-        public ClosestPosition(PointD closestPosition, double distance, TtPoint point1, TtPoint point2, TtPolygon polygon, boolean insidePoly) {
+        public ClosestPosition(UTMCoords closestPosition, double distance, TtPoint point1, TtPoint point2, TtPolygon polygon, boolean insidePoly) {
             this.ClosestPosition = closestPosition;
             this.Distance = distance;
             this.Point1 = point1;
@@ -243,7 +232,7 @@ public class ClosestPositionCalculator {
             this.Polygon = polygon;
             this.InsidePoly = insidePoly;
 
-            this.PositionIsPoint1 = this.Point1.sameAdjLocation(this.ClosestPosition.X, this.ClosestPosition.Y, this.Point1.getAdjZ());
+            this.PositionIsPoint1 = this.Point1.sameAdjLocation(this.ClosestPosition.getX(), this.ClosestPosition.getY(), this.Point1.getAdjZ());
         }
 
         /**
@@ -270,7 +259,7 @@ public class ClosestPositionCalculator {
         /**
          * @return Closest position on the polygon
          */
-        public PointD getClosestPosition() {
+        public UTMCoords getCoords() {
             return ClosestPosition;
         }
 

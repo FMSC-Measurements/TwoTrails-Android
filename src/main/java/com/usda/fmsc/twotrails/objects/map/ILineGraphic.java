@@ -13,6 +13,5 @@ public interface ILineGraphic {
     Position getPosition();
 
     void setVisible(boolean visible);
-
     boolean isVisible();
 }

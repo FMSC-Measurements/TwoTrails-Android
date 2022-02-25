@@ -374,6 +374,13 @@ public class TtUtils {
             }
         }
 
+        public static double distance(UTMCoords p1, UTMCoords p2) {
+            if (p1 == null || p2 == null)
+                return -1;
+            else
+                return distance(p1.getX(), p1.getY(), p2.getX(), p2.getY());
+        }
+
         public static double distance(PointD p1, PointD p2) {
             return distance(p1.X, p1.Y, p2.X, p2.Y);
         }
