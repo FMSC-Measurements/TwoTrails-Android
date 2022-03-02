@@ -68,7 +68,8 @@ public class ClosestPositionCalculator {
                 }
 
                 _LastIndexInPoly.put(poly.getCN(), lastIndex);
-                _PolygonsCalcs.put(poly.getCN(), new PolygonCalculator(apoints));
+
+                _PolygonsCalcs.put(poly.getCN(), apoints.size() > 2 ? new PolygonCalculator(apoints) : null);
             }
         }
     }
@@ -206,20 +207,32 @@ public class ClosestPositionCalculator {
 
         Tuple<UTMCoords, Double> cdNext = getClosestPointAndDistance(currCoords, calcPoint.getCoords(), nextPoint);
 
-        if (cdPrev.Item2.isNaN() && !cdNext.Item2.isNaN()) {
-            return new ClosestPosition(cdNext.Item1, cdNext.Item2, point, nextTtPoint, polygon, polyCalc.pointInPolygon(utmX, utmY));
-        } else if (!cdPrev.Item2.isNaN() && cdNext.Item2.isNaN()) {
-            return new ClosestPosition(cdPrev.Item1, cdPrev.Item2, point, prevTtPoint, polygon, polyCalc.pointInPolygon(utmX, utmY));
+        if (cdPrev != null && cdNext != null) {
+            if (cdPrev.Item2.isNaN() && !cdNext.Item2.isNaN()) {
+                return new ClosestPosition(cdNext.Item1, cdNext.Item2, point, nextTtPoint, polygon, polyCalc != null && polyCalc.pointInPolygon(utmX, utmY));
+            } else if (!cdPrev.Item2.isNaN() && cdNext.Item2.isNaN()) {
+                return new ClosestPosition(cdPrev.Item1, cdPrev.Item2, point, prevTtPoint, polygon, polyCalc != null && polyCalc.pointInPolygon(utmX, utmY));
+            } else {
+                return (cdPrev.Item2 < cdNext.Item2) ?
+                    new ClosestPosition(cdPrev.Item1, cdPrev.Item2, point, prevTtPoint, polygon, polyCalc != null && polyCalc.pointInPolygon(utmX, utmY)) :
+                    new ClosestPosition(cdNext.Item1, cdNext.Item2, point, nextTtPoint, polygon, polyCalc != null && polyCalc.pointInPolygon(utmX, utmY));
+            }
+        } else if (cdPrev != null) {
+            return new ClosestPosition(cdPrev.Item1, cdPrev.Item2, point, prevTtPoint, polygon, polyCalc != null && polyCalc.pointInPolygon(utmX, utmY));
+        } else if (cdNext != null) {
+            return new ClosestPosition(cdNext.Item1, cdNext.Item2, point, nextTtPoint, polygon, polyCalc != null && polyCalc.pointInPolygon(utmX, utmY));
         } else {
-            return (cdPrev.Item2 < cdNext.Item2) ?
-                new ClosestPosition(cdPrev.Item1, cdPrev.Item2, point, prevTtPoint, polygon, polyCalc.pointInPolygon(utmX, utmY)) :
-                new ClosestPosition(cdNext.Item1, cdNext.Item2, point, nextTtPoint, polygon, polyCalc.pointInPolygon(utmX, utmY));
+            return null;
         }
     }
 
     public static Tuple<UTMCoords, Double> getClosestPointAndDistance(UTMCoords cp, UTMCoords p1, UTMCoords p2) {
-        UTMCoords intersection = TtUtils.Math.getClosestPointOnLineSegment(cp, p1, p2);
-        return new Tuple<>(intersection, TtUtils.Math.distance(cp, intersection));
+        try {
+            UTMCoords intersection = TtUtils.Math.getClosestPointOnLineSegment(cp, p1, p2);
+            return new Tuple<>(intersection, TtUtils.Math.distance(cp, intersection));
+        } catch (Exception e) {
+            return null;
+        }
     }
 
 
@@ -259,6 +272,7 @@ public class ClosestPositionCalculator {
         private final double Distance;
         private final boolean InsidePoly;
         private final boolean PositionIsPoint1;
+        private final boolean PositionIsPoint2;
 
         /**
          * @param closestPosition Closest position to the initial position
@@ -277,6 +291,7 @@ public class ClosestPositionCalculator {
             this.InsidePoly = insidePoly;
 
             this.PositionIsPoint1 = this.Point1.sameAdjLocation(this.ClosestPosition.getX(), this.ClosestPosition.getY(), this.Point1.getAdjZ());
+            this.PositionIsPoint2 = this.Point2.sameAdjLocation(this.ClosestPosition.getX(), this.ClosestPosition.getY(), this.Point1.getAdjZ());
         }
 
         /**
@@ -324,6 +339,13 @@ public class ClosestPositionCalculator {
          */
         public boolean IsPositionPoint1() {
             return PositionIsPoint1;
+        }
+
+        /**
+         * @return Whether Point 2 is closest (same and poly) distance from the initial position
+         */
+        public boolean IsPositionPoint2() {
+            return PositionIsPoint2;
         }
     }
 }

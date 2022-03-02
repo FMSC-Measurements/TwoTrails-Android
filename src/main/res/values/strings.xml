@@ -81,6 +81,8 @@
     <string name="str_to">To</string>
     <string name="str_dist">Distance</string>
     <string name="str_az">Azimuth</string>
+    <string name="str_az_true">Azimuth (True)</string>
+    <string name="str_az_mag">Azimuth (Mag)</string>
     <string name="str_slp">Slope</string>
     <string name="str_slp_ang">S. Angle</string>
     <string name="str_mag">Magnetic</string>

@@ -125,6 +125,7 @@ public class DeviceSettings extends Settings {
     public static final String MAP_ID = "MapTerrainType";
     public static final String ARC_GIS_MAPS = "ArcGISMaps";
     public static final String ARC_GIS_MAP_ID_COUNTER = "ArcGISMapIdCounter";
+    public static final String MAP_DIST_TO_POLY_LINE_WIDTH = "MapDistToPolyLineWidth";
     public static final String MAP_ADJ_LINE_WIDTH = "MapAdjLineWidth";
     public static final String MAP_UNADJ_LINE_WIDTH = "MapUnAdjLineWidth";
     public static final String MAP_CHOOSE_OFFLINE = "MapChooseOffline";
@@ -220,6 +221,7 @@ public class DeviceSettings extends Settings {
     public final int DEFAULT_ARC_GIS_MAP_ID_COUNTER = 0;
     public final int DEFAULT_MAP_ADJ_LINE_WIDTH = 6;
     public final int DEFAULT_MAP_UNADJ_LINE_WIDTH = 16;
+    public final int DEFAULT_MAP_DIST_TO_POLY_LINE_WIDTH = 10;
     public final int DEFAULT_MAP_CHOOSE_OFFLINE = 0;
     public final boolean DEFAULT_MAP_CHOOSE_OFFLINE_ASK = true;
 
@@ -328,6 +330,7 @@ public class DeviceSettings extends Settings {
         editor.putInt(MAP_ID, DEFAULT_MAP_ID);
         editor.putString(ARC_GIS_MAPS, DEFAULT_ARC_GIS_MAPS);
         editor.putInt(ARC_GIS_MAP_ID_COUNTER, DEFAULT_ARC_GIS_MAP_ID_COUNTER);
+        editor.putInt(MAP_DIST_TO_POLY_LINE_WIDTH, DEFAULT_MAP_DIST_TO_POLY_LINE_WIDTH);
         editor.putInt(MAP_ADJ_LINE_WIDTH, DEFAULT_MAP_ADJ_LINE_WIDTH);
         editor.putInt(MAP_UNADJ_LINE_WIDTH, DEFAULT_MAP_UNADJ_LINE_WIDTH);
         editor.putInt(MAP_CHOOSE_OFFLINE, DEFAULT_MAP_CHOOSE_OFFLINE);
@@ -437,6 +440,7 @@ public class DeviceSettings extends Settings {
         js.name(MAP_USE_UTM_NAV).value(getMapUseUtmNav());
         js.name(MAP_TYPE).value(getMapType().toString());
         js.name(MAP_ID).value(getMapId());
+        js.name(MAP_DIST_TO_POLY_LINE_WIDTH).value(getMapDistToPolyLineWidth());
         js.name(MAP_ADJ_LINE_WIDTH).value(getMapAdjLineWidth());
         js.name(MAP_UNADJ_LINE_WIDTH).value(getMapUnAdjLineWidth());
         js.name(MAP_CHOOSE_OFFLINE).value(getAutoMapChooseOffline());
@@ -979,6 +983,14 @@ public class DeviceSettings extends Settings {
         setInt(MAP_ID, value);
     }
 
+
+    public int getMapDistToPolyLineWidth() {
+        return getInt(MAP_DIST_TO_POLY_LINE_WIDTH, DEFAULT_MAP_DIST_TO_POLY_LINE_WIDTH);
+    }
+
+    public void setMapDistToPolyLineWidth(int value) {
+        setInt(MAP_DIST_TO_POLY_LINE_WIDTH, value);
+    }
 
 
     public int getMapAdjLineWidth() {

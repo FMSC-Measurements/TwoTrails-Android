@@ -91,6 +91,7 @@ import com.usda.fmsc.utilities.Tuple;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -1528,7 +1529,7 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
     }
 
     public void btnFromPointClick(View view) {
-        if (_FromPoly == null || !polyPoints.containsKey(_FromPoly.getCN())) {
+        if (_FromPoly == null) {
             Toast.makeText(this, "Select polygon first", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -1561,7 +1562,7 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
     }
 
     public void btnToPointClick(View view) {
-        if (_ToPoly == null || !polyPoints.containsKey(_ToPoly.getCN())) {
+        if (_ToPoly == null) {
             Toast.makeText(this, "Select polygon first", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -1594,7 +1595,7 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
     }
 
     public void btnToPoint2Click(View view) {
-        if (_ToPoly == null || !polyPoints.containsKey(_ToPoly.getCN())) {
+        if (_ToPoly == null) {
             Toast.makeText(this, "Select polygon first", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -1639,12 +1640,15 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
     }
 
     private void showPolySelectDialog(String title, onPolySelectClickListener opscl) {
-        if (polyPoints.size() > 0) {
-            final String[] polyStrs = new String[polyPoints.size()];
-            final ArrayList<TtPolygon> polys = getSortedPolys();
+        final ArrayList<TtPolygon> polygons = new ArrayList<>(getPolygons().values());
+        Collections.sort(polygons);
+
+
+        if (polygons.size() > 0) {
+            final String[] polyStrs = new String[polygons.size()];
 
             int i = 0;
-            for(TtPolygon poly : polys) {
+            for(TtPolygon poly : polygons) {
                 polyStrs[i] = poly.getName();
                 i++;
             }
@@ -1654,7 +1658,7 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
             dialogBuilder.setTitle(title);
 
             dialogBuilder.setItems(polyStrs, (dialog, which) -> {
-                opscl.onClick(polys.get(which));
+                opscl.onClick(polygons.get(which));
             });
 
             dialogBuilder.setNegativeButton(R.string.str_cancel, null);
@@ -1668,12 +1672,17 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
     }
 
     private void showPointSelectDialog(TtPolygon poly, onPointSelectClickListener opscl) {
-        if (poly == null || !polyPoints.containsKey(poly.getCN())) {
+        if (poly == null) {
             Toast.makeText(this, "Select polygon first", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        ArrayList<TtPoint> points = polyPoints.get(poly.getCN());
+        ArrayList<TtPoint> points = null;
+        if (polyPoints.containsKey(poly.getCN())) {
+            points = polyPoints.get(poly.getCN());
+        } else {
+            points = getTtAppCtx().getDAL().getPointsInPolygon(poly.getCN());
+        }
 
         if (points != null && points.size() > 0) {
             AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
@@ -1736,11 +1745,16 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
                         targetLocation = TtUtils.Points.getPointLocation(_ToPoint, true, getMetadata());
                     }
                 } else {
-                    if (_ToPoint != null && _ToPoint2 != null) {
+                    if (_ToPoint != null && _ToPoint2 != null && !_ToPoint.sameAdjLocation(_ToPoint2)) {
                         Tuple<UTMCoords, Double> closestPosition = ClosestPositionCalculator.getClosestPointAndDistance(
                                 currPos,
                                 new UTMCoords(_ToPoint.getAdjX(), _ToPoint.getAdjY(), meta.getZone()),
                                 new UTMCoords(_ToPoint2.getAdjX(), _ToPoint2.getAdjY(), meta.getZone()));
+
+                        //error calculating position
+                        if (closestPosition == null) {
+                            return;
+                        }
 
                         toCoords = closestPosition.Item1;
                         targetLocation = new Location("");

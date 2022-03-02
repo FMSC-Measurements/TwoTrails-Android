@@ -35,7 +35,7 @@
                 style="@style/ToolbarElevation2">
 
                 <include
-                    layout="@layout/control_gps_info"
+                    layout="@layout/control_gps_info_for_sat"
                     android:layout_height="wrap_content"
                     android:layout_width="match_parent"/>
             </androidx.cardview.widget.CardView>

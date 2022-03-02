@@ -1,7 +1,6 @@
 package com.usda.fmsc.twotrails.activities;
 
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -9,6 +8,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
@@ -27,29 +27,21 @@ import com.usda.fmsc.geospatial.utm.UTMTools;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.activities.base.AcquireGpsMapActivity;
-import com.usda.fmsc.twotrails.data.DataAccessLayer;
-import com.usda.fmsc.twotrails.data.TwoTrailsSchema;
 import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
 import com.usda.fmsc.twotrails.logic.PointNamer;
 import com.usda.fmsc.twotrails.objects.FilterOptions;
-import com.usda.fmsc.twotrails.objects.TtGroup;
-import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.objects.map.LineGraphicManager;
 import com.usda.fmsc.twotrails.objects.map.LineGraphicOptions;
-import com.usda.fmsc.twotrails.objects.map.PolygonGraphicOptions;
 import com.usda.fmsc.twotrails.objects.map.TrailGraphicManager;
-import com.usda.fmsc.twotrails.objects.map.TrailGraphicOptions;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.points.WayPoint;
+import com.usda.fmsc.twotrails.units.Dist;
 import com.usda.fmsc.twotrails.utilities.ClosestPositionCalculator;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
-import org.joda.time.DateTime;
-
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Locale;
 
 /*
@@ -62,6 +54,7 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
 
     private CardView cvGpsInfo;
     private FloatingActionButton fabTakePoint, fabCancel;
+    private TextView tvCPDist, tvCP, tvAzTrue, tvAzMag;
 
     private MenuItem miHideGpsInfo;
     private boolean gpsInfoHidden;
@@ -141,7 +134,7 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
         fabTakePoint = findViewById(R.id.satFabTakePoint);
 
         connectionLine = new LineGraphicManager(null, null,
-                new LineGraphicOptions(R.color.black_1000, getTtAppCtx().getDeviceSettings().getMapUnAdjLineWidth(), LineGraphicOptions.LineStyle.Dashed));
+                new LineGraphicOptions(R.color.black_1000, getTtAppCtx().getDeviceSettings().getMapDistToPolyLineWidth(), LineGraphicOptions.LineStyle.Dashed));
         //connectionLine.setVisible(false);
     }
 
@@ -149,6 +142,17 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
 //    protected int getMapRightDrawerLayoutId() {
 //        return R.layout.content_drawer_media;  //TODO add other tools
 //    }
+
+
+    @Override
+    public void setContentView(int layoutResID) {
+        super.setContentView(layoutResID);
+
+        tvCPDist = findViewById(R.id.gpsInfoForSatTvDist);
+        tvCP = findViewById(R.id.gpsInfoForSatTvCP);
+        tvAzTrue = findViewById(R.id.gpsInfoForSatTvAzTrue);
+        tvAzMag = findViewById(R.id.gpsInfoForSatTvAzMag);
+    }
 
     @Override
     protected void updateSettings() {
@@ -312,7 +316,7 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
         //saveValidationPoint(closestPosition);
 
         updateDirPathUI(closestPosition.getCoords(), currentCoords);
-
+        updateCPInfo(closestPosition, currentCoords);
 
         //cancel
         _Bursts.clear();
@@ -393,6 +397,35 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
             cancelVisible = false;
         }
     }
+
+    private void updateCPInfo(ClosestPositionCalculator.ClosestPosition closestPosition, UTMCoords currentCoords) {
+        runOnUiThread(() -> {
+            if (closestPosition != null) {
+                tvCPDist.setText(String.format(Locale.getDefault(), "%.2f (%s)",
+                        TtUtils.Convert.distance(closestPosition.getDistance(), getCurrentMetadata().getDistance(), Dist.Meters), getCurrentMetadata().getDistance().toStringAbv()));
+
+                if (closestPosition.IsPositionPoint1()) {
+                    tvCP.setText(String.format(Locale.getDefault(), "%d (%s)", closestPosition.getPoint1().getPID(), closestPosition.getPoint1().getOp()));
+                } else if (closestPosition.IsPositionPoint2()) {
+                    tvCP.setText(String.format(Locale.getDefault(), "%d (%s)", closestPosition.getPoint2().getPID(), closestPosition.getPoint2().getOp()));
+                } else {
+                    tvCP.setText(String.format(Locale.getDefault(), "%d \u21F9 %d", closestPosition.getPoint1().getPID(), closestPosition.getPoint2().getPID()));
+                }
+
+
+                double azimuth = TtUtils.Math.azimuthOfPoint(currentCoords.getX(), currentCoords.getY(), closestPosition.getCoords().getX(), closestPosition.getCoords().getY());
+                double azMag = azimuth - getCurrentMetadata().getMagDec();
+
+                tvAzTrue.setText(String.format(Locale.getDefault(), "%.0f\u00B0", azimuth));
+                tvAzMag.setText(String.format(Locale.getDefault(), "%.0f\u00B0", azMag));
+            } else {
+                tvCPDist.setText(R.string.str_nullvalue);
+                tvCP.setText(R.string.str_nullvalue);
+                tvAzTrue.setText(R.string.str_nullvalue);
+                tvAzMag.setText(R.string.str_nullvalue);
+            }
+        });
+    }
     //endregion
 
     //region GPS
@@ -458,6 +491,8 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
                 if (cp != null) {
                     updateDirPathUI(cp.getCoords(), currentCoords);
                 }
+
+                updateCPInfo(cp, currentCoords);
             }
         }
     }
