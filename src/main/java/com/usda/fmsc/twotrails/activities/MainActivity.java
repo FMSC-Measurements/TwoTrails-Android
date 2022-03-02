@@ -42,7 +42,9 @@ import com.usda.fmsc.twotrails.fragments.main.MainDataFragment;
 import com.usda.fmsc.twotrails.fragments.main.MainFileFragment;
 import com.usda.fmsc.twotrails.fragments.main.MainToolsFragment;
 import com.usda.fmsc.twotrails.logic.AdjustingException;
+import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.objects.TwoTrailsProject;
+import com.usda.fmsc.twotrails.objects.map.IPolygonGraphicManager;
 import com.usda.fmsc.twotrails.utilities.Export;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 import com.usda.fmsc.utilities.FileUtils;
@@ -55,6 +57,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.function.Function;
 
 
 public class MainActivity extends TtProjectAdjusterActivity {
@@ -1125,7 +1128,62 @@ public class MainActivity extends TtProjectAdjusterActivity {
 
     public void btnSATClick(View view) {
         if(getTtAppCtx().getDAL().hasPolygons()) {
-            startActivity(new Intent(this, SalesAdminToolsActivity.class));
+            final ArrayList<TtPolygon> polygons = getTtAppCtx().getDAL().getPolygons();
+            final ArrayList<TtPolygon> filteredPolygons = TtUtils.Collections.filterOutPltsAndSats(getTtAppCtx().getDAL().getPolygons());
+
+            Function<TtPolygon, Integer> startSAT = (targetPoly -> {
+                TtPolygon valPoly = null;
+
+                String valPolyName = String.format(Locale.getDefault(), "%s_sat", targetPoly.getName());
+
+                for (TtPolygon poly : polygons) {
+                    if (poly.getName().equals(valPolyName)) {
+                        valPoly = poly;
+                        break;
+                    }
+                }
+
+                if (valPoly == null) {
+                    int polyCount = polygons.size();
+
+                    valPoly = new TtPolygon(polyCount * 1000 + 1010);
+                    valPoly.setName(String.format(Locale.getDefault(), valPolyName, polyCount + 1));
+                    valPoly.setAccuracy(Consts.Default_Point_Accuracy);
+                    valPoly.setDescription(String.format(Locale.getDefault(), "Validation points for %s", targetPoly.getName()));
+                    getTtAppCtx().getDAL().insertPolygon(valPoly);
+                }
+
+                Intent intent = new Intent(this, SalesAdminToolsActivity.class);
+                intent.putExtra(Consts.Codes.Data.METADATA_DATA, getTtAppCtx().getDAL().getDefaultMetadata());
+                intent.putExtra(Consts.Codes.Data.POLYGON_DATA, targetPoly);
+
+                updateAppInfoOnResult.launch(intent);
+
+                return 0;
+            });
+
+
+            if (polygons.size() > 1) {
+                final String[] polyStrs = new String[filteredPolygons.size()];
+
+                for (int i = 0; i < filteredPolygons.size(); i++) {
+                    polyStrs[i] = filteredPolygons.get(i).getName();
+                }
+
+                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+
+                dialogBuilder.setTitle("Track Polygon");
+
+                dialogBuilder.setItems(polyStrs, (dialog, which) -> startSAT.apply(filteredPolygons.get(which)));
+
+                dialogBuilder.setNegativeButton(R.string.str_cancel, null);
+
+                final AlertDialog dialog = dialogBuilder.create();
+
+                dialog.show();
+            } else {
+                startSAT.apply(filteredPolygons.get(0));
+            }
         } else {
             Toast.makeText(this, "No Polygons in Project", Toast.LENGTH_SHORT).show();
         }
@@ -1134,13 +1192,11 @@ public class MainActivity extends TtProjectAdjusterActivity {
 
     //region Tools
     public void btnMapClick(View view) {
-        //if (AndroidUtils.App.requestNetworkPermission(this, Consts.Codes.Requests.INTERNET)) {
-            if (getTtAppCtx().getDAL().needsAdjusting()) {
-                askToAdjust();
-            } else {
-                startActivity(new Intent(this, MapActivity.class));
-            }
-        //}
+        if (getTtAppCtx().getDAL().needsAdjusting()) {
+            askToAdjust();
+        } else {
+            startActivity(new Intent(this, MapActivity.class));
+        }
     }
 
     public void btnGoogleEarthClick(View view) {

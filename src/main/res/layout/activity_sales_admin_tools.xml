@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -20,23 +19,32 @@
 
         <View style="@style/ToolbarShadowViewElevation" android:layout_below="@id/toolbar"/>
 
-        <androidx.cardview.widget.CardView
-            android:id="@+id/satCardGpsInfo"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@android:color/white"
-            android:layout_margin="8dp"
-            style="@style/ToolbarElevation2"
+            android:layout_height="0dp"
+            android:orientation="vertical"
             android:layout_below="@id/toolbar"
             android:layout_alignParentBottom="true">
 
-            <include
-                layout="@layout/control_gps_info"
+            <androidx.cardview.widget.CardView
+                android:id="@+id/satCardGpsInfo"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_width="match_parent"/>
-        </androidx.cardview.widget.CardView>
-    </RelativeLayout>
+                android:background="@android:color/white"
+                android:layout_margin="8dp"
+                style="@style/ToolbarElevation2">
 
+                <include
+                    layout="@layout/control_gps_info"
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"/>
+            </androidx.cardview.widget.CardView>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0dp"/>
+        </LinearLayout>
+    </RelativeLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/satFabTakePoint"
@@ -44,6 +52,7 @@
         android:onClick="btnTakePointClick"
         android:src="@drawable/ic_ttpoint_gps_white"
         app:layout_constraintBottom_toBottomOf="@id/lay1"
-        app:layout_constraintEnd_toEndOf="@+id/lay1"/>
+        app:layout_constraintEnd_toEndOf="@+id/lay1"
+        android:contentDescription=""/>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -430,8 +430,6 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                 rvPoints.setViewHasFooter(true);
                 rvPoints.setLayoutManager(linearLayoutManager);
                 rvPoints.setHasFixedSize(true);
-                //rvPoints.setItemAnimator(new SlideInUpAnimator()); //too long of a delay
-
 
                 rvPoints.setItemAnimator(new BaseItemAnimator() {
                     @Override protected void animateRemoveImpl(@NonNull final RecyclerView.ViewHolder holder) {
@@ -922,7 +920,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
             fabSS.setEnabled(true);
 
             if (isTrailModeEnabled()) {
-                addPosition(t5point, true);
+                addPosition(t5point);
             } else {
                 getTtAppCtx().getReport().writeWarn("TrailMode is disabled.", "Take5Activity:addTake5");
             }

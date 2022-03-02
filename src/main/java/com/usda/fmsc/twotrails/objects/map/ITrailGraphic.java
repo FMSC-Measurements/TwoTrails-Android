@@ -9,9 +9,9 @@ import java.util.HashMap;
 import java.util.List;
 
 public interface ITrailGraphic {
-    void build(List<TtPoint> points, HashMap<String, TtMetadata> meta, TrailGraphicOptions graphicOptions);
+    void build(List<TtPoint> points, boolean adjusted, HashMap<String, TtMetadata> meta, TrailGraphicOptions graphicOptions);
 
-    Position add(TtPoint point, HashMap<String, TtMetadata> meta);
+    Position add(TtPoint point, boolean adjusted, HashMap<String, TtMetadata> meta);
 
     void deleteLastPoint();
 

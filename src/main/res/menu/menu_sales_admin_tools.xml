@@ -19,7 +19,7 @@
         <menu>
             <item
                 android:id="@+id/satMenuSatSettings"
-                android:title="@string/menu_map_select_type"
+                android:title="@string/menu_sat_settings"
                 app:showAsAction="never"/>
 
             <item

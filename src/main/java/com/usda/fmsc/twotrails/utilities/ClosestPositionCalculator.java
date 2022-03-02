@@ -17,10 +17,13 @@ import java.util.List;
 
 public class ClosestPositionCalculator {
     public static final int BLOCK_SIZE = 10; //in meters
+    public static final int MAX_SHELL = 5; //100 meters from center [5(MAX_SHELL) x 10(BLOCK_SIZE) x 2]
 
     private final MultiKeyMap<Integer, List<CalcPoint>> _PointMap = new MultiKeyMap<>();
     private final HashMap<String, TtMetadata> _Metadata;
-    private final HashMap<String, List<TtPoint>> _PointsByPoly = new HashMap<>();
+    private final HashMap<String, HashMap<Integer, TtPoint>> _PointsByPoly = new HashMap<>();
+    private final HashMap<String, Integer> _FirstIndexInPoly = new HashMap<>();
+    private final HashMap<String, Integer> _LastIndexInPoly = new HashMap<>();
     private final HashMap<String, TtPolygon> _Polygons = new HashMap<>();
     private final HashMap<String, PolygonCalculator> _PolygonsCalcs = new HashMap<>();
     private final int _DefaultZone;
@@ -33,14 +36,22 @@ public class ClosestPositionCalculator {
             ArrayList<TtPoint> points = dal.getPointsInPolygon(poly.getCN());
 
             if (points.size() > 1) {
+                HashMap<Integer, TtPoint> ttPoints = new HashMap<>();
                 _Polygons.put(poly.getCN(), poly);
-                _PointsByPoly.put(poly.getCN(), points);
+                _PointsByPoly.put(poly.getCN(), ttPoints);
 
                 ArrayList<PointD> apoints = new ArrayList<>();
+
+                int lastIndex = 0;
 
                 for (TtPoint point : points) {
                     if (point.isOnBnd()) {
                         TtMetadata currMeta = _Metadata.get(point.getMetadataCN());
+                        ttPoints.put(point.getIndex(), point);
+
+                        if (!_FirstIndexInPoly.containsKey(poly.getCN())) {
+                            _FirstIndexInPoly.put(poly.getCN(), point.getIndex());
+                        }
 
                         if (currMeta == null) throw new RuntimeException("Metadata Not Found");
                         if (currMeta.getZone() == defaultZone) {
@@ -51,9 +62,12 @@ public class ClosestPositionCalculator {
                             addToMap(coords, point);
                             apoints.add(new PointD(coords.getX(), coords.getY()));
                         }
+
+                        lastIndex = point.getIndex();
                     }
                 }
 
+                _LastIndexInPoly.put(poly.getCN(), lastIndex);
                 _PolygonsCalcs.put(poly.getCN(), new PolygonCalculator(apoints));
             }
         }
@@ -88,16 +102,19 @@ public class ClosestPositionCalculator {
 
         ClosestPosition closestPosition = null;
 
-        while (blockCount < totalBlocks) {
-            int startX = bx - (BLOCK_SIZE * shell);
-            int startY = by - (BLOCK_SIZE * shell);
+        while (blockCount < totalBlocks && shell < MAX_SHELL) {
+//            int startX = bx - (BLOCK_SIZE * shell);
+//            int startY = by - (BLOCK_SIZE * shell);
+            int startX = bx - shell;
+            int startY = by - shell;
 
             int column = 0, row = 0, lastColumnRow = (1 + 2 * shell);
 
             while (row < lastColumnRow) {
                 while (column < lastColumnRow) {
                     if (row == 0 || row == lastColumnRow - 1 || column == 0 || column == lastColumnRow - 1) {
-                        List<CalcPoint> block = _PointMap.get(startX + BLOCK_SIZE * column, startY + BLOCK_SIZE * row);
+                        List<CalcPoint> block = _PointMap.get(startX + column, startY + row);
+//                        List<CalcPoint> block = _PointMap.get(startX + BLOCK_SIZE * column, startY + BLOCK_SIZE * row);
                         if (block != null) {
 
                             for (CalcPoint calcPoint : block) {
@@ -113,6 +130,7 @@ public class ClosestPositionCalculator {
                     }
                     column++;
                 }
+                column = 0;
                 row++;
             }
 
@@ -130,13 +148,26 @@ public class ClosestPositionCalculator {
         TtPoint point = calcPoint.getTtPoint();
         TtPolygon polygon = _Polygons.get(point.getPolyCN());
         UTMCoords currCoords = new UTMCoords(utmX, utmY, calcPoint.getCoords().getZone());
-        List<TtPoint> points = _PointsByPoly.get(polygon.getCN());
+        HashMap<Integer, TtPoint> points = _PointsByPoly.get(polygon.getCN());
         PolygonCalculator polyCalc = _PolygonsCalcs.get(polygon.getCN());
 
+        int lastIndex = _LastIndexInPoly.get(polygon.getCN());
+        int firstIndex = _FirstIndexInPoly.get(polygon.getCN());
+
         UTMCoords prevCoords;
-        TtPoint prevTtPoint = (point.getIndex() > 0) ?
-                points.get(point.getIndex() - 1) :
-                points.get(points.size() - 1);
+        TtPoint prevTtPoint = null;
+//            (point.getIndex() > 0) ?
+//                points.get(point.getIndex() - 1) :
+//                points.get(_LastIndexInPoly.get(polygon.getCN()));
+
+        if (point.getIndex() > firstIndex) {
+            for (int i = point.getIndex() - 1; i >= firstIndex; i--) {
+                prevTtPoint = points.get(i);
+                if (prevTtPoint != null) break;
+            }
+        } else {
+            prevTtPoint = points.get(lastIndex);
+        }
 
         int oMetaZone = _Metadata.get(prevTtPoint.getMetadataCN()).getZone();
 
@@ -150,9 +181,20 @@ public class ClosestPositionCalculator {
         Tuple<UTMCoords, Double> cdPrev = getClosestPointAndDistance(currCoords, calcPoint.getCoords(), prevCoords);
 
         UTMCoords nextPoint;
-        TtPoint nextTtPoint = (point.getIndex() < points.size() - 1) ?
-                points.get(point.getIndex() + 1) :
-                points.get(0);
+        TtPoint nextTtPoint = null;
+//                = (point.getIndex() < points.size() - 1) ?
+//                points.get(point.getIndex() + 1) :
+//                points.get(0);
+
+        if (point.getIndex() < lastIndex) {
+            for (int i = point.getIndex() + 1; i <= lastIndex; i++) {
+                nextTtPoint = points.get(i);
+                if (nextTtPoint != null) break;
+            }
+        } else {
+            nextTtPoint = points.get(firstIndex);
+        }
+
 
         oMetaZone = _Metadata.get(prevTtPoint.getMetadataCN()).getZone();
 
@@ -164,21 +206,23 @@ public class ClosestPositionCalculator {
 
         Tuple<UTMCoords, Double> cdNext = getClosestPointAndDistance(currCoords, calcPoint.getCoords(), nextPoint);
 
-        return (cdPrev.Item2 < cdNext.Item2) ?
+        if (cdPrev.Item2.isNaN() && !cdNext.Item2.isNaN()) {
+            return new ClosestPosition(cdNext.Item1, cdNext.Item2, point, nextTtPoint, polygon, polyCalc.pointInPolygon(utmX, utmY));
+        } else if (!cdPrev.Item2.isNaN() && cdNext.Item2.isNaN()) {
+            return new ClosestPosition(cdPrev.Item1, cdPrev.Item2, point, prevTtPoint, polygon, polyCalc.pointInPolygon(utmX, utmY));
+        } else {
+            return (cdPrev.Item2 < cdNext.Item2) ?
                 new ClosestPosition(cdPrev.Item1, cdPrev.Item2, point, prevTtPoint, polygon, polyCalc.pointInPolygon(utmX, utmY)) :
                 new ClosestPosition(cdNext.Item1, cdNext.Item2, point, nextTtPoint, polygon, polyCalc.pointInPolygon(utmX, utmY));
+        }
     }
 
     public static Tuple<UTMCoords, Double> getClosestPointAndDistance(UTMCoords cp, UTMCoords p1, UTMCoords p2) {
-        double slope = (p2.getY() - p1.getY()) / (p2.getX() - p1.getX());
-        double b = p1.getY() - slope * p1.getX();
-        double invSlope =  -1 / slope;
-        double pb = cp.getY() - invSlope * cp.getX();
-        double x = (b - pb) / (invSlope - slope);
-        double y = invSlope * x + pb;
-        UTMCoords intersection = new UTMCoords(x, y, cp.getZone());
+        UTMCoords intersection = TtUtils.Math.getClosestPointOnLineSegment(cp, p1, p2);
         return new Tuple<>(intersection, TtUtils.Math.distance(cp, intersection));
     }
+
+
 
 
     private static class CalcPoint {

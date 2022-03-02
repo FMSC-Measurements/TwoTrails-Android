@@ -24,9 +24,11 @@ import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
+import com.usda.fmsc.twotrails.objects.map.GoogleMapsLineGraphic;
 import com.usda.fmsc.twotrails.objects.map.GoogleMapsPolygonGraphic;
 import com.usda.fmsc.twotrails.objects.map.GoogleMapsTrailGraphic;
 import com.usda.fmsc.twotrails.objects.map.IMarkerDataGraphic;
+import com.usda.fmsc.twotrails.objects.map.LineGraphicManager;
 import com.usda.fmsc.twotrails.objects.map.PolygonDrawOptions;
 import com.usda.fmsc.twotrails.objects.map.PolygonGraphicManager;
 import com.usda.fmsc.twotrails.objects.map.TrailGraphicManager;
@@ -52,6 +54,7 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
     private final ArrayList<IMarkerDataGraphic> _MarkerDataGraphics = new ArrayList<>();
     private final HashMap<String, GoogleMapsPolygonGraphic> polygonGraphics = new HashMap<>();
     private final HashMap<String, GoogleMapsTrailGraphic> trailGraphics = new HashMap<>();
+    private final HashMap<String, GoogleMapsLineGraphic> lineGraphics = new HashMap<>();
 
     private Marker currentMarker;
 
@@ -501,4 +504,19 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
 
     }
 
+    @Override
+    public void addLine(LineGraphicManager graphicManager) {
+        if (!lineGraphics.containsKey(graphicManager.getCN())) {
+            GoogleMapsLineGraphic gmlg = new GoogleMapsLineGraphic(map);
+            lineGraphics.put(graphicManager.getCN(), gmlg);
+
+            graphicManager.setGraphic(gmlg);
+        }
+    }
+
+    //todo removeLine(LineGraphicManager graphicManager)
+    @Override
+    public void removeLine(LineGraphicManager graphicManager) {
+
+    }
 }

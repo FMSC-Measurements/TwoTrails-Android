@@ -5,6 +5,7 @@ import android.os.Parcelable;
 
 import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.geospatial.Position;
+import com.usda.fmsc.twotrails.objects.map.LineGraphicManager;
 import com.usda.fmsc.twotrails.objects.map.PolygonDrawOptions;
 import com.usda.fmsc.twotrails.objects.map.PolygonGraphicManager;
 import com.usda.fmsc.twotrails.objects.map.TrailGraphicManager;
@@ -43,6 +44,10 @@ public interface IMultiMapFragment {
     void addTrail(TrailGraphicManager graphicManager);
 
     void removeTrail(TrailGraphicManager graphicManager);
+
+    void addLine(LineGraphicManager graphicManager);
+
+    void removeLine(LineGraphicManager graphicManager);
 
     void hideSelectedMarkerInfo();
 

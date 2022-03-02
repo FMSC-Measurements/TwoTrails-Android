@@ -48,6 +48,7 @@ import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
 import com.usda.fmsc.twotrails.objects.FilterOptions;
 import com.usda.fmsc.twotrails.objects.PointD;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
+import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.objects.TwoTrailsProject;
 import com.usda.fmsc.twotrails.objects.media.TtImage;
 import com.usda.fmsc.twotrails.objects.media.TtMedia;
@@ -398,6 +399,37 @@ public class TtUtils {
                     java.lang.Math.cos(java.lang.Math.toRadians(lat1)) * java.lang.Math.cos(java.lang.Math.toRadians(lat2)) *
                             java.lang.Math.sin(dLng/2) * java.lang.Math.sin(dLng/2);
             return (earthRadius * 2 * java.lang.Math.atan2(java.lang.Math.sqrt(a), java.lang.Math.sqrt(1-a)));
+        }
+
+
+        public static UTMCoords getClosestPointOnLineSegment(UTMCoords p, UTMCoords v1, UTMCoords v2)
+        {
+            if (p.getZone() != v1.getZone() || p.getZone() != v2.getZone())  {
+                throw  new RuntimeException("Zone Mismatch");
+            }
+
+            double xDelta = v2.getX() - v1.getX();
+            double yDelta = v2.getY() - v1.getY();
+
+            if ((xDelta == 0) && (yDelta == 0))
+            {
+                throw new IllegalArgumentException("Segment start equals segment end");
+            }
+
+            double u = ((p.getX() - v1.getX()) * xDelta + (p.getY() - v1.getY()) * yDelta) / (xDelta * xDelta + yDelta * yDelta);
+
+            if (u < 0)
+            {
+                return new UTMCoords(v1.getX(), v1.getY(), p.getZone());
+            }
+            else if (u > 1)
+            {
+                return new UTMCoords(v2.getX(), v2.getY(), p.getZone());
+            }
+            else
+            {
+                return new UTMCoords((v1.getX() + u * xDelta), (v1.getY() + u * yDelta), p.getZone());
+            }
         }
         //endregion
 
@@ -1808,6 +1840,18 @@ public class TtUtils {
             }
 
             return true;
+        }
+
+        public static ArrayList<TtPolygon> filterOutPltsAndSats(ArrayList<TtPolygon> polygons) {
+            ArrayList<TtPolygon> filtered = new ArrayList<>();
+
+            for (TtPolygon poly : polygons) {
+                if (!(poly.getName().endsWith("_plts") || poly.getName().endsWith("_sat"))) {
+                    filtered.add(poly);
+                }
+            }
+
+            return filtered;
         }
     }
 

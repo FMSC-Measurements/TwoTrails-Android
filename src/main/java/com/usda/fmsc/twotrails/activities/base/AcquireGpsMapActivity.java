@@ -5,16 +5,13 @@ import android.animation.Animator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
-import androidx.exifinterface.media.ExifInterface;
 
-import android.provider.OpenableColumns;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.RelativeLayout;
@@ -41,7 +38,6 @@ import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.media.TtImage;
 import com.usda.fmsc.twotrails.objects.media.TtMedia;
-import com.usda.fmsc.twotrails.objects.media.TtPanorama;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.objects.map.PolygonGraphicOptions;
@@ -49,17 +45,12 @@ import com.usda.fmsc.twotrails.objects.map.TrailGraphicManager;
 import com.usda.fmsc.twotrails.objects.map.TrailGraphicOptions;
 import com.usda.fmsc.twotrails.ui.GpsStatusSatView;
 import com.usda.fmsc.twotrails.ui.GpsStatusSkyView;
-import com.usda.fmsc.twotrails.units.PictureType;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
-import com.usda.fmsc.utilities.FileUtils;
-import com.usda.fmsc.utilities.ParseEx;
 import com.usda.fmsc.utilities.StringEx;
 
 import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -106,10 +97,18 @@ public abstract class AcquireGpsMapActivity extends BaseMapActivity {
                     if (intent.hasExtra(Consts.Codes.Data.POINT_PACKAGE)) {
                         Bundle bundle = intent.getBundleExtra(Consts.Codes.Data.POINT_PACKAGE);
 
-                        _Metadata = bundle.getParcelable(Consts.Codes.Data.METADATA_DATA);
-                        _Polygon = bundle.getParcelable(Consts.Codes.Data.POLYGON_DATA);
-                    } else if (intent.hasExtra(Consts.Codes.Data.POLYGON_DATA)) {
-                        _Polygon = intent.getParcelableExtra(Consts.Codes.Data.POLYGON_DATA);
+                        if (bundle != null) {
+                            _Metadata = bundle.getParcelable(Consts.Codes.Data.METADATA_DATA);
+                            _Polygon = bundle.getParcelable(Consts.Codes.Data.POLYGON_DATA);
+                        }
+                    } else {
+                        if (intent.hasExtra(Consts.Codes.Data.POLYGON_DATA)) {
+                            _Polygon = intent.getParcelableExtra(Consts.Codes.Data.POLYGON_DATA);
+                        }
+
+                        if (intent.hasExtra(Consts.Codes.Data.METADATA_DATA)) {
+                            _Metadata = intent.getParcelableExtra(Consts.Codes.Data.METADATA_DATA);
+                        }
                     }
 
                     if (_Polygon == null) {
@@ -221,26 +220,30 @@ public abstract class AcquireGpsMapActivity extends BaseMapActivity {
     private void setupTrailMode(TtPolygon poly) {
         _Polygon = poly;
 
-        ArrayList<TtPoint> points = getTtAppCtx().getDAL().getPointsInPolygon(poly.getCN());
+        trailGraphicManager = createTrailGraphicManager(poly, false);
+    }
 
+    protected TrailGraphicManager createTrailGraphicManager(TtPolygon poly, boolean closeTrail) {
+        ArrayList<TtPoint> points = getTtAppCtx().getDAL().getPointsInPolygon(poly.getCN());
         PolygonGraphicOptions pgo = getTtAppCtx().getMapSettings().getPolyGraphicOptions(poly.getCN());
 
-        trailGraphicManager = new TrailGraphicManager(poly, points, getMetadata(),
+        return new TrailGraphicManager(poly, points, false, getMetadata(),
                 new TrailGraphicOptions(
                         pgo.getUnAdjNavColor(),
                         pgo.getAdjPtsColor(),
-                        getTtAppCtx().getDeviceSettings().getMapUnAdjLineWidth()
+                        getTtAppCtx().getDeviceSettings().getMapUnAdjLineWidth(),
+                        closeTrail
                 )
         );
     }
 
     public void addPosition(TtPoint point) {
-        addPosition(point, false);
+        addPosition(point, false, false);
     }
 
-    public void addPosition(TtPoint point, boolean moveToPointAfterAdd) {
+    public void addPosition(TtPoint point, boolean adjusted, boolean moveToPointAfterAdd) {
         if (trailModeEnabled) {
-            final Position position = trailGraphicManager.addPoint(point);
+            final Position position = trailGraphicManager.addPoint(point, adjusted);
 
             if (position != null) {
                 if (moveToPointAfterAdd) {
@@ -598,16 +601,6 @@ public abstract class AcquireGpsMapActivity extends BaseMapActivity {
 
 
     //region Misc
-    @Override
-    protected void createPolygonGraphicManagers() {
-        if (trailModeEnabled) {
-            addTrailGraphic(trailGraphicManager);
-        }
-
-        super.createPolygonGraphicManagers();
-    }
-
-
     protected TtPolygon getPolygon() {
         return _Polygon;
     }

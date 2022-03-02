@@ -1041,6 +1041,7 @@ public class DeviceSettings extends Settings {
     //endregion
 
     //endregion
+
     public int getExportMode() {
         return getInt(EXPORT_MODE, DEFAULT_EXPORT_MODE);
     }
@@ -1056,6 +1057,7 @@ public class DeviceSettings extends Settings {
     public void setExportModeAsk(boolean value) {
         setBool(EXPORT_MODE_ASK, value);
     }
+
     //region Export
 
 

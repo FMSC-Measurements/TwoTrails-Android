@@ -68,8 +68,8 @@ import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment;
 import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment.MarkerData;
 import com.usda.fmsc.twotrails.fragments.map.ManagedSupportMapFragment;
 import com.usda.fmsc.twotrails.gps.GpsService;
-import com.usda.fmsc.twotrails.objects.PointD;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
+import com.usda.fmsc.twotrails.objects.map.IPolygonGraphicManager;
 import com.usda.fmsc.twotrails.objects.map.LineGraphicManager;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
@@ -130,6 +130,7 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
 
     private final ArrayList<PolygonGraphicManager> polyGraphicManagers = new ArrayList<>();
     private final ArrayList<TrailGraphicManager> trailGraphicManagers = new ArrayList<>();
+    private final ArrayList<LineGraphicManager> lineGraphicManagers = new ArrayList<>();
 
     private Position lastPosition;
     private android.location.Location targetLocation;
@@ -295,7 +296,7 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
             LinearLayoutManager llm = new LinearLayoutManager(this);
             rvPolyOptions.setLayoutManager(llm);
 
-            PolyMarkerMapRvAdapter pmmAdapter = new PolyMarkerMapRvAdapter(this, getPolyGraphicManagers(), this);
+            PolyMarkerMapRvAdapter pmmAdapter = new PolyMarkerMapRvAdapter(this, getPolygonGraphicManagers(), this);
             rvPolyOptions.setItemAnimator(new SlideInUpAnimator());
             rvPolyOptions.setAdapter(pmmAdapter);
 
@@ -521,13 +522,14 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
         } else if (itemId == R.id.mapMenuResetBounds) {
             resetMapBounds(true);
         } else if (itemId == R.id.mapMenuZoomToPoly) {
-            int gSize = getPolyGraphicManagers().size();
+            ArrayList<IPolygonGraphicManager> managers = getIPolygonGraphicManagers();
+            int gSize = managers.size();
             if (gSize > 0) {
                 if (gSize > 1) {
-                    final String[] polyStrs = new String[polyPoints.size()];
+                    final String[] polyStrs = new String[managers.size()];
 
                     for (int i = 0; i < gSize; i++) {
-                        polyStrs[i] = getPolyGraphicManagers().get(i).getPolyName();
+                        polyStrs[i] = managers.get(i).getPolyName();
                     }
 
                     AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
@@ -535,7 +537,7 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
                     dialogBuilder.setTitle("Track Polygon");
 
                     dialogBuilder.setItems(polyStrs, (dialog, which) -> {
-                        PolygonGraphicManager pmm = getPolyGraphicManagers().get(which);
+                        IPolygonGraphicManager pmm = managers.get(which);
                         trackedPoly = pmm.getExtents();
                         getTtAppCtx().getProjectSettings().setTrackedPolyCN(pmm.getPolygonCN());
                         mapMoved = true;
@@ -548,7 +550,7 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
 
                     dialog.show();
                 } else {
-                    PolygonGraphicManager pmm = getPolyGraphicManagers().get(0);
+                    IPolygonGraphicManager pmm = getIPolygonGraphicManagers().get(0);
                     trackedPoly = pmm.getExtents();
                     getTtAppCtx().getProjectSettings().setTrackedPolyCN(pmm.getPolygonCN());
                     mapMoved = true;
@@ -792,7 +794,7 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
             }
 
             if (mmFrag != null) {
-                for (PolygonGraphicManager pgm : getPolyGraphicManagers()) {
+                for (PolygonGraphicManager pgm : getPolygonGraphicManagers()) {
                     mmFrag.addPolygon(pgm, null);
                 }
             }
@@ -910,11 +912,21 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
     }
 
     protected void addLineGraphic(LineGraphicManager graphicManager) {
-        //todo add graphic
+        if (mmFrag != null) {
+            mmFrag.addLine(graphicManager);
+        }
+
+        lineGraphicManagers.add(graphicManager);
     }
 
     private void removeLineGraphic(LineGraphicManager graphicManager) {
-        //todo remove graphic
+        if (graphicManager != null && lineGraphicManagers.contains(graphicManager)) {
+            if (mmFrag != null) {
+                mmFrag.removeLine(graphicManager);
+            }
+
+            lineGraphicManagers.remove(graphicManager);
+        }
     }
 
     @Override
@@ -1194,14 +1206,14 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
 
     //region Polygon Options
     private void setupGraphicManagers() {
-        createPolygonGraphicManagers();
+        createGraphicManagers();
 
-        if (getPolyGraphicManagers().size() > 0) {
+        if (getPolygonGraphicManagers().size() > 0) {
             Extent.Builder builder = new Extent.Builder();
             Extent tmp;
 
             int usedBounds = 0;
-            for (PolygonGraphicManager pgm : getPolyGraphicManagers()) {
+            for (IPolygonGraphicManager pgm : getIPolygonGraphicManagers()) {
                 tmp = pgm.getExtents();
 
                 if (tmp == null)
@@ -1223,7 +1235,7 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
         setupMasterPolyControl();
     }
 
-    protected void createPolygonGraphicManagers() {
+    protected void createGraphicManagers() {
         PolygonGraphicManager polygonGraphicManager;
         String trackedPolyCN = getTrackedPolyCN();
 
@@ -1315,29 +1327,29 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
             }
         });
 
-        tcbPoly.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolyOptions(PolygonDrawOptions.DrawCode.VISIBLE, isChecked));
+        tcbPoly.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolygonDrawOptions(PolygonDrawOptions.DrawCode.VISIBLE, isChecked));
 
-        tcbAdjBnd.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolyOptions(PolygonDrawOptions.DrawCode.ADJBND, isChecked));
+        tcbAdjBnd.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolygonDrawOptions(PolygonDrawOptions.DrawCode.ADJBND, isChecked));
 
-        tcbAdjNav.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolyOptions(PolygonDrawOptions.DrawCode.ADJNAV, isChecked));
+        tcbAdjNav.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolygonDrawOptions(PolygonDrawOptions.DrawCode.ADJNAV, isChecked));
 
-        tcbUnAdjBnd.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolyOptions(PolygonDrawOptions.DrawCode.UNADJBND, isChecked));
+        tcbUnAdjBnd.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolygonDrawOptions(PolygonDrawOptions.DrawCode.UNADJBND, isChecked));
 
-        tcbUnAdjNav.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolyOptions(PolygonDrawOptions.DrawCode.UNADJNAV, isChecked));
+        tcbUnAdjNav.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolygonDrawOptions(PolygonDrawOptions.DrawCode.UNADJNAV, isChecked));
 
-        tcbAdjBndPts.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolyOptions(PolygonDrawOptions.DrawCode.ADJBNDPTS, isChecked));
+        tcbAdjBndPts.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolygonDrawOptions(PolygonDrawOptions.DrawCode.ADJBNDPTS, isChecked));
 
-        tcbAdjNavPts.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolyOptions(PolygonDrawOptions.DrawCode.ADJNAVPTS, isChecked));
+        tcbAdjNavPts.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolygonDrawOptions(PolygonDrawOptions.DrawCode.ADJNAVPTS, isChecked));
 
-        tcbUnAdjBndPts.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolyOptions(PolygonDrawOptions.DrawCode.UNADJBNDPTS, isChecked));
+        tcbUnAdjBndPts.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolygonDrawOptions(PolygonDrawOptions.DrawCode.UNADJBNDPTS, isChecked));
 
-        tcbUnAdjNavPts.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolyOptions(PolygonDrawOptions.DrawCode.UNADJNAVPTS, isChecked));
+        tcbUnAdjNavPts.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolygonDrawOptions(PolygonDrawOptions.DrawCode.UNADJNAVPTS, isChecked));
 
-        tcbAdjMiscPts.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolyOptions(PolygonDrawOptions.DrawCode.ADJMISCPTS, isChecked));
+        tcbAdjMiscPts.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolygonDrawOptions(PolygonDrawOptions.DrawCode.ADJMISCPTS, isChecked));
 
-        tcbUnAdjMiscPts.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolyOptions(PolygonDrawOptions.DrawCode.UNADJMISCPTS, isChecked));
+        tcbUnAdjMiscPts.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolygonDrawOptions(PolygonDrawOptions.DrawCode.UNADJMISCPTS, isChecked));
 
-        tcbWayPts.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolyOptions(PolygonDrawOptions.DrawCode.WAYPTS, isChecked));
+        tcbWayPts.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolygonDrawOptions(PolygonDrawOptions.DrawCode.WAYPTS, isChecked));
     }
 
     //change master
@@ -1348,7 +1360,7 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
         int x = -1;
 
         try {
-            for (PolygonGraphicManager map : getPolyGraphicManagers()) {
+            for (PolygonGraphicManager map : getPolygonGraphicManagers()) {
 
                 boolean value = map.getDrawOptions().getValue(code);
 
@@ -1463,8 +1475,8 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
     }
 
     //change options for all drawoptions and display
-    private void updatePolyOptions(PolygonDrawOptions.DrawCode code, boolean value) {
-        for (PolygonGraphicManager gm : getPolyGraphicManagers()) {
+    private void updatePolygonDrawOptions(PolygonDrawOptions.DrawCode code, boolean value) {
+        for (PolygonGraphicManager gm : getPolygonGraphicManagers()) {
             gm.update(code, value);
         }
     }
@@ -1793,12 +1805,21 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
         return zone;
     }
 
-    protected ArrayList<PolygonGraphicManager> getPolyGraphicManagers() {
+    protected ArrayList<PolygonGraphicManager> getPolygonGraphicManagers() {
         return polyGraphicManagers;
     }
 
     protected ArrayList<TrailGraphicManager> getTrailGraphicManagers() {
         return trailGraphicManagers;
+    }
+
+    protected ArrayList<IPolygonGraphicManager> getIPolygonGraphicManagers() {
+        ArrayList<IPolygonGraphicManager> managers = new ArrayList<>();
+
+        managers.addAll(getTrailGraphicManagers());
+        managers.addAll(getPolygonGraphicManagers());
+
+        return managers;
     }
 
     protected Collection<TtPolygon> getPolygonsToMap() {

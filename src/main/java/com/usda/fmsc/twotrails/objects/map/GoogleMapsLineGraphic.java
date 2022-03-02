@@ -35,7 +35,7 @@ public class GoogleMapsLineGraphic implements ILineGraphic {
         PolylineOptions plo = new PolylineOptions();
         plo.width(graphicOptions.getLineWidth());
         plo.color(graphicOptions.getLineColor());
-        plo.pattern(getLinePattern(graphicOptions.getLineStyle()));
+        //plo.pattern(getLinePattern(graphicOptions.getLineStyle()));
 
         if (polyline != null) {
             polyline.remove();

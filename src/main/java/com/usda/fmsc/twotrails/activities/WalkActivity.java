@@ -452,7 +452,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
 
         getTtAppCtx().getTtNotifyManager().showPointAquired();
 
-        addPosition(_CurrentPoint, getLastPosition() != null);
+        addPosition(_CurrentPoint, false, getLastPosition() != null);
     }
 
     private void setStartWalkingDrawable(boolean startAquring) {

@@ -2,6 +2,7 @@ package com.usda.fmsc.twotrails.objects.map;
 
 import com.esri.arcgisruntime.geometry.Point;
 import com.esri.arcgisruntime.geometry.PointCollection;
+import com.esri.arcgisruntime.geometry.Polygon;
 import com.esri.arcgisruntime.geometry.Polyline;
 import com.esri.arcgisruntime.geometry.SpatialReferences;
 import com.esri.arcgisruntime.mapping.view.Graphic;
@@ -30,8 +31,9 @@ public class ArcGisTrailGraphic implements ITrailGraphic, IMarkerDataGraphic {
     private Graphic _TrailGraphic;
     private PointCollection _TrailPoints;
     private SimpleLineSymbol _TrailOutline;
-
     private SimpleMarkerSymbol markerOpts;
+
+    private TrailGraphicOptions _TrailGraphicOptions;
 
     private TtPoint _LastPoint;
 
@@ -44,9 +46,9 @@ public class ArcGisTrailGraphic implements ITrailGraphic, IMarkerDataGraphic {
 
 
     @Override
-    public void build(List<TtPoint> points, HashMap<String, TtMetadata> meta, TrailGraphicOptions graphicOptions) {
+    public void build(List<TtPoint> points, boolean adjusted, HashMap<String, TtMetadata> meta, TrailGraphicOptions graphicOptions) {
         _MarkerData = new HashMap<>();
-
+        _TrailGraphicOptions = graphicOptions;
         eBuilder = new Extent.Builder();
 
         _TrailLayer = new GraphicsOverlay();
@@ -59,7 +61,7 @@ public class ArcGisTrailGraphic implements ITrailGraphic, IMarkerDataGraphic {
         _TrailOutline = new SimpleLineSymbol(SimpleLineSymbol.Style.SOLID, graphicOptions.getTrailColor(), drawSize);
 
         for (TtPoint point : points) {
-            addPoint(point, meta);
+            addPoint(point, adjusted, meta);
         }
 
         map.getGraphicsOverlays().add(_TrailLayer);
@@ -72,21 +74,21 @@ public class ArcGisTrailGraphic implements ITrailGraphic, IMarkerDataGraphic {
     }
 
     @Override
-    public Position add(TtPoint point, HashMap<String, TtMetadata> meta) {
-        Position position = addPoint(point, meta);
+    public Position add(TtPoint point, boolean adjusted, HashMap<String, TtMetadata> meta) {
+        Position position = addPoint(point, adjusted, meta);
 
         polyBounds = eBuilder.build();
 
         return position;
     }
 
-    private Position addPoint(TtPoint point, HashMap<String, TtMetadata> meta) {
+    private Position addPoint(TtPoint point, boolean adjusted, HashMap<String, TtMetadata> meta) {
         TtMetadata metadata = meta.get(point.getMetadataCN());
 
-        Position pos = TtUtils.Points.getLatLonFromPoint(point, false, metadata);
+        Position pos = TtUtils.Points.getLatLonFromPoint(point, adjusted, metadata);
         Point posLL = new Point(pos.getLongitudeSignedDecimal(), pos.getLatitudeSignedDecimal(), SpatialReferences.getWgs84());
         Graphic mk = new Graphic(posLL, markerOpts);
-        MarkerData md = new MarkerData(point, metadata, true);
+        MarkerData md = new MarkerData(point, metadata, adjusted);
 
         _MarkerData.put(md.getKey(), md);
         mk.getAttributes().put(MarkerData.ATTR_KEY, md.getKey());
@@ -101,9 +103,18 @@ public class ArcGisTrailGraphic implements ITrailGraphic, IMarkerDataGraphic {
             _TrailPoints.add(posLL);
 
             if (_TrailGraphic != null) {
-                _TrailGraphic.setGeometry(new Polyline(_TrailPoints));
+                if (_TrailGraphicOptions.isClosedTrail()) {
+                    _TrailGraphic.setGeometry(new Polygon(_TrailPoints));
+                } else {
+                    _TrailGraphic.setGeometry(new Polyline(_TrailPoints));
+                }
             } else {
-                _TrailGraphic = new Graphic(new Polyline(_TrailPoints), _TrailOutline);
+                if (_TrailGraphicOptions.isClosedTrail()) {
+                    _TrailGraphic = new Graphic(new Polygon(_TrailPoints), _TrailOutline);
+                } else {
+                    _TrailGraphic = new Graphic(new Polyline(_TrailPoints), _TrailOutline);
+                }
+
                 _TrailLayer.getGraphics().add(_TrailGraphic);
             }
 
@@ -122,9 +133,17 @@ public class ArcGisTrailGraphic implements ITrailGraphic, IMarkerDataGraphic {
                 _TrailPoints.remove(_TrailPoints.size() - 1);
 
                 if (_TrailGraphic != null) {
-                    _TrailGraphic.setGeometry(new Polyline(_TrailPoints));
+                    if (_TrailGraphicOptions.isClosedTrail()) {
+                        _TrailGraphic.setGeometry(new Polygon(_TrailPoints));
+                    } else {
+                        _TrailGraphic.setGeometry(new Polyline(_TrailPoints));
+                    }
                 } else {
-                    _TrailGraphic = new Graphic(new Polyline(_TrailPoints), _TrailOutline);
+                    if (_TrailGraphicOptions.isClosedTrail()) {
+                        _TrailGraphic = new Graphic(new Polygon(_TrailPoints), _TrailOutline);
+                    } else {
+                        _TrailGraphic = new Graphic(new Polyline(_TrailPoints), _TrailOutline);
+                    }
                     _TrailLayer.getGraphics().add(_TrailGraphic);
                 }
             }

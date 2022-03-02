@@ -44,10 +44,12 @@ import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.fragments.TtBaseFragment;
 import com.usda.fmsc.twotrails.gps.GpsService;
+import com.usda.fmsc.twotrails.objects.map.ArcGisLineGraphic;
 import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
 import com.usda.fmsc.twotrails.objects.map.ArcGisPolygonGraphic;
 import com.usda.fmsc.twotrails.objects.map.ArcGisTrailGraphic;
 import com.usda.fmsc.twotrails.objects.map.IMarkerDataGraphic;
+import com.usda.fmsc.twotrails.objects.map.LineGraphicManager;
 import com.usda.fmsc.twotrails.objects.map.PolygonDrawOptions;
 import com.usda.fmsc.twotrails.objects.map.PolygonGraphicManager;
 import com.usda.fmsc.twotrails.objects.map.TrailGraphicManager;
@@ -81,6 +83,7 @@ public class ArcGisMapFragment extends TtBaseFragment implements IMultiMapFragme
     private final ArrayList<IMarkerDataGraphic> _MarkerDataGraphics = new ArrayList<>();
     private final HashMap<String, ArcGisPolygonGraphic> polygonGraphics = new HashMap<>();
     private final HashMap<String, ArcGisTrailGraphic> trailGraphics = new HashMap<>();
+    private final HashMap<String, ArcGisLineGraphic> lineGraphics = new HashMap<>();
 
     private Compass compass;
     private Integer basemapId;
@@ -548,6 +551,21 @@ public class ArcGisMapFragment extends TtBaseFragment implements IMultiMapFragme
     //todo removeTrail(TrailGraphicManager graphicManager)
     @Override
     public void removeTrail(TrailGraphicManager graphicManager) {
+
+    }
+
+    @Override
+    public void addLine(LineGraphicManager graphicManager) {
+        if (!lineGraphics.containsKey(graphicManager.getCN())) {
+            ArcGisLineGraphic lineGraphic = new ArcGisLineGraphic(mapView);
+            lineGraphics.put(graphicManager.getCN(), lineGraphic);
+
+            graphicManager.setGraphic(lineGraphic);
+        }
+    }
+
+    @Override
+    public void removeLine(LineGraphicManager graphicManager) {
 
     }
 

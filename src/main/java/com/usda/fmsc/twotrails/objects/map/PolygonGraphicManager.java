@@ -166,6 +166,11 @@ public class PolygonGraphicManager implements IPolygonGraphicManager {
     @Override
     public String getPolygonCN() { return polygon.getCN();}
 
+    @Override
+    public String getCN() {
+        return getPolygonCN();
+    }
+
     public String getPolyName() {
         return polygon.getName();
     }

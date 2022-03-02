@@ -10,6 +10,7 @@ import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.util.HashMap;
+import java.util.UUID;
 
 public class LineGraphicManager implements IGraphicManager {
 
@@ -17,6 +18,7 @@ public class LineGraphicManager implements IGraphicManager {
    private LineGraphicOptions graphicOptions;
    private Position point1, point2;
    private boolean visible = true;
+   private final String _CN;
 
 
    public LineGraphicManager(Position point1, Position point2, LineGraphicOptions graphicOptions) {
@@ -31,6 +33,8 @@ public class LineGraphicManager implements IGraphicManager {
       if (lineGraphic != null) {
          setGraphic(lineGraphic);
       }
+
+      _CN = UUID.randomUUID().toString();
    }
 
    public void setGraphic(ILineGraphic lineGraphic) {
@@ -82,6 +86,11 @@ public class LineGraphicManager implements IGraphicManager {
       }
    }
 
+
+   @Override
+   public String getCN() {
+      return _CN;
+   }
 
    @Override
    public Position getPosition() {
