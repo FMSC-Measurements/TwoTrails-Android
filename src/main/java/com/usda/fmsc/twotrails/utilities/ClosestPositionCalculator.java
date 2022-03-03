@@ -17,7 +17,7 @@ import java.util.List;
 
 public class ClosestPositionCalculator {
     public static final int BLOCK_SIZE = 10; //in meters
-    public static final int MAX_SHELL = 5; //100 meters from center [5(MAX_SHELL) x 10(BLOCK_SIZE) x 2]
+    public static final int DEFAULT_MAX_SHELL = 5; //100 meters from center [5(MAX_SHELL) x 10(BLOCK_SIZE) x 2]
 
     private final MultiKeyMap<Integer, List<CalcPoint>> _PointMap = new MultiKeyMap<>();
     private final HashMap<String, TtMetadata> _Metadata;
@@ -26,11 +26,13 @@ public class ClosestPositionCalculator {
     private final HashMap<String, Integer> _LastIndexInPoly = new HashMap<>();
     private final HashMap<String, TtPolygon> _Polygons = new HashMap<>();
     private final HashMap<String, PolygonCalculator> _PolygonsCalcs = new HashMap<>();
-    private final int _DefaultZone;
+    private final int _DefaultZone, _MaxShellSize;
 
     public ClosestPositionCalculator(List<TtPolygon> polygons, int defaultZone, DataAccessLayer dal) {
         _DefaultZone = defaultZone;
         _Metadata = dal.getMetadataMap();
+
+        double maxDistBetweenPoints = 0;
 
         for (TtPolygon poly : polygons) {
             ArrayList<TtPoint> points = dal.getPointsInPolygon(poly.getCN());
@@ -43,11 +45,16 @@ public class ClosestPositionCalculator {
                 ArrayList<PointD> apoints = new ArrayList<>();
 
                 int lastIndex = 0;
+                TtPoint firstPoint = null, lastPoint = null;
 
                 for (TtPoint point : points) {
                     if (point.isOnBnd()) {
                         TtMetadata currMeta = _Metadata.get(point.getMetadataCN());
                         ttPoints.put(point.getIndex(), point);
+
+                        if (firstPoint == null) {
+                            firstPoint = point;
+                        }
 
                         if (!_FirstIndexInPoly.containsKey(poly.getCN())) {
                             _FirstIndexInPoly.put(poly.getCN(), point.getIndex());
@@ -64,13 +71,31 @@ public class ClosestPositionCalculator {
                         }
 
                         lastIndex = point.getIndex();
+
+                        if (lastPoint != null) {
+                            maxDistBetweenPoints = Double.max(TtUtils.Math.distance(lastPoint, point), maxDistBetweenPoints);
+                        }
+
+                        lastPoint = point;
                     }
+                }
+
+                if (lastPoint != null) {
+                    maxDistBetweenPoints = Double.max(TtUtils.Math.distance(lastPoint, firstPoint), maxDistBetweenPoints);
                 }
 
                 _LastIndexInPoly.put(poly.getCN(), lastIndex);
 
                 _PolygonsCalcs.put(poly.getCN(), apoints.size() > 2 ? new PolygonCalculator(apoints) : null);
             }
+        }
+
+        double maxCalcShellSize = maxDistBetweenPoints / BLOCK_SIZE;
+
+        if (maxCalcShellSize > DEFAULT_MAX_SHELL) {
+            _MaxShellSize = (int)maxCalcShellSize + 1;
+        } else {
+            _MaxShellSize = DEFAULT_MAX_SHELL;
         }
     }
 
@@ -89,23 +114,39 @@ public class ClosestPositionCalculator {
         }
     }
 
+    /**
+     * @param coords Coordinates in UTM
+     * @return Closest Position to current position
+     */
     public ClosestPosition getClosestPosition(UTMCoords coords) {
-        return getClosestPosition(coords.getX(), coords.getY());
+        return getClosestPosition(coords.getX(), coords.getY(), false);
     }
 
-    public ClosestPosition getClosestPosition(Double utmX, Double utmY) {
+    /**
+     * @param coords Coordinates in UTM
+     * @param lookBeyondFirstPosition Whether to look past the closest point for points' which line segments may be closer
+     * @return Closest Position to current position
+     */
+    public ClosestPosition getClosestPosition(UTMCoords coords, boolean lookBeyondFirstPosition) {
+        return getClosestPosition(coords.getX(), coords.getY(), lookBeyondFirstPosition);
+    }
+
+    /**
+     * @param utmX UTM X of current position
+     * @param utmY UTM Y of current position
+     * @param lookBeyondFirstPosition Whether to look past the closest point for points' which line segments may be closer
+     * @return Closest Position to current position
+     */
+    public ClosestPosition getClosestPosition(Double utmX, Double utmY, boolean lookBeyondFirstPosition) {
         int bx = (int)(utmX / BLOCK_SIZE);
         int by = (int)(utmY / BLOCK_SIZE);
 
         int shell = 0, blockCount = 0;
         final int totalBlocks = _PointMap.size();
 
-
         ClosestPosition closestPosition = null;
 
-        while (blockCount < totalBlocks && shell < MAX_SHELL) {
-//            int startX = bx - (BLOCK_SIZE * shell);
-//            int startY = by - (BLOCK_SIZE * shell);
+        while (blockCount < totalBlocks && shell < _MaxShellSize) {
             int startX = bx - shell;
             int startY = by - shell;
 
@@ -115,13 +156,12 @@ public class ClosestPositionCalculator {
                 while (column < lastColumnRow) {
                     if (row == 0 || row == lastColumnRow - 1 || column == 0 || column == lastColumnRow - 1) {
                         List<CalcPoint> block = _PointMap.get(startX + column, startY + row);
-//                        List<CalcPoint> block = _PointMap.get(startX + BLOCK_SIZE * column, startY + BLOCK_SIZE * row);
                         if (block != null) {
 
                             for (CalcPoint calcPoint : block) {
                                 ClosestPosition cp = getPosition(utmX, utmY, calcPoint);
 
-                                if (closestPosition == null || cp.getDistance() < closestPosition.getDistance()) {
+                                if (closestPosition == null || (cp != null && cp.getDistance() < closestPosition.getDistance())) {
                                     closestPosition = cp;
                                 }
                             }
@@ -135,14 +175,14 @@ public class ClosestPositionCalculator {
                 row++;
             }
 
-            if (closestPosition != null) {
+            if (closestPosition != null && !lookBeyondFirstPosition) {
                 return closestPosition;
             }
 
             shell++;
         }
 
-        return null;
+        return closestPosition;
     }
 
     private ClosestPosition getPosition(Double utmX, Double utmY, CalcPoint calcPoint) {
@@ -157,10 +197,6 @@ public class ClosestPositionCalculator {
 
         UTMCoords prevCoords;
         TtPoint prevTtPoint = null;
-//            (point.getIndex() > 0) ?
-//                points.get(point.getIndex() - 1) :
-//                points.get(_LastIndexInPoly.get(polygon.getCN()));
-
         if (point.getIndex() > firstIndex) {
             for (int i = point.getIndex() - 1; i >= firstIndex; i--) {
                 prevTtPoint = points.get(i);
@@ -183,9 +219,6 @@ public class ClosestPositionCalculator {
 
         UTMCoords nextPoint;
         TtPoint nextTtPoint = null;
-//                = (point.getIndex() < points.size() - 1) ?
-//                points.get(point.getIndex() + 1) :
-//                points.get(0);
 
         if (point.getIndex() < lastIndex) {
             for (int i = point.getIndex() + 1; i <= lastIndex; i++) {
@@ -234,8 +267,6 @@ public class ClosestPositionCalculator {
             return null;
         }
     }
-
-
 
 
     private static class CalcPoint {

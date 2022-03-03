@@ -798,9 +798,8 @@ public class TtUtils {
         public static UTMCoords forcePointZone(TtPoint point, int targetZone, int currentZone, boolean adjusted) {
             if (targetZone == currentZone) {
                 if (adjusted) {
-
                     if (point.getAdjX() == null || point.getAdjY() == null)
-                        return new UTMCoords(0, 0, targetZone);
+                        throw new RuntimeException("Point Not Adjusted");
                     return new UTMCoords(point.getAdjX(), point.getAdjY(), targetZone);
                 } else {
                     return new UTMCoords(point.getUnAdjX(), point.getUnAdjY(), targetZone);
@@ -816,7 +815,7 @@ public class TtUtils {
 
                 if (adjusted) {
                     if (point.getAdjX() == null || point.getAdjY() == null)
-                        return new UTMCoords(0, 0, targetZone);
+                        throw new RuntimeException("Point Not Adjusted");
 
                     position = UTMTools.convertUTMtoLatLonSignedDec(point.getAdjX(), point.getAdjY(), currentZone);
                 } else {
