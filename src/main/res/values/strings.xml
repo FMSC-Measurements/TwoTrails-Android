@@ -25,7 +25,7 @@
     <string name="str_link">Linked</string>
     <string name="str_create">Create</string>
     <string name="str_empty"> </string>
-    <string name="str_nullvalue">*</string>
+    <string name="str_null_value">*</string>
     <string name="str_view">View</string>
     <string name="str_fullscreen">View in Gallery</string>
     <string name="str_onbnd">On Boundary</string>
@@ -134,6 +134,9 @@
     <string name="str_rand">Random</string>
     <string name="str_create_poly">Create Polygon</string>
     <string name="str_create_map_layer">Create Map Layer</string>
+    <string name="str_collect_point">Collect Point</string>
+    <string name="str_closest_dist">Closest Distance</string>
+    <string name="str_pos_on_poly">Position on Polygon</string>
 
     <string name="zero">0</string>
     <string name="str_x">X</string>

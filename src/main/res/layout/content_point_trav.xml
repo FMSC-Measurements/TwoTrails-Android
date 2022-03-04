@@ -140,7 +140,7 @@
                     android:layout_weight="1"
                     android:textSize="20sp"
                     android:textColor="@android:color/black"
-                    android:text="@string/str_nullvalue"
+                    android:text="@string/str_null_value"
                     android:paddingLeft="8dp"
                     android:paddingStart="8dp"
                     android:paddingRight="0dp"

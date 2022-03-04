@@ -159,7 +159,7 @@ public class ClosestPositionCalculator {
                         if (block != null) {
 
                             for (CalcPoint calcPoint : block) {
-                                ClosestPosition cp = getPosition(utmX, utmY, calcPoint);
+                                ClosestPosition cp = getClosestPosition(utmX, utmY, calcPoint);
 
                                 if (closestPosition == null || (cp != null && cp.getDistance() < closestPosition.getDistance())) {
                                     closestPosition = cp;
@@ -185,7 +185,7 @@ public class ClosestPositionCalculator {
         return closestPosition;
     }
 
-    private ClosestPosition getPosition(Double utmX, Double utmY, CalcPoint calcPoint) {
+    private ClosestPosition getClosestPosition(Double utmX, Double utmY, CalcPoint calcPoint) {
         TtPoint point = calcPoint.getTtPoint();
         TtPolygon polygon = _Polygons.get(point.getPolyCN());
         UTMCoords currCoords = new UTMCoords(utmX, utmY, calcPoint.getCoords().getZone());

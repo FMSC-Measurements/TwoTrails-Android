@@ -26,7 +26,7 @@
                 android:id="@+id/gpsInfoTvGpsStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/str_nullvalue"/>
+                android:text="@string/str_null_value"/>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -37,7 +37,7 @@
                 android:id="@+id/gpsInfoTvGpsFix"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/str_nullvalue"/>
+                android:text="@string/str_null_value"/>
         </TableRow>
 
 
@@ -48,12 +48,12 @@
                 android:text="@string/str_lat"/>
             <TextView
                 android:id="@+id/gpsInfoTvLat"
-                android:text="@string/str_nullvalue"/>
+                android:text="@string/str_null_value"/>
             <TextView
                 android:text="@string/str_lon"/>
             <TextView
                 android:id="@+id/gpsInfoTvLon"
-                android:text="@string/str_nullvalue"/>
+                android:text="@string/str_null_value"/>
         </TableRow>
 
 
@@ -64,14 +64,14 @@
                 android:text="@string/str_utmx"/>
             <TextView
                 android:id="@+id/gpsInfoTvUtmX"
-                android:text="@string/str_nullvalue"
+                android:text="@string/str_null_value"
                 android:paddingEnd="5dp"
                 android:paddingStart="0dp"/>
             <TextView
                 android:text="@string/str_utmy"/>
             <TextView
                 android:id="@+id/gpsInfoTvUtmY"
-                android:text="@string/str_nullvalue"/>
+                android:text="@string/str_null_value"/>
         </TableRow>
 
 
@@ -82,14 +82,13 @@
                 android:text="@string/str_satellites"/>
             <TextView
                 android:id="@+id/gpsInfoTvSats"
-                android:text="@string/str_nullvalue"/>
+                android:text="@string/str_null_value"/>
             <TextView
                 android:text="@string/str_elev"/>
             <TextView
                 android:id="@+id/gpsInfoTvElev"
-                android:text="@string/str_nullvalue"/>
+                android:text="@string/str_null_value"/>
         </TableRow>
-
 
         <TableRow
             android:layout_width="0dp"
@@ -98,14 +97,14 @@
                 android:text="@string/str_zone"/>
             <TextView
                 android:id="@+id/gpsInfoTvZone"
-                android:text="@string/str_nullvalue"/>
+                android:text="@string/str_null_value"/>
             <TextView
                 android:text="@string/str_dec"
                 android:paddingEnd="5dp"
                 android:paddingStart="0dp"/>
             <TextView
                 android:id="@+id/gpsInfoTvDec"
-                android:text="@string/str_nullvalue"/>
+                android:text="@string/str_null_value"/>
         </TableRow>
 
         <TableRow
@@ -115,28 +114,45 @@
                 android:text="@string/str_pdop"/>
             <TextView
                 android:id="@+id/gpsInfoTvPdop"
-                android:text="@string/str_nullvalue"/>
+                android:text="@string/str_null_value"/>
             <TextView
                 android:text="@string/str_hdop"/>
             <TextView
                 android:id="@+id/gpsInfoTvHdop"
-                android:text="@string/str_nullvalue"/>
+                android:text="@string/str_null_value"/>
         </TableRow>
+    </TableLayout>
+
+    <TableLayout
+        android:id="@+id/gpsInfoForSatTable"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/gpsInfoLayStats"
+        android:stretchColumns="*">
 
         <TableRow
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:paddingTop="8dp">
             <TextView
-                android:text="Closest Dist"/>
+                android:text="@string/str_closest_dist"
+                android:textSize="7pt"/>
             <TextView
                 android:id="@+id/gpsInfoForSatTvDist"
-                android:text="@string/str_nullvalue"/>
+                android:text="@string/str_null_value"
+                android:textSize="7pt"/>
+        </TableRow>
+
+        <TableRow
+            android:layout_width="0dp"
+            android:layout_height="wrap_content">
             <TextView
-                android:text="Pos on Poly"/>
+                android:text="@string/str_pos_on_poly"
+                android:textSize="7pt"/>
             <TextView
                 android:id="@+id/gpsInfoForSatTvCP"
-                android:text="@string/str_nullvalue"/>
+                android:text="@string/str_null_value"
+                android:textSize="7pt"/>
         </TableRow>
 
         <TableRow
@@ -144,68 +160,35 @@
             android:layout_height="wrap_content">
 
             <TextView
-                android:text="@string/str_az_true"/>
+                android:text="@string/str_az_true"
+                android:textSize="7pt"/>
             <TextView
                 android:id="@+id/gpsInfoForSatTvAzTrue"
-                android:text="@string/str_nullvalue"/>
+                android:text="@string/str_null_value"
+                android:textSize="7pt"/>
+
+        </TableRow>
+
+        <TableRow
+            android:layout_width="0dp"
+            android:layout_height="wrap_content">
 
             <TextView
-                android:text="@string/str_az_mag"/>
+                android:text="@string/str_az_mag"
+                android:textSize="7pt"/>
             <TextView
                 android:id="@+id/gpsInfoForSatTvAzMag"
-                android:text="@string/str_nullvalue"/>
+                android:text="@string/str_null_value"
+                android:textSize="7pt"/>
 
         </TableRow>
     </TableLayout>
-
-<!--    <TableLayout-->
-<!--        android:id="@+id/gpsInfoForSatCP"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_below="@id/gpsInfoLayStats"-->
-<!--        android:stretchColumns="*"-->
-<!--        android:paddingTop="8dp">-->
-
-<!--        <TableRow-->
-<!--            android:layout_width="0dp"-->
-<!--            android:layout_height="wrap_content">-->
-<!--            <TextView-->
-<!--                android:text="Closest Dist"/>-->
-<!--            <TextView-->
-<!--                android:id="@+id/gpsInfoForSatTvDist"-->
-<!--                android:text="@string/str_nullvalue"/>-->
-<!--            <TextView-->
-<!--                android:text="Pos on Poly"/>-->
-<!--            <TextView-->
-<!--                android:id="@+id/gpsInfoForSatTvCP"-->
-<!--                android:text="@string/str_nullvalue"/>-->
-<!--        </TableRow>-->
-
-<!--        <TableRow-->
-<!--            android:layout_width="0dp"-->
-<!--            android:layout_height="wrap_content">-->
-
-<!--            <TextView-->
-<!--                android:text="@string/str_az_true"/>-->
-<!--            <TextView-->
-<!--                android:id="@+id/gpsInfoForSatTvAzTrue"-->
-<!--                android:text="@string/str_nullvalue"/>-->
-
-<!--            <TextView-->
-<!--                android:text="@string/str_az_mag"/>-->
-<!--            <TextView-->
-<!--                android:id="@+id/gpsInfoForSatTvAzMag"-->
-<!--                android:text="@string/str_nullvalue"/>-->
-
-<!--        </TableRow>-->
-<!--    </TableLayout>-->
 
     <FrameLayout
         android:id="@+id/gpsInfoLaySatInfo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/gpsInfoLayStats">
-<!--        android:layout_below="@id/gpsInfoForSatCP">-->
+        android:layout_below="@id/gpsInfoForSatTable">
 
         <RelativeLayout
             android:id="@+id/gpsInfoLaySatInfoSub"

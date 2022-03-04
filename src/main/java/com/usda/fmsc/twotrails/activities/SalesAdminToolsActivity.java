@@ -44,12 +44,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Locale;
 
-/*
--Live view of Map and show a line (dashed) from current location.
--Button takes 5 and averages, show window saying pass/fail and a button to create a waypt under poly named: (track_poly or all pts)_validation,
-  includes dist from poly and two closest points in desc
-*/
-
 public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
 
     private CardView cvGpsInfo;
@@ -128,14 +122,17 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
             AndroidUtils.UI.createToastForToolbarTitle(SalesAdminToolsActivity.this, getToolbar());
         }
 
-        cvGpsInfo = findViewById(R.id.take5CardGpsInfo);
+        cvGpsInfo = findViewById(R.id.satCardGpsInfo);
 
-        fabCancel = findViewById(R.id.take5FabCancel);
+        fabCancel = findViewById(R.id.satFabCancel);
         fabTakePoint = findViewById(R.id.satFabTakePoint);
 
         connectionLine = new LineGraphicManager(null, null,
-                new LineGraphicOptions(R.color.black_1000, getTtAppCtx().getDeviceSettings().getMapDistToPolyLineWidth(), LineGraphicOptions.LineStyle.Dashed));
-        //connectionLine.setVisible(false);
+                new LineGraphicOptions(
+                        AndroidUtils.UI.getColor(getTtAppCtx(), R.color.black_1000),
+                        getTtAppCtx().getDeviceSettings().getMapDistToPolyLineWidth(),
+                        LineGraphicOptions.LineStyle.Dashed)
+        );
     }
 
 //    @Override
@@ -419,10 +416,10 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
                 tvAzTrue.setText(String.format(Locale.getDefault(), "%.0f\u00B0", azimuth));
                 tvAzMag.setText(String.format(Locale.getDefault(), "%.0f\u00B0", azMag));
             } else {
-                tvCPDist.setText(R.string.str_nullvalue);
-                tvCP.setText(R.string.str_nullvalue);
-                tvAzTrue.setText(R.string.str_nullvalue);
-                tvAzMag.setText(R.string.str_nullvalue);
+                tvCPDist.setText(R.string.str_null_value);
+                tvCP.setText(R.string.str_null_value);
+                tvAzTrue.setText(R.string.str_null_value);
+                tvAzMag.setText(R.string.str_null_value);
             }
         });
     }

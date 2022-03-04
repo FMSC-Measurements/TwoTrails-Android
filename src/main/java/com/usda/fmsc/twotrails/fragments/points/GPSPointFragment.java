@@ -187,7 +187,7 @@ public class GPSPointFragment extends BasePointFragment {
 
         tvElev.setText(getMetadata().getElevation().toString());
 
-        String rmser = getString(R.string.str_nullvalue);
+        String rmser = getString(R.string.str_null_value);
         String nssda = rmser;
 
         if (_GpsPoint.getRMSEr() != null) {

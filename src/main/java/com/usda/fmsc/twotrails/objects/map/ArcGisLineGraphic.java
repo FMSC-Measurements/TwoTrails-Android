@@ -8,23 +8,20 @@ import com.esri.arcgisruntime.geometry.SpatialReferences;
 import com.esri.arcgisruntime.mapping.view.Graphic;
 import com.esri.arcgisruntime.mapping.view.GraphicsOverlay;
 import com.esri.arcgisruntime.mapping.view.MapView;
-import com.esri.arcgisruntime.symbology.LineSymbol;
 import com.esri.arcgisruntime.symbology.SimpleLineSymbol;
-import com.google.android.gms.maps.model.Dash;
-import com.google.android.gms.maps.model.Dot;
-import com.google.android.gms.maps.model.Gap;
 import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.geospatial.Position;
 
-import java.util.Arrays;
-
-public class ArcGisLineGraphic implements ILineGraphic {
+public class ArcGisLineGraphic implements ILineGraphic, LineGraphicOptions.Listener{
    private final MapView map;
    private Extent polyBounds;
 
    private GraphicsOverlay _LineLayer;
    private Graphic _LineGraphic;
    private SimpleLineSymbol _LineOutline;
+   private Polyline _Polyline;
+
+   LineGraphicOptions _GraphicOptions;
 
    private boolean visible = true;
 
@@ -35,19 +32,22 @@ public class ArcGisLineGraphic implements ILineGraphic {
 
    @Override
    public void build(Position point1, Position point2, LineGraphicOptions graphicOptions) {
+      _GraphicOptions = graphicOptions;
       _LineLayer = new GraphicsOverlay();
 
-      int drawSize = (int)(graphicOptions.getLineWidth() / 2);
+      int drawSize = _GraphicOptions.getLineWidth() / 2;
 
-      _LineOutline = new SimpleLineSymbol(getLineSymbolStyle(graphicOptions.getLineStyle()), graphicOptions.getLineColor(), drawSize);
+      _LineOutline = new SimpleLineSymbol(getLineSymbolStyle(_GraphicOptions.getLineStyle()), _GraphicOptions.getLineColor(), drawSize);
 
-      update(point1, point2);
+      updateGeometry(point1, point2);
 
       map.getGraphicsOverlays().add(_LineLayer);
+
+      graphicOptions.addListener(this);
    }
 
    @Override
-   public void update(Position point1, Position point2) {
+   public void updateGeometry(Position point1, Position point2) {
       Extent.Builder eBuilder = new Extent.Builder();
       PointCollection linePoints = new PointCollection(SpatialReferences.getWgs84());
 
@@ -57,10 +57,12 @@ public class ArcGisLineGraphic implements ILineGraphic {
       posLL = new Point(point2.getLongitudeSignedDecimal(), point2.getLatitudeSignedDecimal(), SpatialReferences.getWgs84());
       linePoints.add(posLL);
 
+      _Polyline = new Polyline(linePoints);
+
       if (_LineGraphic != null) {
-         _LineGraphic.setGeometry(new Polyline(linePoints));
+         _LineGraphic.setGeometry(_Polyline);
       } else {
-         _LineGraphic = new Graphic(new Polyline(linePoints), _LineOutline);
+         _LineGraphic = new Graphic(_Polyline, _LineOutline);
          _LineLayer.getGraphics().add(_LineGraphic);
       }
 
@@ -98,5 +100,17 @@ public class ArcGisLineGraphic implements ILineGraphic {
          case Solid:
          default: return SimpleLineSymbol.Style.SOLID;
       }
+   }
+
+   @Override
+   public void onOptionChanged(LineGraphicOptions lgo, LineGraphicOptions.LineGraphicCode code, int value) {
+      if (_LineGraphic != null) {
+         _LineLayer.getGraphics().remove(_LineGraphic);
+      }
+
+      _LineOutline = new SimpleLineSymbol(getLineSymbolStyle(lgo.getLineStyle()), lgo.getLineColor(), (int)(lgo.getLineWidth() / 2));
+
+      _LineGraphic = new Graphic(_Polyline, _LineOutline);
+      _LineLayer.getGraphics().add(_LineGraphic);
    }
 }

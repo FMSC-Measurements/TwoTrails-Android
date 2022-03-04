@@ -152,7 +152,7 @@
                         android:id="@+id/pointsFragGpsTvRMSEr"
                         android:textSize="18sp"
                         android:textColor="@android:color/black"
-                        android:text="@string/str_nullvalue" />
+                        android:text="@string/str_null_value" />
 
                     <TextView
                         android:text="@string/points_gps_nssda"
@@ -168,7 +168,7 @@
                         android:id="@+id/pointsFragGpsTvNSSDA"
                         android:textSize="18sp"
                         android:textColor="@android:color/black"
-                        android:text="@string/str_nullvalue" />
+                        android:text="@string/str_null_value" />
                 </TableRow>
             </TableLayout>
         </LinearLayout>

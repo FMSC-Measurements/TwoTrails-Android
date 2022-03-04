@@ -3,6 +3,8 @@ package com.usda.fmsc.twotrails.objects.map;
 
 import android.location.Location;
 
+import androidx.annotation.ColorInt;
+
 import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
@@ -71,7 +73,7 @@ public class LineGraphicManager implements IGraphicManager {
       }
 
       if (this.lineGraphic != null) {
-         this.lineGraphic.update(this.point1, this.point2);
+         this.lineGraphic.updateGeometry(this.point1, this.point2);
       }
    }
 
@@ -82,7 +84,7 @@ public class LineGraphicManager implements IGraphicManager {
       this.point2 = new Position(loc.getLatitude(), loc.getLongitude());
 
       if (this.lineGraphic != null) {
-         this.lineGraphic.update(this.point1, this.point2);
+         this.lineGraphic.updateGeometry(this.point1, this.point2);
       }
    }
 
@@ -113,5 +115,17 @@ public class LineGraphicManager implements IGraphicManager {
 
    public boolean isVisible() {
       return this.visible;
+   }
+
+   public void setLineColor(@ColorInt int color) {
+      graphicOptions.setLineColor(color);
+   }
+
+   public void setLineWidth(int width) {
+      graphicOptions.setLineWidth(width);
+   }
+
+   public void setLineStyle(LineGraphicOptions.LineStyle style) {
+      graphicOptions.setLineStyle(style);
    }
 }

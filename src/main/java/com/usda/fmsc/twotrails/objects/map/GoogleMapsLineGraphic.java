@@ -17,13 +17,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class GoogleMapsLineGraphic implements ILineGraphic {
+public class GoogleMapsLineGraphic implements ILineGraphic, LineGraphicOptions.Listener {
     private final GoogleMap map;
 
     private Extent lineBounds;
     private Polyline polyline;
 
     private boolean visible = true;
+
+    private LineGraphicOptions _GraphicOptions;
+    private ArrayList<LatLng> _LatLngs;
 
 
     public GoogleMapsLineGraphic(GoogleMap map) {
@@ -32,6 +35,8 @@ public class GoogleMapsLineGraphic implements ILineGraphic {
 
     @Override
     public void build(Position point1, Position point2, LineGraphicOptions graphicOptions) {
+        _GraphicOptions = graphicOptions;
+
         PolylineOptions plo = new PolylineOptions();
         plo.width(graphicOptions.getLineWidth());
         plo.color(graphicOptions.getLineColor());
@@ -43,25 +48,27 @@ public class GoogleMapsLineGraphic implements ILineGraphic {
 
         polyline = map.addPolyline(plo);
 
-        update(point1, point2);
+        updateGeometry(point1, point2);
+
+        graphicOptions.addListener(this);
     }
 
     @Override
-    public void update(Position point1, Position point2) {
-        ArrayList<LatLng> latLngs = new ArrayList<>();
+    public void updateGeometry(Position point1, Position point2) {
+        _LatLngs = new ArrayList<>();
         LatLngBounds.Builder llBuilder = new LatLngBounds.Builder();
 
-        latLngs.add(new LatLng(point1.getLatitudeSignedDecimal(), point1.getLongitudeSignedDecimal()));
-        latLngs.add(new LatLng(point2.getLatitudeSignedDecimal(), point2.getLongitudeSignedDecimal()));
+        _LatLngs.add(new LatLng(point1.getLatitudeSignedDecimal(), point1.getLongitudeSignedDecimal()));
+        _LatLngs.add(new LatLng(point2.getLatitudeSignedDecimal(), point2.getLongitudeSignedDecimal()));
 
-        llBuilder.include(latLngs.get(0));
-        llBuilder.include(latLngs.get(1));
+        llBuilder.include(_LatLngs.get(0));
+        llBuilder.include(_LatLngs.get(1));
 
         LatLngBounds bounds = llBuilder.build();
         lineBounds = new Extent(bounds.northeast.latitude, bounds.northeast.longitude,
                 bounds.southwest.latitude, bounds.southwest.longitude);
 
-        polyline.setPoints(latLngs);
+        polyline.setPoints(_LatLngs);
     }
 
 
@@ -97,5 +104,20 @@ public class GoogleMapsLineGraphic implements ILineGraphic {
         }
 
         return  pattern;
+    }
+
+    @Override
+    public void onOptionChanged(LineGraphicOptions lgo, LineGraphicOptions.LineGraphicCode code, int value) {
+        PolylineOptions plo = new PolylineOptions();
+        plo.width(_GraphicOptions.getLineWidth());
+        plo.color(_GraphicOptions.getLineColor());
+        plo.pattern(getLinePattern(_GraphicOptions.getLineStyle()));
+
+        if (polyline != null) {
+            polyline.remove();
+        }
+
+        polyline = map.addPolyline(plo);
+        polyline.setPoints(_LatLngs);
     }
 }

@@ -489,7 +489,7 @@ public abstract class AcquireGpsMapActivity extends BaseMapActivity {
 
     protected void setZone(Integer zone) {
         this.zone = zone;
-        tvZone.setText(zone != null ? Integer.toString(zone) : getText(R.string.str_nullvalue));
+        tvZone.setText(zone != null ? Integer.toString(zone) : getText(R.string.str_null_value));
     }
 
 

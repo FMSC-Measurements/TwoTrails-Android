@@ -7,7 +7,7 @@ import com.usda.fmsc.geospatial.Position;
 public interface ILineGraphic {
     void build(Position point1, Position point2, LineGraphicOptions graphicOptions);
 
-    void update(Position point1, Position point2);
+    void updateGeometry(Position point1, Position point2);
 
     Extent getExtents();
     Position getPosition();
