@@ -91,7 +91,6 @@ import com.usda.fmsc.utilities.Tuple;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -964,10 +963,10 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
             miTrackedPoly.setVisible(true);//getMapTracking() == MapTracking.POLY_BOUNDS);
         }
 
-        updateSettings();
+        updateActivitySettings();
     }
 
-    protected void updateSettings() {
+    protected void updateActivitySettings() {
 
     }
 

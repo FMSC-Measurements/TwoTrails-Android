@@ -41,7 +41,7 @@ import com.usda.fmsc.twotrails.utilities.ClosestPositionCalculator;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Locale;
 
 public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
@@ -152,8 +152,8 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
     }
 
     @Override
-    protected void updateSettings() {
-        super.updateSettings();
+    protected void updateActivitySettings() {
+        super.updateActivitySettings();
 
         options.Fix = getTtAppCtx().getDeviceSettings().getSATFilterFix();
         options.FixType = getTtAppCtx().getDeviceSettings().getSATFilterFixType();
@@ -163,7 +163,7 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
         takeAmount = getTtAppCtx().getDeviceSettings().getSATNmeaAmount();
 
         if (getPolygon() != null) {
-            _ClosestPositionCalc = new ClosestPositionCalculator(Arrays.asList(getPolygon()), getZone(), getTtAppCtx().getDAL());
+            _ClosestPositionCalc = new ClosestPositionCalculator(Collections.singletonList(getPolygon()), getZone(), getTtAppCtx().getDAL());
         }
     }
 
@@ -202,8 +202,8 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
     }
 
     @Override
-    protected void onSettingsUpdated() {
-        updateSettings();
+    protected void onAppSettingsUpdated() {
+        updateActivitySettings();
     }
 
     @Override
@@ -401,9 +401,9 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
                 tvCPDist.setText(String.format(Locale.getDefault(), "%.2f (%s)",
                         TtUtils.Convert.distance(closestPosition.getDistance(), getCurrentMetadata().getDistance(), Dist.Meters), getCurrentMetadata().getDistance().toStringAbv()));
 
-                if (closestPosition.IsPositionPoint1()) {
+                if (closestPosition.isPositionPoint1()) {
                     tvCP.setText(String.format(Locale.getDefault(), "%d (%s)", closestPosition.getPoint1().getPID(), closestPosition.getPoint1().getOp()));
-                } else if (closestPosition.IsPositionPoint2()) {
+                } else if (closestPosition.isPositionPoint2()) {
                     tvCP.setText(String.format(Locale.getDefault(), "%d (%s)", closestPosition.getPoint2().getPID(), closestPosition.getPoint2().getOp()));
                 } else {
                     tvCP.setText(String.format(Locale.getDefault(), "%d \u21F9 %d", closestPosition.getPoint1().getPID(), closestPosition.getPoint2().getPID()));

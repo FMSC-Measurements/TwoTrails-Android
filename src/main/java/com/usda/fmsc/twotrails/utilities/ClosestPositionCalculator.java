@@ -368,14 +368,14 @@ public class ClosestPositionCalculator {
         /**
          * @return Whether Point 1 is closest (same and poly) distance from the initial position
          */
-        public boolean IsPositionPoint1() {
+        public boolean isPositionPoint1() {
             return PositionIsPoint1;
         }
 
         /**
          * @return Whether Point 2 is closest (same and poly) distance from the initial position
          */
-        public boolean IsPositionPoint2() {
+        public boolean isPositionPoint2() {
             return PositionIsPoint2;
         }
     }

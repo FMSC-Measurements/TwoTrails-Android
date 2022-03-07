@@ -176,8 +176,8 @@ public class WalkActivity extends AcquireGpsMapActivity {
     }
 
     @Override
-    protected void updateSettings() {
-        super.updateSettings();
+    protected void updateActivitySettings() {
+        super.updateActivitySettings();
 
         options.Fix = getTtAppCtx().getDeviceSettings().getWalkFilterFix();
         options.FixType = getTtAppCtx().getDeviceSettings().getWalkFilterFixType();
@@ -247,8 +247,8 @@ public class WalkActivity extends AcquireGpsMapActivity {
     }
 
     @Override
-    protected void onSettingsUpdated() {
-        updateSettings();
+    protected void onAppSettingsUpdated() {
+        updateActivitySettings();
     }
 
     @Override

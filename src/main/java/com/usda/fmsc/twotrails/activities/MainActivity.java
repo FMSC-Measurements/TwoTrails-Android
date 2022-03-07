@@ -263,7 +263,7 @@ public class MainActivity extends TtProjectAdjusterActivity {
     }
 
     @Override
-    protected void onSettingsUpdated() {
+    protected void onAppSettingsUpdated() {
         updateAppInfo();
     }
 

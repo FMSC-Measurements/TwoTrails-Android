@@ -74,8 +74,8 @@ public class MapActivity extends BaseMapActivity {
     //endregion
 
     @Override
-    protected void updateSettings() {
-        super.updateSettings();
+    protected void updateActivitySettings() {
+        super.updateActivitySettings();
 
         myPosBtn = getTtAppCtx().getDeviceSettings().getMapMyPosBtns();
         dispLoc = getTtAppCtx().getDeviceSettings().getMapDisplayGpsLocation();

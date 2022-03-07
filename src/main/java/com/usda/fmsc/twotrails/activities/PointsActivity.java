@@ -898,7 +898,7 @@ public class PointsActivity extends TtPointCollectionActivity implements PointMe
     }
 
     @Override
-    protected void onSettingsUpdated() {
+    protected void onAppSettingsUpdated() {
         if (getTtAppCtx().getDeviceSettings().isRangeFinderConfigured()) {
             getTtAppCtx().getRF().startRangeFinder();
         }

@@ -1,7 +1,6 @@
 package com.usda.fmsc.twotrails.activities.base;
 
 import android.content.Intent;
-import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MotionEvent;
@@ -15,7 +14,6 @@ import androidx.annotation.MenuRes;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.widget.Toolbar;
 
-import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.activities.SettingsActivity;
 
@@ -142,16 +140,16 @@ public abstract class CustomToolbarActivity extends TtActivity {
 
 
 
-    private final ActivityResultLauncher<Intent> openSettingsForResult = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
-        onSettingsUpdated();
+    private final ActivityResultLauncher<Intent> openAppSettingsForResult = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+        onAppSettingsUpdated();
     });
 
     protected void openSettings() {
-        openSettingsForResult.launch(new Intent(this, SettingsActivity.class));
+        openAppSettingsForResult.launch(new Intent(this, SettingsActivity.class));
     }
     protected void openSettings(String settingsPage) {
-        openSettingsForResult.launch(new Intent(this, SettingsActivity.class).putExtra(SettingsActivity.SETTINGS_PAGE, settingsPage));
+        openAppSettingsForResult.launch(new Intent(this, SettingsActivity.class).putExtra(SettingsActivity.SETTINGS_PAGE, settingsPage));
     }
 
-    protected void onSettingsUpdated() { }
+    protected void onAppSettingsUpdated() { }
 }

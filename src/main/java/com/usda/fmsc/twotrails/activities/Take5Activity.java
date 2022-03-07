@@ -543,8 +543,8 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
     }
 
     @Override
-    protected void updateSettings() {
-        super.updateSettings();
+    protected void updateActivitySettings() {
+        super.updateActivitySettings();
 
         options.Fix = getTtAppCtx().getDeviceSettings().getTake5FilterFix();
         options.FixType = getTtAppCtx().getDeviceSettings().getTake5FilterFixType();
@@ -647,8 +647,8 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
     }
 
     @Override
-    protected void onSettingsUpdated() {
-        updateSettings();
+    protected void onAppSettingsUpdated() {
+        updateActivitySettings();
     }
 
 

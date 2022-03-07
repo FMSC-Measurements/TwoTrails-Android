@@ -169,8 +169,8 @@ public class DeviceSettings extends Settings {
     public final GGASentence.GpsFixType DEFAULT_SAT_FIX_TYPE = GGASentence.GpsFixType.GPS;
     public final GSASentence.Fix DEFAULT_SAT_FIX = GSASentence.Fix._3D;
     public final int DEFAULT_SAT_DOP_VALUE = 20;
-    public final int DEFAULT_SAT_INCREMENT = 5;
-    public final int DEFAULT_SAT_NMEA_AMOUNT = 5;
+    public final int DEFAULT_SAT_INCREMENT = 1;
+    public final int DEFAULT_SAT_NMEA_AMOUNT = 60;
     public final boolean DEFAULT_SAT_IGNORE = false;
     public final int DEFAULT_SAT_IGNORE_AMOUNT = 2;
     public final int DEFAULT_SAT_FAIL_AMOUNT = 10;

@@ -8,7 +8,7 @@
         android:title="@string/menu_take5_map_mode"
         app:showAsAction="always"
         android:icon="@drawable/ic_map_white_24dp"
-        android:visible="true"/>
+        android:visible="false"/>
 
     <item
         android:id="@+id/overflowMenu"
@@ -31,6 +31,12 @@
                 android:id="@+id/mmMenuMapSettings"
                 android:title="@string/menu_map_settings"
                 app:showAsAction="never"/>
+
+            <item android:id="satMenuColorToggle"
+                app:actionViewClass="android.widget.Switch"
+                android:title=""
+                app:showAsAction="never"
+                android:visible="true"/>
 
             <item
                 android:id="@+id/satMenuGps"
