@@ -12,7 +12,7 @@ import com.esri.arcgisruntime.symbology.SimpleLineSymbol;
 import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.geospatial.Position;
 
-public class ArcGisLineGraphic implements ILineGraphic, LineGraphicOptions.Listener{
+public class ArcGisLineGraphic implements ILineGraphic, LineGraphicOptions.Listener {
    private final MapView map;
    private Extent polyBounds;
 

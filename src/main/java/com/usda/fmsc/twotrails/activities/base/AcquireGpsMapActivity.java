@@ -111,6 +111,10 @@ public abstract class AcquireGpsMapActivity extends BaseMapActivity {
                         }
                     }
 
+                    if (_Metadata == null) {
+                        _Metadata = getDefaultMetadata();
+                    }
+
                     if (_Polygon == null) {
                         trailModeEnabled = false;
                     }
@@ -599,18 +603,6 @@ public abstract class AcquireGpsMapActivity extends BaseMapActivity {
     }
     //endregion
 
-
-    //region Misc
-    protected TtPolygon getPolygon() {
-        return _Polygon;
-    }
-
-    protected TtMetadata getCurrentMetadata() {
-        return _Metadata;
-    }
-    //endregion
-
-
     private Uri _CapturedImageUri;
     private String _CapturedImagePointCN;
 
@@ -772,6 +764,14 @@ public abstract class AcquireGpsMapActivity extends BaseMapActivity {
 
 
     //region Get
+    protected TtPolygon getPolygon() {
+        return _Polygon;
+    }
+
+    protected TtMetadata getCurrentMetadata() {
+        return _Metadata;
+    }
+
     protected TtMedia getCurrentMedia() { return null; }
     //endregion
 

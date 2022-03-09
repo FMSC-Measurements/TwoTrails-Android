@@ -3,6 +3,8 @@ package com.usda.fmsc.twotrails;
 import android.content.SharedPreferences;
 import android.util.JsonWriter;
 
+import androidx.annotation.ColorInt;
+
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.usda.fmsc.geospatial.nmea41.sentences.GGASentence;
@@ -126,6 +128,8 @@ public class DeviceSettings extends Settings {
     public static final String ARC_GIS_MAPS = "ArcGISMaps";
     public static final String ARC_GIS_MAP_ID_COUNTER = "ArcGISMapIdCounter";
     public static final String MAP_DIST_TO_POLY_LINE_WIDTH = "MapDistToPolyLineWidth";
+    public static final String MAP_DIST_TO_POLY_LINE_COLOR = "MapDistToPolyLineColor";
+    public static final String MAP_DIST_TO_POLY_LINE_TOLERANCE = "MapDistToPolyLineTolerance";
     public static final String MAP_ADJ_LINE_WIDTH = "MapAdjLineWidth";
     public static final String MAP_UNADJ_LINE_WIDTH = "MapUnAdjLineWidth";
     public static final String MAP_CHOOSE_OFFLINE = "MapChooseOffline";
@@ -222,6 +226,8 @@ public class DeviceSettings extends Settings {
     public final int DEFAULT_MAP_ADJ_LINE_WIDTH = 6;
     public final int DEFAULT_MAP_UNADJ_LINE_WIDTH = 16;
     public final int DEFAULT_MAP_DIST_TO_POLY_LINE_WIDTH = 10;
+    public final @ColorInt int DEFAULT_MAP_DIST_TO_POLY_LINE_COLOR = 0xFF000000;
+    public final float DEFAULT_MAP_DIST_TO_POLY_LINE_TOLERANCE = 10; //in meters
     public final int DEFAULT_MAP_CHOOSE_OFFLINE = 0;
     public final boolean DEFAULT_MAP_CHOOSE_OFFLINE_ASK = true;
 
@@ -331,6 +337,8 @@ public class DeviceSettings extends Settings {
         editor.putString(ARC_GIS_MAPS, DEFAULT_ARC_GIS_MAPS);
         editor.putInt(ARC_GIS_MAP_ID_COUNTER, DEFAULT_ARC_GIS_MAP_ID_COUNTER);
         editor.putInt(MAP_DIST_TO_POLY_LINE_WIDTH, DEFAULT_MAP_DIST_TO_POLY_LINE_WIDTH);
+        editor.putInt(MAP_DIST_TO_POLY_LINE_COLOR, DEFAULT_MAP_DIST_TO_POLY_LINE_COLOR);
+        editor.putFloat(MAP_DIST_TO_POLY_LINE_TOLERANCE, DEFAULT_MAP_DIST_TO_POLY_LINE_TOLERANCE);
         editor.putInt(MAP_ADJ_LINE_WIDTH, DEFAULT_MAP_ADJ_LINE_WIDTH);
         editor.putInt(MAP_UNADJ_LINE_WIDTH, DEFAULT_MAP_UNADJ_LINE_WIDTH);
         editor.putInt(MAP_CHOOSE_OFFLINE, DEFAULT_MAP_CHOOSE_OFFLINE);
@@ -992,6 +1000,21 @@ public class DeviceSettings extends Settings {
         setInt(MAP_DIST_TO_POLY_LINE_WIDTH, value);
     }
 
+    public int getMapDistToPolyLineColor() {
+        return getInt(MAP_DIST_TO_POLY_LINE_COLOR, DEFAULT_MAP_DIST_TO_POLY_LINE_COLOR);
+    }
+
+    public void setMapDistToPolyLineColor(int value) {
+        setInt(MAP_DIST_TO_POLY_LINE_COLOR, value);
+    }
+
+    public double getMapDistToPolyLineTolerance() {
+        return getDouble(MAP_DIST_TO_POLY_LINE_TOLERANCE, DEFAULT_MAP_DIST_TO_POLY_LINE_TOLERANCE);
+    }
+
+    public void setMapDistToPolyTolerance(double value) {
+        setDouble(MAP_DIST_TO_POLY_LINE_TOLERANCE, value);
+    }
 
     public int getMapAdjLineWidth() {
         return getInt(MAP_ADJ_LINE_WIDTH, DEFAULT_MAP_ADJ_LINE_WIDTH);

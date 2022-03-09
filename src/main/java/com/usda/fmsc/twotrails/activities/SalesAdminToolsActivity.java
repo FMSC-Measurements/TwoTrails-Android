@@ -11,6 +11,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.ColorInt;
 import androidx.appcompat.app.ActionBar;
 import androidx.cardview.widget.CardView;
 import androidx.core.view.GravityCompat;
@@ -18,6 +19,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.usda.fmsc.android.AndroidUtils;
+import com.usda.fmsc.android.dialogs.NumberPickerDialog;
 import com.usda.fmsc.android.widget.SheetLayoutEx;
 import com.usda.fmsc.geospatial.GeoTools;
 import com.usda.fmsc.geospatial.Position;
@@ -25,8 +27,10 @@ import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.geospatial.utm.UTMTools;
 import com.usda.fmsc.twotrails.Consts;
+import com.usda.fmsc.twotrails.DeviceSettings;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.activities.base.AcquireGpsMapActivity;
+import com.usda.fmsc.twotrails.dialogs.SATPointDialogTt;
 import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
 import com.usda.fmsc.twotrails.logic.PointNamer;
 import com.usda.fmsc.twotrails.objects.FilterOptions;
@@ -45,13 +49,16 @@ import java.util.Collections;
 import java.util.Locale;
 
 public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
+    private static final String SAT_POINT_DIALOG = "sat_point_diag";
+    private static final String COLOR_DIALOG = "color_diag";
+    private static final String TOLERANCE_DIALOG = "tol_diag";
 
     private CardView cvGpsInfo;
     private FloatingActionButton fabTakePoint, fabCancel;
     private TextView tvCPDist, tvCP, tvAzTrue, tvAzMag;
 
     private MenuItem miHideGpsInfo;
-    private boolean gpsInfoHidden;
+    private boolean gpsInfoHidden, _ToleranceExceeded = false;
 
     private ArrayList<TtNmeaBurst> _Bursts, _UsedBursts;
     private TtPoint _CurrentPoint;
@@ -64,7 +71,9 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
     private TtPolygon _ValidationPolygon;
     private ClosestPositionCalculator _ClosestPositionCalc;
 
-    private LineGraphicManager connectionLine;
+    private LineGraphicManager _ConnectionLine;
+    private double _LineTolerance = 100;
+    private @ColorInt int _LineColor;
 
     private final FilterOptions options = new FilterOptions();
 
@@ -127,9 +136,9 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
         fabCancel = findViewById(R.id.satFabCancel);
         fabTakePoint = findViewById(R.id.satFabTakePoint);
 
-        connectionLine = new LineGraphicManager(null, null,
+        _ConnectionLine = new LineGraphicManager(null, null,
                 new LineGraphicOptions(
-                        AndroidUtils.UI.getColor(getTtAppCtx(), R.color.black_1000),
+                        _LineColor,
                         getTtAppCtx().getDeviceSettings().getMapDistToPolyLineWidth(),
                         LineGraphicOptions.LineStyle.Dashed)
         );
@@ -155,12 +164,17 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
     protected void updateActivitySettings() {
         super.updateActivitySettings();
 
-        options.Fix = getTtAppCtx().getDeviceSettings().getSATFilterFix();
-        options.FixType = getTtAppCtx().getDeviceSettings().getSATFilterFixType();
-        options.DopType = getTtAppCtx().getDeviceSettings().getSATFilterDopType();
-        options.DopValue = getTtAppCtx().getDeviceSettings().getSATFilterDopValue();
-        increment = getTtAppCtx().getDeviceSettings().getSATIncrement();
-        takeAmount = getTtAppCtx().getDeviceSettings().getSATNmeaAmount();
+        DeviceSettings ds = getTtAppCtx().getDeviceSettings();
+
+        options.Fix = ds.getSATFilterFix();
+        options.FixType = ds.getSATFilterFixType();
+        options.DopType = ds.getSATFilterDopType();
+        options.DopValue = ds.getSATFilterDopValue();
+        increment = ds.getSATIncrement();
+        takeAmount = ds.getSATNmeaAmount();
+
+        _LineTolerance = ds.getMapDistToPolyLineTolerance();
+        _LineColor = ds.getMapDistToPolyLineColor();
 
         if (getPolygon() != null) {
             _ClosestPositionCalc = new ClosestPositionCalculator(Collections.singletonList(getPolygon()), getZone(), getTtAppCtx().getDAL());
@@ -196,6 +210,20 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
                 miHideGpsInfo.setTitle(R.string.menu_x_show_gps_info);
             }
         } else if (itemId == R.id.satMenuValidationPoly) {//select poly or (all polys except _plts and _validations) for checking
+        } else if (itemId == R.id.satMenuColor) {
+//            ColorPickerDialog.newInstance(0)
+//                    .setListener(color -> {
+//                        _ConnectionLine.setLineColor(color);
+//                        getTtAppCtx().getDeviceSettings().setMapDistToPolyLineColor(color);
+//                    })
+//                    .show(getSupportFragmentManager(), COLOR_DIALOG);
+        } else if (itemId == R.id.satMenuTolerance) {
+            NumberPickerDialog.newInstance(0)
+                    .setListener(number -> {
+                        _LineTolerance = TtUtils.Convert.distance(number, Dist.Meters, getCurrentMetadata().getDistance());
+                        getTtAppCtx().getDeviceSettings().setMapDistToPolyTolerance(_LineTolerance);
+                    })
+                    .show(getSupportFragmentManager(), TOLERANCE_DIALOG);
         }
 
         return super.onOptionsItemSelected(item);
@@ -248,21 +276,34 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
     @Override
     protected void createGraphicManagers() {
         super.createGraphicManagers();
-        addLineGraphic(connectionLine);
+        addLineGraphic(_ConnectionLine);
     }
 
     //endregion
 
     //region Map
-    private void updateDirPathUI(UTMCoords to, UTMCoords from) {
+    private void updateDirPathUI(ClosestPositionCalculator.ClosestPosition cp, UTMCoords currPos) {
+        if (cp.getDistance() > _LineTolerance ^ _ToleranceExceeded) {
+            _ToleranceExceeded = cp.getDistance() > _LineTolerance;
+
+            _ConnectionLine.setLineColor(_ToleranceExceeded ?
+                    AndroidUtils.UI.getColor(SalesAdminToolsActivity.this, android.R.color.holo_red_dark) :
+                    _LineColor
+            );
+        }
+
+        updateDirPathVector(cp.getCoords(), currPos);
+    }
+
+    private void updateDirPathVector(UTMCoords to, UTMCoords from) {
         if (to != null && from != null) {
-            connectionLine.updateGraphic(
+            _ConnectionLine.updateGraphic(
                     UTMTools.convertUTMtoLatLonSignedDec(to),
                     UTMTools.convertUTMtoLatLonSignedDec(from)
             );
 
-            if (!connectionLine.isVisible()) {
-                connectionLine.setVisible(true);
+            if (!_ConnectionLine.isVisible()) {
+                _ConnectionLine.setVisible(true);
             }
         }
     }
@@ -301,31 +342,56 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
         showCancel();
     }
 
-    private void showValidationPoint(UTMCoords currentCoords, ClosestPositionCalculator.ClosestPosition closestPosition) {
-        hideCancel();
-        fabTakePoint.setEnabled(true);
+    private void showValidationPoint(UTMCoords currentCoords, final ClosestPositionCalculator.ClosestPosition closestPosition) {
         pauseDistLine = true;
 
+        _ValidationPoint.setComment(String.format(Locale.getDefault(),
+                "This point is %.2f (%s) from the closest position %s with an azimuth of %s",
+                TtUtils.Convert.distance(closestPosition.getDistance(), getCurrentMetadata().getDistance(), Dist.Meters),
+                getCurrentMetadata().getDistance().toStringAbv(),
+                closestPosition.isPositionAtAPoint() ?
+                        String.format(Locale.getDefault(), "at point %d", closestPosition.getClosestPoint().getPID()) :
+                        String.format(Locale.getDefault(), "between points %d and %d", closestPosition.getPoint1().getPID(), closestPosition.getPoint2().getPID()),
+                closestPosition.getAzimuthToClosestPosition(currentCoords)
+        ));
 
-        //TODO show msgbox with point information and whether to save
-
-        //save
-        //saveValidationPoint(closestPosition);
-
-        updateDirPathUI(closestPosition.getCoords(), currentCoords);
+        updateDirPathUI(closestPosition, currentCoords);
         updateCPInfo(closestPosition, currentCoords);
 
-        //cancel
-        _Bursts.clear();
-        _UsedBursts.clear();
-        pauseDistLine = false;
+        SATPointDialogTt.newInstance(_ValidationPoint, closestPosition)
+                .setListener(new SATPointDialogTt.Listener() {
+                    @Override
+                    public void onSave(WayPoint point) {
+                        if (point.getPID() != _ValidationPoint.getPID()) {
+                            _ValidationPoint.setPID(point.getPID());
+                        }
+
+                        if (point.getComment() != null && !point.getComment().equals(_ValidationPoint.getComment())) {
+                            _ValidationPoint.setComment(point.getComment());
+                        }
+
+                        saveValidationPoint();
+                        hideCancel();
+                        fabTakePoint.setEnabled(true);
+                    }
+
+                    @Override
+                    public void retake() {
+                        resetCollectedNmeaData();
+                        pauseDistLine = false;
+                        startLogging();
+                    }
+
+                    @Override
+                    public void onCancel() {
+                        resetCollectedNmeaData();
+                        pauseDistLine = false;
+                    }
+                }).show(getSupportFragmentManager(), SAT_POINT_DIALOG);
     }
 
-    private void saveValidationPoint(ClosestPositionCalculator.ClosestPosition closestPosition) {
+    private void saveValidationPoint() {
         if (_ValidationPoint != null) {
-
-            _ValidationPoint.setComment(String.format(Locale.getDefault(), "%s", closestPosition));
-
             getTtAppCtx().getDAL().insertPoint(_ValidationPoint);
             getTtAppCtx().getDAL().insertNmeaBursts(_Bursts);
 
@@ -336,6 +402,12 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
         }
 
         pauseDistLine = false;
+    }
+
+
+    private void resetCollectedNmeaData() {
+        _Bursts.clear();
+        _UsedBursts.clear();
     }
     //endregion
 
@@ -401,16 +473,14 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
                 tvCPDist.setText(String.format(Locale.getDefault(), "%.2f (%s)",
                         TtUtils.Convert.distance(closestPosition.getDistance(), getCurrentMetadata().getDistance(), Dist.Meters), getCurrentMetadata().getDistance().toStringAbv()));
 
-                if (closestPosition.isPositionPoint1()) {
-                    tvCP.setText(String.format(Locale.getDefault(), "%d (%s)", closestPosition.getPoint1().getPID(), closestPosition.getPoint1().getOp()));
-                } else if (closestPosition.isPositionPoint2()) {
-                    tvCP.setText(String.format(Locale.getDefault(), "%d (%s)", closestPosition.getPoint2().getPID(), closestPosition.getPoint2().getOp()));
+                if (closestPosition.isPositionAtAPoint()) {
+                    tvCP.setText(String.format(Locale.getDefault(), "%d (%s)", closestPosition.getClosestPoint().getPID(), closestPosition.getClosestPoint().getOp()));
                 } else {
                     tvCP.setText(String.format(Locale.getDefault(), "%d \u21F9 %d", closestPosition.getPoint1().getPID(), closestPosition.getPoint2().getPID()));
                 }
 
 
-                double azimuth = TtUtils.Math.azimuthOfPoint(currentCoords.getX(), currentCoords.getY(), closestPosition.getCoords().getX(), closestPosition.getCoords().getY());
+                double azimuth = closestPosition.getAzimuthToClosestPosition(currentCoords);
                 double azMag = azimuth - getCurrentMetadata().getMagDec();
 
                 tvAzTrue.setText(String.format(Locale.getDefault(), "%.0f\u00B0", azimuth));
@@ -486,7 +556,7 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
                 ClosestPositionCalculator.ClosestPosition cp = _ClosestPositionCalc.getClosestPosition(currentCoords);
 
                 if (cp != null) {
-                    updateDirPathUI(cp.getCoords(), currentCoords);
+                    updateDirPathUI(cp, currentCoords);
                 }
 
                 updateCPInfo(cp, currentCoords);

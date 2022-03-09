@@ -92,9 +92,7 @@ public class LatLonDialog extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity());
 
-        LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
-        final View view = inflater.inflate(R.layout.diag_latlon, null);
+        final View view = getLayoutInflater().inflate(R.layout.diag_latlon, null);
 
         layDD = view.findViewById(R.id.diagLatLonLayDD);
         layDMS = view.findViewById(R.id.diagLatLonLayDMS);

@@ -32,8 +32,7 @@
                 android:title="@string/menu_map_settings"
                 app:showAsAction="never"/>
 
-            <item android:id="satMenuColorToggle"
-                app:actionViewClass="android.widget.Switch"
+            <item android:id="@+id/satMenuColor"
                 android:title=""
                 app:showAsAction="never"
                 android:visible="true"/>
@@ -61,6 +60,12 @@
                 android:title="@string/menu_sat_validation_poly"
                 app:showAsAction="never"
                 android:visible="false"/>
+
+            <item
+                android:id="@+id/satMenuTolerance"
+                android:title="@string/menu_sat_unit_tolerance"
+                app:showAsAction="never"
+                android:visible="true"/>
         </menu>
     </item>
 </menu>

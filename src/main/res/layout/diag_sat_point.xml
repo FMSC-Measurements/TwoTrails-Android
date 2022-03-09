@@ -3,6 +3,85 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <TableLayout
+        android:id="@+id/lay1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:stretchColumns="1,4"
+        android:layout_alignParentTop="true">
 
+        <TableRow>
+            <TextView
+                android:id="@+id/tvPid"
+                android:text="@string/str_pid"
+                android:textSize="8pt"
+                android:padding="4dp"
+                android:layout_width="100dp"/>
+            <EditText
+                android:id="@+id/txtPid"
+                android:labelFor="@id/tvPid"
+                android:maxLines="1"
+                android:textSize="8pt"
+                android:autofillHints=""
+                android:inputType="number"
+                android:hint="@string/str_null_value"
+                android:padding="4dp"/>
 
+            <View android:layout_width="8dp"/>
+
+            <TextView
+                android:text="@string/str_polygon"
+                android:textSize="8pt"
+                android:padding="4dp"
+                android:layout_width="100dp"/>
+            <TextView
+                android:id="@+id/tvPoly"
+                android:textSize="8pt"
+                android:text="@string/str_null_value"
+                android:padding="4dp"/>
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:text="@string/str_closest_dist"
+                android:textSize="8pt"
+                android:padding="4dp"
+                android:layout_width="100dp"/>
+            <TextView
+                android:id="@+id/tvCP"
+                android:textSize="8pt"
+                android:text="@string/str_null_value"
+                android:padding="4dp"/>
+
+            <View android:layout_width="8dp"/>
+
+            <TextView
+                android:text="@string/str_polygon"
+                android:textSize="8pt"
+                android:padding="4dp"
+                android:layout_width="100dp"/>
+            <TextView
+                android:id="@+id/tvCPoly"
+                android:textSize="8pt"
+                android:text="@string/str_null_value"
+                android:padding="4dp"/>
+        </TableRow>
+
+    </TableLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/lay1"
+        android:layout_alignParentBottom="true">
+
+        <EditText
+            android:id="@+id/txtDesc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/str_desc"
+            android:importantForAutofill="no"
+            android:inputType="text"
+            android:maxLines="4" />
+    </com.google.android.material.textfield.TextInputLayout>
 </RelativeLayout>

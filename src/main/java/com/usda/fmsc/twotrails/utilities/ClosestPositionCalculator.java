@@ -297,13 +297,13 @@ public class ClosestPositionCalculator {
     }
 
     public static class ClosestPosition {
-        private final TtPoint Point1, Point2;
-        private final UTMCoords ClosestPosition;
-        private final TtPolygon Polygon;
-        private final double Distance;
-        private final boolean InsidePoly;
-        private final boolean PositionIsPoint1;
-        private final boolean PositionIsPoint2;
+        private final TtPoint _Point1, _Point2;
+        private final UTMCoords _ClosestPosition;
+        private final TtPolygon _Polygon;
+        private final double _Distance;
+        private final boolean _InsidePoly;
+        private final boolean _PositionIsPoint1;
+        private final boolean _PositionIsPoint2;
 
         /**
          * @param closestPosition Closest position to the initial position
@@ -314,69 +314,110 @@ public class ClosestPositionCalculator {
          * @param insidePoly Whether or not the initial position was inside the polygon
          */
         public ClosestPosition(UTMCoords closestPosition, double distance, TtPoint point1, TtPoint point2, TtPolygon polygon, boolean insidePoly) {
-            this.ClosestPosition = closestPosition;
-            this.Distance = distance;
-            this.Point1 = point1;
-            this.Point2 = point2;
-            this.Polygon = polygon;
-            this.InsidePoly = insidePoly;
+            this._ClosestPosition = closestPosition;
+            this._Distance = distance;
+            this._Point1 = point1;
+            this._Point2 = point2;
+            this._Polygon = polygon;
+            this._InsidePoly = insidePoly;
 
-            this.PositionIsPoint1 = this.Point1.sameAdjLocation(this.ClosestPosition.getX(), this.ClosestPosition.getY(), this.Point1.getAdjZ());
-            this.PositionIsPoint2 = this.Point2.sameAdjLocation(this.ClosestPosition.getX(), this.ClosestPosition.getY(), this.Point1.getAdjZ());
+            this._PositionIsPoint1 = this._Point1.sameAdjLocation(this._ClosestPosition.getX(), this._ClosestPosition.getY(), this._Point1.getAdjZ());
+            this._PositionIsPoint2 = this._Point2.sameAdjLocation(this._ClosestPosition.getX(), this._ClosestPosition.getY(), this._Point1.getAdjZ());
         }
 
         /**
          * @return First Point in closest line to the closest position
          */
         public TtPoint getPoint1() {
-            return Point1;
+            return _Point1;
         }
 
         /**
          * @return Second Point in closest line to the closest position
          */
         public TtPoint getPoint2() {
-            return Point2;
+            return _Point2;
         }
 
         /**
          * @return Polygon of the closest position
          */
         public TtPolygon getPolygon() {
-            return Polygon;
+            return _Polygon;
         }
 
         /**
          * @return Closest position on the polygon
          */
         public UTMCoords getCoords() {
-            return ClosestPosition;
+            return _ClosestPosition;
         }
 
         /**
          * @return Distance to the closest position
          */
         public double getDistance() {
-            return Distance;
+            return _Distance;
         }
 
         /**
          * @return Whether or not the initial position is inside the polygon
          */
-        public boolean isInsidePoly() { return InsidePoly; }
+        public boolean isInsidePoly() { return _InsidePoly; }
 
         /**
          * @return Whether Point 1 is closest (same and poly) distance from the initial position
          */
         public boolean isPositionPoint1() {
-            return PositionIsPoint1;
+            return _PositionIsPoint1;
         }
 
         /**
          * @return Whether Point 2 is closest (same and poly) distance from the initial position
          */
         public boolean isPositionPoint2() {
-            return PositionIsPoint2;
+            return _PositionIsPoint2;
+        }
+
+        /**
+         * @return Whether the position is at a specific point
+         */
+        public boolean isPositionAtAPoint() {
+            return _PositionIsPoint1 || _PositionIsPoint2;
+        }
+
+        /**
+         * @return The closest TtPoint on the polygon or null if it is between points on the polygon
+         */
+        public TtPoint getClosestPoint() {
+            return isPositionAtAPoint() ? (_PositionIsPoint1 ? _Point1 : _Point2) : null;
+        }
+
+        /**
+         * @param currCoods Current Coordinates
+         * @return The azimuth to the Closest Position on the Polygon
+         */
+        public double getAzimuthToClosestPosition(UTMCoords currCoods) {
+            return getAzimuthToClosestPosition(currCoods.getX(), currCoods.getY());
+        }
+
+        /**
+         * @param point Current Point
+         * @return The azimuth to the Closest Position on the Polygon
+         */
+        public double getAzimuthToClosestPosition(TtPoint point) {
+            return getAzimuthToClosestPosition(point.getAdjX(), point.getAdjY());
+        }
+
+        /**
+         * @param utmX UTM X
+         * @param utmY UTM Y
+         * @return The azimuth to the Closest Position on the Polygon
+         */
+        public double getAzimuthToClosestPosition(double utmX, double utmY) {
+            return TtUtils.Math.azimuthOfPoint(
+                    _ClosestPosition.getX(), _ClosestPosition.getY(),
+                    utmX, utmY);
         }
     }
 }

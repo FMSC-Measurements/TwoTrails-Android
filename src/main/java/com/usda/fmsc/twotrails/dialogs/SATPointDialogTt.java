@@ -2,10 +2,10 @@ package com.usda.fmsc.twotrails.dialogs;
 
 
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -17,7 +17,6 @@ import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.objects.points.WayPoint;
 import com.usda.fmsc.twotrails.utilities.ClosestPositionCalculator;
-import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.util.MissingFormatArgumentException;
 
@@ -53,7 +52,7 @@ public class SATPointDialogTt extends TtBaseDialogFragment {
             args.putParcelable(CLOSEST_POINT2, position.getPoint2());
         }
 
-        double az = TtUtils.Math.azimuthOfPoint(point.getUnAdjX(), point.getUnAdjY(), position.getCoords().getX(), position.getCoords().getY());
+        double az = position.getAzimuthToClosestPosition(point);
 
         args.putParcelable(CLOSEST_POLYGON, position.getPolygon());
         args.putDouble(DIST_TO_POLY, position.getDistance());
@@ -104,10 +103,11 @@ public class SATPointDialogTt extends TtBaseDialogFragment {
 
         AlertDialog.Builder db = new AlertDialog.Builder(getActivity());
 
-        View view = LayoutInflater.from(getContext()).inflate(R.layout.diag_sat_point, null);
+        View view = getLayoutInflater().inflate(R.layout.diag_sat_point, null);
 
 
-        TextView tvDist, tvAz, tvCP, tvCPoly, tvX, tvY, txtPid, txtDesc;
+        TextView tvDist, tvAz, tvCP, tvCPoly, tvX, tvY, tvPoly;
+        EditText txtPid, txtDesc;
         ImageView imgInsidePoly;
 
 
@@ -115,7 +115,10 @@ public class SATPointDialogTt extends TtBaseDialogFragment {
         db.setView(view)
         .setPositiveButton(getString(R.string.str_create), (dialog, which) -> {
             if (_Listener != null) {
-                _Listener.onSave();
+
+
+
+                _Listener.onSave(_Point);
             }
         })
         .setNegativeButton("Retake", (dialog, which) -> {
@@ -137,12 +140,13 @@ public class SATPointDialogTt extends TtBaseDialogFragment {
         return db.create();
     }
 
-    public void setListener(Listener listener) {
+    public SATPointDialogTt setListener(Listener listener) {
         _Listener = listener;
+        return this;
     }
 
     public interface Listener {
-        void onSave();
+        void onSave(WayPoint point);
         void retake();
         void onCancel();
     }

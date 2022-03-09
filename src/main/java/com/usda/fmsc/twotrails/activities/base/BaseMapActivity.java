@@ -162,6 +162,7 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
     private final HashMap<String, ArrayList<TtPoint>> polyPoints = new HashMap<>();
     private HashMap<String, TtPolygon> _Polygons = new HashMap<>();
     private HashMap<String, TtMetadata> _Metadata;
+    private TtMetadata _DefaultMetadata;
 
     private Extent completeBnds, trackedPoly;
 
@@ -1861,6 +1862,10 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
 
     protected MapTracking getMapTracking() {
         return mapTracking;
+    }
+
+    protected final TtMetadata getDefaultMetadata() {
+        return _DefaultMetadata != null ? _DefaultMetadata : (_DefaultMetadata = getMetadata().get(Consts.EmptyGuid));
     }
 
 
