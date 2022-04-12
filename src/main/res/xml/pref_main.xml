@@ -18,6 +18,12 @@
         android:persistent="false">
     </Preference>
 
+    <Preference
+        android:title="Sales Admin Tools Settings"
+        android:key="satSetup"
+        android:persistent="false">
+    </Preference>
+
     <!--<PreferenceScreen-->
     <!--android:title="Dialog Options"-->
     <!--android:key="dialogSetup"-->

@@ -2,7 +2,6 @@ package com.usda.fmsc.twotrails.activities;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import androidx.appcompat.app.AlertDialog;
 import android.view.MenuItem;
@@ -20,27 +19,28 @@ import com.usda.fmsc.geospatial.nmea41.sentences.base.NmeaSentence;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.Settings;
-import com.usda.fmsc.twotrails.TwoTrailsApp;
-import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
+import com.usda.fmsc.twotrails.activities.base.TtCustomToolbarActivity;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.ui.GpsStatusSatView;
 import com.usda.fmsc.twotrails.ui.GpsStatusSkyView;
 import com.usda.fmsc.utilities.StringEx;
 
+import java.util.Locale;
+
 @SuppressLint("DefaultLocale")
-public class GpsStatusActivity extends CustomToolbarActivity implements GpsService.Listener {
+public class GpsStatusActivity extends TtCustomToolbarActivity implements GpsService.Listener {
     private static final String nVal = "*";
 
     private Integer zone = null;
 
     private TextView tvGpsStatus, tvGpsFix, tvLat, tvLon, tvUtmX, tvUtmY,
-            tvZone, tvDec, tvSat, tvElev, tvPdop, tvHdop;
+            tvZone, tvDec, tvSat, tvElev, tvPdop, tvHdop, tvNmeaStats;
 
     private GpsStatusSkyView skyView;
     private GpsStatusSatView statusView;
 
+    private boolean nmeaInvalid = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,6 +77,7 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
         tvElev = findViewById(R.id.gpsInfoTvElev);
         tvPdop = findViewById(R.id.gpsInfoTvPdop);
         tvHdop = findViewById(R.id.gpsInfoTvHdop);
+        tvNmeaStats = findViewById(R.id.gpsInfoNmeaTvStats);
 
         tvGpsFix.setText(GGASentence.GpsFixType.NoFix.toString());
 
@@ -144,16 +145,20 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
                     }
                 }
 
+                boolean iivRMC = false, iivGGA = false, iivGSA = false, iivGSV = false;
+
                 if (burst.isValid(NmeaIDs.SentenceID.RMC) && burst.getMagVar() != null) {
                     tvDec.setText(String.format("%.2f %s", burst.getMagVar(), burst.getMagVarDir().toStringAbv()));
                 } else {
                     tvDec.setText(nVal);
+                    iivRMC = true;
                 }
 
                 if (burst.isValid(NmeaIDs.SentenceID.GGA)) {
                     tvGpsFix.setText(burst.getFixQuality().toStringX());
                 } else {
                     tvGpsFix.setText(GGASentence.GpsFixType.NoFix.toString());
+                    iivGGA = true;
                 }
 
                 if (burst.isValid(NmeaIDs.SentenceID.GSA)) {
@@ -164,6 +169,7 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
                     tvGpsStatus.setText(GSASentence.Fix.NoFix.toString());
                     tvHdop.setText(nVal);
                     tvPdop.setText(nVal);
+                    iivGSA = true;
                 }
 
                 if (burst.isValid(NmeaIDs.SentenceID.GSV)) {
@@ -174,6 +180,21 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
                             burst.getSatellitesInViewCount()));
                 } else {
                     tvSat.setText(nVal);
+                    iivGSV = true;
+                }
+
+                if ((iivRMC || iivGGA || iivGSA || iivGSV) ^ nmeaInvalid) {
+                    nmeaInvalid = (iivRMC || iivGGA || iivGSA || iivGSV);
+                    tvNmeaStats.setVisibility(nmeaInvalid ? View.VISIBLE : View.GONE);
+                }
+
+                if (nmeaInvalid) {
+                    tvNmeaStats.setText(String.format(Locale.getDefault(),
+                            "Invalid or Missing NMEA: %s %s %s %s",
+                            iivRMC ? "RMC" : StringEx.Empty,
+                            iivGGA ? "GGA" : StringEx.Empty,
+                            iivGSA ? "GSA" : StringEx.Empty,
+                            iivGSV ? "GSV" : StringEx.Empty));
                 }
 
                 skyView.update(burst);
@@ -221,6 +242,9 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
     public void receivingNmeaStrings(boolean receiving) {
         if (!receiving) {
             Toast.makeText(GpsStatusActivity.this, "Not receiving NMEA data.", Toast.LENGTH_LONG).show();
+            tvNmeaStats.setVisibility(View.VISIBLE);
+            tvNmeaStats.setText("Not receiving NMEA");
+            nmeaInvalid = true;
         }
     }
 

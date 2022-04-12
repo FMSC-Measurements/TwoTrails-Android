@@ -17,7 +17,7 @@ import androidx.appcompat.widget.Toolbar;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.activities.SettingsActivity;
 
-public abstract class CustomToolbarActivity extends TtActivity {
+public abstract class TtCustomToolbarActivity extends TtActivity {
     private final String DEFAULT_EXIT_WARNING = "Press again to exit.";
 
     private Toolbar toolbar;

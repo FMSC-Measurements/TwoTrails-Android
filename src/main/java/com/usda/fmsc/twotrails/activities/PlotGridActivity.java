@@ -24,7 +24,7 @@ import com.usda.fmsc.android.dialogs.InputDialog;
 import com.usda.fmsc.android.utilities.TaskRunner;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.DeviceSettings;
-import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
+import com.usda.fmsc.twotrails.activities.base.TtCustomToolbarActivity;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.logic.PlotGenerator;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
@@ -48,7 +48,7 @@ import org.joda.time.DateTime;
 
 import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
 
-public class PlotGridActivity extends CustomToolbarActivity {
+public class PlotGridActivity extends TtCustomToolbarActivity {
     private final TaskRunner taskRunner = new TaskRunner();
     private Spinner spnPoints, spnPointLoc, spnSampleType;
     private EditText txtGridX, txtGridY, txtTilt, txtSubSample;

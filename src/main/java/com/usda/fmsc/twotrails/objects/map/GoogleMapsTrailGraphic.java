@@ -30,6 +30,7 @@ public class GoogleMapsTrailGraphic implements ITrailGraphic, IMarkerDataGraphic
     private ArrayList<LatLng> latLngs;
     private Polyline polyline;
     private Polygon polygon;
+    private TrailGraphicOptions _GraphicOptions;
 
     private boolean visible = true, trailVisible = true, markersVisible = true;
 
@@ -41,6 +42,7 @@ public class GoogleMapsTrailGraphic implements ITrailGraphic, IMarkerDataGraphic
 
     @Override
     public void build(List<TtPoint> points, boolean adjusted, HashMap<String, TtMetadata> meta, TrailGraphicOptions graphicOptions) {
+        _GraphicOptions = graphicOptions;
         _Markers = new ArrayList<>();
         _MarkerData = new HashMap<>();
 
@@ -60,19 +62,25 @@ public class GoogleMapsTrailGraphic implements ITrailGraphic, IMarkerDataGraphic
             polyBounds = null;
         }
 
-        if (graphicOptions.isClosedTrail()) {
-            PolygonOptions po = new PolygonOptions();
-            po.strokeWidth(graphicOptions.getTrailWidth());
-            po.strokeColor(graphicOptions.getTrailColor());
-            po.addAll(latLngs);
-            polygon = map.addPolygon(po);
-        } else {
-            PolylineOptions plo = new PolylineOptions();
-            plo.width(graphicOptions.getTrailWidth());
-            plo.color(graphicOptions.getTrailColor());
-            plo.addAll(latLngs);
-            polyline = map.addPolyline(plo);
-        }
+//        if (graphicOptions.isClosedTrail()) {
+//            PolygonOptions po = new PolygonOptions();
+//            po.strokeWidth(graphicOptions.getTrailWidth());
+//            po.strokeColor(graphicOptions.getTrailColor());
+//
+//            if (latLngs.size() > 0) {
+//                po.addAll(latLngs);
+//                polygon = map.addPolygon(po);
+//            }
+//        } else {
+//            PolylineOptions plo = new PolylineOptions();
+//            plo.width(graphicOptions.getTrailWidth());
+//            plo.color(graphicOptions.getTrailColor());
+//
+//            if (latLngs.size() > 0) {
+//                plo.addAll(latLngs);
+//                polyline = map.addPolyline(plo);
+//            }
+//        }
     }
 
     @Override
@@ -99,6 +107,28 @@ public class GoogleMapsTrailGraphic implements ITrailGraphic, IMarkerDataGraphic
 
         if (point.isOnBnd()) {
             latLngs.add(marker.getPosition());
+
+            if (_GraphicOptions.isClosedTrail()) {
+                if (polyline == null) {
+                    PolylineOptions plo = new PolylineOptions();
+                    plo.width(_GraphicOptions.getTrailWidth());
+                    plo.color(_GraphicOptions.getTrailColor());
+
+                    plo.addAll(latLngs);
+                    polyline = map.addPolyline(plo);
+                } else {
+                    polyline.setPoints(latLngs);
+                }
+            } else {
+                if (polygon == null) {
+                    PolygonOptions po = new PolygonOptions();
+                    po.strokeWidth(_GraphicOptions.getTrailWidth());
+                    po.strokeColor(_GraphicOptions.getTrailColor());
+
+                    po.addAll(latLngs);
+                    polygon = map.addPolygon(po);
+                }
+            }
 
             if (polyline != null) {
                 polyline.setPoints(latLngs);

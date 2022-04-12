@@ -18,7 +18,7 @@ import com.usda.fmsc.android.utilities.TaskRunner;
 import com.usda.fmsc.android.widget.FABProgressCircleEx;
 import com.usda.fmsc.android.widget.MultiStateTouchCheckBox;
 import com.usda.fmsc.twotrails.DeviceSettings;
-import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
+import com.usda.fmsc.twotrails.activities.base.TtCustomToolbarActivity;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.activities.contracts.CreateDocumentWType;
 import com.usda.fmsc.twotrails.utilities.Export;
@@ -28,10 +28,9 @@ import com.usda.fmsc.utilities.Tuple;
 
 import org.joda.time.DateTime;
 
-import java.util.Date;
 import java.util.Locale;
 
-public class ExportActivity extends CustomToolbarActivity {
+public class ExportActivity extends TtCustomToolbarActivity {
     private MultiStateTouchCheckBox chkAll, chkPoints, chkPolys, chkMeta, chkProj, chkNmea, chkKmz, chkGpx, chkSum, chkImgInfo, chkPc;
     private FABProgressCircleEx progCircle;
     private Export.ExportTask exportTask;

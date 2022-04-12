@@ -188,7 +188,8 @@
                 android:inputType="textMultiLine"
                 android:hint="@string/str_cmt"
                 android:maxLines="6"
-                style="@style/EditTextStyle"/>
+                android:minLines="2"
+                style="@style/EditTextStyle" />
         </com.google.android.material.textfield.TextInputLayout>
     </RelativeLayout>
 </RelativeLayout>

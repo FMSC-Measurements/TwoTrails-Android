@@ -3,17 +3,12 @@ package com.usda.fmsc.twotrails.activities.base;
 
 import android.Manifest;
 import android.content.Intent;
-import android.database.Cursor;
 import android.net.Uri;
-import android.os.Bundle;
-import android.provider.OpenableColumns;
-import android.view.WindowManager;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
-import androidx.exifinterface.media.ExifInterface;
 
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.utilities.DeviceOrientationEx;
@@ -24,24 +19,18 @@ import com.usda.fmsc.twotrails.activities.TtCameraActivity;
 import com.usda.fmsc.twotrails.activities.contracts.GetImages;
 import com.usda.fmsc.twotrails.objects.media.TtImage;
 import com.usda.fmsc.twotrails.objects.media.TtMedia;
-import com.usda.fmsc.twotrails.objects.media.TtPanorama;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
-import com.usda.fmsc.twotrails.units.PictureType;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
-import com.usda.fmsc.utilities.FileUtils;
-import com.usda.fmsc.utilities.ParseEx;
 
 import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public abstract class TtPointCollectionActivity extends TtProjectAdjusterActivity {
+public abstract class PointCollectionActivity extends ProjectAdjusterActivity {
     private Uri _CapturedImageUri;
     private String _CapturedImagePointCN;
 

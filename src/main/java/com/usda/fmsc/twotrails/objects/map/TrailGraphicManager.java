@@ -67,7 +67,7 @@ public class TrailGraphicManager implements IPolygonGraphicManager {
 
     @Override
     public Extent getExtents() {
-        return trailGraphic.getExtents();
+        return trailGraphic != null ? trailGraphic.getExtents() : null;
     }
 
     @Override

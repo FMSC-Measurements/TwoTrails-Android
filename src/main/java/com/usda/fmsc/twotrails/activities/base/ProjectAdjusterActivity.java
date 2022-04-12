@@ -14,7 +14,7 @@ import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.logic.AdjustingException;
 
-public abstract class TtProjectAdjusterActivity extends CustomToolbarActivity implements TwoTrailsApp.ProjectAdjusterListener {
+public abstract class ProjectAdjusterActivity extends TtCustomToolbarActivity implements TwoTrailsApp.ProjectAdjusterListener {
     private ProgressDialogEx pd;
     private MenuItem miAdjust;
     private AnimationDrawable adAdjust;

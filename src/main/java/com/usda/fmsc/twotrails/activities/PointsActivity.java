@@ -52,7 +52,7 @@ import com.usda.fmsc.twotrails.DeviceSettings;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.activities.base.PointMediaController;
 import com.usda.fmsc.twotrails.activities.base.PointMediaListener;
-import com.usda.fmsc.twotrails.activities.base.TtPointCollectionActivity;
+import com.usda.fmsc.twotrails.activities.base.PointCollectionActivity;
 import com.usda.fmsc.twotrails.adapters.MediaPagerAdapter;
 import com.usda.fmsc.twotrails.adapters.MediaRvAdapter;
 import com.usda.fmsc.twotrails.adapters.PointDetailsAdapter;
@@ -103,7 +103,7 @@ import com.usda.fmsc.utilities.StringEx;
 import jp.wasabeef.recyclerview.animators.FadeInAnimator;
 
 @SuppressWarnings({"unused", "RestrictedApi"})
-public class PointsActivity extends TtPointCollectionActivity implements PointMediaController, RangeFinderService.Listener {
+public class PointsActivity extends PointCollectionActivity implements PointMediaController, RangeFinderService.Listener {
     private final HashMap<String, PointMediaListener> listeners = new HashMap<>();
 
     private MenuItem miLock, miLink, miReset, miEnterLatLon, miNmeaRecalc, miDelete, miGoto;//, miMovePoint;

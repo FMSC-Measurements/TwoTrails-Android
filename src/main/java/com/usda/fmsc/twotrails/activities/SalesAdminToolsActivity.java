@@ -8,6 +8,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,8 +20,10 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.usda.fmsc.android.AndroidUtils;
-import com.usda.fmsc.android.dialogs.NumberPickerDialog;
+import com.usda.fmsc.android.dialogs.NumericInputDialog;
+import com.usda.fmsc.android.utilities.PostDelayHandler;
 import com.usda.fmsc.android.widget.SheetLayoutEx;
+import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.geospatial.GeoTools;
 import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
@@ -43,6 +46,7 @@ import com.usda.fmsc.twotrails.objects.points.WayPoint;
 import com.usda.fmsc.twotrails.units.Dist;
 import com.usda.fmsc.twotrails.utilities.ClosestPositionCalculator;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
+import com.usda.fmsc.utilities.StringEx;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -55,10 +59,11 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
 
     private CardView cvGpsInfo;
     private FloatingActionButton fabTakePoint, fabCancel;
-    private TextView tvCPDist, tvCP, tvAzTrue, tvAzMag;
+    private TextView tvCPDist, tvCP, tvAzTrue, tvAzMag, tvProg;
+    private RelativeLayout progLay;
 
     private MenuItem miHideGpsInfo;
-    private boolean gpsInfoHidden, _ToleranceExceeded = false;
+    private boolean gpsInfoHidden, _ToleranceExceeded = false, killAcquire = true;
 
     private ArrayList<TtNmeaBurst> _Bursts, _UsedBursts;
     private TtPoint _CurrentPoint;
@@ -66,7 +71,7 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
 
     private boolean isPointSetup, cancelVisible, pauseDistLine;
 
-    private int increment, takeAmount;
+    private int increment, takeAmount, nmeaCount = 0;
 
     private TtPolygon _ValidationPolygon;
     private ClosestPositionCalculator _ClosestPositionCalc;
@@ -75,11 +80,15 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
     private double _LineTolerance = 100;
     private @ColorInt int _LineColor;
 
+    private final PostDelayHandler pdhHideProgress = new PostDelayHandler(500);
+
     private final FilterOptions options = new FilterOptions();
 
 
     //region Activity
     protected void onCreate(Bundle savedInstanceState) {
+//        disableTrailMode();
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sales_admin_tools);
 
@@ -125,7 +134,7 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
-            actionBar.setTitle(R.string.title_activity_sales_admin_tools);
+            actionBar.setTitle(String.format(Locale.getDefault(), "Tracking: %s", getPolygon().getName()));
             actionBar.setDisplayShowTitleEnabled(true);
 
             AndroidUtils.UI.createToastForToolbarTitle(SalesAdminToolsActivity.this, getToolbar());
@@ -155,9 +164,11 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
         super.setContentView(layoutResID);
 
         tvCPDist = findViewById(R.id.gpsInfoForSatTvDist);
-        tvCP = findViewById(R.id.gpsInfoForSatTvCP);
+        tvCP = findViewById(R.id.gpsInfoForSatTvPoP);
         tvAzTrue = findViewById(R.id.gpsInfoForSatTvAzTrue);
         tvAzMag = findViewById(R.id.gpsInfoForSatTvAzMag);
+        tvProg = findViewById(R.id.satProgressText);
+        progLay = findViewById(R.id.progressLayout);
     }
 
     @Override
@@ -198,7 +209,7 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
         } else if (itemId == R.id.satMenuGps) {
             openSettings(SettingsActivity.GPS_SETTINGS_PAGE);
         } else if (itemId == R.id.satMenuSatSettings) {
-            openSettings(SettingsActivity.POINT_SAT_SETTINGS_PAGE);
+            openSettings(SettingsActivity.SAT_SETTINGS_PAGE);
         } else if (itemId == R.id.satMenuGpsInfoToggle) {
             if (gpsInfoHidden) {
                 gpsInfoHidden = false;
@@ -218,12 +229,22 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
 //                    })
 //                    .show(getSupportFragmentManager(), COLOR_DIALOG);
         } else if (itemId == R.id.satMenuTolerance) {
-            NumberPickerDialog.newInstance(0)
-                    .setListener(number -> {
-                        _LineTolerance = TtUtils.Convert.distance(number, Dist.Meters, getCurrentMetadata().getDistance());
+            NumericInputDialog ndiag = new NumericInputDialog(SalesAdminToolsActivity.this,
+                    TtUtils.Convert.distance(_LineTolerance, getCurrentMetadata().getDistance(), Dist.Meters));
+
+            ndiag
+                .setTitle(String.format(Locale.getDefault(), "Tolerance (%s)", getCurrentMetadata().getDistance().toStringAbv()))
+                .setPositiveButton(R.string.str_ok, (dialog, which) -> {
+                    if (ndiag.getDouble() < 0) {
+                        Toast.makeText(SalesAdminToolsActivity.this, "Tolerance must be greater than 0", Toast.LENGTH_LONG).show();
+                    } else {
+                        _LineTolerance = TtUtils.Convert.distance(ndiag.getDouble(), Dist.Meters, getCurrentMetadata().getDistance());
                         getTtAppCtx().getDeviceSettings().setMapDistToPolyTolerance(_LineTolerance);
-                    })
-                    .show(getSupportFragmentManager(), TOLERANCE_DIALOG);
+                    }
+                })
+                .setNeutralButton(R.string.str_cancel, null);
+
+            ndiag.show();
         }
 
         return super.onOptionsItemSelected(item);
@@ -290,6 +311,8 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
                     AndroidUtils.UI.getColor(SalesAdminToolsActivity.this, android.R.color.holo_red_dark) :
                     _LineColor
             );
+
+            tvCPDist.setTextColor(AndroidUtils.UI.getColor(this, _ToleranceExceeded ? android.R.color.holo_red_dark : android.R.color.black));
         }
 
         updateDirPathVector(cp.getCoords(), currPos);
@@ -310,7 +333,26 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
 
     @Override
     protected TrailGraphicManager createTrailGraphicManager(TtPolygon poly, boolean closeTrail) {
-        return super.createTrailGraphicManager(poly, true);
+        return super.createTrailGraphicManager(_ValidationPolygon, true);
+    }
+
+    @Override
+    protected Extent getTrackedPolyExtents() {
+        return getTrackedPolyManager() != null ? getTrackedPolyManager().getExtents() : super.getTrackedPolyExtents();
+    }
+
+    @Override
+    protected ArrayList<TtPolygon> getPolygonsToMap() {
+
+        ArrayList<TtPolygon> polygonsToMap = new ArrayList<>();
+
+        for (TtPolygon p : getPolygons().values()) {
+            if (!p.getCN().equals(_ValidationPolygon.getCN())) {
+                polygonsToMap.add(p);
+            }
+        }
+
+        return polygonsToMap;
     }
     //endregion
 
@@ -346,7 +388,7 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
         pauseDistLine = true;
 
         _ValidationPoint.setComment(String.format(Locale.getDefault(),
-                "This point is %.2f (%s) from the closest position %s with an azimuth of %s",
+                "This point is %.2f (%s) from the closest position %s with an azimuth of %.2f",
                 TtUtils.Convert.distance(closestPosition.getDistance(), getCurrentMetadata().getDistance(), Dist.Meters),
                 getCurrentMetadata().getDistance().toStringAbv(),
                 closestPosition.isPositionAtAPoint() ?
@@ -361,13 +403,13 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
         SATPointDialogTt.newInstance(_ValidationPoint, closestPosition)
                 .setListener(new SATPointDialogTt.Listener() {
                     @Override
-                    public void onSave(WayPoint point) {
-                        if (point.getPID() != _ValidationPoint.getPID()) {
-                            _ValidationPoint.setPID(point.getPID());
+                    public void onSave(Integer pid, String cmt) {
+                        if (pid != null && pid != _ValidationPoint.getPID()) {
+                            _ValidationPoint.setPID(pid);
                         }
 
-                        if (point.getComment() != null && !point.getComment().equals(_ValidationPoint.getComment())) {
-                            _ValidationPoint.setComment(point.getComment());
+                        if (cmt != null && !cmt.equals(_ValidationPoint.getComment())) {
+                            _ValidationPoint.setComment(cmt);
                         }
 
                         saveValidationPoint();
@@ -408,6 +450,50 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
     private void resetCollectedNmeaData() {
         _Bursts.clear();
         _UsedBursts.clear();
+    }
+
+    @Override
+    protected void startLogging() {
+        super.startLogging();
+
+        nmeaCount = 0;
+
+        progLay.setVisibility(View.VISIBLE);
+        tvProg.setText("0");
+    }
+
+    @Override
+    protected void stopLogging() {
+        super.stopLogging();
+
+        if (killAcquire) {
+            runOnUiThread(() -> progLay.setVisibility(View.GONE));
+
+            killAcquire = false;
+        } else {
+            pdhHideProgress.post(() -> runOnUiThread(() -> {
+                Animation a = AnimationUtils.loadAnimation(SalesAdminToolsActivity.this, R.anim.push_down_out);
+
+                a.setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+                        progLay.setVisibility(View.GONE);
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {
+
+                    }
+                });
+
+                progLay.startAnimation(a);
+            }));
+        }
     }
     //endregion
 
@@ -481,10 +567,9 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
 
 
                 double azimuth = closestPosition.getAzimuthToClosestPosition(currentCoords);
-                double azMag = azimuth - getCurrentMetadata().getMagDec();
 
                 tvAzTrue.setText(String.format(Locale.getDefault(), "%.0f\u00B0", azimuth));
-                tvAzMag.setText(String.format(Locale.getDefault(), "%.0f\u00B0", azMag));
+                tvAzMag.setText(String.format(Locale.getDefault(), "%.0f\u00B0", azimuth - getCurrentMetadata().getMagDec()));
             } else {
                 tvCPDist.setText(R.string.str_null_value);
                 tvCP.setText(R.string.str_null_value);
@@ -508,6 +593,8 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
                 if (TtUtils.NMEA.isBurstUsable(burst, options)) {
                     burst.setUsed(true);
                     _UsedBursts.add(burst);
+
+                    runOnUiThread(() -> tvProg.setText(StringEx.toString(++nmeaCount)));
 
                     if (_UsedBursts.size() == takeAmount) {
                         stopLogging();
@@ -544,6 +631,7 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
                         _ValidationPoint.setElevation(position.getElevation());
                         _ValidationPoint.setRMSEr(dRMSEr);
                         _ValidationPoint.setAndCalc(x, y, position.getElevation(), _ValidationPolygon);
+                        _ValidationPoint.adjustPoint();
 
                         UTMCoords calcCoords = new UTMCoords(x, y, zone);
                         showValidationPoint(calcCoords, _ClosestPositionCalc.getClosestPosition(calcCoords));
@@ -581,6 +669,8 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
         hideCancel();
 
         if (isLogging()) {
+            killAcquire = true;
+
             stopLogging();
             _Bursts.clear();
             _UsedBursts.clear();

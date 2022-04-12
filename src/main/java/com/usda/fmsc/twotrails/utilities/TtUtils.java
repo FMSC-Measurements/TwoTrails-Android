@@ -1497,7 +1497,7 @@ public class TtUtils {
             String snippet = String.format(Locale.getDefault(), "UTM X: %.3f\nUTM Y: %.3f\nElev (%s): %.1f\n\nLat: %.4f\nLon: %.4f%s",
                     x, y, meta.getElevation().toStringAbv(), Convert.distance(z, meta.getElevation(), UomElevation.Meters), lat, lon,
                     !StringEx.isEmpty(point.getComment()) ?
-                            String.format("\n\nComment: %s", point.getComment()) :
+                            "\n\n" + Misc.splitCommentToSize("Comment: " + point.getComment(), 40) :
                             StringEx.Empty
             );
 
@@ -1505,7 +1505,7 @@ public class TtUtils {
             MarkerOptions options = new MarkerOptions();
 
             options.title(String.format(Locale.getDefault(), "%d (%s)", point.getPID(), adjusted ? "Adj" : "UnAdj"));
-            options.snippet(String.format("%s\n\n%s", point.getOp().toString(), snippet));
+            options.snippet(String.format(Locale.getDefault(), "%s\n\n%s", point.getOp().toString(), snippet));
 
             LatLng ll = new LatLng(lat, lon);
 
@@ -1535,18 +1535,15 @@ public class TtUtils {
                     sFaz, sBaz, meta.getDistance().toString(), point.getSlopeAngle(),
                     meta.getSlope().toStringAbv(), point.getSlopeAngle(),
                     !StringEx.isEmpty(point.getComment()) ?
-                    String.format("\n\nComment: %s", point.getComment()) :
-                    StringEx.Empty
+                            "\n\n" + Misc.splitCommentToSize("Comment: " + point.getComment(), 40) :
+                            StringEx.Empty
             );
 
             Position position = UTMTools.convertUTMtoLatLonSignedDec(x, y, meta.getZone());
 
             return new MarkerOptions()
                     .title(String.format(Locale.getDefault(), "%d (%s)", point.getPID(), adjusted ? "Adj" : "UnAdj"))
-                    .snippet(String.format("%s\n\n%s%s", point.getOp(), snippet,
-                            !StringEx.isEmpty(point.getComment()) ?
-                                    String.format("\n\nComment: %s", point.getComment()) :
-                                    StringEx.Empty))
+                    .snippet(String.format("%s\n\n%s", point.getOp(), snippet))
                     .position(new LatLng(position.getLatitudeSignedDecimal(), position.getLongitudeSignedDecimal()));
         }
 
@@ -1760,7 +1757,7 @@ public class TtUtils {
                     point.getOp().toString(),
                     x, y, meta.getElevation().toStringAbv(), Convert.distance(z, meta.getElevation(), UomElevation.Meters), lat, lon,
                     !StringEx.isEmpty(point.getComment()) ?
-                            String.format(Locale.getDefault(), "\n\nComment: %s", point.getComment()) :
+                            "\n\n" + Misc.splitCommentToSize("Comment: " + point.getComment(), 40) :
                             StringEx.Empty);
         }
 
@@ -1782,7 +1779,7 @@ public class TtUtils {
                     sFaz, sBaz, meta.getDistance().toString(), point.getSlopeAngle(),
                     meta.getSlope().toStringAbv(), point.getSlopeAngle(),
                     !StringEx.isEmpty(point.getComment()) ?
-                            String.format("\n\nComment: %s", point.getComment()) :
+                            "\n\n" + Misc.splitCommentToSize("Comment: " + point.getComment(), 40) :
                             StringEx.Empty);
         }
 
@@ -1792,7 +1789,7 @@ public class TtUtils {
                 point.getParentPID(),
                 getInfoWindowSnippet(point.getParentPoint(), adjusted, meta),
                     !StringEx.isEmpty(point.getComment()) ?
-                            String.format("\n\nComment: %s", point.getComment()) :
+                            "\n\n" + Misc.splitCommentToSize("Comment: " + point.getComment(), 40) :
                             StringEx.Empty);
         }
 
@@ -1813,6 +1810,31 @@ public class TtUtils {
                         .setPositiveButton(R.string.str_ok, null)
                         .show();
             }
+        }
+
+        public static String splitCommentToSize(String comment, int maxSize) {
+            StringBuilder sb = new StringBuilder();
+            String[] parts = comment.split(" ");
+
+            if (parts.length > 0) {
+                int i = 1, size = parts[0].length();
+                sb.append(parts[0]);
+
+                for (; i < parts.length; i++) {
+                    String part = parts[i];
+                    int partSize = part.length() + 1;
+
+                    if ((size + partSize) > maxSize) {
+                        sb.append("\n").append(part);
+                        size = part.length();
+                    } else {
+                        sb.append(" ").append(part);
+                        size += partSize;
+                    }
+                }
+            }
+
+            return sb.toString();
         }
     }
 

@@ -322,10 +322,7 @@ public class GoogleMapsPolygonGraphic implements IPolygonGraphic, IMarkerDataGra
 
         visible &= drawOptions.isVisible();
         for (Marker m : _AdjBndPts) {
-            if (visible || (!drawOptions.isAdjNavPts() && isInList(_AdjNavPts, m) ||
-                    !drawOptions.isAdjMiscPts() && isInList(_AdjMiscPts, m))) {
-                m.setVisible(visible);
-            }
+            m.setVisible(visible || (drawOptions.isAdjNavPts() && isInList(_AdjNavPts, m)) || (drawOptions.isAdjMiscPts() && isInList(_AdjMiscPts, m)));
         }
     }
 
@@ -351,10 +348,7 @@ public class GoogleMapsPolygonGraphic implements IPolygonGraphic, IMarkerDataGra
 
         visible &= drawOptions.isVisible();
         for (Marker m : _UnadjBndPts) {
-            if (visible || (!drawOptions.isUnadjNavPts() && isInList(_UnadjNavPts, m) ||
-                    !drawOptions.isUnadjMiscPts() && isInList(_UnadjMiscPts, m))) {
-                m.setVisible(visible);
-            }
+            m.setVisible(visible || (drawOptions.isUnadjNavPts() && isInList(_UnadjNavPts, m) || drawOptions.isUnadjMiscPts() && isInList(_UnadjMiscPts, m)));
         }
     }
 
@@ -374,9 +368,7 @@ public class GoogleMapsPolygonGraphic implements IPolygonGraphic, IMarkerDataGra
 
         visible &= drawOptions.isVisible();
         for (Marker m : _AdjNavPts) {
-            if (visible || !drawOptions.isAdjBndPts() && isInList(_AdjBndPts, m)) {
-                m.setVisible(visible);
-            }
+            m.setVisible(visible || (drawOptions.isAdjBndPts() && isInList(_AdjBndPts, m)));
         }
     }
 
@@ -396,9 +388,7 @@ public class GoogleMapsPolygonGraphic implements IPolygonGraphic, IMarkerDataGra
 
         visible &= drawOptions.isVisible();
         for (Marker m : _UnadjNavPts) {
-            if (visible || !drawOptions.isUnadjBndPts() && isInList(_UnadjBndPts, m)) {
-                m.setVisible(visible);
-            }
+            m.setVisible(visible || (drawOptions.isUnadjBndPts() && isInList(_UnadjBndPts, m)));
         }
     }
 
@@ -409,10 +399,7 @@ public class GoogleMapsPolygonGraphic implements IPolygonGraphic, IMarkerDataGra
 
         visible &= drawOptions.isVisible();
         for (Marker m : _AdjMiscPts) {
-            if (visible || (!drawOptions.isAdjBndPts() && isInList(_AdjBndPts, m) ||
-                    !drawOptions.isAdjNavPts() && isInList(_AdjNavPts, m))) {
-                m.setVisible(visible);
-            }
+            m.setVisible(visible || (drawOptions.isAdjBndPts() && isInList(_AdjBndPts, m)) || (drawOptions.isAdjNavPts() && isInList(_AdjNavPts, m)));
         }
     }
 
@@ -422,9 +409,7 @@ public class GoogleMapsPolygonGraphic implements IPolygonGraphic, IMarkerDataGra
 
         visible &= drawOptions.isVisible();
         for (Marker m : _UnadjMiscPts) {
-            if (visible || (!drawOptions.isUnadjBndPts() && isInList(_UnadjBndPts, m) || !drawOptions.isUnadjNavPts() && isInList(_UnadjNavPts, m))) {
-                m.setVisible(visible);
-            }
+            m.setVisible(visible || (drawOptions.isUnadjBndPts() && isInList(_UnadjBndPts, m)) || (drawOptions.isUnadjNavPts() && isInList(_UnadjNavPts, m)));
         }
     }
 

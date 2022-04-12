@@ -40,7 +40,6 @@
                 android:text="@string/str_null_value"/>
         </TableRow>
 
-
         <TableRow
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
@@ -55,7 +54,6 @@
                 android:id="@+id/gpsInfoTvLon"
                 android:text="@string/str_null_value"/>
         </TableRow>
-
 
         <TableRow
             android:layout_width="0dp"
@@ -73,7 +71,6 @@
                 android:id="@+id/gpsInfoTvUtmY"
                 android:text="@string/str_null_value"/>
         </TableRow>
-
 
         <TableRow
             android:layout_width="0dp"
@@ -124,7 +121,7 @@
     </TableLayout>
 
     <TableLayout
-        android:id="@+id/gpsInfoForSatTable"
+        android:id="@+id/gpsInfoForSatCPInfo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/gpsInfoLayStats"
@@ -150,7 +147,7 @@
                 android:text="@string/str_pos_on_poly"
                 android:textSize="7pt"/>
             <TextView
-                android:id="@+id/gpsInfoForSatTvCP"
+                android:id="@+id/gpsInfoForSatTvPoP"
                 android:text="@string/str_null_value"
                 android:textSize="7pt"/>
         </TableRow>
@@ -184,11 +181,22 @@
         </TableRow>
     </TableLayout>
 
+    <TextView
+        android:id="@+id/gpsInfoNmeaTvStats"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/gpsInfoForSatCPInfo"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
+        android:text="@string/str_null_value"
+        android:textColor="@color/red_A700"
+        android:visibility="gone"/>
+
     <FrameLayout
         android:id="@+id/gpsInfoLaySatInfo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/gpsInfoForSatTable">
+        android:layout_below="@id/gpsInfoNmeaTvStats">
 
         <RelativeLayout
             android:id="@+id/gpsInfoLaySatInfoSub"
@@ -206,8 +214,8 @@
                 android:id="@+id/gpsInfoSatSky"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_alignParentTop="true"
-                android:layout_above="@id/gpsInfoSatStatus"/>
+                android:layout_above="@id/gpsInfoSatStatus"
+                android:layout_alignParentTop="true" />
         </RelativeLayout>
     </FrameLayout>
 </RelativeLayout>

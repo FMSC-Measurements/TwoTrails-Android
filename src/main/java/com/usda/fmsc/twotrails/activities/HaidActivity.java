@@ -18,7 +18,7 @@ import android.widget.TextView;
 
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.utilities.TaskRunner;
-import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
+import com.usda.fmsc.twotrails.activities.base.TtCustomToolbarActivity;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.logic.HaidLogic;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
@@ -26,7 +26,7 @@ import com.usda.fmsc.twotrails.objects.TtPolygon;
 import java.util.ArrayList;
 
 
-public class HaidActivity extends CustomToolbarActivity {
+public class HaidActivity extends TtCustomToolbarActivity {
     private ActionBarDrawerToggle drawerToggle;
     private DrawerLayout drawerLayout;
     private final TaskRunner taskRunner = new TaskRunner();

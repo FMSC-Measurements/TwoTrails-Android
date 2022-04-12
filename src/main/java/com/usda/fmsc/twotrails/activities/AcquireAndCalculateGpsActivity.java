@@ -842,8 +842,8 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
 
         if (lastPosition != null) {
             moveToLocation(lastPosition, Consts.Location.ZOOM_CLOSE, true);
-        } else if (getTrackedPolyCN() != null) {
-            moveToLocation(getTrackedPoly(), Consts.Location.PADDING, true);
+        } else if (getTrackedPolyExtents() != null) {
+            moveToLocation(getTrackedPolyExtents(), Consts.Location.PADDING, true);
         } else if (getCompleteBounds() != null) {
             moveToLocation(getCompleteBounds(), Consts.Location.PADDING, true);
         }

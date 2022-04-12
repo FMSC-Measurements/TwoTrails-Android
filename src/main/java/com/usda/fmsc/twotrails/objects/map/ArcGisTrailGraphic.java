@@ -67,17 +67,19 @@ public class ArcGisTrailGraphic implements ITrailGraphic, IMarkerDataGraphic {
         map.getGraphicsOverlays().add(_TrailLayer);
         map.getGraphicsOverlays().add(_PtsLayer);
 
-        if (points.size() > 0)
-            polyBounds = eBuilder.build();
-        else
-            polyBounds = null;
+//        if (points.size() > 0)
+//            polyBounds = eBuilder.build();
+//        else
+//            polyBounds = null;
     }
 
     @Override
     public Position add(TtPoint point, boolean adjusted, HashMap<String, TtMetadata> meta) {
         Position position = addPoint(point, adjusted, meta);
 
-        polyBounds = eBuilder.build();
+        if (eBuilder.numberOfPositions() > 0) {
+            polyBounds = eBuilder.build();
+        }
 
         return position;
     }

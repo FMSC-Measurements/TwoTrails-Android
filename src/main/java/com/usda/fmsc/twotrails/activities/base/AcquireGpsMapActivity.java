@@ -2,7 +2,6 @@ package com.usda.fmsc.twotrails.activities.base;
 
 import android.Manifest;
 import android.animation.Animator;
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
@@ -56,20 +55,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-@SuppressLint("DefaultLocale")
 public abstract class AcquireGpsMapActivity extends BaseMapActivity {
     private static final String nVal = "*";
 
     private TextView tvGpsStatus, tvGpsFix, tvLat, tvLon, tvUtmX, tvUtmY,
-            tvZone, tvDec, tvSat, tvElev, tvPdop, tvHdop;
+            tvZone, tvDec, tvSat, tvElev, tvPdop, tvHdop, tvNmeaStats;
 
     private View viewGpsInfoLaySatInfo;
     private GpsStatusSkyView skyView;
     private GpsStatusSatView statusView;
 
     private Integer zone = null;
-    private boolean canceling = false, useLostConnectionWarning = false, trailModeEnabled = true;
-    private boolean logging, gpsExtraVisible = true, animating, gpsExtraLayoutSet;
+    private boolean canceling = false, useLostConnectionWarning = false, trailModeEnabled = true, trailCreated = false;
+    private boolean logging, gpsExtraVisible = true, animating, gpsExtraLayoutSet, nmeaInvalid = false;
 
     private ArrayList<TtPolygon> polygonsToMap;
 
@@ -90,45 +88,41 @@ public abstract class AcquireGpsMapActivity extends BaseMapActivity {
             setResult(Consts.Codes.Results.GPS_NOT_CONFIGURED);
             finish();
         } else {
-            if (trailModeEnabled) {
-                Intent intent = getIntent();
+            Intent intent = getIntent();
 
-                if (intent != null) {
-                    if (intent.hasExtra(Consts.Codes.Data.POINT_PACKAGE)) {
-                        Bundle bundle = intent.getBundleExtra(Consts.Codes.Data.POINT_PACKAGE);
+            if (intent != null) {
+                if (intent.hasExtra(Consts.Codes.Data.POINT_PACKAGE)) {
+                    Bundle bundle = intent.getBundleExtra(Consts.Codes.Data.POINT_PACKAGE);
 
-                        if (bundle != null) {
-                            _Metadata = bundle.getParcelable(Consts.Codes.Data.METADATA_DATA);
-                            _Polygon = bundle.getParcelable(Consts.Codes.Data.POLYGON_DATA);
-                        }
-                    } else {
-                        if (intent.hasExtra(Consts.Codes.Data.POLYGON_DATA)) {
-                            _Polygon = intent.getParcelableExtra(Consts.Codes.Data.POLYGON_DATA);
-                        }
-
-                        if (intent.hasExtra(Consts.Codes.Data.METADATA_DATA)) {
-                            _Metadata = intent.getParcelableExtra(Consts.Codes.Data.METADATA_DATA);
-                        }
-                    }
-
-                    if (_Metadata == null) {
-                        _Metadata = getDefaultMetadata();
-                    }
-
-                    if (_Polygon == null) {
-                        trailModeEnabled = false;
-                    }
-
-                    super.onCreate(savedInstanceState);
-
-                    if (trailModeEnabled) {
-                        setupTrailMode(_Polygon);
+                    if (bundle != null) {
+                        _Metadata = bundle.getParcelable(Consts.Codes.Data.METADATA_DATA);
+                        _Polygon = bundle.getParcelable(Consts.Codes.Data.POLYGON_DATA);
                     }
                 } else {
-                    canceling = true;
+                    if (intent.hasExtra(Consts.Codes.Data.POLYGON_DATA)) {
+                        _Polygon = intent.getParcelableExtra(Consts.Codes.Data.POLYGON_DATA);
+                    }
+
+                    if (intent.hasExtra(Consts.Codes.Data.METADATA_DATA)) {
+                        _Metadata = intent.getParcelableExtra(Consts.Codes.Data.METADATA_DATA);
+                    }
                 }
-            } else {
+
+                if (_Metadata == null) {
+                    _Metadata = getDefaultMetadata();
+                }
+
+                if (_Polygon == null) {
+                    trailModeEnabled = false;
+                }
+
                 super.onCreate(savedInstanceState);
+
+//                if (isTrailModeEnabled()) {
+//                    setupTrailMode(_Polygon);
+//                }
+            } else if (isTrailModeEnabled()) {
+                canceling = true;
             }
         }
     }
@@ -145,6 +139,10 @@ public abstract class AcquireGpsMapActivity extends BaseMapActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
+        if (isTrailModeEnabled() && !trailCreated) {
+            setupTrailMode(_Polygon);
+        }
 
         if (skyView != null) {
             skyView.resume();
@@ -167,6 +165,7 @@ public abstract class AcquireGpsMapActivity extends BaseMapActivity {
         tvElev = findViewById(R.id.gpsInfoTvElev);
         tvPdop = findViewById(R.id.gpsInfoTvPdop);
         tvHdop = findViewById(R.id.gpsInfoTvHdop);
+        tvNmeaStats = findViewById(R.id.gpsInfoNmeaTvStats);
 
         tvGpsFix.setText(GGASentence.GpsFixType.NoFix.toString());
 
@@ -208,7 +207,7 @@ public abstract class AcquireGpsMapActivity extends BaseMapActivity {
             setMapPadding(0, mapOffsetY, 0, 0);
         }
 
-        if (trailModeEnabled) {
+        if (isTrailModeEnabled()) {
             addTrailGraphic(trailGraphicManager);
         }
     }
@@ -223,8 +222,8 @@ public abstract class AcquireGpsMapActivity extends BaseMapActivity {
 
     private void setupTrailMode(TtPolygon poly) {
         _Polygon = poly;
-
         trailGraphicManager = createTrailGraphicManager(poly, false);
+        trailCreated = true;
     }
 
     protected TrailGraphicManager createTrailGraphicManager(TtPolygon poly, boolean closeTrail) {
@@ -246,7 +245,7 @@ public abstract class AcquireGpsMapActivity extends BaseMapActivity {
     }
 
     public void addPosition(TtPoint point, boolean adjusted, boolean moveToPointAfterAdd) {
-        if (trailModeEnabled) {
+        if (isTrailModeEnabled()) {
             final Position position = trailGraphicManager.addPoint(point, adjusted);
 
             if (position != null) {
@@ -270,7 +269,7 @@ public abstract class AcquireGpsMapActivity extends BaseMapActivity {
         if (polygonsToMap == null) {
             polygonsToMap = new ArrayList<>();
 
-            if (trailModeEnabled) {
+            if (isTrailModeEnabled()) {
                 for (TtPolygon p : getPolygons().values()) {
                     if (!p.getCN().equals(getTrackedPolyCN())) {
                         polygonsToMap.add(p);
@@ -290,12 +289,8 @@ public abstract class AcquireGpsMapActivity extends BaseMapActivity {
     }
 
     @Override
-    protected Extent getTrackedPoly() {
-        if (trailModeEnabled) {
-            return trailGraphicManager.getExtents();
-        } else {
-            throw new RuntimeException("TrailMode is disabled");
-        }
+    protected Extent getTrackedPolyExtents() {
+        return isTrailModeEnabled() ? trailGraphicManager.getExtents() : super.getTrackedPolyExtents();
     }
 
     @Override
@@ -328,6 +323,7 @@ public abstract class AcquireGpsMapActivity extends BaseMapActivity {
             removeTrailGraphic(trailGraphicManager);
             trailGraphicManager = null;
         }
+        trailCreated = false;
     }
 
     protected final boolean isTrailModeEnabled() {
@@ -402,6 +398,9 @@ public abstract class AcquireGpsMapActivity extends BaseMapActivity {
         if (!receivingNmea) {
             Toast.makeText(this, "Not receiving NMEA data.", Toast.LENGTH_LONG).show();
             AndroidUtils.Device.vibrate(getApplicationContext(), Consts.Notifications.VIB_PATTERN_GPS_LOST_CONNECTED);
+            tvNmeaStats.setVisibility(View.VISIBLE);
+            tvNmeaStats.setText("Not receiving NMEA");
+            nmeaInvalid = true;
         }
     }
 
@@ -419,11 +418,11 @@ public abstract class AcquireGpsMapActivity extends BaseMapActivity {
                 if (burst.hasPosition()) {
                     UTMCoords coords = zone != null ? burst.getUTM(zone) : burst.getTrueUTM();
 
-                    tvLat.setText(String.format("%.4f", burst.getLatitudeSD()));
-                    tvLon.setText(String.format("%.4f", burst.getLongitudeSD()));
+                    tvLat.setText(String.format(Locale.getDefault(), "%.4f", burst.getLatitudeSD()));
+                    tvLon.setText(String.format(Locale.getDefault(), "%.4f", burst.getLongitudeSD()));
 
-                    tvUtmX.setText(String.format("%.3f", coords.getX()));
-                    tvUtmY.setText(String.format("%.3f", coords.getY()));
+                    tvUtmX.setText(String.format(Locale.getDefault(), "%.3f", coords.getX()));
+                    tvUtmY.setText(String.format(Locale.getDefault(), "%.3f", coords.getY()));
 
                     if (zone == null) {
                         tvZone.setText(StringEx.toString(coords.getZone()));
@@ -432,7 +431,7 @@ public abstract class AcquireGpsMapActivity extends BaseMapActivity {
                     }
 
                     if (burst.hasElevation()) {
-                        tvElev.setText(String.format("%.2f", burst.getElevation()));
+                        tvElev.setText(String.format(Locale.getDefault(), "%.2f", burst.getElevation()));
                     } else {
                         tvElev.setText(nVal);
                     }
@@ -450,35 +449,55 @@ public abstract class AcquireGpsMapActivity extends BaseMapActivity {
                     }
                 }
 
+                boolean iivRMC = false, iivGGA = false, iivGSA = false, iivGSV = false;
+
                 if (burst.isValid(NmeaIDs.SentenceID.RMC) && burst.getMagVar() != null) {
-                    tvDec.setText(String.format("%.2f %s", burst.getMagVar(), burst.getMagVarDir().toStringAbv()));
+                    tvDec.setText(String.format(Locale.getDefault(), "%.2f %s", burst.getMagVar(), burst.getMagVarDir().toStringAbv()));
                 } else {
                     tvDec.setText(nVal);
+                    iivRMC = true;
                 }
 
                 if (burst.isValid(NmeaIDs.SentenceID.GGA)) {
                     tvGpsFix.setText(burst.getFixQuality().toStringX());
                 } else {
                     tvGpsFix.setText(GGASentence.GpsFixType.NoFix.toString());
+                    iivGGA = true;
                 }
 
                 if (burst.isValid(NmeaIDs.SentenceID.GSA)) {
                     tvGpsStatus.setText(burst.getFix().toString());
-                    tvPdop.setText(burst.getPDOP() == null ? nVal : String.format("%.2f", burst.getPDOP()));
-                    tvHdop.setText(burst.getHDOP() == null ? nVal : String.format("%.2f", burst.getHDOP()));
+                    tvPdop.setText(burst.getPDOP() == null ? nVal : String.format(Locale.getDefault(), "%.2f", burst.getPDOP()));
+                    tvHdop.setText(burst.getHDOP() == null ? nVal : String.format(Locale.getDefault(), "%.2f", burst.getHDOP()));
                 } else {
                     tvGpsStatus.setText(GSASentence.Fix.NoFix.toString());
                     tvHdop.setText(nVal);
                     tvPdop.setText(nVal);
+                    iivGSA = true;
                 }
 
                 if (burst.isValid(NmeaIDs.SentenceID.GSV)) {
-                    tvSat.setText(String.format("%d/%d/%d",
+                    tvSat.setText(String.format(Locale.getDefault(), "%d/%d/%d",
                             burst.getUsedSatellitesCount(),
                             burst.isValid(NmeaIDs.SentenceID.GGA) ? burst.getTrackedSatellitesCount() : 0,
                             burst.getSatellitesInViewCount()));
                 } else {
                     tvSat.setText(nVal);
+                    iivGSV = true;
+                }
+
+                if ((iivRMC || iivGGA || iivGSA || iivGSV) ^ nmeaInvalid) {
+                    nmeaInvalid = (iivRMC || iivGGA || iivGSA || iivGSV);
+                    tvNmeaStats.setVisibility(nmeaInvalid ? View.VISIBLE : View.GONE);
+                }
+
+                if (nmeaInvalid) {
+                    tvNmeaStats.setText(String.format(Locale.getDefault(),
+                            "Missing: %s %s %s %s",
+                            iivRMC ? "RMC" : StringEx.Empty,
+                            iivGGA ? "GGA" : StringEx.Empty,
+                            iivGSA ? "GSA" : StringEx.Empty,
+                            iivGSV ? "GSV" : StringEx.Empty));
                 }
 
                 if (gpsExtraVisible) {

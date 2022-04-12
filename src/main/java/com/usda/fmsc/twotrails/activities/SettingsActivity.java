@@ -1,7 +1,5 @@
 package com.usda.fmsc.twotrails.activities;
 
-import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -13,13 +11,12 @@ import androidx.appcompat.app.ActionBar;
 import android.view.MenuItem;
 
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.TwoTrailsApp;
-import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
+import com.usda.fmsc.twotrails.activities.base.TtCustomToolbarActivity;
 import com.usda.fmsc.twotrails.activities.base.TtActivity;
 import com.usda.fmsc.twotrails.fragments.settings.DeviceSettingsFragment;
 import com.usda.fmsc.twotrails.fragments.settings.MiscSettingsFragment;
 
-public class SettingsActivity extends CustomToolbarActivity {
+public class SettingsActivity extends TtCustomToolbarActivity {
     public static final String SETTINGS_PAGE = "settings_page";
 
     public static final String MAIN_SETTINGS_PAGE = "main";
@@ -29,6 +26,7 @@ public class SettingsActivity extends CustomToolbarActivity {
     public static final String MEDIA_SETTINGS_PAGE = "mediaSetup";
     public static final String DIALOG_SETTINGS_PAGE = "diagSetup";
     public static final String MISC_SETTINGS_PAGE = "miscSetup";
+    public static final String SAT_SETTINGS_PAGE = "satSetup";
 
     public static final String GPS_SETTINGS_PAGE = "gpsSetup";
     public static final String LASER_SETTINGS_PAGE = "rfSetup";
@@ -36,7 +34,6 @@ public class SettingsActivity extends CustomToolbarActivity {
     public static final String POINT_GPS_SETTINGS_PAGE = "gpsPointSetup";
     public static final String POINT_WALK_SETTINGS_PAGE = "walkPointSetup";
     public static final String POINT_TAKE5_SETTINGS_PAGE = "take5PointSetup";
-    public static final String POINT_SAT_SETTINGS_PAGE = "satPointSetup"; //todo setup settings
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,7 +86,8 @@ public class SettingsActivity extends CustomToolbarActivity {
             case POINT_GPS_SETTINGS_PAGE:
             case POINT_TAKE5_SETTINGS_PAGE:
             case POINT_WALK_SETTINGS_PAGE:
-            case DIALOG_SETTINGS_PAGE: frag = SettingsFragment.newInstance(key); break;
+            case DIALOG_SETTINGS_PAGE:
+            case SAT_SETTINGS_PAGE: frag = SettingsFragment.newInstance(key); break;
         }
 
         return frag;
@@ -107,6 +105,7 @@ public class SettingsActivity extends CustomToolbarActivity {
             case MEDIA_SETTINGS_PAGE: return R.xml.pref_media_settings;
             case MISC_SETTINGS_PAGE: return R.xml.pref_other_settings;
             case DIALOG_SETTINGS_PAGE: return R.xml.pref_dialog_settings;
+            case SAT_SETTINGS_PAGE: return R.xml.pref_sat_settings;
             default: return 0;
         }
     }
@@ -160,9 +159,10 @@ public class SettingsActivity extends CustomToolbarActivity {
                 case MAP_SETTINGS_PAGE: settingsTitle = "Map Settings"; break;
                 case MEDIA_SETTINGS_PAGE: settingsTitle = "Media Settings"; break;
                 case DIALOG_SETTINGS_PAGE: settingsTitle = "Dialog Settings"; break;
+                case SAT_SETTINGS_PAGE: settingsTitle = "Sales Admin Tools"; break;
             }
 
-            ActionBar actionBar = ((CustomToolbarActivity)getActivity()).getSupportActionBar();
+            ActionBar actionBar = ((TtCustomToolbarActivity)getActivity()).getSupportActionBar();
 
             if (actionBar != null) {
                 actionBar.setHomeButtonEnabled(true);

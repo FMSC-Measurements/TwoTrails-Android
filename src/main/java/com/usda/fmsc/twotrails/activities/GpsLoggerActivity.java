@@ -1,8 +1,6 @@
 package com.usda.fmsc.twotrails.activities;
 
 import android.app.Activity;
-import android.content.DialogInterface;
-import android.content.Intent;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -22,7 +20,7 @@ import android.widget.Toast;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
 import com.usda.fmsc.twotrails.Consts;
-import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
+import com.usda.fmsc.twotrails.activities.base.TtCustomToolbarActivity;
 import com.usda.fmsc.twotrails.activities.contracts.CreateZipDocument;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.R;
@@ -32,13 +30,11 @@ import org.joda.time.DateTime;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Locale;
 
 import com.usda.fmsc.geospatial.nmea41.sentences.base.NmeaSentence;
-import com.usda.fmsc.twotrails.utilities.TtUtils;
 import com.usda.fmsc.utilities.FileUtils;
 
-public class GpsLoggerActivity extends CustomToolbarActivity implements GpsService.Listener {
+public class GpsLoggerActivity extends TtCustomToolbarActivity implements GpsService.Listener {
     private final String STRINGS_KEY = "strings";
     private final String LOGGING_KEY = "logging";
 

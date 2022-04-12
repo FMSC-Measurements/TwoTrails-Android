@@ -20,7 +20,7 @@ import com.usda.fmsc.twotrails.units.Dist;
 import com.usda.fmsc.twotrails.units.OpType;
 import com.usda.fmsc.twotrails.units.Slope;
 import com.usda.fmsc.utilities.StringEx;
-import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
+import com.usda.fmsc.twotrails.activities.base.TtCustomToolbarActivity;
 import com.usda.fmsc.twotrails.R;
 
 import com.usda.fmsc.twotrails.objects.points.GpsPoint;
@@ -40,7 +40,7 @@ import java.util.List;
 
 import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
 
-public class TableViewActivity extends CustomToolbarActivity {
+public class TableViewActivity extends TtCustomToolbarActivity {
     private static final DateTimeFormatter DateTimeFormatter = DateTimeFormat.forPattern("h:mm:ss a M/d/yyyy");
 
     private final static String[] Headers = new String[] {

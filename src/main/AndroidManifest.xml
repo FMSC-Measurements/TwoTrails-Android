@@ -297,6 +297,7 @@
         <activity
             android:name=".activities.WalkActivity"
             android:label="@string/title_activity_walk"
+            android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait" />
         <activity
             android:name=".activities.PolygonsActivity"
@@ -354,6 +355,7 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".activities.base.AcquireGpsMapActivity"
+            android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait" />
         <activity
             android:name=".activities.MapDetailsActivity"
@@ -381,6 +383,7 @@
         <activity
             android:name=".activities.SalesAdminToolsActivity"
             android:label="@string/title_activity_sales_admin_tools"
+            android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait" />
     </application>
 

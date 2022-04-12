@@ -30,7 +30,7 @@ import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.DeviceSettings;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
-import com.usda.fmsc.twotrails.activities.base.TtProjectAdjusterActivity;
+import com.usda.fmsc.twotrails.activities.base.ProjectAdjusterActivity;
 import com.usda.fmsc.twotrails.activities.contracts.CreateZipDocument;
 import com.usda.fmsc.twotrails.activities.contracts.OpenDocumentTreePersistent;
 import com.usda.fmsc.twotrails.adapters.RecentProjectAdapter;
@@ -44,11 +44,9 @@ import com.usda.fmsc.twotrails.fragments.main.MainToolsFragment;
 import com.usda.fmsc.twotrails.logic.AdjustingException;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.objects.TwoTrailsProject;
-import com.usda.fmsc.twotrails.objects.map.IPolygonGraphicManager;
 import com.usda.fmsc.twotrails.utilities.Export;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 import com.usda.fmsc.utilities.FileUtils;
-import com.usda.fmsc.utilities.MimeTypes;
 import com.usda.fmsc.utilities.StringEx;
 
 import org.joda.time.DateTime;
@@ -60,7 +58,7 @@ import java.util.Locale;
 import java.util.function.Function;
 
 
-public class MainActivity extends TtProjectAdjusterActivity {
+public class MainActivity extends ProjectAdjusterActivity {
     private static final boolean SYNC_OPTION_ENABLED = false;
 
     private View progressLayout;

@@ -17,12 +17,12 @@ import com.usda.fmsc.android.dialogs.InputDialog;
 import com.usda.fmsc.android.widget.PopupMenuButton;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
+import com.usda.fmsc.twotrails.activities.base.TtCustomToolbarActivity;
 import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
 import com.usda.fmsc.twotrails.utilities.ArcGISTools;
 import com.usda.fmsc.utilities.StringEx;
 
-public class MapDetailsActivity extends CustomToolbarActivity {
+public class MapDetailsActivity extends TtCustomToolbarActivity {
     private ArcGisMapLayer arcGisMapLayer, agmlBackup;
     private ImageView ivStatusIcon;
     private TextView tvName, tvFile, tvUrl, tvScaleMin, tvScaleMax;

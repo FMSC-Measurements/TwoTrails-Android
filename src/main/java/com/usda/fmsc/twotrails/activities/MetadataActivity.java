@@ -25,7 +25,7 @@ import com.usda.fmsc.android.dialogs.NumericInputDialog;
 import com.usda.fmsc.android.listeners.ComplexOnPageChangeListener;
 import com.usda.fmsc.geospatial.UomElevation;
 import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
-import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
+import com.usda.fmsc.twotrails.activities.base.TtCustomToolbarActivity;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.data.TwoTrailsSchema;
 import com.usda.fmsc.twotrails.dialogs.EditableListDialogTt;
@@ -49,7 +49,7 @@ import java.util.Locale;
 import com.usda.fmsc.geospatial.nmea41.sentences.base.NmeaSentence;
 import com.usda.fmsc.utilities.StringEx;
 
-public class MetadataActivity extends CustomToolbarActivity {
+public class MetadataActivity extends TtCustomToolbarActivity {
     private HashMap<String, Listener> listeners;
 
     private GpsService.Listener listener;

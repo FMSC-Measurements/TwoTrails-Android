@@ -416,8 +416,8 @@ public class ClosestPositionCalculator {
          */
         public double getAzimuthToClosestPosition(double utmX, double utmY) {
             return TtUtils.Math.azimuthOfPoint(
-                    _ClosestPosition.getX(), _ClosestPosition.getY(),
-                    utmX, utmY);
+                    utmX, utmY,
+                    _ClosestPosition.getX(), _ClosestPosition.getY());
         }
     }
 }

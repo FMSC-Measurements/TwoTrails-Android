@@ -82,7 +82,9 @@
     <string name="str_dist">Distance</string>
     <string name="str_az">Azimuth</string>
     <string name="str_az_true">Azimuth (True)</string>
+    <string name="str_az_true_abv">Az True</string>
     <string name="str_az_mag">Azimuth (Mag)</string>
+    <string name="str_az_mag_abv">Az Mag</string>
     <string name="str_slp">Slope</string>
     <string name="str_slp_ang">S. Angle</string>
     <string name="str_mag">Magnetic</string>
@@ -136,7 +138,13 @@
     <string name="str_create_map_layer">Create Map Layer</string>
     <string name="str_collect_point">Collect Point</string>
     <string name="str_closest_dist">Closest Distance</string>
+    <string name="str_closest_dist_abv">Clst Dist</string>
+    <string name="str_closest_polygon_abv">Clst Poly</string>
     <string name="str_pos_on_poly">Position on Polygon</string>
+    <string name="str_inside_poly">Inside Polygon</string>
+    <string name="str_outside_poly">Outside Polygon</string>
+    <string name="str_commit">Commit</string>
+    <string name="str_commit_ss">Commit Sideshot</string>
 
     <string name="zero">0</string>
     <string name="str_x">X</string>
@@ -306,6 +314,18 @@
     <string name="set_WALK_RING_ON_CREATE_POINT">WalkRingOnCreate</string>
     <string name="set_WALK_SHOW_ALL_POINTS_ON_MAP">WalkShowAllPointsOnMap</string>
 
+    <string name="set_SAT_FILTER_DOP_TYPE">SATFilterDopType</string>
+    <string name="set_SAT_FILTER_DOP_VALUE">SATFilterDopValue</string>
+    <string name="set_SAT_FILTER_FIX">SATFilterFix</string>
+    <string name="set_SAT_FILTER_FIX_TYPE">SATFilterFixType</string>
+    <string name="set_SAT_NMEA_AMOUNT">SATNmeaAmount</string>
+    <string name="set_SAT_IGNORE_NMEA">SATIgnoreNmea</string>
+    <string name="set_SAT_IGNORE_NMEA_AMOUNT">SATIgnoreNmeaAmount</string>
+    <string name="set_SAT_FAIL_AMOUNT">SATFailAmount</string>
+    <string name="set_SAT_INCREMENT">SATIncrement</string>
+    <string name="set_SAT_VIB_ON_CREATE_POINT">SATVibrationOnCreate</string>
+    <string name="set_SAT_RING_ON_CREATE_POINT">SATRingOnCreate</string>
+    
     <string name="set_AUTO_UPDATE_INDEX">AutoUpdateIndex</string>
     <string name="set_AUTO_UPDATE_WALK_ONBND_ASK">AutoUpdateWalkOnBndAsk</string>
     <string name="set_AUTO_OVERWRITE_PLOTGRID_ASK">AutoOverwritePlotGridAsk</string>

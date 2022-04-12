@@ -13,7 +13,6 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
@@ -23,7 +22,7 @@ import com.usda.fmsc.android.widget.FABProgressCircleEx;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
-import com.usda.fmsc.twotrails.activities.base.TtProjectAdjusterActivity;
+import com.usda.fmsc.twotrails.activities.base.ProjectAdjusterActivity;
 import com.usda.fmsc.twotrails.activities.contracts.GetContentMultiMimes;
 import com.usda.fmsc.twotrails.fragments.imprt.BaseImportFragment;
 import com.usda.fmsc.twotrails.fragments.imprt.ImportGpxFragment;
@@ -36,7 +35,7 @@ import com.usda.fmsc.utilities.MimeTypes;
 
 import java.util.regex.Pattern;
 
-public class ImportActivity extends TtProjectAdjusterActivity {
+public class ImportActivity extends ProjectAdjusterActivity {
     private FloatingActionButton fabImport;
     private FABProgressCircleEx fabProgCircle;
 

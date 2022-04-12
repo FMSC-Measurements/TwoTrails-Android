@@ -124,11 +124,22 @@
         </TableRow>
     </TableLayout>
 
+    <TextView
+        android:id="@+id/gpsInfoNmeaTvStats"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/gpsInfoLayStats"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
+        android:text="@string/str_null_value"
+        android:textColor="@color/red_A700"
+        android:visibility="gone"/>
+
     <FrameLayout
         android:id="@+id/gpsInfoLaySatInfo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/gpsInfoLayStats">
+        android:layout_below="@id/gpsInfoNmeaTvStats">
 
         <RelativeLayout
             android:id="@+id/gpsInfoLaySatInfoSub"
@@ -146,8 +157,8 @@
                 android:id="@+id/gpsInfoSatSky"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_alignParentTop="true"
-                android:layout_above="@id/gpsInfoSatStatus"/>
+                android:layout_above="@id/gpsInfoSatStatus"
+                android:layout_alignParentTop="true" />
         </RelativeLayout>
     </FrameLayout>
 </RelativeLayout>

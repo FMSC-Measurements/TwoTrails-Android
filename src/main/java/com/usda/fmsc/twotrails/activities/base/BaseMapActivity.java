@@ -103,8 +103,7 @@ import static androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_LOCKED_OPEN;
 import static androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_UNDEFINED;
 import static androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_UNLOCKED;
 
-@SuppressWarnings({"SameParameterValue"})
-public abstract class BaseMapActivity extends TtProjectAdjusterActivity implements IMultiMapFragment.MultiMapListener, GpsService.Listener,
+public abstract class BaseMapActivity extends ProjectAdjusterActivity implements IMultiMapFragment.MultiMapListener, GpsService.Listener,
         SensorEventListener, PolyMarkerMapRvAdapter.Listener, OnMapsSdkInitializedCallback {
 
     //region Lock and Gravity Defs
@@ -164,7 +163,8 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
     private HashMap<String, TtMetadata> _Metadata;
     private TtMetadata _DefaultMetadata;
 
-    private Extent completeBnds, trackedPoly;
+    private Extent completeBnds;//, trackedPolyExtents;
+    private IPolygonGraphicManager trackedPolyManager;
 
     private final boolean[] visd = new boolean[12];
     private final boolean[] invisd = new boolean[12];
@@ -538,11 +538,10 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
                     dialogBuilder.setTitle("Track Polygon");
 
                     dialogBuilder.setItems(polyStrs, (dialog, which) -> {
-                        IPolygonGraphicManager pmm = managers.get(which);
-                        trackedPoly = pmm.getExtents();
-                        getTtAppCtx().getProjectSettings().setTrackedPolyCN(pmm.getPolygonCN());
+                        trackedPolyManager = managers.get(which);
+                        getTtAppCtx().getProjectSettings().setTrackedPolyCN(trackedPolyManager.getPolygonCN());
                         mapMoved = true;
-                        moveToLocation(pmm.getExtents(), Consts.Location.PADDING, true);
+                        moveToLocation(trackedPolyManager.getExtents(), Consts.Location.PADDING, true);
                     });
 
                     dialogBuilder.setNegativeButton(R.string.str_cancel, null);
@@ -551,11 +550,10 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
 
                     dialog.show();
                 } else {
-                    IPolygonGraphicManager pmm = getIPolygonGraphicManagers().get(0);
-                    trackedPoly = pmm.getExtents();
-                    getTtAppCtx().getProjectSettings().setTrackedPolyCN(pmm.getPolygonCN());
+                    trackedPolyManager = getIPolygonGraphicManagers().get(0);
+                    getTtAppCtx().getProjectSettings().setTrackedPolyCN(trackedPolyManager.getPolygonCN());
                     mapMoved = true;
-                    moveToLocation(pmm.getExtents(), Consts.Location.PADDING, true);
+                    moveToLocation(trackedPolyManager.getExtents(), Consts.Location.PADDING, true);
                 }
             } else {
                 Toast.makeText(this, "No Polygons", Toast.LENGTH_SHORT).show();
@@ -806,8 +804,8 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
 
     protected void resetMapBounds(boolean animate) {
         mapMoved = true;
-        if (getMapTracking() == MapTracking.POLY_BOUNDS && getTrackedPoly() != null) {
-            moveToLocation(getTrackedPoly(), Consts.Location.PADDING, animate);
+        if (getMapTracking() == MapTracking.POLY_BOUNDS && getTrackedPolyExtents() != null) {
+            moveToLocation(getTrackedPolyExtents(), Consts.Location.PADDING, animate);
         } else if (getMapTracking() == MapTracking.FOLLOW && hasPosition()) {
             moveToLocation(getLastPosition(), Consts.Location.ZOOM_CLOSE, animate);
         } else if (getCompleteBounds() != null) {
@@ -1029,8 +1027,8 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
         if (getMapTracking() == MapTracking.FOLLOW) {
             moveToLocation(position, true);
         } else if (mapMoved) {
-            if (getMapTracking() == MapTracking.POLY_BOUNDS && getTrackedPoly() != null) {
-                moveToLocation(getTrackedPoly(), Consts.Location.PADDING, true);
+            if (getMapTracking() == MapTracking.POLY_BOUNDS && getTrackedPolyExtents() != null) {
+                moveToLocation(getTrackedPolyExtents(), Consts.Location.PADDING, true);
             } else if (getMapTracking() == MapTracking.COMPLETE_BOUNDS && getCompleteBounds() != null) {
                 moveToLocation(getCompleteBounds(), Consts.Location.PADDING, true);
             }
@@ -1258,7 +1256,7 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
             addPolygonGraphic(polygonGraphicManager, getTtAppCtx().getMapSettings().getPolyDrawOptions(polygon.getCN()));
 
             if (trackedPolyCN != null && polygon.getCN().equals(trackedPolyCN)) {
-                trackedPoly = polygonGraphicManager.getExtents();
+                trackedPolyManager = polygonGraphicManager;
             }
         }
     }
@@ -1844,8 +1842,12 @@ public abstract class BaseMapActivity extends TtProjectAdjusterActivity implemen
         return getTtAppCtx().getProjectSettings().getTrackedPolyCN();
     }
 
-    protected Extent getTrackedPoly() {
-        return trackedPoly;
+    protected IPolygonGraphicManager getTrackedPolyManager() {
+        return trackedPolyManager;
+    }
+
+    protected Extent getTrackedPolyExtents() {
+        return trackedPolyManager.getExtents();
     }
 
     protected Extent getCompleteBounds() {

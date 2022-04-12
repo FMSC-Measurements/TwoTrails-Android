@@ -10,7 +10,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.preference.Preference;
 
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
+import com.usda.fmsc.twotrails.activities.base.TtCustomToolbarActivity;
 import com.usda.fmsc.twotrails.activities.base.TtActivity;
 import com.usda.fmsc.twotrails.fragments.TtBasePrefFragment;
 import com.usda.fmsc.twotrails.logic.SettingsLogic;
@@ -105,7 +105,7 @@ public class MiscSettingsFragment extends TtBasePrefFragment {
             });
         }
 
-        CustomToolbarActivity activity = (CustomToolbarActivity)getActivity();
+        TtCustomToolbarActivity activity = (TtCustomToolbarActivity)getActivity();
         if (activity != null) {
             ActionBar actionBar = activity.getSupportActionBar();
 

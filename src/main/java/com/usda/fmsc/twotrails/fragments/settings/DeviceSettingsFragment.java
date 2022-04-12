@@ -27,7 +27,7 @@ import com.usda.fmsc.geospatial.nmea41.sentences.base.NmeaSentence;
 import com.usda.fmsc.twotrails.DeviceSettings;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.activities.SettingsActivity;
-import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
+import com.usda.fmsc.twotrails.activities.base.TtCustomToolbarActivity;
 import com.usda.fmsc.twotrails.devices.TtBluetoothManager;
 import com.usda.fmsc.twotrails.dialogs.CheckNmeaDialogTt;
 import com.usda.fmsc.twotrails.fragments.TtBasePrefFragment;
@@ -79,7 +79,7 @@ public class DeviceSettingsFragment extends TtBasePrefFragment {
         if (bundle != null && bundle.containsKey(CURRENT_PAGE)) {
             moveToPage = bundle.getString(CURRENT_PAGE);
 
-            CustomToolbarActivity activity = (CustomToolbarActivity)getActivity();
+            TtCustomToolbarActivity activity = (TtCustomToolbarActivity)getActivity();
             if (activity != null) {
                 ActionBar actionBar = activity.getSupportActionBar();
 

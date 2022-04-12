@@ -15,12 +15,12 @@ import com.usda.fmsc.android.listeners.SimpleTextWatcher;
 import com.usda.fmsc.android.utilities.DeviceOrientationEx;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
+import com.usda.fmsc.twotrails.activities.base.TtCustomToolbarActivity;
 import com.usda.fmsc.twotrails.fragments.media.TtCameraFragment;
 import com.usda.fmsc.utilities.ParseEx;
 import com.usda.fmsc.utilities.StringEx;
 
-public class GetDirectionActivity extends CustomToolbarActivity implements CameraFragment.CameraListener {
+public class GetDirectionActivity extends TtCustomToolbarActivity implements CameraFragment.CameraListener {
     private TtCameraFragment cameraFragment;
 
     private View cameraView;

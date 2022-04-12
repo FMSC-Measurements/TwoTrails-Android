@@ -18,7 +18,7 @@ import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.listeners.ComplexOnPageChangeListener;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
-import com.usda.fmsc.twotrails.activities.base.TtProjectAdjusterActivity;
+import com.usda.fmsc.twotrails.activities.base.ProjectAdjusterActivity;
 import com.usda.fmsc.twotrails.data.TwoTrailsSchema;
 import com.usda.fmsc.twotrails.fragments.AnimationCardFragment;
 import com.usda.fmsc.twotrails.fragments.polygon.PolygonFragment;
@@ -33,7 +33,7 @@ import java.util.List;
 import com.usda.fmsc.utilities.StringEx;
 
 @SuppressLint("DefaultLocale")
-public class PolygonsActivity extends TtProjectAdjusterActivity {
+public class PolygonsActivity extends ProjectAdjusterActivity {
     private HashMap<String, Listener> listeners;
 
     private MenuItem miLock, miReset, miDelete, miAdjust;

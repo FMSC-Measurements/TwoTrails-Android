@@ -282,40 +282,38 @@ public class ArcGisMapFragment extends TtBaseFragment implements IMultiMapFragme
                 }
 
                 if (currentGisMapLayer.isOnline() && currentGisMapLayer.getNumberOfLevels() < 1) {
-                    //AndroidUtils.Device.isInternetAvailable(getContext(), internetAvailable -> {
-                        if (AndroidUtils.Device.isInternetAvailable(getContext())) {
-                            getTtAppCtx().getArcGISTools().getLayerFromUrl(agml.getUrl(), getActivity(), new ArcGISTools.IGetArcMapLayerListener() {
-                                @Override
-                                public void onComplete(ArcGisMapLayer layer) {
-                                    boolean updated = false;
+                    if (AndroidUtils.Device.isInternetAvailable(getContext())) {
+                        getTtAppCtx().getArcGISTools().getLayerFromUrl(agml.getUrl(), getActivity(), new ArcGISTools.IGetArcMapLayerListener() {
+                            @Override
+                            public void onComplete(ArcGisMapLayer layer) {
+                                boolean updated = false;
 
-                                    if (layer.hasDetailLevels()) {
-                                        agml.setLevelsOfDetail(layer.getLevelsOfDetail());
-                                        updated = true;
-                                    }
-
-                                    if (agml.getMaxScale() < 0 && layer.getMaxScale() >= 0) {
-                                        agml.setMaxScale(layer.getMaxScale());
-                                        agml.setMinScale(layer.getMinScale());
-                                        updated = true;
-                                    }
-
-                                    if (updated) {
-                                        getTtAppCtx().getArcGISTools().updateMapLayer(agml);
-
-                                        if (currentGisMapLayer.getId() == agml.getId()) {
-                                            currentGisMapLayer = agml;
-                                        }
-                                    }
+                                if (layer.hasDetailLevels()) {
+                                    agml.setLevelsOfDetail(layer.getLevelsOfDetail());
+                                    updated = true;
                                 }
 
-                                @Override
-                                public void onBadUrl(String error) {
-
+                                if (agml.getMaxScale() < 0 && layer.getMaxScale() >= 0) {
+                                    agml.setMaxScale(layer.getMaxScale());
+                                    agml.setMinScale(layer.getMinScale());
+                                    updated = true;
                                 }
-                            });
-                        }
-                    //});
+
+                                if (updated) {
+                                    getTtAppCtx().getArcGISTools().updateMapLayer(agml);
+
+                                    if (currentGisMapLayer.getId() == agml.getId()) {
+                                        currentGisMapLayer = agml;
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onBadUrl(String error) {
+
+                            }
+                        });
+                    }
                 }
             } catch (FileNotFoundException e) {
                 Toast.makeText(getActivity(), "Unable to find offline map file.", Toast.LENGTH_LONG).show();
@@ -355,7 +353,6 @@ public class ArcGisMapFragment extends TtBaseFragment implements IMultiMapFragme
 
                 if (currentGisMapLayer != null && zLevels > 0 && zoomLevel > zLevels) {
                     zoomLevel = currentGisMapLayer.getNumberOfLevels();
-                    //zoomLevel = (float)currentGisMapLayer.getLevelsOfDetail()[(int)zoomLevel].getResolution();
                 }
 
                 if (zoomLevel > -1) {
@@ -372,7 +369,6 @@ public class ArcGisMapFragment extends TtBaseFragment implements IMultiMapFragme
     @Override
     public void moveToLocation(Extent extents, int padding, boolean animate) {
         if (mapView != null) {
-            //mapView.setViewpointAsync(new Viewpoint(getTtAppCtx().getArcGISTools().getEnvelopFromLatLngExtents(extents, mapView)));
             mapView.setViewpointGeometryAsync(getTtAppCtx().getArcGISTools().getEnvelopFromLatLngExtents(extents, mapView), padding);
         }
     }
@@ -625,9 +621,6 @@ public class ArcGisMapFragment extends TtBaseFragment implements IMultiMapFragme
                 Graphic graphic = _LocationLayer.getGraphics().get(0);
                 graphic.setGeometry(point);
             } else {
-//                if (sms == null) {
-//                    sms = new SimpleMarkerSymbol(SimpleMarkerSymbol.Style.DIAMOND, Color.RED, 20);
-//                }
                 _LocationLayer.getGraphics().add(new Graphic(point, new SimpleMarkerSymbol(SimpleMarkerSymbol.Style.DIAMOND, Color.RED, 20)));
             }
         }

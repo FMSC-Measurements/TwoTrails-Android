@@ -2,15 +2,14 @@ package com.usda.fmsc.twotrails.activities;
 
 
 import android.os.Bundle;
-import android.webkit.WebView;
 
 import androidx.annotation.Nullable;
 
 import com.mukesh.MarkdownView;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
+import com.usda.fmsc.twotrails.activities.base.TtCustomToolbarActivity;
 
-public class PrivacyPolicyActivity extends CustomToolbarActivity {
+public class PrivacyPolicyActivity extends TtCustomToolbarActivity {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
