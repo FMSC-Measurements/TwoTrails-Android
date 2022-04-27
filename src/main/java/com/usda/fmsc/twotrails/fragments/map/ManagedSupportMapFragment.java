@@ -180,43 +180,6 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
 
     @Override
     public void onMapLoaded() {
-//        if (initialLoad && startUpMapOptions != null && startUpMapOptions.getMapId() != GoogleMapType.MAP_TYPE_NONE.getValue()) {
-//            try {
-//                if (startUpMapOptions.hasExtents()) {
-//                    moveToLocation(CameraUpdateFactory.newLatLngBounds(
-//                            new LatLngBounds(
-//                                    new LatLng(startUpMapOptions.getSouth(), startUpMapOptions.getWest()),
-//                                    new LatLng(startUpMapOptions.getNorth(), startUpMapOptions.getEast())
-//                            ),
-//                            //fragWidth - startUpMapOptions.getPadding() / 2,
-//                            //fragHeight - startUpMapOptions.getPadding() / 2,
-//                            startUpMapOptions.getPadding()
-//                        ),
-//                    false);
-//                } else if (startUpMapOptions.hasLocation()) {
-//                    moveToLocation(CameraUpdateFactory.newLatLngZoom(
-//                            new LatLng(
-//                                    startUpMapOptions.getLatitude(),
-//                                    startUpMapOptions.getLongitude()
-//                            ),
-//                            startUpMapOptions.getZoomLevel() != null ? startUpMapOptions.getZoomLevel() : Consts.Location.ZOOM_GENERAL),
-//                    false);
-//                } else {
-//                    moveToLocation(CameraUpdateFactory.newLatLngBounds(
-//                            Consts.Location.GoogleMaps.USA_BOUNDS,
-//                            fragWidth,
-//                            fragHeight,
-//                            Consts.Location.PADDING
-//                    ), false);
-//                }
-//            } catch (Exception e) {
-//                getTtAppCtx().getReport().writeError("ManagedSupportMapFragment:onMapReady", e.getMessage(), e.getStackTrace());
-//            }
-//
-//            initialLoad = false;
-//        }
-
-
         if (mmlistener != null) {
             mmlistener.onMapLoaded();
         }

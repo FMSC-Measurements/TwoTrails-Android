@@ -63,7 +63,7 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
     private RelativeLayout progLay;
 
     private MenuItem miHideGpsInfo;
-    private boolean gpsInfoHidden, _ToleranceExceeded = false, killAcquire = true;
+    private boolean gpsInfoHidden, _ToleranceExceeded = false, killAcquire = true, lookBeyondFirstPosition = true;
 
     private ArrayList<TtNmeaBurst> _Bursts, _UsedBursts;
     private TtPoint _CurrentPoint;
@@ -87,8 +87,6 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
 
     //region Activity
     protected void onCreate(Bundle savedInstanceState) {
-//        disableTrailMode();
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sales_admin_tools);
 
@@ -183,6 +181,7 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
         options.DopValue = ds.getSATFilterDopValue();
         increment = ds.getSATIncrement();
         takeAmount = ds.getSATNmeaAmount();
+        lookBeyondFirstPosition = true; // TODO create setting
 
         _LineTolerance = ds.getMapDistToPolyLineTolerance();
         _LineColor = ds.getMapDistToPolyLineColor();
@@ -392,7 +391,7 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
                 TtUtils.Convert.distance(closestPosition.getDistance(), getCurrentMetadata().getDistance(), Dist.Meters),
                 getCurrentMetadata().getDistance().toStringAbv(),
                 closestPosition.isPositionAtAPoint() ?
-                        String.format(Locale.getDefault(), "at point %d", closestPosition.getClosestPoint().getPID()) :
+                        String.format(Locale.getDefault(), "at point %d", closestPosition.getClosestPoint().getPID(), lookBeyondFirstPosition) :
                         String.format(Locale.getDefault(), "between points %d and %d", closestPosition.getPoint1().getPID(), closestPosition.getPoint2().getPID()),
                 closestPosition.getAzimuthToClosestPosition(currentCoords)
         ));
@@ -634,14 +633,14 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
                         _ValidationPoint.adjustPoint();
 
                         UTMCoords calcCoords = new UTMCoords(x, y, zone);
-                        showValidationPoint(calcCoords, _ClosestPositionCalc.getClosestPosition(calcCoords));
+                        showValidationPoint(calcCoords, _ClosestPositionCalc.getClosestPosition(calcCoords, lookBeyondFirstPosition));
                     }
                 }
             }
 
             if (!pauseDistLine && _ClosestPositionCalc != null) {
                 UTMCoords currentCoords = nmeaBurst.getUTM(getCurrentMetadata().getZone());
-                ClosestPositionCalculator.ClosestPosition cp = _ClosestPositionCalc.getClosestPosition(currentCoords);
+                ClosestPositionCalculator.ClosestPosition cp = _ClosestPositionCalc.getClosestPosition(currentCoords, lookBeyondFirstPosition);
 
                 if (cp != null) {
                     updateDirPathUI(cp, currentCoords);

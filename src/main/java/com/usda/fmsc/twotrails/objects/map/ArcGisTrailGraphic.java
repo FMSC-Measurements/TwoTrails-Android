@@ -66,11 +66,6 @@ public class ArcGisTrailGraphic implements ITrailGraphic, IMarkerDataGraphic {
 
         map.getGraphicsOverlays().add(_TrailLayer);
         map.getGraphicsOverlays().add(_PtsLayer);
-
-//        if (points.size() > 0)
-//            polyBounds = eBuilder.build();
-//        else
-//            polyBounds = null;
     }
 
     @Override
@@ -96,10 +91,9 @@ public class ArcGisTrailGraphic implements ITrailGraphic, IMarkerDataGraphic {
         mk.getAttributes().put(MarkerData.ATTR_KEY, md.getKey());
         _PtsLayer.getGraphics().add(mk);
 
-
         if (point.isOnBnd()) {
             if (_TrailPoints == null) {
-                _TrailPoints = new PointCollection(SpatialReferences.getWgs84());//new PointCollection(map.getSpatialReference());
+                _TrailPoints = new PointCollection(SpatialReferences.getWgs84());
             }
 
             _TrailPoints.add(posLL);
@@ -119,9 +113,9 @@ public class ArcGisTrailGraphic implements ITrailGraphic, IMarkerDataGraphic {
 
                 _TrailLayer.getGraphics().add(_TrailGraphic);
             }
-
-            eBuilder.include(pos);
         }
+
+        eBuilder.include(pos);
 
         _LastPoint = point;
 

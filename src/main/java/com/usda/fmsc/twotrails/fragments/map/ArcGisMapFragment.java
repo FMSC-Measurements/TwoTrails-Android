@@ -14,6 +14,7 @@ import androidx.annotation.NonNull;
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
 import com.esri.arcgisruntime.geometry.Envelope;
 import com.esri.arcgisruntime.geometry.Geometry;
+import com.esri.arcgisruntime.geometry.GeometryEngine;
 import com.esri.arcgisruntime.geometry.GeometryType;
 import com.esri.arcgisruntime.geometry.Point;
 import com.esri.arcgisruntime.geometry.SpatialReference;
@@ -273,9 +274,18 @@ public class ArcGisMapFragment extends TtBaseFragment implements IMultiMapFragme
                 this.basemapId = agml.getId();
                 this.currentGisMapLayer = agml;
 
+                if (agml.getMinScale() < 0) {
+                    baseMap.setMinScale(4622324);
+                }
+
+                if (agml.getMaxScale() > 1000 || agml.getMaxScale() < 0) {
+                    baseMap.setMaxScale(1000);
+                }
+
                 mBasemapLayer = baseMap;
 
                 mapView.setMap(mBasemapLayer);
+                mapView.setPadding(padLeft, padTop, padRight, padBottom);
 
                 if (mmListener != null) {
                     mmListener.onMapTypeChanged(MapType.ArcGIS, basemapId, agml.isOnline());
@@ -394,17 +404,12 @@ public class ArcGisMapFragment extends TtBaseFragment implements IMultiMapFragme
 
     @Override
     public Extent getExtents() {
-        Viewpoint vp = mapView.getCurrentViewpoint(Viewpoint.Type.BOUNDING_GEOMETRY);
+        Envelope envelope = getArcExtents();
 
-        if (vp.getTargetGeometry() != null && vp.getTargetGeometry().getGeometryType() == GeometryType.ENVELOPE) {
-            Envelope envelope = vp.getTargetGeometry().getExtent();
+        if (envelope != null) {
+            envelope = (Envelope) GeometryEngine.project(envelope, SpatialReferences.getWgs84());
 
-            if (envelope != null) {
-                Point ne = getTtAppCtx().getArcGISTools().mapPointToLatLng((int)envelope.getYMax(), (int)envelope.getXMax(), mapView);
-                Point sw = getTtAppCtx().getArcGISTools().mapPointToLatLng((int)envelope.getYMin(), (int)envelope.getXMin(), mapView);
-
-                return new Extent(sw.getY(), ne.getX(), ne.getY(), sw.getX());
-            }
+            return new Extent(envelope.getYMax(), envelope.getXMax(), envelope.getYMin(), envelope.getXMin());
         }
 
         return null;
@@ -496,13 +501,14 @@ public class ArcGisMapFragment extends TtBaseFragment implements IMultiMapFragme
 
     @Override
     public void setMapPadding(int left, int top, int right, int bottom) {
-        //compass.setPadding(left, top, right, bottom);
-        //scalebar.setPadding(left, top, right, bottom);
-
         padLeft = left;
         padTop = top;
         padRight = right;
         padBottom = bottom;
+
+        if (mapView != null) {
+            mapView.setPadding(padLeft, padTop, padRight, padBottom);
+        }
     }
 
     @Override

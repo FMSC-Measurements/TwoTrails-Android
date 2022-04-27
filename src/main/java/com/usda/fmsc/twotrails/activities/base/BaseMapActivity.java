@@ -864,30 +864,34 @@ public abstract class BaseMapActivity extends ProjectAdjusterActivity implements
     }
 
     protected void addPolygonGraphic(PolygonGraphicManager graphicManager, PolygonDrawOptions drawOptions) {
-        if (mmFrag != null) {
-            try {
-                mmFrag.addPolygon(graphicManager, drawOptions);
-            } catch (NullPointerException e) {
-                new AlertDialog.Builder(this)
-                        .setMessage("An error occurred trying to add a polygon. Please try readjusting your Polygons.")
-                        .setPositiveButton("Adjust Polygons", (dialog, which) -> {
-                            getTtAppCtx().adjustProject();
-                            finish();
-                        })
-                        .setNeutralButton(R.string.str_cancel, (dialog, which) -> finish())
-                        .show();
+        if (!polyGraphicManagers.contains(graphicManager)) {
+            if (mmFrag != null) {
+                try {
+                    mmFrag.addPolygon(graphicManager, drawOptions);
+                } catch (NullPointerException e) {
+                    new AlertDialog.Builder(this)
+                            .setMessage("An error occurred trying to add a polygon. Please try readjusting your Polygons.")
+                            .setPositiveButton("Adjust Polygons", (dialog, which) -> {
+                                getTtAppCtx().adjustProject();
+                                finish();
+                            })
+                            .setNeutralButton(R.string.str_cancel, (dialog, which) -> finish())
+                            .show();
+                }
             }
-        }
 
-        polyGraphicManagers.add(graphicManager);
+            polyGraphicManagers.add(graphicManager);
+        }
     }
 
     protected void addTrailGraphic(TrailGraphicManager graphicManager) {
-        if (mmFrag != null) {
-            mmFrag.addTrail(graphicManager);
-        }
+        if (!trailGraphicManagers.contains(graphicManager)) {
+            if (mmFrag != null) {
+                mmFrag.addTrail(graphicManager);
+            }
 
-        trailGraphicManagers.add(graphicManager);
+            trailGraphicManagers.add(graphicManager);
+        }
     }
 
     protected void removePolygonGraphic(PolygonGraphicManager graphicManager) {

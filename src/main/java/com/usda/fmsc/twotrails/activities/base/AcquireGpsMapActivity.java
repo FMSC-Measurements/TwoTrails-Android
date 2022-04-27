@@ -206,6 +206,11 @@ public abstract class AcquireGpsMapActivity extends BaseMapActivity {
         if (mapOffsetY > 0) {
             setMapPadding(0, mapOffsetY, 0, 0);
         }
+    }
+
+    @Override
+    protected void createGraphicManagers() {
+        super.createGraphicManagers();
 
         if (isTrailModeEnabled()) {
             addTrailGraphic(trailGraphicManager);

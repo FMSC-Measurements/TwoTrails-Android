@@ -119,7 +119,7 @@ public class ClosestPositionCalculator {
      * @return Closest Position to current position
      */
     public ClosestPosition getClosestPosition(UTMCoords coords) {
-        return getClosestPosition(coords.getX(), coords.getY(), false);
+        return getClosestPosition(coords.getX(), coords.getY(), true);
     }
 
     /**

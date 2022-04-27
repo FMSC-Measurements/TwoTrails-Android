@@ -213,7 +213,7 @@ public class ArcGisMapLayer implements Parcelable, Comparable<ArcGisMapLayer> {
 
 
     public boolean hasScales() {
-        return minScale != 0 && maxScale != 0;
+        return minScale > 0 && maxScale > 0;
     }
 
 

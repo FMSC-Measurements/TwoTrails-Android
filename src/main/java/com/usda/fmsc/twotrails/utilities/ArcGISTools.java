@@ -254,21 +254,20 @@ public class ArcGISTools {
     }
 
     public ArcGISMap getBaseLayer(ArcGisMapLayer agml, boolean isOnline) throws FileNotFoundException {
-        ArcGISTiledLayer tiledLayer;
+        Basemap basemap;
 
         if (isOnline) {
-            tiledLayer = new ArcGISTiledLayer(agml.getUrl());
+            basemap = new Basemap(new ArcGISTiledLayer(agml.getUrl()));
         } else {
             File filePath = new File(getTtAppCtx().getOfflineMapsDir(), agml.getFileName());
             if (FileUtils.fileOrFolderExists(filePath.getPath())) {
-                TileCache tileCache = new TileCache(filePath.getPath());
-                tiledLayer = new ArcGISTiledLayer(tileCache);
+                basemap = new Basemap(new ArcGISTiledLayer(new TileCache(filePath.getPath())));
             } else {
                 throw new FileNotFoundException("Tile Package Not Found");
             }
         }
 
-        return new ArcGISMap(new Basemap(tiledLayer));
+        return new ArcGISMap(basemap);
     }
 
 
@@ -344,28 +343,12 @@ public class ArcGISTools {
         return (Point) GeometryEngine.project(mapView.screenToLocation(screenPoint), SpatialReferences.getWgs84());
     }
 
-//    public Point latLngToMapSpatial(double lat, double lon, MapView mapView) {
-//        return latLngToMapSpatial(new Point(lon, lat), mapView);
-//    }
-//
-//    public Point latLngToMapSpatial(Point point, MapView mapView) {
-//        //android.graphics.Point p = mapView.locationToScreen(point);
-//        //return new Point(p.x, p.y);
-//        return (Point) GeometryEngine.project(point, mapView.getSpatialReference(), LatLonSpatialTransformation);
-//        //return (Point) GeometryEngine.project(mapView.locationToScreen(point), SpatialReferences.getWgs84());
-//    }
-
     public Envelope getEnvelopFromLatLngExtents(Extent extents, MapView mapView) {
         return getEnvelopFromLatLngExtents(extents.getNorth(), extents.getEast(), extents.getSouth(), extents.getWest(), mapView);
     }
 
     public Envelope getEnvelopFromLatLngExtents(double n, double e, double s, double w, MapView mapView) {
-
-        //Point ne = latLngToMapSpatial(n, e, mapView);
-        //Point sw = latLngToMapSpatial(s, w, mapView);
-
         return new Envelope(w, s, e, n, LatLonSpatialReference);
-//        return new Envelope(sw.getX(), sw.getY(), ne.getX(), ne.getY(), LatLonSpatialReference);
     }
 
 

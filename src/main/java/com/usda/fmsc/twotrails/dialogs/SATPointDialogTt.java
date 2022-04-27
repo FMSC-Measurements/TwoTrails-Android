@@ -195,6 +195,11 @@ public class SATPointDialogTt extends TtBaseDialogFragment {
             if (_Listener != null) {
                 _Listener.onCancel();
             }
+        })
+        .setOnDismissListener(dialog -> {
+            if (_Listener != null) {
+                _Listener.onCancel();
+            }
         });
 
         return db.create();
