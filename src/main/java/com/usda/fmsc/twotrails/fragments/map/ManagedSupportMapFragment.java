@@ -58,11 +58,9 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
 
     private Marker currentMarker;
 
-    private int fragWidth, fragHeight;
-
     private final Queue<CameraUpdate> cameraQueue = new ArrayDeque<>();
 
-    private boolean isMoving, cameraQueueEnabled = false, initialLoad = true;
+    private boolean isMoving, cameraQueueEnabled = false;
 
 
     @NonNull
@@ -97,16 +95,6 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
         }
 
         getMapAsync(this);
-    }
-
-    @Override
-    public void onViewCreated(@NonNull final View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-        view.getViewTreeObserver().addOnGlobalLayoutListener(() -> {
-            fragWidth = view.getWidth();
-            fragHeight = view.getHeight();
-        });
     }
 
 

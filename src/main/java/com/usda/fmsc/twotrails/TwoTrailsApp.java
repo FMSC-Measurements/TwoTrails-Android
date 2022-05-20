@@ -1,5 +1,6 @@
 package com.usda.fmsc.twotrails;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.Application;
@@ -41,6 +42,7 @@ import com.usda.fmsc.twotrails.logic.SegmentFactory;
 import com.usda.fmsc.twotrails.logic.SegmentList;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.objects.TwoTrailsProject;
+import com.usda.fmsc.twotrails.objects.media.TtMedia;
 import com.usda.fmsc.twotrails.objects.points.QuondamPoint;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.rangefinder.RangeFinderService;
@@ -514,7 +516,7 @@ public class TwoTrailsApp extends Application {
     private final Runnable searchForGps = new Runnable() {
         @Override
         public void run() {
-            if (!AndroidUtils.App.checkBluetoothPermission(TwoTrailsApp.this)) {
+            if (!AndroidUtils.App.checkBluetoothScanAndConnectPermission(TwoTrailsApp.this)) {
                 getReport().writeDebug("Bluetooth Permission not granted", "TwoTrailsApp:searchForGps");
                 return;
             }
@@ -524,6 +526,7 @@ public class TwoTrailsApp extends Application {
 
                 if (adapter != null) {
                     scanningForGps = true;
+
                     adapter.startDiscovery();
                     Log.d(Consts.LOG_TAG, "Scanning for BT devices.");
 
@@ -730,6 +733,13 @@ public class TwoTrailsApp extends Application {
             }
 
             getReport().writeEvent(String.format("MAL Loaded: %s (%s)", _CurrentProject.Name, _CurrentProject.TTMPXFile));
+
+            File mediaDir = getProjectMediaDir();
+            if (!mediaDir.exists()) {
+                if (!mediaDir.mkdirs()) {
+                    getReport().writeError("Unable to make mediaDir", "TwoTrailsApp:onCreate");
+                }
+            }
         } else {
             getReport().writeEvent("MAL Unloaded");
         }
@@ -861,29 +871,7 @@ public class TwoTrailsApp extends Application {
     //endregion
 
 
-    //For use with logging only
-//    public static synchronized TtReport getTtReport() {
-//        return _AppContext.getReport();
-//    }
-//
-//    public static TwoTrailsApp getInstance(Context baseContext) {
-//        return (TwoTrailsApp)baseContext.getApplicationContext();
-//    }
-
-//    @Override
-//    public void onConfigurationChanged(Configuration newConfig) {
-//        super.onConfigurationChanged(newConfig);
-//    }
-//
-//
-//    @Override
-//    public void onLowMemory() {
-//        super.onLowMemory();
-//    }
-
-
     //region Syncing
-
 
     public void syncExternalDir() {
 
@@ -1156,8 +1144,20 @@ public class TwoTrailsApp extends Application {
         return _MediaDir != null ? _MediaDir : (_MediaDir = Paths.get(getFilesDir().getPath(), Consts.FolderLayout.Internal.MediaDir, FileUtils.getFileNameWoExt(getDAL().getFileName())).toFile());
     }
 
-    public Uri getMediaFileByFileName(String fileName) {
-        return  Uri.parse(Paths.get(getProjectMediaDir().toString(), fileName).toString());
+    public File getMediaFileByFileName(String fileName) {
+        return new File(Paths.get(getProjectMediaDir().toString(), fileName).toString());
+    }
+
+    public File getMediaFile(TtMedia media) {
+        return getMediaFileByFileName(media.getFileName());
+    }
+
+    public Uri getMediaUri(TtMedia media) {
+        return  Uri.fromFile(getMediaFileByFileName(media.getFileName()));
+    }
+
+    public File getMediaFileProviderPath(String fileName) {
+        return Paths.get(Consts.FolderLayout.Internal.MediaDir, FileUtils.getFileNameWoExt(getDAL().getFileName()), fileName).toFile();
     }
 
     public File getSettingsFile() {

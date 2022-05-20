@@ -44,7 +44,6 @@ import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.fragments.TtBaseFragment;
-import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.objects.map.ArcGisLineGraphic;
 import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
 import com.usda.fmsc.twotrails.objects.map.ArcGisPolygonGraphic;
@@ -72,8 +71,6 @@ public class ArcGisMapFragment extends TtBaseFragment implements IMultiMapFragme
 
     private MapOptions startUpMapOptions;
     private MultiMapListener mmListener;
-
-    private GpsService.GpsBinder binder;
 
     private MapView mapView;
     private GraphicsOverlay _LocationLayer = new GraphicsOverlay();
@@ -431,41 +428,6 @@ public class ArcGisMapFragment extends TtBaseFragment implements IMultiMapFragme
     public double getScale() {
         return mapView.getMapScale();
     }
-
-
-//    public int getMapZoomLevel() {
-//        if (mBasemapLayer instanceof ArcGISTiledMapServiceLayer) {
-//            double mapRes = mapView.getResolution();
-//            double[] resolutions = ((ArcGISTiledMapServiceLayer) mBasemapLayer).getTileInfo().getResolutions();
-//
-//            for (int i = 0; i < resolutions.length - 2; i++) {
-//                if (mapRes <= resolutions[i] && mapRes > resolutions[i + 1])
-//                    return i;
-//            }
-//        }
-//
-//        return  -1;
-//    }
-
-
-//    public Point getMapPoint(int x, int y) {
-//        return mapView.toMapPoint(x, y);
-//    }
-
-
-//    public Extent getExtentsFromScreen(int xmin, int ymin, int xmax, int ymax) {
-//        Point ne = getTtAppCtx().getArcGISTools().mapPointToLatLng(getMapPoint(xmin, ymin), mapView);
-//        Point sw = getTtAppCtx().getArcGISTools().mapPointToLatLng(getMapPoint(xmax, ymax), mapView);
-//
-//        return new Extent(sw.getX(), ne.getY(), ne.getX(), sw.getY());
-//    }
-//
-//    public Envelope getArcExtentsFromScreen(int xmin, int ymin, int xmax, int ymax) {
-//        Point nw = getMapPoint(xmin, ymin);
-//        Point se = getMapPoint(xmax, ymax);
-//
-//        return new Envelope(nw.getX(), nw.getY(), se.getX(), se.getY());
-//    }
 
 
     @Override

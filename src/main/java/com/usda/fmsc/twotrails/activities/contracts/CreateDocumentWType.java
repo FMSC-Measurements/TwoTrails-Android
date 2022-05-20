@@ -15,7 +15,6 @@ import androidx.annotation.Nullable;
 import com.usda.fmsc.utilities.Tuple;
 
 
-@TargetApi(19)
 public class CreateDocumentWType extends ActivityResultContract<Tuple<String, String>, Uri> {
 
     @CallSuper

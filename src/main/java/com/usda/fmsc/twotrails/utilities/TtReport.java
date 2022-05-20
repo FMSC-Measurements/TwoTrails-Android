@@ -58,9 +58,8 @@ public class TtReport {
             getLogWriter().flush();
         } catch (Exception e) {
             e.printStackTrace();
+            Log.d(Consts.LOG_TAG, text);
         }
-
-        Log.d(Consts.LOG_TAG, text);
     }
 
     public void writeError(String msg, String codePage) {

@@ -1,10 +1,12 @@
 package com.usda.fmsc.twotrails.data;
 
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.view.View;
 
 import com.usda.fmsc.android.utilities.BitmapManager;
@@ -326,7 +328,9 @@ public class MediaAccessLayer extends IDataLayer implements BitmapManager.IBitma
         boolean success = false;
 
         try {
-            InputStream fs = getTtAppContext().getContentResolver().openInputStream(image.getFilePath(getTtAppContext()));
+            Uri path = getTtAppContext().getMediaUri(image);
+            ContentResolver cr = getTtAppContext().getContentResolver();
+            InputStream fs = cr.openInputStream(path);
 
             insertImageData(image, FileUtils.readInputStream(fs));
 
@@ -444,7 +448,7 @@ public class MediaAccessLayer extends IDataLayer implements BitmapManager.IBitma
         boolean success = false;
 
         try {
-            InputStream fs = getTtAppContext().getContentResolver().openInputStream(image.getFilePath(getTtAppContext()));
+            InputStream fs = getTtAppContext().getContentResolver().openInputStream(getTtAppContext().getMediaUri(image));
 
             updateImageData(image, FileUtils.readInputStream(fs));
 
@@ -704,7 +708,7 @@ public class MediaAccessLayer extends IDataLayer implements BitmapManager.IBitma
     @Override
     public boolean hasBitmap(String key) {
         return this.getItemsCount(TwoTrailsMediaSchema.Media.TableName,
-                String.format("%s == %s and %s == 0 and %s == 0",
+                String.format("%s == '%s' and %s == 0 and %s == 0",
                         TwoTrailsMediaSchema.SharedSchema.CN, key,
                         TwoTrailsMediaSchema.Media.IsExternal,
                         TwoTrailsMediaSchema.Media.MediaType

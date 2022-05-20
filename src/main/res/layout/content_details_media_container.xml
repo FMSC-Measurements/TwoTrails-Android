@@ -39,13 +39,13 @@
             android:id="@+id/pmdIvFullscreen"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:padding="8dp"
-            android:src="@drawable/ic_fullscreen_black_36dp"
+            android:layout_centerVertical="true"
+            android:layout_toStartOf="@id/pmdMenu"
+            android:layout_toLeftOf="@id/pmdMenu"
             android:clickable="true"
             android:contentDescription="@string/str_fullscreen"
-            android:layout_toLeftOf="@id/pmdMenu"
-            android:layout_toStartOf="@id/pmdMenu"
-            android:layout_centerVertical="true"/>
+            android:padding="8dp"
+            android:src="@drawable/ic_fullscreen_black_36dp" />
 
         <TextView
             android:id="@+id/pmdTitle"
@@ -81,8 +81,8 @@
             android:id="@+id/pmdViewPager"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_alignParentTop="true"
-            android:layout_above="@id/lay1">
+            android:layout_above="@id/lay1"
+            android:layout_alignParentTop="true">
 
         </androidx.viewpager.widget.ViewPager>
     </RelativeLayout>

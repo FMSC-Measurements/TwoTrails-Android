@@ -119,25 +119,25 @@ public class ClosestPositionCalculator {
      * @return Closest Position to current position
      */
     public ClosestPosition getClosestPosition(UTMCoords coords) {
-        return getClosestPosition(coords.getX(), coords.getY(), true);
+        return getClosestPosition(coords.getX(), coords.getY(), false);
     }
 
     /**
      * @param coords Coordinates in UTM
-     * @param lookBeyondFirstPosition Whether to look past the closest point for points' which line segments may be closer
+     * @param lookBeyondMaxDist Whether to look past the maximum possible distance between points
      * @return Closest Position to current position
      */
-    public ClosestPosition getClosestPosition(UTMCoords coords, boolean lookBeyondFirstPosition) {
-        return getClosestPosition(coords.getX(), coords.getY(), lookBeyondFirstPosition);
+    public ClosestPosition getClosestPosition(UTMCoords coords, boolean lookBeyondMaxDist) {
+        return getClosestPosition(coords.getX(), coords.getY(), lookBeyondMaxDist);
     }
 
     /**
      * @param utmX UTM X of current position
      * @param utmY UTM Y of current position
-     * @param lookBeyondFirstPosition Whether to look past the closest point for points' which line segments may be closer
+     * @param lookBeyondMaxDist Whether to look past the maximum possible distance between points
      * @return Closest Position to current position
      */
-    public ClosestPosition getClosestPosition(Double utmX, Double utmY, boolean lookBeyondFirstPosition) {
+    public ClosestPosition getClosestPosition(Double utmX, Double utmY, boolean lookBeyondMaxDist) {
         int bx = (int)(utmX / BLOCK_SIZE);
         int by = (int)(utmY / BLOCK_SIZE);
 
@@ -175,11 +175,19 @@ public class ClosestPositionCalculator {
                 row++;
             }
 
-            if (closestPosition != null && !lookBeyondFirstPosition) {
-                return closestPosition;
-            }
-
             shell++;
+        }
+
+        if (closestPosition == null && lookBeyondMaxDist) {
+            for (List<CalcPoint> blocks : _PointMap.values()) {
+                for (CalcPoint block : blocks) {
+                    ClosestPosition cp = getClosestPosition(utmX, utmY, block);
+
+                    if (closestPosition == null || (cp != null && cp.getDistance() < closestPosition.getDistance())) {
+                        closestPosition = cp;
+                    }
+                }
+            }
         }
 
         return closestPosition;

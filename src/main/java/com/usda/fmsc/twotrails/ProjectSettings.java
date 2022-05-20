@@ -130,8 +130,8 @@ public class ProjectSettings extends Settings {
         return projects;
     }
 
-    public boolean setRecentProjects(List<TwoTrailsProject> twoTrailsProjects) {
-        return getEditor().putString(RECENT_PROJS, new Gson().toJson(twoTrailsProjects)).commit();
+    public void setRecentProjects(List<TwoTrailsProject> twoTrailsProjects) {
+        setString(RECENT_PROJS, new Gson().toJson(twoTrailsProjects));
     }
 
     public void updateRecentProjects(TwoTrailsProject project) {

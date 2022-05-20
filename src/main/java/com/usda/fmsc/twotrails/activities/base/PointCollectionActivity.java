@@ -9,21 +9,26 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.FileProvider;
 
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.utilities.DeviceOrientationEx;
+import com.usda.fmsc.twotrails.BuildConfig;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.activities.GetDirectionActivity;
 import com.usda.fmsc.twotrails.activities.TtCameraActivity;
+import com.usda.fmsc.twotrails.activities.contracts.CaptureTtImage;
 import com.usda.fmsc.twotrails.activities.contracts.GetImages;
 import com.usda.fmsc.twotrails.objects.media.TtImage;
 import com.usda.fmsc.twotrails.objects.media.TtMedia;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
+import com.usda.fmsc.utilities.Tuple;
 
 import org.joda.time.DateTime;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -94,8 +99,6 @@ public abstract class PointCollectionActivity extends ProjectAdjusterActivity {
                 .show();
     }
 
-
-
     private final ActivityResultLauncher<Uri> captureImageForResult = registerForActivityResult(new ActivityResultContracts.TakePicture(), picTaken -> {
         if (picTaken) {
             if (AndroidUtils.Files.fileExists(getTtAppCtx(), _CapturedImageUri)) {
@@ -114,15 +117,9 @@ public abstract class PointCollectionActivity extends ProjectAdjusterActivity {
         _CapturedImageUri = null;
         _CapturedImagePointCN = null;
     });
-    private final ActivityResultLauncher<Intent> captureTtImageForResult = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
-
-        if (result.getResultCode() == RESULT_OK) {
-            Intent intent = result.getData();
-
-            if (intent != null && intent.hasExtra(Consts.Codes.Data.TTIMAGE)) {
-                TtImage ttImage = intent.getParcelableExtra(Consts.Codes.Data.TTIMAGE);
-                onImageCaptured(ttImage);
-            }
+    private final ActivityResultLauncher<Tuple<String, Uri>> captureTtImageForResult = registerForActivityResult(new CaptureTtImage(), result -> {
+        if (result != null) {
+            onImageCaptured(result.getImage());
         }
 
         _CapturedImageUri = null;
@@ -130,11 +127,7 @@ public abstract class PointCollectionActivity extends ProjectAdjusterActivity {
     });
     private final ActivityResultLauncher<String> requestTtCameraPermission = registerForActivityResult(new ActivityResultContracts.RequestPermission(), permissionGranted -> {
         if (permissionGranted) {
-
-            captureTtImageForResult.launch(
-                    new Intent(this, TtCameraActivity.class)
-                        .putExtra(Consts.Codes.Data.POINT_CN, _CapturedImagePointCN)
-                        .putExtra(Consts.Codes.Data.TTIMAGE_URI, _CapturedImageUri));
+            captureTtImageForResult.launch(new Tuple<>(_CapturedImagePointCN, _CapturedImageUri));
         } else {
             Toast.makeText(this, "Camera permission is required to take pictures", Toast.LENGTH_LONG).show();
         }
@@ -145,56 +138,18 @@ public abstract class PointCollectionActivity extends ProjectAdjusterActivity {
 
         _CapturedImageUri = Uri.parse(Paths.get(
                 getTtAppCtx().getProjectMediaDir().toString(),
-                String.format(Locale.getDefault(), "IMG_%s_%d.jpg", TtUtils.Date.toStringDateMillis(dateTime))).toString());
+                String.format(Locale.getDefault(), "IMG_%s.jpg", TtUtils.Date.toStringDateMillis(dateTime))).toString());
         _CapturedImagePointCN = currentPoint.getCN();
 
         if (useTtCamera) {
             if (AndroidUtils.App.checkCameraPermission(this)) {
-                captureTtImageForResult.launch(
-                        new Intent(this, TtCameraActivity.class)
-                            .putExtra(Consts.Codes.Data.POINT_CN, _CapturedImagePointCN)
-                            .putExtra(Consts.Codes.Data.TTIMAGE_URI, _CapturedImageUri));
+                captureTtImageForResult.launch(new Tuple<>(_CapturedImagePointCN, _CapturedImageUri));
             } else {
                 requestTtCameraPermission.launch(Manifest.permission.CAMERA);
             }
         } else {
             captureImageForResult.launch(_CapturedImageUri);
         }
-
-
-
-
-//        if (AndroidUtils.App.requestCameraPermission(activity, Consts.Codes.Requests.CAMERA)) {
-//            if (useTtCamera) {
-//                Intent intent = new Intent(activity, TtCameraActivity.class);
-//
-//                if (currentPoint != null) {
-//                    intent.putExtra(Consts.Codes.Data.POINT_CN, currentPoint.getCN());
-//                }
-//
-//                activity.startActivityForResult(intent, Consts.Codes.Activities.TTCAMERA);
-//            } else {
-//                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-//
-//                DateTime dateTime = DateTime.now();
-//
-//                File photo = new File(activity.getApplicationContext().getCacheDir(), String.format("IMG_%d%d%d_%d.jpg",
-//                        dateTime.getYear(), dateTime.getMonthOfYear(), dateTime.getDayOfMonth(), dateTime.getMillisOfDay()));
-////                    File photo = new File(TtUtils.getTtMediaDir(), String.format("IMG_%d%d%d_%d.jpg",
-////                            dateTime.getYear(), dateTime.getMonthOfYear(), dateTime.getDayOfMonth(), dateTime.getMillisOfDay()));
-//
-//                intent.putExtra(MediaStore.EXTRA_OUTPUT,
-//                        AndroidUtils.Files.getUri(activity, BuildConfig.APPLICATION_ID, photo)
-//                );
-//
-//                if (intent.resolveActivity(activity.getPackageManager()) != null) {
-//                    activity.startActivityForResult(intent, Consts.Codes.Requests.CAPTURE_IMAGE);
-//                    return Uri.fromFile(photo);
-//                } else {
-//                    Toast.makeText(activity, "Unable to find a Camera application", Toast.LENGTH_LONG).show();
-//                }
-//            }
-//        }
     }
     //endregion
 

@@ -73,7 +73,7 @@ public class DeviceSettingsFragment extends TtBasePrefFragment {
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         Bundle bundle = getArguments();
-        
+
         addPreferencesFromResource(R.xml.pref_device_setup);
 
         if (bundle != null && bundle.containsKey(CURRENT_PAGE)) {

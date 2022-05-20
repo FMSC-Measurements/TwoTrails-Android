@@ -22,9 +22,9 @@ public abstract class Settings {
         return  prefs;
     }
 
-    public SharedPreferences.Editor getEditor() {
-        return editor;
-    }
+//    public SharedPreferences.Editor getEditor() {
+//        return editor;
+//    }
 
 
     protected int getInt(String settingName)

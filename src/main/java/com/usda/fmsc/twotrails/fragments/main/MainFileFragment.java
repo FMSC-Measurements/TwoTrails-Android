@@ -66,11 +66,16 @@ public class MainFileFragment extends TtBaseFragment {
 
         enableButtons(enabled);
 
-        if(getTtAppCtx().hasDAL()) {
+        return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if (getTtAppCtx().hasDAL()) {
             updateInfo();
         }
-
-        return view;
     }
 
     @Override

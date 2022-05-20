@@ -14,12 +14,15 @@ import android.widget.Toast;
 
 import androidx.annotation.ColorInt;
 import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
 import androidx.cardview.widget.CardView;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.usda.fmsc.android.AndroidUtils;
+import com.usda.fmsc.android.dialogs.DontAskAgainDialog;
 import com.usda.fmsc.android.dialogs.NumericInputDialog;
 import com.usda.fmsc.android.utilities.PostDelayHandler;
 import com.usda.fmsc.android.widget.SheetLayoutEx;
@@ -33,14 +36,17 @@ import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.DeviceSettings;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.activities.base.AcquireGpsMapActivity;
+import com.usda.fmsc.twotrails.dialogs.ColorPickerDialog;
 import com.usda.fmsc.twotrails.dialogs.SATPointDialogTt;
 import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
 import com.usda.fmsc.twotrails.logic.PointNamer;
+import com.usda.fmsc.twotrails.objects.DataActionType;
 import com.usda.fmsc.twotrails.objects.FilterOptions;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.objects.map.LineGraphicManager;
 import com.usda.fmsc.twotrails.objects.map.LineGraphicOptions;
 import com.usda.fmsc.twotrails.objects.map.TrailGraphicManager;
+import com.usda.fmsc.twotrails.objects.media.TtImage;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.points.WayPoint;
 import com.usda.fmsc.twotrails.units.Dist;
@@ -50,12 +56,12 @@ import com.usda.fmsc.utilities.StringEx;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 
 public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
     private static final String SAT_POINT_DIALOG = "sat_point_diag";
     private static final String COLOR_DIALOG = "color_diag";
-    private static final String TOLERANCE_DIALOG = "tol_diag";
 
     private CardView cvGpsInfo;
     private FloatingActionButton fabTakePoint, fabCancel;
@@ -63,7 +69,7 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
     private RelativeLayout progLay;
 
     private MenuItem miHideGpsInfo;
-    private boolean gpsInfoHidden, _ToleranceExceeded = false, killAcquire = true, lookBeyondFirstPosition = true;
+    private boolean gpsInfoHidden, _ToleranceExceeded = false, killAcquire = true;
 
     private ArrayList<TtNmeaBurst> _Bursts, _UsedBursts;
     private TtPoint _CurrentPoint;
@@ -119,6 +125,11 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
             setResult(Consts.Codes.Results.NO_POLYGON_DATA);
             finish();
             return;
+        }
+
+        ArrayList<TtPoint> polyPoints = getTtAppCtx().getDAL().getPointsInPolygon(_ValidationPolygon.getCN());
+        if (polyPoints.size() > 0) {
+            _CurrentPoint = polyPoints.get(polyPoints.size() - 1);
         }
 
         addMapDrawerListener(new DrawerLayout.SimpleDrawerListener() {
@@ -181,7 +192,6 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
         options.DopValue = ds.getSATFilterDopValue();
         increment = ds.getSATIncrement();
         takeAmount = ds.getSATNmeaAmount();
-        lookBeyondFirstPosition = true; // TODO create setting
 
         _LineTolerance = ds.getMapDistToPolyLineTolerance();
         _LineColor = ds.getMapDistToPolyLineColor();
@@ -219,14 +229,15 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
                 cvGpsInfo.setVisibility(View.GONE);
                 miHideGpsInfo.setTitle(R.string.menu_x_show_gps_info);
             }
-        } else if (itemId == R.id.satMenuValidationPoly) {//select poly or (all polys except _plts and _validations) for checking
+        } else if (itemId == R.id.satMenuValidationPoly) {
+            //select poly or (all polys except _plts and _validations) for checking
         } else if (itemId == R.id.satMenuColor) {
-//            ColorPickerDialog.newInstance(0)
-//                    .setListener(color -> {
-//                        _ConnectionLine.setLineColor(color);
-//                        getTtAppCtx().getDeviceSettings().setMapDistToPolyLineColor(color);
-//                    })
-//                    .show(getSupportFragmentManager(), COLOR_DIALOG);
+            ColorPickerDialog.newInstance(getTtAppCtx().getDeviceSettings().getMapDistToPolyLineColor())
+                    .setListener(color -> {
+                        _ConnectionLine.setLineColor(color);
+                        getTtAppCtx().getDeviceSettings().setMapDistToPolyLineColor(color);
+                    })
+                    .show(getSupportFragmentManager(), COLOR_DIALOG);
         } else if (itemId == R.id.satMenuTolerance) {
             NumericInputDialog ndiag = new NumericInputDialog(SalesAdminToolsActivity.this,
                     TtUtils.Convert.distance(_LineTolerance, getCurrentMetadata().getDistance(), Dist.Meters));
@@ -391,7 +402,7 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
                 TtUtils.Convert.distance(closestPosition.getDistance(), getCurrentMetadata().getDistance(), Dist.Meters),
                 getCurrentMetadata().getDistance().toStringAbv(),
                 closestPosition.isPositionAtAPoint() ?
-                        String.format(Locale.getDefault(), "at point %d", closestPosition.getClosestPoint().getPID(), lookBeyondFirstPosition) :
+                        String.format(Locale.getDefault(), "at point %d", closestPosition.getClosestPoint().getPID()) :
                         String.format(Locale.getDefault(), "between points %d and %d", closestPosition.getPoint1().getPID(), closestPosition.getPoint2().getPID()),
                 closestPosition.getAzimuthToClosestPosition(currentCoords)
         ));
@@ -414,6 +425,33 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
                         saveValidationPoint();
                         hideCancel();
                         fabTakePoint.setEnabled(true);
+
+                        //convert to DontAskAgainDialog
+                        new AlertDialog.Builder(SalesAdminToolsActivity.this)
+                                .setMessage(R.string.sat_cap_media_after_create)
+                                .setPositiveButton(R.string.menu_sat_capture, (dialog, which) -> {
+                                    if (AndroidUtils.Device.isFullOrientationAvailable(SalesAdminToolsActivity.this)) {
+                                        if (getTtAppCtx().getDeviceSettings().getUseTtCameraAsk()) {
+                                            DontAskAgainDialog dagdialog = new DontAskAgainDialog(SalesAdminToolsActivity.this,
+                                                    DeviceSettings.USE_TTCAMERA_ASK,
+                                                    DeviceSettings.USE_TTCAMERA,
+                                                    getTtAppCtx().getDeviceSettings().getPrefs());
+
+                                            dagdialog.setMessage(SalesAdminToolsActivity.this.getString(R.string.points_camera_diag))
+                                                    .setPositiveButton("TwoTrails", (dialogInterface, i, value) -> captureImage(true, _CurrentPoint), 2)
+                                                    .setNegativeButton("Android", (dialogInterface, i, value) -> captureImage(false, _CurrentPoint), 1)
+                                                    .setNeutralButton(getString(R.string.str_cancel), null, 0)
+                                                    .show();
+                                        } else {
+                                            captureImage(getTtAppCtx().getDeviceSettings().getUseTtCamera() == 2, _CurrentPoint);
+                                        }
+                                    } else {
+                                        captureImage(false, _CurrentPoint);
+                                    }
+                                })
+                                .setNeutralButton(R.string.str_cancel, null)
+                                .create()
+                                .show();
                     }
 
                     @Override
@@ -492,6 +530,21 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
 
                 progLay.startAnimation(a);
             }));
+        }
+    }
+    //endregion
+
+    //region Media
+    @Override
+    protected void onImageCaptured(TtImage image) {
+        //TODO add multi image add support
+        if (image != null) {
+            if (getTtAppCtx().getMAL().insertImage(image)) {
+                getTtAppCtx().getDAL().updateUserActivity(DataActionType.InsertedMedia);
+                Toast.makeText(SalesAdminToolsActivity.this, "Image Captured", Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(SalesAdminToolsActivity.this, "Error saving image", Toast.LENGTH_LONG).show();
+            }
         }
     }
     //endregion
@@ -633,14 +686,14 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
                         _ValidationPoint.adjustPoint();
 
                         UTMCoords calcCoords = new UTMCoords(x, y, zone);
-                        showValidationPoint(calcCoords, _ClosestPositionCalc.getClosestPosition(calcCoords, lookBeyondFirstPosition));
+                        showValidationPoint(calcCoords, _ClosestPositionCalc.getClosestPosition(calcCoords, true));
                     }
                 }
             }
 
             if (!pauseDistLine && _ClosestPositionCalc != null) {
                 UTMCoords currentCoords = nmeaBurst.getUTM(getCurrentMetadata().getZone());
-                ClosestPositionCalculator.ClosestPosition cp = _ClosestPositionCalc.getClosestPosition(currentCoords, lookBeyondFirstPosition);
+                ClosestPositionCalculator.ClosestPosition cp = _ClosestPositionCalc.getClosestPosition(currentCoords);
 
                 if (cp != null) {
                     updateDirPathUI(cp, currentCoords);

@@ -963,7 +963,7 @@ public abstract class BaseMapActivity extends ProjectAdjusterActivity implements
         }
 
         if (miTrackedPoly != null) {
-            miTrackedPoly.setVisible(true);//getMapTracking() == MapTracking.POLY_BOUNDS);
+            miTrackedPoly.setVisible(true);
         }
 
         updateActivitySettings();

@@ -172,10 +172,6 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
         public boolean onMenuItemClick(MenuItem item) {
             int itemId = item.getItemId();
             if (itemId == R.id.ctx_menu_add) {
-//                Intent intent = new Intent(Intent.ACTION_PICK);
-//                intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-//                intent.setType("image/*");
-//                startActivityForResult(intent, Consts.Codes.Requests.ADD_IMAGES);
                 pickImages();
             } else if (itemId == R.id.ctx_menu_capture) {
                 if (AndroidUtils.Device.isFullOrientationAvailable(Take5Activity.this)) {
@@ -517,7 +513,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
             if (ivFullscreen != null) {
                 ivFullscreen.setOnClickListener(v -> {
                     if (_CurrentMedia != null && _CurrentMedia.getMediaType() == MediaType.Picture) {
-                        TtUtils.Media.openInImageViewer(Take5Activity.this, _CurrentMedia.getFilePath(getTtAppCtx()));
+                        TtUtils.Media.openInImageViewer(getTtAppCtx(), _CurrentMedia);
                     }
                 });
 
@@ -601,14 +597,8 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
             openMapDrawer(GravityCompat.END);
         } else if (itemId == R.id.take5MenuGps) {
             openSettings(SettingsActivity.GPS_SETTINGS_PAGE);
-//            startActivityForResult(new Intent(this, SettingsActivity.class)
-//                            .putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.GPS_SETTINGS_PAGE),
-//                    Consts.Codes.Activities.SETTINGS);
         } else if (itemId == R.id.take5MenuTake5Settings) {
             openSettings(SettingsActivity.POINT_TAKE5_SETTINGS_PAGE);
-//            startActivityForResult(new Intent(this, SettingsActivity.class)
-//                            .putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.POINT_TAKE5_SETTINGS_PAGE),
-//                    Consts.Codes.Activities.SETTINGS);
         } else if (itemId == R.id.take5MenuMode) {
             if (!mapViewMode && _Points.size() > 0 && _CurrentPoint.getOp() == OpType.SideShot && !saved) {
                 btnCancelClick(null);

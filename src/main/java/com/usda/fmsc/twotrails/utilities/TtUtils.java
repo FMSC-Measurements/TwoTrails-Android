@@ -13,7 +13,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.provider.OpenableColumns;
 import android.util.JsonWriter;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
@@ -39,17 +38,13 @@ import com.usda.fmsc.twotrails.BuildConfig;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
-import com.usda.fmsc.twotrails.activities.base.TtActivity;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
-import com.usda.fmsc.twotrails.data.DataAccessManager;
-import com.usda.fmsc.twotrails.data.MediaAccessManager;
 import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment;
 import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
 import com.usda.fmsc.twotrails.objects.FilterOptions;
 import com.usda.fmsc.twotrails.objects.PointD;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
-import com.usda.fmsc.twotrails.objects.TwoTrailsProject;
 import com.usda.fmsc.twotrails.objects.media.TtImage;
 import com.usda.fmsc.twotrails.objects.media.TtMedia;
 import com.usda.fmsc.twotrails.objects.media.TtPanorama;
@@ -1032,22 +1027,21 @@ public class TtUtils {
             return index;
         }
 
-        public static void openInImageViewer(Activity activity, Uri uri) {
-            File file = new File(uri.getPath());
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            Uri extUri = FileProvider.getUriForFile(activity, BuildConfig.APPLICATION_ID + ".provider", file);
-            intent.setDataAndType(extUri, "image/*");
-            intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            activity.startActivity(intent);
-        }
+        public static void openInImageViewer(TwoTrailsApp app, TtMedia media) {
+            Uri extUri = FileProvider.getUriForFile(app, BuildConfig.APPLICATION_ID + ".provider", app.getMediaFileByFileName(media.getFileName()));
 
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setDataAndType(extUri, "image/*");
+            intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
+            app.startActivity(intent);
+        }
 
         public static TtImage createImageFromFile(TwoTrailsApp app, Uri uri, String pointCN) throws IOException {
             if (uri != null && uri.getPath() != null && AndroidUtils.Files.fileExists(app, uri)) {
                 DateTime time = null;
                 Integer width, height;
 
-                Uri internalImage = app.getMediaFileByFileName(FileUtils.getFileName(uri.getPath()));
+                Uri internalImage = Uri.fromFile(app.getMediaFileByFileName(FileUtils.getFileName(uri.getPath())));
                 InputStream fileStream = app.getContentResolver().openInputStream(internalImage);
 
                 AndroidUtils.Files.copyFile(app, uri, internalImage);
@@ -1103,7 +1097,6 @@ public class TtUtils {
                     if (name == null) {
                         name = uri.getPath();
                     }
-
 
                     name = FileUtils.getFileNameWoExt(name);
 

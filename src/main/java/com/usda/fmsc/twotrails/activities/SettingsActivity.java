@@ -3,6 +3,7 @@ package com.usda.fmsc.twotrails.activities;
 import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
@@ -175,8 +176,8 @@ public class SettingsActivity extends TtCustomToolbarActivity {
 
 
         @Override
-        public boolean onPreferenceTreeClick(Preference preference) {
-            if (preference != null && preference.hasKey()) {
+        public boolean onPreferenceTreeClick(@NonNull Preference preference) {
+            if (preference.hasKey()) {
                 Fragment frag = getSettingsFragment(preference.getKey());
 
                 if (frag != null){

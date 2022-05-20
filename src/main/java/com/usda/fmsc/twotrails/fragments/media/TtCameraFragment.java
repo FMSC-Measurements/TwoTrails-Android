@@ -37,11 +37,11 @@ public class TtCameraFragment extends CameraFragment {
     private Uri saveImageUri;
 
 
-    public static TtCameraFragment newInstance(String pointCN, String saveFilePath) {
+    public static TtCameraFragment newInstance(String pointCN, Uri saveFilePath) {
         TtCameraFragment fragment = new TtCameraFragment();
         Bundle args = new Bundle();
         args.putString(POINT_CN, pointCN);
-        args.putString(SAVE_IMAGE_URI, saveFilePath);
+        args.putParcelable(SAVE_IMAGE_URI, saveFilePath);
         args.putBoolean(SAVE_IMAGE, true);
         fragment.setArguments(args);
         return fragment;
@@ -70,10 +70,7 @@ public class TtCameraFragment extends CameraFragment {
             pointCN = bundle.getString(POINT_CN);
             saveImage = bundle.getBoolean(SAVE_IMAGE);
 
-            String siu = bundle.getString(SAVE_IMAGE_URI);
-            if (!StringEx.isEmpty(siu)) {
-                saveImageUri = Uri.parse(siu);
-            }
+            saveImageUri = bundle.getParcelable(SAVE_IMAGE_URI);
         } else {
             throw new IllegalArgumentException("Requires Point CN");
         }
@@ -105,8 +102,8 @@ public class TtCameraFragment extends CameraFragment {
     }
 
     @Override
-    protected File getCreateImageFile() {
-        return saveImageUri != null ? new File(saveImageUri.getPath()) : super.getCreateImageFile();
+    protected File createImageFile() {
+        return saveImageUri != null ? new File(saveImageUri.getPath()) : super.createImageFile();
     }
 
     @Override
@@ -132,9 +129,9 @@ public class TtCameraFragment extends CameraFragment {
         }
 
         if (type == PictureType.Panorama) {
-            ttImage = new TtPanorama(name, fileName, null, captureTime, pointCN, true, orientation.getRationalAzimuth(), orientation.getPitch(), orientation.getRoll());
+            ttImage = new TtPanorama(name, fileName, "", captureTime, pointCN, true, orientation.getRationalAzimuth(), orientation.getPitch(), orientation.getRoll());
         } else {
-            ttImage = new TtImage(name, fileName, null, captureTime, pointCN, true, orientation.getRationalAzimuth(), orientation.getPitch(), orientation.getRoll());
+            ttImage = new TtImage(name, fileName, "", captureTime, pointCN, true, orientation.getRationalAzimuth(), orientation.getPitch(), orientation.getRoll());
         }
 
         if (listener != null) {

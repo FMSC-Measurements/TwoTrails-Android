@@ -1,7 +1,5 @@
 package com.usda.fmsc.twotrails.objects.media;
 
-import android.content.Context;
-import android.net.Uri;
 import android.os.Parcel;
 
 import com.usda.fmsc.android.AndroidUtils;
@@ -9,12 +7,9 @@ import com.usda.fmsc.android.utilities.ParcelTools;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.objects.TtObject;
 import com.usda.fmsc.twotrails.units.MediaType;
-import com.usda.fmsc.utilities.FileUtils;
 import com.usda.fmsc.utilities.StringEx;
 
 import org.joda.time.DateTime;
-
-import java.nio.file.Paths;
 
 public abstract class TtMedia extends TtObject {
     private String _Name;
@@ -75,17 +70,6 @@ public abstract class TtMedia extends TtObject {
     public void setFileName(String fileName) {
         _FileName = fileName;
     }
-
-
-    public boolean externalFileExists(TwoTrailsApp app) {
-        return _IsExternal && _FileName != null && AndroidUtils.Files.fileExists(app, app.getMediaFileByFileName(_FileName));
-    }
-
-    public Uri getFilePath(TwoTrailsApp app) {
-        if (_FileName == null) throw new RuntimeException("No External File");
-        return app.getMediaFileByFileName(_FileName);
-    }
-
 
     public String getComment() {
         return _Comment;

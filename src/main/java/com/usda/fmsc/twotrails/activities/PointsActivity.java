@@ -675,10 +675,10 @@ public class PointsActivity extends PointCollectionActivity implements PointMedi
         ivFullscreen = findViewById(R.id.pmdIvFullscreen);
         if (ivFullscreen != null) {
             ivFullscreen.setOnClickListener(v -> {
-                if (_CurrentMedia != null && _CurrentMedia.getMediaType() == MediaType.Picture && _CurrentMedia.isExternal() &&
+                if (_CurrentMedia != null && _CurrentMedia.getMediaType() == MediaType.Picture &&
                         (slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED ||
                                 slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.ANCHORED)) {
-                    TtUtils.Media.openInImageViewer(PointsActivity.this, _CurrentMedia.getFilePath(getTtAppCtx()));
+                    TtUtils.Media.openInImageViewer(getTtAppCtx(), _CurrentMedia);
                 }
             });
 
@@ -1895,13 +1895,13 @@ public class PointsActivity extends PointCollectionActivity implements PointMedi
                 setMediaUpdated(false);
             }
 
-            if (media.isExternal()) {
+//            if (media.isExternal()) {
                 ivFullscreen.setEnabled(true);
                 ivFullscreen.setAlpha(Consts.ENABLED_ALPHA);
-            } else {
-                ivFullscreen.setEnabled(false);
-                ivFullscreen.setAlpha(Consts.DISABLED_ALPHA);
-            }
+//            } else {
+//                ivFullscreen.setEnabled(false);
+//                ivFullscreen.setAlpha(Consts.DISABLED_ALPHA);
+//            }
         } else {
             setMediaTitle(null);
             _BackupMedia = null;

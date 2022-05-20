@@ -226,6 +226,8 @@
     <string name="menu_sat_settings">Sales Admin Settings</string>
     <string name="menu_sat_validation_poly">Validation Polygon</string>
     <string name="menu_sat_unit_tolerance">Unit Tolerance</string>
+    <string name="menu_sat_color">Distance Color</string>
+    <string name="menu_sat_capture">Capture</string>
 
 
     <!-- Transitions -->
@@ -566,6 +568,10 @@
     <string name="amd_update_path">Update File Path</string>
     <string name="amd_update_details">Update Map Details</string>
     <string name="amd_scale">Map Scale</string>
+
+
+    <!-- Sales Admin Tools-->
+    <string name="sat_cap_media_after_create">Would you like to capture an image of your Plot?</string>
 
 
     <!-- ArcGIS Values -->

@@ -179,24 +179,25 @@
                 android:textSize="7pt"/>
 
         </TableRow>
-    </TableLayout>
 
-    <TextView
-        android:id="@+id/gpsInfoNmeaTvStats"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/gpsInfoForSatCPInfo"
-        android:paddingTop="4dp"
-        android:paddingBottom="4dp"
-        android:text="@string/str_null_value"
-        android:textColor="@color/red_A700"
-        android:visibility="gone"/>
+        <TableRow android:layout_width="0dp"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/gpsInfoNmeaTvStats"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/str_null_value"
+                android:textColor="@color/red_A700"
+                android:visibility="gone"/>
+        </TableRow>
+    </TableLayout>
 
     <FrameLayout
         android:id="@+id/gpsInfoLaySatInfo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/gpsInfoNmeaTvStats">
+        android:layout_below="@id/gpsInfoForSatCPInfo">
 
         <RelativeLayout
             android:id="@+id/gpsInfoLaySatInfoSub"

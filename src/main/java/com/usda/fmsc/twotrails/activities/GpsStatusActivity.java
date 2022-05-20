@@ -28,7 +28,6 @@ import com.usda.fmsc.utilities.StringEx;
 
 import java.util.Locale;
 
-@SuppressLint("DefaultLocale")
 public class GpsStatusActivity extends TtCustomToolbarActivity implements GpsService.Listener {
     private static final String nVal = "*";
 
@@ -114,11 +113,11 @@ public class GpsStatusActivity extends TtCustomToolbarActivity implements GpsSer
                 if (burst.hasPosition()) {
                     UTMCoords coords = zone != null ? burst.getUTM(zone) : burst.getTrueUTM();
 
-                    tvLat.setText(String.format("%.4f", burst.getLatitudeSD()));
-                    tvLon.setText(String.format("%.4f", burst.getLongitudeSD()));
+                    tvLat.setText(String.format(Locale.getDefault(), "%.4f", burst.getLatitudeSD()));
+                    tvLon.setText(String.format(Locale.getDefault(), "%.4f", burst.getLongitudeSD()));
 
-                    tvUtmX.setText(String.format("%.3f", coords.getX()));
-                    tvUtmY.setText(String.format("%.3f", coords.getY()));
+                    tvUtmX.setText(String.format(Locale.getDefault(), "%.3f", coords.getX()));
+                    tvUtmY.setText(String.format(Locale.getDefault(), "%.3f", coords.getY()));
 
                     if (zone == null) {
                         tvZone.setText(StringEx.toString(coords.getZone()));
@@ -127,7 +126,7 @@ public class GpsStatusActivity extends TtCustomToolbarActivity implements GpsSer
                     }
 
                     if (burst.hasElevation()) {
-                        tvElev.setText(String.format("%.2f", burst.getElevation()));
+                        tvElev.setText(String.format(Locale.getDefault(), "%.2f", burst.getElevation()));
                     } else {
                         tvElev.setText(nVal);
                     }
@@ -145,13 +144,12 @@ public class GpsStatusActivity extends TtCustomToolbarActivity implements GpsSer
                     }
                 }
 
-                boolean iivRMC = false, iivGGA = false, iivGSA = false, iivGSV = false;
+                boolean iivRMC = !burst.isValid(NmeaIDs.SentenceID.RMC), iivGGA = false, iivGSA = false, iivGSV = false;
 
-                if (burst.isValid(NmeaIDs.SentenceID.RMC) && burst.getMagVar() != null) {
-                    tvDec.setText(String.format("%.2f %s", burst.getMagVar(), burst.getMagVarDir().toStringAbv()));
+                if (!iivRMC && burst.getMagVar() != null) {
+                    tvDec.setText(String.format(Locale.getDefault(), "%.2f %s", burst.getMagVar(), burst.getMagVarDir().toStringAbv()));
                 } else {
                     tvDec.setText(nVal);
-                    iivRMC = true;
                 }
 
                 if (burst.isValid(NmeaIDs.SentenceID.GGA)) {
@@ -161,10 +159,10 @@ public class GpsStatusActivity extends TtCustomToolbarActivity implements GpsSer
                     iivGGA = true;
                 }
 
-                if (burst.isValid(NmeaIDs.SentenceID.GSA)) {
+                if (burst.areAnyValid(NmeaIDs.SentenceID.GSA)) {
                     tvGpsStatus.setText(burst.getFix().toString());
-                    tvPdop.setText(burst.getPDOP() == null ? nVal : String.format("%.2f", burst.getPDOP()));
-                    tvHdop.setText(burst.getHDOP() == null ? nVal : String.format("%.2f", burst.getHDOP()));
+                    tvPdop.setText(burst.getPDOP() == null ? nVal : String.format(Locale.getDefault(), "%.2f", burst.getPDOP()));
+                    tvHdop.setText(burst.getHDOP() == null ? nVal : String.format(Locale.getDefault(), "%.2f", burst.getHDOP()));
                 } else {
                     tvGpsStatus.setText(GSASentence.Fix.NoFix.toString());
                     tvHdop.setText(nVal);
@@ -172,9 +170,9 @@ public class GpsStatusActivity extends TtCustomToolbarActivity implements GpsSer
                     iivGSA = true;
                 }
 
-                if (burst.isValid(NmeaIDs.SentenceID.GSV)) {
+                if (burst.areAnyValid(NmeaIDs.SentenceID.GSV)) {
 
-                    tvSat.setText(String.format("%d/%d/%d",
+                    tvSat.setText(String.format(Locale.getDefault(), "%d/%d/%d",
                             burst.getUsedSatellitesCount(),
                             burst.isValid(NmeaIDs.SentenceID.GGA) ? burst.getTrackedSatellitesCount() : 0,
                             burst.getSatellitesInViewCount()));

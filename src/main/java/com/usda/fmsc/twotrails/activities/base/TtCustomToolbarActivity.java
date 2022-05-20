@@ -46,17 +46,6 @@ public abstract class TtCustomToolbarActivity extends TtActivity {
         setupToolbar(view);
     }
 
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        boolean result = super.onCreateOptionsMenu(menu);
-//
-//        if (result) {
-//            AndroidUtils.UI.addIconsToMenu(menu);
-//        }
-//
-//        return result;
-//    }
-
     protected final void inflateMenu(@MenuRes int menuRes, Menu menu) {
         getMenuInflater().inflate(menuRes, menu);
     }

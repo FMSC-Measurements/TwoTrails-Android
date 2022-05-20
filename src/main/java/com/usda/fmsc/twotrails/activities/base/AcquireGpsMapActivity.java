@@ -32,6 +32,7 @@ import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.activities.GetDirectionActivity;
 import com.usda.fmsc.twotrails.activities.TtCameraActivity;
+import com.usda.fmsc.twotrails.activities.contracts.CaptureTtImage;
 import com.usda.fmsc.twotrails.activities.contracts.GetImages;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
@@ -46,6 +47,7 @@ import com.usda.fmsc.twotrails.ui.GpsStatusSatView;
 import com.usda.fmsc.twotrails.ui.GpsStatusSkyView;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 import com.usda.fmsc.utilities.StringEx;
+import com.usda.fmsc.utilities.Tuple;
 
 import org.joda.time.DateTime;
 
@@ -454,13 +456,12 @@ public abstract class AcquireGpsMapActivity extends BaseMapActivity {
                     }
                 }
 
-                boolean iivRMC = false, iivGGA = false, iivGSA = false, iivGSV = false;
+                boolean iivRMC = !burst.isValid(NmeaIDs.SentenceID.RMC), iivGGA = false, iivGSA = false, iivGSV = false;
 
-                if (burst.isValid(NmeaIDs.SentenceID.RMC) && burst.getMagVar() != null) {
+                if (!iivRMC && burst.getMagVar() != null) {
                     tvDec.setText(String.format(Locale.getDefault(), "%.2f %s", burst.getMagVar(), burst.getMagVarDir().toStringAbv()));
                 } else {
                     tvDec.setText(nVal);
-                    iivRMC = true;
                 }
 
                 if (burst.isValid(NmeaIDs.SentenceID.GGA)) {
@@ -470,7 +471,7 @@ public abstract class AcquireGpsMapActivity extends BaseMapActivity {
                     iivGGA = true;
                 }
 
-                if (burst.isValid(NmeaIDs.SentenceID.GSA)) {
+                if (burst.areAnyValid(NmeaIDs.SentenceID.GSA)) {
                     tvGpsStatus.setText(burst.getFix().toString());
                     tvPdop.setText(burst.getPDOP() == null ? nVal : String.format(Locale.getDefault(), "%.2f", burst.getPDOP()));
                     tvHdop.setText(burst.getHDOP() == null ? nVal : String.format(Locale.getDefault(), "%.2f", burst.getHDOP()));
@@ -633,7 +634,7 @@ public abstract class AcquireGpsMapActivity extends BaseMapActivity {
     //region Requests
     private final ActivityResultLauncher<String> requestImagesForResult = registerForActivityResult(new GetImages(), results -> {
         try {
-            List<TtImage> images =getImagesFromUris(results, _CapturedImagePointCN);
+            List<TtImage> images = getImagesFromUris(results, _CapturedImagePointCN);
 
             onImagesSelected(images);
 
@@ -695,7 +696,6 @@ public abstract class AcquireGpsMapActivity extends BaseMapActivity {
     private final ActivityResultLauncher<Uri> captureImageForResult = registerForActivityResult(new ActivityResultContracts.TakePicture(), picTaken -> {
         if (picTaken) {
             if (AndroidUtils.Files.fileExists(getTtAppCtx(), _CapturedImageUri)) {
-
                 try {
                     onImageCaptured(createImageFromFile(_CapturedImageUri, _CapturedImagePointCN));
                 } catch (IOException e) {
@@ -710,19 +710,17 @@ public abstract class AcquireGpsMapActivity extends BaseMapActivity {
         _CapturedImageUri = null;
         _CapturedImagePointCN = null;
     });
-    private final ActivityResultLauncher<Intent> captureTtImageForResult = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
-
+    private final ActivityResultLauncher<Tuple<String, Uri>> captureTtImageForResult = registerForActivityResult(new CaptureTtImage(), result -> {
+        if (result != null) {
+            onImageCaptured(result.getImage());
+        }
 
         _CapturedImageUri = null;
         _CapturedImagePointCN = null;
     });
     private final ActivityResultLauncher<String> requestTtCameraPermission = registerForActivityResult(new ActivityResultContracts.RequestPermission(), permissionGranted -> {
         if (permissionGranted) {
-
-            captureTtImageForResult.launch(
-                    new Intent(this, TtCameraActivity.class)
-                            .putExtra(Consts.Codes.Data.POINT_CN, _CapturedImagePointCN)
-                            .putExtra(Consts.Codes.Data.TTIMAGE_URI, _CapturedImageUri));
+            captureTtImageForResult.launch(new Tuple<>(_CapturedImagePointCN, _CapturedImageUri));
         } else {
             Toast.makeText(this, "Camera permission is required to take pictures", Toast.LENGTH_LONG).show();
         }
@@ -738,51 +736,13 @@ public abstract class AcquireGpsMapActivity extends BaseMapActivity {
 
         if (useTtCamera) {
             if (AndroidUtils.App.checkCameraPermission(this)) {
-                captureTtImageForResult.launch(
-                        new Intent(this, TtCameraActivity.class)
-                                .putExtra(Consts.Codes.Data.POINT_CN, _CapturedImagePointCN)
-                                .putExtra(Consts.Codes.Data.TTIMAGE_URI, _CapturedImageUri));
+                captureTtImageForResult.launch(new Tuple<>(_CapturedImagePointCN, _CapturedImageUri));
             } else {
                 requestTtCameraPermission.launch(Manifest.permission.CAMERA);
             }
         } else {
             captureImageForResult.launch(_CapturedImageUri);
         }
-
-
-
-
-//        if (AndroidUtils.App.requestCameraPermission(activity, Consts.Codes.Requests.CAMERA)) {
-//            if (useTtCamera) {
-//                Intent intent = new Intent(activity, TtCameraActivity.class);
-//
-//                if (currentPoint != null) {
-//                    intent.putExtra(Consts.Codes.Data.POINT_CN, currentPoint.getCN());
-//                }
-//
-//                activity.startActivityForResult(intent, Consts.Codes.Activities.TTCAMERA);
-//            } else {
-//                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-//
-//                DateTime dateTime = DateTime.now();
-//
-//                File photo = new File(activity.getApplicationContext().getCacheDir(), String.format("IMG_%d%d%d_%d.jpg",
-//                        dateTime.getYear(), dateTime.getMonthOfYear(), dateTime.getDayOfMonth(), dateTime.getMillisOfDay()));
-////                    File photo = new File(TtUtils.getTtMediaDir(), String.format("IMG_%d%d%d_%d.jpg",
-////                            dateTime.getYear(), dateTime.getMonthOfYear(), dateTime.getDayOfMonth(), dateTime.getMillisOfDay()));
-//
-//                intent.putExtra(MediaStore.EXTRA_OUTPUT,
-//                        AndroidUtils.Files.getUri(activity, BuildConfig.APPLICATION_ID, photo)
-//                );
-//
-//                if (intent.resolveActivity(activity.getPackageManager()) != null) {
-//                    activity.startActivityForResult(intent, Consts.Codes.Requests.CAPTURE_IMAGE);
-//                    return Uri.fromFile(photo);
-//                } else {
-//                    Toast.makeText(activity, "Unable to find a Camera application", Toast.LENGTH_LONG).show();
-//                }
-//            }
-//        }
     }
     //endregion
 

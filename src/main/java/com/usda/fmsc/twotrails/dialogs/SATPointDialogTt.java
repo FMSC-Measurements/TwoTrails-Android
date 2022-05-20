@@ -152,8 +152,9 @@ public class SATPointDialogTt extends TtBaseDialogFragment {
                 defMeta.getDistance().toStringAbv()));
         tvCPoly.setText(_ClosestPolygon.getName());
 
-        if (_CPoint2 == null) {
-            tvPoP.setText(String.format(Locale.getDefault(), "%d (%s)", _CPoint1.getPID(), _CPoint1.getOp()));
+        if (_CPoint1 == null ^ _CPoint2 == null) {
+            TtPoint pt = _CPoint2 == null ? _CPoint1 : _CPoint2;
+            tvPoP.setText(String.format(Locale.getDefault(), "%d (%s)", pt.getPID(), pt.getOp()));
         } else {
             tvPoP.setText(String.format(Locale.getDefault(), "%d \u21F9 %d", _CPoint1.getPID(), _CPoint2.getPID()));
         }
