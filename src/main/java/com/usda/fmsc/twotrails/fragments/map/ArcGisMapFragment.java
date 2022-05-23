@@ -162,10 +162,6 @@ public class ArcGisMapFragment extends TtBaseFragment implements IMultiMapFragme
 
         mapView.getGraphicsOverlays().add(_LocationLayer);
 
-//        if (startUpMapOptions.hasExtents() || startUpMapOptions.hasLocation()) {
-//            centerOnLoad = true;
-//        }
-
         return view;
     }
 
@@ -216,26 +212,6 @@ public class ArcGisMapFragment extends TtBaseFragment implements IMultiMapFragme
                 if (!mapReady) {
                     mmListener.onMapReady();
                     mapReady = true;
-
-//                    if (centerOnLoad) {
-//                        if (startUpMapOptions.hasExtents()) {
-//                            moveToLocation(new Extent(startUpMapOptions.getNorth(),
-//                                    startUpMapOptions.getEast(),
-//                                    startUpMapOptions.getSouth(),
-//                                    startUpMapOptions.getWest()), 0, false);
-//                        } else {
-//                            moveToLocation(startUpMapOptions.getLatitude(), startUpMapOptions.getLongitide(), false);
-//                        }
-//
-//                        centerOnLoad = false;
-//                    } else {
-//                        //if map is offline and has extents
-//                        if (startUpMapOptions.hasExtents()) {
-//                            moveToLocation(startUpMapOptions.getExtents(), 0, false);
-//                        } else {
-//                            moveToMapMaxExtents(false);
-//                        }
-//                    }
                 }
 
                 mmListener.onMapLoaded();
@@ -375,7 +351,7 @@ public class ArcGisMapFragment extends TtBaseFragment implements IMultiMapFragme
 
     @Override
     public void moveToLocation(Extent extents, int padding, boolean animate) {
-        if (mapView != null) {
+        if (mapView != null && getTtAppCtx() != null) {
             mapView.setViewpointGeometryAsync(getTtAppCtx().getArcGISTools().getEnvelopFromLatLngExtents(extents, mapView), padding);
         }
     }

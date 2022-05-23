@@ -22,8 +22,6 @@ public abstract class TtBaseDialogFragment extends DialogFragment {
                 } else {
                     throw new RuntimeException("Null app context");
                 }
-            } else {
-                throw new RuntimeException("Activity not found");
             }
         }
 
