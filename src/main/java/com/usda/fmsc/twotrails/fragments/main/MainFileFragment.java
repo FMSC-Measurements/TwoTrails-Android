@@ -1,5 +1,6 @@
 package com.usda.fmsc.twotrails.fragments.main;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -7,6 +8,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TableLayout;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
 
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
@@ -25,7 +28,7 @@ public class MainFileFragment extends TtBaseFragment {
     private TextView tvDate, tvPolys, tvPoints, tvGroups, tvMeta, tvDalVersion;
     private View viewCleanDb;
 
-    private boolean enabled = false, viewExists = false;
+    private boolean enabled = false, viewExists = false, updateOnAttached;
 
     public boolean isViewCreated() {
         return viewExists;
@@ -96,28 +99,46 @@ public class MainFileFragment extends TtBaseFragment {
 
             tblInfo.setVisibility(enable ? View.VISIBLE : View.INVISIBLE);
 
-            if (getTtAppCtx().getDeviceSettings().isDeveloperOptionsEnabled()) {
-                viewCleanDb.setVisibility(View.VISIBLE);
+            if (getTtAppCtx() != null) {
+                if (getTtAppCtx().getDeviceSettings().isDeveloperOptionsEnabled()) {
+                    viewCleanDb.setVisibility(View.VISIBLE);
+                } else {
+                    viewCleanDb.setVisibility(View.GONE);
+                }
             } else {
+                updateOnAttached = true;
                 viewCleanDb.setVisibility(View.GONE);
             }
         }
     }
 
     public void updateInfo() {
-        DataAccessManager dam = getTtAppCtx().getDAM();
-        DataAccessLayer dal = dam.getDAL();
+        if (getTtAppCtx() != null) {
+            DataAccessManager dam = getTtAppCtx().getDAM();
+            DataAccessLayer dal = dam.getDAL();
 
-        if (isViewCreated()) {
-            File dbFile = dam.getDBFile();
+            if (isViewCreated()) {
+                File dbFile = dam.getDBFile();
 
-            tvDalVersion.setText(dal.getVersion().toString());
-            tvDate.setText(new Date(dbFile.lastModified()).toString());
-            tvPolys.setText(StringEx.toString(dal.getItemsCount(TwoTrailsSchema.PolygonSchema.TableName)));
-            tvPoints.setText(StringEx.toString(dal.getItemsCount(TwoTrailsSchema.PointSchema.TableName)));
-            tvGroups.setText(StringEx.toString(dal.getItemsCount(TwoTrailsSchema.GroupSchema.TableName)));
-            tvMeta.setText(StringEx.toString(dal.getItemsCount(TwoTrailsSchema.MetadataSchema.TableName)));
+                tvDalVersion.setText(dal.getVersion().toString());
+                tvDate.setText(new Date(dbFile.lastModified()).toString());
+                tvPolys.setText(StringEx.toString(dal.getItemsCount(TwoTrailsSchema.PolygonSchema.TableName)));
+                tvPoints.setText(StringEx.toString(dal.getItemsCount(TwoTrailsSchema.PointSchema.TableName)));
+                tvGroups.setText(StringEx.toString(dal.getItemsCount(TwoTrailsSchema.GroupSchema.TableName)));
+                tvMeta.setText(StringEx.toString(dal.getItemsCount(TwoTrailsSchema.MetadataSchema.TableName)));
+            }
+        } else {
+            updateOnAttached = true;
         }
     }
 
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+
+        updateInfo();
+        enableButtons(enabled);
+
+        updateOnAttached = false;
+    }
 }

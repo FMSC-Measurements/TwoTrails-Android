@@ -1437,6 +1437,7 @@ public class PointsActivity extends PointCollectionActivity implements PointMedi
             _CurrentMetadata = getMetadata().get(_CurrentPoint.getMetadataCN());
             _CurrentIndex = index;
             pointViewPager.setCurrentItem(index, smoothScroll);
+            loadMedia(_CurrentPoint, false);
         } else {
             _CurrentPoint = null;
             _CurrentMetadata = null;

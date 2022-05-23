@@ -1851,7 +1851,7 @@ public abstract class BaseMapActivity extends ProjectAdjusterActivity implements
     }
 
     protected Extent getTrackedPolyExtents() {
-        return trackedPolyManager.getExtents();
+        return trackedPolyManager != null ? trackedPolyManager.getExtents() : null;
     }
 
     protected Extent getCompleteBounds() {

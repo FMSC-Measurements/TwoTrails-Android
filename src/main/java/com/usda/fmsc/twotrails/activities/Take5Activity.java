@@ -52,6 +52,8 @@ import com.usda.fmsc.twotrails.adapters.MediaRvAdapter;
 import com.usda.fmsc.twotrails.data.TwoTrailsMediaSchema;
 import com.usda.fmsc.twotrails.objects.media.TtImage;
 import com.usda.fmsc.twotrails.objects.media.TtMedia;
+import com.usda.fmsc.twotrails.rangefinder.RangeFinderService;
+import com.usda.fmsc.twotrails.rangefinder.TtRangeFinderData;
 import com.usda.fmsc.twotrails.units.MapTracking;
 import com.usda.fmsc.twotrails.units.MediaType;
 import com.usda.fmsc.twotrails.units.OpType;
@@ -83,7 +85,7 @@ import com.usda.fmsc.geospatial.GeoTools;
 import jp.wasabeef.recyclerview.animators.BaseItemAnimator;
 import jp.wasabeef.recyclerview.animators.FadeInAnimator;
 
-public class Take5Activity extends AcquireGpsMapActivity implements PointMediaController {
+public class Take5Activity extends AcquireGpsMapActivity implements PointMediaController, RangeFinderService.Listener {
     private static final boolean enableCardFading = true;
 
     private final HashMap<String, PointMediaListener> listeners = new HashMap<>();
@@ -1737,9 +1739,55 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
     }
     //endregion
 
-
+    //region RangeFinder
     @Override
     protected TtMedia getCurrentMedia() {
         return _CurrentMedia;
     }
+
+    @Override
+    public void rfDataReceived(TtRangeFinderData rfData) {
+
+    }
+
+    @Override
+    public void rfStringReceived(String rfString) {
+
+    }
+
+    @Override
+    public void rfInvalidStringReceived(String rfString) {
+
+    }
+
+    @Override
+    public void rangeFinderStarted() {
+
+    }
+
+    @Override
+    public void rangeFinderStopped() {
+
+    }
+
+    @Override
+    public void rangeFinderConnecting() {
+
+    }
+
+    @Override
+    public void rangeFinderServiceStarted() {
+
+    }
+
+    @Override
+    public void rangeFinderServiceStopped() {
+
+    }
+
+    @Override
+    public void rangeFinderError(RangeFinderService.RangeFinderError error) {
+
+    }
+    //endregion
 }
