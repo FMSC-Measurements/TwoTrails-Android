@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.widget.Toast;
@@ -24,6 +25,7 @@ import com.usda.fmsc.android.dialogs.DontAskAgainDialog;
 import com.usda.fmsc.android.dialogs.ProgressDialogEx;
 import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
 import com.usda.fmsc.geospatial.nmea41.sentences.base.NmeaSentence;
+import com.usda.fmsc.twotrails.BuildConfig;
 import com.usda.fmsc.twotrails.DeviceSettings;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.activities.SettingsActivity;
@@ -133,11 +135,14 @@ public class DeviceSettingsFragment extends TtBasePrefFragment {
 
         exGpsCat.setEnabled(getTtAppCtx().getDeviceSettings().getGpsExternal());
 
+        boolean requireBluetooth = false;
+
         String devName = getTtAppCtx().getDeviceSettings().getGpsDeviceName();
         if (StringEx.isEmpty(devName)) {
             prefLstGpsDevice.setSummary(R.string.ds_no_dev);
         } else {
             prefLstGpsDevice.setSummary(devName);
+            requireBluetooth = true;
         }
 
         if (getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
@@ -155,6 +160,7 @@ public class DeviceSettingsFragment extends TtBasePrefFragment {
             prefLstRFDevice.setSummary(R.string.ds_no_dev);
         } else {
             prefLstRFDevice.setSummary(devName);
+            requireBluetooth = true;
         }
 
         if (getTtAppCtx().getDeviceSettings().isRangeFinderConfigured()) {
@@ -165,6 +171,12 @@ public class DeviceSettingsFragment extends TtBasePrefFragment {
             }
         } else {
             prefRFCheck.setSummary(R.string.ds_dev_not_configured);
+        }
+
+        if (requireBluetooth) {
+            if (!AndroidUtils.App.checkBluetoothScanAndConnectPermission(getActivity())) {
+                requestBluetoothPermission();
+            }
         }
     }
 
@@ -177,30 +189,30 @@ public class DeviceSettingsFragment extends TtBasePrefFragment {
         }
     }
 
-    private final ActivityResultLauncher<String> requestBluetoothPermissionOnResult = registerForActivityResult(new ActivityResultContracts.RequestPermission(), hasPermission -> {
-        if (hasPermission) {
+    private final ActivityResultLauncher<String[]> requestBluetoothPermissionOnResult = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
+        if (TtUtils.Collections.areAllTrue(result.values())) {
             setBTValues(prefLstGpsDevice);
             setBTValues(prefLstRFDevice);
             swtUseExGpsDev.setChecked(true);
             switchToExternal();
         } else {
-            Toast.makeText(getActivity(), "Requires Bluetooth Permission", Toast.LENGTH_LONG).show();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                Toast.makeText(getActivity(), "Requires Bluetooth and Nearby Device Permission", Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(getActivity(), "Requires Bluetooth Permission", Toast.LENGTH_LONG).show();
+            }
         }
     });
 
-    private void requestBluetoothPermission() {
-        requestBluetoothPermissionOnResult.launch(Manifest.permission.BLUETOOTH);
+    private boolean requestBluetoothPermission() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ?
+            AndroidUtils.App.requestBluetoothScanPermission(getActivity(), requestBluetoothPermissionOnResult, "Bluetooth is required to find and connect to nearby devices.") :
+            AndroidUtils.App.requestBluetoothPermission(getActivity(), requestBluetoothPermissionOnResult, "Bluetooth is required to find and connect to nearby devices.");
     }
 
 
     private final ActivityResultLauncher<String[]> requestInternalLocationPermissionOnResult = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result ->
             onLocationRequestResult(TtUtils.Collections.areAllTrue(result.values())));
-
-//    private final ActivityResultLauncher<String> requestBackgroundLocationPermissionOnResult = registerForActivityResult(new ActivityResultContracts.RequestPermission(), this::onBackgroundLocationRequestResult);
-
-
-//    private final ActivityResultLauncher<String[]> requestBackgroundLocationPermissionOnResult = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result ->
-//            onBackgroundLocationRequestResult(TtUtils.Collections.areAllTrue(result.values())));
 
     private final ActivityResultLauncher<String> requestBackgroundLocationPermissionOnResult = registerForActivityResult(new ActivityResultContracts.RequestPermission(), this::onBackgroundLocationRequestResult);
 
@@ -656,10 +668,14 @@ public class DeviceSettingsFragment extends TtBasePrefFragment {
         public boolean onPreferenceChange(Preference preference, Object newValue) {
             boolean useExternal = (boolean)newValue;
 
-            boolean success = false;
+            boolean success;
 
             if (useExternal) {
-                requestBluetoothPermission();
+                success = requestBluetoothPermission();
+
+                if (success) {
+                    switchToExternal();
+                }
             } else {
                 success = requestInternalGpsPermission();
 

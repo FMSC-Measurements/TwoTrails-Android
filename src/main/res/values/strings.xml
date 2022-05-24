@@ -359,6 +359,7 @@
     <string name="diag_pcp_adjpts">Adjusted Points</string>
     <string name="diag_pcp_unadjpts">Unadjusted Points</string>
     <string name="diag_loc">TwoTrails requires location permissions in order to collection point data.</string>
+    <string name="diag_bt_loc">TwoTrails requires bluetooth permissions in order to connect to external GPS and Range Finders.</string>
     <string name="diag_back_loc">Without background location you should not let your screen turn off or open another application while collecting data. To prevent the screen falling asleep you can enable the \'Keep Awake\' setting. Would you like to enable it now?</string>
     <string name="diag_keep_on_req">To collect data while the screen is off or another application is in use background location permissions are required. Would you like to enable background location?</string>
 

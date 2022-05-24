@@ -10,9 +10,11 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 
+import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.twotrails.DeviceSettings;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.devices.BluetoothConnection;
+import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.units.Dist;
 import com.usda.fmsc.twotrails.units.Slope;
 import com.usda.fmsc.utilities.ParseEx;
@@ -148,6 +150,10 @@ public class RangeFinderService extends Service implements BluetoothConnection.L
     }
 
     private RangeFinderDeviceStatus startExternalRangeFinder() {
+        if (!AndroidUtils.App.checkBluetoothScanAndConnectPermission(getApplicationContext())) {
+            return RangeFinderDeviceStatus.RangeFinderNeedsPermissions;
+        }
+
         try {
             BluetoothSocket socket = TtAppCtx.getBluetoothManager().getSocket(_deviceUUID);
 
@@ -193,11 +199,6 @@ public class RangeFinderService extends Service implements BluetoothConnection.L
             if (logging && logPrintWriter != null) {
                 logPrintWriter.close();
             }
-
-//            File logFileDir = new File(TtUtils.getTtLogFileDir());
-//            if (!logFileDir.exists()) {
-//                logFileDir.mkdirs();
-//            }
 
             logPrintWriter = new PrintWriter(logFile);
 

@@ -2,6 +2,7 @@ package com.usda.fmsc.twotrails.activities;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -256,7 +257,7 @@ public class MainActivity extends ProjectAdjusterActivity {
                     .setNeutralButton(R.string.str_cancel, null)
                     .show();
         } else {
-            super.onBackPressed();
+            finishAndRemoveTask();
         }
     }
 
@@ -266,9 +267,12 @@ public class MainActivity extends ProjectAdjusterActivity {
     }
 
     @Override
-    public void finishAndRemoveTask() {
-        closeProject();
-        super.finishAndRemoveTask();
+    protected void onDestroy() {
+        if (getTtAppCtx() != null) {
+            getTtAppCtx().close();
+        }
+
+        super.onDestroy();
     }
 
     @Override
@@ -372,25 +376,18 @@ public class MainActivity extends ProjectAdjusterActivity {
     private final ActivityResultLauncher<String[]> requestInternalLocationPermissionOnResult = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result ->
             onLocationRequestResult(TtUtils.Collections.areAllTrue(result.values())));
 
-//    private final ActivityResultLauncher<String[]> requestBackgroundLocationPermissionOnResult = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result ->
-//            onBackgroundLocationRequestResult(TtUtils.Collections.areAllTrue(result.values())));
-
     private final ActivityResultLauncher<String> requestBackgroundLocationPermissionOnResult = registerForActivityResult(new ActivityResultContracts.RequestPermission(), this::onBackgroundLocationRequestResult);
 
 
     private void onLocationRequestResult(boolean hasPermissions) {
         if (hasPermissions) {
-            if (getTtAppCtx().isGpsServiceStarted()) {
-                getTtAppCtx().getGps().startGps();
-            } else {
-                getTtAppCtx().startGpsService();
-            }
+            startGps();
 
             AndroidUtils.App.requestBackgroundLocationPermission(MainActivity.this,
                     requestBackgroundLocationPermissionOnResult,
                     getString(R.string.diag_back_loc));
         } else {
-            Toast.makeText(MainActivity.this, "Cannot use GPS without permissions", Toast.LENGTH_LONG).show();
+            Toast.makeText(MainActivity.this, "Cannot use GPS without location permissions", Toast.LENGTH_LONG).show();
         }
 
         if (resuming) {
@@ -416,17 +413,50 @@ public class MainActivity extends ProjectAdjusterActivity {
                 getString(R.string.diag_loc));
     }
 
+    private final ActivityResultLauncher<String[]> requestBluetoothPermissionOnResult = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result ->
+            onBluetoothRequestResult(TtUtils.Collections.areAllTrue(result.values())));
+
+    private void onBluetoothRequestResult(boolean hasPermissions) {
+        if (hasPermissions) {
+            startGps();
+        } else {
+            Toast.makeText(MainActivity.this, "Cannot use GPS without bluetooth permissions", Toast.LENGTH_LONG).show();
+        }
+
+        if (resuming) {
+            openProjectOnResume();
+        }
+    }
+
+    private boolean requestBluetoothPermissions() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ?
+                AndroidUtils.App.requestBluetoothScanPermission(MainActivity.this,
+                        requestBluetoothPermissionOnResult,
+                        getString(R.string.diag_bt_loc))
+                :
+                AndroidUtils.App.requestBluetoothPermission(MainActivity.this,
+                        requestBluetoothPermissionOnResult,
+                        getString(R.string.diag_bt_loc));
+    }
+
     private void checkGpsOnResume() {
         if (resuming) {
             DeviceSettings ds = getTtAppCtx().getDeviceSettings();
+            String devId = ds.getGpsDeviceID();
 
-            if (StringEx.isEmpty(ds.getGpsDeviceID()) && ds.isGpsAlwaysOn()) {
-                if (requestGpsAccess()) {
-                    openProjectOnResume();
-                }//else wait for callback
-            } else  {
+            if (ds.isGpsAlwaysOn() && (StringEx.isEmpty(devId) ? requestGpsAccess() : requestBluetoothPermissions())) {
+                openProjectOnResume();
+            } else {
                 openProjectOnResume();
             }
+        }
+    }
+
+    private void startGps() {
+        if (getTtAppCtx().isGpsServiceStarted()) {
+            getTtAppCtx().getGps().startGps();
+        } else {
+            getTtAppCtx().startGpsService();
         }
     }
 

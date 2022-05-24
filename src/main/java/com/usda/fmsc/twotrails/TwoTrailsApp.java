@@ -609,6 +609,35 @@ public class TwoTrailsApp extends Application {
         }
     }
 
+    public void close() {
+        if (isGpsServiceStarted()) {
+            getGps().stopService();
+            stopService(new Intent(TwoTrailsApp.this, GpsService.class));
+        }
+
+        if (isRFServiceStarted()) {
+            getRF().stopService();
+            stopService(new Intent(TwoTrailsApp.this, RangeFinderService.class));
+        }
+
+        if (_Report != null) {
+            _Report.writeEvent("TwoTrails Stopped");
+            _Report.closeReport();
+        }
+
+        if (hasMAL()) {
+            getMAL().close();
+        }
+
+        if (hasDAL()) {
+            getDAL().close();
+        }
+
+        _CurrentProject = null;
+        _DAM = null;
+        _MAM = null;
+    }
+
     //region Settings / Tools
     public DeviceSettings getDeviceSettings() {
         return _DeviceSettings != null ? _DeviceSettings : (_DeviceSettings = new DeviceSettings(TwoTrailsApp.this));

@@ -49,7 +49,7 @@ public class TtBluetoothManager {
         try {
             device = adapter.getRemoteDevice(uuid);
         } catch (Exception e) {
-            e.printStackTrace();
+            //
         }
 
         if (device != null) {

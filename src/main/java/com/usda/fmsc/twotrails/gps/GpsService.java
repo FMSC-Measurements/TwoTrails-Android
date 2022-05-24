@@ -122,7 +122,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
             }
 
             if (TtAppCtx.getDeviceSettings().isGpsConfigured() && TtAppCtx.getDeviceSettings().isGpsAlwaysOn()) {
-                if (_deviceUUID != null || AndroidUtils.App.checkPermission(TtAppCtx, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                if (_deviceUUID != null || AndroidUtils.App.checkLocationPermission(TtAppCtx)) {
                     startGps();
                 }
             }
@@ -246,6 +246,10 @@ public class GpsService extends Service implements LocationListener, LocationSou
     }
 
     private GpsDeviceStatus startInternalGps() {
+        if (!AndroidUtils.App.checkLocationPermission(getApplicationContext())) {
+            return GpsDeviceStatus.InternalGpsRequiresPermissions;
+        }
+
         try {
             if(locManager == null)
                 locManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);
@@ -294,6 +298,10 @@ public class GpsService extends Service implements LocationListener, LocationSou
     }
 
     private GpsDeviceStatus startExternalGps() {
+        if (!AndroidUtils.App.checkBluetoothScanAndConnectPermission(getApplicationContext())) {
+            return GpsDeviceStatus.ExternalGpsRequiresPermissions;
+        }
+
         try {
             BluetoothSocket socket = TtAppCtx.getBluetoothManager().getSocket(_deviceUUID);
 
@@ -621,7 +629,9 @@ public class GpsService extends Service implements LocationListener, LocationSou
     private void postReceivingNmeaStrings(final boolean receivingNmea) {
         for (final Listener listener : listeners) {
             try {
-                new Handler(Looper.getMainLooper()).post(() -> listener.receivingNmeaStrings(receivingNmea));
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    if (listener != null) listener.receivingNmeaStrings(receivingNmea);
+                });
             } catch (Exception ex) {
                 //
             }
@@ -717,12 +727,14 @@ public class GpsService extends Service implements LocationListener, LocationSou
         InternalGpsNotEnabled,
         InternalGpsNeedsPermissions,
         InternalGpsError,
+        InternalGpsRequiresPermissions,
         ExternalGpsConnecting,
         ExternalGpsStarted,
         ExternalGpsStopped,
         ExternalGpsNotFound,
         ExternalGpsNotConnected,
         ExternalGpsError,
+        ExternalGpsRequiresPermissions,
         GpsAlreadyStarted,
         GpsAlreadyStopped,
         GpsServiceInUse,
