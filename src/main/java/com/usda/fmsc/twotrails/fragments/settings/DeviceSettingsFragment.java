@@ -128,10 +128,8 @@ public class DeviceSettingsFragment extends TtBasePrefFragment {
             prefCheckNmea.setOnPreferenceClickListener(checkNmeaListener);
 
         //get initial bluetooth devices
-        if (AndroidUtils.App.checkBluetoothPermission(getContext())) {
-            setBTValues(prefLstGpsDevice);
-            setBTValues(prefLstRFDevice);
-        }
+        setBTValues(prefLstGpsDevice);
+        setBTValues(prefLstRFDevice);
 
         exGpsCat.setEnabled(getTtAppCtx().getDeviceSettings().getGpsExternal());
 
@@ -239,23 +237,28 @@ public class DeviceSettingsFragment extends TtBasePrefFragment {
     }
 
     private void setBTValues(ListPreference lstPref) {
-        TtBluetoothManager btm = getTtAppCtx().getBluetoothManager();
+        if (AndroidUtils.App.checkBluetoothScanAndConnectPermission(getActivity())) {
+            TtBluetoothManager btm = getTtAppCtx().getBluetoothManager();
 
-        try {
-            if (btm.isEnabled() && btm.isAvailable()) {
-                List<String> deviceNames = new ArrayList<>();
-                List<String> deviceIDs = new ArrayList<>();
+            try {
+                if (btm.isEnabled() && btm.isAvailable()) {
+                    List<String> deviceNames = new ArrayList<>();
+                    List<String> deviceIDs = new ArrayList<>();
 
-                for (BluetoothDevice btd : btm.getAdapter().getBondedDevices()) {
-                    deviceNames.add(btd.getName());
-                    deviceIDs.add(String.format("%s,%s", btd.getAddress(), btd.getName()));
+                    for (BluetoothDevice btd : btm.getAdapter().getBondedDevices()) {
+                        deviceNames.add(btd.getName());
+                        deviceIDs.add(String.format("%s,%s", btd.getAddress(), btd.getName()));
+                    }
+
+                    lstPref.setEntries(deviceNames.toArray(new String[0]));
+                    lstPref.setEntryValues(deviceIDs.toArray(new String[0]));
                 }
-
-                lstPref.setEntries(deviceNames.toArray(new String[0]));
-                lstPref.setEntryValues(deviceIDs.toArray(new String[0]));
+            } catch (Exception e) {
+                //
             }
-        } catch (Exception e) {
-            //
+        } else {
+            lstPref.setEntries(new String[0]);
+            lstPref.setEntryValues(new String[0]);
         }
     }
 

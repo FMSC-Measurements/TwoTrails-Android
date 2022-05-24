@@ -24,4 +24,6 @@
         <item>Points</item>
         <item>Percent</item>
     </string-array>
+
+    <string-array name="arr_empty"/>
 </resources>
