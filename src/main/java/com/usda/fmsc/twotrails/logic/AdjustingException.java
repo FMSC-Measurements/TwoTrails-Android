@@ -17,7 +17,7 @@ public class AdjustingException extends Exception {
         None,
         Unknown,
         Traverse,
-        Sideshot,
+        SideShot,
         Gps,
         Quondam
     }

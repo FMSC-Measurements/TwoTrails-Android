@@ -114,18 +114,20 @@ public class MainFileFragment extends TtBaseFragment {
 
     public void updateInfo() {
         if (getTtAppCtx() != null) {
-            DataAccessManager dam = getTtAppCtx().getDAM();
-            DataAccessLayer dal = dam.getDAL();
+            if (getTtAppCtx().hasDAL()) {
+                DataAccessManager dam = getTtAppCtx().getDAM();
+                DataAccessLayer dal = dam.getDAL();
 
-            if (isViewCreated()) {
-                File dbFile = dam.getDBFile();
+                if (isViewCreated()) {
+                    File dbFile = dam.getDBFile();
 
-                tvDalVersion.setText(dal.getVersion().toString());
-                tvDate.setText(new Date(dbFile.lastModified()).toString());
-                tvPolys.setText(StringEx.toString(dal.getItemsCount(TwoTrailsSchema.PolygonSchema.TableName)));
-                tvPoints.setText(StringEx.toString(dal.getItemsCount(TwoTrailsSchema.PointSchema.TableName)));
-                tvGroups.setText(StringEx.toString(dal.getItemsCount(TwoTrailsSchema.GroupSchema.TableName)));
-                tvMeta.setText(StringEx.toString(dal.getItemsCount(TwoTrailsSchema.MetadataSchema.TableName)));
+                    tvDalVersion.setText(dal.getVersion().toString());
+                    tvDate.setText(new Date(dbFile.lastModified()).toString());
+                    tvPolys.setText(StringEx.toString(dal.getItemsCount(TwoTrailsSchema.PolygonSchema.TableName)));
+                    tvPoints.setText(StringEx.toString(dal.getItemsCount(TwoTrailsSchema.PointSchema.TableName)));
+                    tvGroups.setText(StringEx.toString(dal.getItemsCount(TwoTrailsSchema.GroupSchema.TableName)));
+                    tvMeta.setText(StringEx.toString(dal.getItemsCount(TwoTrailsSchema.MetadataSchema.TableName)));
+                }
             }
         } else {
             updateOnAttached = true;

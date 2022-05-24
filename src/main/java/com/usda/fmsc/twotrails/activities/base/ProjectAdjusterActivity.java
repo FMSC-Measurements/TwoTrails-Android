@@ -115,8 +115,8 @@ public abstract class ProjectAdjusterActivity extends TtCustomToolbarActivity im
                         case Traverse:
                             text = "Polygons Failed to Adjust due to a Traverse error";
                             break;
-                        case Sideshot:
-                            text = "Polygons Failed to Adjust due to a Sideshot error";
+                        case SideShot:
+                            text = "Polygons Failed to Adjust due to a SideShot error";
                         case Gps:
                             text = "Polygons Failed to Adjust due to a GPS error";
                         case Quondam:
@@ -152,7 +152,7 @@ public abstract class ProjectAdjusterActivity extends TtCustomToolbarActivity im
     @Override
     public void onAdjusterRunningSlow() {
         runOnUiThread(() -> {
-            AlertDialog.Builder alert = new AlertDialog.Builder(getBaseContext());
+            AlertDialog.Builder alert = new AlertDialog.Builder(ProjectAdjusterActivity.this);
 
             alert.setTitle(R.string.diag_slow_adjusting_title);
             alert.setMessage(R.string.diag_slow_adjusting);

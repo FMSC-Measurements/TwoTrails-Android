@@ -486,20 +486,20 @@ public class MainActivity extends ProjectAdjusterActivity {
 
                 if (dam.dbHasErrors()) {
                     //TODO has errors
-                    Toast.makeText(MainActivity.this, "Database has Errors", Toast.LENGTH_LONG).show();
+                    runOnUiThread(() -> Toast.makeText(MainActivity.this, "Database has Errors", Toast.LENGTH_LONG).show());
                 } else {
                     app.setDAM(dam);
 
                     if (dam.justCreated()) {
-                        Toast.makeText(MainActivity.this, "Project Created", Toast.LENGTH_LONG).show();
+                        runOnUiThread(() -> Toast.makeText(MainActivity.this, "Project Created", Toast.LENGTH_LONG).show());
                         updateAppInfoAndGotoDataTabOnResult.launch(new Intent(this, ProjectActivity.class));
                     } else {
                         if (app.getDAL().needsAdjusting()) {
-                            Toast.makeText(MainActivity.this, "Adjusting polygons in project", Toast.LENGTH_LONG).show();
+                            runOnUiThread(() -> Toast.makeText(MainActivity.this, "Adjusting polygons in project", Toast.LENGTH_LONG).show());
                             app.adjustProject(true);
                         } else {
                             if (dam.justUpgraded()) {
-                                Toast.makeText(MainActivity.this, "Project Upgraded", Toast.LENGTH_LONG).show();
+                                runOnUiThread(() -> Toast.makeText(MainActivity.this, "Project Upgraded", Toast.LENGTH_LONG).show());
                             }
 
                             onProjectOpened();

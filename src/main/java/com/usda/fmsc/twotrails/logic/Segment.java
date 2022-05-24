@@ -83,7 +83,7 @@ public class Segment {
                     try {
                         adjusted = ((SideShotPoint)points.get(1)).adjustPoint(startPoint);
                     } catch (Exception e) {
-                        throw new AdjustingException(AdjustingException.AdjustingError.Sideshot, e.getCause());
+                        throw new AdjustingException(AdjustingException.AdjustingError.SideShot, e.getCause());
                     }
                 }
             } else if (len > 2 && points.get(1).getOp() == OpType.Traverse) {
@@ -249,7 +249,7 @@ public class Segment {
                 break;
             }
             default: {
-                throw new RuntimeException("Sideshots can not come first");
+                throw new RuntimeException("SideShots can not come first");
             }
         }
 
