@@ -533,7 +533,7 @@ public class RangeFinderService extends Service implements BluetoothConnection.L
         }
 
         public boolean postsAllRFStrings() {
-            return RangeFinderService.this.POST_ALL_RF_STRINGS;
+            return RangeFinderService.POST_ALL_RF_STRINGS;
         }
 
         @Override
