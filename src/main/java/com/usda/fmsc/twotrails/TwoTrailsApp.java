@@ -439,6 +439,10 @@ public class TwoTrailsApp extends Application {
                 if (isGpsServiceStarted()) {
                     getGps().stopService();
                 }
+
+                if (isRFServiceStarted()) {
+                    getRF().stopService();
+                }
             } catch (Exception e) {
                 Log.e(Consts.LOG_TAG, "Error in TwoTrailsApp:uncaughtException");
             }
@@ -496,7 +500,9 @@ public class TwoTrailsApp extends Application {
                 //
             }
 
-            _CurrentActivity.finishAndRemoveTask();
+            if (_CurrentActivity != null) {
+                _CurrentActivity.finishAndRemoveTask();
+            }
             System.exit(2);
         }
     };
@@ -574,10 +580,7 @@ public class TwoTrailsApp extends Application {
 
         _Report.writeEvent(String.format("TwoTrails Started (%s)", TtUtils.getAndroidApplicationVersion(this)));
 
-        //ArcGISRuntime.setClientId(this.getString(R.string.arcgis_client_id)); //100.2.9
         ArcGISRuntimeEnvironment.setLicense(this.getString(R.string.arcgis_runtime_license)); //100.10.0
-
-//        ImageLoader.getInstance().init(new ImageLoaderConfiguration.Builder(this).build());
 
         AppLifecycle.get(this).addListener(appLifecycleListener);
 

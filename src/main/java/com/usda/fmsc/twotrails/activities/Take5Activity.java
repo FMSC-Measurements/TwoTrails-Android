@@ -109,7 +109,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
 
     private int increment, takeAmount, nmeaCount = 0;
     private boolean saved = true, updated, onBnd = true, createSSVisible, cancelVisible, commitSSVisible,
-            ignoreScroll, useRing, useVib, mapViewMode, killAcquire, cameraSupported, gpsInfoHidden,
+            ignoreScroll, mapViewMode, killAcquire, cameraSupported, gpsInfoHidden,
             centerPosition = false, _Locked;
 
     boolean invisible = false, handling;
@@ -550,9 +550,6 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
         options.DopValue = getTtAppCtx().getDeviceSettings().getTake5FilterDopValue();
         increment = getTtAppCtx().getDeviceSettings().getTake5Increment();
         takeAmount = getTtAppCtx().getDeviceSettings().getTake5NmeaAmount();
-
-        useVib = getTtAppCtx().getDeviceSettings().getTake5VibrateOnCreate();
-        useRing = getTtAppCtx().getDeviceSettings().getTake5RingOnCreate();
     }
 
     @Override
@@ -900,8 +897,6 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
 
             ignoreScroll = true;
 
-            //getTtAppCtx().getTtNotifyManager().showPointAquired();
-
             t5pAdapter.notifyItemInserted(_Points.size() - 1);
             t5pAdapter.notifyDataSetChanged();
 
@@ -917,11 +912,11 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                 getTtAppCtx().getReport().writeWarn("TrailMode is disabled.", "Take5Activity:addTake5");
             }
 
-            if (useVib) {
+            if (getTtAppCtx().getDeviceSettings().getTake5VibrateOnCreate()) {
                 AndroidUtils.Device.vibrate(this, Consts.Notifications.VIB_POINT_CREATED);
             }
 
-            if (useRing) {
+            if (getTtAppCtx().getDeviceSettings().getTake5RingOnCreate()) {
                 AndroidUtils.Device.playSound(this, R.raw.ring);
             }
 

@@ -407,6 +407,15 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
                 closestPosition.getAzimuthToClosestPosition(currentCoords)
         ));
 
+
+        if (getTtAppCtx().getDeviceSettings().getSATVibrateOnCreate()) {
+            AndroidUtils.Device.vibrate(this, Consts.Notifications.VIB_POINT_CREATED);
+        }
+
+        if (getTtAppCtx().getDeviceSettings().getSATRingOnCreate()) {
+            AndroidUtils.Device.playSound(this, R.raw.ring);
+        }
+
         updateDirPathUI(closestPosition, currentCoords);
         updateCPInfo(closestPosition, currentCoords);
 
@@ -425,6 +434,7 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
                         saveValidationPoint();
                         hideCancel();
                         fabTakePoint.setEnabled(true);
+                        pauseDistLine = false;
 
                         //convert to DontAskAgainDialog
                         new AlertDialog.Builder(SalesAdminToolsActivity.this)

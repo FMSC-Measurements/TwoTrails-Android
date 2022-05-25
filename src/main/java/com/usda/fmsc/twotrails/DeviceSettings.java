@@ -85,6 +85,8 @@ public class DeviceSettings extends Settings {
     public static final String SAT_IGNORE_FIRST_NMEA_AMOUNT = "SATIgnoreNmeaAmount";
     public static final String SAT_FAIL_AMOUNT = "SATFailAmount";
     public static final String SAT_INCREMENT = "SATIncrement";
+    public static final String SAT_VIBRATE_ON_CREATE = "SATVibrationOnCreate";
+    public static final String SAT_RING_ON_CREATE = "SATRingOnCreate";
 
     public static final String WALK_FILTER_DOP_TYPE = "WalkFilterDopType";
     public static final String WALK_FILTER_DOP_VALUE = "WalkFilterDopValue";
@@ -178,6 +180,8 @@ public class DeviceSettings extends Settings {
     public final boolean DEFAULT_SAT_IGNORE = false;
     public final int DEFAULT_SAT_IGNORE_AMOUNT = 2;
     public final int DEFAULT_SAT_FAIL_AMOUNT = 10;
+    public final boolean DEFAULT_SAT_VIB_ON_CREATE = true;
+    public final boolean DEFAULT_SAT_RING_ON_CREATE = true;
     
     public final DopType DEFAULT_WALK_DOP_TYPE = DopType.HDOP;
     public final GGASentence.GpsFixType DEFAULT_WALK_FIX_TYPE = GGASentence.GpsFixType.GPS;
@@ -292,6 +296,8 @@ public class DeviceSettings extends Settings {
         setInt(SAT_IGNORE_FIRST_NMEA_AMOUNT, DEFAULT_SAT_IGNORE_AMOUNT);
         setInt(SAT_FAIL_AMOUNT, DEFAULT_SAT_FAIL_AMOUNT);
         setInt(SAT_INCREMENT, DEFAULT_SAT_INCREMENT);
+        setBool(SAT_RING_ON_CREATE, DEFAULT_SAT_RING_ON_CREATE);
+        setBool(SAT_VIBRATE_ON_CREATE, DEFAULT_SAT_VIB_ON_CREATE);
 
         setInt(WALK_FILTER_DOP_TYPE, DEFAULT_WALK_DOP_TYPE.getValue());
         setInt(WALK_FILTER_DOP_VALUE, DEFAULT_WALK_DOP_VALUE);
@@ -855,6 +861,24 @@ public class DeviceSettings extends Settings {
 
     public void setSATIncrement(int value) {
         setInt(SAT_INCREMENT, value);
+    }
+
+
+    public boolean getSATVibrateOnCreate() {
+        return getBool(SAT_VIBRATE_ON_CREATE, DEFAULT_SAT_VIB_ON_CREATE);
+    }
+
+    public void setSATVibrateOnCreate(boolean value) {
+        setBool(SAT_VIBRATE_ON_CREATE, value);
+    }
+
+
+    public boolean getSATRingOnCreate() {
+        return getBool(SAT_RING_ON_CREATE, DEFAULT_SAT_RING_ON_CREATE);
+    }
+
+    public void setSATRingOnCreate(boolean value) {
+        setBool(TAKE5_RING_ON_CREATE, value);
     }
     //endregion
     
