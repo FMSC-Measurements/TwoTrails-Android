@@ -2078,34 +2078,6 @@ public class PointsActivity extends PointCollectionActivity implements PointMedi
             startBursts = bursts;
 
             handleStartAdjustingResult(getTtAppCtx().adjustProject());
-
-//            PolygonAdjuster.adjust(getTtAppCtx(), false, new PolygonAdjuster.Listener() {
-//                @Override
-//                public void adjusterStarted() {
-//                    runOnUiThread(() -> Toast.makeText(PointsActivity.this, "Adjusting Points. Starting Acquire soon.", Toast.LENGTH_SHORT).show());
-//                }
-//
-//                @Override
-//                public void adjusterStopped(final PolygonAdjuster.AdjustResult result, AdjustingException.AdjustingError error) {
-//                    runOnUiThread(() -> {
-//                        if (result == PolygonAdjuster.AdjustResult.SUCCESSFUL) {
-//                            startAcquireGpsActivity(point, bursts);
-//                        } else if (result != PolygonAdjuster.AdjustResult.ADJUSTING) {
-//                            Toast.makeText(PointsActivity.this, "Adjusting Failed. See error log for details", Toast.LENGTH_LONG).show();
-//                        }
-//                    });
-//                }
-//
-//                @Override
-//                public void adjusterRunningSlow() {
-//                    runOnUiThread(() -> new AlertDialog.Builder(getBaseContext())
-//                    .setTitle(R.string.diag_slow_adjusting_title)
-//                    .setMessage(R.string.diag_slow_adjusting)
-//                    .setPositiveButton("Wait", null)
-//                    .setNegativeButton(R.string.str_cancel, (dialogInterface, i) -> PolygonAdjuster.cancel())
-//                    .show());
-//                }
-//            });
         } else {
             startAcquireGpsActivity(point, bursts);
         }
@@ -2144,37 +2116,6 @@ public class PointsActivity extends PointCollectionActivity implements PointMedi
 
             handleStartAdjustingResult(getTtAppCtx().adjustProject());
 
-//            PolygonAdjuster.AdjustResult result = PolygonAdjuster.adjust(getTtAppCtx(), false, new PolygonAdjuster.Listener() {
-//                @Override
-//                public void adjusterStarted() {
-//                    runOnUiThread(() -> Toast.makeText(PointsActivity.this, "Adjusting Points. Starting Acquire soon.", Toast.LENGTH_SHORT).show());
-//                }
-//
-//                @Override
-//                public void adjusterStopped(final PolygonAdjuster.AdjustResult result, AdjustingException.AdjustingError error) {
-//                    runOnUiThread(() -> {
-//                        if (result == PolygonAdjuster.AdjustResult.SUCCESSFUL) {
-//                            startTake5Activity(point);
-//                        } else if (result != PolygonAdjuster.AdjustResult.ADJUSTING) {
-//                            Toast.makeText(PointsActivity.this, "Adjusting Failed. See error log for details", Toast.LENGTH_LONG).show();
-//                        }
-//                    });
-//                }
-//
-//                @Override
-//                public void adjusterRunningSlow() {
-//                    runOnUiThread(() -> new AlertDialog.Builder(getBaseContext())
-//                            .setTitle(R.string.diag_slow_adjusting_title)
-//                            .setMessage(R.string.diag_slow_adjusting)
-//                            .setPositiveButton("Wait", null)
-//                            .setNegativeButton(R.string.str_cancel, (dialogInterface, i) -> PolygonAdjuster.cancel())
-//                            .show());
-//                }
-//            });
-//
-//            if (result != PolygonAdjuster.AdjustResult.ADJUSTING) {
-//                startTake5Activity(point);
-//            }
         } else {
             startTake5Activity(point);
         }
@@ -2218,37 +2159,6 @@ public class PointsActivity extends PointCollectionActivity implements PointMedi
 
             handleStartAdjustingResult(getTtAppCtx().adjustProject());
 
-//             PolygonAdjuster.AdjustResult result = PolygonAdjuster.adjust(getTtAppCtx(), false, new PolygonAdjuster.Listener() {
-//                @Override
-//                public void adjusterStarted() {
-//                    runOnUiThread(() -> Toast.makeText(PointsActivity.this, "Adjusting Points. Starting Acquire soon.", Toast.LENGTH_SHORT).show());
-//                }
-//
-//                @Override
-//                public void adjusterStopped(final PolygonAdjuster.AdjustResult result, AdjustingException.AdjustingError error) {
-//                    runOnUiThread(() -> {
-//                        if (result == PolygonAdjuster.AdjustResult.SUCCESSFUL) {
-//                            startWalkActivity(point);
-//                        } else if (result != PolygonAdjuster.AdjustResult.ADJUSTING) {
-//                            Toast.makeText(PointsActivity.this, "Adjusting Failed. See error log for details", Toast.LENGTH_LONG).show();
-//                        }
-//                    });
-//                }
-//
-//                @Override
-//                public void adjusterRunningSlow() {
-//                    runOnUiThread(() -> new AlertDialog.Builder(getBaseContext())
-//                            .setTitle(R.string.diag_slow_adjusting_title)
-//                            .setMessage(R.string.diag_slow_adjusting)
-//                            .setPositiveButton("Wait", null)
-//                            .setNegativeButton(R.string.str_cancel, (dialogInterface, i) -> PolygonAdjuster.cancel())
-//                            .show());
-//                }
-//            });
-//
-//            if (result != PolygonAdjuster.AdjustResult.ADJUSTING) {
-//                startWalkActivity(point);
-//            }
         } else {
             startWalkActivity(point);
         }

@@ -2689,7 +2689,27 @@ public class DataAccessLayer extends IDataLayer {
 
     //TODO implement error checking
     public boolean hasErrors() {
-        return false;
+        //just checking for project table for now.
+        try {
+            String query = "SELECT name FROM sqlite_master WHERE type='table' AND name='" + TwoTrailsSchema.ProjectInfoSchema.TableName + "';";
+
+            Cursor cursor = getDB().rawQuery(query, null);
+
+            if (null != cursor) {
+                if (!cursor.moveToFirst()) {
+                    cursor.close();
+                    return true;
+                }
+            } else {
+                return true;
+            }
+
+            return false;
+        } catch (Exception e) {
+            //
+        }
+
+        return true;
     }
 
 

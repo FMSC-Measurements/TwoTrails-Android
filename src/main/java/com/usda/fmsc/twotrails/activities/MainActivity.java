@@ -514,9 +514,11 @@ public class MainActivity extends ProjectAdjusterActivity {
 
                 DataAccessManager dam = DataAccessManager.openDAL(app, projectFileName, projectName);
 
+                //just checking for basic table structure for now
                 if (dam.dbHasErrors()) {
                     //TODO has errors
-                    runOnUiThread(() -> Toast.makeText(MainActivity.this, "Database has Errors", Toast.LENGTH_LONG).show());
+                    runOnUiThread(() -> Toast.makeText(MainActivity.this, "Project file is corrupted. Please try opening on the PC application or contact the developer.", Toast.LENGTH_LONG).show());
+                    closeProject();
                 } else {
                     app.setDAM(dam);
 
@@ -645,16 +647,19 @@ public class MainActivity extends ProjectAdjusterActivity {
     private final ActivityResultLauncher<Intent> updateAppInfoOnResult = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> updateAppInfo());
     private void updateAppInfo() {
         boolean enable = false;
-        if(getTtAppCtx().hasDAL()) {
-            getTtAppCtx().getProjectSettings().updateRecentProjects(
-                    new TwoTrailsProject(getTtAppCtx().getDAL().getProjectID(), getTtAppCtx().getDAL().getFileName()));
-            
-            setTitle("TwoTrails - " + getTtAppCtx().getDAL().getProjectID());
-            enable = true;
 
-            mFragFile.updateInfo();
-        } else {
-            setTitle(R.string.app_name);
+        if (getTtAppCtx() != null) {
+            if (getTtAppCtx().hasDAL()) {
+                getTtAppCtx().getProjectSettings().updateRecentProjects(
+                        new TwoTrailsProject(getTtAppCtx().getDAL().getProjectID(), getTtAppCtx().getDAL().getFileName()));
+
+                setTitle("TwoTrails - " + getTtAppCtx().getDAL().getProjectID());
+                enable = true;
+
+                mFragFile.updateInfo();
+            } else {
+                setTitle(R.string.app_name);
+            }
         }
 
         mFragFile.enableButtons(enable);
@@ -1123,7 +1128,6 @@ public class MainActivity extends ProjectAdjusterActivity {
     //region Data
     public void btnPointsClick(View view) {
         if (getTtAppCtx().getDAL().hasPolygons()) {
-            //startActivityForResult(new Intent(this, PointsActivity.class), UPDATE_INFO);
             updateAppInfoOnResult.launch(new Intent(this, PointsActivity.class));
         } else {
             Toast.makeText(this, "No Polygons in Project", Toast.LENGTH_SHORT).show();

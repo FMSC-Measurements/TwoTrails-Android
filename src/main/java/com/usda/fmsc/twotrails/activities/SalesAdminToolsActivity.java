@@ -162,6 +162,15 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
         );
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        if (_ValidationPoint != null && getTtAppCtx() != null) {
+            getTtAppCtx().adjustProject(true);
+        }
+    }
+
 //    @Override
 //    protected int getMapRightDrawerLayoutId() {
 //        return R.layout.content_drawer_media;  //TODO add other tools
