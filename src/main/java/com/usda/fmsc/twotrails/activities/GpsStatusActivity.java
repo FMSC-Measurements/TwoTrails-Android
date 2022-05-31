@@ -2,11 +2,11 @@ package com.usda.fmsc.twotrails.activities;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import androidx.appcompat.app.AlertDialog;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,31 +19,36 @@ import com.usda.fmsc.geospatial.nmea41.sentences.base.NmeaSentence;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
+import com.usda.fmsc.twotrails.activities.base.TtCustomToolbarActivity;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.ui.GpsStatusSatView;
 import com.usda.fmsc.twotrails.ui.GpsStatusSkyView;
 import com.usda.fmsc.utilities.StringEx;
 
-@SuppressLint("DefaultLocale")
-public class GpsStatusActivity extends CustomToolbarActivity implements GpsService.Listener {
-    private static final String nVal = "*";
+import java.util.Locale;
 
-    private GpsService.GpsBinder binder;
+public class GpsStatusActivity extends TtCustomToolbarActivity implements GpsService.Listener {
+    private static final String nVal = "*";
 
     private Integer zone = null;
 
     private TextView tvGpsStatus, tvGpsFix, tvLat, tvLon, tvUtmX, tvUtmY,
-            tvZone, tvDec, tvSat, tvElev, tvPdop, tvHdop;
+            tvZone, tvDec, tvSat, tvElev, tvPdop, tvHdop, tvNmeaStats;
 
     private GpsStatusSkyView skyView;
     private GpsStatusSatView statusView;
 
+    private boolean nmeaInvalid = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (getTtAppCtx().getDeviceSettings().getKeepScreenOn()) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        }
+
         setContentView(R.layout.activity_gps_status);
 
         if (getTtAppCtx().hasDAL()) {
@@ -52,22 +57,6 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
             if (metadata != null) {
                 zone = metadata.getZone();
             }
-        }
-
-        binder = getTtAppCtx().getGps();
-        binder.addListener(this);
-
-        if (getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
-            binder.startGps();
-        }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        if (!getTtAppCtx().getDeviceSettings().isGpsAlwaysOn()) {
-            binder.stopGps();
         }
     }
 
@@ -87,6 +76,7 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
         tvElev = findViewById(R.id.gpsInfoTvElev);
         tvPdop = findViewById(R.id.gpsInfoTvPdop);
         tvHdop = findViewById(R.id.gpsInfoTvHdop);
+        tvNmeaStats = findViewById(R.id.gpsInfoNmeaTvStats);
 
         tvGpsFix.setText(GGASentence.GpsFixType.NoFix.toString());
 
@@ -107,20 +97,14 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
     protected void onStart() {
         super.onStart();
 
-        if (!binder.isGpsRunning()) {
+        if (!getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
             configGPS();
         }
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == Consts.Codes.Activites.SETTINGS) {
-            if (getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
-                binder.startGps();
-            }
-        }
+    public boolean requiresGpsService() {
+        return true;
     }
 
     protected void setNmeaData(final NmeaBurst burst) {
@@ -129,11 +113,11 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
                 if (burst.hasPosition()) {
                     UTMCoords coords = zone != null ? burst.getUTM(zone) : burst.getTrueUTM();
 
-                    tvLat.setText(String.format("%.4f", burst.getLatitudeSD()));
-                    tvLon.setText(String.format("%.4f", burst.getLongitudeSD()));
+                    tvLat.setText(String.format(Locale.getDefault(), "%.4f", burst.getLatitudeSD()));
+                    tvLon.setText(String.format(Locale.getDefault(), "%.4f", burst.getLongitudeSD()));
 
-                    tvUtmX.setText(String.format("%.3f", coords.getX()));
-                    tvUtmY.setText(String.format("%.3f", coords.getY()));
+                    tvUtmX.setText(String.format(Locale.getDefault(), "%.3f", coords.getX()));
+                    tvUtmY.setText(String.format(Locale.getDefault(), "%.3f", coords.getY()));
 
                     if (zone == null) {
                         tvZone.setText(StringEx.toString(coords.getZone()));
@@ -142,7 +126,7 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
                     }
 
                     if (burst.hasElevation()) {
-                        tvElev.setText(String.format("%.2f", burst.getElevation()));
+                        tvElev.setText(String.format(Locale.getDefault(), "%.2f", burst.getElevation()));
                     } else {
                         tvElev.setText(nVal);
                     }
@@ -160,8 +144,10 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
                     }
                 }
 
-                if (burst.isValid(NmeaIDs.SentenceID.RMC) && burst.getMagVar() != null) {
-                    tvDec.setText(String.format("%.2f %s", burst.getMagVar(), burst.getMagVarDir().toStringAbv()));
+                boolean iivRMC = !burst.isValid(NmeaIDs.SentenceID.RMC), iivGGA = false, iivGSA = false, iivGSV = false;
+
+                if (!iivRMC && burst.getMagVar() != null) {
+                    tvDec.setText(String.format(Locale.getDefault(), "%.2f %s", burst.getMagVar(), burst.getMagVarDir().toStringAbv()));
                 } else {
                     tvDec.setText(nVal);
                 }
@@ -170,26 +156,43 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
                     tvGpsFix.setText(burst.getFixQuality().toStringX());
                 } else {
                     tvGpsFix.setText(GGASentence.GpsFixType.NoFix.toString());
+                    iivGGA = true;
                 }
 
-                if (burst.isValid(NmeaIDs.SentenceID.GSA)) {
+                if (burst.areAnyValid(NmeaIDs.SentenceID.GSA)) {
                     tvGpsStatus.setText(burst.getFix().toString());
-                    tvPdop.setText(burst.getPDOP() == null ? nVal : String.format("%.2f", burst.getPDOP()));
-                    tvHdop.setText(burst.getHDOP() == null ? nVal : String.format("%.2f", burst.getHDOP()));
+                    tvPdop.setText(burst.getPDOP() == null ? nVal : String.format(Locale.getDefault(), "%.2f", burst.getPDOP()));
+                    tvHdop.setText(burst.getHDOP() == null ? nVal : String.format(Locale.getDefault(), "%.2f", burst.getHDOP()));
                 } else {
                     tvGpsStatus.setText(GSASentence.Fix.NoFix.toString());
                     tvHdop.setText(nVal);
                     tvPdop.setText(nVal);
+                    iivGSA = true;
                 }
 
-                if (burst.isValid(NmeaIDs.SentenceID.GSV)) {
+                if (burst.areAnyValid(NmeaIDs.SentenceID.GSV)) {
 
-                    tvSat.setText(String.format("%d/%d/%d",
+                    tvSat.setText(String.format(Locale.getDefault(), "%d/%d/%d",
                             burst.getUsedSatellitesCount(),
                             burst.isValid(NmeaIDs.SentenceID.GGA) ? burst.getTrackedSatellitesCount() : 0,
                             burst.getSatellitesInViewCount()));
                 } else {
                     tvSat.setText(nVal);
+                    iivGSV = true;
+                }
+
+                if ((iivRMC || iivGGA || iivGSA || iivGSV) ^ nmeaInvalid) {
+                    nmeaInvalid = (iivRMC || iivGGA || iivGSA || iivGSV);
+                    tvNmeaStats.setVisibility(nmeaInvalid ? View.VISIBLE : View.GONE);
+                }
+
+                if (nmeaInvalid) {
+                    tvNmeaStats.setText(String.format(Locale.getDefault(),
+                            "Invalid or Missing NMEA: %s %s %s %s",
+                            iivRMC ? "RMC" : StringEx.Empty,
+                            iivGGA ? "GGA" : StringEx.Empty,
+                            iivGSA ? "GSA" : StringEx.Empty,
+                            iivGSV ? "GSV" : StringEx.Empty));
                 }
 
                 skyView.update(burst);
@@ -206,13 +209,12 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
 
         dialog.setMessage("The GPS is currently not configured. Would you like to configure it now?");
 
-        dialog.setPositiveButton("Configure", (dialog1, which) -> startActivityForResult(new Intent(getBaseContext(), SettingsActivity.class).putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.GPS_SETTINGS_PAGE), Consts.Codes.Activites.SETTINGS));
+        dialog.setPositiveButton("Configure", (dialog1, which) -> openSettings(SettingsActivity.GPS_SETTINGS_PAGE));
 
         dialog.setNeutralButton(R.string.str_cancel, null);
 
         dialog.show();
     }
-
 
     @Override
     public void nmeaBurstReceived(NmeaBurst burst) {
@@ -238,6 +240,9 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
     public void receivingNmeaStrings(boolean receiving) {
         if (!receiving) {
             Toast.makeText(GpsStatusActivity.this, "Not receiving NMEA data.", Toast.LENGTH_LONG).show();
+            tvNmeaStats.setVisibility(View.VISIBLE);
+            tvNmeaStats.setText("Not receiving NMEA");
+            nmeaInvalid = true;
         }
     }
 
@@ -270,7 +275,7 @@ public class GpsStatusActivity extends CustomToolbarActivity implements GpsServi
             dialog.setTitle("GPS Connection Lost");
             dialog.setMessage("The GPS bluetooth connection has been broken. Would you like to try and reestablish the connection?");
             dialog.setPositiveButton("Connect", (d, which) -> {
-                GpsService.GpsDeviceStatus status = binder.startGps();
+                GpsService.GpsDeviceStatus status = getTtAppCtx().getGps().startGps();
 
                 if (status != GpsService.GpsDeviceStatus.ExternalGpsStarted &&
                         status != GpsService.GpsDeviceStatus.InternalGpsStarted) {

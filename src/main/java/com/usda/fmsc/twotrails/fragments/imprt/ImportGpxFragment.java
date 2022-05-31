@@ -1,5 +1,6 @@
 package com.usda.fmsc.twotrails.fragments.imprt;
 
+import android.net.Uri;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -8,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.usda.fmsc.android.utilities.TaskRunner;
 import com.usda.fmsc.android.widget.MultiSelectRecyclerView;
 import com.usda.fmsc.android.widget.multiselection.MultiSelector;
 import com.usda.fmsc.android.widget.multiselection.SelectableHolder;
@@ -20,16 +22,19 @@ import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.utilities.Import;
 import com.usda.fmsc.twotrails.utilities.Import.GPXImportTask;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import jp.wasabeef.recyclerview.animators.SlideInUpAnimator;
 
 public class ImportGpxFragment extends BaseImportFragment {
-    private static final String FILENAME = "filename";
+    private static final String FILE_PATH = "file_path";
+
+    private final TaskRunner taskRunner = new TaskRunner();
 
     private MultiSelectRecyclerView rvImport;
-    private MultiSelector selector = new MultiSelector( new MultiSelector.Listener() {
+    private final MultiSelector selector = new MultiSelector(new MultiSelector.Listener() {
         @Override
         public void onItemSelectionChange(SelectableHolder holder, boolean isSelected) {
             if (holder instanceof GpxTracksAdapter.GpxBaseTrackHolder) {
@@ -55,7 +60,7 @@ public class ImportGpxFragment extends BaseImportFragment {
 
     private Import.GPXImportTask task;
 
-    private String _FileName;
+    private Uri _FilePath;
 
     private GpxDocument gpxDocument;
 
@@ -63,11 +68,11 @@ public class ImportGpxFragment extends BaseImportFragment {
     private List<GpxBaseTrack> tracks;
 
 
-    public static ImportGpxFragment newInstance(String fileName) {
+    public static ImportGpxFragment newInstance(Uri filePath) {
         ImportGpxFragment fragment = new ImportGpxFragment();
         Bundle args = new Bundle();
 
-        args.putString(FILENAME, fileName);
+        args.putString(FILE_PATH, filePath.getPath());
 
         fragment.setArguments(args);
         return fragment;
@@ -80,10 +85,10 @@ public class ImportGpxFragment extends BaseImportFragment {
 
         Bundle bundle = getArguments();
 
-        if (bundle != null && bundle.containsKey(FILENAME)) {
-            _FileName = bundle.getString(FILENAME);
+        if (bundle != null && bundle.containsKey(FILE_PATH)) {
+            _FilePath = Uri.parse(bundle.getString(FILE_PATH));
 
-            updateFileName(_FileName);
+            updateFilePath(_FilePath);
         }
 
         polyParams = new ArrayList<>();
@@ -130,17 +135,17 @@ public class ImportGpxFragment extends BaseImportFragment {
         selector.getSelectedPositions();
 
         GPXImportTask.GPXImportParams params = new GPXImportTask.GPXImportParams(
-                app, _FileName, getParams()
+                app, _FilePath, getParams()
         );
 
         onTaskStart();
-        task.execute(params);
+        taskRunner.executeAsync(task, params);
     }
 
     @Override
     public void cancel() {
         if (task != null) {
-            task.cancel(false);
+            task.cancel();
         }
     }
 
@@ -161,7 +166,7 @@ public class ImportGpxFragment extends BaseImportFragment {
         for (GpxTracksAdapter.GpxBaseTrackHolder holder : polyParams) {
             params.add(new GPXImportTask.GPXPolyParams(
                     holder.getName(), null, null, null, null,
-                    tracks.get(holder.getAdapterPosition()), TwoTrailsApp.getInstance(getActivity()).getMetadataSettings().getDefaultMetadata()));
+                    tracks.get(holder.getBindingAdapterPosition()), getTtAppCtx().getMetadataSettings().getDefaultMetadata()));
         }
 
         return params;
@@ -172,14 +177,13 @@ public class ImportGpxFragment extends BaseImportFragment {
     }
 
     @Override
-    public void updateFileName(String filename) {
-        if (!StringEx.isEmpty(_FileName)) {
+    public void updateFilePath(Uri filePath) {
+        if (_FilePath != null) {
 
-            _FileName = filename;
+            _FilePath = filePath;
 
             try {
-                gpxDocument = GpxDocument.parseFile(_FileName);
-
+                gpxDocument = GpxDocument.parseFile(new File(_FilePath.getPath()));
                 setupTracks();
 
             } catch (Exception e) {

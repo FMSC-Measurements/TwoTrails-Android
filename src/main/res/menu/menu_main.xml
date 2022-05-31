@@ -1,6 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools" tools:context=".MainActivity">
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".activities.MainActivity">
 
     <item android:id="@+id/miAdjPoly"
         android:title="@string/str_poly_adjusting"
@@ -8,25 +9,39 @@
         android:icon="@drawable/ica_adjpoly"
         android:visible="false"/>
 
-    <item android:id="@+id/mainMenuSettings"
-        android:title="@string/str_settings"
-        app:showAsAction="never"
-        android:icon="@drawable/ic_settings_black_36dp" />
+    <item
+        android:id="@+id/overflowMenu"
+        android:icon="@drawable/ic_action_overflow_white"
+        android:title=""
+        app:showAsAction="always">
 
-    <item android:id="@+id/mainMenuRangeFinderSettings"
-        android:title="@string/menu_x_range_finder_settings"
-        app:showAsAction="never"
-        android:icon="@drawable/ic_laser_black_36dp"
-        android:enabled="false"
-        android:visible="false"/>
+        <menu>
+            <item android:id="@+id/mainMenuSettings"
+                android:title="@string/str_settings"
+                app:showAsAction="never"
+                android:icon="@drawable/ic_settings_black_36dp" />
 
-    <item android:id="@+id/mainMenuGpsSettings"
-          android:title="@string/menu_x_gps_settings"
-          app:showAsAction="never"
-          android:icon="@drawable/ic_my_location_black_36dp" />
+            <item android:id="@+id/mainMenuRangeFinderSettings"
+                android:title="@string/menu_x_range_finder_settings"
+                app:showAsAction="never"
+                android:icon="@drawable/ic_laser_black_36dp"
+                android:enabled="false"
+                android:visible="false"/>
 
-    <item android:id="@+id/mainMenuAbout"
-          android:title="@string/menu_main_about"
-          app:showAsAction="never"
-          android:icon="@drawable/ic_info_outline_black_36dp"/>
+            <item android:id="@+id/mainMenuGpsSettings"
+                  android:title="@string/menu_x_gps_settings"
+                  app:showAsAction="never"
+                  android:icon="@drawable/ic_my_location_black_36dp" />
+
+            <item android:id="@+id/mainMenuPrivacyPolicy"
+                android:title="@string/menu_main_privacy_policy"
+                app:showAsAction="never"
+                android:icon="@drawable/ic_file_document_outline_black_36dp"/>
+
+            <item android:id="@+id/mainMenuAbout"
+                  android:title="@string/menu_main_about"
+                  app:showAsAction="never"
+                  android:icon="@drawable/ic_info_outline_black_36dp"/>
+        </menu>
+    </item>
 </menu>

@@ -14,7 +14,6 @@ import com.usda.fmsc.android.adapters.SelectableStringArrayAdapter;
 import com.usda.fmsc.android.listeners.SimpleTextWatcher;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.adapters.PointDetailsAdapter;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.objects.points.QuondamPoint;
@@ -81,7 +80,7 @@ public class QuondamPointFragment extends BasePointFragment {
     public View onCreateViewEx(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_points_quondam_card, container, false);
 
-        _Polygons = TwoTrailsApp.getInstance(getActivity()).getDAL().getPolygons();
+        _Polygons = getTtAppCtx().getDAL().getPolygons();
         ArrayList<String> _PolygonNames = new ArrayList<>();
         _Points = new ArrayList<?>[_Polygons.size()];
 
@@ -223,7 +222,7 @@ public class QuondamPointFragment extends BasePointFragment {
 
         if (_Points[index] == null) {
             ArrayList<TtPoint> tmpPoints = new ArrayList<>();
-            for (TtPoint point : TwoTrailsApp.getInstance(getActivity()).getDAL().getPointsInPolygon(_Polygons.get(index).getCN())) {
+            for (TtPoint point : getTtAppCtx().getDAL().getPointsInPolygon(_Polygons.get(index).getCN())) {
                 if (point.getOp() != OpType.WayPoint) {
                     if (point.getOp() != OpType.Quondam || !point.getCN().equals(_Quondam.getCN())) {
                         tmpPoints.add(point);

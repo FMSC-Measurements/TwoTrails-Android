@@ -10,9 +10,9 @@
         android:orientation="vertical">
 
         <Button
-            android:text="@string/str_new"
+            android:text="@string/str_create"
             android:id="@+id/mainFragFileBtnNew"
-            android:onClick="btnNewClick"
+            android:onClick="btnCreateClick"
             android:layout_marginTop="5dp"
             style="@style/MainActivityButtons"/>
 
@@ -27,31 +27,50 @@
         <View style="@style/Dividers"/>
 
         <Button
-            android:text="@string/main_btn_open_rec"
+            android:text="@string/main_btn_import_project"
             android:id="@+id/mainFragFileBtnOpenRecent"
-            android:onClick="btnOpenRecClick"
+            android:onClick="btnImportProjectClick"
             style="@style/MainActivityButtons"/>
 
 
         <View style="@style/Dividers"/>
 
         <Button
-            android:text="@string/main_btn_import"
+            android:text="@string/main_btn_export_project"
+            android:id="@+id/mainFragFileBtnExportProject"
+            android:onClick="btnExportProjectClick"
+            android:enabled="false"
+            style="@style/MainActivityButtons"/>
+
+        <View style="@style/Dividers"/>
+
+        <Button
+            android:text="@string/main_btn_remove_project"
+            android:id="@+id/mainFragFileBtnRemove"
+            android:onClick="btnRemoveProjectClick"
+            android:enabled="false"
+            style="@style/MainActivityButtons" android:visibility="gone"/>
+
+        <View style="@style/Dividers" android:visibility="gone"/>
+
+        <Button
+            android:text="@string/main_btn_import_data"
             android:id="@+id/mainFragFileBtnImport"
-            android:onClick="btnImportClick"
+            android:onClick="btnImportDataClick"
             android:enabled="false"
             style="@style/MainActivityButtons"/>
 
         <View style="@style/Dividers"/>
 
-        <Button
-            android:text="@string/main_btn_duplicate"
-            android:id="@+id/mainFragFileBtnDup"
-            android:onClick="btnDupClick"
-            android:enabled="false"
-            style="@style/MainActivityButtons"/>
+<!--        <Button-->
+<!--            android:text="@string/main_btn_duplicate"-->
+<!--            android:id="@+id/mainFragFileBtnDup"-->
+<!--            android:onClick="btnBackupClick"-->
+<!--            android:enabled="false"-->
+<!--            style="@style/MainActivityButtons"-->
+<!--            android:visibility="gone"/>-->
 
-        <View style="@style/Dividers"/>
+<!--        <View style="@style/Dividers"/>-->
 
         <LinearLayout
             android:id="@+id/mainFragFileCleanDb"
@@ -88,6 +107,19 @@
 
                 <TextView
                     android:id="@+id/mainFragFileTvDate"
+                    android:gravity="end"
+                    android:padding="5dip"/>
+            </TableRow>
+
+            <TableRow>
+
+                <TextView
+                    android:layout_column="1"
+                    android:text="@string/main_tv_dal_version"
+                    android:padding="5dip"/>
+
+                <TextView
+                    android:id="@+id/mainFragFileTvVersion"
                     android:gravity="end"
                     android:padding="5dip"/>
             </TableRow>

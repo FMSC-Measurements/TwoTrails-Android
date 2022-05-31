@@ -1,5 +1,9 @@
 package com.usda.fmsc.twotrails.data;
 
+import androidx.annotation.NonNull;
+
+import java.util.Locale;
+
 public class TtVersion {
     public int Major;
     public int Minor;
@@ -50,10 +54,11 @@ public class TtVersion {
         }
     }
 
+    @NonNull
     @Override
     public String toString()
     {
-        return String.format("%d.%d.%d", Major, Minor, Update);
+        return String.format(Locale.getDefault(), "%d.%d.%d", Major, Minor, Update);
     }
 
     public int toIntVersion() {

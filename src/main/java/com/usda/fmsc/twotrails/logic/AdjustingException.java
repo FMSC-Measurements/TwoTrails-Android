@@ -1,7 +1,7 @@
 package com.usda.fmsc.twotrails.logic;
 
 public class AdjustingException extends Exception {
-    private AdjustingError _ErrorType;
+    private final AdjustingError _ErrorType;
 
     public AdjustingException(AdjustingError errorType, Throwable ex) {
         super(ex);
@@ -17,7 +17,7 @@ public class AdjustingException extends Exception {
         None,
         Unknown,
         Traverse,
-        Sideshot,
+        SideShot,
         Gps,
         Quondam
     }

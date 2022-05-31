@@ -34,7 +34,7 @@ import com.usda.fmsc.utilities.StringEx;
 public abstract class BasePointFragment extends AnimationCardFragment implements PointMediaListener {
     public static final String POINT = "Point";
 
-    private static String sOnBnd = "On Boundary", sOffBnd = "Off Boundary";
+    private static final String sOnBnd = "On Boundary", sOffBnd = "Off Boundary";
 
     private TextView tvPID;
     private ImageButton ibBnd;
@@ -132,7 +132,7 @@ public abstract class BasePointFragment extends AnimationCardFragment implements
     public abstract View onCreateViewEx(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState);
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         try {
             this.controller = (PointMediaController) context;

@@ -3,6 +3,7 @@ package com.usda.fmsc.twotrails.objects.map;
 import androidx.annotation.ColorInt;
 
 import com.usda.fmsc.geospatial.Extent;
+import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
@@ -11,13 +12,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class PolygonGraphicManager implements IGraphicManager {
-    private ArrayList<PolygonDrawOptions.Listener> polygonDrawListeners = new ArrayList<>();
-    private ArrayList<PolygonGraphicOptions.Listener> polygonGraphicListeners = new ArrayList<>();
+public class PolygonGraphicManager implements IPolygonGraphicManager {
+    private final ArrayList<PolygonDrawOptions.Listener> polygonDrawListeners = new ArrayList<>();
+    private final ArrayList<PolygonGraphicOptions.Listener> polygonGraphicListeners = new ArrayList<>();
 
-    private TtPolygon polygon;
-    private List<TtPoint> points;
-    private HashMap<String, TtMetadata> meta;
+    private final TtPolygon polygon;
+    private final List<TtPoint> points;
+    private final HashMap<String, TtMetadata> meta;
 
     private IPolygonGraphic polygonGraphic;
     private PolygonGraphicOptions graphicOptions;
@@ -165,6 +166,11 @@ public class PolygonGraphicManager implements IGraphicManager {
     @Override
     public String getPolygonCN() { return polygon.getCN();}
 
+    @Override
+    public String getCN() {
+        return getPolygonCN();
+    }
+
     public String getPolyName() {
         return polygon.getName();
     }
@@ -273,6 +279,10 @@ public class PolygonGraphicManager implements IGraphicManager {
         return polygonGraphic != null ? polygonGraphic.getExtents() : null;
     }
 
+    @Override
+    public Position getPosition() {
+        return polygonGraphic != null ? polygonGraphic.getPosition() : null;
+    }
 
     public void addPolygonDrawListener(PolygonDrawOptions.Listener polygonDrawListener) {
         polygonDrawListeners.add(polygonDrawListener);

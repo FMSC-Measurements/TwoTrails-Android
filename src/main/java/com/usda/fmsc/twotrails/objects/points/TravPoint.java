@@ -64,6 +64,7 @@ public class TravPoint extends TtPoint {
         this._FwdAz = p.getFwdAz();
         this._SlopeDistance = p.getSlopeDistance();
         this._SlopeAngle = p.getSlopeAngle();
+        this._Declination = p.getDeclination();
     }
 
     //endregion

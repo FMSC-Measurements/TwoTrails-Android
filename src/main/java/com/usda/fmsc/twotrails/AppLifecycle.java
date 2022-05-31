@@ -60,8 +60,8 @@ public class AppLifecycle implements Application.ActivityLifecycleCallbacks {
     private static AppLifecycle instance;
 
     private boolean foreground = false, paused = true;
-    private Handler handler = new Handler();
-    private List<Listener> listeners = new CopyOnWriteArrayList<Listener>();
+    private final Handler handler = new Handler();
+    private final List<Listener> listeners = new CopyOnWriteArrayList<Listener>();
     private Runnable check;
 
     /**

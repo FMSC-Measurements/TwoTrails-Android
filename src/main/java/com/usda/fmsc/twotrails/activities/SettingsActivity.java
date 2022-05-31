@@ -3,6 +3,7 @@ package com.usda.fmsc.twotrails.activities;
 import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
@@ -11,11 +12,12 @@ import androidx.appcompat.app.ActionBar;
 import android.view.MenuItem;
 
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
+import com.usda.fmsc.twotrails.activities.base.TtCustomToolbarActivity;
+import com.usda.fmsc.twotrails.activities.base.TtActivity;
 import com.usda.fmsc.twotrails.fragments.settings.DeviceSettingsFragment;
 import com.usda.fmsc.twotrails.fragments.settings.MiscSettingsFragment;
 
-public class SettingsActivity extends CustomToolbarActivity {
+public class SettingsActivity extends TtCustomToolbarActivity {
     public static final String SETTINGS_PAGE = "settings_page";
 
     public static final String MAIN_SETTINGS_PAGE = "main";
@@ -25,6 +27,7 @@ public class SettingsActivity extends CustomToolbarActivity {
     public static final String MEDIA_SETTINGS_PAGE = "mediaSetup";
     public static final String DIALOG_SETTINGS_PAGE = "diagSetup";
     public static final String MISC_SETTINGS_PAGE = "miscSetup";
+    public static final String SAT_SETTINGS_PAGE = "satSetup";
 
     public static final String GPS_SETTINGS_PAGE = "gpsSetup";
     public static final String LASER_SETTINGS_PAGE = "rfSetup";
@@ -47,6 +50,16 @@ public class SettingsActivity extends CustomToolbarActivity {
         }
 
         getSupportFragmentManager().beginTransaction().replace(R.id.content, getSettingsFragment(page)).commit();
+    }
+
+    @Override
+    public boolean requiresGpsService() {
+        return true;
+    }
+
+    @Override
+    public boolean requiresRFService() {
+        return true;
     }
 
     @Override
@@ -74,7 +87,8 @@ public class SettingsActivity extends CustomToolbarActivity {
             case POINT_GPS_SETTINGS_PAGE:
             case POINT_TAKE5_SETTINGS_PAGE:
             case POINT_WALK_SETTINGS_PAGE:
-            case DIALOG_SETTINGS_PAGE: frag = SettingsFragment.newInstance(key); break;
+            case DIALOG_SETTINGS_PAGE:
+            case SAT_SETTINGS_PAGE: frag = SettingsFragment.newInstance(key); break;
         }
 
         return frag;
@@ -92,6 +106,7 @@ public class SettingsActivity extends CustomToolbarActivity {
             case MEDIA_SETTINGS_PAGE: return R.xml.pref_media_settings;
             case MISC_SETTINGS_PAGE: return R.xml.pref_other_settings;
             case DIALOG_SETTINGS_PAGE: return R.xml.pref_dialog_settings;
+            case SAT_SETTINGS_PAGE: return R.xml.pref_sat_settings;
             default: return 0;
         }
     }
@@ -145,9 +160,10 @@ public class SettingsActivity extends CustomToolbarActivity {
                 case MAP_SETTINGS_PAGE: settingsTitle = "Map Settings"; break;
                 case MEDIA_SETTINGS_PAGE: settingsTitle = "Media Settings"; break;
                 case DIALOG_SETTINGS_PAGE: settingsTitle = "Dialog Settings"; break;
+                case SAT_SETTINGS_PAGE: settingsTitle = "Sales Admin Tools"; break;
             }
 
-            ActionBar actionBar = ((CustomToolbarActivity)getActivity()).getSupportActionBar();
+            ActionBar actionBar = ((TtCustomToolbarActivity)getActivity()).getSupportActionBar();
 
             if (actionBar != null) {
                 actionBar.setHomeButtonEnabled(true);
@@ -160,16 +176,23 @@ public class SettingsActivity extends CustomToolbarActivity {
 
 
         @Override
-        public boolean onPreferenceTreeClick(Preference preference) {
-            if (preference != null && preference.hasKey()) {
+        public boolean onPreferenceTreeClick(@NonNull Preference preference) {
+            if (preference.hasKey()) {
                 Fragment frag = getSettingsFragment(preference.getKey());
 
                 if (frag != null){
-                    getFragmentManager()
-                            .beginTransaction()
-                            .replace(R.id.content, frag)
-                            .addToBackStack(frag.getClass().getSimpleName())
-                            .commit();
+                    if (isAdded()) {
+                        getParentFragmentManager()
+                                .beginTransaction()
+                                .replace(R.id.content, frag)
+                                .addToBackStack(frag.getClass().getSimpleName())
+                                .commit();
+                    } else {
+                        TtActivity activity = (TtActivity) getActivity();
+                        if (activity != null) {
+                            activity.getTtAppCtx().getReport().writeError("FragmentManager not found", "SettingsActivity:onPreferenceTreeClick");
+                        }
+                    }
                 }
             }
 

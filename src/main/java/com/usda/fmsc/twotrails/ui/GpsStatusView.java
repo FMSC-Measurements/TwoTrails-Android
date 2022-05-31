@@ -17,12 +17,12 @@ public class GpsStatusView extends View {
     public static final long SBAS_VISIBILITY_TIMEOUT = 120000; //120 sec
 
     private List<Integer> usedSats;
-    private ConcurrentHashMap<Integer, Satellite> satellites;
-    private ConcurrentHashMap<Integer, Boolean> satellitesVisibility;
-    private ConcurrentHashMap<Integer, Boolean> satellitesUsed;
-    private ConcurrentHashMap<Integer, Boolean> satellitesLocValid;
-    private ConcurrentHashMap<Integer, Boolean> satellitesSrnValid;
-    private ConcurrentHashMap<Integer, Long> satellitesLastSeen;
+    private final ConcurrentHashMap<Integer, Satellite> satellites;
+    private final ConcurrentHashMap<Integer, Boolean> satellitesVisibility;
+    private final ConcurrentHashMap<Integer, Boolean> satellitesUsed;
+    private final ConcurrentHashMap<Integer, Boolean> satellitesLocValid;
+    private final ConcurrentHashMap<Integer, Boolean> satellitesSrnValid;
+    private final ConcurrentHashMap<Integer, Long> satellitesLastSeen;
 
     private int satsUsedCount, satsVisCount, satsTrackedCount, satValidLocCount, satValidSrnCount;
 

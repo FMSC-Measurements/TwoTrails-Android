@@ -1,6 +1,7 @@
 package com.usda.fmsc.twotrails.fragments.imprt;
 
 import android.app.Activity;
+import android.net.Uri;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SwitchCompat;
@@ -9,12 +10,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TableRow;
 import android.widget.Toast;
 
 import com.usda.fmsc.android.AndroidUtils;
+import com.usda.fmsc.android.utilities.TaskRunner;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.utilities.StringEx;
 import com.usda.fmsc.twotrails.R;
@@ -29,8 +30,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@SuppressWarnings("FieldCanBeLocal")
 public class ImportTextFragment extends BaseImportFragment {
-    private static final String FILENAME = "filename";
+    private static final String FILE_PATH = "file_path";
+
+    private final TaskRunner taskRunner = new TaskRunner();
 
     private SwitchCompat swtAdvanced;
 
@@ -51,16 +55,16 @@ public class ImportTextFragment extends BaseImportFragment {
     private TextImportTask task;
 
     private String[] _Columns;
-    private String _FileName;
+    private Uri _FilePath;
 
     private boolean advImport = false, validFile;
 
 
-    public static ImportTextFragment newInstance(String fileName) {
+    public static ImportTextFragment newInstance(Uri filePath) {
         ImportTextFragment fragment = new ImportTextFragment();
         Bundle args = new Bundle();
         
-        args.putString(FILENAME, fileName);
+        args.putString(FILE_PATH, filePath.getPath());
         
         fragment.setArguments(args);
         return fragment;
@@ -73,10 +77,10 @@ public class ImportTextFragment extends BaseImportFragment {
 
         Bundle bundle = getArguments();
 
-        if (bundle != null && bundle.containsKey(FILENAME)) {
-            _FileName = bundle.getString(FILENAME);
+        if (bundle != null && bundle.containsKey(FILE_PATH)) {
+            _FilePath = Uri.parse(bundle.getString(FILE_PATH));
 
-            updateFileName(_FileName);
+            updateFilePath(_FilePath);
         }
     }
 
@@ -272,8 +276,7 @@ public class ImportTextFragment extends BaseImportFragment {
 
 
         AndroidUtils.UI.hideKeyboardOnTouch(view.findViewById(R.id.importFragSv),
-                (EditText)((Activity) view.getContext()).findViewById(R.id.importTxtFile),
-                true);
+                ((Activity) view.getContext()).findViewById(R.id.importTxtFile), true);
 
         return view;
     }
@@ -552,10 +555,10 @@ public class ImportTextFragment extends BaseImportFragment {
         Map<Import.TextFieldType, Integer> columnMap = getColumnsMap(advImport);
         List<String> polygonNames = new ArrayList<>();
 
-        TextImportTask.TextImportParams params = new TextImportTask.TextImportParams(app, _FileName, columnMap, polygonNames, advImport);
+        TextImportTask.TextImportParams params = new TextImportTask.TextImportParams(app, _FilePath, columnMap, polygonNames, advImport);
 
         onTaskStart();
-        task.execute(params);
+        taskRunner.executeAsync(task, params);
     }
 
     @Override
@@ -618,14 +621,14 @@ public class ImportTextFragment extends BaseImportFragment {
     }
 
     @Override
-    public void updateFileName(String filename) {
+    public void updateFilePath(Uri filePath) {
         validFile = false;
 
-        _FileName = filename;
+        _FilePath = filePath;
         _Columns = new String[0];
 
-        if (!StringEx.isEmpty(_FileName)) {
-            File f = new File(_FileName);
+        if (_FilePath != null) {
+            File f = new File(_FilePath.getPath());
 
             if (f.exists() && !f.isDirectory()) {
                 try {
@@ -665,7 +668,7 @@ public class ImportTextFragment extends BaseImportFragment {
     @Override
     public void cancel() {
         if (task != null) {
-            task.cancel(false);
+            task.cancel();
         }
     }
 }

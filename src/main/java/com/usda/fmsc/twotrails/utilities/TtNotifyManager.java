@@ -13,38 +13,37 @@ import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
 
 public class TtNotifyManager {
-    private int GPS_NOTIFICATION_ID = 123;
+    private static final int GPS_NOTIFICATION_ID = 123;
 
-    private TwoTrailsApp TtAppCtx;
+    private final TwoTrailsApp TtAppCtx;
     
-    private NotificationManager _NotificationManager;
-    private NotificationCompat.Builder _GpsBuilder;
+    private final NotificationManager _NotificationManager;
+    private final NotificationCompat.Builder _GpsBuilder;
     private int _UsedDrawable;
-    private String _UsedText, _ChannelId;
+    private String _UsedText;
+    private final String _ChannelId;
     private boolean isExternal;
-    private SparseArray<NotificationCompat.Builder> _DownloadingNotifs;
+    private final SparseArray<NotificationCompat.Builder> _DownloadingNotifs;
 
     public TtNotifyManager(TwoTrailsApp context) {
         TtAppCtx = context;
 
         _NotificationManager = (NotificationManager) TtAppCtx.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = TtAppCtx.getString(R.string.app_notify_service_channel_name);
-            String description = TtAppCtx.getString(R.string.app_notify_service_channel_desc);
+        CharSequence name = TtAppCtx.getString(R.string.app_notify_service_channel_name);
+        String description = TtAppCtx.getString(R.string.app_notify_service_channel_desc);
 
-            NotificationChannel channel = new NotificationChannel(
-                    (_ChannelId = TtAppCtx.getString(R.string.app_notify_service_channel_id)),
-                    name,
-                    NotificationManager.IMPORTANCE_LOW);
-            channel.setDescription(description);
-            channel.setSound(null, null);
+        NotificationChannel channel = new NotificationChannel(
+                (_ChannelId = TtAppCtx.getString(R.string.app_notify_service_channel_id)),
+                name,
+                NotificationManager.IMPORTANCE_LOW);
+        channel.setDescription(description);
+        channel.setSound(null, null);
 
-            // Register the channel with the system; you can't change the importance
-            // or other notification behaviors after this
-            _NotificationManager.deleteNotificationChannel(channel.getId());
-            _NotificationManager.createNotificationChannel(channel);
-        }
+        // Register the channel with the system; you can't change the importance
+        // or other notification behaviors after this
+        _NotificationManager.deleteNotificationChannel(channel.getId());
+        _NotificationManager.createNotificationChannel(channel);
 
         _GpsBuilder = new NotificationCompat.Builder(TtAppCtx, _ChannelId);
         _GpsBuilder.setOngoing(true)
@@ -95,7 +94,7 @@ public class TtNotifyManager {
     }
 
     public void stopWalking() {
-        if (TtAppCtx.getGps().isGpsRunning()) {
+        if (TtAppCtx.isGpsServiceStartedAndRunning()) {
             setGpsOn(isExternal);
         } else {
             setGpsOff();

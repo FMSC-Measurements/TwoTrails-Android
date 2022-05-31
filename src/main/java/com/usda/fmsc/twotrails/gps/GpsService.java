@@ -1,5 +1,6 @@
 package com.usda.fmsc.twotrails.gps;
 
+import android.Manifest;
 import android.app.Service;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
@@ -15,6 +16,8 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 
+import androidx.annotation.NonNull;
+
 import com.google.android.gms.maps.LocationSource;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.utilities.PostDelayHandler;
@@ -26,12 +29,12 @@ import com.usda.fmsc.geospatial.nmea41.sentences.base.NmeaSentence;
 import com.usda.fmsc.twotrails.DeviceSettings;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.devices.BluetoothConnection;
-import com.usda.fmsc.twotrails.utilities.TtUtils;
 import com.usda.fmsc.utilities.StringEx;
 
 import org.joda.time.DateTime;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -50,7 +53,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
     private boolean logging, logBurstDetails, receivingValidBursts;
     private Position lastPosition;
 
-    private ArrayList<Listener> listeners = new ArrayList<>();
+    private final ArrayList<Listener> listeners = new ArrayList<>();
     private final Binder binder = new GpsBinder();
 
     private BluetoothConnection btConn;
@@ -64,7 +67,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
     private PostDelayHandler nmeaReceived;
     private boolean receivingNmea;
 
-    private GnssStatus.Callback mGnssStatusCallback = new GnssStatus.Callback() {
+    private final GnssStatus.Callback mGnssStatusCallback = new GnssStatus.Callback() {
         @Override
         public void onStarted() {
             postGpsStart();
@@ -81,7 +84,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
         }
 
         @Override
-        public void onSatelliteStatusChanged(GnssStatus status) {
+        public void onSatelliteStatusChanged(@NonNull GnssStatus status) {
             //
         }
     };
@@ -119,7 +122,9 @@ public class GpsService extends Service implements LocationListener, LocationSou
             }
 
             if (TtAppCtx.getDeviceSettings().isGpsConfigured() && TtAppCtx.getDeviceSettings().isGpsAlwaysOn()) {
-                startGps();
+                if (_deviceUUID != null || AndroidUtils.App.checkLocationPermission(TtAppCtx)) {
+                    startGps();
+                }
             }
 
             logBurstDetails = TtAppCtx.getDeviceSettings().getGpsLogBurstDetails();
@@ -241,6 +246,10 @@ public class GpsService extends Service implements LocationListener, LocationSou
     }
 
     private GpsDeviceStatus startInternalGps() {
+        if (!AndroidUtils.App.checkLocationPermission(getApplicationContext())) {
+            return GpsDeviceStatus.InternalGpsRequiresPermissions;
+        }
+
         try {
             if(locManager == null)
                 locManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);
@@ -289,6 +298,10 @@ public class GpsService extends Service implements LocationListener, LocationSou
     }
 
     private GpsDeviceStatus startExternalGps() {
+        if (!AndroidUtils.App.checkBluetoothScanAndConnectPermission(getApplicationContext())) {
+            return GpsDeviceStatus.ExternalGpsRequiresPermissions;
+        }
+
         try {
             BluetoothSocket socket = TtAppCtx.getBluetoothManager().getSocket(_deviceUUID);
 
@@ -328,18 +341,18 @@ public class GpsService extends Service implements LocationListener, LocationSou
 
 
     //region Logging
-    public void startLogging(String fileName) {
+    public void startLogging(File logFile) {
         try {
             if (logging && logPrintWriter != null) {
                 logPrintWriter.close();
             }
 
-            File logFileDir = new File(TtUtils.getTtLogFileDir());
-            if (!logFileDir.exists()) {
-                logFileDir.mkdirs();
-            }
+//            File logFileDir = new File(TtUtils.getTtLogFileDir());
+//            if (!logFileDir.exists()) {
+//                logFileDir.mkdirs();
+//            }
 
-            logPrintWriter = new PrintWriter(fileName);
+            logPrintWriter = new PrintWriter(new FileWriter(logFile, true));
 
             writeStartLog();
 
@@ -469,22 +482,23 @@ public class GpsService extends Service implements LocationListener, LocationSou
     }
 
     @Override
-    public void onLocationChanged(Location location) {
+    public void onLocationChanged(@NonNull Location location) {
         //
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
-        //
+        //not available after Android Q
     }
 
     @Override
-    public void onProviderEnabled(String provider) {
+    public void onProviderEnabled(@NonNull String provider) {
         //if gps or coarse loc gets turned on
     }
 
     @Override
-    public void onProviderDisabled(String provider) {
+    public void onProviderDisabled(@NonNull String provider) {
         //if gps or coarse loc gets turned off
     }
     //endregion
@@ -615,7 +629,9 @@ public class GpsService extends Service implements LocationListener, LocationSou
     private void postReceivingNmeaStrings(final boolean receivingNmea) {
         for (final Listener listener : listeners) {
             try {
-                new Handler(Looper.getMainLooper()).post(() -> listener.receivingNmeaStrings(receivingNmea));
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    if (listener != null) listener.receivingNmeaStrings(receivingNmea);
+                });
             } catch (Exception ex) {
                 //
             }
@@ -682,7 +698,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
 
     //region LocationSource for GMaps
     @Override
-    public void activate(OnLocationChangedListener onLocationChangedListener) {
+    public void activate(@NonNull OnLocationChangedListener onLocationChangedListener) {
         gmapListener = onLocationChangedListener;
 
         if (!isGpsRunning()) {
@@ -711,12 +727,14 @@ public class GpsService extends Service implements LocationListener, LocationSou
         InternalGpsNotEnabled,
         InternalGpsNeedsPermissions,
         InternalGpsError,
+        InternalGpsRequiresPermissions,
         ExternalGpsConnecting,
         ExternalGpsStarted,
         ExternalGpsStopped,
         ExternalGpsNotFound,
         ExternalGpsNotConnected,
         ExternalGpsError,
+        ExternalGpsRequiresPermissions,
         GpsAlreadyStarted,
         GpsAlreadyStopped,
         GpsServiceInUse,
@@ -799,8 +817,8 @@ public class GpsService extends Service implements LocationListener, LocationSou
         }
 
         @Override
-        public void startLogging(String fileName) {
-            GpsService.this.startLogging(fileName);
+        public void startLogging(File logFile) {
+            GpsService.this.startLogging(logFile);
         }
 
         @Override
@@ -858,7 +876,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
 
         GpsProvider getGpsProvider();
 
-        void startLogging(String fileName);
+        void startLogging(File logFile);
 
         void stopLogging();
 

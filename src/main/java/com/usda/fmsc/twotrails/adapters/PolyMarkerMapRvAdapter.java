@@ -5,6 +5,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -23,8 +24,8 @@ import com.usda.fmsc.twotrails.objects.map.PolygonGraphicOptions;
 import java.util.List;
 
 public class PolyMarkerMapRvAdapter extends RecyclerView.Adapter<PolyMarkerMapRvAdapter.PolyMarkerMapViewHolder> {
-    private AppCompatActivity activity;
-    private List<PolygonGraphicManager> markerMaps;
+    private final AppCompatActivity activity;
+    private final List<PolygonGraphicManager> markerMaps;
     private Listener listener;
 
 
@@ -44,6 +45,7 @@ public class PolyMarkerMapRvAdapter extends RecyclerView.Adapter<PolyMarkerMapRv
         return markerMaps.size();
     }
 
+    @NonNull
     @Override
     public PolyMarkerMapViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.card_map_opts, parent, false);
@@ -138,52 +140,46 @@ public class PolyMarkerMapRvAdapter extends RecyclerView.Adapter<PolyMarkerMapRv
         holder.pmbOptions.setItemChecked(R.id.mapOptMenuCloseUnAdjBnd, graphicManager.isUnadjBndClose());
 
         holder.pmbOptions.setListener(item -> {
-            switch (item.getItemId()) {
-                case R.id.mapOptMenuCloseAdjBnd: {
-                    boolean checked = !item.isChecked();
-                    item.setChecked(checked);
+            int itemId = item.getItemId();
+            if (itemId == R.id.mapOptMenuCloseAdjBnd) {
+                boolean checked = !item.isChecked();
+                item.setChecked(checked);
 
-                    graphicManager.setAdjBndClose(checked);
-                    onOptionChanged(holder, DrawCode.ADJBNDCLOSE);
-                    break;
-                }
-                case R.id.mapOptMenuCloseUnAdjBnd: {
-                    boolean checked = !item.isChecked();
-                    item.setChecked(checked);
+                graphicManager.setAdjBndClose(checked);
+                onOptionChanged(holder, DrawCode.ADJBNDCLOSE);
+            } else if (itemId == R.id.mapOptMenuCloseUnAdjBnd) {
+                boolean checked = !item.isChecked();
+                item.setChecked(checked);
 
-                    graphicManager.setUnadjBndClose(checked);
-                    onOptionChanged(holder, DrawCode.UNADJBNDCLOSE);
-                    break;
-                }
-                case R.id.mapOptMenuColors: {
-                    PointColorPickerDialog dialog = PointColorPickerDialog.newInstance(
-                            graphicManager.getGraphicOptions().getColors(),
-                            graphicManager.getPolyName()
-                    );
+                graphicManager.setUnadjBndClose(checked);
+                onOptionChanged(holder, DrawCode.UNADJBNDCLOSE);
+            } else if (itemId == R.id.mapOptMenuColors) {
+                PointColorPickerDialog dialog = PointColorPickerDialog.newInstance(
+                        graphicManager.getGraphicOptions().getColors(),
+                        graphicManager.getPolyName()
+                );
 
-                    dialog.setListener(colorOptions -> {
-                        graphicManager.setAdjBndColor(colorOptions[0]);
-                        graphicManager.setAdjNavColor(colorOptions[1]);
-                        graphicManager.setUnAdjBndColor(colorOptions[2]);
-                        graphicManager.setUnAdjNavColor(colorOptions[3]);
-                        graphicManager.setAdjPtsColor(colorOptions[4]);
-                        graphicManager.setUnAdjPtsColor(colorOptions[5]);
-                        graphicManager.setWayPtsColor(colorOptions[6]);
+                dialog.setListener(colorOptions -> {
+                    graphicManager.setAdjBndColor(colorOptions[0]);
+                    graphicManager.setAdjNavColor(colorOptions[1]);
+                    graphicManager.setUnAdjBndColor(colorOptions[2]);
+                    graphicManager.setUnAdjNavColor(colorOptions[3]);
+                    graphicManager.setAdjPtsColor(colorOptions[4]);
+                    graphicManager.setUnAdjPtsColor(colorOptions[5]);
+                    graphicManager.setWayPtsColor(colorOptions[6]);
 
-                        graphicManager.update(PolygonGraphicOptions.GraphicCode.ADJBND_COLOR, colorOptions[0]);
-                        graphicManager.update(PolygonGraphicOptions.GraphicCode.ADJNAV_COLOR, colorOptions[1]);
-                        graphicManager.update(PolygonGraphicOptions.GraphicCode.UNADJBND_COLOR, colorOptions[2]);
-                        graphicManager.update(PolygonGraphicOptions.GraphicCode.UNADJNAV_COLOR, colorOptions[3]);
-                        graphicManager.update(PolygonGraphicOptions.GraphicCode.ADJPTS_COLOR, colorOptions[4]);
-                        graphicManager.update(PolygonGraphicOptions.GraphicCode.UNADJPTS_COLOR, colorOptions[5]);
-                        graphicManager.update(PolygonGraphicOptions.GraphicCode.WAYPTS_COLOR, colorOptions[6]);
+                    graphicManager.update(PolygonGraphicOptions.GraphicCode.ADJBND_COLOR, colorOptions[0]);
+                    graphicManager.update(PolygonGraphicOptions.GraphicCode.ADJNAV_COLOR, colorOptions[1]);
+                    graphicManager.update(PolygonGraphicOptions.GraphicCode.UNADJBND_COLOR, colorOptions[2]);
+                    graphicManager.update(PolygonGraphicOptions.GraphicCode.UNADJNAV_COLOR, colorOptions[3]);
+                    graphicManager.update(PolygonGraphicOptions.GraphicCode.ADJPTS_COLOR, colorOptions[4]);
+                    graphicManager.update(PolygonGraphicOptions.GraphicCode.UNADJPTS_COLOR, colorOptions[5]);
+                    graphicManager.update(PolygonGraphicOptions.GraphicCode.WAYPTS_COLOR, colorOptions[6]);
 
-                        setButtonColors(holder, graphicManager);
-                    });
+                    setButtonColors(holder, graphicManager);
+                });
 
-                    dialog.show(activity.getSupportFragmentManager(), "COLOR_PICKER");
-                    break;
-                }
+                dialog.show(activity.getSupportFragmentManager(), "COLOR_PICKER");
             }
 
             return false;
@@ -215,16 +211,16 @@ public class PolyMarkerMapRvAdapter extends RecyclerView.Adapter<PolyMarkerMapRv
     }
 
 
-    public class PolyMarkerMapViewHolder extends RecyclerView.ViewHolder implements PolygonDrawOptions.Listener {
-        TextView tvPolyName;
-        View layHeader, layContent;
-        MultiStateTouchCheckBox tcbPoly;
-        PopupMenuButton pmbOptions;
-        FlipCheckBoxEx fcbAdjBnd, fcbAdjNav, fcbUnAdjBnd, fcbUnAdjNav,
+    public static class PolyMarkerMapViewHolder extends RecyclerView.ViewHolder implements PolygonDrawOptions.Listener {
+        public final TextView tvPolyName;
+        public final View layHeader, layContent;
+        public final MultiStateTouchCheckBox tcbPoly;
+        public final PopupMenuButton pmbOptions;
+        public final FlipCheckBoxEx fcbAdjBnd, fcbAdjNav, fcbUnAdjBnd, fcbUnAdjNav,
                 fcbAdjBndPts, fcbAdjNavPts, fcbUnAdjBndPts, fcbUnAdjNavPts,
                 fcbAdjMiscPts, fcbUnAdjMiscPts, fcbWayPts;
 
-        boolean cardExpanded = false;
+        private boolean cardExpanded = false;
 
 
         PolyMarkerMapViewHolder(View itemView) {
@@ -282,7 +278,6 @@ public class PolyMarkerMapRvAdapter extends RecyclerView.Adapter<PolyMarkerMapRv
                     fcbUnAdjBndPts.setCheckedNoEvent(value);
                     break;
                 case ADJBNDCLOSE:
-                    break;
                 case UNADJBNDCLOSE:
                     break;
                 case ADJNAV:

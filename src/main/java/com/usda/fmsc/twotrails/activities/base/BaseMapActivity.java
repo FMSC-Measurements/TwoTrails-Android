@@ -9,9 +9,11 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.location.Location;
 import android.os.Bundle;
 import androidx.annotation.ColorInt;
 import androidx.annotation.IntDef;
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -38,6 +40,8 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.maps.MapsInitializer;
+import com.google.android.gms.maps.OnMapsSdkInitializedCallback;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.animation.ViewAnimator;
@@ -64,8 +68,9 @@ import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment;
 import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment.MarkerData;
 import com.usda.fmsc.twotrails.fragments.map.ManagedSupportMapFragment;
 import com.usda.fmsc.twotrails.gps.GpsService;
-import com.usda.fmsc.twotrails.logic.PolygonAdjuster;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
+import com.usda.fmsc.twotrails.objects.map.IPolygonGraphicManager;
+import com.usda.fmsc.twotrails.objects.map.LineGraphicManager;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
@@ -78,8 +83,10 @@ import com.usda.fmsc.twotrails.units.GoogleMapType;
 import com.usda.fmsc.twotrails.units.MapTracking;
 import com.usda.fmsc.twotrails.units.MapType;
 import com.usda.fmsc.twotrails.utilities.AppUnits;
+import com.usda.fmsc.twotrails.utilities.ClosestPositionCalculator;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 import com.usda.fmsc.utilities.StringEx;
+import com.usda.fmsc.utilities.Tuple;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -87,6 +94,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Locale;
 
 import jp.wasabeef.recyclerview.animators.SlideInUpAnimator;
 
@@ -95,9 +103,8 @@ import static androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_LOCKED_OPEN;
 import static androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_UNDEFINED;
 import static androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_UNLOCKED;
 
-@SuppressWarnings({"unused", "SameParameterValue"})
-public abstract class BaseMapActivity extends CustomToolbarActivity implements IMultiMapFragment.MultiMapListener, GpsService.Listener,
-        SensorEventListener, PolyMarkerMapRvAdapter.Listener {
+public abstract class BaseMapActivity extends ProjectAdjusterActivity implements IMultiMapFragment.MultiMapListener, GpsService.Listener,
+        SensorEventListener, PolyMarkerMapRvAdapter.Listener, OnMapsSdkInitializedCallback {
 
     //region Lock and Gravity Defs
     @IntDef({LOCK_MODE_UNLOCKED, LOCK_MODE_LOCKED_CLOSED, LOCK_MODE_LOCKED_OPEN,
@@ -120,8 +127,9 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     private Fragment mapFragment;
     private IMultiMapFragment mmFrag;
 
-    private ArrayList<PolygonGraphicManager> polyGraphicManagers = new ArrayList<>();
-    private ArrayList<TrailGraphicManager> trailGraphicManagers = new ArrayList<>();
+    private final ArrayList<PolygonGraphicManager> polyGraphicManagers = new ArrayList<>();
+    private final ArrayList<TrailGraphicManager> trailGraphicManagers = new ArrayList<>();
+    private final ArrayList<LineGraphicManager> lineGraphicManagers = new ArrayList<>();
 
     private Position lastPosition;
     private android.location.Location targetLocation;
@@ -136,11 +144,12 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     private SlidingUpPanelLayout slidingLayout;
     private TextView tvNavPid, tvNavPoly, tvNavDistMt, tvNavDistFt, tvNavAzTrue, tvNavAzMag;
     private ImageView ivArrow;
-    private Button btnFromPoly, btnFromPoint, btnToPoly, btnToPoint;
+    private Button btnFromPoly, btnFromPoint, btnToPoly, btnToPoint, btnToPoly2, btnToPoint2;
+    private View layToLine;
 
-    private TtPolygon fromPoly, toPoly;
-    private TtPoint fromPoint, toPoint;
-    private boolean fromMyLoc = true, receivingNmea;
+    private TtPolygon _FromPoly, _ToPoly, _ToPoly2;
+    private TtPoint _FromPoint, _ToPoint, _ToPoint2;
+    private boolean _NavFromMyLoc = true, _NavToPoint = true, _ReceivingNmea;
 
     private boolean showCompass, mapMoved = true, showMyPos, polysCreated, mapHasMaxExtents, mapReady;
     private MapTracking mapTracking = MapTracking.FOLLOW;
@@ -149,16 +158,24 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     private float currentDirection;
     private float[] mGravity, mGeomagnetic;
 
-    private HashMap<String, ArrayList<TtPoint>> polyPoints = new HashMap<>();
+    private final HashMap<String, ArrayList<TtPoint>> polyPoints = new HashMap<>();
     private HashMap<String, TtPolygon> _Polygons = new HashMap<>();
     private HashMap<String, TtMetadata> _Metadata;
+    private TtMetadata _DefaultMetadata;
 
-    private Extent completeBnds, trackedPoly;
+    private Extent completeBnds;//, trackedPolyExtents;
+    private IPolygonGraphicManager trackedPolyManager;
 
-    private boolean[] visd = new boolean[12];
-    private boolean[] invisd = new boolean[12];
-    private int[] dpc = new int[12];
+    private final boolean[] visd = new boolean[12];
+    private final boolean[] invisd = new boolean[12];
+    private final int[] dpc = new int[12];
     //endregion
+
+    @Override
+    public boolean requiresGpsService() {
+        return true;
+    }
+
 
     //region get/set
     
@@ -182,6 +199,9 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        //setup new renderer
+        MapsInitializer.initialize(getTtAppCtx(), MapsInitializer.Renderer.LATEST, this);
 
         if (savedInstanceState != null && savedInstanceState.containsKey(FRAGMENT) && savedInstanceState.containsKey(MAP_TYPE)) {
             mapType = MapType.parse(savedInstanceState.getInt(MAP_TYPE));
@@ -233,12 +253,6 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         setCompassEnabled(getShowCompass());
         setLocationEnabled(getShowMyPos());
 
-        getTtAppCtx().getGps().addListener(this);
-
-        if (getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
-            getTtAppCtx().getGps().startGps();
-        }
-
         if (AndroidUtils.Device.isFullOrientationAvailable(this)) {
             mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 
@@ -262,6 +276,9 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         btnFromPoint = findViewById(R.id.mapNavBtnFromPoint);
         btnToPoly = findViewById(R.id.mapNavBtnToPoly);
         btnToPoint = findViewById(R.id.mapNavBtnToPoint);
+        btnToPoly2 = findViewById(R.id.mapNavBtnToPoly2);
+        btnToPoint2 = findViewById(R.id.mapNavBtnToPoint2);
+        layToLine = findViewById(R.id.mapNavLayToLine);
 
         tvNavDistFt = findViewById(R.id.mapNavTvDistFeet);
         tvNavDistMt = findViewById(R.id.mapNavTvDistMeters);
@@ -280,7 +297,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
             LinearLayoutManager llm = new LinearLayoutManager(this);
             rvPolyOptions.setLayoutManager(llm);
 
-            PolyMarkerMapRvAdapter pmmAdapter = new PolyMarkerMapRvAdapter(this, getPolyGraphicManagers(), this);
+            PolyMarkerMapRvAdapter pmmAdapter = new PolyMarkerMapRvAdapter(this, getPolygonGraphicManagers(), this);
             rvPolyOptions.setItemAnimator(new SlideInUpAnimator());
             rvPolyOptions.setAdapter(pmmAdapter);
 
@@ -358,9 +375,9 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     @Override
     public void setContentView(int layoutResID) {
         LayoutInflater inflater = LayoutInflater.from(this);
-
-        View view = inflater.inflate(layoutResID, null);
         FrameLayout container = findViewById(R.id.contentContainer);
+
+        View view = inflater.inflate(layoutResID, container, false);
 
         if (view != null) {
             if (container != null) {
@@ -389,7 +406,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
 
         if (getMapRightDrawerLayoutId() != 0) {
             FrameLayout rightDrawer = findViewById(R.id.mapRightDrawer);
-            view = inflater.inflate(getMapRightDrawerLayoutId(), null);
+            view = inflater.inflate(getMapRightDrawerLayoutId(), container, false);
             if (view != null) {
                 rightDrawer.addView(view);
             } else {
@@ -438,7 +455,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
                     startGMap();
                 }
             }
-            case Consts.Codes.Activites.SETTINGS: {
+            case Consts.Codes.Activities.SETTINGS: {
                 getMapSettings();
                 break;
             }
@@ -446,7 +463,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenuEx(Menu menu) {
         miResetBounds = menu.findItem(R.id.mapMenuResetBounds);
         if (miResetBounds != null) {
             miResetBounds.setVisible(getMapTracking() != MapTracking.FOLLOW);
@@ -478,100 +495,68 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
             miMapMaxBounds.setVisible(mapHasMaxExtents);
         }
 
-        return super.onCreateOptionsMenu(menu);
+        return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.mapMenuShowMyPos: {
-                showMyPos = !showMyPos;
-                getTtAppCtx().getDeviceSettings().setMapShowMyPos(showMyPos);
-                miShowMyPos.setChecked(showMyPos);
+        int itemId = item.getItemId();
+        if (itemId == R.id.mapMenuShowMyPos) {
+            showMyPos = !showMyPos;
+            getTtAppCtx().getDeviceSettings().setMapShowMyPos(showMyPos);
+            miShowMyPos.setChecked(showMyPos);
 
-                if (getShowMyPos()) {
-                    if (!getTtAppCtx().getGps().isGpsRunning()) {
-                        startGps();
+            setLocationEnabled(getShowMyPos());
+        } else if (itemId == R.id.mmMenuSelectMap) {
+            selectMapType();
+        } else if (itemId == R.id.mapMenuGps) {
+            openSettings(SettingsActivity.GPS_SETTINGS_PAGE);
+        } else if (itemId == R.id.mmMenuMapSettings) {
+            openSettings(SettingsActivity.MAP_SETTINGS_PAGE);
+        } else if (itemId == R.id.mapMenuWhereIs) {
+            calculateDir();
+            slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
+        } else if (itemId == R.id.mmMenuMoveToMaxBounds) {
+            if (mmFrag != null) {
+                mmFrag.moveToMapMaxExtents(true);
+            }
+        } else if (itemId == R.id.mapMenuResetBounds) {
+            resetMapBounds(true);
+        } else if (itemId == R.id.mapMenuZoomToPoly) {
+            ArrayList<IPolygonGraphicManager> managers = getIPolygonGraphicManagers();
+            int gSize = managers.size();
+            if (gSize > 0) {
+                if (gSize > 1) {
+                    final String[] polyStrs = new String[managers.size()];
+
+                    for (int i = 0; i < gSize; i++) {
+                        polyStrs[i] = managers.get(i).getPolyName();
                     }
-                } else {
-                    if (!getTtAppCtx().getDeviceSettings().isGpsAlwaysOn()) {
-                        stopGps();
-                    }
-                }
 
-                setLocationEnabled(getShowMyPos());
-                break;
-            }
-            case R.id.mmMenuSelectMap: {
-                selectMapType();
-                break;
-            }
-            case R.id.mapMenuGps: {
-                startActivityForResult(new Intent(this, SettingsActivity.class).
-                                putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.GPS_SETTINGS_PAGE),
-                        Consts.Codes.Activites.SETTINGS);
-                break;
-            }
-            case R.id.mmMenuMapSettings: {
-                startActivityForResult(new Intent(this, SettingsActivity.class).
-                                putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.MAP_SETTINGS_PAGE),
-                        Consts.Codes.Activites.SETTINGS);
-                break;
-            }
-            case R.id.mapMenuWhereIs: {
-                calculateDir();
-                slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
-                break;
-            }
-            case R.id.mmMenuMoveToMaxBounds: {
-                if (mmFrag != null) {
-                    mmFrag.moveToMapMaxExtents(true);
-                }
-                break;
-            }
-            case R.id.mapMenuResetBounds: {
-                resetMapBounds(true);
-                break;
-            }
-            case R.id.mapMenuZoomToPoly: {
-                int gSize = getPolyGraphicManagers().size();
-                if (gSize > 0) {
-                    if (gSize > 1) {
-                        final String[] polyStrs = new String[polyPoints.size()];
+                    AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
 
-                        for (int i = 0; i < gSize; i++) {
-                            polyStrs[i] = getPolyGraphicManagers().get(i).getPolyName();
-                        }
+                    dialogBuilder.setTitle("Track Polygon");
 
-                        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
-
-                        dialogBuilder.setTitle("Track Polygon");
-
-                        dialogBuilder.setItems(polyStrs, (dialog, which) -> {
-                            PolygonGraphicManager pmm = getPolyGraphicManagers().get(which);
-                            trackedPoly = pmm.getExtents();
-                            getTtAppCtx().getProjectSettings().setTrackedPolyCN(pmm.getPolygonCN());
-                            mapMoved = true;
-                            moveToLocation(pmm.getExtents(), Consts.Location.PADDING, true);
-                        });
-
-                        dialogBuilder.setNegativeButton(R.string.str_cancel, null);
-
-                        final AlertDialog dialog = dialogBuilder.create();
-
-                        dialog.show();
-                    } else {
-                        PolygonGraphicManager pmm = getPolyGraphicManagers().get(0);
-                        trackedPoly = pmm.getExtents();
-                        getTtAppCtx().getProjectSettings().setTrackedPolyCN(pmm.getPolygonCN());
+                    dialogBuilder.setItems(polyStrs, (dialog, which) -> {
+                        trackedPolyManager = managers.get(which);
+                        getTtAppCtx().getProjectSettings().setTrackedPolyCN(trackedPolyManager.getPolygonCN());
                         mapMoved = true;
-                        moveToLocation(pmm.getExtents(), Consts.Location.PADDING, true);
-                    }
-                } else {
-                    Toast.makeText(this, "No Polygons", Toast.LENGTH_SHORT).show();
-                }
+                        moveToLocation(trackedPolyManager.getExtents(), Consts.Location.PADDING, true);
+                    });
 
-                break;
+                    dialogBuilder.setNegativeButton(R.string.str_cancel, null);
+
+                    final AlertDialog dialog = dialogBuilder.create();
+
+                    dialog.show();
+                } else {
+                    trackedPolyManager = getIPolygonGraphicManagers().get(0);
+                    getTtAppCtx().getProjectSettings().setTrackedPolyCN(trackedPolyManager.getPolygonCN());
+                    mapMoved = true;
+                    moveToLocation(trackedPolyManager.getExtents(), Consts.Location.PADDING, true);
+                }
+            } else {
+                Toast.makeText(this, "No Polygons", Toast.LENGTH_SHORT).show();
             }
         }
 
@@ -623,13 +608,6 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     }
 
     @Override
-    protected void onDestroy() {
-        getTtAppCtx().getGps().removeListener(this);
-
-        super.onDestroy();
-    }
-
-    @Override
     public void onBackPressed() {
         if (baseMapDrawer.isDrawerOpen(GravityCompat.START)) {
             baseMapDrawer.closeDrawer(GravityCompat.START);
@@ -665,7 +643,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
 
         if (mapFragment != null) {
@@ -706,7 +684,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     }
 
     protected IMultiMapFragment.MapOptions getMapStartLocation(MapType mapType, int terrainType) {
-        return new IMultiMapFragment.MapOptions(terrainType, Consts.Location.USA_BOUNDS, Consts.Location.PADDING);
+        return new IMultiMapFragment.MapOptions(terrainType, mmFrag != null ? mmFrag.getExtents() : Consts.Location.USA_BOUNDS, Consts.Location.PADDING);
     }
 
 
@@ -741,7 +719,9 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
                 finish();
             } else {
                 mapReady = false;
-                mapFragment = createMapFragment(mapType, getMapOptions(mapType, mapId));
+                mapTypeChanging = true;
+                startOptions = getMapStartLocation(mapType, mapId);
+                mapFragment = createMapFragment(mapType, startOptions);
                 mmFrag = (IMultiMapFragment) mapFragment;
                 getSupportFragmentManager().beginTransaction().replace(R.id.mapContainer, mapFragment).commit();
 
@@ -785,7 +765,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     }
 
     protected void moveToLocation(Extent extents, int padding, boolean animate) {
-        if (mapFragment != null) {
+        if (mmFrag != null) {
             if (extents != null) {
                 mmFrag.moveToLocation(extents, padding, animate);
             } else {
@@ -813,12 +793,10 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
             }
 
             if (mmFrag != null) {
-                for (PolygonGraphicManager pgm : getPolyGraphicManagers()) {
+                for (PolygonGraphicManager pgm : getPolygonGraphicManagers()) {
                     mmFrag.addPolygon(pgm, null);
                 }
             }
-
-            resetMapBounds(true);
 
             setupPolygonOptionsUI();
         }
@@ -826,8 +804,8 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
 
     protected void resetMapBounds(boolean animate) {
         mapMoved = true;
-        if (getMapTracking() == MapTracking.POLY_BOUNDS && getTrackedPoly() != null) {
-            moveToLocation(getTrackedPoly(), Consts.Location.PADDING, animate);
+        if (getMapTracking() == MapTracking.POLY_BOUNDS && getTrackedPolyExtents() != null) {
+            moveToLocation(getTrackedPolyExtents(), Consts.Location.PADDING, animate);
         } else if (getMapTracking() == MapTracking.FOLLOW && hasPosition()) {
             moveToLocation(getLastPosition(), Consts.Location.ZOOM_CLOSE, animate);
         } else if (getCompleteBounds() != null) {
@@ -838,9 +816,27 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         mapMoved = false;
     }
 
+    boolean mapTypeChanging;
+    IMultiMapFragment.MapOptions startOptions;
+
+    @Override
+    public void onMapsSdkInitialized(@NonNull MapsInitializer.Renderer renderer) {
+        switch (renderer) {
+            case LEGACY:
+                break;
+            case LATEST:
+                break;
+        }
+    }
+
     @Override
     public void onMapLoaded() {
-
+        if (mapTypeChanging) {
+            moveToLocation(startOptions.getExtents(), startOptions.getPadding(), false);
+            mapTypeChanging = false;
+        } else {
+            resetMapBounds(true);
+        }
     }
 
     @Override
@@ -858,40 +854,44 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         tvNavPid.setText(StringEx.toString(currentPoint.getPID()));
         tvNavPoly.setText(currentPoint.getPolyName());
 
-        toPoint = currentPoint;
-        toPoly = getPolygons().get(currentPoint.getPolyCN());
-        btnToPoint.setText(StringEx.toString(toPoint.getPID()));
-        btnToPoly.setText(toPoly.getName());
+        _ToPoint = currentPoint;
+        _ToPoly = getPolygons().get(currentPoint.getPolyCN());
+        btnToPoint.setText(StringEx.toString(_ToPoint.getPID()));
+        btnToPoly.setText(_ToPoly.getName());
         calculateDir();
 
         slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
     }
 
     protected void addPolygonGraphic(PolygonGraphicManager graphicManager, PolygonDrawOptions drawOptions) {
-        if (mmFrag != null) {
-            try {
-                mmFrag.addPolygon(graphicManager, drawOptions);
-            } catch (NullPointerException e) {
-                new AlertDialog.Builder(this)
-                        .setMessage("An error occurred trying to add a polygon. Please try readjusting your Polygons.")
-                        .setPositiveButton("Adjust Polygons", (dialog, which) -> {
-                            PolygonAdjuster.adjust(getTtAppCtx());
-                            finish();
-                        })
-                        .setNeutralButton(R.string.str_cancel, (dialog, which) -> finish())
-                        .show();
+        if (!polyGraphicManagers.contains(graphicManager)) {
+            if (mmFrag != null) {
+                try {
+                    mmFrag.addPolygon(graphicManager, drawOptions);
+                } catch (NullPointerException e) {
+                    new AlertDialog.Builder(this)
+                            .setMessage("An error occurred trying to add a polygon. Please try readjusting your Polygons.")
+                            .setPositiveButton("Adjust Polygons", (dialog, which) -> {
+                                getTtAppCtx().adjustProject();
+                                finish();
+                            })
+                            .setNeutralButton(R.string.str_cancel, (dialog, which) -> finish())
+                            .show();
+                }
             }
-        }
 
-        polyGraphicManagers.add(graphicManager);
+            polyGraphicManagers.add(graphicManager);
+        }
     }
 
     protected void addTrailGraphic(TrailGraphicManager graphicManager) {
-        if (mmFrag != null) {
-            mmFrag.addTrail(graphicManager);
-        }
+        if (!trailGraphicManagers.contains(graphicManager)) {
+            if (mmFrag != null) {
+                mmFrag.addTrail(graphicManager);
+            }
 
-        trailGraphicManagers.add(graphicManager);
+            trailGraphicManagers.add(graphicManager);
+        }
     }
 
     protected void removePolygonGraphic(PolygonGraphicManager graphicManager) {
@@ -911,6 +911,24 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
             }
 
             trailGraphicManagers.remove(graphicManager);
+        }
+    }
+
+    protected void addLineGraphic(LineGraphicManager graphicManager) {
+        if (mmFrag != null) {
+            mmFrag.addLine(graphicManager);
+        }
+
+        lineGraphicManagers.add(graphicManager);
+    }
+
+    private void removeLineGraphic(LineGraphicManager graphicManager) {
+        if (graphicManager != null && lineGraphicManagers.contains(graphicManager)) {
+            if (mmFrag != null) {
+                mmFrag.removeLine(graphicManager);
+            }
+
+            lineGraphicManagers.remove(graphicManager);
         }
     }
 
@@ -945,17 +963,13 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         }
 
         if (miTrackedPoly != null) {
-            miTrackedPoly.setVisible(true);//getMapTracking() == MapTracking.POLY_BOUNDS);
+            miTrackedPoly.setVisible(true);
         }
 
-        if (getShowMyPos()) {
-            startGps();
-        }
-
-        getSettings();
+        updateActivitySettings();
     }
 
-    protected void getSettings() {
+    protected void updateActivitySettings() {
 
     }
 
@@ -1017,8 +1031,8 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         if (getMapTracking() == MapTracking.FOLLOW) {
             moveToLocation(position, true);
         } else if (mapMoved) {
-            if (getMapTracking() == MapTracking.POLY_BOUNDS && getTrackedPoly() != null) {
-                moveToLocation(getTrackedPoly(), Consts.Location.PADDING, true);
+            if (getMapTracking() == MapTracking.POLY_BOUNDS && getTrackedPolyExtents() != null) {
+                moveToLocation(getTrackedPolyExtents(), Consts.Location.PADDING, true);
             } else if (getMapTracking() == MapTracking.COMPLETE_BOUNDS && getCompleteBounds() != null) {
                 moveToLocation(getCompleteBounds(), Consts.Location.PADDING, true);
             }
@@ -1042,20 +1056,18 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
 
             lastPosition = position;
 
-            if (fromMyLoc && slidingLayout != null && slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
+            if (_NavFromMyLoc && slidingLayout != null && slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
                 calculateDir();
             }
 
             if (mmFrag != null) {
                 mmFrag.updateLocation(nmeaBurst.getPosition());
             }
-
-            onNmeaBurstReceived(nmeaBurst);
-        } else {
-            onNmeaBurstReceived(nmeaBurst);
         }
 
-        receivingNmea = true;
+        onNmeaBurstReceived(nmeaBurst);
+
+        _ReceivingNmea = true;
     }
 
     protected void onNmeaBurstReceived(NmeaBurst nmeaBurst) {
@@ -1067,7 +1079,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         switch (error) {
             case LostDeviceConnection:
                 Toast.makeText(BaseMapActivity.this, "Lost GPS Connection", Toast.LENGTH_LONG).show();
-                receivingNmea = false;
+                _ReceivingNmea = false;
                 break;
             case NoExternalGpsSocket:
                 break;
@@ -1089,7 +1101,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
 
     @Override
     public void nmeaBurstValidityChanged(boolean burstsValid) {
-        receivingNmea = burstsValid;
+        _ReceivingNmea = burstsValid;
     }
 
     @Override
@@ -1120,7 +1132,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     }
 
     protected boolean isReceivingNmea() {
-        return receivingNmea;
+        return _ReceivingNmea;
     }
     //endregion
 
@@ -1197,14 +1209,14 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
 
     //region Polygon Options
     private void setupGraphicManagers() {
-        createPolygonGraphicManagers();
+        createGraphicManagers();
 
-        if (getPolyGraphicManagers().size() > 0) {
+        if (getPolygonGraphicManagers().size() > 0) {
             Extent.Builder builder = new Extent.Builder();
             Extent tmp;
 
             int usedBounds = 0;
-            for (PolygonGraphicManager pgm : getPolyGraphicManagers()) {
+            for (IPolygonGraphicManager pgm : getIPolygonGraphicManagers()) {
                 tmp = pgm.getExtents();
 
                 if (tmp == null)
@@ -1226,7 +1238,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         setupMasterPolyControl();
     }
 
-    protected void createPolygonGraphicManagers() {
+    protected void createGraphicManagers() {
         PolygonGraphicManager polygonGraphicManager;
         String trackedPolyCN = getTrackedPolyCN();
 
@@ -1248,7 +1260,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
             addPolygonGraphic(polygonGraphicManager, getTtAppCtx().getMapSettings().getPolyDrawOptions(polygon.getCN()));
 
             if (trackedPolyCN != null && polygon.getCN().equals(trackedPolyCN)) {
-                trackedPoly = polygonGraphicManager.getExtents();
+                trackedPolyManager = polygonGraphicManager;
             }
         }
     }
@@ -1260,7 +1272,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
 
     private boolean masterCardExpanded;
 
-    PostDelayHandler[] postDelayHandlers = new PostDelayHandler[12];
+    private final PostDelayHandler[] postDelayHandlers = new PostDelayHandler[12];
 
     private void setupMasterPolyControl() {
         for (int i = 0; i < 12; i++) {
@@ -1318,29 +1330,29 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
             }
         });
 
-        tcbPoly.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolyOptions(PolygonDrawOptions.DrawCode.VISIBLE, isChecked));
+        tcbPoly.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolygonDrawOptions(PolygonDrawOptions.DrawCode.VISIBLE, isChecked));
 
-        tcbAdjBnd.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolyOptions(PolygonDrawOptions.DrawCode.ADJBND, isChecked));
+        tcbAdjBnd.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolygonDrawOptions(PolygonDrawOptions.DrawCode.ADJBND, isChecked));
 
-        tcbAdjNav.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolyOptions(PolygonDrawOptions.DrawCode.ADJNAV, isChecked));
+        tcbAdjNav.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolygonDrawOptions(PolygonDrawOptions.DrawCode.ADJNAV, isChecked));
 
-        tcbUnAdjBnd.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolyOptions(PolygonDrawOptions.DrawCode.UNADJBND, isChecked));
+        tcbUnAdjBnd.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolygonDrawOptions(PolygonDrawOptions.DrawCode.UNADJBND, isChecked));
 
-        tcbUnAdjNav.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolyOptions(PolygonDrawOptions.DrawCode.UNADJNAV, isChecked));
+        tcbUnAdjNav.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolygonDrawOptions(PolygonDrawOptions.DrawCode.UNADJNAV, isChecked));
 
-        tcbAdjBndPts.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolyOptions(PolygonDrawOptions.DrawCode.ADJBNDPTS, isChecked));
+        tcbAdjBndPts.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolygonDrawOptions(PolygonDrawOptions.DrawCode.ADJBNDPTS, isChecked));
 
-        tcbAdjNavPts.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolyOptions(PolygonDrawOptions.DrawCode.ADJNAVPTS, isChecked));
+        tcbAdjNavPts.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolygonDrawOptions(PolygonDrawOptions.DrawCode.ADJNAVPTS, isChecked));
 
-        tcbUnAdjBndPts.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolyOptions(PolygonDrawOptions.DrawCode.UNADJBNDPTS, isChecked));
+        tcbUnAdjBndPts.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolygonDrawOptions(PolygonDrawOptions.DrawCode.UNADJBNDPTS, isChecked));
 
-        tcbUnAdjNavPts.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolyOptions(PolygonDrawOptions.DrawCode.UNADJNAVPTS, isChecked));
+        tcbUnAdjNavPts.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolygonDrawOptions(PolygonDrawOptions.DrawCode.UNADJNAVPTS, isChecked));
 
-        tcbAdjMiscPts.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolyOptions(PolygonDrawOptions.DrawCode.ADJMISCPTS, isChecked));
+        tcbAdjMiscPts.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolygonDrawOptions(PolygonDrawOptions.DrawCode.ADJMISCPTS, isChecked));
 
-        tcbUnAdjMiscPts.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolyOptions(PolygonDrawOptions.DrawCode.UNADJMISCPTS, isChecked));
+        tcbUnAdjMiscPts.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolygonDrawOptions(PolygonDrawOptions.DrawCode.UNADJMISCPTS, isChecked));
 
-        tcbWayPts.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolyOptions(PolygonDrawOptions.DrawCode.WAYPTS, isChecked));
+        tcbWayPts.setOnCheckedStateChangeListener((buttonView, isChecked, state) -> updatePolygonDrawOptions(PolygonDrawOptions.DrawCode.WAYPTS, isChecked));
     }
 
     //change master
@@ -1351,7 +1363,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         int x = -1;
 
         try {
-            for (PolygonGraphicManager map : getPolyGraphicManagers()) {
+            for (PolygonGraphicManager map : getPolygonGraphicManagers()) {
 
                 boolean value = map.getDrawOptions().getValue(code);
 
@@ -1466,8 +1478,8 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     }
 
     //change options for all drawoptions and display
-    private void updatePolyOptions(PolygonDrawOptions.DrawCode code, boolean value) {
-        for (PolygonGraphicManager gm : getPolyGraphicManagers()) {
+    private void updatePolygonDrawOptions(PolygonDrawOptions.DrawCode code, boolean value) {
+        for (PolygonGraphicManager gm : getPolygonGraphicManagers()) {
             gm.update(code, value);
         }
     }
@@ -1477,21 +1489,32 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     //region Controls
     public void radFromClick(View view) {
         if (((RadioButton) view).isChecked()) {
-            switch (view.getId()) {
-                case R.id.mapNavRadPoint: {
-                    fromMyLoc = false;
+            int id = view.getId();
+            if (id == R.id.mapNavRadPoint) {
+                _NavFromMyLoc = false;
 
-                    btnFromPoint.setEnabled(true);
-                    btnFromPoly.setEnabled(true);
-                    break;
-                }
-                case R.id.mapNavRadMyLoc: {
-                    fromMyLoc = true;
+                btnFromPoint.setEnabled(true);
+                btnFromPoly.setEnabled(true);
+            } else if (id == R.id.mapNavRadMyLoc) {
+                _NavFromMyLoc = true;
 
-                    btnFromPoint.setEnabled(false);
-                    btnFromPoly.setEnabled(false);
-                    break;
-                }
+                btnFromPoint.setEnabled(false);
+                btnFromPoly.setEnabled(false);
+            }
+
+            calculateDir();
+        }
+    }
+
+    public void radToClick(View view) {
+        if (((RadioButton) view).isChecked()) {
+            int id = view.getId();
+            if (id == R.id.mapNavRadToPoint) {
+                _NavToPoint = true;
+                layToLine.setVisibility(View.GONE);
+            } else if (id == R.id.mapNavRadToPoly) {
+                _NavToPoint = false;
+                layToLine.setVisibility(View.VISIBLE);
             }
 
             calculateDir();
@@ -1499,127 +1522,174 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
     }
 
     public void btnFromPolyClick(View view) {
-        if (polyPoints.size() > 0) {
-            final String[] polyStrs = new String[polyPoints.size()];
-            final ArrayList<TtPolygon> polys = getSortedPolys();
-
-            int i = 0;
-            for(TtPolygon poly : polys) {
-                polyStrs[i] = poly.getName();
-                i++;
-            }
-
-            AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
-
-            dialogBuilder.setTitle("From Polygon");
-
-
-            dialogBuilder.setItems(polyStrs, (dialog, which) -> {
-                fromPoly = polys.get(which);
-                fromPoint = null;
-                btnFromPoly.setText(fromPoly.getName());
-                btnFromPoint.setText(R.string.str_point);
-            });
-
-            dialogBuilder.setNegativeButton(R.string.str_cancel, null);
-
-            final AlertDialog dialog = dialogBuilder.create();
-
-            dialog.show();
-        } else {
-            Toast.makeText(this, "No Polygons", Toast.LENGTH_SHORT).show();
-        }
+        showPolySelectDialog("From Polygon", polygon -> {
+            _FromPoly = polygon;
+            _FromPoint = null;
+            btnFromPoly.setText(_FromPoly.getName());
+            btnFromPoint.setText(R.string.str_point);
+        });
     }
 
     public void btnFromPointClick(View view) {
-        if (fromPoly == null || !polyPoints.containsKey(fromPoly.getCN())) {
-            Toast.makeText(this, "Select polygon first", Toast.LENGTH_SHORT).show();
-        } else {
-            ArrayList<TtPoint> points = polyPoints.get(fromPoly.getCN());
-
-            if (points != null && points.size() > 0) {
-                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
-
-                dialogBuilder.setTitle(String.format("From Point in %s", fromPoly.getName()));
-                ListView listView = new ListView(this);
-                listView.setBackgroundColor(AndroidUtils.UI.getColor(BaseMapActivity.this, android.R.color.white));
-
-                final PointDetailsAdapter pda = new PointDetailsAdapter(this, points, AppUnits.IconColor.Primary);
-                pda.setShowPolygonName(true);
-                @ColorInt int transparent = AndroidUtils.UI.getColor(BaseMapActivity.this, android.R.color.transparent);
-                pda.setSelectedColor(transparent);
-                pda.setNonSelectedColor(transparent);
-
-                listView.setAdapter(pda);
-
-                dialogBuilder.setView(listView);
-                dialogBuilder.setNegativeButton(R.string.str_cancel, null);
-
-                final AlertDialog dialog = dialogBuilder.create();
-
-                listView.setOnItemClickListener((adapterView, view1, i, l) -> {
-                    fromPoint = pda.getItem(i);
-                    if (fromPoint != null) {
-                        btnFromPoint.setText(StringEx.toString(fromPoint.getPID()));
-                    }
-                    calculateDir();
-                    dialog.dismiss();
-                });
-
-                dialog.show();
-            } else {
-                fromPoint = null;
-                calculateDir();
-
-                Toast.makeText(this, "No Points in Polygon", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
-    public void btnToPolyClick(View view) {
-        if (polyPoints.size() > 0) {
-            final String[] polyStrs = new String[polyPoints.size()];
-            final ArrayList<TtPolygon> polys = getSortedPolys();
-
-            int i = 0;
-            for(TtPolygon poly : polys) {
-                polyStrs[i] = poly.getName();
-                i++;
-            }
-
-            AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
-
-            dialogBuilder.setTitle("To Polygon");
-
-            dialogBuilder.setItems(polyStrs, (dialog, which) -> {
-                toPoly = polys.get(which);
-                toPoint = null;
-                btnToPoly.setText(toPoly.getName());
-                btnToPoint.setText(R.string.str_point);
-            });
-
-            dialogBuilder.setNegativeButton(R.string.str_cancel, null);
-
-            final AlertDialog dialog = dialogBuilder.create();
-
-            dialog.show();
-        } else {
-            Toast.makeText(this, "No Polygons", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    public void btnToPointClick(View view) {
-        if (toPoly == null || !polyPoints.containsKey(toPoly.getCN())) {
+        if (_FromPoly == null) {
             Toast.makeText(this, "Select polygon first", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        ArrayList<TtPoint> points = polyPoints.get(toPoly.getCN());
+        showPointSelectDialog(_FromPoly, new onPointSelectClickListener() {
+            @Override
+            public void onClick(TtPoint point) {
+                _FromPoint = point;
+                if (_FromPoint != null) {
+                    btnFromPoint.setText(StringEx.toString(_FromPoint.getPID()));
+                }
+                calculateDir();
+            }
+
+            @Override
+            public void onNoPoints() {
+                _FromPoint = null;
+                calculateDir();
+            }
+        });
+    }
+
+    public void btnToPolyClick(View view) {
+        showPolySelectDialog("To Polygon", polygon -> {
+            _ToPoly = polygon;
+            _ToPoint = null;
+            btnToPoly.setText(_ToPoly.getName());
+            btnToPoint.setText(R.string.str_point);
+        });
+    }
+
+    public void btnToPointClick(View view) {
+        if (_ToPoly == null) {
+            Toast.makeText(this, "Select polygon first", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        showPointSelectDialog(_ToPoly, new onPointSelectClickListener() {
+            @Override
+            public void onClick(TtPoint point) {
+                _ToPoint = point;
+                if (_ToPoint != null) {
+                    onTargetPointSelected();
+                    btnToPoint.setText(String.format(Locale.getDefault(), "%s",  _ToPoint.getPID()));
+                }
+            }
+
+            @Override
+            public void onNoPoints() {
+                _ToPoint = null;
+                calculateDir();
+            }
+        });
+    }
+
+    public void btnToPoly2Click(View view) {
+        showPolySelectDialog("To Polygon 2", polygon -> {
+            _ToPoly2 = polygon;
+            _ToPoint2 = null;
+            btnToPoly2.setText(_ToPoly2.getName());
+            btnToPoint2.setText(R.string.str_point);
+        });
+    }
+
+    public void btnToPoint2Click(View view) {
+        if (_ToPoly == null) {
+            Toast.makeText(this, "Select polygon first", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        showPointSelectDialog(_ToPoly2, new onPointSelectClickListener() {
+            @Override
+            public void onClick(TtPoint point) {
+                _ToPoint2 = point;
+                if (_ToPoint2 != null) {
+                    onTargetPointSelected();
+                    btnToPoint2.setText(String.format(Locale.getDefault(), "%s",  _ToPoint2.getPID()));
+                }
+            }
+
+            @Override
+            public void onNoPoints() {
+                _ToPoint2 = null;
+                calculateDir();
+            }
+        });
+    }
+
+    private void onTargetPointSelected() {
+        if (_ToPoly != null && _ToPoint != null && _ToPoly2 != null && _ToPoint2 != null) {
+            tvNavPid.setText(String.format(Locale.getDefault(), "%s \u21F9 %s", _ToPoint.getPID(), _ToPoint2.getPID()));
+            tvNavPoly.setText((_ToPoly.getCN().equals(_ToPoly2.getCN())) ?
+                    _ToPoly.getName() :
+                    String.format(Locale.getDefault(), "%s - %s", _ToPoly.getName(), _ToPoly2.getName()));
+
+
+        } else if (_ToPoint != null) {
+            tvNavPid.setText(StringEx.toString(_ToPoint.getPID()));
+            tvNavPoly.setText(_ToPoint.getPolyName());
+        } else {
+            tvNavPid.setText(R.string.str_point);
+            tvNavPoly.setText(R.string.str_polygon);
+        }
+
+        calculateDir();
+
+        hideSelectedMarkerInfo();
+    }
+
+    private void showPolySelectDialog(String title, onPolySelectClickListener opscl) {
+        final ArrayList<TtPolygon> polygons = new ArrayList<>(getPolygons().values());
+        Collections.sort(polygons);
+
+
+        if (polygons.size() > 0) {
+            final String[] polyStrs = new String[polygons.size()];
+
+            int i = 0;
+            for(TtPolygon poly : polygons) {
+                polyStrs[i] = poly.getName();
+                i++;
+            }
+
+            AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+
+            dialogBuilder.setTitle(title);
+
+            dialogBuilder.setItems(polyStrs, (dialog, which) -> {
+                opscl.onClick(polygons.get(which));
+            });
+
+            dialogBuilder.setNegativeButton(R.string.str_cancel, null);
+
+            final AlertDialog dialog = dialogBuilder.create();
+
+            dialog.show();
+        } else {
+            Toast.makeText(this, "No Polygons", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void showPointSelectDialog(TtPolygon poly, onPointSelectClickListener opscl) {
+        if (poly == null) {
+            Toast.makeText(this, "Select polygon first", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        ArrayList<TtPoint> points = null;
+        if (polyPoints.containsKey(poly.getCN())) {
+            points = polyPoints.get(poly.getCN());
+        } else {
+            points = getTtAppCtx().getDAL().getPointsInPolygon(poly.getCN());
+        }
 
         if (points != null && points.size() > 0) {
             AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
 
-            dialogBuilder.setTitle(String.format("To Point in %s", toPoly.getName()));
+            dialogBuilder.setTitle(String.format("To Point in %s", poly.getName()));
             ListView listView = new ListView(this);
             listView.setBackgroundColor(AndroidUtils.UI.getColor(BaseMapActivity.this, android.R.color.white));
 
@@ -1637,27 +1707,13 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
             final AlertDialog dialog = dialogBuilder.create();
 
             listView.setOnItemClickListener((adapterView, view1, i, l) -> {
-                toPoint = pda.getItem(i);
-                if (toPoint != null) {
-                    btnToPoint.setText(StringEx.toString(toPoint.getPID()));
-                    tvNavPid.setText(StringEx.toString(toPoint.getPID()));
-                    tvNavPoly.setText(toPoint.getPolyName());
-                }
-
-                calculateDir();
-
-                hideSelectedMarkerInfo();
-
-                targetLocation = TtUtils.Points.getPointLocation(toPoint, false, getMetadata());
-
+                opscl.onClick(pda.getItem(i));
                 dialog.dismiss();
             });
 
             dialog.show();
         } else {
-            toPoint = null;
-            calculateDir();
-
+            opscl.onNoPoints();
             Toast.makeText(this, "No Points in Polygon", Toast.LENGTH_SHORT).show();
         }
     }
@@ -1665,32 +1721,67 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
 
 
     private void calculateDir() {
-        if (toPoint != null) {
+        if (_ToPoint != null) {
             UTMCoords currPos = null;
 
-            if (fromMyLoc && lastPosition != null) {
+            if (_NavFromMyLoc && lastPosition != null) {
                 currPos = UTMTools.convertLatLonSignedDecToUTM(lastPosition.getLatitudeSignedDecimal(), lastPosition.getLongitudeSignedDecimal(), zone);
-            } else if (!fromMyLoc && fromPoint != null){
-                currPos = new UTMCoords(fromPoint.getUnAdjX(), fromPoint.getUnAdjY(), zone);
+            } else if (!_NavFromMyLoc && _FromPoint != null){
+                currPos = new UTMCoords(_FromPoint.getUnAdjX(), _FromPoint.getUnAdjY(), zone);
             }
 
             if (currPos != null) {
-                double distInMt = TtUtils.Math.distance(currPos.getX(), currPos.getY(), toPoint.getUnAdjX(), toPoint.getUnAdjY());
-                double distInFt = TtUtils.Convert.toFeetTenths(distInMt, Dist.Meters);
+                UTMCoords toCoords = null;
+                double magDec;
 
-                double azimuth = TtUtils.Math.azimuthOfPoint(currPos.getX(), currPos.getY(), toPoint.getUnAdjX(), toPoint.getUnAdjY());
-
-                TtMetadata meta = getMetadata().get(toPoint.getMetadataCN());
+                TtMetadata meta = getMetadata().get(_ToPoint.getMetadataCN());
                 if (meta == null)
                     throw new RuntimeException("Metadata not found");
+                else
+                    magDec = meta.getMagDec();
 
-                double azMag = azimuth - meta.getMagDec();
 
-                tvNavDistFt.setText(StringEx.toString(distInFt, 2));
-                tvNavDistMt.setText(StringEx.toString(distInMt, 2));
-                tvNavAzTrue.setText(StringEx.format("%.2f\u00B0", azimuth));
-                tvNavAzMag.setText(StringEx.format("%.2f\u00B0", azMag));
-                return;
+                if (_NavToPoint) {
+                    if (_ToPoint != null) {
+                        toCoords = new UTMCoords(_ToPoint.getAdjX(), _ToPoint.getAdjY(), meta.getZone());
+                        targetLocation = TtUtils.Points.getPointLocation(_ToPoint, true, getMetadata());
+                    }
+                } else {
+                    if (_ToPoint != null && _ToPoint2 != null && !_ToPoint.sameAdjLocation(_ToPoint2)) {
+                        Tuple<UTMCoords, Double> closestPosition = ClosestPositionCalculator.getClosestPointAndDistance(
+                                currPos,
+                                new UTMCoords(_ToPoint.getAdjX(), _ToPoint.getAdjY(), meta.getZone()),
+                                new UTMCoords(_ToPoint2.getAdjX(), _ToPoint2.getAdjY(), meta.getZone()));
+
+                        //error calculating position
+                        if (closestPosition == null) {
+                            return;
+                        }
+
+                        toCoords = closestPosition.Item1;
+                        targetLocation = new Location("");
+
+                        Position position = UTMTools.convertUTMtoLatLonSignedDec(toCoords);
+                        targetLocation.setLatitude(position.getLatitudeSignedDecimal());
+                        targetLocation.setLongitude(position.getLongitudeSignedDecimal());
+                        targetLocation.setAltitude(_ToPoint.getAdjZ());
+                    }
+                }
+
+                if (toCoords != null) {
+                    double distInMt = TtUtils.Math.distance(currPos, toCoords);
+                    double distInFt = TtUtils.Convert.toFeetTenths(distInMt, Dist.Meters);
+
+                    double azimuth = TtUtils.Math.azimuthOfPoint(currPos.getX(), currPos.getY(), toCoords.getX(), toCoords.getY());
+                    double azMag = azimuth - magDec;
+
+                    tvNavDistFt.setText(StringEx.toString(distInFt, 2));
+                    tvNavDistMt.setText(StringEx.toString(distInMt, 2));
+                    tvNavAzTrue.setText(String.format(Locale.getDefault(), "%.2f\u00B0", azimuth));
+                    tvNavAzMag.setText(String.format(Locale.getDefault(), "%.2f\u00B0", azMag));
+
+                    return;
+                }
             }
         }
 
@@ -1730,7 +1821,7 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         return zone;
     }
 
-    protected ArrayList<PolygonGraphicManager> getPolyGraphicManagers() {
+    protected ArrayList<PolygonGraphicManager> getPolygonGraphicManagers() {
         return polyGraphicManagers;
     }
 
@@ -1738,25 +1829,13 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         return trailGraphicManagers;
     }
 
+    protected ArrayList<IPolygonGraphicManager> getIPolygonGraphicManagers() {
+        ArrayList<IPolygonGraphicManager> managers = new ArrayList<>();
 
-    protected final void startGps() {
-        if (shouldStartGps()) {
-            getTtAppCtx().getGps().startGps();
-        }
-    }
+        managers.addAll(getTrailGraphicManagers());
+        managers.addAll(getPolygonGraphicManagers());
 
-    public boolean shouldStartGps() {
-        return getShowMyPos();
-    }
-
-    protected final void stopGps() {
-        if (shouldStopGps()) {
-            getTtAppCtx().getGps().stopGps();
-        }
-    }
-
-    public boolean shouldStopGps() {
-        return !getShowMyPos();
+        return managers;
     }
 
     protected Collection<TtPolygon> getPolygonsToMap() {
@@ -1767,8 +1846,12 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
         return getTtAppCtx().getProjectSettings().getTrackedPolyCN();
     }
 
-    protected Extent getTrackedPoly() {
-        return trackedPoly;
+    protected IPolygonGraphicManager getTrackedPolyManager() {
+        return trackedPolyManager;
+    }
+
+    protected Extent getTrackedPolyExtents() {
+        return trackedPolyManager != null ? trackedPolyManager.getExtents() : null;
     }
 
     protected Extent getCompleteBounds() {
@@ -1785,5 +1868,20 @@ public abstract class BaseMapActivity extends CustomToolbarActivity implements I
 
     protected MapTracking getMapTracking() {
         return mapTracking;
+    }
+
+    protected final TtMetadata getDefaultMetadata() {
+        return _DefaultMetadata != null ? _DefaultMetadata : (_DefaultMetadata = getMetadata().get(Consts.EmptyGuid));
+    }
+
+
+
+    private interface onPolySelectClickListener {
+        void onClick(TtPolygon polygon);
+    }
+
+    private interface onPointSelectClickListener {
+        void onClick(TtPoint point);
+        void onNoPoints();
     }
 }

@@ -1,5 +1,6 @@
 package com.usda.fmsc.twotrails.adapters;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,16 +16,17 @@ import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import com.usda.fmsc.utilities.StringEx;
 
 public class PointDetailsSpinnerAdapter extends BaseAdapter {
-    private List<TtPoint> points;
-    private LayoutInflater inflater;
-    private Context context;
+    private final List<TtPoint> points;
+    private final LayoutInflater inflater;
+    private final Context context;
     private AppUnits.IconColor iconColor;
     private boolean showPolygon = false;
-    private int itemView;
+    private final int itemView;
 
     public PointDetailsSpinnerAdapter(ArrayList<TtPoint> points, Context context) {
         this(points, context, AppUnits.IconColor.Light, android.R.layout.simple_spinner_item);
@@ -62,7 +64,7 @@ public class PointDetailsSpinnerAdapter extends BaseAdapter {
         ViewHolder mViewHolder;
 
         if(convertView == null) {
-            convertView = inflater.inflate(itemView, null);
+            convertView = inflater.inflate(itemView, parent, false);
             mViewHolder = new ViewHolder();
             convertView.setTag(mViewHolder);
 
@@ -73,7 +75,7 @@ public class PointDetailsSpinnerAdapter extends BaseAdapter {
 
         TtPoint point = getItem(position);
 
-        mViewHolder.text.setText(String.format("%d", point.getPID()));
+        mViewHolder.text.setText(String.format(Locale.getDefault(), "%d", point.getPID()));
 
         return convertView;
     }
@@ -96,7 +98,7 @@ public class PointDetailsSpinnerAdapter extends BaseAdapter {
         TtPoint point = getItem(position);
 
         mViewHolder.image.setImageDrawable(TtUtils.UI.getTtOpDrawable(point.getOp(), iconColor, context));
-        mViewHolder.text.setText(String.format("%d%s", point.getPID(),
+        mViewHolder.text.setText(String.format(Locale.getDefault(), "%d%s", point.getPID(),
                 showPolygon ? " - " + point.getPolyName() : StringEx.Empty));
 
         return convertView;

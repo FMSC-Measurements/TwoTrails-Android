@@ -2,6 +2,7 @@ package com.usda.fmsc.twotrails.activities;
 
 import android.content.Intent;
 import android.media.Image;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.view.View;
@@ -14,12 +15,12 @@ import com.usda.fmsc.android.listeners.SimpleTextWatcher;
 import com.usda.fmsc.android.utilities.DeviceOrientationEx;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
+import com.usda.fmsc.twotrails.activities.base.TtCustomToolbarActivity;
 import com.usda.fmsc.twotrails.fragments.media.TtCameraFragment;
 import com.usda.fmsc.utilities.ParseEx;
 import com.usda.fmsc.utilities.StringEx;
 
-public class GetDirectionActivity extends CustomToolbarActivity implements CameraFragment.CameraListener {
+public class GetDirectionActivity extends TtCustomToolbarActivity implements CameraFragment.CameraListener {
     private TtCameraFragment cameraFragment;
 
     private View cameraView;
@@ -27,6 +28,7 @@ public class GetDirectionActivity extends CustomToolbarActivity implements Camer
     private boolean _canceled = true, updating;
 
     private DeviceOrientationEx.Orientation _Orientation =  new DeviceOrientationEx.Orientation(0f, 0f, 0f);
+    private String _ImageCN;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,8 +39,13 @@ public class GetDirectionActivity extends CustomToolbarActivity implements Camer
         Intent intent = getIntent();
         if (intent != null && intent.getExtras() != null) {
             try {
-                if (intent.getExtras().containsKey(Consts.Codes.Data.ORIENTATION)) {
+                Bundle bundle = intent.getExtras();
+
+                if (bundle.containsKey(Consts.Codes.Data.ORIENTATION)) {
                     _Orientation = intent.getParcelableExtra(Consts.Codes.Data.ORIENTATION);
+                }
+                if (bundle.containsKey(Consts.Codes.Data.TTIMAGE_CN)) {
+                    _ImageCN = intent.getStringExtra(Consts.Codes.Data.TTIMAGE_CN);
                 }
             } catch (Exception e) {
                 getTtAppCtx().getReport().writeError(e.getMessage(), "GetDirectionActivity:onCreate");
@@ -111,7 +118,9 @@ public class GetDirectionActivity extends CustomToolbarActivity implements Camer
             setResult(RESULT_CANCELED);
         } else {
             setResult(Consts.Codes.Results.ORIENTATION_UPDATED,
-                    new Intent().putExtra(Consts.Codes.Data.ORIENTATION, _Orientation));
+                    new Intent()
+                        .putExtra(Consts.Codes.Data.ORIENTATION, _Orientation)
+                        .putExtra(Consts.Codes.Data.TTIMAGE_CN, _ImageCN));
         }
 
         super.finish();
@@ -197,7 +206,7 @@ public class GetDirectionActivity extends CustomToolbarActivity implements Camer
     }
 
     @Override
-    public void onImageSaved(String filePath) {
+    public void onImageSaved(Uri filePath) {
 
     }
 

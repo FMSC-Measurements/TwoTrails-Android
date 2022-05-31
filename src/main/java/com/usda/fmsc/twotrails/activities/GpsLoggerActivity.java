@@ -1,14 +1,17 @@
 package com.usda.fmsc.twotrails.activities;
 
 import android.app.Activity;
-import android.content.Intent;
 
-import androidx.annotation.NonNull;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
+
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -17,18 +20,21 @@ import android.widget.Toast;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
 import com.usda.fmsc.twotrails.Consts;
-import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
+import com.usda.fmsc.twotrails.activities.base.TtCustomToolbarActivity;
+import com.usda.fmsc.twotrails.activities.contracts.CreateZipDocument;
 import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.R;
 
 import org.joda.time.DateTime;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import com.usda.fmsc.geospatial.nmea41.sentences.base.NmeaSentence;
-import com.usda.fmsc.twotrails.utilities.TtUtils;
+import com.usda.fmsc.utilities.FileUtils;
 
-public class GpsLoggerActivity extends CustomToolbarActivity implements GpsService.Listener {
+public class GpsLoggerActivity extends TtCustomToolbarActivity implements GpsService.Listener {
     private final String STRINGS_KEY = "strings";
     private final String LOGGING_KEY = "logging";
 
@@ -40,12 +46,49 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
     private MenuItem miCheckLtf;
 
     private boolean logging;
+    private File _CurrentLogFile;
+    private final ArrayList<File> _AllGpsLogFiles = new ArrayList<>();
 
-    private GpsService.GpsBinder binder;
+
+    private final ActivityResultLauncher<String> exportAllGpsLogs = registerForActivityResult(new CreateZipDocument(),
+            uri -> {
+                if (uri != null) {
+                    try {
+                        File tmpZip = new File(getTtAppCtx().getCacheDir(), "tmpZip.zip");
+                        FileUtils.zipFiles(tmpZip, _AllGpsLogFiles.toArray(new File[_AllGpsLogFiles.size()]));
+                        AndroidUtils.Files.copyFile(getTtAppCtx(), Uri.fromFile(tmpZip), uri);
+                        tmpZip.delete();
+                    } catch (Exception e) {
+                        getTtAppCtx().getReport().writeError(e.getMessage(), "GpsLoggerActivity:exportAllGpsLogs");
+                        Toast.makeText(GpsLoggerActivity.this, "Error exporting GPS Logs. See log file for details.", Toast.LENGTH_LONG).show();
+                    }
+                } else {
+                    Toast.makeText(GpsLoggerActivity.this, "Error selecting file for export", Toast.LENGTH_LONG).show();
+                }
+            });
+
+    private final ActivityResultLauncher<String> exportGpsLog = registerForActivityResult(new ActivityResultContracts.CreateDocument(),
+            uri -> {
+                if (uri != null) {
+                    try {
+                        AndroidUtils.Files.copyFile(GpsLoggerActivity.this, Uri.fromFile(_CurrentLogFile), uri);
+                    } catch (IOException e) {
+                        getTtAppCtx().getReport().writeError(e.getMessage(), "GpsLoggerActivity:exportGpsLog");
+                        Toast.makeText(GpsLoggerActivity.this, "Error exporting GPS Log. See log file for details.", Toast.LENGTH_LONG).show();
+                    }
+                } else {
+                    Toast.makeText(GpsLoggerActivity.this, "Error selecting file for export", Toast.LENGTH_LONG).show();
+                }
+            });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (getTtAppCtx().getDeviceSettings().getKeepScreenOn()) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        }
+
         setContentView(R.layout.activity_gps_logger);
 
         lvNmea = findViewById(R.id.logLvNmea);
@@ -53,26 +96,18 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
         if (lvNmea != null) {
             lvNmea.setFadingEdgeLength(0);
 
-            binder = getTtAppCtx().getGps();
-            binder.addListener(this);
-
-            if (getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
-                binder.startGps();
-            }
-
             btnLog = findViewById(R.id.loggerBtnLog);
 
             if (savedInstanceState != null) {
                 restoreState(savedInstanceState);
             } else {
                 strings = new ArrayList<>();
-                strings.add(DateTime.now().toString());
 
                 a = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, strings);
 
                 lvNmea.setAdapter(a);
 
-                if (binder.isLogging()) {
+                if (getTtAppCtx().isGpsServiceStartedAndRunning() && getTtAppCtx().getGps().isLogging()) {
                     btnLog.setText(R.string.aqr_log_pause);
                     logging = true;
                 }
@@ -82,31 +117,30 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
 
     @Override
     public void onBackPressed() {
-        final GpsService.GpsBinder binder = getTtAppCtx().getGps();
-        final Activity activity = this;
+        if (getTtAppCtx().isGpsServiceStarted()) {
+            final GpsService.GpsBinder binder = getTtAppCtx().getGps();
+            final Activity activity = this;
 
-        if (binder.isLogging()) {
-            AlertDialog.Builder alert = new AlertDialog.Builder(this);
+            if (binder.isLogging()) {
+                AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
-            alert.setTitle("GPS Logging");
-            alert.setMessage("The GPS is currently logging data to a file. Would you like to keep logging in the background?");
+                alert.setTitle("GPS Logging");
+                alert.setMessage("The GPS is currently logging data to a file. Would you like to keep logging in the background?");
 
-            alert.setPositiveButton("Continue", (dialogInterface, i) -> activity.onBackPressed());
+                alert.setPositiveButton("Continue", (dialogInterface, i) -> activity.onBackPressed());
 
-            alert.setNegativeButton("Stop", (dialogInterface, i) -> {
-                if (!getTtAppCtx().getDeviceSettings().isGpsAlwaysOn()) {
-                    binder.stopGps();
-                }
-                activity.onBackPressed();
-            });
+                alert.setNegativeButton("Stop", (dialogInterface, i) -> {
+                    if (!getTtAppCtx().getDeviceSettings().isGpsAlwaysOn()) {
+                        binder.stopGps();
+                    }
+                    activity.onBackPressed();
+                });
 
-            alert.setNeutralButton(R.string.str_cancel, null);
-        } else {
-            if (!getTtAppCtx().getDeviceSettings().isGpsAlwaysOn()) {
-                binder.stopGps();
+                alert.setNeutralButton(R.string.str_cancel, null);
             }
-            super.onBackPressed();
         }
+
+        super.onBackPressed();
     }
 
     @Override
@@ -127,12 +161,12 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
                     logging = false;
                 }
             } else {
-                if (AndroidUtils.App.requestStoragePermission(GpsLoggerActivity.this, Consts.Codes.Requests.OPEN_FILE)) {
-                    item.setChecked(true);
+                item.setChecked(true);
 
-                    if (logging) {
-                        getTtAppCtx().getGps().startLogging(TtUtils.getGpsLogFilePath());
-                    }
+                if (logging) {
+                    getTtAppCtx().getGps().stopLogging();
+                    _CurrentLogFile = getTtAppCtx().getGpsLogFile();
+                    getTtAppCtx().getGps().startLogging(_CurrentLogFile);
                 }
             }
             return true;
@@ -143,8 +177,38 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.loggerMenuExportLog) {
+            _AllGpsLogFiles.clear();
+            for (File file : getTtAppCtx().getCacheDir().listFiles()) {
+                if (file.getName().contains(Consts.Files.GPS_LOG_FILE_PREFIX)) {
+                    _AllGpsLogFiles.add(file);
+                }
+            }
 
-        if (item.getItemId() == android.R.id.home) {
+            Runnable exportCurrent = () -> exportGpsLog.launch(_CurrentLogFile.getName());
+            Runnable exportAll = () -> exportAllGpsLogs.launch("TwoTrailsGPSLogFiles.zip");
+
+            if (_CurrentLogFile != null) {
+                if (_AllGpsLogFiles.size() > 1) {
+                    new AlertDialog.Builder(GpsLoggerActivity.this)
+                        .setMessage("Would you like to export the current GPS log or all the GPS logs?")
+                        .setPositiveButton("Current", (dialog, which) -> {
+                            exportCurrent.run();
+                        })
+                        .setNeutralButton("All", (dialog, which) -> {
+                            exportAll.run();
+                        })
+                        .setNegativeButton(R.string.str_cancel, null)
+                        .show();
+                } else {
+                    exportCurrent.run();
+                }
+            } else if (_AllGpsLogFiles.size() > 0) {
+                exportAll.run();
+            } else {
+                Toast.makeText(GpsLoggerActivity.this, "There are no GPS Log files found to export", Toast.LENGTH_LONG).show();
+            }
+        } else if (item.getItemId() == android.R.id.home) {
             onBackPressed();
         }
 
@@ -152,14 +216,8 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == Consts.Codes.Activites.SETTINGS) {
-            if (getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
-                binder.startGps();
-            }
-        }
+    public boolean requiresGpsService() {
+        return true;
     }
 
 
@@ -208,7 +266,7 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
 
         dialog.setMessage("The GPS is currently not configured. Would you like to configure it now?");
 
-        dialog.setPositiveButton("Configure", (dialog1, which) -> startActivityForResult(new Intent(getBaseContext(), SettingsActivity.class).putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.GPS_SETTINGS_PAGE), Consts.Codes.Activites.SETTINGS));
+        dialog.setPositiveButton("Configure", (dialog1, which) -> openSettings(SettingsActivity.GPS_SETTINGS_PAGE));
 
         dialog.setNeutralButton(R.string.str_cancel, null);
 
@@ -225,8 +283,10 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
         logging = !logging;
 
         if (logging) {
+            strings.add(DateTime.now().toString());
+
             if (getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
-                if (!binder.isGpsRunning()) {
+                if (!getTtAppCtx().isGpsServiceStartedAndRunning()) {
                     Toast.makeText(GpsLoggerActivity.this, "GPS is not Receiving", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -234,7 +294,8 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
                 btnLog.setText(R.string.aqr_log_pause);
 
                 if (miCheckLtf.isChecked()) {
-                    binder.startLogging(TtUtils.getGpsLogFilePath());
+                    _CurrentLogFile = getTtAppCtx().getGpsLogFile();
+                    getTtAppCtx().getGps().startLogging(_CurrentLogFile);
                 }
             } else {
                 logging = false;
@@ -242,7 +303,9 @@ public class GpsLoggerActivity extends CustomToolbarActivity implements GpsServi
             }
         } else {
             btnLog.setText(R.string.aqr_log);
-            binder.stopLogging();
+            if (!getTtAppCtx().isGpsServiceStartedAndRunning()) {
+                getTtAppCtx().getGps().stopLogging();
+            }
         }
     }
 

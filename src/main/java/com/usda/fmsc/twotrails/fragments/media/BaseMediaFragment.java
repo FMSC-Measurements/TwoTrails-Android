@@ -2,8 +2,6 @@ package com.usda.fmsc.twotrails.fragments.media;
 
 import android.content.Context;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import android.text.Editable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,16 +10,20 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.listeners.SimpleTextWatcher;
 import com.usda.fmsc.android.utilities.Clipboard;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.activities.base.PointMediaController;
 import com.usda.fmsc.twotrails.activities.base.PointMediaListener;
+import com.usda.fmsc.twotrails.fragments.TtBaseFragment;
 import com.usda.fmsc.twotrails.objects.media.TtMedia;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
 
-public abstract class BaseMediaFragment extends Fragment implements PointMediaListener {
+public abstract class BaseMediaFragment extends TtBaseFragment implements PointMediaListener {
     protected static final String MEDIA = "Media";
 
     private PointMediaController controller;
@@ -48,7 +50,7 @@ public abstract class BaseMediaFragment extends Fragment implements PointMediaLi
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = onCreateViewEx(inflater, container, savedInstanceState);
 
         txtName = view.findViewById(R.id.pmdFragTxtName);
@@ -83,7 +85,7 @@ public abstract class BaseMediaFragment extends Fragment implements PointMediaLi
         //endregion
 
         tvFile.setOnLongClickListener(v -> {
-            Clipboard.copyText(getContext(), _Media.getFilePath());
+            Clipboard.copyText(getContext(), _Media.getFileName().toString());
             Toast.makeText(getContext(), "File Path Copied", Toast.LENGTH_LONG).show();
             AndroidUtils.Device.vibrate(getContext(), 100);
             return false;
@@ -95,7 +97,7 @@ public abstract class BaseMediaFragment extends Fragment implements PointMediaLi
     public abstract View onCreateViewEx(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState);
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         try {
             this.controller = (PointMediaController) context;
@@ -145,7 +147,7 @@ public abstract class BaseMediaFragment extends Fragment implements PointMediaLi
 
         txtCmt.setText(_Media.getComment());
         txtName.setText(_Media.getName());
-        tvFile.setText(_Media.getFilePath());
+        tvFile.setText(_Media.getFileName().toString());
 
         settingView = false;
     }

@@ -8,6 +8,7 @@ import org.joda.time.DateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 import com.usda.fmsc.android.utilities.ParcelTools;
 import com.usda.fmsc.twotrails.objects.TtObject;
@@ -294,7 +295,7 @@ public abstract class TtPoint extends TtObject implements Comparable<TtPoint>, C
     }
 
     public void addQuondamLink(String cn) {
-        if(_LinkedPoints.indexOf(cn) < 0)
+        if(!_LinkedPoints.contains(cn))
             _LinkedPoints.add(cn);
     }
 
@@ -352,14 +353,23 @@ public abstract class TtPoint extends TtObject implements Comparable<TtPoint>, C
 
     //region Point Locations
     public boolean sameAdjLocation(TtPoint point) {
-        return (this._AdjX.equals(point.getAdjX()) &&
-                this._AdjY.equals(point.getAdjY()) &&
-                this._AdjZ.equals(point.getAdjZ()));
+        return sameAdjLocation(point._AdjX, point._AdjY, point._AdjZ);
+    }
+
+    public boolean sameAdjLocation(Double x, Double y, Double z) {
+        return (this._AdjX.equals(x) &&
+                this._AdjY.equals(y) &&
+                this._AdjZ.equals(z));
     }
 
     public boolean sameUnAdjLocation(TtPoint point) {
-        return  (this._UnAdjX == point.getUnAdjX() && this._UnAdjY == point.getUnAdjY() &&
-                this._UnAdjZ == point.getUnAdjZ());
+        return sameUnAdjLocation(point._UnAdjX, point._UnAdjY, point._UnAdjZ);
+    }
+
+    public boolean sameUnAdjLocation(Double x, Double y, Double z) {
+        return (this._AdjX.equals(x) &&
+                this._AdjY.equals(y) &&
+                this._AdjZ.equals(z));
     }
     //endregion
 
@@ -407,8 +417,9 @@ public abstract class TtPoint extends TtObject implements Comparable<TtPoint>, C
     }
 
     @Override
+    @NonNull
     public String toString() {
-        return StringEx.format("%d: %s", _PID, getOp());
+        return String.format(Locale.getDefault(), "%d: %s", _PID, getOp());
     }
 
     @Override

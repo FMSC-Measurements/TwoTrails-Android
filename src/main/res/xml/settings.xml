@@ -33,7 +33,7 @@
                 android:title="External GPS Settings"
                 android:key="@string/set_GPS_CAT">
 
-                <com.usda.fmsc.android.preferences.ListCompatPreference
+                <ListPreference
                     android:id="@+id/prefLstGpsDevice"
                     android:key="@string/set_GPS_LIST_DEVICE"
                     android:title="External GPS Device"

@@ -7,6 +7,8 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+
 import com.usda.fmsc.geospatial.nmea41.NmeaIDs;
 import com.usda.fmsc.twotrails.R;
 
@@ -14,9 +16,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NmeaDetailsAdapter extends ArrayAdapter<NmeaDetailsAdapter.NmeaDetails> {
-    private List<NmeaDetails> nmeaDetails;
+    private final List<NmeaDetails> nmeaDetails;
 
-    private LayoutInflater inflater;
+    private final LayoutInflater inflater;
 
 
     public NmeaDetailsAdapter(Context context) {
@@ -31,8 +33,9 @@ public class NmeaDetailsAdapter extends ArrayAdapter<NmeaDetailsAdapter.NmeaDeta
     }
 
 
+    @NonNull
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(int position, View convertView,@NonNull ViewGroup parent) {
         ViewHolder holder;
         NmeaDetails details = getItem(position);
 
@@ -44,8 +47,10 @@ public class NmeaDetailsAdapter extends ArrayAdapter<NmeaDetailsAdapter.NmeaDeta
             holder = (ViewHolder)convertView.getTag();
         }
 
-        holder.talkerID.setText(details.getTalkerIdStr());
-        holder.nmeaIDs.setText(details.getNmeaIdsStr());
+        if (details != null) {
+            holder.talkerID.setText(details.getTalkerIdStr());
+            holder.nmeaIDs.setText(details.getNmeaIdsStr());
+        }
 
         return convertView;
     }
@@ -62,8 +67,8 @@ public class NmeaDetailsAdapter extends ArrayAdapter<NmeaDetailsAdapter.NmeaDeta
     }
 
     public static class NmeaDetails {
-        private String talkerIdStr;
-        private List<String> ids = new ArrayList<>();
+        private final String talkerIdStr;
+        private final List<String> ids = new ArrayList<>();
 
         public NmeaDetails(NmeaIDs.TalkerID talkerID) {
             this(talkerID.toStringCode());
@@ -112,10 +117,9 @@ public class NmeaDetailsAdapter extends ArrayAdapter<NmeaDetailsAdapter.NmeaDeta
     }
 
 
-    private class  ViewHolder {
-        TextView talkerID;
-        TextView nmeaIDs;
-
+    private static class ViewHolder {
+        public final TextView talkerID;
+        public final TextView nmeaIDs;
 
         public ViewHolder(View view)
         {

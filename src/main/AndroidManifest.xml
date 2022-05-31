@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="com.usda.fmsc.twotrails">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <permission
         android:name="com.usda.fmsc.twotrails.permission.MAPS_RECEIVE"
@@ -11,22 +10,29 @@
     <uses-feature
         android:glEsVersion="0x00020000"
         android:required="true" />
-
     <uses-permission android:name="android.permission.READ_INTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_INTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" />
+
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
+
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+
     <uses-permission android:name="android.permission.CAMERA" />
+
     <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
+
     <uses-permission android:name="com.usda.fmsc.twotrails.permission.MAPS_RECEIVE" />
 
     <application
@@ -84,77 +90,192 @@
         <activity
             android:name=".activities.MainActivity"
             android:label="@string/app_name"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <!-- http requests without mimetypes -->
-            <intent-filter>
+            <intent-filter
+                android:label="@string/app_name"
+                android:icon="@drawable/ic_ttx">
                 <action android:name="android.intent.action.VIEW" />
-
                 <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data android:host="*" android:scheme="http" />
-                <data android:host="*" android:scheme="file" />
-                <data android:mimeType="*/*" />
-                <data android:pathPattern="/.*\\.ttx" />
+                <data android:scheme="file"/>
+                <data android:mimeType="application/ttx" />
             </intent-filter>
 
-            <!-- mimetypes, where the suffix is irrelevant -->
-            <intent-filter>
+            <intent-filter
+                android:label="@string/app_name"
+                android:icon="@drawable/ic_ttx">
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
 
-                <data android:host="*" android:scheme="http" />
-                <data android:mimeType="application/tt" />
-            </intent-filter>
+                <data android:scheme="file"/>
+                <data android:scheme="content"/>
 
-            <!-- from a file browser app -->
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <data android:scheme="file" />
-                <data android:host="*" />
-                <data android:pathPattern="/.*\\.ttx" />
-            </intent-filter>
-
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data android:scheme="file" />
                 <data android:mimeType="*/*" />
                 <data android:pathPattern=".*\\.ttx" />
                 <data android:host="*" />
             </intent-filter>
 
-            <intent-filter>
+            <intent-filter
+                android:label="@string/app_name"
+                android:icon="@drawable/ic_ttx">
                 <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
+
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="content" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:scheme="file"/>
+
+                <data android:mimeType="file/ttx" />
+                <data android:pathPattern=".*\\.ttx" />
                 <data android:host="*" />
-                <data android:mimeType="*/*" />
+            </intent-filter>
+
+            <!--  Fix 1 -->
+<!--            <intent-filter>-->
+<!--                <data-->
+<!--                    android:scheme="content"-->
+<!--                    android:mimeType="application/vnd.twotrails"-->
+<!--                    android:pathPattern=".*\\.ttx" />-->
+<!--                <data-->
+<!--                    android:scheme="content"-->
+<!--                    android:mimeType="application/twotrails"-->
+<!--                    android:pathPattern=".*\\.ttx" />-->
+<!--                <data-->
+<!--                    android:scheme="content"-->
+<!--                    android:mimeType="application/octet-stream"-->
+<!--                    android:pathPattern=".*\\.ttx" />-->
+
+<!--                <action android:name="android.intent.action.VIEW" />-->
+
+<!--                <category android:name="android.intent.category.DEFAULT" />-->
+<!--                <category android:name="android.intent.category.BROWSABLE" />-->
+<!--            </intent-filter>-->
+
+            <!--  Fix 1.1 -->
+<!--            <intent-filter>-->
+<!--                <data-->
+<!--                    android:scheme="content"-->
+<!--                    android:mimeType="application/vnd.ttx"-->
+<!--                    android:pathPattern=".*\\.ttx" />-->
+<!--                <data-->
+<!--                    android:scheme="content"-->
+<!--                    android:mimeType="application/ttx"-->
+<!--                    android:pathPattern=".*\\.ttx" />-->
+<!--                <data-->
+<!--                    android:scheme="content"-->
+<!--                    android:mimeType="application/octet-stream"-->
+<!--                    android:pathPattern=".*\\.ttx" />-->
+
+<!--                <action android:name="android.intent.action.VIEW" />-->
+
+<!--                <category android:name="android.intent.category.DEFAULT" />-->
+<!--                <category android:name="android.intent.category.BROWSABLE" />-->
+<!--            </intent-filter>-->
+
+            <!--  Fix 2  -->
+            <!--
+                 Capture content by MIME type, which is how Gmail broadcasts
+                 attachment open requests.  pathPattern and file extensions
+                 are ignored, so the MIME type *MUST* be explicit, otherwise
+                 we will match absolutely every file opened.
+            -->
+            <intent-filter
+                android:label="@string/app_name"
+                android:icon="@drawable/ic_ttx"
+                android:priority="50" >
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:scheme="file" />
+                <data android:scheme="content" />
+                <data android:mimeType="application/vnd.twotrails" />
+            </intent-filter>
+
+            <!--
+                 Capture file open requests (pathPattern is honoured) where no
+                 MIME type is provided in the Intent.  An Intent with a null
+                 MIME type will never be matched by a filter with a set MIME
+                 type, so we need a second intent-filter if we wish to also
+                 match files with this extension and a non-null MIME type
+                 (even if it is non-null but zero length).
+            -->
+            <intent-filter
+                android:label="@string/app_name"
+                android:icon="@drawable/ic_ttx"
+                android:priority="50" >
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:scheme="file" />
+                <data android:host="*" />
+
+                <!--
+                     Work around Android's ugly primitive PatternMatcher
+                     implementation that can't cope with finding a . early in
+                     the path unless it's explicitly matched.
+                -->
                 <data android:pathPattern=".*\\.ttx" />
                 <data android:pathPattern=".*\\..*\\.ttx" />
                 <data android:pathPattern=".*\\..*\\..*\\.ttx" />
                 <data android:pathPattern=".*\\..*\\..*\\..*\\.ttx" />
                 <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.ttx" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.ttx" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.ttx" />
+            </intent-filter>
+
+            <!--
+                 Capture file open requests (pathPattern is honoured) where a
+                 (possibly blank) MIME type is provided in the Intent.  This
+                 filter may only be necessary for supporting ES File Explorer,
+                 which has the probably buggy behaviour of using an Intent
+                 with a MIME type that is set but zero-length.  It's
+                 impossible to match such a type except by using a global
+                 wildcard.
+            -->
+            <intent-filter
+                android:label="@string/app_name"
+                android:icon="@drawable/ic_ttx"
+                android:priority="50" >
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:scheme="file" />
+                <data android:host="*" />
+                <data android:mimeType="*/*" />
+
+                <!--
+                     Work around Android's ugly primitive PatternMatcher
+                     implementation that can't cope with finding a . early in
+                     the path unless it's explicitly matched.
+                -->
+                <data android:pathPattern=".*\\.ttx" />
+                <data android:pathPattern=".*\\..*\\.ttx" />
+                <data android:pathPattern=".*\\..*\\..*\\.ttx" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.ttx" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.ttx" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.ttx" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.ttx" />
             </intent-filter>
         </activity>
         <activity
             android:name=".activities.SettingsActivity"
             android:label="@string/title_activity_settings"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:exported="true">
             <intent-filter>
                 <action android:name="openSettings" />
 
@@ -174,6 +295,7 @@
         <activity
             android:name=".activities.WalkActivity"
             android:label="@string/title_activity_walk"
+            android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait" />
         <activity
             android:name=".activities.PolygonsActivity"
@@ -221,17 +343,6 @@
             android:label="@string/title_activity_import"
             android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait" />
-        <!--<activity-->
-            <!--android:name="com.nononsenseapps.filepicker.FilePickerActivity"-->
-            <!--android:label="@string/app_name"-->
-            <!--android:screenOrientation="portrait"-->
-            <!--android:theme="@style/FilePickerTheme">-->
-            <!--<intent-filter>-->
-                <!--<action android:name="android.intent.action.GET_CONTENT" />-->
-
-                <!--<category android:name="android.intent.category.DEFAULT" />-->
-            <!--</intent-filter>-->
-        <!--</activity>-->
         <activity
             android:name=".activities.TestActivity"
             android:screenOrientation="portrait" />
@@ -240,23 +351,15 @@
             android:label="@string/title_activity_offline_map_manager"
             android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait" />
-<!--        <activity-->
-<!--            android:name=".activities.GetMapExtentsActivity"-->
-<!--            android:label="@string/title_activity_get_map_extents"-->
-<!--            android:screenOrientation="portrait" />-->
         <activity
             android:name=".activities.base.AcquireGpsMapActivity"
+            android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait" />
         <activity
             android:name=".activities.MapDetailsActivity"
             android:label="@string/title_activity_edit_arc_map"
             android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait" />
-<!--        <activity-->
-<!--            android:name=".activities.ArcGisLoginActivity"-->
-<!--            android:label="@string/title_activity_arc_gis_login"-->
-<!--            android:windowSoftInputMode="adjustPan"-->
-<!--            android:screenOrientation="portrait" />-->
         <activity
             android:name=".activities.TtCameraActivity"
             android:screenOrientation="portrait" />
@@ -267,10 +370,19 @@
         <activity
             android:name=".activities.GetDirectionActivity"
             android:label="@string/title_activity_get_direction"
-            android:theme="@style/AppTheme" />
+            android:theme="@style/AppTheme"/>
         <activity android:name=".activities.GpsStatusActivity"
             android:label="@string/title_activity_gps_status"
             android:screenOrientation="portrait"/>
+        <activity
+            android:name=".activities.PrivacyPolicyActivity"
+            android:label="@string/title_activity_privacy_policy"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activities.SalesAdminToolsActivity"
+            android:label="@string/title_activity_sales_admin_tools"
+            android:windowSoftInputMode="adjustPan"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

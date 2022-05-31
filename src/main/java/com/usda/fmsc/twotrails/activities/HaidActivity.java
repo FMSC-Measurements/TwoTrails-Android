@@ -1,10 +1,8 @@
 package com.usda.fmsc.twotrails.activities;
 
-import android.annotation.SuppressLint;
-import android.os.AsyncTask;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
-import android.content.DialogInterface;
+
 import android.content.res.Configuration;
 import android.os.Bundle;
 import androidx.core.view.GravityCompat;
@@ -13,27 +11,28 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.usda.fmsc.android.AndroidUtils;
-import com.usda.fmsc.twotrails.TwoTrailsApp;
-import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
+import com.usda.fmsc.android.utilities.TaskRunner;
+import com.usda.fmsc.twotrails.activities.base.TtCustomToolbarActivity;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.data.DataAccessLayer;
 import com.usda.fmsc.twotrails.logic.HaidLogic;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
 
 import java.util.ArrayList;
 
-@SuppressLint("DefaultLocale")
-public class HaidActivity extends CustomToolbarActivity {
+
+public class HaidActivity extends TtCustomToolbarActivity {
     private ActionBarDrawerToggle drawerToggle;
     private DrawerLayout drawerLayout;
-    private PolyInfo[] polyinfo;
+    private final TaskRunner taskRunner = new TaskRunner();
+    private HaidLogic _HaidLogic;
+    private PolyInfoTask _PolyInfoTask;
+    private PolyInfo[] _PolyInfos;
     private PolyInfo currentPoly;
     private String onWait;
     private ProgressBar progress;
@@ -41,7 +40,6 @@ public class HaidActivity extends CustomToolbarActivity {
     private MenuItem miShowPoints, miTSInc, miTSDec;
     private TextView tvInfo;
     private int textSize = 18;
-    private HaidLogic _HaidLogic;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +47,8 @@ public class HaidActivity extends CustomToolbarActivity {
         setContentView(R.layout.activity_haid);
 
         _HaidLogic = new HaidLogic(getTtAppCtx());
+        _PolyInfoTask = new PolyInfoTask(_HaidLogic);
+
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
@@ -69,12 +69,20 @@ public class HaidActivity extends CustomToolbarActivity {
         }
 
         String[] polyNames = new String[polys.size()];
-        polyinfo = new PolyInfo[polys.size()];
+        _PolyInfos = new PolyInfo[polys.size()];
+
+        _PolyInfoTask.setListener(polyInfo -> {
+            if (currentPoly != null && polyInfo.getPolygon().getCN().equals(currentPoly.getPolygon().getCN())) {
+                updateContent();
+            }
+        });
 
         int i = 0;
         for (TtPolygon poly : polys) {
             polyNames[i] = poly.getName();
-            polyinfo[i] = new PolyInfo(_HaidLogic, poly, false);
+            PolyInfo pi = new PolyInfo(poly, i);
+            _PolyInfos[i] = pi;
+            taskRunner.executeAsync(_PolyInfoTask, new PolyInfoTask.Params(pi, false));
             i++;
         }
 
@@ -83,11 +91,11 @@ public class HaidActivity extends CustomToolbarActivity {
 
             lvPolys.setOnItemClickListener((adapterView, view, i1, l) -> {
                 if (i1 > -1) {
-                    currentPoly = polyinfo[i1];
+                    currentPoly = _PolyInfos[i1];
 
                     updateContent();
 
-                    getToolbar().setTitle(currentPoly.getName());
+                    getToolbar().setTitle(currentPoly.getPolygon().getName());
                 } else {
                     currentPoly = null;
                     tvInfo.setText("Invalid Option");
@@ -104,7 +112,7 @@ public class HaidActivity extends CustomToolbarActivity {
             public void onDrawerClosed(View drawerView) {
                 super.onDrawerClosed(drawerView);
                 if (currentPoly != null) {
-                    getToolbar().setTitle(currentPoly.getName());
+                    getToolbar().setTitle(currentPoly.getPolygon().getName());
                 } else {
                     getToolbar().setTitle(getString(R.string.str_polygons));
                 }
@@ -123,23 +131,11 @@ public class HaidActivity extends CustomToolbarActivity {
     }
 
     private void updateContent() {
-        if (currentPoly.getText() != null) {
-            onWait = null;
-
-            tvInfo.setText(currentPoly.getText());
-
+        if (currentPoly.getHaid() != null) {
+            tvInfo.setText(currentPoly.getHaid());
             progress.setVisibility(View.GONE);
         } else {
-            onWait = currentPoly.getCN();
             progress.setVisibility(View.VISIBLE);
-
-            currentPoly.setListener(txt -> {
-                if (onWait != null && onWait.equals(currentPoly.getCN())) {
-                    tvInfo.setText(currentPoly.getText());
-                    onWait = null;
-                    progress.setVisibility(View.GONE);
-                }
-            });
         }
     }
 
@@ -159,69 +155,54 @@ public class HaidActivity extends CustomToolbarActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
+        if (id == R.id.haidMenuShowPoints) {
+            miShowPoints.setTitle(showPoints ? R.string.haid_menu_show_points : R.string.haid_menu_hide_points);
+            miShowPoints.setIcon(showPoints ? R.drawable.ic_action_location_on_black : R.drawable.ic_action_location_off_black);
 
-        switch (id) {
-            case R.id.haidMenuShowPoints: {
-                miShowPoints.setTitle(showPoints ? R.string.haid_menu_show_points : R.string.haid_menu_hide_points);
-                miShowPoints.setIcon(showPoints ? R.drawable.ic_action_location_on_black : R.drawable.ic_action_location_off_black);
+            showPoints = !showPoints;
 
-                showPoints = !showPoints;
-
-                PolyInfo pi;
-                for (int i = 0; i < polyinfo.length; i++) {
-                    pi = new PolyInfo(_HaidLogic, polyinfo[i].getPolygon(), showPoints);
-                    polyinfo[i] = pi;
-
-                    if (pi.getCN().equals(currentPoly.getCN())) {
-                        currentPoly = pi;
-                        updateContent();
-                    }
-                }
-                break;
+            PolyInfo pi;
+            for (int i = 0; i < _PolyInfos.length; i++) {
+                pi = _PolyInfos[i];
+                taskRunner.executeAsync(_PolyInfoTask, new PolyInfoTask.Params(pi, showPoints));
             }
-            case R.id.haidMenuHelp: {
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        } else if (id == R.id.haidMenuHelp) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-                builder.setTitle(R.string.str_help)
-                        .setMessage(R.string.haid_help_text)
-                        .setPositiveButton(R.string.str_ok, (dialog, id1) -> {
-                            // User clicked OK button
-                        });
+            builder.setTitle(R.string.str_help)
+                    .setMessage(R.string.haid_help_text)
+                    .setPositiveButton(R.string.str_ok, (dialog, id1) -> {
+                        // User clicked OK button
+                    });
 
-                builder.create().show();
-                break;
-            }
-            case R.id.haidMenuIncreaseTextSize: {
-                if (textSize < 48) {
-                    textSize *= 1.2;
+            builder.create().show();
+        } else if (id == R.id.haidMenuIncreaseTextSize) {
+            if (textSize < 48) {
+                textSize *= 1.2;
 
-                    if (textSize >= 48) {
-                        AndroidUtils.UI.disableMenuItem(miTSInc);
-                    }
-
-                    if (!miTSDec.isEnabled()) {
-                        AndroidUtils.UI.enableMenuItem(miTSDec);
-                    }
-
-                    tvInfo.setTextSize(textSize);
+                if (textSize >= 48) {
+                    AndroidUtils.UI.disableMenuItem(miTSInc);
                 }
-                break;
-            }
-            case R.id.haidMenuDecreaseTextSize: {
-                if (textSize > 8) {
-                    textSize /= 1.2;
 
-                    if (textSize <= 8) {
-                        AndroidUtils.UI.disableMenuItem(miTSDec);
-                    }
-
-                    if (!miTSInc.isEnabled()) {
-                        AndroidUtils.UI.enableMenuItem(miTSInc);
-                    }
-
-                    tvInfo.setTextSize(textSize);
+                if (!miTSDec.isEnabled()) {
+                    AndroidUtils.UI.enableMenuItem(miTSDec);
                 }
-                break;
+
+                tvInfo.setTextSize(textSize);
+            }
+        } else if (id == R.id.haidMenuDecreaseTextSize) {
+            if (textSize > 8) {
+                textSize /= 1.2;
+
+                if (textSize <= 8) {
+                    AndroidUtils.UI.disableMenuItem(miTSDec);
+                }
+
+                if (!miTSInc.isEnabled()) {
+                    AndroidUtils.UI.enableMenuItem(miTSInc);
+                }
+
+                tvInfo.setTextSize(textSize);
             }
         }
 
@@ -242,47 +223,59 @@ public class HaidActivity extends CustomToolbarActivity {
     }
 
 
-    private static class PolyInfo extends AsyncTask<PolyInfo.PolyInfoParams, Void, String> {
-        private TtPolygon polygon;
-        private String text;
-        private HaidLogic haidLogic;
+    private static class PolyInfo {
+        private final TtPolygon polygon;
+        private String haid;
+        private final int index;
 
-        private Listener listener;
-
-        public PolyInfo(HaidLogic haidLogic, TtPolygon polygon, boolean showPoints) {
-            this.haidLogic = haidLogic;
+        public PolyInfo(TtPolygon polygon, int index) {
             this.polygon = polygon;
-            this.execute(new PolyInfoParams(polygon, showPoints));
-        }
-
-        @Override
-        protected String doInBackground(PolyInfoParams... params) {
-            return haidLogic.generatePolyStats(params[0].polygon, params[0].isShowingPoints(), false);
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            this.text = s;
-
-            if (listener != null) {
-                listener.onGenerated(text);
-            }
-        }
-
-        public String getText() {
-            return text;
-        }
-
-        public String getName() {
-            return polygon.getName();
-        }
-
-        public String getCN() {
-            return polygon.getCN();
+            this.index = index;
         }
 
         public TtPolygon getPolygon() {
             return polygon;
+        }
+
+        public int getIndex() {
+            return index;
+        }
+
+        public String getHaid() {
+            return haid;
+        }
+
+        public void setHaid(String haid) {
+            this.haid = haid;
+        }
+    }
+
+
+    private static class PolyInfoTask extends TaskRunner.Task<PolyInfoTask.Params, PolyInfo> {
+        private final HaidLogic haidLogic;
+        private Listener listener;
+
+        public PolyInfoTask(HaidLogic haidLogic) {
+            this.haidLogic = haidLogic;
+        }
+
+        @Override
+        protected PolyInfo onBackgroundWork(Params params) {
+            PolyInfo polyInfo = params.polyInfo;
+            polyInfo.setHaid(haidLogic.generatePolyStats(polyInfo.getPolygon(), params.isShowingPoints(), false));
+            return polyInfo;
+        }
+
+        @Override
+        protected void onComplete(PolyInfo result) {
+            if (listener != null) {
+                listener.onGenerated(result);
+            }
+        }
+
+        @Override
+        protected void onError(Exception exception) {
+
         }
 
         public void setListener(Listener listener) {
@@ -290,26 +283,23 @@ public class HaidActivity extends CustomToolbarActivity {
         }
 
         public interface Listener {
-            void onGenerated(String txt);
+            void onGenerated(PolyInfo polyInfo);
         }
 
 
-        public class PolyInfoParams {
-            private TtPolygon polygon;
+        public static class Params {
+            private final PolyInfo polyInfo;
             private boolean showPoints;
 
-            public PolyInfoParams(TtPolygon polygon, boolean showPoints) {
-                this.polygon = polygon;
+            public Params(PolyInfo polyInfo, boolean showPoints) {
+                this.polyInfo = polyInfo;
                 this.showPoints = showPoints;
             }
 
-            public TtPolygon getPolygon() {
-                return polygon;
+            public PolyInfo getPolyInfo() {
+                return polyInfo;
             }
 
-            public void setPolygon(TtPolygon polygon) {
-                this.polygon = polygon;
-            }
 
             public boolean isShowingPoints() {
                 return showPoints;

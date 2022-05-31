@@ -14,9 +14,9 @@ import com.usda.fmsc.twotrails.utilities.AppUnits;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
 public class PointOpsAdapter extends BaseAdapter {
-    private OpType[] opTypes;
-    private LayoutInflater inflater;
-    private Context context;
+    private final OpType[] opTypes;
+    private final LayoutInflater inflater;
+    private final Context context;
     private AppUnits.IconColor iconColor = AppUnits.IconColor.Light;
 
     public PointOpsAdapter(Context context) {

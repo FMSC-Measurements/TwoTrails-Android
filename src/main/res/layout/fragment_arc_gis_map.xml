@@ -38,10 +38,10 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:style="dualUnitLine"
-        app:textColor="@android:color/black"
-        app:textShadowColor="@color/accent"
-        app:fillColor="@color/accent"
-        app:lineColor="@color/accent"
+        app:textColor="@color/white_700"
+        app:textShadowColor="@color/black_1000"
+        app:fillColor="@color/white_700"
+        app:lineColor="@color/white_700"
         app:unitSystem="imperial"
         android:visibility="visible"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

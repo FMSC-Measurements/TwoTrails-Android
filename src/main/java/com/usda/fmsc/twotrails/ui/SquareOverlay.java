@@ -10,7 +10,7 @@ import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.twotrails.R;
 
 public class SquareOverlay extends View {
-    private Paint paint;
+    private final Paint paint;
 
     public SquareOverlay(Context context) {
         this(context, null, 0);
@@ -52,7 +52,7 @@ public class SquareOverlay extends View {
             size = heightSize;
         }
         else{
-            size = widthSize < heightSize ? widthSize : heightSize;
+            size = Math.min(widthSize, heightSize);
         }
 
         int finalMeasureSpec = MeasureSpec.makeMeasureSpec(size, MeasureSpec.EXACTLY);

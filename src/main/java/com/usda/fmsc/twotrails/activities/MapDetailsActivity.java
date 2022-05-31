@@ -17,12 +17,12 @@ import com.usda.fmsc.android.dialogs.InputDialog;
 import com.usda.fmsc.android.widget.PopupMenuButton;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
+import com.usda.fmsc.twotrails.activities.base.TtCustomToolbarActivity;
 import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
 import com.usda.fmsc.twotrails.utilities.ArcGISTools;
 import com.usda.fmsc.utilities.StringEx;
 
-public class MapDetailsActivity extends CustomToolbarActivity {
+public class MapDetailsActivity extends TtCustomToolbarActivity {
     private ArcGisMapLayer arcGisMapLayer, agmlBackup;
     private ImageView ivStatusIcon;
     private TextView tvName, tvFile, tvUrl, tvScaleMin, tvScaleMax;
@@ -31,7 +31,7 @@ public class MapDetailsActivity extends CustomToolbarActivity {
 
     private boolean updated = false;
 
-    private boolean[] overwrites = new boolean[3];
+    private final boolean[] overwrites = new boolean[3];
 
 
     @Override
@@ -61,55 +61,45 @@ public class MapDetailsActivity extends CustomToolbarActivity {
             setUpdated(false);
 
             ofmb.setListener(item -> {
-                switch (item.getItemId()) {
-                    case R.id.amdMenuRename: {
-                        final InputDialog id = new InputDialog(MapDetailsActivity.this);
+                int itemId = item.getItemId();
+                if (itemId == R.id.amdMenuRename) {
+                    final InputDialog id = new InputDialog(MapDetailsActivity.this);
 
-                        id.setInputText(arcGisMapLayer.getName())
-                        .setPositiveButton(R.string.str_rename, (dialog, which) -> {
-                            String value = id.getText();
+                    id.setInputText(arcGisMapLayer.getName())
+                            .setPositiveButton(R.string.str_rename, (dialog, which) -> {
+                                String value = id.getText();
 
-                            arcGisMapLayer.setName(value);
-                            tvName.setText(value);
-                            setUpdated(true);
-                        })
-                        .setNeutralButton(R.string.str_cancel, null)
-                        .show();
-                        break;
+                                arcGisMapLayer.setName(value);
+                                tvName.setText(value);
+                                setUpdated(true);
+                            })
+                            .setNeutralButton(R.string.str_cancel, null)
+                            .show();
+                } else if (itemId == R.id.amdMenuUpdatePath) {
+                    updatePath();
+                } else if (itemId == R.id.amdMenuUpdateDetails) {
+                    checkUpdateDetails(0);
+                } else if (itemId == R.id.amdMenuReset) {
+                    if (updated) {
+                        arcGisMapLayer = new ArcGisMapLayer(agmlBackup);
+                        setValues(arcGisMapLayer);
+                        setUpdated(false);
                     }
-                    case R.id.amdMenuUpdatePath: {
-                        updatePath();
-                        break;
-                    }
-                    case R.id.amdMenuUpdateDetails: {
-                        checkUpdateDetails(0);
-                        break;
-                    }
-                    case R.id.amdMenuReset: {
-                        if (updated) {
-                            arcGisMapLayer = new ArcGisMapLayer(agmlBackup);
-                            setValues(arcGisMapLayer);
-                            setUpdated(false);
-                        }
-                        break;
-                    }
-                    case R.id.amdMenuDelete: {
-                        new AlertDialog.Builder(MapDetailsActivity.this)
-                                .setMessage("Arc you sure you want to delete this map?")
-                                .setPositiveButton(R.string.str_delete, (dialog, which) ->
-                                        getTtAppCtx().getArcGISTools().deleteMapLayer(MapDetailsActivity.this, arcGisMapLayer.getId(), true, o -> {
-                                            setUpdated(false);
+                } else if (itemId == R.id.amdMenuDelete) {
+                    new AlertDialog.Builder(MapDetailsActivity.this)
+                            .setMessage("Arc you sure you want to delete this map?")
+                            .setPositiveButton(R.string.str_delete, (dialog, which) ->
+                                    getTtAppCtx().getArcGISTools().deleteMapLayer(MapDetailsActivity.this, arcGisMapLayer.getId(), true, o -> {
+                                        setUpdated(false);
 
-                                    Intent i = new Intent();
-                                    i.putExtra(Consts.Codes.Data.MAP_DATA, arcGisMapLayer);
+                                        Intent i = new Intent();
+                                        i.putExtra(Consts.Codes.Data.MAP_DATA, arcGisMapLayer);
 
-                                    MapDetailsActivity.this.setResult(Consts.Codes.Results.MAP_DELETED, i);
-                                    MapDetailsActivity.this.finish();
-                                }))
-                                .setNeutralButton(R.string.str_cancel, null)
-                                .show();
-                        break;
-                    }
+                                        MapDetailsActivity.this.setResult(Consts.Codes.Results.MAP_DELETED, i);
+                                        MapDetailsActivity.this.finish();
+                                    }))
+                            .setNeutralButton(R.string.str_cancel, null)
+                            .show();
                 }
                 return false;
                 });
@@ -122,10 +112,10 @@ public class MapDetailsActivity extends CustomToolbarActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == Consts.Codes.Dialogs.REQUEST_FILE && data != null && data.getData() != null) {
-            arcGisMapLayer.setFilePath(data.getData().toString());
+        if (requestCode == Consts.Codes.Dialogs.IMPORT_PROJECT_FILE && data != null && data.getData() != null) {
+            arcGisMapLayer.setFileName(data.getData().toString());
 
-            tvFile.setText(arcGisMapLayer.getFilePath());
+            tvFile.setText(arcGisMapLayer.getFileName());
 
             tvFile.setTextColor(AndroidUtils.UI.getColor(this,
                     arcGisMapLayer.hasValidFile() ?
@@ -147,7 +137,7 @@ public class MapDetailsActivity extends CustomToolbarActivity {
 
         tvUrl.setText(agml.getUrl());
 
-        tvFile.setText(agml.getFilePath());
+        tvFile.setText(agml.getFileName());
 
         tvFile.setTextColor(AndroidUtils.UI.getColor(this,
                 agml.hasValidFile() ?
@@ -199,11 +189,11 @@ public class MapDetailsActivity extends CustomToolbarActivity {
     }
 
     private void updatePath() {
-        AndroidUtils.App.openFileIntent(this, Consts.FileExtensions.TPK, Consts.Codes.Dialogs.REQUEST_FILE);
+        AndroidUtils.App.openFileIntent(this, Consts.FileMimes.TPK, Consts.Codes.Dialogs.IMPORT_PROJECT_FILE);
     }
 
 
-    String[] messages = new String[] {
+    private final String[] messages = new String[] {
             "A description already exists. Would you like to overwrite it?",
             "Scale Levels already exists. Would you like to overwrite them?",
             "Detail Levels already exists. Would you like to overwrite them?"
@@ -252,7 +242,7 @@ public class MapDetailsActivity extends CustomToolbarActivity {
                             arcGisMapLayer.setMinScale(layer.getMinScale());
                         }
 
-                        if (overwrites[2]) {
+                        if (overwrites[2] && layer.hasDetailLevels()) {
                             arcGisMapLayer.setLevelsOfDetail(layer.getLevelsOfDetail());
                         }
 

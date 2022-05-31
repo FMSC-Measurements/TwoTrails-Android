@@ -17,7 +17,7 @@ import java.util.List;
 public class KmlPolygonsAdapter extends MultiSelectRecyclerView.MSAdapter<MultiSelectRecyclerView.MSViewHolder> {
     private static final int POLYGON = 1;
 
-    private List<Polygon> polygons;
+    private final List<Polygon> polygons;
 
 
     public KmlPolygonsAdapter(Context context, List<Polygon> polygons, MultiSelector selector) {
@@ -59,8 +59,8 @@ public class KmlPolygonsAdapter extends MultiSelectRecyclerView.MSAdapter<MultiS
 
 
     public class KmlPolygonHolder extends MultiSelectRecyclerView.MSViewHolder implements MultiStateTouchCheckBox.OnCheckedStateChangeListener {
-        private MultiStateTouchCheckBox mcb;
-        private TextView tvName, tvPointCount;
+        private final MultiStateTouchCheckBox mcb;
+        private final TextView tvName, tvPointCount;
 
         protected Polygon polygon;
 

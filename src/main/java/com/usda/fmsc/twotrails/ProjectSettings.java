@@ -1,13 +1,12 @@
 package com.usda.fmsc.twotrails;
 
-import android.content.Context;
 import android.util.JsonWriter;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
-import com.usda.fmsc.twotrails.objects.RecentProject;
-import com.usda.fmsc.utilities.FileUtils;
+import com.usda.fmsc.twotrails.data.DataAccessManager;
+import com.usda.fmsc.twotrails.objects.TwoTrailsProject;
 import com.usda.fmsc.utilities.StringEx;
 
 import java.io.IOException;
@@ -25,11 +24,12 @@ public class ProjectSettings extends Settings {
     public static final String TRACKED_POLY_CN = "TrackedPolyCN";
 
 
-    public ProjectSettings(Context context) {
+    public ProjectSettings(TwoTrailsApp context) {
         super(context);
     }
 
     public void writeToFile(JsonWriter js) throws IOException {
+        //TODO Project Settings Export
     }
 
 
@@ -112,17 +112,17 @@ public class ProjectSettings extends Settings {
 
     //region Recent Projects
     @SuppressWarnings("unchecked")
-    public ArrayList<RecentProject> getRecentProjects() {
+    public ArrayList<TwoTrailsProject> getRecentProjects() {
         Gson gson = new Gson();
         String json = getPrefs().getString(RECENT_PROJS, null);
 
         if(json == null)
             return new ArrayList<>();
 
-        ArrayList<RecentProject> projects = new ArrayList<>();
+        ArrayList<TwoTrailsProject> projects = new ArrayList<>();
 
-        for (RecentProject rp : (ArrayList<RecentProject>)gson.fromJson(json, new TypeToken<ArrayList<RecentProject>>() { }.getType())) {
-            if (FileUtils.fileExists(rp.File)) {
+        for (TwoTrailsProject rp : (ArrayList<TwoTrailsProject>)gson.fromJson(json, new TypeToken<ArrayList<TwoTrailsProject>>() { }.getType())) {
+            if (DataAccessManager.localDALExists(getContext(), rp.TTXFile)) {
                 projects.add(rp);
             }
         }
@@ -130,24 +130,25 @@ public class ProjectSettings extends Settings {
         return projects;
     }
 
-    public boolean setRecentProjects(List<RecentProject> recentProjects) {
-        return getEditor().putString(RECENT_PROJS, new Gson().toJson(recentProjects)).commit();
+    public void setRecentProjects(List<TwoTrailsProject> twoTrailsProjects) {
+        setString(RECENT_PROJS, new Gson().toJson(twoTrailsProjects));
     }
 
-    public void updateRecentProjects(RecentProject project) {
-        ArrayList<RecentProject> newList = new ArrayList<>();
+    public void updateRecentProjects(TwoTrailsProject project) {
+        ArrayList<TwoTrailsProject> newList = new ArrayList<>();
         newList.add(project);
 
-        for (RecentProject p : getRecentProjects()) {
-            if (!project.File.equals(p.File)) {
+        for (TwoTrailsProject p : getRecentProjects()) {
+            if (!project.TTXFile.equals(p.TTXFile)) {
                 newList.add(p);
             }
         }
 
-        if (newList.size() > 7)
-            setRecentProjects(newList.subList(0, 8));
-        else
-            setRecentProjects(newList);
+        setRecentProjects(newList);
+    }
+
+    public void clearRecentProjects() {
+        setRecentProjects(new ArrayList<>());
     }
     //endregion
 }

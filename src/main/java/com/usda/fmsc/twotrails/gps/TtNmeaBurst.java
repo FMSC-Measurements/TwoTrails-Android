@@ -8,6 +8,7 @@ import org.joda.time.DateTime;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import com.usda.fmsc.android.utilities.ParcelTools;
 import com.usda.fmsc.geospatial.EastWest;
@@ -26,9 +27,9 @@ import com.usda.fmsc.utilities.ParseEx;
 import com.usda.fmsc.utilities.StringEx;
 
 public class TtNmeaBurst extends TtObject implements Parcelable {
-    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+    public static final Parcelable.Creator<TtNmeaBurst> CREATOR = new Parcelable.Creator<TtNmeaBurst>() {
         @Override
-        public Object createFromParcel(Parcel source) {
+        public TtNmeaBurst createFromParcel(Parcel source) {
             return new TtNmeaBurst(source);
         }
 
@@ -38,38 +39,38 @@ public class TtNmeaBurst extends TtObject implements Parcelable {
         }
     };
 
-    private String pointCN;
+    private final String pointCN;
     private boolean used;
-    private DateTime timeCreated;
+    private final DateTime timeCreated;
 
     private Double _X, _Y;
     private Integer _Zone;
 
     //region NmeaBurst Values
-    private Position position;
+    private final Position position;
 
     //rmc
-    private DateTime fixTime;
-    private Double groundSpeed; //groud speed in knots
-    private Double trackAngle;  //in degrees, true
-    private double magVar;
-    private EastWest magVarDir;
+    private final DateTime fixTime;
+    private final Double groundSpeed; //groud speed in knots
+    private final Double trackAngle;  //in degrees, true
+    private final double magVar;
+    private final EastWest magVarDir;
 
     //gsa
-    private GSASentence.Mode opMode;
-    private GSASentence.Fix fix;
-    private ArrayList<Integer> satsUsed;
-    private double pdop, hdop, vdop;
+    private final GSASentence.Mode opMode;
+    private final GSASentence.Fix fix;
+    private final ArrayList<Integer> satsUsed;
+    private final double pdop, hdop, vdop;
 
     //gga
-    private GGASentence.GpsFixType fixQuality;
-    private int trackedSatellites;
-    private double horizDilution;
-    private double geoidHeight;
-    private UomElevation geoUom;
+    private final GGASentence.GpsFixType fixQuality;
+    private final int trackedSatellites;
+    private final double horizDilution;
+    private final double geoidHeight;
+    private final UomElevation geoUom;
 
     //gsv
-    private int numberOfSatellitesInView;
+    private final int numberOfSatellitesInView;
     private ArrayList<Satellite> satellitesInView;
     //endregion
 
@@ -407,7 +408,7 @@ public class TtNmeaBurst extends TtObject implements Parcelable {
             StringBuilder sb = new StringBuilder();
 
             for (Satellite sat : satellitesInView) {
-                sb.append(StringEx.format("%d;%f;%f;%f;%d_", sat.getNmeaID(), sat.getElevation(), sat.getAzimuth(), sat.getSRN(), sat.getGnssType().getValue()));
+                sb.append(String.format(Locale.getDefault(), "%d;%f;%f;%f;%d_", sat.getNmeaID(), sat.getElevation(), sat.getAzimuth(), sat.getSRN(), sat.getGnssType().getValue()));
             }
 
             return sb.toString();

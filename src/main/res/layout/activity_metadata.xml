@@ -15,12 +15,21 @@
 
         <include layout="@layout/toolbar_default" android:id="@id/toolbar" />
 
+        <ProgressBar
+            android:id="@+id/progress"
+            android:layout_width="match_parent"
+            android:layout_height="15dp"
+            android:layout_below="@id/toolbar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:indeterminate="true"
+            android:visibility="invisible"/>
+
         <androidx.viewpager.widget.ViewPager
             android:id="@+id/metaViewPager"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_alignParentBottom="true"
-            android:layout_below="@id/toolbar"/>
+            android:layout_below="@id/progress"/>
 
         <View style="@style/ToolbarShadowViewElevation" android:layout_below="@id/toolbar" />
     </RelativeLayout>

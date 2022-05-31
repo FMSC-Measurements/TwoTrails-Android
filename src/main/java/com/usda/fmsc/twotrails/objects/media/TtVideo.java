@@ -1,18 +1,19 @@
 package com.usda.fmsc.twotrails.objects.media;
 
+import android.content.Context;
+import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.usda.fmsc.twotrails.units.MediaType;
-import com.usda.fmsc.utilities.FileUtils;
 import com.usda.fmsc.utilities.StringEx;
 
 import org.joda.time.DateTime;
 
 public class TtVideo extends TtMedia {
-    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+    public static final Parcelable.Creator<TtVideo> CREATOR = new Parcelable.Creator<TtVideo>() {
         @Override
-        public Object createFromParcel(Parcel source) {
+        public TtVideo createFromParcel(Parcel source) {
             return new TtVideo(source);
         }
 
@@ -22,8 +23,8 @@ public class TtVideo extends TtMedia {
         }
     };
 
-    private PositionTimeline _Timeline;
-    private String _PositionTimelineFile;
+    private final PositionTimeline _Timeline;
+    private final String _PositionTimelineFile;
 
     public TtVideo(Parcel source) {
         super(source);
@@ -32,8 +33,8 @@ public class TtVideo extends TtMedia {
         _PositionTimelineFile = source.readString();
     }
 
-    public TtVideo(String Name, String FilePath, String Comment, DateTime TimeCreated, String PointCN, boolean isExternal, PositionTimeline _Timeline, String _PositionTimelineFile) {
-        super(Name, FilePath, Comment, TimeCreated, PointCN, isExternal);
+    public TtVideo(String Name, String filename, String Comment, DateTime TimeCreated, String PointCN, boolean isExternal, PositionTimeline _Timeline, String _PositionTimelineFile) {
+        super(Name, filename, Comment, TimeCreated, PointCN, isExternal);
         this._Timeline = _Timeline;
         this._PositionTimelineFile = _PositionTimelineFile;
     }
@@ -50,8 +51,9 @@ public class TtVideo extends TtMedia {
         return MediaType.Video;
     }
 
-    public boolean isTimeLineFileValid() {
-        return FileUtils.fileExists(_PositionTimelineFile);
+    public boolean isTimeLineFileValid(Context context) {
+        return false; //TODO update file api
+        //return FileUtils.fileExists(_PositionTimelineFile, context);
     }
 
     public PositionTimeline getTimeline() {

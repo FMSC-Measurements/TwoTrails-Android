@@ -15,7 +15,7 @@ public class DataActionType {
     public static final int InsertedGroups      = 1 << 10;
     public static final int ModifiedGroups      = 1 << 11;
     public static final int DeletedGroups       = 1 << 12;
-    public static final int InsertedMedia       = 1 << 13;
+    public static final int InsertedMedia       = 1 << 13; //TODO Add actions to associated activities
     public static final int ModifiedMedia       = 1 << 14;
     public static final int DeletedMedia        = 1 << 15;
     public static final int ManualPointCreation = 1 << 16;
@@ -25,7 +25,11 @@ public class DataActionType {
     public static final int ConvertPoints       = 1 << 20;
     public static final int ModifiedDataDictionary  = 1 << 21;
     public static final int DataImported        = 1 << 22;
-    public static final int ProjectUpgraded        = 1 << 23;
+    public static final int ProjectUpgraded     = 1 << 23;
+    public static final int InsertedNmea        = 1 << 24;
+    public static final int DeletedNmea         = 1 << 25;
+    public static final int RezonedPoints       = 1 << 26;
+    public static final int ModifiedNmea        = 1 << 27;
             
 
     private int value;

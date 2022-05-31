@@ -8,7 +8,7 @@ import java.lang.reflect.Method;
 import java.util.UUID;
 
 public class TtBluetoothManager {
-    private BluetoothAdapter adapter;
+    private final BluetoothAdapter adapter;
     private static final UUID UUID_VALUE = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
 
@@ -49,7 +49,7 @@ public class TtBluetoothManager {
         try {
             device = adapter.getRemoteDevice(uuid);
         } catch (Exception e) {
-            e.printStackTrace();
+            //
         }
 
         if (device != null) {

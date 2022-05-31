@@ -9,11 +9,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import androidx.fragment.app.Fragment;
+import androidx.annotation.NonNull;
 
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
 import com.esri.arcgisruntime.geometry.Envelope;
 import com.esri.arcgisruntime.geometry.Geometry;
+import com.esri.arcgisruntime.geometry.GeometryEngine;
 import com.esri.arcgisruntime.geometry.GeometryType;
 import com.esri.arcgisruntime.geometry.Point;
 import com.esri.arcgisruntime.geometry.SpatialReference;
@@ -42,12 +43,13 @@ import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.TwoTrailsApp;
-import com.usda.fmsc.twotrails.gps.GpsService;
+import com.usda.fmsc.twotrails.fragments.TtBaseFragment;
+import com.usda.fmsc.twotrails.objects.map.ArcGisLineGraphic;
 import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
 import com.usda.fmsc.twotrails.objects.map.ArcGisPolygonGraphic;
 import com.usda.fmsc.twotrails.objects.map.ArcGisTrailGraphic;
 import com.usda.fmsc.twotrails.objects.map.IMarkerDataGraphic;
+import com.usda.fmsc.twotrails.objects.map.LineGraphicManager;
 import com.usda.fmsc.twotrails.objects.map.PolygonDrawOptions;
 import com.usda.fmsc.twotrails.objects.map.PolygonGraphicManager;
 import com.usda.fmsc.twotrails.objects.map.TrailGraphicManager;
@@ -61,18 +63,14 @@ import java.util.HashMap;
 import java.util.concurrent.ExecutionException;
 
 
-public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, MapRotationChangedListener, MapScaleChangedListener,
+public class ArcGisMapFragment extends TtBaseFragment implements IMultiMapFragment, MapRotationChangedListener, MapScaleChangedListener,
         ArcGISMap.BasemapChangedListener, LoadStatusChangedListener {
     private static final String START_ARC_OPTIONS = "StartupArcOptions";
-
-    private TwoTrailsApp TtAppCtx;
 
     private static final int TOLERANCE = 30;
 
     private MapOptions startUpMapOptions;
     private MultiMapListener mmListener;
-
-    private GpsService.GpsBinder binder;
 
     private MapView mapView;
     private GraphicsOverlay _LocationLayer = new GraphicsOverlay();
@@ -80,15 +78,16 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Ma
 
     private LayoutInflater inflater;
 
-    private ArrayList<IMarkerDataGraphic> _MarkerDataGraphics = new ArrayList<>();
-    private HashMap<String, ArcGisPolygonGraphic> polygonGraphics = new HashMap<>();
-    private HashMap<String, ArcGisTrailGraphic> trailGraphics = new HashMap<>();
+    private final ArrayList<IMarkerDataGraphic> _MarkerDataGraphics = new ArrayList<>();
+    private final HashMap<String, ArcGisPolygonGraphic> polygonGraphics = new HashMap<>();
+    private final HashMap<String, ArcGisTrailGraphic> trailGraphics = new HashMap<>();
+    private final HashMap<String, ArcGisLineGraphic> lineGraphics = new HashMap<>();
 
-    private Scalebar scalebar;
     private Compass compass;
     private Integer basemapId;
 
-    private boolean mapReady, showPosition, centerOnLoad = false;
+    private boolean mapReady;
+    private boolean showPosition;
     private int padLeft, padTop, padRight, padBottom;
 
     private ArcGisMapLayer startArcOpts, currentGisMapLayer;
@@ -152,7 +151,7 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Ma
         compass = view.findViewById(R.id.compass);
         compass.bindTo(mapView);
 
-        scalebar = view.findViewById(R.id.scalebar);
+        Scalebar scalebar = view.findViewById(R.id.scalebar);
         scalebar.bindTo(mapView);
 
         if (startArcOpts != null) {
@@ -163,19 +162,12 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Ma
 
         mapView.getGraphicsOverlays().add(_LocationLayer);
 
-//        if (startUpMapOptions.hasExtents() || startUpMapOptions.hasLocation()) {
-//            centerOnLoad = true;
-//        }
-
         return view;
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (mmListener != null && mmListener.shouldStopGps()) {
-            binder.stopGps();
-        }
 
         // Release MapView resources
         if (mapView != null) {
@@ -213,33 +205,13 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Ma
         //onMapLocationChanged();
     }
 
-    private Runnable baseMapDoneLoading = new Runnable() {
+    private final Runnable baseMapDoneLoading = new Runnable() {
         @Override
         public void run() {
             if (mmListener != null) {
                 if (!mapReady) {
                     mmListener.onMapReady();
                     mapReady = true;
-
-//                    if (centerOnLoad) {
-//                        if (startUpMapOptions.hasExtents()) {
-//                            moveToLocation(new Extent(startUpMapOptions.getNorth(),
-//                                    startUpMapOptions.getEast(),
-//                                    startUpMapOptions.getSouth(),
-//                                    startUpMapOptions.getWest()), 0, false);
-//                        } else {
-//                            moveToLocation(startUpMapOptions.getLatitude(), startUpMapOptions.getLongitide(), false);
-//                        }
-//
-//                        centerOnLoad = false;
-//                    } else {
-//                        //if map is offline and has extents
-//                        if (startUpMapOptions.hasExtents()) {
-//                            moveToLocation(startUpMapOptions.getExtents(), 0, false);
-//                        } else {
-//                            moveToMapMaxExtents(false);
-//                        }
-//                    }
                 }
 
                 mmListener.onMapLoaded();
@@ -259,14 +231,14 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Ma
 
 
     private void changeBasemap(int basemapId) {
-        changeBasemap(TtAppCtx.getArcGISTools().getMapLayer(basemapId));
+        changeBasemap(getTtAppCtx().getArcGISTools().getMapLayer(basemapId));
     }
 
     public void changeBasemap(final ArcGisMapLayer agml) {
         ArcGISMap mBasemapLayer;
         if (mapView != null) {
             try {
-                ArcGISMap baseMap = TtAppCtx.getArcGISTools().getBaseLayer(getContext(), agml);
+                ArcGISMap baseMap = getTtAppCtx().getArcGISTools().getBaseLayer(agml);
 
                 baseMap.addBasemapChangedListener(this);
                 baseMap.addLoadStatusChangedListener(this);
@@ -275,49 +247,56 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Ma
                 this.basemapId = agml.getId();
                 this.currentGisMapLayer = agml;
 
+                if (agml.getMinScale() < 0) {
+                    baseMap.setMinScale(4622324);
+                }
+
+                if (agml.getMaxScale() > 1000 || agml.getMaxScale() < 0) {
+                    baseMap.setMaxScale(1000);
+                }
+
                 mBasemapLayer = baseMap;
 
                 mapView.setMap(mBasemapLayer);
+                mapView.setPadding(padLeft, padTop, padRight, padBottom);
 
                 if (mmListener != null) {
                     mmListener.onMapTypeChanged(MapType.ArcGIS, basemapId, agml.isOnline());
                 }
 
                 if (currentGisMapLayer.isOnline() && currentGisMapLayer.getNumberOfLevels() < 1) {
-                    //AndroidUtils.Device.isInternetAvailable(getContext(), internetAvailable -> {
-                        if (AndroidUtils.Device.isInternetAvailable(getContext())) {
-                            TtAppCtx.getArcGISTools().getLayerFromUrl(agml.getUrl(), getActivity(), new ArcGISTools.IGetArcMapLayerListener() {
-                                @Override
-                                public void onComplete(ArcGisMapLayer layer) {
-                                    boolean updated = false;
+                    if (AndroidUtils.Device.isInternetAvailable(getContext())) {
+                        getTtAppCtx().getArcGISTools().getLayerFromUrl(agml.getUrl(), getActivity(), new ArcGISTools.IGetArcMapLayerListener() {
+                            @Override
+                            public void onComplete(ArcGisMapLayer layer) {
+                                boolean updated = false;
 
-                                    if (layer.getLevelsOfDetail() != null) {
-                                        agml.setLevelsOfDetail(layer.getLevelsOfDetail());
-                                        updated = true;
-                                    }
-
-                                    if (agml.getMaxScale() < 0 && layer.getMaxScale() >= 0) {
-                                        agml.setMaxScale(layer.getMaxScale());
-                                        agml.setMinScale(layer.getMinScale());
-                                        updated = true;
-                                    }
-
-                                    if (updated) {
-                                        TtAppCtx.getArcGISTools().updateMapLayer(agml);
-
-                                        if (currentGisMapLayer.getId() == agml.getId()) {
-                                            currentGisMapLayer = agml;
-                                        }
-                                    }
+                                if (layer.hasDetailLevels()) {
+                                    agml.setLevelsOfDetail(layer.getLevelsOfDetail());
+                                    updated = true;
                                 }
 
-                                @Override
-                                public void onBadUrl(String error) {
-
+                                if (agml.getMaxScale() < 0 && layer.getMaxScale() >= 0) {
+                                    agml.setMaxScale(layer.getMaxScale());
+                                    agml.setMinScale(layer.getMinScale());
+                                    updated = true;
                                 }
-                            });
-                        }
-                    //});
+
+                                if (updated) {
+                                    getTtAppCtx().getArcGISTools().updateMapLayer(agml);
+
+                                    if (currentGisMapLayer.getId() == agml.getId()) {
+                                        currentGisMapLayer = agml;
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onBadUrl(String error) {
+
+                            }
+                        });
+                    }
                 }
             } catch (FileNotFoundException e) {
                 Toast.makeText(getActivity(), "Unable to find offline map file.", Toast.LENGTH_LONG).show();
@@ -357,7 +336,6 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Ma
 
                 if (currentGisMapLayer != null && zLevels > 0 && zoomLevel > zLevels) {
                     zoomLevel = currentGisMapLayer.getNumberOfLevels();
-                    //zoomLevel = (float)currentGisMapLayer.getLevelsOfDetail()[(int)zoomLevel].getResolution();
                 }
 
                 if (zoomLevel > -1) {
@@ -373,9 +351,8 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Ma
 
     @Override
     public void moveToLocation(Extent extents, int padding, boolean animate) {
-        if (mapView != null) {
-            //mapView.setViewpointAsync(new Viewpoint(TtAppCtx.getArcGISTools().getEnvelopFromLatLngExtents(extents, mapView)));
-            mapView.setViewpointGeometryAsync(TtAppCtx.getArcGISTools().getEnvelopFromLatLngExtents(extents, mapView), padding);
+        if (mapView != null && getTtAppCtx() != null) {
+            mapView.setViewpointGeometryAsync(getTtAppCtx().getArcGISTools().getEnvelopFromLatLngExtents(extents, mapView), padding);
         }
     }
 
@@ -400,17 +377,12 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Ma
 
     @Override
     public Extent getExtents() {
-        Viewpoint vp = mapView.getCurrentViewpoint(Viewpoint.Type.BOUNDING_GEOMETRY);
+        Envelope envelope = getArcExtents();
 
-        if (vp.getTargetGeometry() != null && vp.getTargetGeometry().getGeometryType() == GeometryType.ENVELOPE) {
-            Envelope envelope = vp.getTargetGeometry().getExtent();
+        if (envelope != null) {
+            envelope = (Envelope) GeometryEngine.project(envelope, SpatialReferences.getWgs84());
 
-            if (envelope != null) {
-                Point ne = TtAppCtx.getArcGISTools().mapPointToLatLng((int)envelope.getYMax(), (int)envelope.getXMin(), mapView);
-                Point sw = TtAppCtx.getArcGISTools().mapPointToLatLng((int)envelope.getYMin(), (int)envelope.getXMax(), mapView);
-
-                return new Extent(sw.getY(), ne.getX(), ne.getY(), sw.getX());
-            }
+            return new Extent(envelope.getYMax(), envelope.getXMax(), envelope.getYMin(), envelope.getXMin());
         }
 
         return null;
@@ -434,55 +406,14 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Ma
     }
 
 
-//    public int getMapZoomLevel() {
-//        if (mBasemapLayer instanceof ArcGISTiledMapServiceLayer) {
-//            double mapRes = mapView.getResolution();
-//            double[] resolutions = ((ArcGISTiledMapServiceLayer) mBasemapLayer).getTileInfo().getResolutions();
-//
-//            for (int i = 0; i < resolutions.length - 2; i++) {
-//                if (mapRes <= resolutions[i] && mapRes > resolutions[i + 1])
-//                    return i;
-//            }
-//        }
-//
-//        return  -1;
-//    }
-
-
-//    public Point getMapPoint(int x, int y) {
-//        return mapView.toMapPoint(x, y);
-//    }
-
-
-//    public Extent getExtentsFromScreen(int xmin, int ymin, int xmax, int ymax) {
-//        Point ne = TtAppCtx.getArcGISTools().mapPointToLatLng(getMapPoint(xmin, ymin), mapView);
-//        Point sw = TtAppCtx.getArcGISTools().mapPointToLatLng(getMapPoint(xmax, ymax), mapView);
-//
-//        return new Extent(sw.getX(), ne.getY(), ne.getX(), sw.getY());
-//    }
-//
-//    public Envelope getArcExtentsFromScreen(int xmin, int ymin, int xmax, int ymax) {
-//        Point nw = getMapPoint(xmin, ymin);
-//        Point se = getMapPoint(xmax, ymax);
-//
-//        return new Envelope(nw.getX(), nw.getY(), se.getX(), se.getY());
-//    }
-
-
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NonNull Context context) {
         super.onAttach(context);
+
         if (context instanceof MultiMapListener) {
-            if (TtAppCtx == null) {
-                TtAppCtx = TwoTrailsApp.getInstance(context);
-            }
-
             mmListener = (MultiMapListener) context;
-
-            if (mmListener.shouldStartGps()) {
-                if (binder == null)
-                    binder = TtAppCtx.getGps();
-                binder.startGps();
+            if (currentGisMapLayer != null && mapReady) {
+                mmListener.onMapTypeChanged(MapType.ArcGIS, this.basemapId, currentGisMapLayer.isOnline());
             }
         }
     }
@@ -508,13 +439,14 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Ma
 
     @Override
     public void setMapPadding(int left, int top, int right, int bottom) {
-        //compass.setPadding(left, top, right, bottom);
-        //scalebar.setPadding(left, top, right, bottom);
-
         padLeft = left;
         padTop = top;
         padRight = right;
         padBottom = bottom;
+
+        if (mapView != null) {
+            mapView.setPadding(padLeft, padTop, padRight, padBottom);
+        }
     }
 
     @Override
@@ -559,6 +491,21 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Ma
     //todo removeTrail(TrailGraphicManager graphicManager)
     @Override
     public void removeTrail(TrailGraphicManager graphicManager) {
+
+    }
+
+    @Override
+    public void addLine(LineGraphicManager graphicManager) {
+        if (!lineGraphics.containsKey(graphicManager.getCN())) {
+            ArcGisLineGraphic lineGraphic = new ArcGisLineGraphic(mapView);
+            lineGraphics.put(graphicManager.getCN(), lineGraphic);
+
+            graphicManager.setGraphic(lineGraphic);
+        }
+    }
+
+    @Override
+    public void removeLine(LineGraphicManager graphicManager) {
 
     }
 
@@ -618,9 +565,6 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Ma
                 Graphic graphic = _LocationLayer.getGraphics().get(0);
                 graphic.setGeometry(point);
             } else {
-//                if (sms == null) {
-//                    sms = new SimpleMarkerSymbol(SimpleMarkerSymbol.Style.DIAMOND, Color.RED, 20);
-//                }
                 _LocationLayer.getGraphics().add(new Graphic(point, new SimpleMarkerSymbol(SimpleMarkerSymbol.Style.DIAMOND, Color.RED, 20)));
             }
         }
@@ -689,7 +633,7 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Ma
             }
 
             if (!infoDisplayed && mmListener != null) {
-                Point pointLL = TtAppCtx.getArcGISTools().mapPointToLatLng((int)e.getX(), (int)e.getY(), mapView);
+                Point pointLL = getTtAppCtx().getArcGISTools().mapPointToLatLng((int)e.getX(), (int)e.getY(), mapView);
 
                 mmListener.onMapClick(new Position(pointLL.getY(), pointLL.getX()));
             }
@@ -721,5 +665,7 @@ public class ArcGisMapFragment extends Fragment implements IMultiMapFragment, Ma
 
             return false;
         }
+
+
     }
 }

@@ -9,25 +9,27 @@ import com.usda.fmsc.twotrails.objects.TtPolygon;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class TrailGraphicManager implements IGraphicManager {
-    private TtPolygon polygon;
-    private ArrayList<TtPoint> points;
-    private ArrayList<Position> positions;
-    private HashMap<String, TtMetadata> meta;
+public class TrailGraphicManager implements IPolygonGraphicManager {
+    private final TtPolygon polygon;
+    private final ArrayList<TtPoint> points;
+    private final ArrayList<Position> positions;
+    private final HashMap<String, TtMetadata> meta;
+    private final boolean isAdjusted;
 
     private ITrailGraphic trailGraphic;
     private TrailGraphicOptions graphicOptions;
 
 
-    public TrailGraphicManager(TtPolygon polygon, ArrayList<TtPoint> points, HashMap<String, TtMetadata> meta, TrailGraphicOptions graphicOptions) {
-        this(polygon, points, meta, null, graphicOptions);
+    public TrailGraphicManager(TtPolygon polygon, ArrayList<TtPoint> points, boolean adjusted, HashMap<String, TtMetadata> meta, TrailGraphicOptions graphicOptions) {
+        this(polygon, points, adjusted, meta, null, graphicOptions);
     }
 
-    public TrailGraphicManager(TtPolygon polygon, ArrayList<TtPoint> points, HashMap<String, TtMetadata> meta, ITrailGraphic trailGraphic, TrailGraphicOptions graphicOptions) {
+    public TrailGraphicManager(TtPolygon polygon, ArrayList<TtPoint> points, boolean adjusted, HashMap<String, TtMetadata> meta, ITrailGraphic trailGraphic, TrailGraphicOptions graphicOptions) {
         this.polygon = polygon;
         this.points = points;
         this.meta = meta;
         this.graphicOptions = graphicOptions;
+        this.isAdjusted = adjusted;
 
         positions = new ArrayList<>();
 
@@ -44,7 +46,7 @@ public class TrailGraphicManager implements IGraphicManager {
         this.trailGraphic = trailGraphic;
         this.graphicOptions = graphicOptions;
 
-        this.trailGraphic.build(points, meta, graphicOptions);
+        this.trailGraphic.build(points, isAdjusted, meta, graphicOptions);
     }
 
 
@@ -54,10 +56,24 @@ public class TrailGraphicManager implements IGraphicManager {
     }
 
     @Override
-    public Extent getExtents() {
-        return trailGraphic.getExtents();
+    public String getPolyName() {
+        return polygon.getName();
     }
 
+    @Override
+    public String getCN() {
+        return getPolygonCN();
+    }
+
+    @Override
+    public Extent getExtents() {
+        return trailGraphic != null ? trailGraphic.getExtents() : null;
+    }
+
+    @Override
+    public Position getPosition() {
+        return trailGraphic.getPosition();
+    }
 
     public ITrailGraphic getTrailGraphic() {
         return trailGraphic;
@@ -76,11 +92,11 @@ public class TrailGraphicManager implements IGraphicManager {
         return positions.size();
     }
 
-    public Position addPoint(TtPoint point) {
+    public Position addPoint(TtPoint point, boolean adjusted) {
         Position position = null;
 
         if (trailGraphic != null) {
-            position = trailGraphic.add(point, meta);
+            position = trailGraphic.add(point, adjusted, meta);
 
             positions.add(position);
         }

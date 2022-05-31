@@ -24,7 +24,7 @@ import com.usda.fmsc.twotrails.TwoTrailsApp;
 
 import java.util.Arrays;
 
-public class PointColorPickerDialog extends DialogFragment {
+public class PointColorPickerDialog extends TtBaseDialogFragment {
     public static final String OPTIONS = "Options";
     public static final String NAME = "Name";
 
@@ -40,7 +40,7 @@ public class PointColorPickerDialog extends DialogFragment {
 
     private ColorPicker picker;
     private RelativeLayout lastSelectedView;
-    private ImageView[] ivs = new ImageView[NUMBER_OF_COLORS];
+    private final ImageView[] ivs = new ImageView[NUMBER_OF_COLORS];
     
     
     private PointColorListener listener;
@@ -141,7 +141,7 @@ public class PointColorPickerDialog extends DialogFragment {
             Button button = ((AlertDialog) dialog12).getButton(AlertDialog.BUTTON_NEGATIVE);
 
             button.setOnClickListener(view1 -> {
-                MapSettings ms = TwoTrailsApp.getInstance(getActivity()).getMapSettings();
+                MapSettings ms = getTtAppCtx().getMapSettings();
 
                 updateColor(0, ms.getDefaultAdjBndColor());
                 updateColor(1, ms.getDefaultAdjNavColor());

@@ -1,22 +1,24 @@
 package com.usda.fmsc.twotrails.fragments.main;
 
+import android.content.Context;
 import android.os.Bundle;
-import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import androidx.annotation.NonNull;
+
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.TwoTrailsApp;
+import com.usda.fmsc.twotrails.fragments.TtBaseFragment;
 
 
-public class MainToolsFragment extends Fragment {
+public class MainToolsFragment extends TtBaseFragment {
     private Button btnMap, btnGEarth, btnHAID, btnExport,
             btnPlotGrid, btnGpsLogger, btnGpsStatus;
     private View viewTest;
 
-    private boolean enabled = false, viewExists = false;
+    private boolean enabled = false, viewExists = false, updateOnAttached;
 
     public boolean isViewCreated() {
         return viewExists;
@@ -68,14 +70,26 @@ public class MainToolsFragment extends Fragment {
             btnHAID.setEnabled(enable);
             btnExport.setEnabled(enable);
             btnPlotGrid.setEnabled(enable);
-            //btnGpsLogger.setEnabled(enable);
-            //btnGpsStatus.setEnabled(enable);
 
-            if (TwoTrailsApp.getInstance(getContext()).getDeviceSettings().isDeveloperOptionsEnabled()) {
-                viewTest.setVisibility(View.VISIBLE);
+            if (getTtAppCtx() != null) {
+                if (getTtAppCtx().getDeviceSettings().isDeveloperOptionsEnabled()) {
+                    viewTest.setVisibility(View.VISIBLE);
+                } else {
+                    viewTest.setVisibility(View.GONE);
+                }
             } else {
+                updateOnAttached = true;
                 viewTest.setVisibility(View.GONE);
             }
         }
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+
+        enableButtons(enabled);
+
+        updateOnAttached = false;
     }
 }

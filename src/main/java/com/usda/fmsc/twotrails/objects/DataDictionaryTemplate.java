@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 public class DataDictionaryTemplate implements Iterable<DataDictionaryField>{
-    private HashMap<String, DataDictionaryField> _Fields = new HashMap<>();
+    private final HashMap<String, DataDictionaryField> _Fields = new HashMap<>();
     public DataDictionaryTemplate(Iterable<DataDictionaryField> dataDictionaryFields) {
         if (dataDictionaryFields != null) {
             for (DataDictionaryField field : dataDictionaryFields) {
@@ -31,10 +31,7 @@ public class DataDictionaryTemplate implements Iterable<DataDictionaryField>{
     }
 
     public void AddField(DataDictionaryField field) {
-        if (_Fields.containsKey(field.getCN()))
-            _Fields.put(field.getCN(), field);
-        else
-            _Fields.put(field.getCN(), field);
+        _Fields.put(field.getCN(), field);
     }
 
     public void RemoveField(String cn) {

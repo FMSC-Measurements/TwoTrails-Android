@@ -19,12 +19,12 @@ import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
 import java.util.List;
 
 public class ArcGisMapSelectionAdapter extends ArrayAdapter<ArcGisMapLayer> {
-    private IArcGisMapAdapterListener listener;
+    private final IArcGisMapAdapterListener listener;
 
-    private LayoutInflater inflater;
-    private List<ArcGisMapLayer> maps;
+    private final LayoutInflater inflater;
+    private final List<ArcGisMapLayer> maps;
 
-    private Drawable dOnline, dOffline;
+    private final Drawable dOnline, dOffline;
 
     private View selectedView;
     private int selectedIndex;
@@ -66,7 +66,7 @@ public class ArcGisMapSelectionAdapter extends ArrayAdapter<ArcGisMapLayer> {
             MapViewHolder holder;
 
             if (convertView == null) {
-                convertView = inflater.inflate(R.layout.content_map_header, null);
+                convertView = inflater.inflate(R.layout.content_map_header, parent, false);
 
                 holder = new MapViewHolder(convertView);
                 convertView.setTag(holder);
@@ -134,10 +134,10 @@ public class ArcGisMapSelectionAdapter extends ArrayAdapter<ArcGisMapLayer> {
     }
 
 
-    private class MapViewHolder {
-        ImageView ivStatusIcon;
-        PopupMenuButton ofmbMenu;
-        TextView tvName;
+    private static class MapViewHolder {
+        public final ImageView ivStatusIcon;
+        public final PopupMenuButton ofmbMenu;
+        public final TextView tvName;
 
         private MapViewHolder(View view) {
             ivStatusIcon = view.findViewById(R.id.mhIcon);

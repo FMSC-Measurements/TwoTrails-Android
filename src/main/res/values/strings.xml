@@ -25,7 +25,7 @@
     <string name="str_link">Linked</string>
     <string name="str_create">Create</string>
     <string name="str_empty"> </string>
-    <string name="str_nullvalue">*</string>
+    <string name="str_null_value">*</string>
     <string name="str_view">View</string>
     <string name="str_fullscreen">View in Gallery</string>
     <string name="str_onbnd">On Boundary</string>
@@ -81,6 +81,10 @@
     <string name="str_to">To</string>
     <string name="str_dist">Distance</string>
     <string name="str_az">Azimuth</string>
+    <string name="str_az_true">Azimuth (True)</string>
+    <string name="str_az_true_abv">Az True</string>
+    <string name="str_az_mag">Azimuth (Mag)</string>
+    <string name="str_az_mag_abv">Az Mag</string>
     <string name="str_slp">Slope</string>
     <string name="str_slp_ang">S. Angle</string>
     <string name="str_mag">Magnetic</string>
@@ -114,6 +118,7 @@
     <string name="str_ha">Ha</string>
     <string name="str_perim">Perimeter</string>
     <string name="str_perim_line">Perim Line</string>
+    <string name="str_line">Line</string>
     <string name="str_area">Area</string>
     <string name="str_calc">Calculate</string>
     <string name="str_bnd">Boundary</string>
@@ -129,6 +134,17 @@
     <string name="str_img_info">Media Info</string>
     <string name="str_uom">UOM</string>
     <string name="str_rand">Random</string>
+    <string name="str_create_poly">Create Polygon</string>
+    <string name="str_create_map_layer">Create Map Layer</string>
+    <string name="str_collect_point">Collect Point</string>
+    <string name="str_closest_dist">Closest Distance</string>
+    <string name="str_closest_dist_abv">Clst Dist</string>
+    <string name="str_closest_polygon_abv">Clst Poly</string>
+    <string name="str_pos_on_poly">Position on Polygon</string>
+    <string name="str_inside_poly">Inside Polygon</string>
+    <string name="str_outside_poly">Outside Polygon</string>
+    <string name="str_commit">Commit</string>
+    <string name="str_commit_ss">Commit Sideshot</string>
 
     <string name="zero">0</string>
     <string name="str_x">X</string>
@@ -144,6 +160,10 @@
     <string name="op_qndm">Quondam</string>
 
 
+    <!-- Requests -->
+    <string name="str_gps_request">This app collects location data to enable point creation during point collection or navigation operations. It may also collect location while the app is being run in the background.</string>
+
+
     <!-- Measurements -->
     <string name="meas_feet">Feet</string>
     <string name="meas_meters">Meters</string>
@@ -151,6 +171,7 @@
 
     <!-- Settings -->
     <string name="menu_main_about">About</string>
+    <string name="menu_main_privacy_policy">Privacy Policy</string>
     <string name="menu_x_gps_settings">GPS Setup</string>
     <string name="menu_x_range_finder_settings">Range Finder</string>
     <string name="menu_x_filter">Filter</string>
@@ -202,6 +223,11 @@
     <string name="menu_pmd_update_orientation">Update Orientation</string>
     <string name="menu_pmd_capture">Capture Media</string>
     <string name="menu_pmd_delete">Delete Media</string>
+    <string name="menu_sat_settings">Sales Admin Settings</string>
+    <string name="menu_sat_validation_poly">Validation Polygon</string>
+    <string name="menu_sat_unit_tolerance">Unit Tolerance</string>
+    <string name="menu_sat_color">Distance Color</string>
+    <string name="menu_sat_capture">Capture</string>
 
 
     <!-- Transitions -->
@@ -240,6 +266,8 @@
     <string name="set_DROP">prefDropZero</string>
     <string name="set_CLEAR_LOG">prefClearLog</string>
     <string name="set_EXPORT_REPORT">prefExportReport</string>
+    <string name="set_EXPORT_PROJECTS">prefExportProjects</string>
+    <string name="set_APP_DATA_DUMP">prefAppDataDump</string>
     <string name="set_RESET">prefResetDevice</string>
     <string name="set_CODE">prefEnterCode</string>
     <string name="set_MEDIA_COPY_TO_PROJECT">prefCopyToProject</string>
@@ -288,6 +316,18 @@
     <string name="set_WALK_RING_ON_CREATE_POINT">WalkRingOnCreate</string>
     <string name="set_WALK_SHOW_ALL_POINTS_ON_MAP">WalkShowAllPointsOnMap</string>
 
+    <string name="set_SAT_FILTER_DOP_TYPE">SATFilterDopType</string>
+    <string name="set_SAT_FILTER_DOP_VALUE">SATFilterDopValue</string>
+    <string name="set_SAT_FILTER_FIX">SATFilterFix</string>
+    <string name="set_SAT_FILTER_FIX_TYPE">SATFilterFixType</string>
+    <string name="set_SAT_NMEA_AMOUNT">SATNmeaAmount</string>
+    <string name="set_SAT_IGNORE_NMEA">SATIgnoreNmea</string>
+    <string name="set_SAT_IGNORE_NMEA_AMOUNT">SATIgnoreNmeaAmount</string>
+    <string name="set_SAT_FAIL_AMOUNT">SATFailAmount</string>
+    <string name="set_SAT_INCREMENT">SATIncrement</string>
+    <string name="set_SAT_VIB_ON_CREATE_POINT">SATVibrationOnCreate</string>
+    <string name="set_SAT_RING_ON_CREATE_POINT">SATRingOnCreate</string>
+    
     <string name="set_AUTO_UPDATE_INDEX">AutoUpdateIndex</string>
     <string name="set_AUTO_UPDATE_WALK_ONBND_ASK">AutoUpdateWalkOnBndAsk</string>
     <string name="set_AUTO_OVERWRITE_PLOTGRID_ASK">AutoOverwritePlotGridAsk</string>
@@ -318,6 +358,10 @@
     <string name="diag_latlon_lonDD">Longitude (XXX.XXXXX)</string>
     <string name="diag_pcp_adjpts">Adjusted Points</string>
     <string name="diag_pcp_unadjpts">Unadjusted Points</string>
+    <string name="diag_loc">TwoTrails requires location permissions in order to collection point data.</string>
+    <string name="diag_bt_loc">TwoTrails requires bluetooth permissions in order to connect to external GPS and Range Finders.</string>
+    <string name="diag_back_loc">Without background location you should not let your screen turn off or open another application while collecting data. To prevent the screen falling asleep you can enable the \'Keep Awake\' setting. Would you like to enable it now?</string>
+    <string name="diag_keep_on_req">To collect data while the screen is off or another application is in use background location permissions are required. Would you like to enable background location?</string>
 
 
     <!-- Activity Titles -->
@@ -343,6 +387,8 @@
     <string name="title_activity_get_map_extents">Get Map Boundaries</string>
     <string name="title_activity_edit_arc_map">Map Details</string>
     <string name="title_activity_get_direction">Get Direction</string>
+    <string name="title_activity_privacy_policy">Privacy Policy</string>
+    <string name="title_activity_sales_admin_tools">Sales Admin Tools</string>
 
     <!-- Main -->
     <string name="main_tab_file">FILE</string>
@@ -351,6 +397,10 @@
     <string name="main_tab_devices">GPS/RangeFinder</string>
 
     <string name="main_btn_open_rec">Opened Recently</string>
+    <string name="main_btn_import_project">Import Project</string>
+    <string name="main_btn_export_project">Export Project</string>
+    <string name="main_btn_remove_project">Remove Project</string>
+    <string name="main_btn_import_data">Import Data</string>
     <string name="main_btn_import">Import</string>
     <string name="main_btn_duplicate">Duplicate</string>
     <string name="main_btn_exit">Exit</string>
@@ -371,9 +421,10 @@
     <string name="main_btn_gps_log">GPS Logger</string>
     <string name="main_btn_gps_status">GPS Status</string>
     <string name="main_btn_map_manager">Map Manager</string>
+    <string name="main_btn_sat">Sales Admin Tools</string>
 
     <string name="main_tv_edited">Last Edited</string>
-
+    <string name="main_tv_dal_version">DAL Version</string>
 
     <!-- Polygon -->
     <string name="poly_acc">Accuracy</string>
@@ -467,6 +518,7 @@
 
     <!-- GPS Logger -->
     <string name="logger_ltf">Log to File</string>
+    <string name="logger_export">Export Log</string>
 
     <!-- Map -->
     <string name="map_adj_bnd">Adjusted Boundary Polygon</string>
@@ -517,6 +569,10 @@
     <string name="amd_update_path">Update File Path</string>
     <string name="amd_update_details">Update Map Details</string>
     <string name="amd_scale">Map Scale</string>
+
+
+    <!-- Sales Admin Tools-->
+    <string name="sat_cap_media_after_create">Would you like to capture an image of your Plot?</string>
 
 
     <!-- ArcGIS Values -->

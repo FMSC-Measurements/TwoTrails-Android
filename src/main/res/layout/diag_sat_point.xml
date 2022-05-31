@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/toolbar_height"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:orientation="horizontal"
+        android:background="@android:color/white"
+        style="@style/ToolbarElevation3">
+
+        <ImageView
+            android:id="@+id/ivInPoly"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:background="@android:color/transparent"
+            android:contentDescription="@string/str_inside_poly"
+            android:src="@drawable/ic_in_poly_dark" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true">
+
+            <EditText
+                android:id="@+id/txtPid"
+                style="@style/AutoSelectEditTextStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:autofillHints=""
+                android:textSize="12pt"
+                android:inputType="number"
+                android:maxLines="1"
+                android:gravity="center"/>
+        </com.google.android.material.textfield.TextInputLayout>
+    </RelativeLayout>
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:stretchColumns="1,3"
+        android:padding="8dp">
+
+        <TableRow>
+            <TextView
+                android:gravity="center_vertical"
+                android:text="@string/str_utmx"
+                android:textSize="8pt" />
+
+            <TextView
+                android:id="@+id/tvUtmX"
+                android:text="@string/str_null_value"
+                android:gravity="center_vertical"
+                android:textSize="8pt" />
+
+            <TextView
+                android:text="@string/str_utmy"
+                android:gravity="center_vertical"
+                android:textSize="8pt" />
+
+            <TextView
+                android:id="@+id/tvUtmY"
+                android:text="@string/str_null_value"
+                android:gravity="center_vertical"
+                android:textSize="8pt" />
+        </TableRow>
+
+        <TableRow
+            android:paddingBottom="12dp">
+
+            <TextView
+                android:layout_width="100dp"
+                android:text="@string/str_polygon"
+                android:gravity="center_vertical"
+                android:textSize="8pt" />
+
+            <TextView
+                android:id="@+id/tvPoly"
+                android:text="@string/str_null_value"
+                android:gravity="center_vertical"
+                android:textSize="8pt" />
+
+            <TextView
+                android:layout_width="100dp"
+                android:text="@string/str_elev"
+                android:gravity="center_vertical"
+                android:textSize="8pt" />
+
+            <TextView
+                android:id="@+id/tvElev"
+                android:text="@string/str_null_value"
+                android:gravity="center_vertical"
+                android:textSize="8pt" />
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:gravity="center_vertical"
+                android:text="@string/str_closest_dist_abv"
+                android:textSize="8pt" />
+
+            <TextView
+                android:id="@+id/tvCDist"
+                android:text="@string/str_null_value"
+                android:gravity="center_vertical"
+                android:textSize="8pt" />
+
+            <TextView
+                android:text="@string/str_closest_polygon_abv"
+                android:gravity="center_vertical"
+                android:textSize="8pt" />
+
+            <TextView
+                android:id="@+id/tvCPoly"
+                android:text="@string/str_null_value"
+                android:gravity="center_vertical"
+                android:textSize="8pt" />
+        </TableRow>
+
+        <TableRow
+            android:paddingBottom="6dp">
+            <TextView
+                android:text="@string/str_pos_on_poly"
+                android:gravity="center_vertical"
+                android:textSize="8pt"
+                android:layout_span="2"/>
+
+            <TextView
+                android:id="@+id/tvPoP"
+                android:text="@string/str_null_value"
+                android:gravity="center_vertical"
+                android:textSize="8pt"
+                android:layout_span="2" />
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:gravity="center_vertical"
+                android:text="@string/str_utmx"
+                android:textSize="8pt" />
+
+            <TextView
+                android:id="@+id/tvCPUtmX"
+                android:text="@string/str_null_value"
+                android:gravity="center_vertical"
+                android:textSize="8pt" />
+
+            <TextView
+                android:text="@string/str_utmy"
+                android:gravity="center_vertical"
+                android:textSize="8pt" />
+
+            <TextView
+                android:id="@+id/tvCPUtmY"
+                android:text="@string/str_null_value"
+                android:gravity="center_vertical"
+                android:textSize="8pt" />
+        </TableRow>
+
+        <TableRow
+            android:paddingBottom="4dp">
+            <TextView
+                android:text="@string/str_az_true_abv"
+                android:gravity="center_vertical"
+                android:textSize="8pt" />
+
+            <TextView
+                android:id="@+id/tvAzTrue"
+                android:text="@string/str_null_value"
+                android:gravity="center_vertical"
+                android:textSize="8pt" />
+
+            <TextView
+                android:text="@string/str_az_mag_abv"
+                android:gravity="center_vertical"
+                android:textSize="8pt" />
+
+            <TextView
+                android:id="@+id/tvAzMag"
+                android:text="@string/str_null_value"
+                android:gravity="center_vertical"
+                android:textSize="8pt" />
+        </TableRow>
+    </TableLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp">
+
+        <EditText
+            android:id="@+id/txtDesc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/str_desc"
+            android:inputType="text|textMultiLine|textAutoComplete|textAutoCorrect"
+            android:importantForAutofill="no"
+            android:maxLines="6"
+            android:minLines="4"/>
+    </com.google.android.material.textfield.TextInputLayout>
+</LinearLayout>

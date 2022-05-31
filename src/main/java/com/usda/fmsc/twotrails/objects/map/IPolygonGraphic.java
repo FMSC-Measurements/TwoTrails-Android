@@ -3,6 +3,7 @@ package com.usda.fmsc.twotrails.objects.map;
 import androidx.annotation.ColorInt;
 
 import com.usda.fmsc.geospatial.Extent;
+import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
@@ -20,6 +21,8 @@ public interface IPolygonGraphic {
     PolygonGraphicOptions getGraphicOptions();
 
     Extent getExtents();
+
+    Position getPosition();
 
     void setVisible(boolean visible);
 

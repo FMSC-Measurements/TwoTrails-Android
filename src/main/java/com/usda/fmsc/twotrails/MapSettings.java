@@ -8,65 +8,63 @@ import com.usda.fmsc.twotrails.objects.map.PolygonGraphicOptions;
 
 import java.util.HashMap;
 
-public class MapSettings {
-    private HashMap<String, PolygonDrawOptions> _PolyDrawOptions = new HashMap<>();
-    private PolygonDrawOptions _MasterPolyDrawOptions = new PolygonDrawOptions();
+public class MapSettings extends Settings {
+    private final HashMap<String, PolygonDrawOptions> _PolyDrawOptions = new HashMap<>();
+    private final PolygonDrawOptions _MasterPolyDrawOptions = new PolygonDrawOptions();
 
     private HashMap<String, PolygonGraphicOptions> _PolyGraphicOptions = new HashMap<>();
     private PolygonGraphicOptions _MasterPolyGraphicOptions;
 
-    private TwoTrailsApp _Context;
-
     public MapSettings(TwoTrailsApp context) {
-        _Context = context;
+        super(context);
     }
 
     private @ColorInt Integer adjBnd;
     public @ColorInt int getDefaultAdjBndColor() {
         if (adjBnd == null)
-            adjBnd = AndroidUtils.UI.getColor(_Context, R.color.map_adj_bnd);
+            adjBnd = AndroidUtils.UI.getColor(getContext(), R.color.map_adj_bnd);
         return adjBnd;
     }
 
     private @ColorInt Integer adjNav;
     public @ColorInt int getDefaultAdjNavColor() {
         if (adjNav == null)
-            adjNav = AndroidUtils.UI.getColor(_Context, R.color.map_adj_nav);
+            adjNav = AndroidUtils.UI.getColor(getContext(), R.color.map_adj_nav);
         return adjNav;
     }
 
     private @ColorInt Integer unadjBnd;
     public @ColorInt int getDefaultUnAdjBndColor() {
         if (unadjBnd == null)
-            unadjBnd = AndroidUtils.UI.getColor(_Context, R.color.map_unadj_bnd);
+            unadjBnd = AndroidUtils.UI.getColor(getContext(), R.color.map_unadj_bnd);
         return unadjBnd;
     }
 
     private @ColorInt Integer unadjNav;
     public @ColorInt int getDefaultUnAdjNavColor() {
         if (unadjNav == null)
-            unadjNav = AndroidUtils.UI.getColor(_Context, R.color.map_unadj_nav);
+            unadjNav = AndroidUtils.UI.getColor(getContext(), R.color.map_unadj_nav);
         return unadjNav;
     }
 
     private @ColorInt Integer adjpts;
     public @ColorInt int getDefaultAdjPtsColor() {
         if (adjpts == null)
-            adjpts = AndroidUtils.UI.getColor(_Context, R.color.map_adj_pts);
+            adjpts = AndroidUtils.UI.getColor(getContext(), R.color.map_adj_pts);
         return adjpts;
     }
 
     private @ColorInt Integer unadjpts;
     public @ColorInt int getDefaultUnAdjPtsColor() {
         if (unadjpts == null)
-            unadjpts = AndroidUtils.UI.getColor(_Context, R.color.map_unadj_pts);
+            unadjpts = AndroidUtils.UI.getColor(getContext(), R.color.map_unadj_pts);
         return unadjpts;
     }
 
     private @ColorInt Integer waypts;
     public @ColorInt int getDefaultWayPtsColor() {
         if (waypts == null)
-            waypts = AndroidUtils.UI.getColor(_Context, R.color.map_way_pts);
+            waypts = AndroidUtils.UI.getColor(getContext(), R.color.map_way_pts);
         return waypts;
     }
 
@@ -77,7 +75,7 @@ public class MapSettings {
 
         _PolyDrawOptions.clear();
 
-        _PolyGraphicOptions = _Context.getDAL().getPolygonGraphicOptionsMap();
+        _PolyGraphicOptions = getContext().getDAL().getPolygonGraphicOptionsMap();
 
         if (_PolyGraphicOptions.containsKey(Consts.EmptyGuid)) {
             _MasterPolyGraphicOptions = _PolyGraphicOptions.get(Consts.EmptyGuid);
@@ -91,12 +89,12 @@ public class MapSettings {
                     getDefaultAdjPtsColor(),
                     getDefaultUnAdjPtsColor(),
                     getDefaultWayPtsColor(),
-                    _Context.getDeviceSettings().getMapAdjLineWidth(),
-                    _Context.getDeviceSettings().getMapUnAdjLineWidth()
+                    getContext().getDeviceSettings().getMapAdjLineWidth(),
+                    getContext().getDeviceSettings().getMapUnAdjLineWidth()
             );
 
-            if (_Context.hasDAL()) {
-                _Context.getDAL().insertPolygonGraphicOption(_MasterPolyGraphicOptions);
+            if (getContext().hasDAL()) {
+                getContext().getDAL().insertPolygonGraphicOption(_MasterPolyGraphicOptions);
             }
 
             _PolyGraphicOptions.put(Consts.EmptyGuid, _MasterPolyGraphicOptions);
@@ -134,8 +132,8 @@ public class MapSettings {
             PolygonGraphicOptions pgo = new PolygonGraphicOptions(cn, _MasterPolyGraphicOptions);
             _PolyGraphicOptions.put(cn, pgo);
 
-            if (_Context.hasDAL()) {
-                _Context.getDAL().insertPolygonGraphicOption(pgo);
+            if (getContext().hasDAL()) {
+                getContext().getDAL().insertPolygonGraphicOption(pgo);
             }
 
             pgo.addListener(updateListener);
@@ -144,12 +142,9 @@ public class MapSettings {
         }
     }
 
-    private PolygonGraphicOptions.Listener updateListener = new PolygonGraphicOptions.Listener() {
-        @Override
-        public void onOptionChanged(PolygonGraphicOptions pgo, PolygonGraphicOptions.GraphicCode code, @ColorInt int value) {
-            if (_Context.hasDAL() && _PolyGraphicOptions.containsKey(pgo.getCN())) {
-                _Context.getDAL().updatePolygonGraphicOption(pgo);
-            }
+    private final PolygonGraphicOptions.Listener updateListener = (pgo, code, value) -> {
+        if (getContext().hasDAL() && _PolyGraphicOptions.containsKey(pgo.getCN())) {
+            getContext().getDAL().updatePolygonGraphicOption(pgo);
         }
     };
 }

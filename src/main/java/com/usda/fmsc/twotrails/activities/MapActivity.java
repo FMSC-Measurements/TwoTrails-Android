@@ -44,17 +44,12 @@ public class MapActivity extends BaseMapActivity {
 
         ivGps = findViewById(R.id.mapIvGps);
 
-        //fabMyPos.setVisibility(myPosBtn && getLastPosition() != null ? View.VISIBLE : View.GONE);
         if (myPosBtn && getLastPosition() != null)
             fabMyPos.show();
         else
             fabMyPos.hide();
 
         setDisplayLocInfoVisible();
-
-        if (getTtAppCtx().getDeviceSettings().isGpsConfigured() && shouldStartGps()) {
-            getTtAppCtx().getGps().startGps();
-        }
 
         created = true;
     }
@@ -70,17 +65,17 @@ public class MapActivity extends BaseMapActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenuEx(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_map, menu);
 
-        return super.onCreateOptionsMenu(menu);
+        return super.onCreateOptionsMenuEx(menu);
     }
 
     //endregion
 
     @Override
-    protected void getSettings() {
-        super.getSettings();
+    protected void updateActivitySettings() {
+        super.updateActivitySettings();
 
         myPosBtn = getTtAppCtx().getDeviceSettings().getMapMyPosBtns();
         dispLoc = getTtAppCtx().getDeviceSettings().getMapDisplayGpsLocation();
@@ -89,7 +84,6 @@ public class MapActivity extends BaseMapActivity {
 
         if (created) {
             if (fabMyPos != null && getLastPosition() != null) {
-                //fabMyPos.setVisibility(myPosBtn ? View.VISIBLE : View.GONE);
                 if (myPosBtn)
                     fabMyPos.show();
                 else
@@ -167,7 +161,6 @@ public class MapActivity extends BaseMapActivity {
 
         if (getLastPosition() != null) {
             if (myPosBtn && fabMyPos != null && getLastPosition() != null) {
-                //fabMyPos.setVisibility(View.VISIBLE);
                 fabMyPos.show();
             }
         }
@@ -193,11 +186,6 @@ public class MapActivity extends BaseMapActivity {
                 tvLocY.setText(StringEx.toString(lastPosition.getLongitudeSignedDecimal(), 6));
             }
         }
-    }
-
-    @Override
-    public boolean shouldStartGps() {
-        return true; //for position bar
     }
     //endregion
 }

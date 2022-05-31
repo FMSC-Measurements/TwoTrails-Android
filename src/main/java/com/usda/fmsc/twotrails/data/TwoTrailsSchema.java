@@ -3,12 +3,16 @@ package com.usda.fmsc.twotrails.data;
 @SuppressWarnings("WeakerAccess")
 public class TwoTrailsSchema {
     //Old Schema Versions
-    public static final TtVersion OSV_2_0_1 = new TtVersion(2, 0, 1);
-    public static final TtVersion OSV_2_0_2 = new TtVersion(2, 0, 2);
-    public static final TtVersion OSV_2_0_3 = new TtVersion(2, 0, 3);
+    public static final TtVersion DAL_2_0_1 = new TtVersion(2, 0, 1);
+    public static final TtVersion DAL_2_0_2 = new TtVersion(2, 0, 2);
+    public static final TtVersion DAL_2_0_3 = new TtVersion(2, 0, 3);
+
+    public static final TtVersion DAL_2_1_0 = new TtVersion(2, 1, 0);
+    public static final int DAL_2_1_0_INT = 4;
 
     //Schema Version
-    public static final TtVersion SchemaVersion = OSV_2_0_3;
+    public static final TtVersion SchemaVersion = DAL_2_1_0;
+    public static final int SchemaVersionInt = DAL_2_1_0_INT;
 
 
     public static class SharedSchema {
@@ -181,6 +185,7 @@ public class TwoTrailsSchema {
         public static final String TableName = "Polygons";
 
         public static final String Name = "Name";
+        public static final String UnitType = "UnitType";
         public static final String Accuracy = "Accuracy";
         public static final String Description = "Description";
         public static final String Area = "Area";
@@ -189,10 +194,12 @@ public class TwoTrailsSchema {
         public static final String IncrementBy = "Increment";
         public static final String PointStartIndex = "PointStartIndex";
         public static final String TimeCreated = "TimeCreated";
+        public static final String ParentUnitCN = "ParentUnitCN";
 
         public static final String CreateTable =
             "CREATE TABLE " + TableName + " (" +
             SharedSchema.CN + " TEXT, " +
+            UnitType        + " INTEGER, " +
             Name            + " TEXT, " +
             Accuracy        + " REAL, " +
             Description     + " TEXT, " +
@@ -201,6 +208,7 @@ public class TwoTrailsSchema {
             PerimeterLine   + " REAL, " +
             IncrementBy     + " INTEGER, " +
             PointStartIndex + " INTEGER, " +
+            ParentUnitCN    + " TEXT, " +
             TimeCreated     + " TEXT, " +
             "PRIMARY KEY (" + SharedSchema.CN + "));";
 
@@ -208,6 +216,7 @@ public class TwoTrailsSchema {
         public static final String SelectItems =
             SharedSchema.CN + ", " +
             Name + ", " +
+            UnitType + ", " +
             Accuracy + ", " +
             Description + ", " +
             Area + ", " +
@@ -215,6 +224,7 @@ public class TwoTrailsSchema {
             PerimeterLine + ", " +
             IncrementBy + ", " +
             PointStartIndex + ", " +
+            ParentUnitCN + ", " +
             TimeCreated;
     }
     //endregion
@@ -470,6 +480,7 @@ public class TwoTrailsSchema {
 
         public static final String UserName = "UserName";
         public static final String DeviceName = "DeviceName";
+        public static final String AppVersion = "AppVersion";
         public static final String ActivityDate = "ActivityDate";
         public static final String DataActivity = "ActivityType";
         public static final String ActivityNotes = "ActivityNotes";
@@ -478,6 +489,7 @@ public class TwoTrailsSchema {
             "CREATE TABLE " + TableName + " (" +
             UserName + " TEXT, " +
             DeviceName + " TEXT, " +
+            AppVersion + " TEXT, " +
             ActivityDate + " TEXT, " +
             DataActivity + " INTEGER, " +
             ActivityNotes + " TEXT" +
@@ -487,6 +499,7 @@ public class TwoTrailsSchema {
         public static final String SelectItems =
             UserName + ", " +
             DeviceName + ", " +
+            AppVersion + ", " +
             ActivityDate + ", " +
             DataActivity + ", " +
             ActivityNotes;
@@ -538,6 +551,15 @@ public class TwoTrailsSchema {
     //endregion
 
 
-    //public static final String UPGRADE_OSV_2_0_3 = "UPDATE " + TtNmeaSchema.TableName + " SET " + TtNmeaSchema.Fix + " = " + TtNmeaSchema.Fix + " + 1; " +
-    public static final String UPGRADE_OSV_2_0_3 =         "UPDATE " + ProjectInfoSchema.TableName + " SET " + ProjectInfoSchema.TtDbSchemaVersion + " = '" + OSV_2_0_3 + "';";
+    public static final String[] UPGRADE_DAL_2_0_3 = new String[] {
+            "UPDATE " + TtNmeaSchema.TableName + " SET " + TtNmeaSchema.Fix + " = " + TtNmeaSchema.Fix + " + 1; ",
+            "UPDATE " + ProjectInfoSchema.TableName + " SET " + ProjectInfoSchema.TtDbSchemaVersion + " = '" + DAL_2_0_3 + "';"
+    };
+
+    public static final String[] UPGRADE_DAL_2_1_0 = new String[] {
+            "ALTER TABLE " + PolygonSchema.TableName +" ADD COLUMN " + PolygonSchema.ParentUnitCN + " TEXT; ",
+            "ALTER TABLE " + PolygonSchema.TableName + " ADD COLUMN " + PolygonSchema.UnitType + " INTEGER; ",
+            "ALTER TABLE " + ActivitySchema.TableName + " ADD COLUMN " + ActivitySchema.AppVersion + " TEXT; ",
+            "UPDATE " + ProjectInfoSchema.TableName + " SET " + ProjectInfoSchema.TtDbSchemaVersion + " = '" + DAL_2_1_0 + "';"
+    };
 }

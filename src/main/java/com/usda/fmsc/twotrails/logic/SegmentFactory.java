@@ -15,38 +15,26 @@ import java.util.HashMap;
 import java.util.Hashtable;
 
 public class SegmentFactory {
-    private ArrayList<TtPoint> points;
-    private HashMap<String, TtPolygon> polys;
+    private final ArrayList<TtPoint> points;
+    private final HashMap<String, TtPolygon> polys;
 
     public SegmentFactory(DataAccessLayer dal) {
         HashMap<String, TtMetadata> meta = dal.getMetadataMap();
         polys = dal.getPolygonsMap();
 
-        ArrayList<TtPoint> tmpWayPoints = new ArrayList<>();
         Hashtable<String, TtPoint> tmpPoints = new Hashtable<>();
 
         for (TtPoint p : dal.getPoints()) {
-            if(p.getOp() == OpType.WayPoint) {
-                p.calculatePoint(polys.get(p.getPolyCN()));
-                p.adjustPoint();
-                tmpWayPoints.add(p);
-            } else {
-                tmpPoints.put(p.getCN(), p);
+            tmpPoints.put(p.getCN(), p);
 
-                if(p.isTravType()) {
-                    ((TravPoint)p).setDeclination(meta.get(p.getMetadataCN()).getMagDec());
-                }
+            if (p.isTravType()) {
+                ((TravPoint)p).setDeclination(meta.get(p.getMetadataCN()).getMagDec());
             }
         }
 
-        if (tmpWayPoints.size() > 0) {
-            dal.updatePoints(tmpWayPoints, tmpWayPoints);
-        }
-
         QuondamPoint qp;
-        for (TtPoint p : tmpPoints.values())
-        {
-            if(p.getOp() == OpType.Quondam) {
+        for (TtPoint p : tmpPoints.values()) {
+            if (p.getOp() == OpType.Quondam) {
                 qp = (QuondamPoint)p;
                 qp.setParentPoint(tmpPoints.get(qp.getParentCN()));
             }
@@ -82,11 +70,9 @@ public class SegmentFactory {
         if (index == points.size())
             points.remove(prev);
 
-        while (index < points.size() && !finished)
-        {
+        while (index < points.size() && !finished) {
             current = points.get(index);
-            if (!currentPolygon.equals(current.getPolyCN()))
-            {
+            if (!currentPolygon.equals(current.getPolyCN())) {
                 finished = true;
                 points.remove(prev);
                 continue;
@@ -104,8 +90,7 @@ public class SegmentFactory {
                 tmpOpType = tmpQp.getOp();
             }
 
-            switch (tmpOpType)
-            {
+            switch (tmpOpType) {
                 case GPS:
                 case WayPoint:
                 case Walk:
@@ -169,9 +154,6 @@ public class SegmentFactory {
                     }
                     break;
                 }
-//                case Quondam: {
-//                    break;
-//                }
             }
         }
 

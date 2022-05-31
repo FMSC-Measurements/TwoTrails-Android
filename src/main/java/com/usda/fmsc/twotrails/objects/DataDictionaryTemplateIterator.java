@@ -6,7 +6,7 @@ import java.util.Iterator;
 public class DataDictionaryTemplateIterator implements Iterator<DataDictionaryField> {
     private int position = 0;
 
-    private ArrayList<DataDictionaryField> fields = new ArrayList<>();
+    private final ArrayList<DataDictionaryField> fields = new ArrayList<>();
 
     public DataDictionaryTemplateIterator(DataDictionaryTemplate template) {
         fields.addAll(template.getFields().values());

@@ -1,7 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.usda.fmsc.twotrails.activities.Take5ActivityOld">
+    tools:context=".activities.Take5Activity">
 
     <item
         android:id="@+id/take5MenuMode"
@@ -18,57 +18,66 @@
         android:visible="true"/>
 
     <item
-        android:id="@+id/take5MenuToBottom"
-        android:title="@string/menu_take5_goto_bottom"
-        app:showAsAction="never"
-        android:visible="true"/>
-    <!--android:icon="@drawable/ic_file_download_white_36dp"-->
+        android:id="@+id/overflowMenu"
+        android:icon="@drawable/ic_action_overflow_white"
+        android:title=""
+        app:showAsAction="always">
 
-    <item
-        android:id="@+id/mmMenuSelectMap"
-        android:title="@string/menu_map_select_type"
-        app:showAsAction="never"/>
+        <menu>
+            <item
+                android:id="@+id/take5MenuToBottom"
+                android:title="@string/menu_take5_goto_bottom"
+                app:showAsAction="never"
+                android:visible="true"/>
+            <!--android:icon="@drawable/ic_file_download_white_36dp"-->
 
-    <item
-        android:id="@+id/mmMenuMapSettings"
-        android:title="@string/menu_map_settings"
-        app:showAsAction="never"/>
+            <item
+                android:id="@+id/mmMenuSelectMap"
+                android:title="@string/menu_map_select_type"
+                app:showAsAction="never"/>
 
-    <item
-        android:id="@+id/take5MenuGps"
-        android:title="@string/menu_x_gps_settings"
-        app:showAsAction="never"
-        android:visible="true"/>
+            <item
+                android:id="@+id/mmMenuMapSettings"
+                android:title="@string/menu_map_settings"
+                app:showAsAction="never"/>
 
-    <item
-        android:id="@+id/take5MenuGpsInfoToggle"
-        android:title="@string/menu_x_hide_gps_info"
-        app:showAsAction="never"
-        android:visible="true"/>
+            <item
+                android:id="@+id/take5MenuGps"
+                android:title="@string/menu_x_gps_settings"
+                app:showAsAction="never"
+                android:visible="true"/>
 
-    <item
-        android:id="@+id/take5MenuCenterPositionToggle"
-        android:title="@string/menu_x_center_position"
-        app:showAsAction="never"
-        android:visible="true"
-        android:checkable="true"
-        android:checked="false"/>
+            <item
+                android:id="@+id/take5MenuGpsInfoToggle"
+                android:title="@string/menu_x_hide_gps_info"
+                app:showAsAction="never"
+                android:visible="true"/>
 
-    <item
-        android:id="@+id/take5MenuTake5Settings"
-        android:title="@string/menu_take5_settings"
-        app:showAsAction="never"
-        android:visible="true"/>
+            <item
+                android:id="@+id/take5MenuCenterPositionToggle"
+                android:title="@string/menu_x_center_position"
+                app:showAsAction="never"
+                android:visible="true"
+                android:checkable="true"
+                android:checked="false"/>
 
-    <item
-        android:id="@+id/take5MenuRenameGroup"
-        android:title="@string/menu_rename_group"
-        app:showAsAction="never"/>
+            <item
+                android:id="@+id/take5MenuTake5Settings"
+                android:title="@string/menu_take5_settings"
+                app:showAsAction="never"
+                android:visible="true"/>
 
-    <item
-        android:id="@+id/mapMenuZoomToPoly"
-        android:title="@string/menu_map_zoom_to_poly"
-        app:showAsAction="never"
-        android:visible="false"/>
+            <item
+                android:id="@+id/take5MenuRenameGroup"
+                android:title="@string/menu_rename_group"
+                app:showAsAction="never"/>
 
+            <item
+                android:id="@+id/mapMenuZoomToPoly"
+                android:title="@string/menu_map_zoom_to_poly"
+                app:showAsAction="never"
+                android:visible="false"/>
+
+        </menu>
+    </item>
 </menu>

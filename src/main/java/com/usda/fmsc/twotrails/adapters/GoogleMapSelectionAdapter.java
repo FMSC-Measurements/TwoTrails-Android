@@ -19,14 +19,14 @@ import java.util.Arrays;
 import java.util.List;
 
 public class GoogleMapSelectionAdapter extends BaseAdapter {
-    private Context context;
+    private final Context context;
 
-    private LayoutInflater inflater;
-    private IGoogleMapAdapterListener listener;
+    private final LayoutInflater inflater;
+    private final IGoogleMapAdapterListener listener;
 
-    private Drawable dMapOffline;
+    private final Drawable dMapOffline;
 
-    private List<GoogleMapType> mapTypes = Arrays.asList(GoogleMapType.values());
+    private final List<GoogleMapType> mapTypes = Arrays.asList(GoogleMapType.values());
     private View selectedView;
     private int selectedIndex;
 
@@ -64,7 +64,7 @@ public class GoogleMapSelectionAdapter extends BaseAdapter {
         MapViewHolder holder;
 
         if (convertView == null) {
-            convertView = inflater.inflate(R.layout.content_map_header, null);
+            convertView = inflater.inflate(R.layout.content_map_header, parent, false);
 
             holder = new MapViewHolder(convertView);
             convertView.setTag(holder);
@@ -133,10 +133,10 @@ public class GoogleMapSelectionAdapter extends BaseAdapter {
         selectedIndex = -1;
     }
 
-    private class MapViewHolder {
-        TextView tvName;
-        PopupMenuButton ofmbMenu;
-        ImageView ivMhIcon;
+    private static class MapViewHolder {
+        public final TextView tvName;
+        public final PopupMenuButton ofmbMenu;
+        public final ImageView ivMhIcon;
 
         private MapViewHolder(View view) {
             tvName = view.findViewById(R.id.mhName);

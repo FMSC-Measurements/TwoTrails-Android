@@ -1,6 +1,8 @@
 package com.usda.fmsc.twotrails.logic;
 
 
+import androidx.annotation.NonNull;
+
 import com.usda.fmsc.twotrails.objects.points.QuondamPoint;
 import com.usda.fmsc.twotrails.objects.points.SideShotPoint;
 import com.usda.fmsc.twotrails.objects.points.TravPoint;
@@ -14,9 +16,9 @@ import java.util.HashMap;
 import java.util.List;
 
 public class Segment {
-    private List<TtPoint> points;
+    private final List<TtPoint> points = new ArrayList<>();
     private int weight = -1;
-    private HashMap<String, TtPolygon> polys;
+    private final HashMap<String, TtPolygon> polys;
 
     private boolean calculated;
     public boolean isCalculated() { return calculated; }
@@ -47,7 +49,6 @@ public class Segment {
 
     public Segment(HashMap<String, TtPolygon> polys) {
         calculated = true;
-        points = new ArrayList<>();
         this.polys = polys;
     }
 
@@ -82,7 +83,7 @@ public class Segment {
                     try {
                         adjusted = ((SideShotPoint)points.get(1)).adjustPoint(startPoint);
                     } catch (Exception e) {
-                        throw new AdjustingException(AdjustingException.AdjustingError.Sideshot, e.getCause());
+                        throw new AdjustingException(AdjustingException.AdjustingError.SideShot, e.getCause());
                     }
                 }
             } else if (len > 2 && points.get(1).getOp() == OpType.Traverse) {
@@ -248,7 +249,7 @@ public class Segment {
                 break;
             }
             default: {
-                throw new RuntimeException("Sideshots can not come first");
+                throw new RuntimeException("SideShots can not come first");
             }
         }
 
@@ -323,8 +324,9 @@ public class Segment {
     }
 
     @Override
+    @NonNull
     public String toString() {
-        if (points != null && points.size() > 0) {
+        if (points.size() > 0) {
             TtPoint tmpPoint = points.get(0);
 
             if (points.size() == 1)

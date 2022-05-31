@@ -12,8 +12,8 @@ import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.twotrails.R;
 
 public class CheckMarkAnimatedView extends View {
-    private float[] points = new float[6];
-    private Paint paint;
+    private final float[] points = new float[6];
+    private final Paint paint;
 
     private float progress;
 

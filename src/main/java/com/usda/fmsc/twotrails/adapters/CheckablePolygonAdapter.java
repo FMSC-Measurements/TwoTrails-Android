@@ -14,11 +14,12 @@ import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class CheckablePolygonAdapter extends ArrayAdapter<TtPolygon> {
-    private ArrayList<Tuple<TtPolygon, Boolean>> _Polygons;
-    private ArrayList<Integer> _PointInPolygonsCount;
-    private LayoutInflater inflater;
+    private final ArrayList<Tuple<TtPolygon, Boolean>> _Polygons;
+    private final ArrayList<Integer> _PointInPolygonsCount;
+    private final LayoutInflater inflater;
 
     public CheckablePolygonAdapter(Context context, int resource, ArrayList<TtPolygon> polygons, ArrayList<Integer> pointInPolysCounts) {
         super(context, resource);
@@ -50,7 +51,7 @@ public class CheckablePolygonAdapter extends ArrayAdapter<TtPolygon> {
         }
 
         holder.checkBox.setText(polygon.Item1.getName());
-        holder.textView.setText(String.format("(%d)", _PointInPolygonsCount.get(position)));
+        holder.textView.setText(String.format(Locale.getDefault(), "(%d)", _PointInPolygonsCount.get(position)));
 
         holder.checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> polygon.Item2 = isChecked);
 
@@ -70,8 +71,8 @@ public class CheckablePolygonAdapter extends ArrayAdapter<TtPolygon> {
 
 
     private static class ViewHolder {
-        private CheckBox checkBox;
-        private TextView textView;
+        private final CheckBox checkBox;
+        private final TextView textView;
 
         private ViewHolder(View view) {
             checkBox = view.findViewById(R.id.checkBox1);

@@ -2,16 +2,14 @@ package com.usda.fmsc.twotrails.logic;
 
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 public class SegmentList {
-    private List<Segment> list;
+    private final List<Segment> list = new ArrayList<>();
     private boolean sorted;
 
     public SegmentList() {
-        list = new ArrayList<>();
         sorted = false;
     }
 
@@ -25,7 +23,7 @@ public class SegmentList {
             return null;
 
         if (!sorted && list.size() != 1) {
-            Collections.sort(list, segmentComparator);
+            list.sort(segmentComparator);
 
             sorted = true;
         }
@@ -41,7 +39,7 @@ public class SegmentList {
     }
 
 
-    private static Comparator<Segment> segmentComparator = (a, b) -> {
+    private final static Comparator<Segment> segmentComparator = (a, b) -> {
         if (a == null) {
             if (b == null)
                 return 0;

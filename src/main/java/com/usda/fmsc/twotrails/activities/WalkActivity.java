@@ -31,9 +31,7 @@ import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.logic.PointNamer;
 import com.usda.fmsc.twotrails.objects.FilterOptions;
 import com.usda.fmsc.twotrails.objects.TtGroup;
-import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
-import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.objects.points.WalkPoint;
 import com.usda.fmsc.twotrails.units.MapTracking;
 import com.usda.fmsc.twotrails.units.OpType;
@@ -67,7 +65,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
     private boolean updated, onBnd = true, walking, useRing, useVib, menuCreated, mapViewMode;
     private long lastPointCreationTime = 0;
 
-    private FilterOptions options = new FilterOptions();
+    private final FilterOptions options = new FilterOptions();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -178,8 +176,8 @@ public class WalkActivity extends AcquireGpsMapActivity {
     }
 
     @Override
-    protected void getSettings() {
-        super.getSettings();
+    protected void updateActivitySettings() {
+        super.updateActivitySettings();
 
         options.Fix = getTtAppCtx().getDeviceSettings().getWalkFilterFix();
         options.FixType = getTtAppCtx().getDeviceSettings().getWalkFilterFixType();
@@ -194,7 +192,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenuEx(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_walk, menu);
 
         miMode = menu.findItem(R.id.walkMenuMode);
@@ -206,70 +204,51 @@ public class WalkActivity extends AcquireGpsMapActivity {
 
         menuCreated = true;
 
-        return super.onCreateOptionsMenu(menu);
+        return super.onCreateOptionsMenuEx(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home: {
-                if (isLogging()) {
+        int itemId = item.getItemId();
+        if (itemId == android.R.id.home) {
+            if (isLogging()) {
 
-                    AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-                    dialog.setMessage("The you are currently acquiring a point. Do you want to exit anyway?");
+                AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+                dialog.setMessage("The you are currently acquiring a point. Do you want to exit anyway?");
 
-                    dialog.setPositiveButton(R.string.str_yes, (dialog1, which) -> {
-                        stopLogging();
-                        finish();
-                    })
-                    .setNeutralButton(R.string.str_cancel, null);
-
-                    dialog.show();
-                } else {
+                dialog.setPositiveButton(R.string.str_yes, (dialog1, which) -> {
+                    stopLogging();
                     finish();
-                }
-                break;
+                })
+                        .setNeutralButton(R.string.str_cancel, null);
+
+                dialog.show();
+            } else {
+                finish();
             }
-            case R.id.walkMenuGps: {
-                startActivityForResult(new Intent(this, SettingsActivity.class)
-                                .putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.GPS_SETTINGS_PAGE),
-                        Consts.Codes.Activites.SETTINGS);
-                break;
-            }
-            case R.id.walkMenuWalkSettings: {
-                startActivityForResult(new Intent(this, SettingsActivity.class)
-                                .putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.POINT_WALK_SETTINGS_PAGE),
-                        Consts.Codes.Activites.SETTINGS);
-                break;
-            }
-            case R.id.walkMenuRenameGroup: {
-                updateGroupName();
-                break;
-            }
-            case R.id.walkMenuMode: {
-                mapViewMode = !mapViewMode;
-                setMapGesturesEnabled(mapViewMode);
-                setMapFollowMyPosition(!mapViewMode);
-                txtCmt.setEnabled(!mapViewMode);
-                walkCardView.setEnabled(!mapViewMode && _CurrentPoint != null);
-                walkCardView.setVisibility(mapViewMode || _CurrentPoint == null ? View.GONE : View.VISIBLE);
-                walkCardView.setAlpha(mapViewMode || _CurrentPoint == null ? 0f : 1f);
-                miMode.setIcon(mapViewMode ? R.drawable.ic_add_location_white_36dp : R.drawable.ic_map_white_36dp);
-                break;
-            }
+        } else if (itemId == R.id.walkMenuGps) {
+            openSettings(SettingsActivity.GPS_SETTINGS_PAGE);
+        } else if (itemId == R.id.walkMenuWalkSettings) {
+            openSettings(SettingsActivity.POINT_WALK_SETTINGS_PAGE);
+        } else if (itemId == R.id.walkMenuRenameGroup) {
+            updateGroupName();
+        } else if (itemId == R.id.walkMenuMode) {
+            mapViewMode = !mapViewMode;
+            setMapGesturesEnabled(mapViewMode);
+            setMapFollowMyPosition(!mapViewMode);
+            txtCmt.setEnabled(!mapViewMode);
+            walkCardView.setEnabled(!mapViewMode && _CurrentPoint != null);
+            walkCardView.setVisibility(mapViewMode || _CurrentPoint == null ? View.GONE : View.VISIBLE);
+            walkCardView.setAlpha(mapViewMode || _CurrentPoint == null ? 0f : 1f);
+            miMode.setIcon(mapViewMode ? R.drawable.ic_add_location_white_36dp : R.drawable.ic_map_white_36dp);
         }
 
         return super.onOptionsItemSelected(item);
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == Consts.Codes.Activites.SETTINGS) {
-            getTtAppCtx().getGps().startGps();
-            getSettings();
-        }
-
-        super.onActivityResult(requestCode, resultCode, data);
+    protected void onAppSettingsUpdated() {
+        updateActivitySettings();
     }
 
     @Override
@@ -473,7 +452,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
 
         getTtAppCtx().getTtNotifyManager().showPointAquired();
 
-        addPosition(_CurrentPoint, getLastPosition() != null);
+        addPosition(_CurrentPoint, false, getLastPosition() != null);
     }
 
     private void setStartWalkingDrawable(boolean startAquring) {

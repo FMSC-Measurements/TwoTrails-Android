@@ -4,14 +4,25 @@
     tools:context=".activities.TableViewActivity">
 
     <item android:id="@+id/teMenuFilter"
-          android:title="@string/menu_table_edit_filter"
-          android:icon="@drawable/ic_view_list_white_36dp"
-          app:showAsAction="always" />
+        android:title="@string/menu_table_edit_filter"
+        android:icon="@drawable/ic_view_list_white_36dp"
+        app:showAsAction="always" />
 
 
     <item android:id="@+id/teMenuColumns"
-          android:title="@string/menu_table_edit_columns"
-          android:icon="@drawable/ic_view_column_white_36dp"
-          app:showAsAction="always" />
+        android:title="@string/menu_table_edit_columns"
+        android:icon="@drawable/ic_view_column_white_36dp"
+        app:showAsAction="always" />
 
+    <item
+        android:id="@+id/overflowMenu"
+        android:icon="@drawable/ic_action_overflow_white"
+        android:title=""
+        app:showAsAction="always"
+        android:visible="false">
+
+        <menu>
+
+        </menu>
+    </item>
 </menu>

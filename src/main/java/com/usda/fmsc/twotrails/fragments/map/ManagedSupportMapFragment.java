@@ -1,8 +1,11 @@
 package com.usda.fmsc.twotrails.fragments.map;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
+
+import androidx.annotation.NonNull;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -21,14 +24,14 @@ import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
-import com.usda.fmsc.twotrails.gps.GpsService;
-import com.usda.fmsc.twotrails.objects.map.GoogleMapsPolygonGrahpic;
+import com.usda.fmsc.twotrails.objects.map.GoogleMapsLineGraphic;
+import com.usda.fmsc.twotrails.objects.map.GoogleMapsPolygonGraphic;
 import com.usda.fmsc.twotrails.objects.map.GoogleMapsTrailGraphic;
 import com.usda.fmsc.twotrails.objects.map.IMarkerDataGraphic;
+import com.usda.fmsc.twotrails.objects.map.LineGraphicManager;
 import com.usda.fmsc.twotrails.objects.map.PolygonDrawOptions;
 import com.usda.fmsc.twotrails.objects.map.PolygonGraphicManager;
 import com.usda.fmsc.twotrails.objects.map.TrailGraphicManager;
-import com.usda.fmsc.twotrails.units.GoogleMapType;
 import com.usda.fmsc.twotrails.units.MapType;
 
 import java.util.ArrayDeque;
@@ -40,25 +43,52 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
         OnMapReadyCallback, GoogleMap.OnMapLoadedCallback, GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener,
         GoogleMap.OnCameraMoveStartedListener, GoogleMap.OnCameraMoveListener, GoogleMap.OnCameraIdleListener {
 
+    private TwoTrailsApp _TtAppCtx;
+
     private MultiMapListener mmlistener;
 
     private GoogleMap map;
 
     private MapOptions startUpMapOptions;
 
-    private ArrayList<IMarkerDataGraphic> _MarkerDataGraphics = new ArrayList<>();
-    private HashMap<String, GoogleMapsPolygonGrahpic> polygonGraphics = new HashMap<>();
-    private HashMap<String, GoogleMapsTrailGraphic> trailGraphics = new HashMap<>();
+    private final ArrayList<IMarkerDataGraphic> _MarkerDataGraphics = new ArrayList<>();
+    private final HashMap<String, GoogleMapsPolygonGraphic> polygonGraphics = new HashMap<>();
+    private final HashMap<String, GoogleMapsTrailGraphic> trailGraphics = new HashMap<>();
+    private final HashMap<String, GoogleMapsLineGraphic> lineGraphics = new HashMap<>();
 
     private Marker currentMarker;
 
-    private int fragWidth, fragHeight;
+    private final Queue<CameraUpdate> cameraQueue = new ArrayDeque<>();
 
-    private Queue<CameraUpdate> cameraQueue = new ArrayDeque<>();
+    private boolean isMoving, cameraQueueEnabled = false, attachGpsServiceOnActivityAttached = false;
 
-    private boolean isMoving, cameraQueueEnabled = false;
+    private Runnable attachGpsService = new Runnable() {
+        @Override
+        public void run() {
+            if (getTtAppCtx().getDeviceSettings().isGpsConfigured() && getTtAppCtx().getDeviceSettings().getGpsExternal()) {
+                if (getTtAppCtx().isGpsServiceStarted()) {
+                    map.setLocationSource(getTtAppCtx().getGps().getService());
+                } else {
+                    getTtAppCtx().startGpsService();
+
+                    new Thread(() -> {
+                        try {
+                            Thread.sleep(2000);
+
+                            if (getTtAppCtx().isGpsServiceStarted()) {
+                                map.setLocationSource(getTtAppCtx().getGps().getService());
+                            }
+                        } catch (InterruptedException e) {
+                            //
+                        }
+                    }).start();
+                }
+            }
+        }
+    };
 
 
+    @NonNull
     public static ManagedSupportMapFragment newInstance() {
         return new ManagedSupportMapFragment();
     }
@@ -93,13 +123,50 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
     }
 
     @Override
-    public void onViewCreated(final View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
 
-        view.getViewTreeObserver().addOnGlobalLayoutListener(() -> {
-            fragWidth = view.getWidth();
-            fragHeight = view.getHeight();
-        });
+        if (_TtAppCtx == null) {
+            Context ctx = context.getApplicationContext();
+            if (ctx != null) {
+                _TtAppCtx = (TwoTrailsApp)ctx;
+            } else {
+                throw new RuntimeException("Null app context");
+            }
+        }
+
+        if (context instanceof MultiMapListener) {
+            mmlistener = (MultiMapListener) context;
+        } else {
+            throw new RuntimeException(context + " must implement MultiMapListener");
+        }
+
+        if (attachGpsServiceOnActivityAttached) {
+            attachGpsService.run();
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mmlistener = null;
+    }
+
+    protected TwoTrailsApp getTtAppCtx() {
+        if (_TtAppCtx == null) {
+            Activity act =  getActivity();
+
+            if (act != null) {
+                Context ctx = act.getApplicationContext();
+                if (ctx != null) {
+                    _TtAppCtx = (TwoTrailsApp)ctx;
+                } else {
+                    throw new RuntimeException("Null app context");
+                }
+            }
+        }
+
+        return _TtAppCtx;
     }
 
 
@@ -115,17 +182,15 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
     }
 
     @Override
-    public void onMapReady(GoogleMap googleMap) {
+    public void onMapReady(@NonNull GoogleMap googleMap) {
         map = googleMap;
 
         //use external GPS if available
-        TwoTrailsApp TtAppCtx = TwoTrailsApp.getInstance(getActivity());
 
-        if (TtAppCtx.getDeviceSettings().isGpsConfigured() && TtAppCtx.getDeviceSettings().getGpsExternal()) {
-            GpsService.GpsBinder binder = TtAppCtx.getGps();
-            GpsService service = binder.getService();
-
-            map.setLocationSource(service);
+        if (getTtAppCtx() != null) {
+            attachGpsService.run();
+        } else {
+            attachGpsServiceOnActivityAttached = true;
         }
 
         map.setOnMapLoadedCallback(this);
@@ -143,38 +208,6 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
         uiSettings.setMyLocationButtonEnabled(false);
 
         setMapPadding(0, (int) (getResources().getDimension(R.dimen.toolbar_height)), 0, 0);
-
-//        if (startUpMapOptions != null && startUpMapOptions.getMapId() != GoogleMapType.MAP_TYPE_NONE.getValue()) {
-//            try {
-//                if (startUpMapOptions.hasExtents()) {
-//                    map.moveCamera(CameraUpdateFactory.newLatLngBounds(
-//                            new LatLngBounds(
-//                                    new LatLng(startUpMapOptions.getSouth(), startUpMapOptions.getWest()),
-//                                    new LatLng(startUpMapOptions.getNorth(), startUpMapOptions.getEast())
-//                            ),
-//                            //fragWidth - startUpMapOptions.getPadding() / 2,
-//                            //fragHeight - startUpMapOptions.getPadding() / 2,
-//                            startUpMapOptions.getPadding()
-//                    ));
-//                } else if (startUpMapOptions.hasLocation()) {
-//                    map.moveCamera(CameraUpdateFactory.newLatLngZoom(
-//                            new LatLng(
-//                                    startUpMapOptions.getLatitude(),
-//                                    startUpMapOptions.getLongitide()
-//                            ),
-//                            startUpMapOptions.getZoomLevel() != null ? startUpMapOptions.getZoomLevel() : Consts.Location.ZOOM_GENERAL));
-//                } else {
-//                    map.moveCamera(CameraUpdateFactory.newLatLngBounds(
-//                            Consts.Location.GoogleMaps.USA_BOUNDS,
-//                            fragWidth,
-//                            fragHeight,
-//                            Consts.Location.PADDING
-//                    ));
-//                }
-//            } catch (Exception e) {
-//                TtAppCtx.getReport().writeError("ManagedSupportMapFragment:onMapReady", e.getMessage(), e.getStackTrace());
-//            }
-//        }
 
         if (mmlistener != null) {
             mmlistener.onMapReady();
@@ -238,10 +271,12 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
             {
                 moveToLocation(CameraUpdateFactory.newLatLng(new LatLng(lat, lon)), animate);
             } catch (Exception ex) {
-                TwoTrailsApp.getInstance(getActivity()).getReport().writeError(ex.getMessage(), "ManagedSupportMapFragment:moveToLocation(f,f,b)", ex.getStackTrace());
+                if (getTtAppCtx() != null) {
+                    getTtAppCtx().getReport().writeError(ex.getMessage(), "ManagedSupportMapFragment:moveToLocation(f,f,b)", ex.getStackTrace());
+                }
             }
-        } else {
-            TwoTrailsApp.getInstance(getActivity()).getReport().writeWarn("Map not ready", "ManagedSupportMapFragment:moveToLocation(f,f,b)");
+        } else if (getTtAppCtx() != null) {
+            getTtAppCtx().getReport().writeWarn("Map not ready", "ManagedSupportMapFragment:moveToLocation(f,f,b)");
         }
     }
 
@@ -254,10 +289,12 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
                         zoomLevel
                 ), animate);
             } catch (Exception ex) {
-                TwoTrailsApp.getInstance(getActivity()).getReport().writeError(ex.getMessage(), "ManagedSupportMapFragment:moveToLocation(f,f,f,b)", ex.getStackTrace());
+                if (getTtAppCtx() != null) {
+                    getTtAppCtx().getReport().writeError(ex.getMessage(), "ManagedSupportMapFragment:moveToLocation(f,f,f,b)", ex.getStackTrace());
+                }
             }
-        } else {
-            TwoTrailsApp.getInstance(getActivity()).getReport().writeWarn("Map not ready", "ManagedSupportMapFragment:moveToLocation(f,f,f,b)");
+        } else if (getTtAppCtx() != null) {
+            getTtAppCtx().getReport().writeWarn("Map not ready", "ManagedSupportMapFragment:moveToLocation(f,f,f,b)");
         }
     }
 
@@ -273,10 +310,12 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
                         padding
                 ), animate);
             } catch (Exception ex) {
-                TwoTrailsApp.getInstance(getActivity()).getReport().writeError(ex.getMessage(), "ManagedSupportMapFragment:moveToLocation(e,i,b)", ex.getStackTrace());
+                if (getTtAppCtx() != null) {
+                    getTtAppCtx().getReport().writeError(ex.getMessage(), "ManagedSupportMapFragment:moveToLocation(e,i,b)", ex.getStackTrace());
+                }
             }
-        } else {
-            TwoTrailsApp.getInstance(getActivity()).getReport().writeWarn("Map not ready", "ManagedSupportMapFragment:moveToLocation(e,i,b)");
+        } else if (getTtAppCtx() != null) {
+            getTtAppCtx().getReport().writeWarn("Map not ready", "ManagedSupportMapFragment:moveToLocation(e,i,b)");
         }
     }
 
@@ -309,7 +348,7 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
         }
     }
 
-    private GoogleMap.CancelableCallback cancelableCallback = new GoogleMap.CancelableCallback() {
+    private final GoogleMap.CancelableCallback cancelableCallback = new GoogleMap.CancelableCallback() {
         @Override
         public void onFinish() {
             if (cameraQueue.peek() != null) {
@@ -337,7 +376,9 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
                     cu = cameraQueue.poll();
                 }
 
-                map.animateCamera(cu);
+                if (cu != null) {
+                    map.animateCamera(cu);
+                }
             }
         }
     }
@@ -387,23 +428,6 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
         return map.getCameraPosition().zoom;
     }
 
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof MultiMapListener) {
-            mmlistener = (MultiMapListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement MultiMapListener");
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mmlistener = null;
-    }
-
 
     @Override
     public void setLocationEnabled(boolean enabled) {
@@ -436,7 +460,7 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
     @Override
     public void addPolygon(PolygonGraphicManager graphicManager, PolygonDrawOptions drawOptions) {
         if (!polygonGraphics.containsKey(graphicManager.getPolygonCN())) {
-            GoogleMapsPolygonGrahpic gmpg = new GoogleMapsPolygonGrahpic(map);
+            GoogleMapsPolygonGraphic gmpg = new GoogleMapsPolygonGraphic(map);
             polygonGraphics.put(graphicManager.getPolygonCN(), gmpg);
 
             graphicManager.setGraphic(gmpg, drawOptions);
@@ -469,4 +493,19 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
 
     }
 
+    @Override
+    public void addLine(LineGraphicManager graphicManager) {
+        if (!lineGraphics.containsKey(graphicManager.getCN())) {
+            GoogleMapsLineGraphic gmlg = new GoogleMapsLineGraphic(map);
+            lineGraphics.put(graphicManager.getCN(), gmlg);
+
+            graphicManager.setGraphic(gmlg);
+        }
+    }
+
+    //todo removeLine(LineGraphicManager graphicManager)
+    @Override
+    public void removeLine(LineGraphicManager graphicManager) {
+
+    }
 }

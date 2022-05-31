@@ -1,12 +1,9 @@
 package com.usda.fmsc.twotrails.adapters;
 
 import android.app.Activity;
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -17,14 +14,13 @@ import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.units.OpType;
 import com.usda.fmsc.twotrails.utilities.AppUnits;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import com.usda.fmsc.utilities.StringEx;
 
+import java.util.ArrayList;
+import java.util.Locale;
+
 public class PointDetailsAdapter extends SelectableArrayAdapter<TtPoint> {
-    private LayoutInflater inflater;
+    private final LayoutInflater inflater;
     private AppUnits.IconColor iconColor = AppUnits.IconColor.Light;
     private boolean showPolygon = false;
     private boolean showQuondamLinks = false;
@@ -58,21 +54,23 @@ public class PointDetailsAdapter extends SelectableArrayAdapter<TtPoint> {
 
         TtPoint point = getItem(position);
 
-        mViewHolder.image.setImageDrawable(TtUtils.UI.getTtOpDrawable(point.getOp(), iconColor, getContext()));
+        if (point != null) {
+            String text;
 
-        String text;
+            mViewHolder.image.setImageDrawable(TtUtils.UI.getTtOpDrawable(point.getOp(), iconColor, getContext()));
 
-        if (showQuondamLinks && point.getOp() == OpType.Quondam) {
-            QuondamPoint qp = (QuondamPoint)point;
+            if (showQuondamLinks && point.getOp() == OpType.Quondam) {
+                QuondamPoint qp = (QuondamPoint)point;
 
-            text = String.format("%d%s (%d%s)",
-                    point.getPID(), showPolygon ? " - " + point.getPolyName() : StringEx.Empty,
-                    qp.getParentPID(), showPolygon ? " - " + qp.getParentPolyName() : StringEx.Empty);
-        } else {
-            text = String.format("%d%s", point.getPID(), showPolygon ? " - " + point.getPolyName() : StringEx.Empty);
+                text = String.format(Locale.getDefault(), "%d%s (%d%s)",
+                        point.getPID(), showPolygon ? " - " + point.getPolyName() : StringEx.Empty,
+                        qp.getParentPID(), showPolygon ? " - " + qp.getParentPolyName() : StringEx.Empty);
+            } else {
+                text = String.format(Locale.getDefault(), "%d%s", point.getPID(), showPolygon ? " - " + point.getPolyName() : StringEx.Empty);
+            }
+
+            mViewHolder.text.setText(text);
         }
-
-        mViewHolder.text.setText(text);
 
         return convertView;
     }

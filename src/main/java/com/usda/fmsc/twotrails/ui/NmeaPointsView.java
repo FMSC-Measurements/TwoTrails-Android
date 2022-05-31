@@ -30,7 +30,8 @@ public class NmeaPointsView extends View {
     private int xpad = 0, ypad = 0;
     private double shortSideAdjust, axis = 1;
 
-    private float ml = 0, bpad, pointRadius = 15;
+    private float ml = 0, bpad;
+    private final float pointRadius;
 
     private final Paint paintNmea = new Paint(), paintNmeaUsed = new Paint(), paintCenter = new Paint(), paintDist = new Paint();
 

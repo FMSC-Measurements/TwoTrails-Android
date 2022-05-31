@@ -2,15 +2,54 @@ package com.usda.fmsc.twotrails.fragments.settings;
 
 
 import android.os.Bundle;
-import androidx.preference.PreferenceFragmentCompat;
+import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.ActionBar;
+import androidx.preference.Preference;
 
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
+import com.usda.fmsc.twotrails.activities.base.TtCustomToolbarActivity;
+import com.usda.fmsc.twotrails.activities.base.TtActivity;
+import com.usda.fmsc.twotrails.fragments.TtBasePrefFragment;
 import com.usda.fmsc.twotrails.logic.SettingsLogic;
+import com.usda.fmsc.twotrails.utilities.TtUtils;
 
-public class MiscSettingsFragment extends PreferenceFragmentCompat {
+import java.util.Locale;
+
+public class MiscSettingsFragment extends TtBasePrefFragment {
+
+    private final ActivityResultLauncher<String> exportReportFileOnResult = registerForActivityResult(new ActivityResultContracts.CreateDocument(), result -> {
+        if (result != null) {
+            SettingsLogic.exportReport((TtActivity) getActivity(), result);
+        }
+    });
+
+    private final ActivityResultLauncher<String> exportProjectsOnResult = registerForActivityResult(new ActivityResultContracts.CreateDocument(), result -> {
+        if (result != null) {
+            if (TtUtils.exportProjects(getTtAppCtx(), result)) {
+                Toast.makeText(getActivity(), "All Projects Exported.", Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(getActivity(), "Error exporting all projects.", Toast.LENGTH_LONG).show();
+            }
+        }
+    });
+
+    private final ActivityResultLauncher<String> dataDumpOnResult = registerForActivityResult(new ActivityResultContracts.CreateDocument(), result -> {
+        if (result != null) {
+            Toast.makeText(getActivity(), "Dumping.. This could take a while.", Toast.LENGTH_LONG).show();
+
+//            new Thread(() -> {
+                if (TtUtils.dataDump(getTtAppCtx(), result)) {
+                    getTtAppCtx().runOnCurrentUIThread(() -> Toast.makeText(getActivity(), "App Data Dumped.", Toast.LENGTH_LONG).show());
+                } else {
+                    getTtAppCtx().runOnCurrentUIThread(() -> Toast.makeText(getActivity(), "Error dumping app data.", Toast.LENGTH_LONG).show());
+                }
+//            }).start();
+        }
+    });
+
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -18,33 +57,64 @@ public class MiscSettingsFragment extends PreferenceFragmentCompat {
 
         setHasOptionsMenu(true);
 
-        findPreference(getString(R.string.set_RESET)).setOnPreferenceClickListener(preference -> {
-            SettingsLogic.reset(getActivity());
-            return false;
-        });
+        Preference pref = findPreference(getString(R.string.set_RESET));
+        if (pref != null) {
+            pref.setOnPreferenceClickListener(preference -> {
+                SettingsLogic.reset((TtActivity) getActivity());
+                return false;
+            });
+        }
 
-        findPreference(getString(R.string.set_CLEAR_LOG)).setOnPreferenceClickListener(preference -> {
-            SettingsLogic.clearLog(getActivity());
-            return false;
-        });
+        pref = findPreference(getString(R.string.set_CLEAR_LOG));
+        if (pref != null) {
+            pref.setOnPreferenceClickListener(preference -> {
+                SettingsLogic.clearLog(getTtAppCtx());
+                return false;
+            });
+        }
 
-        findPreference(getString(R.string.set_EXPORT_REPORT)).setOnPreferenceClickListener(preference -> {
-            SettingsLogic.exportReport(getActivity());
-            return false;
-        });
+        pref = findPreference(getString(R.string.set_EXPORT_REPORT));
+        if (pref != null) {
+            pref.setOnPreferenceClickListener(preference -> {
+                exportReportFileOnResult.launch(String.format(Locale.getDefault(), "TwoTrailsReport_%s.zip", TtUtils.Date.nowToString()));
+                return false;
+            });
+        }
 
-        findPreference(getString(R.string.set_CODE)).setOnPreferenceClickListener(preference -> {
-            SettingsLogic.enterCode(getActivity());
-            return false;
-        });
+        pref = findPreference(getString(R.string.set_CODE));
+        if (pref != null) {
+            pref.setOnPreferenceClickListener(preference -> {
+                SettingsLogic.enterCode(getTtAppCtx());
+                return false;
+            });
+        }
 
-        ActionBar actionBar = ((CustomToolbarActivity)getActivity()).getSupportActionBar();
+        pref = findPreference(getString(R.string.set_EXPORT_PROJECTS));
+        if (pref != null) {
+            pref.setOnPreferenceClickListener(preference -> {
+                exportProjectsOnResult.launch(String.format(Locale.getDefault(), "TwoTrailsProjects_%s.zip", TtUtils.Date.nowToString()));
+                return false;
+            });
+        }
 
-        if (actionBar != null) {
-            actionBar.setHomeButtonEnabled(true);
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setDisplayShowTitleEnabled(true);
-            actionBar.setTitle("Other Settings");
+        pref = findPreference(getString(R.string.set_APP_DATA_DUMP));
+        if (pref != null) {
+            pref.setOnPreferenceClickListener(preference -> {
+                    dataDumpOnResult.launch(String.format(Locale.getDefault(), "TwoTrailsDataDump_%s.zip", TtUtils.Date.nowToString()));
+                return false;
+            });
+        }
+
+        TtCustomToolbarActivity activity = (TtCustomToolbarActivity)getActivity();
+        if (activity != null) {
+            ActionBar actionBar = activity.getSupportActionBar();
+
+            if (actionBar != null) {
+                actionBar.setHomeButtonEnabled(true);
+                actionBar.setDisplayHomeAsUpEnabled(true);
+                actionBar.setDisplayShowTitleEnabled(true);
+                actionBar.setTitle("Other Settings");
+            }
         }
     }
 }

@@ -5,28 +5,33 @@ import com.usda.fmsc.utilities.StringEx;
 import org.joda.time.DateTime;
 
 public class TtUserAction {
-    private String UserName;
-    private String DeviceName;
+    private final String UserName;
+    private final String DeviceName;
+    private final DataActionType Action;
+    private final String AppVersion;
     private DateTime Date;
-    private DataActionType Action;
     private String Notes;
 
-    public TtUserAction(String userName, String deviceName) {
-        this(userName, deviceName, DateTime.now(), new DataActionType(), StringEx.Empty);
+    public TtUserAction(String userName, String deviceName, String appVersion) {
+        this(userName, deviceName, appVersion, DateTime.now(), new DataActionType(), StringEx.Empty);
     }
 
-    public TtUserAction(String userName, String deviceName, DateTime date, DataActionType action, String notes) {
+    public TtUserAction(String userName, String deviceName, String appVersion, DateTime date, DataActionType action, String notes) {
         if (StringEx.isEmpty(userName))
             throw new RuntimeException("Invalid UserName");
 
         if (StringEx.isEmpty(deviceName))
             throw new RuntimeException("Invalid Device");
 
+        if (StringEx.isEmpty(appVersion))
+            throw new RuntimeException("Invalid AppVersion");
+
         UserName = userName;
         DeviceName = deviceName;
         Date = date;
         Action = action;
         Notes = notes;
+        AppVersion = appVersion;
     }
 
     public String getUserName() {
@@ -49,6 +54,10 @@ public class TtUserAction {
         return Notes;
     }
 
+    public String getAppVersion() {
+        return AppVersion;
+    }
+
     public void updateAction(int action) {
         Action.setFlag(action);
         Date = DateTime.now();
@@ -60,6 +69,6 @@ public class TtUserAction {
         if (Notes == null)
             Notes = notes;
         else
-            Notes = StringEx.format("%s|%s", Notes, notes);
+            Notes = String.format("%s | %s", Notes, notes);
     }
 }

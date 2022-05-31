@@ -1,22 +1,21 @@
 package com.usda.fmsc.twotrails.dialogs;
 
 import android.app.Dialog;
-import android.os.Build;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import com.google.android.material.tabs.TabLayout;
-import androidx.fragment.app.DialogFragment;
-import androidx.viewpager.widget.PagerAdapter;
-import androidx.viewpager.widget.ViewPager;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ListView;
 
-import com.usda.fmsc.android.AndroidUtils;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.DialogFragment;
+import androidx.viewpager.widget.PagerAdapter;
+import androidx.viewpager.widget.ViewPager;
+
+import com.google.android.material.tabs.TabLayout;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.adapters.ArcGisMapSelectionAdapter;
 import com.usda.fmsc.twotrails.adapters.GoogleMapSelectionAdapter;
@@ -89,9 +88,9 @@ public class SelectMapTypeDialog extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        AlertDialog.Builder dialog = new AlertDialog.Builder(getContext());
+        AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity());
 
-        inflater = LayoutInflater.from(getContext());
+        inflater = LayoutInflater.from(getActivity());
 
         FrameLayout fl = new FrameLayout(getActivity());
 
@@ -165,18 +164,20 @@ public class SelectMapTypeDialog extends DialogFragment {
             ArcGisMapSelectionAdapter.IArcGisMapAdapterListener,
             GoogleMapSelectionAdapter.IGoogleMapAdapterListener {
 
+
         @Override
-        public boolean isViewFromObject(View view, Object object) {
+        public boolean isViewFromObject(@NonNull View view,@NonNull  Object object) {
             return view == object;
         }
 
+        @NonNull
         @Override
-        public Object instantiateItem(ViewGroup container, int position) {
+        public Object instantiateItem(@NonNull ViewGroup container, int position) {
             View view;
 
             if (position == 0) {
                 if (arcView == null) {
-                    arcView = inflater.inflate(R.layout.content_list_view, null);
+                    arcView = inflater.inflate(R.layout.content_list_view, container, false);
 
                     lvArcMap = arcView.findViewById(R.id.listView);
                     arcMapAdapter = new ArcGisMapSelectionAdapter(getContext(), mapLayers, -1, this);
@@ -186,7 +187,7 @@ public class SelectMapTypeDialog extends DialogFragment {
                 view = arcView;
             } else {
                 if (gmapView == null) {
-                    gmapView = inflater.inflate(R.layout.content_list_view, null);
+                    gmapView = inflater.inflate(R.layout.content_list_view, container, false);
 
                     ListView lvGmap = gmapView.findViewById(R.id.listView);
                     gMapAdapter = new GoogleMapSelectionAdapter(getContext(), -1, this);
@@ -201,7 +202,7 @@ public class SelectMapTypeDialog extends DialogFragment {
         }
 
         @Override
-        public void destroyItem(ViewGroup container, int position, Object object) {
+        public void destroyItem(ViewGroup container, int position, @NonNull Object object) {
             container.removeView((View)object);
         }
 

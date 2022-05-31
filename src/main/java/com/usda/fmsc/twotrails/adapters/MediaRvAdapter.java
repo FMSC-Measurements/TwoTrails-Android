@@ -20,13 +20,13 @@ public class MediaRvAdapter extends SelectableAdapterEx<TtMedia, SelectableAdapt
     private final int PIC = 1;
     private final int VIDEO = 4;
 
-    private int colorTrans;
-    private int colorSelected;
+    private final int colorTrans;
+    private final int colorSelected;
 
-    private int maxHeight;
+    private final int maxHeight;
 
-    private LayoutInflater inflater;
-    private BitmapManager bitmapManager;
+    private final LayoutInflater inflater;
+    private final BitmapManager bitmapManager;
     private MediaChangedListener listener;
 
     public MediaRvAdapter(Activity activity, List<TtMedia> mediaList, Listener<TtMedia> listener, int maxHeight, BitmapManager bitmapManager) {
@@ -136,14 +136,16 @@ public class MediaRvAdapter extends SelectableAdapterEx<TtMedia, SelectableAdapt
         void onNotifyDataSetChanged();
     }
 
-    private abstract class MediaViewHolder extends SelectableViewHolderEx {
+
+    public abstract class MediaViewHolder extends SelectableViewHolderEx {
         public MediaViewHolder(View itemView) {
             super(itemView);
         }
     }
 
-    private class ImageViewHolder extends MediaViewHolder {
-        private ImageView ivImage;
+
+    public class ImageViewHolder extends MediaViewHolder {
+        private final ImageView ivImage;
 
         public ImageViewHolder(View itemView) {
             super(itemView);
@@ -161,19 +163,10 @@ public class MediaRvAdapter extends SelectableAdapterEx<TtMedia, SelectableAdapt
         public void onBindView(TtMedia item) {
             TtImage pic = (TtImage)getItem();
 
-            String key = pic.getCN() + "_thumb";
+            Bitmap img = bitmapManager.get(pic.getCN());
+            int width = img.getWidth() * maxHeight / img.getHeight();
 
-            Bitmap thumbnail;
-
-            if (!bitmapManager.containKey(key)) {
-                Bitmap img = bitmapManager.get(pic.getCN());
-
-                int width = img.getWidth() * maxHeight / img.getHeight();
-                thumbnail = AndroidUtils.UI.resizeBitmap(img, width, maxHeight);
-                bitmapManager.put(key, pic.getFilePath(), thumbnail, new BitmapManager.ScaleOptions(maxHeight, BitmapManager.ScaleMode.Max));
-            } else {
-                thumbnail = bitmapManager.get(key);
-            }
+            Bitmap thumbnail = AndroidUtils.UI.resizeBitmap(img, width, maxHeight);
 
             ivImage.setImageBitmap(thumbnail);
             AndroidUtils.UI.setContentDescToast(ivImage, pic.getName());

@@ -1,13 +1,15 @@
 package com.usda.fmsc.twotrails;
 
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.JsonWriter;
+
+import androidx.annotation.ColorInt;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.usda.fmsc.geospatial.nmea41.sentences.GGASentence;
 import com.usda.fmsc.geospatial.nmea41.sentences.GSASentence;
+import com.usda.fmsc.twotrails.objects.TwoTrailsProject;
 import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
 import com.usda.fmsc.twotrails.units.DopType;
 import com.usda.fmsc.twotrails.units.MapTracking;
@@ -28,6 +30,10 @@ public class DeviceSettings extends Settings {
     private static final String DEVELOPER_OPTIONS = "DeveloperOptions";
     private static final String DEBUG_MODE = "DebugMode";
     private static final String LAST_CRASH_TIME = "LastCrashTime";
+
+    public static final String EXTERNAL_SYNC_ENABLED = "ExternalSync";
+    public static final String EXTERNAL_SYNC_ENABLED_ASK = "ExternalSyncAsk";
+    public static final String EXTERNAL_SYNC_DIR = "ExternalSyncDir";
 
     public static final String DROP_ZERO = "DropZero";
     public static final String ROUND_POINTS = "RoundPoints";
@@ -70,6 +76,18 @@ public class DeviceSettings extends Settings {
     public static final String TAKE5_VIBRATE_ON_CREATE = "Take5VibrationOnCreate";
     public static final String TAKE5_RING_ON_CREATE = "Take5RingOnCreate";
 
+    public static final String SAT_FILTER_DOP_TYPE = "SATFilterDopType";
+    public static final String SAT_FILTER_DOP_VALUE = "SATFilterDopValue";
+    public static final String SAT_FILTER_FIX_TYPE = "SATFilterFixType";
+    public static final String SAT_FILTER_FIX = "SATFilterFix";
+    public static final String SAT_NMEA_AMOUNT = "SATNmeaAmount";
+    public static final String SAT_IGNORE_FIRST_NMEA = "SATIgnoreNmea";
+    public static final String SAT_IGNORE_FIRST_NMEA_AMOUNT = "SATIgnoreNmeaAmount";
+    public static final String SAT_FAIL_AMOUNT = "SATFailAmount";
+    public static final String SAT_INCREMENT = "SATIncrement";
+    public static final String SAT_VIBRATE_ON_CREATE = "SATVibrationOnCreate";
+    public static final String SAT_RING_ON_CREATE = "SATRingOnCreate";
+
     public static final String WALK_FILTER_DOP_TYPE = "WalkFilterDopType";
     public static final String WALK_FILTER_DOP_VALUE = "WalkFilterDopValue";
     public static final String WALK_FILTER_FIX_TYPE = "WalkFilterFixType";
@@ -96,7 +114,9 @@ public class DeviceSettings extends Settings {
     public static final String USE_TTCAMERA_ASK = "UseTtCameraAsk";
 
     public static final String AUTO_OPEN_LAST_PROJECT = "AutoOpenLastProject";
-    public static final String LAST_OPENED_PROJECT = "LastOpenedProject";
+    public static final String LAST_OPENED_PROJECT_NAME = "LastOpenedProjectName";
+    public static final String LAST_OPENED_PROJECT_FILE_TTX = "LastOpenedProjectFileTTX";
+    public static final String LAST_OPENED_PROJECT_FILE_TTMPX = "LastOpenedProjectFileTTMPX";
 
     public static final String MAP_TRACKING_OPTION = "MapTrackingOption";
     public static final String MAP_COMPASS_ENABLED = "MapCompassEnabled";
@@ -109,10 +129,16 @@ public class DeviceSettings extends Settings {
     public static final String MAP_ID = "MapTerrainType";
     public static final String ARC_GIS_MAPS = "ArcGISMaps";
     public static final String ARC_GIS_MAP_ID_COUNTER = "ArcGISMapIdCounter";
+    public static final String MAP_DIST_TO_POLY_LINE_WIDTH = "MapDistToPolyLineWidth";
+    public static final String MAP_DIST_TO_POLY_LINE_COLOR = "MapDistToPolyLineColor";
+    public static final String MAP_DIST_TO_POLY_LINE_TOLERANCE = "MapDistToPolyLineTolerance";
     public static final String MAP_ADJ_LINE_WIDTH = "MapAdjLineWidth";
     public static final String MAP_UNADJ_LINE_WIDTH = "MapUnAdjLineWidth";
     public static final String MAP_CHOOSE_OFFLINE = "MapChooseOffline";
     public static final String MAP_CHOOSE_OFFLINE_ASK = "MapChooseOfflineAsk";
+
+    public static final String EXPORT_MODE = "MapChooseOffline";
+    public static final String EXPORT_MODE_ASK = "MapChooseOfflineAsk";
 
     public static final String ARC_CREDENTIALS = "ArcCredentials";
 
@@ -122,6 +148,10 @@ public class DeviceSettings extends Settings {
     //region Default Values
     public final boolean DEFAULT_DROP_ZERO = true;
     public final boolean DEFAULT_ROUND_POINTS = true;
+
+    public final boolean DEFAULT_EXTERNAL_SYNC_ENABLED = false;
+    public final boolean DEFAULT_EXTERNAL_SYNC_ENABLED_ASK = false;
+    public final String DEFAULT_EXTERNAL_SYNC_DIR = StringEx.Empty;
 
     public final DopType DEFAULT_GPS_DOP_TYPE = DopType.HDOP;
     public final GGASentence.GpsFixType DEFAULT_GPS_FIX_TYPE = GGASentence.GpsFixType.GPS;
@@ -141,6 +171,18 @@ public class DeviceSettings extends Settings {
     public final boolean DEFAULT_TAKE5_VIB_ON_CREATE = true;
     public final boolean DEFAULT_TAKE5_RING_ON_CREATE = true;
 
+    public final DopType DEFAULT_SAT_DOP_TYPE = DopType.HDOP;
+    public final GGASentence.GpsFixType DEFAULT_SAT_FIX_TYPE = GGASentence.GpsFixType.GPS;
+    public final GSASentence.Fix DEFAULT_SAT_FIX = GSASentence.Fix._3D;
+    public final int DEFAULT_SAT_DOP_VALUE = 20;
+    public final int DEFAULT_SAT_INCREMENT = 1;
+    public final int DEFAULT_SAT_NMEA_AMOUNT = 60;
+    public final boolean DEFAULT_SAT_IGNORE = false;
+    public final int DEFAULT_SAT_IGNORE_AMOUNT = 2;
+    public final int DEFAULT_SAT_FAIL_AMOUNT = 10;
+    public final boolean DEFAULT_SAT_VIB_ON_CREATE = true;
+    public final boolean DEFAULT_SAT_RING_ON_CREATE = true;
+    
     public final DopType DEFAULT_WALK_DOP_TYPE = DopType.HDOP;
     public final GGASentence.GpsFixType DEFAULT_WALK_FIX_TYPE = GGASentence.GpsFixType.GPS;
     public final GSASentence.Fix DEFAULT_WALK_FIX = GSASentence.Fix._3D;
@@ -153,7 +195,9 @@ public class DeviceSettings extends Settings {
     public final boolean DEFAULT_WALK_SHOW_ALL_POINTS_ON_MAP = true;
 
     public final boolean DEFAULT_AUTO_OPEN_LAST_PROJECT = true;
-    public final String DEFAULT_LAST_OPENED_PROJECT = null;
+    public final String DEFAULT_LAST_OPENED_PROJECT_NAME = null;
+    public final String DEFAULT_LAST_OPENED_PROJECT_FILE_TTX = null;
+    public final String DEFAULT_LAST_OPENED_PROJECT_FILE_TTMPX = null;
 
     public final boolean DEFAULT_GPS_LOG_BURST_DETAILS = false;
 
@@ -185,118 +229,144 @@ public class DeviceSettings extends Settings {
     public final int DEFAULT_ARC_GIS_MAP_ID_COUNTER = 0;
     public final int DEFAULT_MAP_ADJ_LINE_WIDTH = 6;
     public final int DEFAULT_MAP_UNADJ_LINE_WIDTH = 16;
+    public final int DEFAULT_MAP_DIST_TO_POLY_LINE_WIDTH = 10;
+    public final @ColorInt int DEFAULT_MAP_DIST_TO_POLY_LINE_COLOR = 0xFF000000;
+    public final float DEFAULT_MAP_DIST_TO_POLY_LINE_TOLERANCE = 10; //in meters
     public final int DEFAULT_MAP_CHOOSE_OFFLINE = 0;
     public final boolean DEFAULT_MAP_CHOOSE_OFFLINE_ASK = true;
+
+    public static final int DEFAULT_EXPORT_MODE = 2;
+    public static final boolean DEFAULT_EXPORT_MODE_ASK = true;
 
     public final boolean DEFAULT_MEDIA_COPY_TO_PROJECT = true;
     //endregion
 
 
-    public DeviceSettings(Context context) {
+    public DeviceSettings(TwoTrailsApp context) {
         super(context);
 
-        init();
-    }
-
-
-    public void init() {
         if (!getBool(SETTINGS_CREATED, false)) {
             reset();
         }
     }
 
     public void reset() {
-        SharedPreferences.Editor editor = getEditor();
+        setBool(DEVELOPER_OPTIONS, false);
+        setBool(DEBUG_MODE, false);
 
-        editor.putBoolean(DEVELOPER_OPTIONS, false);
-        editor.putBoolean(DEBUG_MODE, false);
+        setBool(EXTERNAL_SYNC_ENABLED, DEFAULT_EXTERNAL_SYNC_ENABLED);
+        setBool(EXTERNAL_SYNC_ENABLED_ASK, DEFAULT_EXTERNAL_SYNC_ENABLED_ASK);
+        setString(EXTERNAL_SYNC_DIR, DEFAULT_EXTERNAL_SYNC_DIR);
 
-        editor.putString(LAST_CRASH_TIME, StringEx.Empty);
+        setString(LAST_CRASH_TIME, StringEx.Empty);
 
-        editor.putBoolean(DROP_ZERO, DEFAULT_DROP_ZERO);
-        editor.putBoolean(ROUND_POINTS, DEFAULT_ROUND_POINTS);
+        setBool(DROP_ZERO, DEFAULT_DROP_ZERO);
+        setBool(ROUND_POINTS, DEFAULT_ROUND_POINTS);
 
-        editor.putBoolean(GPS_ALWAYS_ON, true);
-        editor.putBoolean(KEEP_SCREEN_ON, false);
+        setBool(GPS_ALWAYS_ON, true);
+        setBool(KEEP_SCREEN_ON, false);
 
-        editor.putInt(GPS_FILTER_DOP_TYPE, DEFAULT_GPS_DOP_TYPE.getValue());
-        editor.putInt(GPS_FILTER_DOP_VALUE, DEFAULT_GPS_DOP_VALUE);
-        editor.putInt(GPS_FILTER_FIX_TYPE, DEFAULT_GPS_FIX_TYPE.getValue());
-        editor.putInt(GPS_FILTER_FIX, DEFAULT_GPS_FIX.getValue());
-        editor.putBoolean(GPS_FILTER_FIX_USE, DEFAULT_GPS_FIX_USE);
+        setInt(GPS_FILTER_DOP_TYPE, DEFAULT_GPS_DOP_TYPE.getValue());
+        setInt(GPS_FILTER_DOP_VALUE, DEFAULT_GPS_DOP_VALUE);
+        setInt(GPS_FILTER_FIX_TYPE, DEFAULT_GPS_FIX_TYPE.getValue());
+        setInt(GPS_FILTER_FIX, DEFAULT_GPS_FIX.getValue());
+        setBool(GPS_FILTER_FIX_USE, DEFAULT_GPS_FIX_USE);
 
-        editor.putInt(AUTO_FILL_FROM_RANGE_FINDER, DEFAULT_AUTO_FILL_FROM_RANGE_FINDER);
-        editor.putBoolean(AUTO_FILL_FROM_RANGE_FINDER_ASK, DEFAULT_AUTO_FILL_FROM_RANGE_FINDER_ASK);
+        setInt(AUTO_FILL_FROM_RANGE_FINDER, DEFAULT_AUTO_FILL_FROM_RANGE_FINDER);
+        setBool(AUTO_FILL_FROM_RANGE_FINDER_ASK, DEFAULT_AUTO_FILL_FROM_RANGE_FINDER_ASK);
 
-        editor.putInt(TAKE5_FILTER_DOP_TYPE, DEFAULT_TAKE5_DOP_TYPE.getValue());
-        editor.putInt(TAKE5_FILTER_DOP_VALUE, DEFAULT_TAKE5_DOP_VALUE);
-        editor.putInt(TAKE5_FILTER_FIX_TYPE, DEFAULT_TAKE5_FIX_TYPE.getValue());
-        editor.putInt(TAKE5_FILTER_FIX, DEFAULT_TAKE5_FIX.getValue());
-        editor.putInt(TAKE5_NMEA_AMOUNT, DEFAULT_TAKE5_NMEA_AMOUNT);
-        editor.putBoolean(TAKE5_IGNORE_FIRST_NMEA, DEFAULT_TAKE5_IGNORE);
-        editor.putInt(TAKE5_IGNORE_FIRST_NMEA_AMOUNT, DEFAULT_TAKE5_IGNORE_AMOUNT);
-        editor.putInt(TAKE5_FAIL_AMOUNT, DEFAULT_TAKE5_FAIL_AMOUNT);
-        editor.putInt(TAKE5_INCREMENT, DEFAULT_TAKE5_INCREMENT);
-        editor.putBoolean(TAKE5_RING_ON_CREATE, DEFAULT_TAKE5_RING_ON_CREATE);
-        editor.putBoolean(TAKE5_VIBRATE_ON_CREATE, DEFAULT_TAKE5_VIB_ON_CREATE);
+        setInt(TAKE5_FILTER_DOP_TYPE, DEFAULT_TAKE5_DOP_TYPE.getValue());
+        setInt(TAKE5_FILTER_DOP_VALUE, DEFAULT_TAKE5_DOP_VALUE);
+        setInt(TAKE5_FILTER_FIX_TYPE, DEFAULT_TAKE5_FIX_TYPE.getValue());
+        setInt(TAKE5_FILTER_FIX, DEFAULT_TAKE5_FIX.getValue());
+        setInt(TAKE5_NMEA_AMOUNT, DEFAULT_TAKE5_NMEA_AMOUNT);
+        setBool(TAKE5_IGNORE_FIRST_NMEA, DEFAULT_TAKE5_IGNORE);
+        setInt(TAKE5_IGNORE_FIRST_NMEA_AMOUNT, DEFAULT_TAKE5_IGNORE_AMOUNT);
+        setInt(TAKE5_FAIL_AMOUNT, DEFAULT_TAKE5_FAIL_AMOUNT);
+        setInt(TAKE5_INCREMENT, DEFAULT_TAKE5_INCREMENT);
+        setBool(TAKE5_RING_ON_CREATE, DEFAULT_TAKE5_RING_ON_CREATE);
+        setBool(TAKE5_VIBRATE_ON_CREATE, DEFAULT_TAKE5_VIB_ON_CREATE);
 
-        editor.putInt(WALK_FILTER_DOP_TYPE, DEFAULT_WALK_DOP_TYPE.getValue());
-        editor.putInt(WALK_FILTER_DOP_VALUE, DEFAULT_WALK_DOP_VALUE);
-        editor.putInt(WALK_FILTER_FIX_TYPE, DEFAULT_WALK_FIX_TYPE.getValue());
-        editor.putInt(WALK_FILTER_FIX, DEFAULT_WALK_FIX.getValue());
-        editor.putInt(WALK_FILTER_ACCURACY, DEFAULT_WALK_ACCURACY);
-        editor.putInt(WALK_FILTER_FREQUENCY, DEFAULT_WALK_FREQUENCY);
-        editor.putInt(WALK_INCREMENT, DEFAULT_WALK_INCREMENT);
-        editor.putBoolean(WALK_SHOW_ALL_POINTS_ON_MAP, DEFAULT_WALK_SHOW_ALL_POINTS_ON_MAP);
-        editor.putBoolean(WALK_RING_ON_CREATE, DEFAULT_WALK_RING_ON_CREATE);
-        editor.putBoolean(WALK_VIBRATE_ON_CREATE, DEFAULT_WALK_VIB_ON_CREATE);
+        setInt(SAT_FILTER_DOP_TYPE, DEFAULT_SAT_DOP_TYPE.getValue());
+        setInt(SAT_FILTER_DOP_VALUE, DEFAULT_SAT_DOP_VALUE);
+        setInt(SAT_FILTER_FIX_TYPE, DEFAULT_SAT_FIX_TYPE.getValue());
+        setInt(SAT_FILTER_FIX, DEFAULT_SAT_FIX.getValue());
+        setInt(SAT_NMEA_AMOUNT, DEFAULT_SAT_NMEA_AMOUNT);
+        setBool(SAT_IGNORE_FIRST_NMEA, DEFAULT_SAT_IGNORE);
+        setInt(SAT_IGNORE_FIRST_NMEA_AMOUNT, DEFAULT_SAT_IGNORE_AMOUNT);
+        setInt(SAT_FAIL_AMOUNT, DEFAULT_SAT_FAIL_AMOUNT);
+        setInt(SAT_INCREMENT, DEFAULT_SAT_INCREMENT);
+        setBool(SAT_RING_ON_CREATE, DEFAULT_SAT_RING_ON_CREATE);
+        setBool(SAT_VIBRATE_ON_CREATE, DEFAULT_SAT_VIB_ON_CREATE);
 
-        editor.putInt(AUTO_SET_GPS_NAME_TO_META, DEFAULT_AUTO_SET_GPS_NAME_TO_META);
-        editor.putBoolean(AUTO_SET_GPS_NAME_TO_META_ASK, DEFAULT_AUTO_SET_GPS_NAME_TO_META_ASK);
-        editor.putInt(AUTO_UPDATE_WALK_ONBND, DEFAULT_AUTO_UPDATE_WALK_ONBND);
-        editor.putBoolean(AUTO_UPDATE_WALK_ONBND_ASK, DEFAULT_AUTO_UPDATE_WALK_ONBND_ASK);
-        editor.putInt(AUTO_OVERWRITE_PLOTGRID, DEFAULT_AUTO_OVERWRITE_PLOTGRID);
-        editor.putBoolean(AUTO_OVERWRITE_PLOTGRID_ASK, DEFAULT_AUTO_OVERWRITE_PLOTGRID_ASK);
-        editor.putInt(AUTO_OVERWRITE_EXPORT, DEFAULT_AUTO_OVERWRITE_EXPORT);
-        editor.putBoolean(AUTO_OVERWRITE_EXPORT_ASK, DEFAULT_AUTO_OVERWRITE_EXPORT_ASK);
-        editor.putInt(AUTO_INTERNALIZE_EXPORT, DEFAULT_AUTO_INTERNALIZE_EXPORT);
-        editor.putBoolean(AUTO_INTERNALIZE_EXPORT_ASK, DEFAULT_AUTO_INTERNALIZE_EXPORT_ASK);
+        setInt(WALK_FILTER_DOP_TYPE, DEFAULT_WALK_DOP_TYPE.getValue());
+        setInt(WALK_FILTER_DOP_VALUE, DEFAULT_WALK_DOP_VALUE);
+        setInt(WALK_FILTER_FIX_TYPE, DEFAULT_WALK_FIX_TYPE.getValue());
+        setInt(WALK_FILTER_FIX, DEFAULT_WALK_FIX.getValue());
+        setInt(WALK_FILTER_ACCURACY, DEFAULT_WALK_ACCURACY);
+        setInt(WALK_FILTER_FREQUENCY, DEFAULT_WALK_FREQUENCY);
+        setInt(WALK_INCREMENT, DEFAULT_WALK_INCREMENT);
+        setBool(WALK_SHOW_ALL_POINTS_ON_MAP, DEFAULT_WALK_SHOW_ALL_POINTS_ON_MAP);
+        setBool(WALK_RING_ON_CREATE, DEFAULT_WALK_RING_ON_CREATE);
+        setBool(WALK_VIBRATE_ON_CREATE, DEFAULT_WALK_VIB_ON_CREATE);
 
-        editor.putInt(USE_TTCAMERA, 2);
-        editor.putBoolean(USE_TTCAMERA_ASK, true);
+        setInt(AUTO_SET_GPS_NAME_TO_META, DEFAULT_AUTO_SET_GPS_NAME_TO_META);
+        setBool(AUTO_SET_GPS_NAME_TO_META_ASK, DEFAULT_AUTO_SET_GPS_NAME_TO_META_ASK);
+        setInt(AUTO_UPDATE_WALK_ONBND, DEFAULT_AUTO_UPDATE_WALK_ONBND);
+        setBool(AUTO_UPDATE_WALK_ONBND_ASK, DEFAULT_AUTO_UPDATE_WALK_ONBND_ASK);
+        setInt(AUTO_OVERWRITE_PLOTGRID, DEFAULT_AUTO_OVERWRITE_PLOTGRID);
+        setBool(AUTO_OVERWRITE_PLOTGRID_ASK, DEFAULT_AUTO_OVERWRITE_PLOTGRID_ASK);
+        setInt(AUTO_OVERWRITE_EXPORT, DEFAULT_AUTO_OVERWRITE_EXPORT);
+        setBool(AUTO_OVERWRITE_EXPORT_ASK, DEFAULT_AUTO_OVERWRITE_EXPORT_ASK);
+        setInt(AUTO_INTERNALIZE_EXPORT, DEFAULT_AUTO_INTERNALIZE_EXPORT);
+        setBool(AUTO_INTERNALIZE_EXPORT_ASK, DEFAULT_AUTO_INTERNALIZE_EXPORT_ASK);
+
+        setInt(USE_TTCAMERA, 2);
+        setBool(USE_TTCAMERA_ASK, true);
 
 
-        editor.putBoolean(AUTO_OPEN_LAST_PROJECT, DEFAULT_AUTO_OPEN_LAST_PROJECT);
-        editor.putString(LAST_OPENED_PROJECT, DEFAULT_LAST_OPENED_PROJECT);
+        setBool(AUTO_OPEN_LAST_PROJECT, DEFAULT_AUTO_OPEN_LAST_PROJECT);
+        setString(LAST_OPENED_PROJECT_NAME, DEFAULT_LAST_OPENED_PROJECT_NAME);
+        setString(LAST_OPENED_PROJECT_FILE_TTX, DEFAULT_LAST_OPENED_PROJECT_FILE_TTX);
+        setString(LAST_OPENED_PROJECT_FILE_TTMPX, DEFAULT_LAST_OPENED_PROJECT_FILE_TTX);
 
-        editor.putInt(MAP_TRACKING_OPTION, DEFAULT_MAP_TRACKING_OPTION.getValue());
-        editor.putBoolean(MAP_MY_POS_BUTTON, DEFAULT_MAP_MYPOS_BUTTON);
-        editor.putBoolean(MAP_COMPASS_ENABLED, DEFAULT_MAP_COMPASS_ENABLED);
-        editor.putBoolean(MAP_SHOW_MY_POS, DEFAULT_MAP_SHOW_MY_POS);
-        editor.putBoolean(MAP_DISPLAY_GPS_LOCATION, DEFAULT_MAP_DISPLAY_GPS_LOCATION);
-        editor.putBoolean(MAP_USE_UTM_NAV, DEFAULT_MAP_USE_UTM_NAV);
-        editor.putInt(MAP_TYPE, DEFAULT_MAP_TYPE);
-        editor.putInt(MAP_ID, DEFAULT_MAP_ID);
-        editor.putString(ARC_GIS_MAPS, DEFAULT_ARC_GIS_MAPS);
-        editor.putInt(ARC_GIS_MAP_ID_COUNTER, DEFAULT_ARC_GIS_MAP_ID_COUNTER);
-        editor.putInt(MAP_ADJ_LINE_WIDTH, DEFAULT_MAP_ADJ_LINE_WIDTH);
-        editor.putInt(MAP_UNADJ_LINE_WIDTH, DEFAULT_MAP_UNADJ_LINE_WIDTH);
-        editor.putInt(MAP_CHOOSE_OFFLINE, DEFAULT_MAP_CHOOSE_OFFLINE);
-        editor.putBoolean(MAP_CHOOSE_OFFLINE_ASK, DEFAULT_MAP_CHOOSE_OFFLINE_ASK);
+        setInt(MAP_TRACKING_OPTION, DEFAULT_MAP_TRACKING_OPTION.getValue());
+        setBool(MAP_MY_POS_BUTTON, DEFAULT_MAP_MYPOS_BUTTON);
+        setBool(MAP_COMPASS_ENABLED, DEFAULT_MAP_COMPASS_ENABLED);
+        setBool(MAP_SHOW_MY_POS, DEFAULT_MAP_SHOW_MY_POS);
+        setBool(MAP_DISPLAY_GPS_LOCATION, DEFAULT_MAP_DISPLAY_GPS_LOCATION);
+        setBool(MAP_USE_UTM_NAV, DEFAULT_MAP_USE_UTM_NAV);
+        setInt(MAP_TYPE, DEFAULT_MAP_TYPE);
+        setInt(MAP_ID, DEFAULT_MAP_ID);
+        setString(ARC_GIS_MAPS, DEFAULT_ARC_GIS_MAPS);
+        setInt(ARC_GIS_MAP_ID_COUNTER, DEFAULT_ARC_GIS_MAP_ID_COUNTER);
+        setInt(MAP_DIST_TO_POLY_LINE_WIDTH, DEFAULT_MAP_DIST_TO_POLY_LINE_WIDTH);
+        setInt(MAP_DIST_TO_POLY_LINE_COLOR, DEFAULT_MAP_DIST_TO_POLY_LINE_COLOR);
+        setDouble(MAP_DIST_TO_POLY_LINE_TOLERANCE, DEFAULT_MAP_DIST_TO_POLY_LINE_TOLERANCE);
+        setInt(MAP_ADJ_LINE_WIDTH, DEFAULT_MAP_ADJ_LINE_WIDTH);
+        setInt(MAP_UNADJ_LINE_WIDTH, DEFAULT_MAP_UNADJ_LINE_WIDTH);
+        setInt(MAP_CHOOSE_OFFLINE, DEFAULT_MAP_CHOOSE_OFFLINE);
+        setBool(MAP_CHOOSE_OFFLINE_ASK, DEFAULT_MAP_CHOOSE_OFFLINE_ASK);
 
-        editor.putBoolean(MEDIA_COPY_TO_PROJECT, DEFAULT_MEDIA_COPY_TO_PROJECT);
+        setBool(MEDIA_COPY_TO_PROJECT, DEFAULT_MEDIA_COPY_TO_PROJECT);
 
-        editor.putString(ARC_CREDENTIALS, StringEx.Empty);
+        setInt(EXPORT_MODE, DEFAULT_EXPORT_MODE);
+        setBool(EXPORT_MODE_ASK, DEFAULT_EXPORT_MODE_ASK);
 
-        editor.putBoolean(SETTINGS_CREATED, true);
+        setString(ARC_CREDENTIALS, StringEx.Empty);
 
-        editor.commit();
+        setBool(SETTINGS_CREATED, true);
     }
 
 
     public void writeToFile(JsonWriter js) throws IOException {
         js.name(DEVELOPER_OPTIONS).value(isDeveloperOptionsEnabled());
-        js.name(LAST_CRASH_TIME).value(getLastCrashTime().toString());
+        DateTime lastCrash = getLastCrashTime();
+        js.name(LAST_CRASH_TIME).value(lastCrash != null ? lastCrash.toString() : "");
+
+        js.name(EXTERNAL_SYNC_ENABLED).value(isExternalSyncEnabled());
+        js.name(EXTERNAL_SYNC_ENABLED_ASK).value(isExternalSyncEnabledAsked());
+        js.name(EXTERNAL_SYNC_DIR).value(getExternalSyncDir());
 
         js.name(DROP_ZERO).value(getDropZeros());
         js.name(ROUND_POINTS).value(getRoundPoints());
@@ -366,7 +436,10 @@ public class DeviceSettings extends Settings {
         js.name(USE_TTCAMERA_ASK).value(getUseTtCameraAsk());
 
         js.name(AUTO_OPEN_LAST_PROJECT).value(getAutoOpenLastProject());
-        js.name(LAST_OPENED_PROJECT).value(getLastOpenedProject());
+
+        TwoTrailsProject rp =getLastOpenedProject();
+        js.name(LAST_OPENED_PROJECT_NAME).value(rp.Name);
+        js.name(LAST_OPENED_PROJECT_FILE_TTX).value(rp.TTXFile);
 
         js.name(MAP_TRACKING_OPTION).value(getMapTrackingOption().toString());
         js.name(MAP_COMPASS_ENABLED).value(getMapCompassEnabled());
@@ -377,6 +450,7 @@ public class DeviceSettings extends Settings {
         js.name(MAP_USE_UTM_NAV).value(getMapUseUtmNav());
         js.name(MAP_TYPE).value(getMapType().toString());
         js.name(MAP_ID).value(getMapId());
+        js.name(MAP_DIST_TO_POLY_LINE_WIDTH).value(getMapDistToPolyLineWidth());
         js.name(MAP_ADJ_LINE_WIDTH).value(getMapAdjLineWidth());
         js.name(MAP_UNADJ_LINE_WIDTH).value(getMapUnAdjLineWidth());
         js.name(MAP_CHOOSE_OFFLINE).value(getAutoMapChooseOffline());
@@ -391,7 +465,7 @@ public class DeviceSettings extends Settings {
             js.name("Description").value(layer.getDescription());
             js.name("Location").value(layer.getLocation());
             js.name("URL").value(layer.getUrl());
-            js.name("FilePath").value(layer.getFilePath());
+            js.name("FilePath").value(layer.getFileName());
             js.name("HasValidFile").value(layer.hasValidFile());
             js.name("Online").value(layer.isOnline());
             js.name("MinScale").value(layer.getMinScale());
@@ -399,11 +473,13 @@ public class DeviceSettings extends Settings {
 
             js.name("DetailLevels");
             js.beginArray();
-            for (ArcGisMapLayer.DetailLevel dl : layer.getLevelsOfDetail()) {
-                js.name("Resolution").value(dl.getResolution());
-                js.name("Level").value(dl.getLevel());
-                js.name("Scale").value(dl.getScale());
-                js.name("DescribeContents").value(dl.describeContents());
+            if (layer.hasDetailLevels()) {
+                for (ArcGisMapLayer.DetailLevel dl : layer.getLevelsOfDetail()) {
+                    js.name("Resolution").value(dl.getResolution());
+                    js.name("Level").value(dl.getLevel());
+                    js.name("Scale").value(dl.getScale());
+                    js.name("DescribeContents").value(dl.describeContents());
+                }
             }
             js.endArray();
 
@@ -601,6 +677,41 @@ public class DeviceSettings extends Settings {
     }
 
 
+
+    public DopType getSATFilterDopType() {
+        return DopType.parse(getInt(SAT_FILTER_DOP_TYPE, DEFAULT_SAT_DOP_TYPE.getValue()));
+    }
+
+    public void setSATFilterDopType(DopType value) {
+        setInt(SAT_FILTER_DOP_TYPE, value.getValue());
+    }
+
+    public int getSATFilterDopValue() {
+        return getInt(SAT_FILTER_DOP_VALUE, DEFAULT_SAT_DOP_VALUE);
+    }
+
+    public void setSATFilterDopValue(int value) {
+        setInt(SAT_FILTER_DOP_VALUE, value);
+    }
+
+    public GGASentence.GpsFixType getSATFilterFixType() {
+        return GGASentence.GpsFixType.parse(getInt(SAT_FILTER_FIX_TYPE, DEFAULT_SAT_FIX_TYPE.getValue()));
+    }
+
+    public void setSATFilterFixType(GGASentence.GpsFixType value) {
+        setInt(SAT_FILTER_FIX_TYPE, value.getValue());
+    }
+
+    public GSASentence.Fix getSATFilterFix() {
+        return GSASentence.Fix.parse(getInt(SAT_FILTER_FIX, DEFAULT_SAT_FIX.getValue()));
+    }
+
+    public void setSATFilterFix(GSASentence.Fix value) {
+        setInt(SAT_FILTER_FIX, value.getValue());
+    }
+    
+    
+    
     public DopType getWalkFilterDopType() {
         return DopType.parse(getInt(WALK_FILTER_DOP_TYPE, DEFAULT_WALK_DOP_TYPE.getValue()));
     }
@@ -711,6 +822,66 @@ public class DeviceSettings extends Settings {
     }
     //endregion
 
+    //region SAT
+    public int getSATNmeaAmount() {
+        return getInt(SAT_NMEA_AMOUNT, DEFAULT_SAT_NMEA_AMOUNT);
+    }
+
+    public void setSATNmeaAmount(int value) {
+        setInt(SAT_NMEA_AMOUNT, value);
+    }
+
+    public boolean getSATIngoreFirstNmea() {
+        return getBool(SAT_IGNORE_FIRST_NMEA);
+    }
+
+    public void setSATIgnoreFirstNmea(boolean value) {
+        setBool(SAT_IGNORE_FIRST_NMEA, value);
+    }
+
+    public int getSATIngoreFirstNmeaAmount() {
+        return getInt(SAT_IGNORE_FIRST_NMEA_AMOUNT, DEFAULT_SAT_IGNORE_AMOUNT);
+    }
+
+    public void setSATIgnoreFirstNmeaAmount(int value) {
+        setInt(SAT_IGNORE_FIRST_NMEA_AMOUNT, value);
+    }
+
+    public int getSATFailAmount() {
+        return getInt(SAT_FAIL_AMOUNT, DEFAULT_SAT_FAIL_AMOUNT);
+    }
+
+    public void setSATFailAmount(int value) {
+        setInt(SAT_FAIL_AMOUNT, value);
+    }
+
+    public int getSATIncrement() {
+        return getInt(SAT_INCREMENT, DEFAULT_SAT_INCREMENT);
+    }
+
+    public void setSATIncrement(int value) {
+        setInt(SAT_INCREMENT, value);
+    }
+
+
+    public boolean getSATVibrateOnCreate() {
+        return getBool(SAT_VIBRATE_ON_CREATE, DEFAULT_SAT_VIB_ON_CREATE);
+    }
+
+    public void setSATVibrateOnCreate(boolean value) {
+        setBool(SAT_VIBRATE_ON_CREATE, value);
+    }
+
+
+    public boolean getSATRingOnCreate() {
+        return getBool(SAT_RING_ON_CREATE, DEFAULT_SAT_RING_ON_CREATE);
+    }
+
+    public void setSATRingOnCreate(boolean value) {
+        setBool(TAKE5_RING_ON_CREATE, value);
+    }
+    //endregion
+    
     //region Walk
     public int getWalkIncrement() {
         return getInt(WALK_INCREMENT, DEFAULT_WALK_INCREMENT);
@@ -841,6 +1012,29 @@ public class DeviceSettings extends Settings {
     }
 
 
+    public int getMapDistToPolyLineWidth() {
+        return getInt(MAP_DIST_TO_POLY_LINE_WIDTH, DEFAULT_MAP_DIST_TO_POLY_LINE_WIDTH);
+    }
+
+    public void setMapDistToPolyLineWidth(int value) {
+        setInt(MAP_DIST_TO_POLY_LINE_WIDTH, value);
+    }
+
+    public int getMapDistToPolyLineColor() {
+        return getInt(MAP_DIST_TO_POLY_LINE_COLOR, DEFAULT_MAP_DIST_TO_POLY_LINE_COLOR);
+    }
+
+    public void setMapDistToPolyLineColor(int value) {
+        setInt(MAP_DIST_TO_POLY_LINE_COLOR, value);
+    }
+
+    public double getMapDistToPolyLineTolerance() {
+        return getDouble(MAP_DIST_TO_POLY_LINE_TOLERANCE, DEFAULT_MAP_DIST_TO_POLY_LINE_TOLERANCE);
+    }
+
+    public void setMapDistToPolyTolerance(double value) {
+        setDouble(MAP_DIST_TO_POLY_LINE_TOLERANCE, value);
+    }
 
     public int getMapAdjLineWidth() {
         return getInt(MAP_ADJ_LINE_WIDTH, DEFAULT_MAP_ADJ_LINE_WIDTH);
@@ -896,10 +1090,31 @@ public class DeviceSettings extends Settings {
         return gson.fromJson(json, new TypeToken<ArrayList<ArcGisMapLayer>>() { }.getType());
     }
 
-    public boolean setArcGisMayLayers(Collection<ArcGisMapLayer> recentProjects) {
-        return getEditor().putString(ARC_GIS_MAPS, new Gson().toJson(recentProjects)).commit();
+    public void setArcGisMayLayers(Collection<ArcGisMapLayer> recentProjects) {
+        setString(ARC_GIS_MAPS, new Gson().toJson(recentProjects));
     }
     //endregion
+
+    //endregion
+
+    public int getExportMode() {
+        return getInt(EXPORT_MODE, DEFAULT_EXPORT_MODE);
+    }
+
+    public void setExportMode(int value) {
+        setInt(EXPORT_MODE, value);
+    }
+
+    public boolean getExportModeAsk() {
+        return getBool(EXPORT_MODE_ASK, DEFAULT_EXPORT_MODE_ASK);
+    }
+
+    public void setExportModeAsk(boolean value) {
+        setBool(EXPORT_MODE_ASK, value);
+    }
+
+    //region Export
+
 
     //endregion
 
@@ -1049,12 +1264,18 @@ public class DeviceSettings extends Settings {
 
 
 
-    public String getLastOpenedProject() {
-        return getString(LAST_OPENED_PROJECT);
+    public TwoTrailsProject getLastOpenedProject() {
+        return new TwoTrailsProject(
+                getString(LAST_OPENED_PROJECT_NAME),
+                getString(LAST_OPENED_PROJECT_FILE_TTX, null),
+                getString(LAST_OPENED_PROJECT_FILE_TTMPX, null)
+        );
     }
 
-    public void setLastOpenedProject(String value) {
-        setString(LAST_OPENED_PROJECT, value);
+    public void setLastOpenedProject(TwoTrailsProject twoTrailsProject) {
+        setString(LAST_OPENED_PROJECT_NAME, twoTrailsProject.Name);
+        setString(LAST_OPENED_PROJECT_FILE_TTX, twoTrailsProject.TTXFile);
+        setString(LAST_OPENED_PROJECT_FILE_TTX, twoTrailsProject.TTMPXFile);
     }
 
 
@@ -1113,6 +1334,31 @@ public class DeviceSettings extends Settings {
         setBool(KEEP_SCREEN_ON, value);
     }
 
+
+
+    public boolean isExternalSyncEnabled() {
+        return getBool(EXTERNAL_SYNC_ENABLED, DEFAULT_EXTERNAL_SYNC_ENABLED);
+    }
+
+    public void setExternalSyncEnabled(boolean value) {
+        setBool(EXTERNAL_SYNC_ENABLED, value);
+    }
+
+    public boolean isExternalSyncEnabledAsked() {
+        return getBool(EXTERNAL_SYNC_ENABLED_ASK, DEFAULT_EXTERNAL_SYNC_ENABLED_ASK);
+    }
+
+    public void setExternalSyncEnabledAsk(boolean value) {
+        setBool(EXTERNAL_SYNC_ENABLED_ASK, value);
+    }
+
+    public String getExternalSyncDir() {
+        return getString(EXTERNAL_SYNC_DIR, DEFAULT_EXTERNAL_SYNC_DIR);
+    }
+
+    public void setExternalSyncDir(String value) {
+        setString(EXTERNAL_SYNC_DIR, value);
+    }
     //endregion
 
 }

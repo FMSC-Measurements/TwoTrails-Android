@@ -7,16 +7,15 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 
 import java.util.List;
 
 public class MetadataDetailsAdapter extends BaseAdapter {
-    private LayoutInflater inflater;
-    private List<TtMetadata> metadata;
-    private boolean autoHighlight;
+    private final LayoutInflater inflater;
+    private final List<TtMetadata> metadata;
+    private final boolean autoHighlight;
 
     public MetadataDetailsAdapter(Context context, List<TtMetadata> metadata) {
         this(context, metadata, true);

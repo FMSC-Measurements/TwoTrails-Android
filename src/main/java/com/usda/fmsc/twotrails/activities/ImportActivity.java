@@ -2,46 +2,53 @@ package com.usda.fmsc.twotrails.activities;
 
 import android.content.Intent;
 import android.graphics.Color;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.utilities.PostDelayHandler;
 import com.usda.fmsc.android.widget.FABProgressCircleEx;
 import com.usda.fmsc.twotrails.Consts;
-import com.usda.fmsc.twotrails.activities.base.CustomToolbarActivity;
+import com.usda.fmsc.twotrails.R;
+import com.usda.fmsc.twotrails.TwoTrailsApp;
+import com.usda.fmsc.twotrails.activities.base.ProjectAdjusterActivity;
+import com.usda.fmsc.twotrails.activities.contracts.GetContentMultiMimes;
 import com.usda.fmsc.twotrails.fragments.imprt.BaseImportFragment;
 import com.usda.fmsc.twotrails.fragments.imprt.ImportGpxFragment;
 import com.usda.fmsc.twotrails.fragments.imprt.ImportKmlFragment;
 import com.usda.fmsc.twotrails.fragments.imprt.ImportTextFragment;
-import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.fragments.imprt.ImportTtxFragment;
 import com.usda.fmsc.twotrails.logic.AdjustingException;
-import com.usda.fmsc.twotrails.logic.PolygonAdjuster;
 import com.usda.fmsc.twotrails.utilities.Import;
+import com.usda.fmsc.utilities.MimeTypes;
 
 import java.util.regex.Pattern;
 
-public class ImportActivity extends CustomToolbarActivity {
+public class ImportActivity extends ProjectAdjusterActivity {
     private FloatingActionButton fabImport;
     private FABProgressCircleEx fabProgCircle;
 
     private BaseImportFragment fragment;
 
     private EditText txtFile;
-    private PostDelayHandler handler = new PostDelayHandler(1000), pdhShowFab = new PostDelayHandler(250);
+    private final PostDelayHandler handler = new PostDelayHandler(1000);
+    private final PostDelayHandler pdhShowFab = new PostDelayHandler(250);
 
     private boolean ignoreChange, adjust;
 
 
-    private BaseImportFragment.Listener listener = new BaseImportFragment.Listener() {
+    private final BaseImportFragment.Listener listener = new BaseImportFragment.Listener() {
         String message = null;
 
         @Override
@@ -52,27 +59,7 @@ public class ImportActivity extends CustomToolbarActivity {
                     View view = findViewById(R.id.parent);
                     if (view != null) {
                         Snackbar snackbar = Snackbar.make(view, "File Imported", Snackbar.LENGTH_LONG)
-                                .setAction("View Map", v -> PolygonAdjuster.adjust(getTtAppCtx(), false, new PolygonAdjuster.Listener() {
-                                    @Override
-                                    public void adjusterStarted() {
-
-                                    }
-
-                                    @Override
-                                    public void adjusterStopped(PolygonAdjuster.AdjustResult result, AdjustingException.AdjustingError error) {
-                                        if (result == PolygonAdjuster.AdjustResult.SUCCESSFUL) {
-                                            adjust = false;
-                                            startActivity(new Intent(ImportActivity.this, MapActivity.class));
-                                        } else {
-                                            Toast.makeText(ImportActivity.this, "Polygon(s) failed to adjust.", Toast.LENGTH_SHORT).show();
-                                        }
-                                    }
-
-                                    @Override
-                                    public void adjusterRunningSlow() {
-
-                                    }
-                                }))
+                                .setAction("View Map", v -> getTtAppCtx().adjustProject(false))
                                 .setActionTextColor(AndroidUtils.UI.getColor(getBaseContext(), R.color.primaryLighter));
 
                         AndroidUtils.UI.setSnackbarTextColor(snackbar, Color.WHITE);
@@ -129,19 +116,15 @@ public class ImportActivity extends CustomToolbarActivity {
 
         txtFile.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
+            public void onTextChanged(CharSequence s, int start, int before, int count) { }
 
             @Override
             public void afterTextChanged(final Editable s) {
                 if (!ignoreChange) {
-                    handler.post(() -> updateFileName(s.toString()));
+                    handler.post(() -> updateFilePath(Uri.parse(s.toString())));
                 }
 
                 ignoreChange = false;
@@ -155,24 +138,26 @@ public class ImportActivity extends CustomToolbarActivity {
         });
     }
 
+    @Override
+    public boolean onCreateOptionsMenuEx(Menu menu) {
+        return false;
+    }
+
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+    public void onAdjusterStopped(TwoTrailsApp.ProjectAdjusterResult result, AdjustingException.AdjustingError error) {
+        super.onAdjusterStopped(result, error);
 
-        if (requestCode == Consts.Codes.Requests.OPEN_FILE) {
-            if (data != null && data.getData() != null && data.getData().getPath() != null) {
-                updateFileName(data.getData().getPath());
-            } else {
-                Toast.makeText(ImportActivity.this, "Unable to update file name.", Toast.LENGTH_LONG).show();
-            }
+        if (result == TwoTrailsApp.ProjectAdjusterResult.SUCCESSFUL) {
+            adjust = false;
+            startActivity(new Intent(ImportActivity.this, MapActivity.class));
         }
     }
 
-    private void updateFileName(String filename) {
+    private void updateFilePath(Uri filePath) {
         boolean fragUpdated = false;
 
-        String[] parts = filename.split(Pattern.quote("."));
+        String[] parts = filePath.toString().split(Pattern.quote("."));
         String ext = parts[parts.length - 1].toLowerCase();
 
         if (parts.length > 1) {
@@ -180,19 +165,19 @@ public class ImportActivity extends CustomToolbarActivity {
                 case "txt":
                 case "csv": {
                     if (fragment == null || !(fragment instanceof ImportTextFragment)) {
-                        fragment = ImportTextFragment.newInstance(filename);
+                        fragment = ImportTextFragment.newInstance(filePath);
                         fragUpdated = true;
                     } else {
-                        fragment.updateFileName(filename);
+                        fragment.updateFilePath(filePath);
                     }
                     break;
                 }
                 case "gpx": {
                     if (fragment == null || !(fragment instanceof ImportGpxFragment)) {
-                        fragment = ImportGpxFragment.newInstance(filename);
+                        fragment = ImportGpxFragment.newInstance(filePath);
                         fragUpdated = true;
                     } else {
-                        fragment.updateFileName(filename);
+                        fragment.updateFilePath(filePath);
                     }
                     break;
                 }
@@ -200,19 +185,19 @@ public class ImportActivity extends CustomToolbarActivity {
                 case "kml": {
 
                     if (fragment == null || !(fragment instanceof ImportKmlFragment)) {
-                        fragment = ImportKmlFragment.newInstance(filename);
+                        fragment = ImportKmlFragment.newInstance(filePath);
                         fragUpdated = true;
                     } else {
-                        fragment.updateFileName(filename);
+                        fragment.updateFilePath(filePath);
                     }
                     break;
                 }
                 case "ttx": {
                     if (fragment == null || !(fragment instanceof ImportTtxFragment)) {
-                        fragment = ImportTtxFragment.newInstance(filename);
+                        fragment = ImportTtxFragment.newInstance(filePath);
                         fragUpdated = true;
                     } else {
-                        fragment.updateFileName(filename);
+                        fragment.updateFilePath(filePath);
                     }
                     break;
                 }
@@ -224,8 +209,8 @@ public class ImportActivity extends CustomToolbarActivity {
 
             if (fragUpdated) {
                 ignoreChange = true;
-                txtFile.setText(filename);
-                txtFile.setSelection(filename.length() - 1);
+                txtFile.setText(filePath.getPath());
+                txtFile.setSelection(filePath.getPath().length() - 1);
                 fragment.setListener(listener);
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContent, fragment).commit();
             }
@@ -249,7 +234,7 @@ public class ImportActivity extends CustomToolbarActivity {
         super.onDestroy();
 
         if (adjust) {
-            PolygonAdjuster.adjust(getTtAppCtx(), true);
+            getTtAppCtx().adjustProject(true);
         }
     }
 
@@ -259,8 +244,20 @@ public class ImportActivity extends CustomToolbarActivity {
         }
     }
 
+
+    private final ActivityResultLauncher<String[]> onFileSelected = registerForActivityResult(new GetContentMultiMimes(), path -> {
+        if (path != null) {
+            updateFilePath(path);
+        } else {
+            Toast.makeText(ImportActivity.this, "Unable to find file.", Toast.LENGTH_LONG).show();
+        }
+    });
+
+
+    //TODO fix import select
     public void btnImportSelect(View view) {
-        String[] extraMimes = {"file/*.csv", "file/*.gpx", "file/*.ttx"};
-        AndroidUtils.App.openFileIntent(this, "file/*.txt", extraMimes, Consts.Codes.Requests.OPEN_FILE);
+        //String[] extraMimes = {"text/*.txt", "file/*.csv", "file/*.gpx", "file/*.ttx"};
+        String[] extraMimes = { MimeTypes.Text.PLAIN, MimeTypes.Text.CSV, MimeTypes.Application.GPS, Consts.FileMimes.TPK, MimeTypes.Application.GOOGLE_EARTH };
+        onFileSelected.launch(extraMimes);
     }
 }

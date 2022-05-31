@@ -3,37 +3,101 @@ package com.usda.fmsc.twotrails.data;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.utilities.StringEx;
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeFieldType;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.DateTimeFormatterBuilder;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Locale;
 
 public abstract class IDataLayer {
-    protected static DateTimeFormatter dtf= DateTimeFormat.forPattern("yyyy-M-dd H:mm:ss");
-    protected static DateTimeFormatter dtfAlt = DateTimeFormat.forPattern("yyyy-M-dd H:mm:ss.SSS"); //Alt Format, PC might be using it
+    protected static final DateTimeFormatter dtf= DateTimeFormat.forPattern("yyyy-M-dd H:mm:ss");
+    protected static final DateTimeFormatter dtfAlt = DateTimeFormat.forPattern("yyyy-M-dd H:mm:ss.SSS"); //Alt Format, PC might be using it
 
-    protected SQLiteDatabase _db;
+    private final SQLiteDatabase _db;
+    private final TwoTrailsApp _Context;
+    private final String _FileName;
+    protected Listener _Listener;
+
+
+    public IDataLayer(TwoTrailsApp context, SQLiteDatabase db, String fileName) {
+        this(context, db, fileName, false);
+    }
+
+    protected IDataLayer(TwoTrailsApp context, SQLiteDatabase db, String fileName, boolean create) {
+        _Context = context;
+        _db = db;
+        _FileName = fileName;
+
+        if (create) {
+            onCreateDB(_db);
+        }
+
+        onOpenDB(_db);
+    }
+
+
+    protected void onCreateDB(SQLiteDatabase db) {}
+
+    protected void onOpenDB(SQLiteDatabase db) {}
+
+    protected void onCloseDB(SQLiteDatabase db) {}
+
+
+    protected SQLiteDatabase getDB() {
+        return _db;
+    }
+
+    protected TwoTrailsApp getTtAppContext() {
+        return _Context;
+    }
+
+    public String getFileName() {
+        return _FileName;
+    }
+
+    public void close() {
+        if (_db != null) {
+            onCloseDB(_db);
+        }
+    }
+
+
+    protected void logError(String msg, String codePage) {
+        getTtAppContext().getReport().writeError(msg, codePage);
+
+        if (_Listener != null) _Listener.onError(msg, codePage, null);
+    }
+
+    protected void logError(String msg, String codePage, StackTraceElement[] stack) {
+        getTtAppContext().getReport().writeError(msg, codePage, stack);
+
+        if (_Listener != null) _Listener.onError(msg, codePage, stack);
+    }
+
+
+    protected void onAction(int action) {
+        if (_Listener != null) _Listener.onAction(action);
+    }
+
 
     protected String createSelectQuery(String table, String items, String where) {
-        return String.format("select %s from %s%s",
-                items, table, StringEx.isEmpty(where) ? StringEx.Empty : String.format(" where %s", where));
+        return String.format(Locale.getDefault(), "select %s from %s%s",
+                items, table, StringEx.isEmpty(where) ? StringEx.Empty : String.format(Locale.getDefault(), " where %s", where));
     }
 
     protected String createSelectAllQuery(String table, String where) {
-        return String.format("select * from %s%s",
+        return String.format(Locale.getDefault(), "select * from %s%s",
                 table, StringEx.isEmpty(where) ?
-                        StringEx.Empty : String.format(" where %s", where));
+                        StringEx.Empty : String.format(Locale.getDefault(), " where %s", where));
     }
 
 
-    public int getItemCount(String tableName) {
+    public int getItemsCount(String tableName) {
         String countQuery = "SELECT COUNT (*) FROM " + tableName;
 
         Cursor cursor = _db.rawQuery(countQuery, null);
@@ -52,7 +116,7 @@ public abstract class IDataLayer {
 
     public int getItemsCount(String tableName, String column, int value) {
         return getItemsCount(tableName,
-                String.format("%s = %d",
+                String.format(Locale.getDefault(), "%s = %d",
                         column,
                         value)
         );
@@ -60,14 +124,14 @@ public abstract class IDataLayer {
 
     public int getItemsCount(String tableName, String column, String value) {
         return getItemsCount(tableName,
-                String.format("%s = '%s'",
+                String.format(Locale.getDefault(), "%s = '%s'",
                     column,
                     value)
         );
     }
 
     public int getItemsCount(String tableName, String where) {
-        String countQuery = String.format("select count(*) from %s where %s", tableName, where);
+        String countQuery = String.format(Locale.getDefault(), "select count(*) from %s where %s", tableName, where);
 
         Cursor cursor = _db.rawQuery(countQuery, null);
 
@@ -105,10 +169,10 @@ public abstract class IDataLayer {
         ArrayList<String> cns = new ArrayList<>();
 
         try {
-            String query = String.format("select %s from %s%s",
+            String query = String.format(Locale.getDefault(), "select %s from %s%s",
                     TwoTrailsSchema.SharedSchema.CN,
                     tableName,
-                    StringEx.isEmpty(where) ? StringEx.Empty : String.format(" where %s", where));
+                    StringEx.isEmpty(where) ? StringEx.Empty : String.format(Locale.getDefault(), " where %s", where));
 
             Cursor c = _db.rawQuery(query, null);
 
@@ -132,9 +196,9 @@ public abstract class IDataLayer {
         final int MAX_BLOB_SIZE = 1000000;
         byte[] data = null;
 
-        String query = String.format("select length(%s) from %s%s",
+        String query = String.format(Locale.getDefault(), "select length(%s) from %s%s",
                 column, tableName,
-                where != null ? String.format(" where %s", where) : null);
+                where != null ? String.format(Locale.getDefault(), " where %s", where) : null);
 
         Cursor cursor = _db.rawQuery(query, null);
         if (cursor.moveToFirst()){
@@ -147,13 +211,13 @@ public abstract class IDataLayer {
 
                 ByteArrayOutputStream baos = new ByteArrayOutputStream(size);
                 while (size > 0) {
-                    query = String.format("select substr(%s,       %d, %d) from %s%s",
+                    query = String.format(Locale.getDefault(), "select substr(%s,       %d, %d) from %s%s",
                             column, start, length, tableName,
-                            where != null ? String.format(" where %s", where) : null);
+                            where != null ? String.format(Locale.getDefault(), " where %s", where) : null);
 
                     size -= MAX_BLOB_SIZE;
                     start += MAX_BLOB_SIZE;
-                    length = size > MAX_BLOB_SIZE ? MAX_BLOB_SIZE : size;
+                    length = Math.min(size, MAX_BLOB_SIZE);
 
                     cursor = _db.rawQuery(query, null);
 
@@ -171,9 +235,9 @@ public abstract class IDataLayer {
 
                 data = baos.toByteArray();
             } else {
-                query = String.format("select %s from %s%s",
+                query = String.format(Locale.getDefault(), "select %s from %s%s",
                         column, tableName,
-                        where != null ? String.format(" where %s", where) : null);
+                        where != null ? String.format(Locale.getDefault(), " where %s", where) : null);
 
                 cursor = _db.rawQuery(query, null);
 
@@ -196,11 +260,23 @@ public abstract class IDataLayer {
     }
 
 
-    public abstract boolean open();
-
-    public abstract boolean isOpen();
-
-    public abstract void close();
-
     public abstract TtVersion getVersion();
+
+
+    public abstract boolean hasErrors();
+
+
+    public interface Listener {
+        void onAction(int action);
+        void onError(String msg, String codePage, StackTraceElement[] stack);
+    }
+
+    public void addListener(Listener listener) {
+        _Listener = listener;
+    }
+
+
+    public void removeListener() {
+        _Listener = null;
+    }
 }

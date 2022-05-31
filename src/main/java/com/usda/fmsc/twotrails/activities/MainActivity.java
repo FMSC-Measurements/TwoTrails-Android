@@ -1,63 +1,84 @@
 package com.usda.fmsc.twotrails.activities;
 
-import android.Manifest;
-import android.app.ProgressDialog;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import com.google.android.material.snackbar.Snackbar;
-import com.google.android.material.tabs.TabLayout;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentPagerAdapter;
-import androidx.viewpager.widget.ViewPager;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AlertDialog;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.Lifecycle;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.widget.ViewPager2;
+
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 import com.usda.fmsc.android.AndroidUtils;
+import com.usda.fmsc.android.dialogs.DontAskAgainDialog;
 import com.usda.fmsc.android.dialogs.InputDialog;
 import com.usda.fmsc.twotrails.BuildConfig;
 import com.usda.fmsc.twotrails.Consts;
+import com.usda.fmsc.twotrails.DeviceSettings;
 import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.activities.base.TtAdjusterCustomToolbarActivity;
+import com.usda.fmsc.twotrails.TwoTrailsApp;
+import com.usda.fmsc.twotrails.activities.base.ProjectAdjusterActivity;
+import com.usda.fmsc.twotrails.activities.contracts.CreateZipDocument;
+import com.usda.fmsc.twotrails.activities.contracts.OpenDocumentTreePersistent;
 import com.usda.fmsc.twotrails.adapters.RecentProjectAdapter;
-import com.usda.fmsc.twotrails.data.DataAccessLayer;
-import com.usda.fmsc.twotrails.data.DataAccessUpgrader;
+import com.usda.fmsc.twotrails.data.DataAccessManager;
+import com.usda.fmsc.twotrails.data.MediaAccessManager;
 import com.usda.fmsc.twotrails.data.TwoTrailsSchema;
+import com.usda.fmsc.twotrails.data.UpgradeException;
 import com.usda.fmsc.twotrails.fragments.main.MainDataFragment;
 import com.usda.fmsc.twotrails.fragments.main.MainFileFragment;
 import com.usda.fmsc.twotrails.fragments.main.MainToolsFragment;
-import com.usda.fmsc.twotrails.logic.PolygonAdjuster;
-import com.usda.fmsc.twotrails.objects.RecentProject;
+import com.usda.fmsc.twotrails.logic.AdjustingException;
+import com.usda.fmsc.twotrails.objects.TtPolygon;
+import com.usda.fmsc.twotrails.objects.TwoTrailsProject;
 import com.usda.fmsc.twotrails.utilities.Export;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 import com.usda.fmsc.utilities.FileUtils;
 import com.usda.fmsc.utilities.StringEx;
 
+import org.joda.time.DateTime;
+
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Locale;
+import java.util.function.Function;
 
 
-public class MainActivity extends TtAdjusterCustomToolbarActivity {
+public class MainActivity extends ProjectAdjusterActivity {
+    private static final boolean SYNC_OPTION_ENABLED = false;
+
     private View progressLayout;
 
     private MainFileFragment mFragFile;
     private MainDataFragment mFragData;
     private MainToolsFragment mFragTools;
 
-    private ViewPager mViewPager;
+    private ViewPager2 mViewPager;
 
-    private boolean _fileOpen = false, exitOnAdjusted, askLocation, showedCrashed;
+    private boolean openingProject, exitOnAdjusted, showedCrashed;
 
-    private String tmpFile;
+    @Override
+    public boolean requiresGpsService() { return false; }
+
+    @Override
+    public boolean requiresRFService() { return false; }
+
+
 
     //region Main Activity Functions
     @Override
@@ -73,7 +94,7 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
 
         setUseExitWarning(true);
 
-        TabsPagerAdapter mTabsPagerAdapter = new TabsPagerAdapter(getSupportFragmentManager());
+        TabsFragmentAdapter mTabsFragmentAdapter = new TabsFragmentAdapter(getSupportFragmentManager(), getLifecycle());
 
         mFragFile = MainFileFragment.newInstance();
         mFragData = MainDataFragment.newInstance();
@@ -84,56 +105,46 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
         // Set up the ViewPager with the sections adapter.
         mViewPager = findViewById(R.id.mainViewPager);
         if (mViewPager != null) {
-            mViewPager.setAdapter(mTabsPagerAdapter);
+            mViewPager.setAdapter(mTabsFragmentAdapter);
         }
 
         //Setup Tabs
         TabLayout tabLayout = findViewById(R.id.mainTabs);
-        if (tabLayout != null) {
-            tabLayout.setupWithViewPager(mViewPager);
-        }
+        new TabLayoutMediator(tabLayout, mViewPager, (tab, position) -> {
+            String tabName = "";
+
+            try {
+                switch (position) {
+                    default:
+                    case 0: tabName = getResources().getString(R.string.main_tab_file); break;
+                    case 1: tabName = getResources().getString(R.string.main_tab_data); break;
+                    case 2: tabName = getResources().getString(R.string.main_tab_tools); break;
+                }
+            } catch (Exception e) {
+                getTtAppCtx().getReport().writeError(e.getMessage(), "MainActivity:TabLayoutMediator");
+            }
+
+            tab.setText(tabName);
+        }).attach();
+
     }
+
+    private boolean resuming = false;
 
     @Override
     protected void onResume() {
         super.onResume();
-        updateAppInfo();
 
-        if (!AndroidUtils.App.checkStoragePermission(MainActivity.this)) {
-            getFilePermissions();
-        }
-        else if (!askLocation && !AndroidUtils.App.requestPermission(MainActivity.this,
-                new String[] { Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION},
-                Consts.Codes.Requests.LOCATION, "TwoTrails needs location permissions in order to create collect location information.")) {
-            askLocation = true;
-        }
+        resuming = true;
 
         if (progressLayout != null) {
             progressLayout.setVisibility(View.GONE);
         }
 
-        if (getTtAppCtx().areFoldersInitiated()) {
-            final Intent intent = getIntent();
-            final String action = intent.getAction();
-
-            if (Intent.ACTION_VIEW.equals(action)){
-                Uri uri = intent.getData();
-
-                if (uri != null) {
-                    openFile(uri);
-                }
-            }
-
-            if (!getTtAppCtx().hasDAL() && getTtAppCtx().getDeviceSettings().getAutoOpenLastProject()) {
-                ArrayList<RecentProject> recentProjects = getTtAppCtx().getProjectSettings().getRecentProjects();
-                if (recentProjects.size() > 0) {
-                    openFile(recentProjects.get(0).File);
-                }
-            }
-        }
-
+        updateAppInfo();
 
         Intent startIntent = getIntent();
+        DeviceSettings ds = getTtAppCtx().getDeviceSettings();
 
         if (!showedCrashed && startIntent != null && startIntent.hasExtra(Consts.Codes.Data.CRASH)) {
             runOnUiThread(() -> {
@@ -143,46 +154,57 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
                             .setPositiveButton("Send", (dialog, which) -> TtUtils.SendCrashEmailToDev(MainActivity.this))
                             .setNeutralButton("Don't Send", null)
                             .show();
-                    showedCrashed = true;
                 } else {
                     new AlertDialog.Builder(MainActivity.this)
                             .setMessage("TwoTrails experienced a crash. You can send a crash log to the development team from inside the settings menu.")
                             .setPositiveButton(R.string.str_ok, null)
                             .show();
-                    showedCrashed = true;
                 }
+                showedCrashed = true;
+
+                openProjectOnResume();
             });
+        } else {
+            if (SYNC_OPTION_ENABLED) {
+                if (ds.isExternalSyncEnabled()) {
+                    if (getTtAppCtx().hasExternalDirAccess()) {
+                        if (getTtAppCtx().getTwoTrailsExternalDir() == null) {
+                            Toast.makeText(MainActivity.this, "Error creating external TwoTrails folder", Toast.LENGTH_LONG).show();
+                        } else {
+                            checkGpsOnResume();
+                        }
+                    } else {
+                        requestExternalDirectoryAccess();
+                    }
+                } else if (!ds.isExternalSyncEnabledAsked()) {
+                    //is not enabled and has not been asked before
 
-//            AndroidUtils.Device.isInternetAvailable(internetAvailable -> runOnUiThread(() -> {
-//                if (internetAvailable) {
-//                    new AlertDialog.Builder(MainActivity.this)
-//                            .setMessage("TwoTrails experienced a crash. Would you like to send an error report to the developer team to help prevent future crashes?")
-//                            .setPositiveButton("Send", (dialog, which) -> TtUtils.SendCrashEmailToDev(MainActivity.this))
-//                            .setNeutralButton("Don't Send", null)
-//                            .show();
-//                    showedCrashed = true;
-//                } else {
-//                    new AlertDialog.Builder(MainActivity.this)
-//                            .setMessage("TwoTrails experienced a crash. You can send a crash log to the development team from inside the settings menu.")
-//                            .setPositiveButton(R.string.str_ok, null)
-//                            .show();
-//                    showedCrashed = true;
-//                }
-//            }));
+                    DontAskAgainDialog dialog = new DontAskAgainDialog(
+                            MainActivity.this,
+                            DeviceSettings.EXTERNAL_SYNC_ENABLED_ASK,
+                            DeviceSettings.EXTERNAL_SYNC_ENABLED,
+                            ds.getPrefs());
+
+                    dialog.setMessage("TwoTrails requires access to the external storage for easy importing, exporting and map use." +
+                            "Without access all projects will need to be accessed manually. Would you like grant access?");
+
+                    dialog.setPositiveButton("Yes", (dialogInterface, i, value) -> {
+                        if (checkExternalDirectoryAccess()) {
+                            checkGpsOnResume();
+                        }
+                    }, false); //dont set ExternalSyncEnabled to true yet
+
+                    dialog.setNegativeButton("No", (dialogInterface, i, value) -> checkGpsOnResume(), false);
+
+                    dialog.show();
+                } else {
+                    //has been asked but did not enable
+                    checkGpsOnResume();
+                }
+            } else {
+                checkGpsOnResume();
+            }
         }
-    }
-
-//    @Override
-//    protected void onDestroy() {
-//        super.onDestroy();
-//        //closeFile();
-//        //finishAndRemoveTask();
-//    }
-
-    private void getFilePermissions() {
-        AndroidUtils.App.requestPermission(MainActivity.this,
-                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, android.Manifest.permission.READ_EXTERNAL_STORAGE},
-                Consts.Codes.Requests.CREATE_FILE, "TwoTrails needs storage permissions in order to Open and Create files.");
     }
 
     @Override
@@ -193,24 +215,22 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.mainMenuSettings:
-                startActivityForResult(new Intent(this, SettingsActivity.class), Consts.Codes.Activites.SETTINGS);
-                break;
-            case R.id.mainMenuGpsSettings:
-                startActivity(new Intent(this, SettingsActivity.class).
-                        putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.GPS_SETTINGS_PAGE));
-                break;
-            case R.id.mainMenuRangeFinderSettings:
-                startActivity(new Intent(this, SettingsActivity.class).
-                        putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.LASER_SETTINGS_PAGE));
-                break;
-            case R.id.mainMenuAbout:
-                new AlertDialog.Builder(MainActivity.this)
-                        .setTitle(R.string.app_name)
-                        .setMessage(String.format("App: %s\nData: %s", TtUtils.getApplicationVersion(getTtAppCtx()), TwoTrailsSchema.SchemaVersion))
-                        .show();
-                break;
+        int itemId = item.getItemId();
+        if (itemId == R.id.mainMenuSettings) {
+            updateAppInfoOnResult.launch(new Intent(this, SettingsActivity.class));
+        } else if (itemId == R.id.mainMenuGpsSettings) {
+            startActivity(new Intent(this, SettingsActivity.class).
+                    putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.GPS_SETTINGS_PAGE));
+        } else if (itemId == R.id.mainMenuRangeFinderSettings) {
+            startActivity(new Intent(this, SettingsActivity.class).
+                    putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.LASER_SETTINGS_PAGE));
+        } else if (itemId == R.id.mainMenuPrivacyPolicy) {
+            startActivity(new Intent(this, PrivacyPolicyActivity.class));
+        }else if (itemId == R.id.mainMenuAbout) {
+            new AlertDialog.Builder(MainActivity.this)
+                    .setTitle(R.string.app_name)
+                    .setMessage(String.format("App: %s\nData: %s", TtUtils.getAndroidApplicationVersion(getTtAppCtx()), TwoTrailsSchema.SchemaVersion))
+                    .show();
         }
 
         return super.onOptionsItemSelected(item);
@@ -223,11 +243,11 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
         * if calculating ask to wait
         *   if yes, return
         *   if no cancel calc and finish*/
-        if (isAboutToExit() && PolygonAdjuster.isProcessing()) {
+        if (isAboutToExit() && getTtAppCtx().isAdjusting()) {
             new AlertDialog.Builder(MainActivity.this)
                     .setMessage("Polygons are currently adjusting. Would you like to wait for them to finish?")
                     .setPositiveButton("Wait", (dialog, which) -> {
-                        if (!PolygonAdjuster.isProcessing()) {
+                        if (!getTtAppCtx().isAdjusting()) {
                             finishAndRemoveTask();
                         } else {
                             exitOnAdjusted = true;
@@ -237,91 +257,64 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
                     .setNeutralButton(R.string.str_cancel, null)
                     .show();
         } else {
-            super.onBackPressed();
-        }
-    }
-
-    @Override
-    public void finishAndRemoveTask() {
-        closeFile();
-        super.finishAndRemoveTask();
-    }
-
-    @Override
-    protected void onAdjusterStopped(PolygonAdjuster.AdjustResult result) {
-        super.onAdjusterStopped(result);
-
-        if (exitOnAdjusted) {
             finishAndRemoveTask();
         }
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    protected void onAppSettingsUpdated() {
+        updateAppInfo();
+    }
 
-        if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            switch (requestCode) {
-                case Consts.Codes.Requests.INTERNET:
-                    startActivity(new Intent(this, MapActivity.class));
-                    break;
-                case Consts.Codes.Requests.CREATE_FILE:
-                    if (!getTtAppCtx().areFoldersInitiated())
-                        getTtAppCtx().initFolders();
+    @Override
+    protected void onDestroy() {
+        if (getTtAppCtx() != null) {
+            getTtAppCtx().close();
+        }
 
-                    if (tmpFile != null)
-                        createFile(tmpFile);
+        super.onDestroy();
+    }
 
-                    if (!askLocation && !AndroidUtils.App.requestPermission(MainActivity.this,
-                            new String[] { Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION},
-                            Consts.Codes.Requests.LOCATION, "TwoTrails needs location permissions in order to create collect location information.")) {
-                        askLocation = true;
-                    }
-                    break;
-                case Consts.Codes.Requests.OPEN_FILE:
-                    if (!getTtAppCtx().areFoldersInitiated())
-                        getTtAppCtx().initFolders();
+    @Override
+    public void onAdjusterStopped(TwoTrailsApp.ProjectAdjusterResult result, AdjustingException.AdjustingError error) {
+        super.onAdjusterStopped(result, error);
 
-                    if (tmpFile != null)
-                        openFile(tmpFile);
-                    break;
-                case  Consts.Codes.Requests.LOCATION:
-                    getTtAppCtx().startGpsService();
-                    break;
-            }
-        } else {
-            if (requestCode == Consts.Codes.Requests.LOCATION) {
-                new AlertDialog.Builder(MainActivity.this)
-                        .setMessage("TwoTrails requires Location Services in order to work.")
-                        .setPositiveButton(R.string.str_ok, (dialog, which) -> AndroidUtils.App.requestLocationPermission(MainActivity.this, Consts.Codes.Requests.LOCATION))
-                        .setOnCancelListener(dialog -> finishAndRemoveTask())
-                        .show();
-            } else if (requestCode == Consts.Codes.Requests.CREATE_FILE) {
-                new AlertDialog.Builder(MainActivity.this)
-                        .setMessage("TwoTrails requires Storage Permission in order to work.")
-                        .setPositiveButton(R.string.str_ok, (dialog, which) -> AndroidUtils.App.requestStoragePermission(MainActivity.this, Consts.Codes.Requests.STORAGE))
-                        .setOnCancelListener(dialog -> finishAndRemoveTask())
-                        .show();
-            }
+        if (exitOnAdjusted) {
+            finishAndRemoveTask();
+        } else if (openingProject) {
+            onProjectOpened();
         }
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
+
+        if (requestCode == Consts.Codes.Activities.SEND_EMAIL_TO_DEV)
+            Toast.makeText(MainActivity.this, "Thank You for your feedback.", Toast.LENGTH_LONG).show();
+        else if (resultCode == Consts.Codes.Results.NO_DAL) {
+            if (getTtAppCtx().hasReport()) {
+                getTtAppCtx().getReport().writeError("DAL not found", "requestCode:" + requestCode);
+            } else {
+                Log.e(Consts.LOG_TAG, "DAL not found");
+            }
+        }
+    }
 
     //endregion
 
 
     //region Tabs
-    //TODO update to non deprecated version
-    public class TabsPagerAdapter extends FragmentPagerAdapter {
+    public class TabsFragmentAdapter extends FragmentStateAdapter {
 
-        private TabsPagerAdapter(FragmentManager fm) {
-            super(fm);
+
+        public TabsFragmentAdapter(@NonNull FragmentManager fragmentManager, @NonNull Lifecycle lifecycle) {
+            super(fragmentManager, lifecycle);
         }
 
-        @Override
         @NonNull
-        public Fragment getItem(int position) {
-
+        @Override
+        public Fragment createFragment(int position) {
             switch (position) {
                 default:
                 case 0:
@@ -331,224 +324,342 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
                 case 2:
                     return mFragTools;
                 //case 3:
-                    //return mFragDev;
+                //return mFragDev;
             }
         }
 
         @Override
-        public int getCount() {
+        public int getItemCount() {
             return 3;
-            //return 4;
         }
 
-        @Override
-        public CharSequence getPageTitle(int position) {
-            switch (position) {
-                default:
-                case 0: return getString(R.string.main_tab_file);
-                case 1: return getString(R.string.main_tab_data);
-                case 2: return getString(R.string.main_tab_tools);
-                case 3: return getString(R.string.main_tab_devices);
-            }
-        }
+
     }
     //endregion
 
 
     //region Actions
-    public final int UPDATE_INFO = 101;
-    public final int UPDATE_INFO_AND_GOTO_DATA_TAB = 102;
-    public final int GOTO_DATA_TAB = 103;
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        switch (requestCode) {
-            case Consts.Codes.Dialogs.REQUEST_FILE: {
-                if(data != null && data.getData() != null) {
-                    openFile(data.getData());
-                }
-                break;
+    private final ActivityResultLauncher<Uri> requestExternalDirectoryAccess = registerForActivityResult(new OpenDocumentTreePersistent(), dir ->  {
+        if (dir != null) {
+            try {
+                getTtAppCtx().setExternalRootDir(dir);
+            } catch (Exception e) {
+                Toast.makeText(MainActivity.this, "Error creating external TwoTrails folder", Toast.LENGTH_LONG).show();
             }
-            case UPDATE_INFO_AND_GOTO_DATA_TAB:
-                gotoDataTab();
-            case UPDATE_INFO: {
-                updateAppInfo();
-                break;
-            }
-            case GOTO_DATA_TAB: {
-                gotoDataTab();
-                break;
-            }
-            case Consts.Codes.Activites.SETTINGS: {
-                updateAppInfo();
-                break;
-            }
-            case Consts.Codes.Activites.SEND_EMAIL_TO_DEV: {
-                Toast.makeText(MainActivity.this, "Thank You for your feedback.", Toast.LENGTH_LONG).show();
-                break;
-            }
-        }
-
-        if (resultCode == Consts.Codes.Results.NO_DAL) {
-            if (getTtAppCtx().hasReport()) {
-                getTtAppCtx().getReport().writeError("DAL not found", "requestCode:" + requestCode);
-            } else {
-                Log.e(Consts.LOG_TAG, "DAL not found");
-            }
-        }
-    }
-
-
-    private void openFile(Uri uri) {
-        openFile(uri.getPath());
-    }
-
-    private void openFile(String filePath) {
-        if (PolygonAdjuster.isProcessing()) {
-            Toast.makeText(this, "Currently Adjusting Polygons.", Toast.LENGTH_LONG).show();
         } else {
-            if (_fileOpen) {
-                closeFile();
-            }
+            Toast.makeText(MainActivity.this, "Cannot create external TwoTrails folder without permissions", Toast.LENGTH_LONG).show();
+        }
 
-            if (!AndroidUtils.App.requestStoragePermission(MainActivity.this, Consts.Codes.Requests.OPEN_FILE)) {
-                tmpFile = filePath;
-                return;
+        if (resuming && requestGpsAccess()) {
+            openProjectOnResume();
+        }
+    });
+
+    private void requestExternalDirectoryAccess() {
+        Uri initDir = AndroidUtils.Files.getDocumentsUri(getTtAppCtx());
+        requestExternalDirectoryAccess.launch(initDir);
+    }
+
+    private boolean checkExternalDirectoryAccess() {
+        if (!getTtAppCtx().hasExternalDirAccess()) {
+
+            requestExternalDirectoryAccess();
+
+            return false; //wait for callback
+        }
+
+        return true;
+    }
+
+
+    private final ActivityResultLauncher<String[]> requestInternalLocationPermissionOnResult = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result ->
+            onLocationRequestResult(TtUtils.Collections.areAllTrue(result.values())));
+
+    private final ActivityResultLauncher<String> requestBackgroundLocationPermissionOnResult = registerForActivityResult(new ActivityResultContracts.RequestPermission(), this::onBackgroundLocationRequestResult);
+
+
+    private void onLocationRequestResult(boolean hasPermissions) {
+        if (hasPermissions) {
+            startGps();
+
+            AndroidUtils.App.requestBackgroundLocationPermission(MainActivity.this,
+                    requestBackgroundLocationPermissionOnResult,
+                    getString(R.string.diag_back_loc));
+        } else {
+            Toast.makeText(MainActivity.this, "Cannot use GPS without location permissions", Toast.LENGTH_LONG).show();
+        }
+
+        if (resuming) {
+            openProjectOnResume();
+        }
+    }
+
+    private void onBackgroundLocationRequestResult(boolean hasPermissions) {
+        if (!(hasPermissions || getTtAppCtx().getDeviceSettings().getKeepScreenOn())) {
+            new AlertDialog.Builder(MainActivity.this)
+                    .setMessage(R.string.diag_keep_on_req)
+                    .setPositiveButton(R.string.str_ok, (dialog, which) -> {
+                        getTtAppCtx().getDeviceSettings().setKeepScreenOn(true);
+                    })
+                    .setNeutralButton(R.string.str_cancel, null)
+                    .show();
+        }
+    }
+
+    private boolean requestGpsAccess() {
+        return AndroidUtils.App.requestLocationPermission(MainActivity.this,
+                requestInternalLocationPermissionOnResult,
+                getString(R.string.diag_loc));
+    }
+
+    private final ActivityResultLauncher<String[]> requestBluetoothPermissionOnResult = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result ->
+            onBluetoothRequestResult(TtUtils.Collections.areAllTrue(result.values())));
+
+    private void onBluetoothRequestResult(boolean hasPermissions) {
+        if (hasPermissions) {
+            startGps();
+        } else {
+            Toast.makeText(MainActivity.this, "Cannot use GPS without bluetooth permissions", Toast.LENGTH_LONG).show();
+        }
+
+        if (resuming) {
+            openProjectOnResume();
+        }
+    }
+
+    private boolean requestBluetoothPermissions() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ?
+                AndroidUtils.App.requestBluetoothScanPermission(MainActivity.this,
+                        requestBluetoothPermissionOnResult,
+                        getString(R.string.diag_bt_loc))
+                :
+                AndroidUtils.App.requestBluetoothPermission(MainActivity.this,
+                        requestBluetoothPermissionOnResult,
+                        getString(R.string.diag_bt_loc));
+    }
+
+    private void checkGpsOnResume() {
+        if (resuming) {
+            DeviceSettings ds = getTtAppCtx().getDeviceSettings();
+            String devId = ds.getGpsDeviceID();
+
+            if (ds.isGpsAlwaysOn() && (StringEx.isEmpty(devId) ? requestGpsAccess() : requestBluetoothPermissions())) {
+                openProjectOnResume();
             } else {
-                tmpFile = null;
+                openProjectOnResume();
+            }
+        }
+    }
+
+    private void startGps() {
+        if (getTtAppCtx().isGpsServiceStarted()) {
+            getTtAppCtx().getGps().startGps();
+        } else {
+            getTtAppCtx().startGpsService();
+        }
+    }
+
+
+    private void openProjectOnResume() {
+        if (resuming) {
+            resuming = false;
+
+            final Intent startIntent = getIntent();
+            final DeviceSettings ds = getTtAppCtx().getDeviceSettings();
+
+            new Thread(() -> {
+                final String action = startIntent.getAction();
+
+                if (Intent.ACTION_VIEW.equals(action)){
+                    openProjectFromIntent(startIntent);
+                } else if (!getTtAppCtx().hasDAL() && ds.getAutoOpenLastProject()) {
+                    openMostRecentProject();
+                }
+
+
+            }).start();
+        }
+    }
+
+    private void openProjectFromIntent(Intent intent) {
+        Uri uri = intent.getData();
+
+        if (uri != null) {
+            importProject(uri);
+        }
+    }
+
+    private void openMostRecentProject() {
+        ArrayList<TwoTrailsProject> twoTrailsProjects = getTtAppCtx().getProjectSettings().getRecentProjects();
+        if (twoTrailsProjects.size() > 0) {
+            TwoTrailsProject rp = twoTrailsProjects.get(0);
+            openProject(rp.Name, rp.TTXFile);
+        }
+    }
+
+
+    private void openProject(String projectName, String projectFileName) {
+        if (continueIfNotProcessing()) {
+            TwoTrailsApp app = getTtAppCtx();
+            if (app.hasDAL()) {
+                closeProject();
             }
 
             try {
-                if (!FileUtils.fileExists(filePath)) {
-                    createFile(filePath);
+                openingProject = true;
+                if (projectFileName == null) {
+                    projectFileName = TtUtils.projectToFileNameTTX(projectName);
+                }
+
+                DataAccessManager dam = DataAccessManager.openDAL(app, projectFileName, projectName);
+
+                //just checking for basic table structure for now
+                if (dam.dbHasErrors()) {
+                    //TODO has errors
+                    runOnUiThread(() -> Toast.makeText(MainActivity.this, "Project file is corrupted. Please try opening on the PC application or contact the developer.", Toast.LENGTH_LONG).show());
+                    closeProject();
                 } else {
-                    getTtAppCtx().setDAL(new DataAccessLayer(filePath, getTtAppCtx()));
+                    app.setDAM(dam);
 
-                    if (getTtAppCtx().getDAL().getVersion().toIntVersion() < TwoTrailsSchema.SchemaVersion.toIntVersion()) {
-                        switch (DataAccessUpgrader.UpgradeDAL(getTtAppCtx(), getTtAppCtx().getDAL())) {
-                            case Successful:
-                                openFile(filePath); break;
-                            case Failed:
-                                runOnUiThread(() -> Toast.makeText(MainActivity.this, "Upgrade Failed. See Log File for details.", Toast.LENGTH_SHORT).show());
-                                break;
-                            case VersionUnsupported: {
-                                runOnUiThread(() -> Toast.makeText(MainActivity.this, "This file needs an Upgrade that needs to be done on the PC", Toast.LENGTH_SHORT).show());
-                                break;
-                            }
-                        }
+                    if (dam.justCreated()) {
+                        runOnUiThread(() -> Toast.makeText(MainActivity.this, "Project Created", Toast.LENGTH_LONG).show());
+                        updateAppInfoAndGotoDataTabOnResult.launch(new Intent(this, ProjectActivity.class));
                     } else {
-                        if (getTtAppCtx().getDAL().needsAdjusting())
-                            PolygonAdjuster.adjust(getTtAppCtx());
+                        if (app.getDAL().needsAdjusting()) {
+                            runOnUiThread(() -> Toast.makeText(MainActivity.this, "Adjusting polygons in project", Toast.LENGTH_LONG).show());
+                            app.adjustProject(true);
+                        } else {
+                            if (dam.justUpgraded()) {
+                                runOnUiThread(() -> Toast.makeText(MainActivity.this, "Project Upgraded", Toast.LENGTH_LONG).show());
+                            }
 
-                        runOnUiThread(() -> {
-                            gotoDataTab();
-                            _fileOpen = true;
-                            updateAppInfo();
-                        });
+                            onProjectOpened();
+                        }
                     }
                 }
+            } catch (UpgradeException ue) {
+                app.getReport().writeError(ue.getMessage(), "MainActivity:openProject:upgradeFailed", ue.getStackTrace());
+                runOnUiThread(() -> Toast.makeText(MainActivity.this, "Upgrade Failed. See Log File for details.", Toast.LENGTH_SHORT).show());
+
+                if (openingProject) {
+                    closeProject();
+                }
+
+                openingProject = false;
             } catch (Exception e) {
-                getTtAppCtx().getReport().writeError(e.getMessage(), "MainActivity:openFile");
+                app.getReport().writeError(e.getMessage(), "MainActivity:openProject", e.getStackTrace());
 
-                runOnUiThread(() -> {
-                    _fileOpen = false;
-                    Toast.makeText(MainActivity.this, "File Failed to Open", Toast.LENGTH_SHORT).show();
-                });
+                openingProject = false;
+
+                runOnUiThread(() -> Toast.makeText(MainActivity.this, "Project Failed to Open", Toast.LENGTH_SHORT).show());
+
+                if (openingProject) {
+                    closeProject();
+                }
             }
         }
     }
 
-    private void createFile(String filePath) {
-        closeFile();
+    private void onProjectOpened() {
+        TwoTrailsApp app = getTtAppCtx();
+        openingProject = false;
 
-        if (!AndroidUtils.App.requestStoragePermission(MainActivity.this, Consts.Codes.Requests.CREATE_FILE)) {
-            tmpFile = filePath;
-            return;
-        } else {
-            tmpFile = null;
-        }
+        runOnUiThread(() -> {
+            gotoDataTab();
+            updateAppInfo();
+        });
 
-        File file = new File(filePath);
+        if (getTtAppCtx().hasMAL()) {
+            try {
+                MediaAccessManager mam = MediaAccessManager.openMAL(app,
+                        app.getCurrentProject().TTXFile.replace(Consts.FileExtensions.TWO_TRAILS, Consts.FileExtensions.TWO_TRAILS_MEDIA_PACKAGE));
 
-        CharSequence toastMessage = "Project Created";
+                if (mam.dbHasErrors()) {
+                    //TODO has errors
+                    runOnUiThread(() -> Toast.makeText(MainActivity.this, "Media Database has Errors", Toast.LENGTH_LONG).show());
+                }
 
-        if (file.exists() && !file.isDirectory()) {
-            if (!file.delete()) {
-                Toast.makeText(this, "Unable to overwrite current file.", Toast.LENGTH_SHORT).show();
-                return;
+                app.setMAM(mam);
+            } catch (UpgradeException ue) {
+                runOnUiThread(() -> app.getReport().writeError(ue.getMessage(), "MainActivity:onProjectOpened:upgradeFailed", ue.getStackTrace()));
+            } catch (Exception e) {
+                app.getReport().writeError(e.getMessage(), "MainActivity:onProjectOpened", e.getStackTrace());
+                runOnUiThread(() -> Toast.makeText(MainActivity.this, "Failed to Open Media Package", Toast.LENGTH_SHORT).show());
             }
         }
-
-        try {
-            getTtAppCtx().setDAL(new DataAccessLayer(filePath, getTtAppCtx()));
-
-            getTtAppCtx().getProjectSettings().initProjectSettings(getTtAppCtx().getDAL());
-
-            startActivityForResult(new Intent(this, ProjectActivity.class), UPDATE_INFO_AND_GOTO_DATA_TAB);
-
-        } catch (Exception e) {
-            getTtAppCtx().getReport().writeError("MainActivity:CreateFile", e.getMessage(), e.getStackTrace());
-            e.printStackTrace();
-            toastMessage = "Project creation failed";
-        }
-
-        Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT).show();
     }
 
-    private void closeFile() {
+    private void createProject(String projectName) {
+        createProject(projectName, false);
+    }
+
+    private void createProject(String projectName, boolean overwrite) {
+        if (continueIfNotProcessing()) {
+            closeProject();
+
+            String projectFileName = TtUtils.projectToFileNameTTX(projectName);
+
+            File projectFile = getDatabasePath(projectFileName);
+
+            if (projectFile != null && projectFile.exists()) {
+                if (overwrite) {
+                    if (!projectFile.delete()) {
+                        Toast.makeText(MainActivity.this, "Unable to delete project.", Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                } else {
+                    Toast.makeText(MainActivity.this, String.format("Project %s already exists", projectName), Toast.LENGTH_LONG).show();
+                    return;
+                }
+            }
+
+            openProject(projectName, projectFileName);
+        }
+    }
+
+
+    private void closeProject() {
         if (getTtAppCtx().hasDAL()) {
             getTtAppCtx().getDAL().close();
-            getTtAppCtx().setDAL(null);
+            getTtAppCtx().setDAM(null);
         }
 
         if (getTtAppCtx().hasMAL()) {
             getTtAppCtx().getMAL().close();
-            getTtAppCtx().setMAL(null);
+            getTtAppCtx().setMAM(null);
         }
+
+        updateAppInfo();
     }
 
+
+    private boolean continueIfNotProcessing() {
+        if (getTtAppCtx().isAdjusting()) {
+            Toast.makeText(this, "Currently Adjusting Polygons.", Toast.LENGTH_LONG).show();
+            return false;
+        }
+
+        return true;
+    }
+
+
+    private final ActivityResultLauncher<Intent> updateAppInfoOnResult = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> updateAppInfo());
     private void updateAppInfo() {
-//        if (viewCreated) {
-//            boolean updatePagerAdapter = false;
-//            if (!mFragFile.isViewCreated()) {
-//                mFragFile = MainFileFragment.newInstance();
-//                updatePagerAdapter = true;
-//            }
-//
-//            if (!mFragData.isViewCreated()) {
-//                mFragData = MainDataFragment.newInstance();
-//                mTabsPagerAdapter.notifyDataSetChanged();
-//                updatePagerAdapter = true;
-//            }
-//
-//            if (!mFragTools.isViewCreated()) {
-//                mFragTools = MainToolsFragment.newInstance();
-//                mTabsPagerAdapter.notifyDataSetChanged();
-//                updatePagerAdapter = true;
-//            }
-//
-//            if (updatePagerAdapter) {
-//                mTabsPagerAdapter.notifyDataSetChanged();
-//
-//                if (mViewPager != null) {
-//                    mViewPager.setAdapter(mTabsPagerAdapter);
-//                }
-//            }
-//        }
-
         boolean enable = false;
-        if(getTtAppCtx().hasDAL()) {
-            getTtAppCtx().getProjectSettings().updateRecentProjects(
-                    new RecentProject(getTtAppCtx().getDAL().getProjectID(), getTtAppCtx().getDAL().getFilePath()));
-            
-            setTitle("TwoTrails - " + getTtAppCtx().getDAL().getProjectID());
-            enable = true;
 
-            mFragFile.updateInfo(getTtAppCtx().getDAL());
-        } else {
-            setTitle(R.string.app_name);
+        if (getTtAppCtx() != null) {
+            if (getTtAppCtx().hasDAL()) {
+                getTtAppCtx().getProjectSettings().updateRecentProjects(
+                        new TwoTrailsProject(getTtAppCtx().getDAL().getProjectID(), getTtAppCtx().getDAL().getFileName()));
+
+                setTitle("TwoTrails - " + getTtAppCtx().getDAL().getProjectID());
+                enable = true;
+
+                mFragFile.updateInfo();
+            } else {
+                setTitle(R.string.app_name);
+            }
         }
 
         mFragFile.enableButtons(enable);
@@ -557,48 +668,182 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
         //mFragDev.enableButtons(enable);
     }
 
+
+    private final ActivityResultLauncher<Intent> gotoDataTabOnResult = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> gotoDataTab());
     private void gotoDataTab() {
         mViewPager.setCurrentItem(1);
     }
 
-    private void duplicateFile(final String fileName) {
-        if (getTtAppCtx().getDAL().duplicate(fileName)) {
-            View view = findViewById(R.id.parent);
-            if (view != null) {
-                Snackbar snackbar = Snackbar.make(view, "File duplicated", Snackbar.LENGTH_LONG).setAction("Open", v -> openFile(fileName))
-                .setActionTextColor(AndroidUtils.UI.getColor(getBaseContext(), R.color.primaryLighter));
+    private final ActivityResultLauncher<Intent> updateAppInfoAndGotoDataTabOnResult = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+        updateAppInfo();
+        gotoDataTab();
+    });
 
-                AndroidUtils.UI.setSnackbarTextColor(snackbar, Color.WHITE);
 
-                snackbar.show();
-            } else {
-                Toast.makeText(this, "File duplicated", Toast.LENGTH_SHORT).show();
-            }
+    private final ActivityResultLauncher<String> importFileOnResult = registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
+        if (uri != null) {
+            importProject(uri);
+        }
+    });
+    private void importProject(Uri filePath) {
+        String fp = filePath.getPath();
+        if (fp == null)
+            throw new RuntimeException("Invalid Filepath");
+
+        if (fp.toLowerCase().endsWith(Consts.FileExtensions.TWO_TRAILS)) {
+            importTTX(filePath);
+        } else if (fp.toLowerCase().endsWith(Consts.FileExtensions.TWO_TRAILS_MEDIA_PACKAGE)) {
+            importTTMPX(filePath);
+        } else if (fp.toLowerCase().endsWith(".zip")) {
+            importTtPackage(filePath);
         } else {
-            Toast.makeText(this, "File failed to duplicate", Toast.LENGTH_SHORT).show();
+            getTtAppCtx().getReport().writeWarn(String.format(Locale.getDefault(), "Invalid import type: '%s'", fp), "MainActivity:importProject");
+            Toast.makeText(MainActivity.this, "Invalid File Type", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void importTTX(Uri filePath) {
+        try {
+            String fp = filePath.getPath();
+            if (fp == null)
+                throw new RuntimeException("Invalid Filepath");
+
+            if (!fp.endsWith(Consts.FileExtensions.TWO_TRAILS))
+                throw new RuntimeException("Invalid File Type");
+
+            String fileName = FileUtils.getFileName(fp);
+
+            if (DataAccessManager.localDALExists(getTtAppCtx(), fileName)) {
+                overwriteLocalProjectByImportDialog(fileName, filePath);
+            } else {
+                DataAccessManager dam = DataAccessManager.importDAL(getTtAppCtx(), filePath);
+
+                String projectName = dam.getDAL().getProjectID();
+                dam.close();
+
+                openProject(projectName, fileName);
+            }
+        } catch (Exception e) {
+            getTtAppCtx().getReport().writeError(e.getMessage(), "MainActivity:importTTX", e.getStackTrace());
+            Toast.makeText(MainActivity.this, "Error Importing Project", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void importTTMPX(Uri filePath) {
+        try {
+            String fp = filePath.getPath();
+            if (fp == null)
+                throw new RuntimeException("Invalid Filepath");
+
+            if (!fp.endsWith(Consts.FileExtensions.TWO_TRAILS_MEDIA_PACKAGE))
+                throw new RuntimeException("Invalid File Type");
+
+            String fileName = FileUtils.getFileName(fp);
+
+            if (MediaAccessManager.localMALExists(getTtAppCtx(), fileName)) {
+                overwriteLocalMediaPackageByImportDialog(fileName, filePath);
+            } else {
+                MediaAccessManager mam = MediaAccessManager.importMAL(getTtAppCtx(), filePath);
+
+                if (fileName.equals(getTtAppCtx().getDAM().getDBFile().getName())) {
+                    getTtAppCtx().setMAM(mam);
+                }
+            }
+        } catch (Exception e) {
+            getTtAppCtx().getReport().writeError(e.getMessage(), "MainActivity:importTTMPX", e.getStackTrace());
+            Toast.makeText(MainActivity.this, "Error Importing Media Package", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    //Todo add import of media files, option to not open project after import if multiple projects detected
+    private void importTtPackage(Uri filePath) {
+        String fp = filePath.getPath();
+        if (fp == null)
+            throw new RuntimeException("Invalid Filepath");
+
+        if (!fp.endsWith(".zip"))
+            throw new RuntimeException("Invalid File Type");
+
+        File tmpInternalZip = new File(getTtAppCtx().getCacheDir(), FileUtils.getFileName(fp));
+        File tmpInternalZipDir = new File(getTtAppCtx().getCacheDir(), FileUtils.getFileNameWoExt(fp));
+
+        try {
+            if (tmpInternalZipDir.exists()) {
+                if (!FileUtils.deleteDirectory(tmpInternalZipDir)) {
+                    throw new RuntimeException("Unable to delete unzipped folder");
+                }
+            }
+
+            AndroidUtils.Files.copyFile(getTtAppCtx(), filePath, Uri.fromFile(tmpInternalZip));
+
+            FileUtils.unzip(tmpInternalZip, tmpInternalZipDir);
+
+            for (File file : tmpInternalZipDir.listFiles()) {
+                importFromFile(file);
+            }
+        } catch (IOException e) {
+            getTtAppCtx().getReport().writeError(e.getMessage(), "MainActivity:importTtPackage");
+            Toast.makeText(MainActivity.this, "Error Importing Project. See Log for details.", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void importFromFile(File item) {
+        if (item.isDirectory()) {
+            for (File subItem : item.listFiles()) {
+                importFromFile(subItem);
+            }
+        } else if (item.getPath().toLowerCase().endsWith(Consts.FileExtensions.TWO_TRAILS)) {
+            importTTX(Uri.fromFile(item));
+        } else if (item.getPath().toLowerCase().endsWith(Consts.FileExtensions.TWO_TRAILS_MEDIA_PACKAGE)) {
+            importTTMPX(Uri.fromFile(item));
+        }
+    }
+
+    private final ActivityResultLauncher<String> exportProjectLauncher = registerForActivityResult(new CreateZipDocument(),
+            uri -> {
+                if (uri != null) {
+                    exportProject(uri);
+                } else {
+                    Toast.makeText(MainActivity.this, "Error selecting file for export", Toast.LENGTH_LONG).show();
+                }
+            });
+    private void exportProject(Uri filePath) {
+        try {
+            if (filePath != null) {
+                File pcPkgFile = Export.exportProjectPackage(getTtAppCtx(), getTtAppCtx().getDAL(), getTtAppCtx().getMAL());
+
+                if (pcPkgFile != null) {
+                    AndroidUtils.Files.copyFile(getTtAppCtx(), Uri.fromFile(pcPkgFile), filePath);
+                } else {
+                    throw new Exception("Unable to create export file");
+                }
+            } else {
+                throw new Exception("Unable to get file path from uri");
+            }
+        } catch (Exception e) {
+            getTtAppCtx().getReport().writeError(e.getMessage(), "MainActivity:exportProject", e.getStackTrace());
+            Toast.makeText(MainActivity.this, "Error Exporting Project", Toast.LENGTH_LONG).show();
         }
     }
     //endregion
 
 
     //region Dialogs
-    private void CreateFileDialog() {
-        final InputDialog inputDialog = new InputDialog(this);
-        inputDialog.setTitle("File Name");
+    private void createProjectDialog() {
+        final InputDialog inputDialog = new InputDialog(MainActivity.this);
+        inputDialog.setTitle("Project Name");
 
         inputDialog.setPositiveButton("Create", (dialog, whichButton) -> {
-            String value = inputDialog.getText().trim();
+            String projectName = inputDialog.getText().trim();
 
-            if (value.length() > 0) {
-                String filePath = TtUtils.getTtFilePath(value);
-
-                if (FileUtils.fileExists(filePath)) {
-                    OverwriteFileDialog(filePath);
+            if (projectName.length() > 0) {
+                if (DataAccessManager.localDALExists(getTtAppCtx(), TtUtils.projectToFileNameTTX(projectName))) {
+                    overwriteLocalProjectByCreateDialog(projectName);
                 } else {
-                    createFile(filePath);
+                    createProject(projectName);
                 }
             } else {
-                runOnUiThread(() -> Toast.makeText(MainActivity.this, "Invalid Filename", Toast.LENGTH_LONG).show());
+                runOnUiThread(() -> Toast.makeText(MainActivity.this, "Invalid Project Name", Toast.LENGTH_LONG).show());
             }
         });
 
@@ -607,22 +852,175 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
         inputDialog.show();
     }
 
-    private void OverwriteFileDialog(final String filePath) {
-        AlertDialog.Builder alert = new AlertDialog.Builder(this);
-        alert.setTitle("File Exists");
-        alert.setMessage("Do you want to overwrite the file?");
+    private void overwriteLocalProjectByCreateDialog(final String projectName) {
+        AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
+        alert.setTitle("Project Exists");
+        alert.setMessage(String.format("The current project '%s' already exists. Do you want to overwrite the project?", projectName));
 
-        alert.setPositiveButton("Yes", (dialog, whichButton) -> createFile(filePath));
+        alert.setPositiveButton("Yes", (dialog, whichButton) -> createProject(projectName, true));
 
         alert.setNegativeButton("No",
-                (dialog, which) -> CreateFileDialog());
+                (dialog, which) -> createProjectDialog());
+        alert.show();
+    }
+
+    private void overwriteLocalProjectByImportDialog(final String fileName, Uri filePath) {
+        AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
+        alert.setTitle("Project Exists");
+        alert.setMessage(String.format(Locale.getDefault(), "The current file '%s' already exists. Do you want to overwrite or rename the project?", fileName));
+
+        alert.setPositiveButton("Overwrite", (dialog, which) -> {
+            try {
+                DataAccessManager dam = DataAccessManager.importDAL(getTtAppCtx(), filePath);
+
+                String projectName = dam.getDAL().getProjectID();
+                dam.close();
+
+                openProject(projectName, fileName);
+            } catch (IOException e) {
+                getTtAppCtx().getReport().writeError(e.getMessage(), "MainActivity:overwriteLocalProjectByImportDialog:overwrite");
+                Toast.makeText(MainActivity.this, "Error Overwriting Project", Toast.LENGTH_LONG).show();
+            }
+        });
+
+        alert.setNegativeButton("Rename", (dialog, which) -> {
+            final InputDialog inputDialog = new InputDialog(MainActivity.this);
+            inputDialog.setTitle("New File Name");
+
+            inputDialog.setPositiveButton("Rename", (d2, wb2) -> {
+                try {
+                    String newFileName = inputDialog.getText();
+
+                    if (!newFileName.endsWith(Consts.FileExtensions.TWO_TRAILS)) {
+                        newFileName += Consts.FileExtensions.TWO_TRAILS;
+                    }
+
+                    DataAccessManager dam = DataAccessManager.importAndRenameDAL(getTtAppCtx(), filePath, newFileName);
+
+                    String projectName = dam.getDAL().getProjectID();
+                    dam.close();
+
+                    openProject(projectName, fileName);
+                } catch (IOException e) {
+                    getTtAppCtx().getReport().writeError(e.getMessage(), "MainActivity:overwriteLocalProjectByImportDialog:rename");
+                    Toast.makeText(MainActivity.this, "Error Renaming Project", Toast.LENGTH_LONG).show();
+                }
+            });
+
+            inputDialog.setNegativeButton("Cancel", null);
+
+            inputDialog.show();
+        });
+
+        alert.setNeutralButton(R.string.str_cancel, null);
+        alert.show();
+    }
+
+    private void overwriteLocalMediaPackageByImportDialog(final String fileName, Uri filePath) {
+        AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
+        alert.setTitle("Media File Exists");
+        alert.setMessage(String.format("The current file '%s' already exists. Do you want to overwrite or rename it?", fileName));
+
+        alert.setPositiveButton("Overwrite", (dialog, which) -> {
+            try {
+                MediaAccessManager mam = MediaAccessManager.importMAL(getTtAppCtx(), filePath);
+                if (fileName.equals(getTtAppCtx().getDAM().getDBFile().getName())) {
+                    getTtAppCtx().setMAM(mam);
+                }
+            } catch (IOException e) {
+                getTtAppCtx().getReport().writeError(e.getMessage(), "MainActivity:overwriteLocalMediaPackageByImportDialog:overwrite");
+                Toast.makeText(MainActivity.this, "Error Overwriting Media Package", Toast.LENGTH_LONG).show();
+            }
+        });
+
+        alert.setNegativeButton("Rename", (dialog, which) -> {
+            final InputDialog inputDialog = new InputDialog(MainActivity.this);
+            inputDialog.setTitle("New File Name");
+
+            inputDialog.setPositiveButton("Rename", (d2, wb2) -> {
+                try {
+                    String newFileName = inputDialog.getText();
+
+                    if (!newFileName.endsWith(Consts.FileExtensions.TWO_TRAILS)) {
+                        newFileName += Consts.FileExtensions.TWO_TRAILS;
+                    }
+
+                    MediaAccessManager mam = MediaAccessManager.importAndRenameMAL(getTtAppCtx(), filePath, newFileName);
+                    if (FileUtils.getFileName(newFileName).equals(getTtAppCtx().getDAM().getDBFile().getName())) {
+                        getTtAppCtx().setMAM(mam);
+                    }
+                } catch (IOException e) {
+                    getTtAppCtx().getReport().writeError(e.getMessage(), "MainActivity:overwriteLocalMediaPackageByImportDialog:rename");
+                    Toast.makeText(MainActivity.this, "Error Renaming Media Package", Toast.LENGTH_LONG).show();
+                }
+            });
+
+            inputDialog.setNegativeButton("Cancel", null);
+
+            inputDialog.show();
+        });
+
+        alert.setNeutralButton(R.string.str_cancel, null);
+        alert.show();
+    }
+
+    private void overwriteLocalProjectAndMediaPackageByImportDialog(String baseFileName, Uri ttxFilePath, Uri ttmpxFilePath) {
+        AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
+        alert.setTitle("Project Exists");
+        alert.setMessage(String.format(Locale.getDefault(), "The project files '%s' already exist. Do you want to overwrite or rename the project?", baseFileName));
+
+        alert.setPositiveButton("Overwrite", (dialog, which) -> {
+            try {
+                DataAccessManager dam = DataAccessManager.importDAL(getTtAppCtx(), ttxFilePath);
+                MediaAccessManager.importMAL(getTtAppCtx(), ttmpxFilePath).close();
+
+                String projectID = dam.getDAL().getProjectID();
+                String fileName = dam.getDatabaseName();
+                dam.close();
+
+                openProject(projectID, fileName);
+            } catch (IOException e) {
+                getTtAppCtx().getReport().writeError(e.getMessage(), "MainActivity:overwriteLocalProjectAndMediaPackageByImportDialog:overwrite");
+                Toast.makeText(MainActivity.this, "Error Overwriting Project", Toast.LENGTH_LONG).show();
+            }
+        });
+
+        alert.setNegativeButton("Rename", (dialog, which) -> {
+            final InputDialog inputDialog = new InputDialog(MainActivity.this);
+            inputDialog.setTitle("New File Name");
+
+            inputDialog.setPositiveButton("Rename", (d2, wb2) -> {
+                try {
+                    String newTtxFileName = inputDialog.getText(), newTtmpxFileName;
+                    String newBaseFileName = newTtxFileName.substring(0, newTtxFileName.lastIndexOf("."));
+
+                    newTtxFileName = newBaseFileName + Consts.FileExtensions.TWO_TRAILS;
+                    newTtmpxFileName = newBaseFileName + Consts.FileExtensions.TWO_TRAILS_MEDIA_PACKAGE;
+
+                    DataAccessManager dam = DataAccessManager.importAndRenameDAL(getTtAppCtx(), ttxFilePath, newTtxFileName);
+                    MediaAccessManager.importAndRenameMAL(getTtAppCtx(), ttmpxFilePath, newTtmpxFileName).close();
+                    dam.close();
+
+                    openProject(newBaseFileName, newTtmpxFileName);
+                } catch (IOException e) {
+                    getTtAppCtx().getReport().writeError(e.getMessage(), "MainActivity:overwriteLocalProjectAndMediaPackageByImportDialog:rename");
+                    Toast.makeText(MainActivity.this, "Error Renaming Project", Toast.LENGTH_LONG).show();
+                }
+            });
+
+            inputDialog.setNegativeButton("Cancel", null);
+
+            inputDialog.show();
+        });
+
+        alert.setNeutralButton(R.string.str_cancel, null);
         alert.show();
     }
 
     private void askToAdjust() {
         new AlertDialog.Builder(MainActivity.this)
         .setMessage("It looks like the data layer needs to be adjusted. Would you like to try and adjust it now?")
-            .setPositiveButton(R.string.str_yes, (dialog, which) -> PolygonAdjuster.adjust(getTtAppCtx(), true, MainActivity.this))
+            .setPositiveButton(R.string.str_yes, (dialog, which) -> getTtAppCtx().adjustProject(true))
             .setNeutralButton(R.string.str_no, null)
             .show();
     }
@@ -631,167 +1029,205 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
 
     //region Fragment Controls
     //region File
-    public void btnNewClick(View view) {
-        if (!AndroidUtils.App.checkStoragePermission(MainActivity.this)) {
-            getFilePermissions();
-        } else {
-            if (PolygonAdjuster.isProcessing()) {
-                Toast.makeText(this, "Currently Adjusting Polygons.", Toast.LENGTH_LONG).show();
-            } else {
-                CreateFileDialog();
-            }
+    public void btnCreateClick(View view) {
+        if (continueIfNotProcessing()) {
+            createProjectDialog();
         }
     }
 
     public void btnOpenClick(View view) {
-        //AndroidUtils.App.openFileIntent(this, "file/*",
-        //        new String[] { "file/*.ttx", "ttx", "*ttx", "*.ttx", "*/*", "*"},
-        //        Consts.Codes.Dialogs.REQUEST_FILE);
-        //AndroidUtils.App.openFileIntent(this, MimeTypeMap.getSingleton().getExtensionFromMimeType("ttx"), Consts.Codes.Dialogs.REQUEST_FILE);
-        //AndroidUtils.App.openFileIntent(this, Consts.FileExtensions.TWO_TRAILS, Consts.Codes.Dialogs.REQUEST_FILE)
-        if (!AndroidUtils.App.checkStoragePermission(MainActivity.this)) {
-            getFilePermissions();
-        } else {
-            AndroidUtils.App.openFileIntent(this, "*/*", Consts.Codes.Dialogs.REQUEST_FILE);
-        }
-    }
+        AlertDialog.Builder builderSingle = new AlertDialog.Builder(
+                MainActivity.this);
 
-    public void btnOpenRecClick(View view) {
-        if (!AndroidUtils.App.checkStoragePermission(MainActivity.this)) {
-            getFilePermissions();
-        } else {
-            AlertDialog.Builder builderSingle = new AlertDialog.Builder(
-                    MainActivity.this);
+        builderSingle.setTitle("Available Projects");
 
-            builderSingle.setTitle("Recently Opened");
+        ArrayList<TwoTrailsProject> twoTrailsProjects = getTtAppCtx().getProjectSettings().getRecentProjects();
 
-            ArrayList<RecentProject> recentProjects = getTtAppCtx().getProjectSettings().getRecentProjects();
-
-            if (recentProjects.size() > 0) {
-                final RecentProjectAdapter adapter = new RecentProjectAdapter(MainActivity.this, recentProjects);
-
-                builderSingle.setNegativeButton("Cancel",
-                        (dialog, which) -> dialog.dismiss());
-
-                builderSingle.setAdapter(adapter,
-                        (dialog, which) -> {
-                            RecentProject project = adapter.getItem(which);
-
-                            if (FileUtils.fileExists(project.File))
-                                openFile(project.File);
-                            else
-                                Toast.makeText(getApplicationContext(), "File not found", Toast.LENGTH_LONG).show();
-                        });
-                builderSingle.show();
-            } else {
-                Toast.makeText(MainActivity.this, "No Recent Projects.", Toast.LENGTH_LONG).show();
-            }
-        }
-    }
-
-    public void btnImportClick(View view) {
-        if (!AndroidUtils.App.checkStoragePermission(MainActivity.this)) {
-            getFilePermissions();
-        } else {
-            startActivityForResult(new Intent(this, ImportActivity.class), UPDATE_INFO);
-        }
-    }
-
-    public void btnDupClick(View view) {
-        if (!AndroidUtils.App.checkStoragePermission(MainActivity.this)) {
-            getFilePermissions();
-        } else {
-            if (PolygonAdjuster.isProcessing()) {
-                Toast.makeText(this, "Currently Adjusting Polygons.", Toast.LENGTH_LONG).show();
-            } else {
-                AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-
-                String filepath = getTtAppCtx().getDAL().getFilePath();
-
-                String dupFile = String.format("%s_bk%s", FileUtils.getFilePathWoExt(filepath), Consts.FILE_EXTENSION);
-                int inc = 2;
-
-                while (true) {
-                    if (FileUtils.fileExists(dupFile)) {
-                        dupFile = StringEx.format("%s_bk%d%s", FileUtils.getFilePathWoExt(filepath), inc, Consts.FILE_EXTENSION);
-                        inc++;
-                        continue;
+        if (twoTrailsProjects.size() < 1) {
+            for (String file : databaseList()) {
+                if (file.toLowerCase().endsWith(Consts.FileExtensions.TWO_TRAILS)) {
+                    DataAccessManager dam = DataAccessManager.openDAL(getTtAppCtx(), file);
+                    String projId = dam.getDAL().getProjectID();
+                    String mediaFile = file.toLowerCase().replace(Consts.FileExtensions.TWO_TRAILS, Consts.FileExtensions.TWO_TRAILS_MEDIA_PACKAGE);
+                    if (!MediaAccessManager.localMALExists(getTtAppCtx(), mediaFile)) {
+                        mediaFile = null;
                     }
-                    break;
+                    TwoTrailsProject proj = new TwoTrailsProject(projId, file, mediaFile);
+                    twoTrailsProjects.add(proj);
                 }
+            }
 
-                final String filename = dupFile;
-
-                dialog.setMessage(String.format("Duplicate File to: %s", dupFile.substring(dupFile.lastIndexOf("/") + 1)));
-
-                dialog.setPositiveButton(R.string.main_btn_duplicate, (dialog1, which) -> duplicateFile(filename))
-                        .setNeutralButton(R.string.str_cancel, null)
-                        .show();
+            if (twoTrailsProjects.size() > 0) {
+                getTtAppCtx().getProjectSettings().setRecentProjects(twoTrailsProjects);
             }
         }
+
+        if (twoTrailsProjects.size() > 0) {
+            final RecentProjectAdapter adapter = new RecentProjectAdapter(MainActivity.this, twoTrailsProjects);
+
+            builderSingle.setNegativeButton("Cancel",
+                    (dialog, which) -> dialog.dismiss());
+
+            builderSingle.setAdapter(adapter,
+                    (dialog, which) -> {
+                        TwoTrailsProject project = adapter.getItem(which);
+
+                        if (DataAccessManager.localDALExists(getTtAppCtx(), project.TTXFile))
+                            openProject(project.Name, project.TTXFile);
+                        else
+                            Toast.makeText(getApplicationContext(), "Project not found", Toast.LENGTH_LONG).show();
+                    });
+            builderSingle.show();
+        } else {
+            Toast.makeText(MainActivity.this, "No Projects.", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    public void btnImportProjectClick(View view) {
+        if (continueIfNotProcessing()) {
+            importFileOnResult.launch("*/*");
+        }
+    }
+
+    public void btnExportProjectClick(View view) {
+        if (continueIfNotProcessing()) {
+
+            String filename = String.format(Locale.getDefault(), "%s_%s.zip",
+                    TtUtils.projectToFileName(getTtAppCtx().getDAL().getProjectID()),
+                    TtUtils.Date.toStringDateMillis(new DateTime(getTtAppCtx().getDAM().getDBFile().lastModified()))
+            );
+
+            exportProjectLauncher.launch(filename);
+        }
+    }
+
+    public void btnImportDataClick(View view) {
+        updateAppInfoOnResult.launch(new Intent(this, ImportActivity.class));
+    }
+
+    public void btnRemoveProjectClick(View view) {
+        //TODO remove project
+        //ask to export first
     }
 
     public void btnCleanDb(View view) {
-        if (!AndroidUtils.App.checkStoragePermission(MainActivity.this)) {
-            getFilePermissions();
-        } else {
-            AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-            dialog.setMessage("This operation will remove data that is not properly connected within the database. Points, Polygons, Groups and NMEA may be deleted. " +
-                    "It is suggested that you backup your project before continuing.")
-                    .setPositiveButton("Clean", (dialog1, which) -> {
-                        ProgressDialog pd = new ProgressDialog(getBaseContext());
-                        pd.setTitle("Cleaning..");
-                        pd.setMessage("This operation may take a few minutes.");
-
-                        pd.show();
-
-                        getTtAppCtx().getDAL().clean();
-
-                        pd.cancel();
-                    })
-                    .setNeutralButton(R.string.str_cancel, null);
-        }
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+        dialog.setMessage("This operation will remove data that is not properly connected within the database. Points, Polygons, Groups and NMEA may be deleted. " +
+                "It is suggested that you backup your project before continuing.")
+                .setPositiveButton("Clean", (dialog1, which) -> {
+                    if (getTtAppCtx().getDAL().clean()) {
+                        Toast.makeText(MainActivity.this, "Database Cleaned", Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(MainActivity.this, "Error Cleaning Database", Toast.LENGTH_LONG).show();
+                    }
+                })
+                .setNeutralButton(R.string.str_cancel, null);
     }
     //endregion
 
     //region Data
     public void btnPointsClick(View view) {
         if (getTtAppCtx().getDAL().hasPolygons()) {
-            startActivityForResult(new Intent(this, PointsActivity.class), UPDATE_INFO);
+            updateAppInfoOnResult.launch(new Intent(this, PointsActivity.class));
         } else {
             Toast.makeText(this, "No Polygons in Project", Toast.LENGTH_SHORT).show();
         }
     }
 
     public void btnPolygonsClick(View view) {
-        startActivityForResult(new Intent(this, PolygonsActivity.class), UPDATE_INFO);
+        //startActivityForResult(new Intent(this, PolygonsActivity.class), UPDATE_INFO);
+        updateAppInfoOnResult.launch(new Intent(this, PolygonsActivity.class));
     }
 
     public void btnMetadataClick(View view) {
-        startActivityForResult(new Intent(this, MetadataActivity.class), UPDATE_INFO);
+        //startActivityForResult(new Intent(this, MetadataActivity.class), UPDATE_INFO);
+        updateAppInfoOnResult.launch(new Intent(this, MetadataActivity.class));
     }
 
     public void btnProjectInfoClick(View view) {
-        startActivityForResult(new Intent(this, ProjectActivity.class), UPDATE_INFO);
+        //startActivityForResult(new Intent(this, ProjectActivity.class), UPDATE_INFO);
+        updateAppInfoOnResult.launch(new Intent(this, ProjectActivity.class));
     }
 
     public void btnPointTableClick(View view) {
-        if (getTtAppCtx().getDAL().getItemCount(TwoTrailsSchema.PointSchema.TableName) > 0) {
-            startActivityForResult(new Intent(this, TableViewActivity.class), UPDATE_INFO);
+        if (getTtAppCtx().getDAL().getItemsCount(TwoTrailsSchema.PointSchema.TableName) > 0) {
+            //startActivityForResult(new Intent(this, TableViewActivity.class), UPDATE_INFO);
+            updateAppInfoOnResult.launch(new Intent(this, TableViewActivity.class));
         } else {
             Toast.makeText(this, "No Points in Project", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void btnSATClick(View view) {
+        if(getTtAppCtx().getDAL().hasPolygons()) {
+            final ArrayList<TtPolygon> polygons = getTtAppCtx().getDAL().getPolygons();
+            final ArrayList<TtPolygon> filteredPolygons = TtUtils.Collections.filterOutPltsAndSats(getTtAppCtx().getDAL().getPolygons());
+
+            Function<TtPolygon, Integer> startSAT = (targetPoly -> {
+                TtPolygon valPoly = null;
+
+                String valPolyName = String.format(Locale.getDefault(), "%s_sat", targetPoly.getName());
+
+                for (TtPolygon poly : polygons) {
+                    if (poly.getName().equals(valPolyName)) {
+                        valPoly = poly;
+                        break;
+                    }
+                }
+
+                if (valPoly == null) {
+                    int polyCount = polygons.size();
+
+                    valPoly = new TtPolygon(polyCount * 1000 + 1010);
+                    valPoly.setName(String.format(Locale.getDefault(), valPolyName, polyCount + 1));
+                    valPoly.setAccuracy(Consts.Default_Point_Accuracy);
+                    valPoly.setDescription(String.format(Locale.getDefault(), "Validation points for %s", targetPoly.getName()));
+                    getTtAppCtx().getDAL().insertPolygon(valPoly);
+                }
+
+                Intent intent = new Intent(this, SalesAdminToolsActivity.class);
+                intent.putExtra(Consts.Codes.Data.METADATA_DATA, getTtAppCtx().getDAL().getDefaultMetadata());
+                intent.putExtra(Consts.Codes.Data.POLYGON_DATA, targetPoly);
+
+                updateAppInfoOnResult.launch(intent);
+
+                return 0;
+            });
+
+
+            if (polygons.size() > 1) {
+                final String[] polyStrs = new String[filteredPolygons.size()];
+
+                for (int i = 0; i < filteredPolygons.size(); i++) {
+                    polyStrs[i] = filteredPolygons.get(i).getName();
+                }
+
+                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+
+                dialogBuilder.setTitle("Track Polygon");
+
+                dialogBuilder.setItems(polyStrs, (dialog, which) -> startSAT.apply(filteredPolygons.get(which)));
+
+                dialogBuilder.setNegativeButton(R.string.str_cancel, null);
+
+                final AlertDialog dialog = dialogBuilder.create();
+
+                dialog.show();
+            } else {
+                startSAT.apply(filteredPolygons.get(0));
+            }
+        } else {
+            Toast.makeText(this, "No Polygons in Project", Toast.LENGTH_SHORT).show();
         }
     }
     //endregion
 
     //region Tools
     public void btnMapClick(View view) {
-        if (AndroidUtils.App.requestNetworkPermission(this, Consts.Codes.Requests.INTERNET)) {
-            if (getTtAppCtx().getDAL().needsAdjusting()) {
-                askToAdjust();
-            } else {
-                startActivity(new Intent(this, MapActivity.class));
-            }
+        if (getTtAppCtx().getDAL().needsAdjusting()) {
+            askToAdjust();
+        } else {
+            startActivity(new Intent(this, MapActivity.class));
         }
     }
 
@@ -804,29 +1240,33 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
             } else {
                 progressLayout.setVisibility(View.VISIBLE);
 
-                String kmlPath = Export.kml(getTtAppCtx().getDAL(), TtUtils.getTtFileDir());
+                try {
+                    File kmlFile = Export.kml(getTtAppCtx(), getTtAppCtx().getDAL(), null);
 
-                progressLayout.setVisibility(View.GONE);
+                    progressLayout.setVisibility(View.GONE);
 
-                if (!StringEx.isEmpty(kmlPath)) {
-                    try {
-                        Intent intent = new Intent(Intent.ACTION_VIEW);
-                        intent.setDataAndType(AndroidUtils.Files.getUri(MainActivity.this,BuildConfig.APPLICATION_ID, kmlPath), "application/vnd.google-earth.kml+xml");
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                        startActivity(intent);
-                    } catch (IllegalArgumentException e) {
-                        Toast.makeText(MainActivity.this, "Error opening Google Earth", Toast.LENGTH_LONG).show();
+                    if (kmlFile != null) {
+                        try {
+                            Intent intent = new Intent(Intent.ACTION_VIEW);
+                            intent.setDataAndType(AndroidUtils.Files.getUri(MainActivity.this, BuildConfig.APPLICATION_ID, kmlFile), "application/vnd.google-earth.kml+xml");
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                            startActivity(intent);
+                        } catch (IllegalArgumentException e) {
+                            Toast.makeText(MainActivity.this, "Error opening Google Earth", Toast.LENGTH_LONG).show();
+                        }
                     }
+                } catch (Exception e) {
+                    Toast.makeText(MainActivity.this, "Error creating kml file", Toast.LENGTH_LONG).show();
                 }
             }
         } else {
             AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 
             dialog.setMessage("Google Earth is not installed.")
-            .setPositiveButton("Install", (dialog1, which) -> AndroidUtils.App.navigateAppStore(MainActivity.this, gEarth))
-            .setNeutralButton(R.string.str_cancel, null)
-            .show();
+                .setPositiveButton("Install", (dialog1, which) -> AndroidUtils.App.navigateAppStore(MainActivity.this, gEarth))
+                .setNeutralButton(R.string.str_cancel, null)
+                .show();
         }
     }
 
@@ -852,7 +1292,8 @@ public class MainActivity extends TtAdjusterCustomToolbarActivity {
 
     public void btnPlotGridClick(View view) {
         if(getTtAppCtx().getDAL().hasPolygons()) {
-            startActivityForResult(new Intent(this, PlotGridActivity.class), UPDATE_INFO);
+            //startActivityForResult(new Intent(this, PlotGridActivity.class), UPDATE_INFO);
+            updateAppInfoOnResult.launch(new Intent(this, PlotGridActivity.class));
         } else {
             Toast.makeText(this, "No Polygons in Project", Toast.LENGTH_SHORT).show();
         }

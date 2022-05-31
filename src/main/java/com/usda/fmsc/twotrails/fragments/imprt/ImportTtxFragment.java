@@ -1,5 +1,6 @@
 package com.usda.fmsc.twotrails.fragments.imprt;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +10,7 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.usda.fmsc.android.utilities.TaskRunner;
 import com.usda.fmsc.android.widget.RecyclerViewEx;
 import com.usda.fmsc.android.widget.multiselection.MultiSelector;
 import com.usda.fmsc.android.widget.multiselection.SelectableHolder;
@@ -16,9 +18,9 @@ import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.adapters.TtxPolygonsAdapter;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
+import com.usda.fmsc.twotrails.data.DataAccessManager;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.utilities.Import.TTXImportTask;
-import com.usda.fmsc.utilities.StringEx;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,10 +28,12 @@ import java.util.List;
 import jp.wasabeef.recyclerview.animators.SlideInUpAnimator;
 
 public class ImportTtxFragment extends BaseImportFragment {
-    private static final String FILENAME = "filename";
+    private static final String FILE_PATH = "file_path";
+
+    private final TaskRunner taskRunner = new TaskRunner();
 
     private RecyclerViewEx rvImport;
-    private MultiSelector selector = new MultiSelector(new MultiSelector.Listener() {
+    private final MultiSelector selector = new MultiSelector(new MultiSelector.Listener() {
         @Override
         public void onItemSelectionChange(SelectableHolder holder, boolean isSelected) {
             if (holder instanceof TtxPolygonsAdapter.TtPolygonHolder) {
@@ -54,18 +58,18 @@ public class ImportTtxFragment extends BaseImportFragment {
 
     private TTXImportTask task;
 
-    private String _FileName;
+    private Uri _FilePath;
 
     private DataAccessLayer idal;
 
     private List<TtxPolygonsAdapter.TtPolygonHolder> polyParams;
 
 
-    public static ImportTtxFragment newInstance(String fileName) {
+    public static ImportTtxFragment newInstance(Uri filePath) {
         ImportTtxFragment fragment = new ImportTtxFragment();
         Bundle args = new Bundle();
 
-        args.putString(FILENAME, fileName);
+        args.putString(FILE_PATH, filePath.toString());
 
         fragment.setArguments(args);
         return fragment;
@@ -78,10 +82,10 @@ public class ImportTtxFragment extends BaseImportFragment {
 
         Bundle bundle = getArguments();
 
-        if (bundle != null && bundle.containsKey(FILENAME)) {
-            _FileName = bundle.getString(FILENAME);
+        if (bundle != null && bundle.containsKey(FILE_PATH)) {
+            _FilePath = Uri.parse(bundle.getString(FILE_PATH));
 
-            updateFileName(_FileName);
+            updateFilePath(_FilePath);
         }
 
         polyParams = new ArrayList<>();
@@ -124,17 +128,17 @@ public class ImportTtxFragment extends BaseImportFragment {
         selector.getSelectedPositions();
 
         TTXImportTask.TTXImportParams params = new TTXImportTask.TTXImportParams(
-                app, _FileName, getPolygons(), idal
+                app, _FilePath, getPolygons(), idal
         );
 
         onTaskStart();
-        task.execute(params);
+        taskRunner.executeAsync(task, params);
     }
 
     @Override
     public void cancel() {
         if (task != null) {
-            task.cancel(false);
+            task.cancel();
         }
     }
 
@@ -162,14 +166,16 @@ public class ImportTtxFragment extends BaseImportFragment {
         rvImport.smoothScrollToPosition(holder.getLayoutPosition());
     }
 
-    @Override
-    public void updateFileName(String filename) {
-        if (!StringEx.isEmpty(_FileName) && getActivity() != null) {
+    public void updateFilePath(Uri filePath) {
 
-            _FileName = filename;
+        if (filePath != null && getActivity() != null) {
+
+            _FilePath = filePath;
 
             try {
-                idal = new DataAccessLayer(_FileName, TwoTrailsApp.getInstance(getActivity()));
+                DataAccessManager dam = DataAccessManager.importDAL(getTtAppCtx(), filePath);
+
+                idal = dam.getDAL();
 
                 setupPolygons();
 

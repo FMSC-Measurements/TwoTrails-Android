@@ -10,9 +10,9 @@ import com.usda.fmsc.twotrails.units.Slope;
 import org.joda.time.DateTime;
 
 public class TtRangeFinderData implements Parcelable {
-    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+    public static final Parcelable.Creator<TtRangeFinderData> CREATOR = new Parcelable.Creator<TtRangeFinderData>() {
         @Override
-        public Object createFromParcel(Parcel source) {
+        public TtRangeFinderData createFromParcel(Parcel source) {
             return new TtRangeFinderData(source);
         }
 
@@ -23,16 +23,16 @@ public class TtRangeFinderData implements Parcelable {
     };
 
 
-    private DateTime time;
-    private String horizVectorMsg;
-    private Double horizDist;
-    private Dist horizDistType;
-    private Double azimuth;
-    private Slope azType;
-    private Double inclination;
-    private Slope incType;
-    private Double slopeDist;
-    private Dist slopeDistType;
+    private final DateTime time;
+    private final String horizVectorMsg;
+    private final Double horizDist;
+    private final Dist horizDistType;
+    private final Double azimuth;
+    private final Slope azType;
+    private final Double inclination;
+    private final Slope incType;
+    private final Double slopeDist;
+    private final Dist slopeDistType;
 
 
 

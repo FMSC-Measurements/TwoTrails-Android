@@ -19,8 +19,8 @@ import java.util.List;
 public class TtxPolygonsAdapter extends MultiSelectRecyclerView.MSAdapter<MultiSelectRecyclerView.MSViewHolder> {
     private static final int POLYGON = 1;
 
-    private List<TtPolygon> polygons;
-    private DataAccessLayer dal;
+    private final List<TtPolygon> polygons;
+    private final DataAccessLayer dal;
 
     public TtxPolygonsAdapter(Context context, List<TtPolygon> polygons, DataAccessLayer dal, MultiSelector multiSelector) {
         super(context, multiSelector);
@@ -61,8 +61,8 @@ public class TtxPolygonsAdapter extends MultiSelectRecyclerView.MSAdapter<MultiS
     }
 
     public class TtPolygonHolder extends MultiSelectRecyclerView.MSViewHolder implements MultiStateTouchCheckBox.OnCheckedStateChangeListener {
-        private MultiStateTouchCheckBox mcb;
-        private TextView tvName, tvPointCount, tvDesv;
+        private final MultiStateTouchCheckBox mcb;
+        private final TextView tvName, tvPointCount, tvDesv;
         private TtPolygon polygon;
 
         protected boolean selected;
