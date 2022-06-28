@@ -1135,23 +1135,19 @@ public class MainActivity extends ProjectAdjusterActivity {
     }
 
     public void btnPolygonsClick(View view) {
-        //startActivityForResult(new Intent(this, PolygonsActivity.class), UPDATE_INFO);
         updateAppInfoOnResult.launch(new Intent(this, PolygonsActivity.class));
     }
 
     public void btnMetadataClick(View view) {
-        //startActivityForResult(new Intent(this, MetadataActivity.class), UPDATE_INFO);
         updateAppInfoOnResult.launch(new Intent(this, MetadataActivity.class));
     }
 
     public void btnProjectInfoClick(View view) {
-        //startActivityForResult(new Intent(this, ProjectActivity.class), UPDATE_INFO);
         updateAppInfoOnResult.launch(new Intent(this, ProjectActivity.class));
     }
 
     public void btnPointTableClick(View view) {
         if (getTtAppCtx().getDAL().getItemsCount(TwoTrailsSchema.PointSchema.TableName) > 0) {
-            //startActivityForResult(new Intent(this, TableViewActivity.class), UPDATE_INFO);
             updateAppInfoOnResult.launch(new Intent(this, TableViewActivity.class));
         } else {
             Toast.makeText(this, "No Points in Project", Toast.LENGTH_SHORT).show();
@@ -1292,7 +1288,6 @@ public class MainActivity extends ProjectAdjusterActivity {
 
     public void btnPlotGridClick(View view) {
         if(getTtAppCtx().getDAL().hasPolygons()) {
-            //startActivityForResult(new Intent(this, PlotGridActivity.class), UPDATE_INFO);
             updateAppInfoOnResult.launch(new Intent(this, PlotGridActivity.class));
         } else {
             Toast.makeText(this, "No Polygons in Project", Toast.LENGTH_SHORT).show();
@@ -1312,8 +1307,6 @@ public class MainActivity extends ProjectAdjusterActivity {
     }
 
     public void btnTest(View view) {
-
-        //throw  new RuntimeException("Crash on purpose");
         startActivity(new Intent(this, TestActivity.class));
     }
     //endregion

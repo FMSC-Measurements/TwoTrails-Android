@@ -335,10 +335,6 @@ public class PointsActivity extends PointCollectionActivity implements PointMedi
         public boolean onMenuItemClick(MenuItem item) {
             int itemId = item.getItemId();
             if (itemId == R.id.ctx_menu_add) {
-//                Intent intent = new Intent(Intent.ACTION_PICK);
-//                intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-//                intent.setType("image/*");
-//                startActivityForResult(intent, Consts.Codes.Requests.ADD_IMAGES);
                 pickImages();
             } else if (itemId == R.id.ctx_menu_capture) {
                 if (AndroidUtils.Device.isFullOrientationAvailable(PointsActivity.this)) {
@@ -405,7 +401,6 @@ public class PointsActivity extends PointCollectionActivity implements PointMedi
 
 
     private final ActivityResultLauncher<Intent> acquireAndCalculateOnResult = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
-
         slexAqr.contractFab();
 
         if (result.getResultCode() == Consts.Codes.Results.POINT_CREATED) {
@@ -415,12 +410,7 @@ public class PointsActivity extends PointCollectionActivity implements PointMedi
                 updatePoint(point);
                 onPointUpdate();
             }
-//            else {
-//                Toast.makeText(PointsActivity.this, "Point does not have extras", Toast.LENGTH_LONG).show();
-//            }
         }
-
-
     });
 
     private void acquireAndOrCalculate(Intent data) {
@@ -883,6 +873,8 @@ public class PointsActivity extends PointCollectionActivity implements PointMedi
 
     @Override
     protected void onAppSettingsUpdated() {
+        super.onAppSettingsUpdated();
+
         if (getTtAppCtx().getDeviceSettings().isRangeFinderConfigured()) {
             getTtAppCtx().getRF().startRangeFinder();
         }
@@ -1056,9 +1048,10 @@ public class PointsActivity extends PointCollectionActivity implements PointMedi
                 } else if (op == OpType.Quondam) {
                     Toast.makeText(PointsActivity.this, "Quondam must have a Parent Point selected", Toast.LENGTH_SHORT).show();
                 }
-            } else if (_CurrentPoint.isGpsType() && op.isTravType()) {
+            } else if ((!_CurrentPoint.isGpsType() || (_CurrentPoint.getOp() == OpType.Quondam && !((QuondamPoint)_CurrentPoint).getParentOp().isGpsType()))
+                    && op.isTravType()) {
                 Toast.makeText(PointsActivity.this,
-                        String.format("A %s cannot be the first point in a polygon. You must have a valid GPS Type point before it.", op.toString()),
+                        String.format("A %s cannot be the first point in a polygon. You must have a valid GPS Type point before it.", op),
                         Toast.LENGTH_LONG).show();
             } else {
                 _deletePoint = _CurrentPoint;
