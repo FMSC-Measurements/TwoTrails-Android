@@ -685,14 +685,6 @@ public class PointsActivity extends PointCollectionActivity implements PointMedi
             AndroidUtils.UI.setContentDescToast(ivFullscreen, "View in Fullscreen");
         }
         //endregion
-
-        if (getTtAppCtx().getDeviceSettings().isRangeFinderConfigured()) {
-            getTtAppCtx().getRF().startRangeFinder();
-        }
-
-        if (getTtAppCtx().getRF() != null) {
-            getTtAppCtx().getRF().addListener(this);
-        }
     }
 
     @Override
@@ -725,14 +717,6 @@ public class PointsActivity extends PointCollectionActivity implements PointMedi
 
             if (adjust) {
                 getTtAppCtx().adjustProject(true);
-            }
-        }
-
-        if (getTtAppCtx().getRF() != null) {
-            getTtAppCtx().getRF().removeListener(this);
-
-            if (!getTtAppCtx().getDeviceSettings().isRangeFinderAlwaysOn()) {
-                getTtAppCtx().getRF().stopRangeFinder();
             }
         }
     }
@@ -901,10 +885,6 @@ public class PointsActivity extends PointCollectionActivity implements PointMedi
     protected void onAppSettingsUpdated() {
         if (getTtAppCtx().getDeviceSettings().isRangeFinderConfigured()) {
             getTtAppCtx().getRF().startRangeFinder();
-        }
-
-        if (getTtAppCtx().getRF() != null) {
-            getTtAppCtx().getRF().addListener(this);
         }
     }
     //endregion
@@ -2357,8 +2337,15 @@ public class PointsActivity extends PointCollectionActivity implements PointMedi
     //endregion
 
 
+    @Override
+    public boolean requiresRFService() {
+        return true;
+    }
+
     //region Range Finder
     @Override
+
+
     public void rfDataReceived(final TtRangeFinderData rfData) {
         if (rfData.isValid()) {
             if (!_PointLocked) {

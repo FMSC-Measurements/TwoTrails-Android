@@ -98,6 +98,8 @@ public class BluetoothConnection extends Thread {
 
         if (btSocket != null) {
             try {
+                btSocket.close();
+
                 if (bufferedReader != null) {
                     bufferedReader.close();
                     bufferedReader = null;
@@ -108,7 +110,6 @@ public class BluetoothConnection extends Thread {
                     inputStreamReader = null;
                 }
 
-                btSocket.close();
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
