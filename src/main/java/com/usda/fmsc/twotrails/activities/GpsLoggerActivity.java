@@ -55,7 +55,7 @@ public class GpsLoggerActivity extends TtCustomToolbarActivity implements GpsSer
                 if (uri != null) {
                     try {
                         File tmpZip = new File(getTtAppCtx().getCacheDir(), "tmpZip.zip");
-                        FileUtils.zipFiles(tmpZip, _AllGpsLogFiles.toArray(new File[_AllGpsLogFiles.size()]));
+                        FileUtils.zipFiles(tmpZip, _AllGpsLogFiles);
                         AndroidUtils.Files.copyFile(getTtAppCtx(), Uri.fromFile(tmpZip), uri);
                         tmpZip.delete();
                     } catch (Exception e) {

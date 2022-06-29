@@ -72,35 +72,20 @@ public class Export {
         File tcZip = new File(context.getCacheDir(), String.format("%s_Export.zip", projectName));
 
         try {
-            byte[] buffer = new byte[1024];
-            ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(tcZip));
+            ArrayList<File> files = new ArrayList<>();
 
-            zos.putNextEntry(new ZipEntry(dal.getFileName()));
-            FileInputStream fis = new FileInputStream(context.getDatabasePath(dal.getFileName()));
-
-            int len;
-            while ((len = fis.read(buffer)) > 0) {
-                zos.write(buffer, 0, len);
-            }
-
-            fis.close();
-
-            zos.closeEntry();
-
+            files.add(context.getDatabasePath(dal.getFileName()));
             if (mal != null) {
-                zos.putNextEntry(new ZipEntry(FileUtils.getFileName(mal.getFileName())));
-                fis = new FileInputStream(context.getDatabasePath(mal.getFileName()));
+                files.add(context.getDatabasePath(mal.getFileName()));
 
-                while ((len = fis.read(buffer)) > 0) {
-                    zos.write(buffer, 0, len);
+                File md = context.getProjectMediaDir();
+
+                if (md != null && md.exists() && md.listFiles().length > 0) {
+                    files.add(md);
                 }
-
-                fis.close();
-
-                zos.closeEntry();
             }
 
-            zos.close();
+            FileUtils.zipFiles(tcZip, files);
 
             return tcZip;
         } catch (Exception e) {

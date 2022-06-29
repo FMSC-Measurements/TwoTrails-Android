@@ -1907,7 +1907,7 @@ public class TtUtils {
             }
         }
 
-        FileUtils.zipFiles(exportFile, files.toArray(new Tuple[0]));
+        FileUtils.zipFilesT(exportFile, files);
 
         return exportFile;
     }
@@ -1996,7 +1996,7 @@ public class TtUtils {
         }
 
         try {
-            FileUtils.zipFiles(exportFile, files.toArray(new Tuple[0]));
+            FileUtils.zipFilesT(exportFile, files);
 
             AndroidUtils.Files.copyFile(app, Uri.fromFile(exportFile), externalProjectFilesPath);
 
@@ -2047,7 +2047,7 @@ public class TtUtils {
                     app.getCacheDir(),
                     fileName);
 
-            FileUtils.zipFiles(exportFile, files.toArray(new Tuple[0]));
+            FileUtils.zipFilesT(exportFile, files);
 
             AndroidUtils.Files.copyFile(app, Uri.fromFile(exportFile), externalDataDumpPath);
 
