@@ -10,39 +10,12 @@ import android.util.Log;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import androidx.annotation.NonNull;
+
 /**
  *
  * Modified From http://steveliles.github.io/is_my_android_app_currently_foreground_or_background.html
  *
- * Usage:
- *
- * 1. Get the Foreground Singleton, passing a Context or Application object unless you
- * are sure that the Singleton has definitely already been initialised elsewhere.
- *
- * 2.a) Perform a direct, synchronous check: Foreground.isForeground() / .isBackground()
- *
- * or
- *
- * 2.b) Register to be notified (useful in Service or other non-UI components):
- *
- *   Foreground.Listener myListener = new Foreground.Listener(){
- *       public void onBecameForeground(){
- *           // ... whatever you want to do
- *       }
- *       public void onBecameBackground(){
- *           // ... whatever you want to do
- *       }
- *   }
- *
- *   public void onCreate(){
- *      super.onCreate();
- *      Foreground.get(this).addListener(listener);
- *   }
- *
- *   public void onDestroy(){
- *      super.onCreate();
- *      Foreground.get(this).removeListener(listener);
- *   }
  */
 public class AppLifecycle implements Application.ActivityLifecycleCallbacks {
 
@@ -110,10 +83,6 @@ public class AppLifecycle implements Application.ActivityLifecycleCallbacks {
         return instance;
     }
 
-    public boolean isForeground(){
-        return foreground;
-    }
-
     public boolean isBackground(){
         return !foreground;
     }
@@ -127,7 +96,7 @@ public class AppLifecycle implements Application.ActivityLifecycleCallbacks {
     }
 
     @Override
-    public void onActivityResumed(final Activity activity) {
+    public void onActivityResumed(@NonNull final Activity activity) {
         paused = false;
         boolean wasBackground = !foreground;
         foreground = true;
@@ -158,7 +127,7 @@ public class AppLifecycle implements Application.ActivityLifecycleCallbacks {
     }
 
     @Override
-    public void onActivityPaused(final Activity activity) {
+    public void onActivityPaused(@NonNull final Activity activity) {
         paused = true;
 
         if (check != null)
@@ -182,7 +151,7 @@ public class AppLifecycle implements Application.ActivityLifecycleCallbacks {
     }
 
     @Override
-    public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+    public void onActivityCreated(@NonNull Activity activity, Bundle savedInstanceState) {
         for (Listener l : listeners) {
             try {
                 l.onCreated(activity);
@@ -193,16 +162,16 @@ public class AppLifecycle implements Application.ActivityLifecycleCallbacks {
     }
 
     @Override
-    public void onActivityStarted(Activity activity) {}
+    public void onActivityStarted(@NonNull Activity activity) {}
 
     @Override
-    public void onActivityStopped(Activity activity) {}
+    public void onActivityStopped(@NonNull Activity activity) {}
 
     @Override
-    public void onActivitySaveInstanceState(Activity activity, Bundle outState) {}
+    public void onActivitySaveInstanceState(@NonNull Activity activity,@NonNull  Bundle outState) {}
 
     @Override
-    public void onActivityDestroyed(Activity activity) {
+    public void onActivityDestroyed(@NonNull Activity activity) {
         for (Listener l : listeners) {
             try {
                 l.onDestroyed(activity);

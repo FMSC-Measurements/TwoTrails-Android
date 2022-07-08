@@ -301,9 +301,7 @@ public class HaidLogic {
             sb.append(String.format(Locale.getDefault(), "The polygon exterior perimeter is: %s%.2f M (%.0f ft).%s%s",
                 save ? "     " : "",
                 TtUtils.Math.round(polyPerim, 2),
-//                    TtUtils.Math.round(polygon.getPerimeter(), 2),
                 TtUtils.Math.round(TtUtils.Convert.toFeetTenths(polyPerim, Dist.Meters), 2),
-//                    TtUtils.Math.round(TtUtils.Convert.toFeetTenths(polygon.getPerimeter(), Dist.Meters), 2),
                 Consts.NewLine, Consts.NewLine));
         }
 
