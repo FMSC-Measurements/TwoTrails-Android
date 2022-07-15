@@ -63,7 +63,8 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/maps_api_key" />
 
-        <uses-library android:name="com.google.android.maps" />
+<!--        V1 API-->
+<!--        <uses-library android:name="com.google.android.maps" />-->
 
         <!-- Samsung Multi Window Support -->
         <uses-library
@@ -79,17 +80,14 @@
 
         <service
             android:name=".gps.GpsService"
-            android:enabled="true"
-            android:exported="true" />
+            android:enabled="true" />
 
         <service
             android:name=".rangefinder.RangeFinderService"
-            android:enabled="true"
-            android:exported="true" />
+            android:enabled="true" />
 
         <activity
             android:name=".activities.MainActivity"
-            android:label="@string/app_name"
             android:screenOrientation="portrait"
             android:exported="true">
             <intent-filter>
