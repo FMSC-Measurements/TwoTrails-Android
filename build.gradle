@@ -77,7 +77,7 @@ android {
             resValue "string", "maps_api_key", project.property("TwoTrails.debug_maps_key")
 
             ndk {
-                abiFilters  "armeabi-v7a", "arm64-v8a"
+                abiFilters "arm64-v8a"
 //                abiFilters  "armeabi-v7a", "arm64-v8a", "x86"
             }
         }

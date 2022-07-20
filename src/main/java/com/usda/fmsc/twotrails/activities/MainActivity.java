@@ -808,15 +808,19 @@ public class MainActivity extends ProjectAdjusterActivity {
                 }
             });
     private void exportProject(Uri filePath) {
+        TwoTrailsApp context = getTtAppCtx();
+
         try {
             if (filePath != null) {
-                File pcPkgFile = Export.exportProjectPackage(getTtAppCtx(), getTtAppCtx().getDAL(), getTtAppCtx().getMAL());
+                File pcPkgFile = Export.exportProjectPackage(context);
 
                 if (pcPkgFile != null) {
                     AndroidUtils.Files.copyFile(getTtAppCtx(), Uri.fromFile(pcPkgFile), filePath);
                 } else {
                     throw new Exception("Unable to create export file");
                 }
+
+                pcPkgFile.deleteOnExit();
             } else {
                 throw new Exception("Unable to get file path from uri");
             }

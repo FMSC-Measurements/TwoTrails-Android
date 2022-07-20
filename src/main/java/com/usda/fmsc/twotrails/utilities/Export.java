@@ -59,7 +59,10 @@ import org.apache.commons.csv.CSVPrinter;
 import org.joda.time.DateTime;
 
 public class Export {
-    public static File exportProjectPackage(TwoTrailsApp context, DataAccessLayer dal, MediaAccessLayer mal) {
+    public static File exportProjectPackage(TwoTrailsApp context) {
+        DataAccessLayer dal = context.getDAL();
+        MediaAccessLayer mal = context.getMAL();
+
         String projectName = scrubProjectName(dal.getProjectID());
 
         File tcProjDir = new File(context.getCacheDir(), projectName);
