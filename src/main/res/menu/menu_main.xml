@@ -12,7 +12,7 @@
     <item
         android:id="@+id/overflowMenu"
         android:icon="@drawable/ic_action_overflow_white"
-        android:title=""
+        android:title="@string/str_settings"
         app:showAsAction="always">
 
         <menu>

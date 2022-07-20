@@ -68,7 +68,7 @@ public class MiscSettingsFragment extends TtBasePrefFragment {
         pref = findPreference(getString(R.string.set_CLEAR_LOG));
         if (pref != null) {
             pref.setOnPreferenceClickListener(preference -> {
-                SettingsLogic.clearLog(getTtAppCtx());
+                SettingsLogic.clearLog(getActivity(), getTtAppCtx());
                 return false;
             });
         }

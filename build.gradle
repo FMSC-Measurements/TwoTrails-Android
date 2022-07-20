@@ -83,6 +83,24 @@ android {
         }
     }
 
+    flavorDimensions "version"
+
+    productFlavors {
+        latest {
+            dimension "version"
+        }
+
+        legacy {
+            dimension "version"
+            minSdkVersion 28
+            applicationIdSuffix ".legacy"
+            versionNameSuffix "-legacy"
+            ndk {
+                abiFilters  "arm64-v8a", "armeabi-v7a"
+            }
+        }
+    }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -93,25 +111,11 @@ android {
         viewBinding true
     }
 
-//    plugins {
-//        id: 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
-//    }
-
-    productFlavors {
-
-    }
     packagingOptions {
         resources {
             excludes += ['META-INF/DEPENDENCIES.txt', 'META-INF/LICENSE.txt', 'META-INF/NOTICE.txt', 'META-INF/NOTICE', 'META-INF/LICENSE', 'META-INF/DEPENDENCIES', 'META-INF/notice.txt', 'META-INF/license.txt', 'META-INF/dependencies.txt', 'META-INF/LGPL2.1']
         }
     }
-
-//    dexOptions {
-//        javaMaxHeapSize "4g"
-//        preDexLibraries true
-//    }
-
-    //so arcgis can build successfully
 
     useLibrary 'org.apache.http.legacy'
     namespace 'com.usda.fmsc.twotrails'
