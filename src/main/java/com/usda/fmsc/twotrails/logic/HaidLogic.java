@@ -21,7 +21,6 @@ import java.util.Locale;
 public class HaidLogic {
     private static final String INFINITE_SYMBOL = "\u221E";
 
-    private final StringBuilder pointStats;
     private double travLength, totalTravError, totalGpsError, polyPerim;
     private boolean traversing;
     private int traverseSegments, lastGpsPtPID;
@@ -36,8 +35,6 @@ public class HaidLogic {
 
     public HaidLogic(TwoTrailsApp app) {
         this.app = app;
-
-        pointStats = new StringBuilder();
 
         _Legs = new ArrayList<>();
 
@@ -54,7 +51,8 @@ public class HaidLogic {
     }
 
     public synchronized String generatePolyStats(TtPolygon polygon, boolean showPoints, boolean save) {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sbInfo = new StringBuilder();
+        StringBuilder pointStats = new StringBuilder();
 
         _Legs.clear();
         totalTravError = totalGpsError = polyPerim = 0;
@@ -67,11 +65,11 @@ public class HaidLogic {
             List<TtPoint> points = app.getDAL().getPointsInPolygon(polygon.getCN());
 
             if (save) {
-                sb.append(String.format(Locale.getDefault(), "Polygon Name: %s%s%s", polygon.getName(), Consts.NewLine, Consts.NewLine));
+                sbInfo.append(String.format(Locale.getDefault(), "Polygon Name: %s%s%s", polygon.getName(), Consts.NewLine, Consts.NewLine));
             }
 
             if (!StringEx.isEmpty(polygon.getDescription())) {
-                sb.append(String.format(Locale.getDefault(), "Description: %s%s%s", polygon.getDescription(), Consts.NewLine, Consts.NewLine));
+                sbInfo.append(String.format(Locale.getDefault(), "Description: %s%s%s", polygon.getDescription(), Consts.NewLine, Consts.NewLine));
             }
 
             if (points.size() > 0) {
@@ -102,19 +100,19 @@ public class HaidLogic {
                                 polyPerim += leg.getDistance();
                             }
 
-                            sb.append(getPolygonSummary(polygon, save));
-                            sb.append(pointStats);
+                            sbInfo.append(getPolygonSummary(polygon, save));
+                            sbInfo.append(pointStats);
                         } else {
-                            sb.append("There are not enough valid points in the polygon.");
+                            sbInfo.append("There are not enough valid points in the polygon.");
                         }
                     } else {
-                        sb.append("There are only WayPoints in the polygon.");
+                        sbInfo.append("There are only WayPoints in the polygon.");
                     }
                 } else {
-                    sb.append("There are not enough points in the polygon.");
+                    sbInfo.append("There are not enough points in the polygon.");
                 }
             } else {
-                sb.append("There are no points in the polygon.");
+                sbInfo.append("There are no points in the polygon.");
             }
         } catch (Exception ex) {
             app.getReport().writeError(ex.getMessage(), "HaidLogic:generatePolyStats", ex.getStackTrace());
@@ -122,10 +120,10 @@ public class HaidLogic {
         }
 
         if (save) {
-            sb.append(String.format(Locale.getDefault(), "%s%s- - - - - - - - - - - - - - - - - - - -", Consts.NewLine, Consts.NewLine));
+            sbInfo.append(String.format(Locale.getDefault(), "%s%s- - - - - - - - - - - - - - - - - - - -", Consts.NewLine, Consts.NewLine));
         }
 
-        return sb.toString();
+        return sbInfo.toString();
     }
 
     public synchronized String generateAllPolyStats(boolean showPoints, boolean save) {

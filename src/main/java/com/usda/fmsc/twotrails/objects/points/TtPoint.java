@@ -139,6 +139,10 @@ public abstract class TtPoint extends TtObject implements Comparable<TtPoint>, C
     public boolean isCalculated() {
         return _calculated;
     }
+
+    public boolean hasAdjustedValues() {
+        return _AdjX != null && _AdjY != null;
+    }
     //endregion
 
     //region Poly

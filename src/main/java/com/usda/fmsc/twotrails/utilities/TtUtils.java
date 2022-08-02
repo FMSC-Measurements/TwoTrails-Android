@@ -1398,48 +1398,52 @@ public class TtUtils {
         }
 
         public static ArrayList<PointD> generateStaticPolyPoints(List<TtPoint> points, HashMap<String, TtMetadata> metadata, int zone, int canvasSize) {
-            ArrayList<PointD> pts = new ArrayList<>();
+            try {
+                ArrayList<PointD> pts = new ArrayList<>();
 
-            double minX = Double.POSITIVE_INFINITY, maxX = Double.NEGATIVE_INFINITY,
-                    minY = Double.POSITIVE_INFINITY, maxY = Double.NEGATIVE_INFINITY;
+                double minX = Double.POSITIVE_INFINITY, maxX = Double.NEGATIVE_INFINITY,
+                        minY = Double.POSITIVE_INFINITY, maxY = Double.NEGATIVE_INFINITY;
 
-            for (TtPoint point : points) {
-                UTMCoords coords = Points.forcePointZone(point, zone, metadata.get(point.getMetadataCN()).getZone(), true);
-                PointD pt = new PointD(coords.getX() + 500000, coords.getY() + 10000000);
+                for (TtPoint point : points) {
+                    UTMCoords coords = Points.forcePointZone(point, zone, metadata.get(point.getMetadataCN()).getZone(), true);
+                    PointD pt = new PointD(coords.getX() + 500000, coords.getY() + 10000000);
 
-                if (pt.X > maxX) {
-                    maxX = pt.X;
+                    if (pt.X > maxX) {
+                        maxX = pt.X;
+                    }
+
+                    if (pt.X < minX) {
+                        minX = pt.X;
+                    }
+
+                    if (pt.Y > maxY) {
+                        maxY = pt.Y;
+                    }
+
+                    if (pt.Y < minY) {
+                        minY = pt.Y;
+                    }
+
+                    pts.add(pt);
                 }
 
-                if (pt.X < minX) {
-                    minX = pt.X;
+                double width = maxX - minX;
+                double height = maxY - minY;
+
+                double adjustment = canvasSize / java.lang.Math.max(width, height);
+
+                double xOffset = (height > width ? (canvasSize - width * adjustment) / 2 : 0);
+                double yOffset = (width > height ? (canvasSize - height * adjustment) / 2 : 0);
+
+                for (PointD pt : pts) {
+                    pt.X = (pt.X - minX) * adjustment + xOffset;
+                    pt.Y = canvasSize - (pt.Y - minY) * adjustment - yOffset;
                 }
 
-                if (pt.Y > maxY) {
-                    maxY = pt.Y;
-                }
-
-                if (pt.Y < minY) {
-                    minY = pt.Y;
-                }
-
-                pts.add(pt);
+                return pts;
+            } catch (Exception e) {
+                return null;
             }
-
-            double width = maxX - minX;
-            double height = maxY - minY;
-
-            double adjustment = canvasSize / java.lang.Math.max(width, height);
-
-            double xOffset = (height > width ? (canvasSize - width * adjustment) / 2 : 0);
-            double yOffset = (width > height ? (canvasSize - height * adjustment) / 2 : 0);
-
-            for (PointD pt : pts) {
-                pt.X = (pt.X - minX) * adjustment + xOffset;
-                pt.Y = canvasSize - (pt.Y - minY) * adjustment - yOffset;
-            }
-
-            return pts;
         }
     }
 

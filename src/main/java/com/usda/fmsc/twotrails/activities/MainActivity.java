@@ -35,6 +35,7 @@ import com.usda.fmsc.twotrails.activities.base.ProjectAdjusterActivity;
 import com.usda.fmsc.twotrails.activities.contracts.CreateZipDocument;
 import com.usda.fmsc.twotrails.activities.contracts.OpenDocumentTreePersistent;
 import com.usda.fmsc.twotrails.adapters.RecentProjectAdapter;
+import com.usda.fmsc.twotrails.data.DataAccessLayer;
 import com.usda.fmsc.twotrails.data.DataAccessManager;
 import com.usda.fmsc.twotrails.data.MediaAccessManager;
 import com.usda.fmsc.twotrails.data.TwoTrailsSchema;
@@ -647,13 +648,16 @@ public class MainActivity extends ProjectAdjusterActivity {
     private final ActivityResultLauncher<Intent> updateAppInfoOnResult = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> updateAppInfo());
     private void updateAppInfo() {
         boolean enable = false;
+        TwoTrailsApp app = getTtAppCtx();
 
-        if (getTtAppCtx() != null) {
-            if (getTtAppCtx().hasDAL()) {
-                getTtAppCtx().getProjectSettings().updateRecentProjects(
-                        new TwoTrailsProject(getTtAppCtx().getDAL().getProjectID(), getTtAppCtx().getDAL().getFileName()));
+        if (app != null) {
+            if (app.hasDAL()) {
+                DataAccessLayer dal = getTtAppCtx().getDAL();
+                String projectID = dal.getProjectID();
+                app.getProjectSettings().updateRecentProjects(
+                        new TwoTrailsProject(projectID, dal.getFileName()));
 
-                setTitle("TwoTrails - " + getTtAppCtx().getDAL().getProjectID());
+                setTitle("TwoTrails - " + projectID);
                 enable = true;
 
                 mFragFile.updateInfo();
