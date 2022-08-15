@@ -1,5 +1,6 @@
 package com.usda.fmsc.twotrails.activities;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
@@ -47,6 +48,7 @@ import com.usda.fmsc.twotrails.logic.AdjustingException;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.objects.TwoTrailsProject;
 import com.usda.fmsc.twotrails.utilities.Export;
+import com.usda.fmsc.twotrails.utilities.TtReport;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 import com.usda.fmsc.utilities.FileUtils;
 import com.usda.fmsc.utilities.StringEx;
@@ -694,15 +696,26 @@ public class MainActivity extends ProjectAdjusterActivity {
         if (fp == null)
             throw new RuntimeException("Invalid Filepath");
 
-        if (fp.toLowerCase().endsWith(Consts.FileExtensions.TWO_TRAILS)) {
-            importTTX(filePath);
-        } else if (fp.toLowerCase().endsWith(Consts.FileExtensions.TWO_TRAILS_MEDIA_PACKAGE)) {
-            importTTMPX(filePath);
-        } else if (fp.toLowerCase().endsWith(".zip")) {
-            importTtPackage(filePath);
-        } else {
-            getTtAppCtx().getReport().writeWarn(String.format(Locale.getDefault(), "Invalid import type: '%s'", fp), "MainActivity:importProject");
-            Toast.makeText(MainActivity.this, "Invalid File Type", Toast.LENGTH_LONG).show();
+        String ext = fp.contains(".") ? fp.toLowerCase().substring(fp.lastIndexOf('.')) : "";
+
+        switch (ext) {
+            case Consts.FileExtensions.TWO_TRAILS: importTTX(filePath); break;
+            case Consts.FileExtensions.TWO_TRAILS_MEDIA_PACKAGE: importTTMPX(filePath); break;
+            case ".zip": importTtPackage(filePath); break;
+            default: {
+                //check if in downloads, prompt for name or ask to select from another location
+                if (fp.toLowerCase().contains("msf:")) {
+                    new AlertDialog.Builder(MainActivity.this)
+                            .setMessage("Importing directly from a protected folder (such as Downloads) does not allow the app to see the filename. Would you like to set the filename or import from the another folder?")
+                            .setPositiveButton("Import from SD", (dialogInterface, i) -> importFileOnResult.launch("*/*"))
+                            .setNegativeButton("Set Filename", (dialogInterface, i) -> importFromProtectedFolderDialog(filePath))
+                            .setNeutralButton(R.string.str_cancel, null)
+                            .show();
+                } else {
+                    getTtAppCtx().getReport().writeWarn(String.format(Locale.getDefault(), "Invalid import type: '%s'", fp), "MainActivity:importProject");
+                    Toast.makeText(MainActivity.this, "Invalid File Type", Toast.LENGTH_LONG).show();
+                }
+            }
         }
     }
 
@@ -1023,6 +1036,83 @@ public class MainActivity extends ProjectAdjusterActivity {
 
         alert.setNeutralButton(R.string.str_cancel, null);
         alert.show();
+    }
+
+
+    private void importFromProtectedFolderDialog(Uri filePath) {
+        final InputDialog inputDialog = new InputDialog(MainActivity.this);
+        inputDialog.setTitle("Filename");
+
+        inputDialog.setPositiveButton("Import Project", (dialog, whichButton) -> {
+                    String filename = inputDialog.getText().trim();
+
+                    if (filename.length() > 0) {
+                        filename = TtUtils.projectToFileNameTTX(filename);
+                        if (DataAccessManager.localDALExists(getTtAppCtx(), filename)) {
+                            overwriteLocalProjectByImportFromProtectedFolderDialog(filename, filePath);
+                        } else {
+                            importFromProtectedFolder(filename, filePath);
+                        }
+                    } else {
+                        runOnUiThread(() -> Toast.makeText(MainActivity.this, "Invalid File Name", Toast.LENGTH_LONG).show());
+                    }
+                })
+                .setNegativeButton(R.string.str_cancel, null)
+                .show();
+    }
+
+    private void overwriteLocalProjectByImportFromProtectedFolderDialog(final String filename, Uri filePath) {
+        AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
+        alert.setTitle("Project Exists");
+        alert.setMessage(String.format("The file '%s' already exists. Do you want to overwrite the project?", filename));
+
+        alert.setPositiveButton("Yes", (dialog, whichButton) -> importFromProtectedFolder(filename, filePath));
+
+        alert.setNegativeButton("No",
+                (dialog, which) -> importFromProtectedFolderDialog(filePath));
+        alert.show();
+    }
+
+    private void importFromProtectedFolder(String filename, Uri filePath) {
+        TtReport report = getTtAppCtx().getReport();
+
+        String tempProjectFileName = TtUtils.projectToFileNameTTX(String.format(Locale.getDefault(), "temp_%s", TtUtils.Date.nowToString()));
+        File tempProjectFile = getDatabasePath(tempProjectFileName);
+
+        Uri tempProjectUri = Uri.fromFile(tempProjectFile);
+        if (tempProjectUri == null) {
+            report.writeWarn("tempProjectUri is NULL", "importProject");
+        } else {
+            try {
+                AndroidUtils.Files.copyFile(getTtAppCtx(), filePath, tempProjectUri);
+                try {
+                    DataAccessManager dam = DataAccessManager.openDAL(getTtAppCtx(), tempProjectFileName);
+                    try {
+                        String projectName = dam.getDAL().getProjectID();
+                        if (projectName == null) {
+                            throw new NullPointerException("Invalid File");
+                        } else {
+                            dam.close();
+                            try {
+                                DataAccessManager.importAndRenameDAL(getTtAppCtx(), tempProjectUri, filename).close();
+                                openProject(projectName, filename);
+                                return;
+                            } catch (IOException e) {
+                                report.writeError("Unable to rename." + e.getMessage(), "importProject", e.getStackTrace());
+                            }
+                        }
+                    } catch (Exception e) {
+                        report.writeError("Invalid Project File. " + e.getMessage(), "importProject", e.getStackTrace());
+                    }
+                } catch (Exception e) {
+                    report.writeError("Unable to open DAL. " + e.getMessage(), "importProject", e.getStackTrace());
+                }
+            } catch (IOException e) {
+                report.writeError("Unable to copy tempProjectUri. " + e.getMessage(), "importProject", e.getStackTrace());
+            }
+        }
+
+        Toast.makeText(MainActivity.this, "Error Importing File: Please send Error Report.", Toast.LENGTH_LONG).show();
     }
 
     private void askToAdjust() {

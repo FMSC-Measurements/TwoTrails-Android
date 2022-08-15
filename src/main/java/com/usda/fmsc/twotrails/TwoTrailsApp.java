@@ -1,6 +1,5 @@
 package com.usda.fmsc.twotrails;
 
-import android.Manifest;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.Application;
@@ -46,7 +45,6 @@ import com.usda.fmsc.twotrails.objects.media.TtMedia;
 import com.usda.fmsc.twotrails.objects.points.QuondamPoint;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.rangefinder.RangeFinderService;
-import com.usda.fmsc.twotrails.rangefinder.TtRangeFinderData;
 import com.usda.fmsc.twotrails.units.OpType;
 import com.usda.fmsc.twotrails.utilities.ArcGISTools;
 import com.usda.fmsc.twotrails.utilities.TtNotifyManager;
@@ -1107,7 +1105,7 @@ public class TwoTrailsApp extends Application {
 
 
     //region File / Folder Paths
-    private File _MediaDir;
+    private File _MediaDir, _ProjectMediaDir;
 
     public File getLogFile() {
         return new File(getFilesDir(), Consts.Files.LOG_FILE);
@@ -1117,9 +1115,13 @@ public class TwoTrailsApp extends Application {
         return new File(getCacheDir(), String.format("%s_%s.txt", Consts.Files.GPS_LOG_FILE_PREFIX, TtUtils.Date.nowToString()));
     }
 
+    public File getMediaDir() {
+        return _MediaDir != null ? _MediaDir : (_MediaDir = new File(getFilesDir(), Consts.FolderLayout.Internal.MediaDir));
+    }
+
     public File getProjectMediaDir() {
         if (!hasDAL()) throw new RuntimeException("Project not opened");
-        return _MediaDir != null ? _MediaDir : (_MediaDir = Paths.get(getFilesDir().getPath(), Consts.FolderLayout.Internal.MediaDir, FileUtils.getFileNameWoExt(getDAL().getFileName())).toFile());
+        return _ProjectMediaDir != null ? _ProjectMediaDir : (_ProjectMediaDir = Paths.get(getMediaDir().getPath(), FileUtils.getFileNameWoExt(getDAL().getFileName())).toFile());
     }
 
     public File getMediaFileByFileName(String fileName) {

@@ -2026,7 +2026,10 @@ public class TtUtils {
         List<Tuple<File, File>> files = new ArrayList<>();
         files.add(new Tuple<>(app.getLogFile(), null));
         files.add(new Tuple<>(app.getOfflineMapsDir(), null));
-        files.add(new Tuple<>(app.getProjectMediaDir(), null));
+
+        if (app.getMediaDir().exists()) {
+            files.add(new Tuple<>(app.getMediaDir(), null));
+        }
 
         if (generateSettingsFile(app)) {
             files.add(new Tuple<>(app.getSettingsFile(), null));
@@ -2138,7 +2141,7 @@ public class TtUtils {
     }
 
     public static String projectToFileNameTTX(String projectName) {
-        return projectToFileName(projectName) + Consts.FileExtensions.TWO_TRAILS;
+        return projectToFileName(projectName) + (projectName.toLowerCase().contains(Consts.FileExtensions.TWO_TRAILS) ? "" : Consts.FileExtensions.TWO_TRAILS);
     }
 
     public static String projectToFileNameTTMPX(String projectName) {
