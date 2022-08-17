@@ -7,6 +7,7 @@ import androidx.documentfile.provider.DocumentFile;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.utilities.TaskRunner;
 import com.usda.fmsc.geospatial.utm.UTMTools;
+import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.data.DataAccessManager;
 import com.usda.fmsc.twotrails.data.MediaAccessLayer;
@@ -1211,10 +1212,27 @@ public class Export {
     }
 
     public static File summary(TwoTrailsApp context, DataAccessLayer dal, File dir) {
-        File tcSummaryFile = new File(dir != null ? dir : context.getCacheDir(), String.format("%s.txt", scrubProjectName(dal.getProjectID())));
+        File tcSummaryFile = new File(dir != null ? dir : context.getCacheDir(), String.format("%s_Summary.txt", scrubProjectName(dal.getProjectID())));
 
         try {
             FileWriter writer = new FileWriter(tcSummaryFile);
+
+            writer.write(String.format(Locale.getDefault(), "Project File: %s\n", dal.getFileName()));
+            writer.write(String.format(Locale.getDefault(), "Project Name: %s\n", dal.getProjectID()));
+            writer.write(String.format(Locale.getDefault(), "Region: %s\n", dal.getProjectRegion()));
+            writer.write(String.format(Locale.getDefault(), "Forest: %s\n", dal.getProjectForest()));
+            writer.write(String.format(Locale.getDefault(), "District: %s\n", dal.getProjectDistrict()));
+            writer.write(String.format(Locale.getDefault(), "Description: %s\n", dal.getProjectDescription()));
+            writer.write(String.format(Locale.getDefault(), "Created On: %s\n", dal.getProjectDateCreated()));
+            writer.write(String.format(Locale.getDefault(), "Version: %s\n", dal.getVersion()));
+            writer.write(String.format(Locale.getDefault(), "Data Version: %s\n", dal.getTtDbVersion()));
+            writer.write(String.format(Locale.getDefault(), "Creation Version: %s\n", dal.getProjectCreatedTtVersion()));
+
+            writer.write("\n\n");
+
+            writer.write(context.getString(R.string.haid_poly_info));
+
+            writer.write("\n\n\n");
 
             writer.write(new HaidLogic(context).generateAllPolyStats(true, true));
 
@@ -1452,7 +1470,7 @@ public class Export {
                 }
             }
 
-            if (!isCancelled() && params.isImgInfo()) {
+            if (!isCancelled() && params.isImgInfo() && params.getContext().hasMAL()) {
                 try {
                     if (params.isZipFile()) {
                         imageInfo(params.getContext(), params.getMal(), zfDir);
@@ -1485,7 +1503,6 @@ public class Export {
                     params.getContext().getReport().writeError(e.getMessage(), "Export:ExportTask:onBackgroundWork:pcPkg", e.getStackTrace());
                     return new Result(ResultCode.ExportFailure, "pcPkg");
                 }
-
             }
 
             if (params.isZipFile()) {

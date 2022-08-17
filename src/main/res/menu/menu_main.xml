@@ -9,6 +9,12 @@
         android:icon="@drawable/ica_adjpoly"
         android:visible="false"/>
 
+    <item android:id="@+id/miExportReport"
+        android:title="Export Report"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_file_upload_white_36dp"
+        android:visible="true" />
+
     <item
         android:id="@+id/overflowMenu"
         android:icon="@drawable/ic_action_overflow_white"

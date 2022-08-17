@@ -1,6 +1,5 @@
 package com.usda.fmsc.twotrails.activities;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
@@ -10,17 +9,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
-
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AlertDialog;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.lifecycle.Lifecycle;
-import androidx.viewpager2.adapter.FragmentStateAdapter;
-import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
@@ -45,6 +33,7 @@ import com.usda.fmsc.twotrails.fragments.main.MainDataFragment;
 import com.usda.fmsc.twotrails.fragments.main.MainFileFragment;
 import com.usda.fmsc.twotrails.fragments.main.MainToolsFragment;
 import com.usda.fmsc.twotrails.logic.AdjustingException;
+import com.usda.fmsc.twotrails.logic.SettingsLogic;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.objects.TwoTrailsProject;
 import com.usda.fmsc.twotrails.utilities.Export;
@@ -60,6 +49,17 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.function.Function;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.Lifecycle;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.widget.ViewPager2;
 
 
 public class MainActivity extends ProjectAdjusterActivity {
@@ -213,6 +213,15 @@ public class MainActivity extends ProjectAdjusterActivity {
     @Override
     public boolean onCreateOptionsMenuEx(Menu menu) {
         inflateMenu(R.menu.menu_main, menu);
+
+        if (BuildConfig.BUILD_TYPE.contains("preview") || BuildConfig.DEBUG) {
+            MenuItem miER = menu.findItem(R.id.miExportReport);
+
+            if (miER != null) {
+                miER.setVisible(true);
+            }
+        }
+
         return true;
     }
 
@@ -229,11 +238,13 @@ public class MainActivity extends ProjectAdjusterActivity {
                     putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.LASER_SETTINGS_PAGE));
         } else if (itemId == R.id.mainMenuPrivacyPolicy) {
             startActivity(new Intent(this, PrivacyPolicyActivity.class));
-        }else if (itemId == R.id.mainMenuAbout) {
+        } else if (itemId == R.id.mainMenuAbout) {
             new AlertDialog.Builder(MainActivity.this)
                     .setTitle(R.string.app_name)
                     .setMessage(String.format("App: %s\nData: %s", TtUtils.getAndroidApplicationVersion(getTtAppCtx()), TwoTrailsSchema.SchemaVersion))
                     .show();
+        } else if (itemId == R.id.miExportReport) {
+            exportReportFileOnResult.launch(String.format(Locale.getDefault(), "TwoTrailsReport_%s.zip", TtUtils.Date.nowToString()));
         }
 
         return super.onOptionsItemSelected(item);
@@ -798,7 +809,7 @@ public class MainActivity extends ProjectAdjusterActivity {
             for (File file : tmpInternalZipDir.listFiles()) {
                 importFromFile(file);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             getTtAppCtx().getReport().writeError(e.getMessage(), "MainActivity:importTtPackage");
             Toast.makeText(MainActivity.this, "Error Importing Project. See Log for details.", Toast.LENGTH_LONG).show();
         }
@@ -846,6 +857,12 @@ public class MainActivity extends ProjectAdjusterActivity {
             Toast.makeText(MainActivity.this, "Error Exporting Project", Toast.LENGTH_LONG).show();
         }
     }
+
+    private final ActivityResultLauncher<String> exportReportFileOnResult = registerForActivityResult(new CreateZipDocument(), result -> {
+        if (result != null) {
+            SettingsLogic.exportReport(MainActivity.this, result);
+        }
+    });
     //endregion
 
 
@@ -987,10 +1004,9 @@ public class MainActivity extends ProjectAdjusterActivity {
 
     private void overwriteLocalProjectAndMediaPackageByImportDialog(String baseFileName, Uri ttxFilePath, Uri ttmpxFilePath) {
         AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
-        alert.setTitle("Project Exists");
-        alert.setMessage(String.format(Locale.getDefault(), "The project files '%s' already exist. Do you want to overwrite or rename the project?", baseFileName));
-
-        alert.setPositiveButton("Overwrite", (dialog, which) -> {
+        alert.setTitle("Project Exists")
+        .setMessage(String.format(Locale.getDefault(), "The project files '%s' already exist. Do you want to overwrite or rename the project?", baseFileName))
+        .setPositiveButton("Overwrite", (dialog, which) -> {
             try {
                 DataAccessManager dam = DataAccessManager.importDAL(getTtAppCtx(), ttxFilePath);
                 MediaAccessManager.importMAL(getTtAppCtx(), ttmpxFilePath).close();
@@ -1004,13 +1020,11 @@ public class MainActivity extends ProjectAdjusterActivity {
                 getTtAppCtx().getReport().writeError(e.getMessage(), "MainActivity:overwriteLocalProjectAndMediaPackageByImportDialog:overwrite");
                 Toast.makeText(MainActivity.this, "Error Overwriting Project", Toast.LENGTH_LONG).show();
             }
-        });
-
-        alert.setNegativeButton("Rename", (dialog, which) -> {
+        })
+        .setNegativeButton("Rename", (dialog, which) -> {
             final InputDialog inputDialog = new InputDialog(MainActivity.this);
-            inputDialog.setTitle("New File Name");
-
-            inputDialog.setPositiveButton("Rename", (d2, wb2) -> {
+            inputDialog.setTitle("New File Name")
+            .setPositiveButton("Rename", (d2, wb2) -> {
                 try {
                     String newTtxFileName = inputDialog.getText(), newTtmpxFileName;
                     String newBaseFileName = newTtxFileName.substring(0, newTtxFileName.lastIndexOf("."));
@@ -1029,9 +1043,9 @@ public class MainActivity extends ProjectAdjusterActivity {
                 }
             });
 
-            inputDialog.setNegativeButton("Cancel", null);
-
-            inputDialog.show();
+            inputDialog
+                .setNegativeButton("Cancel", null)
+                .show();
         });
 
         alert.setNeutralButton(R.string.str_cancel, null);
@@ -1043,7 +1057,7 @@ public class MainActivity extends ProjectAdjusterActivity {
         final InputDialog inputDialog = new InputDialog(MainActivity.this);
         inputDialog.setTitle("Filename");
 
-        inputDialog.setPositiveButton("Import Project", (dialog, whichButton) -> {
+        inputDialog.setPositiveButton("Import TTX", (dialog, whichButton) -> {
                     String filename = inputDialog.getText().trim();
 
                     if (filename.length() > 0) {
@@ -1076,7 +1090,7 @@ public class MainActivity extends ProjectAdjusterActivity {
     private void importFromProtectedFolder(String filename, Uri filePath) {
         TtReport report = getTtAppCtx().getReport();
 
-        String tempProjectFileName = TtUtils.projectToFileNameTTX(String.format(Locale.getDefault(), "temp_%s", TtUtils.Date.nowToString()));
+        String tempProjectFileName = String.format(Locale.getDefault(), "temp_%s", TtUtils.Date.nowToString());
         File tempProjectFile = getDatabasePath(tempProjectFileName);
 
         Uri tempProjectUri = Uri.fromFile(tempProjectFile);
@@ -1085,6 +1099,7 @@ public class MainActivity extends ProjectAdjusterActivity {
         } else {
             try {
                 AndroidUtils.Files.copyFile(getTtAppCtx(), filePath, tempProjectUri);
+
                 try {
                     DataAccessManager dam = DataAccessManager.openDAL(getTtAppCtx(), tempProjectFileName);
                     try {
@@ -1096,6 +1111,7 @@ public class MainActivity extends ProjectAdjusterActivity {
                             try {
                                 DataAccessManager.importAndRenameDAL(getTtAppCtx(), tempProjectUri, filename).close();
                                 openProject(projectName, filename);
+                                tempProjectFile.deleteOnExit();
                                 return;
                             } catch (IOException e) {
                                 report.writeError("Unable to rename." + e.getMessage(), "importProject", e.getStackTrace());
@@ -1112,6 +1128,7 @@ public class MainActivity extends ProjectAdjusterActivity {
             }
         }
 
+        tempProjectFile.deleteOnExit();
         Toast.makeText(MainActivity.this, "Error Importing File: Please send Error Report.", Toast.LENGTH_LONG).show();
     }
 

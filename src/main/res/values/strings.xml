@@ -505,7 +505,7 @@
     <!-- HAID -->
     <string name="haid_menu_show_points">Show Points</string>
     <string name="haid_menu_hide_points">Hide Points</string>
-    <string name="haid_help_text">**** Area-error reduction for GPS surveys should be done by
+    <string name="haid_poly_info">**** Area-error reduction for GPS surveys should be done by
         correctly applying different canopy values along portions of the unit’s boundary.
         Examples of boundary-points where error may be reduced from the polygon-default-assigned-value are:
         along roads/trails; top of cliff edges; or along harvested sites. This reduction is to be done

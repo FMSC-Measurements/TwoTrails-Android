@@ -170,10 +170,8 @@ public class HaidActivity extends TtCustomToolbarActivity {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
             builder.setTitle(R.string.str_help)
-                    .setMessage(R.string.haid_help_text)
-                    .setPositiveButton(R.string.str_ok, (dialog, id1) -> {
-                        // User clicked OK button
-                    });
+                    .setMessage(R.string.haid_poly_info)
+                    .setPositiveButton(R.string.str_ok, null);
 
             builder.create().show();
         } else if (id == R.id.haidMenuIncreaseTextSize) {

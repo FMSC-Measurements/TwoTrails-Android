@@ -89,6 +89,8 @@ public class ExportActivity extends TtCustomToolbarActivity {
             chkKmz.setCheckedStateNoEvent(chkeckedState);
             chkGpx.setCheckedStateNoEvent(chkeckedState);
             chkSum.setCheckedStateNoEvent(chkeckedState);
+
+            chkOnChange(buttonView, isChecked, state);
         });
 
         if (fabExport != null) {
@@ -334,11 +336,11 @@ public class ExportActivity extends TtCustomToolbarActivity {
         getFilePathForExport.launch(new Tuple<>(
                 getFileNameWPrefix(
                         checkedCount == 1 ?
-                                chkPoints.isChecked() ?
+                                (chkPoints.isChecked() ?
                                     "Points" :
-                                    chkPc.isChecked() ?
+                                        (chkPc.isChecked() ?
                                             null :
-                                            "Export" :
+                                            "Export")) :
                                 "Export"
                 ),
                 MimeTypes.Application.ZIP)
