@@ -2575,6 +2575,10 @@ public class DataAccessLayer extends IDataLayer {
     protected boolean insertUserActivity(TtUserAction activity) {
         boolean success = false, inTrans = false;
 
+        if (activity.getAction().equals(DataActionType.None)) {
+            return true;
+        }
+
         try {
             if (getDB().inTransaction()) {
                 inTrans = true;
@@ -2592,14 +2596,14 @@ public class DataAccessLayer extends IDataLayer {
 
             getDB().insert(TwoTrailsSchema.ActivitySchema.TableName, null, cvs);
 
-            if (!inTrans)
+            if (!inTrans) {
                 getDB().setTransactionSuccessful();
+                getDB().endTransaction();
+            }
+
             success = true;
         } catch (Exception ex) {
             logError(ex.getMessage(), "DAL:insertUserActivity");
-        } finally {
-            if (!inTrans)
-                getDB().endTransaction();
         }
 
         return success;

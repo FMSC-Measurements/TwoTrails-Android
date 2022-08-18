@@ -33,6 +33,7 @@ import java.util.ArrayList;
 
 import com.usda.fmsc.geospatial.nmea41.sentences.base.NmeaSentence;
 import com.usda.fmsc.utilities.FileUtils;
+import com.usda.fmsc.utilities.MimeTypes;
 
 public class GpsLoggerActivity extends TtCustomToolbarActivity implements GpsService.Listener {
     private final String STRINGS_KEY = "strings";
@@ -55,7 +56,7 @@ public class GpsLoggerActivity extends TtCustomToolbarActivity implements GpsSer
                 if (uri != null) {
                     try {
                         File tmpZip = new File(getTtAppCtx().getCacheDir(), "tmpZip.zip");
-                        FileUtils.zipFiles(tmpZip, _AllGpsLogFiles.toArray(new File[_AllGpsLogFiles.size()]));
+                        FileUtils.zipFiles(tmpZip, _AllGpsLogFiles);
                         AndroidUtils.Files.copyFile(getTtAppCtx(), Uri.fromFile(tmpZip), uri);
                         tmpZip.delete();
                     } catch (Exception e) {
@@ -67,7 +68,7 @@ public class GpsLoggerActivity extends TtCustomToolbarActivity implements GpsSer
                 }
             });
 
-    private final ActivityResultLauncher<String> exportGpsLog = registerForActivityResult(new ActivityResultContracts.CreateDocument(),
+    private final ActivityResultLauncher<String> exportGpsLog = registerForActivityResult(new ActivityResultContracts.CreateDocument(MimeTypes.Text.PLAIN),
             uri -> {
                 if (uri != null) {
                     try {

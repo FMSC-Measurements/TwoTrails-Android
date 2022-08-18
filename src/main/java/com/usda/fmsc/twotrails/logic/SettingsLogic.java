@@ -40,15 +40,15 @@ public class SettingsLogic {
         alert.show();
     }
 
-    public static void clearLog(final TwoTrailsApp context) {
-        AlertDialog.Builder alert = new AlertDialog.Builder(context);
+    public static void clearLog(final Activity activity, TwoTrailsApp app) {
+        AlertDialog.Builder alert = new AlertDialog.Builder(activity);
 
         alert.setTitle("Clear Log File");
         alert.setMessage("Do you want clear the log file?");
 
         alert.setPositiveButton("Clear", (dialogInterface, i) -> {
-            context.getReport().clearReport();
-            Toast.makeText(context, "Log Cleared", Toast.LENGTH_SHORT).show();
+            app.getReport().clearReport();
+            Toast.makeText(activity, "Log Cleared", Toast.LENGTH_SHORT).show();
         });
 
         alert.setNeutralButton(R.string.str_cancel, null);

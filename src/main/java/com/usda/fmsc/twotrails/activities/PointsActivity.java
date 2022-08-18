@@ -102,7 +102,7 @@ import com.usda.fmsc.utilities.StringEx;
 
 import jp.wasabeef.recyclerview.animators.FadeInAnimator;
 
-@SuppressWarnings({"unused", "RestrictedApi"})
+@SuppressWarnings({"RestrictedApi"})
 public class PointsActivity extends PointCollectionActivity implements PointMediaController, RangeFinderService.Listener {
     private final HashMap<String, PointMediaListener> listeners = new HashMap<>();
 
@@ -142,7 +142,6 @@ public class PointsActivity extends PointCollectionActivity implements PointMedi
 
 
     private BitmapManager bitmapManager;
-    private final BitmapManager.ScaleOptions scaleOptions = new BitmapManager.ScaleOptions();
 
     private TtMedia _CurrentMedia, _BackupMedia;
 
@@ -335,10 +334,6 @@ public class PointsActivity extends PointCollectionActivity implements PointMedi
         public boolean onMenuItemClick(MenuItem item) {
             int itemId = item.getItemId();
             if (itemId == R.id.ctx_menu_add) {
-//                Intent intent = new Intent(Intent.ACTION_PICK);
-//                intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-//                intent.setType("image/*");
-//                startActivityForResult(intent, Consts.Codes.Requests.ADD_IMAGES);
                 pickImages();
             } else if (itemId == R.id.ctx_menu_capture) {
                 if (AndroidUtils.Device.isFullOrientationAvailable(PointsActivity.this)) {
@@ -405,7 +400,6 @@ public class PointsActivity extends PointCollectionActivity implements PointMedi
 
 
     private final ActivityResultLauncher<Intent> acquireAndCalculateOnResult = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
-
         slexAqr.contractFab();
 
         if (result.getResultCode() == Consts.Codes.Results.POINT_CREATED) {
@@ -415,12 +409,7 @@ public class PointsActivity extends PointCollectionActivity implements PointMedi
                 updatePoint(point);
                 onPointUpdate();
             }
-//            else {
-//                Toast.makeText(PointsActivity.this, "Point does not have extras", Toast.LENGTH_LONG).show();
-//            }
         }
-
-
     });
 
     private void acquireAndOrCalculate(Intent data) {
@@ -631,8 +620,6 @@ public class PointsActivity extends PointCollectionActivity implements PointMedi
 
                     bitmapHeight = mediaViewPager.getHeight();
                     bitmapManager.setImageLimitSize(bitmapHeight);
-                    scaleOptions.setScaleMode(BitmapManager.ScaleMode.Max);
-                    scaleOptions.setSize(bitmapHeight);
 
                     rvMediaAdapter = new MediaRvAdapter(PointsActivity.this, Collections.synchronizedList(new ArrayList<>()), mediaListener,
                             pmdScroller.getHeight() - AndroidUtils.Convert.dpToPx(PointsActivity.this, 10), bitmapManager);
@@ -685,14 +672,6 @@ public class PointsActivity extends PointCollectionActivity implements PointMedi
             AndroidUtils.UI.setContentDescToast(ivFullscreen, "View in Fullscreen");
         }
         //endregion
-
-        if (getTtAppCtx().getDeviceSettings().isRangeFinderConfigured()) {
-            getTtAppCtx().getRF().startRangeFinder();
-        }
-
-        if (getTtAppCtx().getRF() != null) {
-            getTtAppCtx().getRF().addListener(this);
-        }
     }
 
     @Override
@@ -725,14 +704,6 @@ public class PointsActivity extends PointCollectionActivity implements PointMedi
 
             if (adjust) {
                 getTtAppCtx().adjustProject(true);
-            }
-        }
-
-        if (getTtAppCtx().getRF() != null) {
-            getTtAppCtx().getRF().removeListener(this);
-
-            if (!getTtAppCtx().getDeviceSettings().isRangeFinderAlwaysOn()) {
-                getTtAppCtx().getRF().stopRangeFinder();
             }
         }
     }
@@ -899,12 +870,10 @@ public class PointsActivity extends PointCollectionActivity implements PointMedi
 
     @Override
     protected void onAppSettingsUpdated() {
+        super.onAppSettingsUpdated();
+
         if (getTtAppCtx().getDeviceSettings().isRangeFinderConfigured()) {
             getTtAppCtx().getRF().startRangeFinder();
-        }
-
-        if (getTtAppCtx().getRF() != null) {
-            getTtAppCtx().getRF().addListener(this);
         }
     }
     //endregion
@@ -1076,9 +1045,10 @@ public class PointsActivity extends PointCollectionActivity implements PointMedi
                 } else if (op == OpType.Quondam) {
                     Toast.makeText(PointsActivity.this, "Quondam must have a Parent Point selected", Toast.LENGTH_SHORT).show();
                 }
-            } else if (_CurrentPoint.isGpsType() && op.isTravType()) {
+            } else if ((!_CurrentPoint.isGpsType() || (_CurrentPoint.getOp() == OpType.Quondam && !((QuondamPoint)_CurrentPoint).getParentOp().isGpsType()))
+                    && op.isTravType()) {
                 Toast.makeText(PointsActivity.this,
-                        String.format("A %s cannot be the first point in a polygon. You must have a valid GPS Type point before it.", op.toString()),
+                        String.format("A %s cannot be the first point in a polygon. You must have a valid GPS Type point before it.", op),
                         Toast.LENGTH_LONG).show();
             } else {
                 _deletePoint = _CurrentPoint;
@@ -1127,7 +1097,7 @@ public class PointsActivity extends PointCollectionActivity implements PointMedi
 
             if (op.isTravType() && _CurrentIndex < 0) {
                 Toast.makeText(PointsActivity.this,
-                        String.format("A %s cannot be the first point in a polygon. Take a GPS Type point first.", op.toString()),
+                        String.format("A %s cannot be the first point in a polygon. Take a GPS Type point first.", op),
                         Toast.LENGTH_LONG).show();
                 return;
             }
@@ -1262,16 +1232,11 @@ public class PointsActivity extends PointCollectionActivity implements PointMedi
         }
     }
 
-    private void removeMedia(TtMedia media, boolean delete) {
+    private void removeMedia(TtMedia media) {
         List<TtMedia> mediaList = rvMediaAdapter.getItems();
         int index = mediaList.indexOf(media);
 
         getTtAppCtx().getMAL().deleteMedia(media);
-
-//        if (delete) {
-//            File file = new File(media.getPath());
-//            file.deleteOnExit();
-//        }
 
         mediaCount--;
         TtMedia changeTo = null;
@@ -1352,23 +1317,9 @@ public class PointsActivity extends PointCollectionActivity implements PointMedi
 
     private void deleteMedia() {
         if (!_PointLocked && _CurrentMedia != null) {
-            removeMedia(_CurrentMedia, false);
-//            new AlertDialog.Builder(PointsActivity.this)
-//                    .setMessage(String.format(
-//                            "Would you like to delete %s '%s' from storage or only remove its association with the point?",
-//                            _CurrentMedia.getMediaType().toString().toLowerCase(),
-//                            _CurrentMedia.getName()))
-//                    .setPositiveButton(R.string.str_remove, (dialog, which) -> removeMedia(_CurrentMedia, false))
-//                    .setNegativeButton(R.string.str_delete, (dialog, which) -> new AlertDialog.Builder(PointsActivity.this)
-//                            .setMessage(String.format("You are about to delete file '%s'.", _CurrentMedia.getPath()))
-//                            .setPositiveButton(R.string.str_delete, (dialog1, which1) -> removeMedia(_CurrentMedia, true))
-//                            .setNeutralButton(R.string.str_cancel, null)
-//                            .show())
-//                    .setNeutralButton(R.string.str_cancel, null)
-//                    .show();
+            removeMedia(_CurrentMedia);
         }
     }
-
 
 
     @Override
@@ -2357,8 +2308,15 @@ public class PointsActivity extends PointCollectionActivity implements PointMedi
     //endregion
 
 
+    @Override
+    public boolean requiresRFService() {
+        return true;
+    }
+
     //region Range Finder
     @Override
+
+
     public void rfDataReceived(final TtRangeFinderData rfData) {
         if (rfData.isValid()) {
             if (!_PointLocked) {
@@ -2393,7 +2351,7 @@ public class PointsActivity extends PointCollectionActivity implements PointMedi
                     DeviceSettings.AUTO_FILL_FROM_RANGE_FINDER,
                     getTtAppCtx().getDeviceSettings().getPrefs());
 
-            dialog.setMessage(String.format("Would You like to set the compass value to Forward or Backwards?"))
+            dialog.setMessage("Would You like to set the compass value to Forward or Backwards?")
                     .setPositiveButton("Fwd", (dialogInterface, i, value) -> {
                         if (dialog.isDontAskAgainChecked()) {
                             autoSetTrav = true;
@@ -2494,8 +2452,6 @@ public class PointsActivity extends PointCollectionActivity implements PointMedi
 
     @Override
     public void onAdjusterStarted() {
-        //super.onAdjusterStarted();
-
         runOnUiThread(() -> Toast.makeText(PointsActivity.this, "Adjusting Points. Starting Acquire soon.", Toast.LENGTH_SHORT).show());
     }
 
@@ -2598,10 +2554,7 @@ public class PointsActivity extends PointCollectionActivity implements PointMedi
 
         @Override
         public void notifyDataSetChanged() {
-            if (listeners != null) {
-                listeners.clear();
-            }
-
+            listeners.clear();
             super.notifyDataSetChanged();
         }
     }

@@ -11,6 +11,10 @@ import com.usda.fmsc.utilities.MimeTypes;
 
 public class CreateZipDocument extends ActivityResultContracts.CreateDocument {
 
+    public CreateZipDocument() {
+        super(MimeTypes.Application.ZIP);
+    }
+
     @NonNull
     @Override
     public Intent createIntent(@NonNull Context context, @NonNull String input) {

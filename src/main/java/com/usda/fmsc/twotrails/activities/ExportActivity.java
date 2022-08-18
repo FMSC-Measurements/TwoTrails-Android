@@ -89,6 +89,8 @@ public class ExportActivity extends TtCustomToolbarActivity {
             chkKmz.setCheckedStateNoEvent(chkeckedState);
             chkGpx.setCheckedStateNoEvent(chkeckedState);
             chkSum.setCheckedStateNoEvent(chkeckedState);
+
+            chkOnChange(buttonView, isChecked, state);
         });
 
         if (fabExport != null) {
@@ -191,13 +193,11 @@ public class ExportActivity extends TtCustomToolbarActivity {
 
 
     private String getFileNameWPrefix(String prefix) {
-        return String.format(Locale.getDefault(), "%s%s_%s%s",
+        return String.format(Locale.getDefault(), "%s%s_(%s)",
                 prefix != null ?
-                        String.format(Locale.getDefault(), "%s_(", prefix) : "",
+                        String.format(Locale.getDefault(), "%s_", prefix) : "",
                 TtUtils.projectToFileName(getTtAppCtx().getDAL().getProjectID()),
-                TtUtils.Date.toStringDateMillis(new DateTime(getTtAppCtx().getDAM().getDBFile().lastModified())),
-                prefix != null ?
-                        ")" : ""
+                TtUtils.Date.toStringDateMillis(new DateTime(getTtAppCtx().getDAM().getDBFile().lastModified()))
         );
     }
 
@@ -334,11 +334,11 @@ public class ExportActivity extends TtCustomToolbarActivity {
         getFilePathForExport.launch(new Tuple<>(
                 getFileNameWPrefix(
                         checkedCount == 1 ?
-                                chkPoints.isChecked() ?
+                                (chkPoints.isChecked() ?
                                     "Points" :
-                                    chkPc.isChecked() ?
+                                        (chkPc.isChecked() ?
                                             null :
-                                            "Export" :
+                                            "Export")) :
                                 "Export"
                 ),
                 MimeTypes.Application.ZIP)

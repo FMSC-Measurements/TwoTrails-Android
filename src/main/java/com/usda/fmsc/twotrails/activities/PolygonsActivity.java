@@ -32,7 +32,6 @@ import java.util.List;
 
 import com.usda.fmsc.utilities.StringEx;
 
-@SuppressLint("DefaultLocale")
 public class PolygonsActivity extends ProjectAdjusterActivity {
     private HashMap<String, Listener> listeners;
 
@@ -235,6 +234,7 @@ public class PolygonsActivity extends ProjectAdjusterActivity {
         }
     }
 
+
     //region Save Delete Create Reset
     private void savePolygon() {
         if (_PolygonUpdated && _CurrentPolygon != null) {
@@ -433,7 +433,7 @@ public class PolygonsActivity extends ProjectAdjusterActivity {
     }
     //endregion
 
-    //Fragment Calls
+    //region Fragment Calls
     private void onLockChange() {
         for (Listener listener : listeners.values()) {
             listener.onLockChange(_PolyLocked);
@@ -503,12 +503,12 @@ public class PolygonsActivity extends ProjectAdjusterActivity {
     }
     //endregion
 
-
     //region Controls
     public void btnNewClick(View view) {
         createPolygon();
     }
     //endregion
+
 
     public void register(String polyCN, Listener listener) {
         if (listener != null && !listeners.containsKey(polyCN)) {

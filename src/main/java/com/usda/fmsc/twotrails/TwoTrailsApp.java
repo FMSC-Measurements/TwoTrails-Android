@@ -1,6 +1,5 @@
 package com.usda.fmsc.twotrails;
 
-import android.Manifest;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.Application;
@@ -46,7 +45,6 @@ import com.usda.fmsc.twotrails.objects.media.TtMedia;
 import com.usda.fmsc.twotrails.objects.points.QuondamPoint;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.rangefinder.RangeFinderService;
-import com.usda.fmsc.twotrails.rangefinder.TtRangeFinderData;
 import com.usda.fmsc.twotrails.units.OpType;
 import com.usda.fmsc.twotrails.utilities.ArcGISTools;
 import com.usda.fmsc.twotrails.utilities.TtNotifyManager;
@@ -170,8 +168,6 @@ public class TwoTrailsApp extends Application {
                                     msg = "Failed to connect to external GPS.";
                                     delayAndSearchForGps.run();
                                     break;
-                                //case Unknown:
-                                //    break;
                             }
 
                             if (msg != null) {
@@ -207,53 +203,6 @@ public class TwoTrailsApp extends Application {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             rfServiceBinder = (RangeFinderService.RangeFinderBinder)service;
-
-            rfServiceBinder.addListener(new RangeFinderService.Listener() {
-                @Override
-                public void rfDataReceived(TtRangeFinderData rfData) {
-
-                }
-
-                @Override
-                public void rfStringReceived(String rfString) {
-
-                }
-
-                @Override
-                public void rfInvalidStringReceived(String rfString) {
-
-                }
-
-                @Override
-                public void rangeFinderStarted() {
-
-                }
-
-                @Override
-                public void rangeFinderStopped() {
-
-                }
-
-                @Override
-                public void rangeFinderConnecting() {
-
-                }
-
-                @Override
-                public void rangeFinderServiceStarted() {
-
-                }
-
-                @Override
-                public void rangeFinderServiceStopped() {
-                    //rfServiceBinder = null;
-                }
-
-                @Override
-                public void rangeFinderError(RangeFinderService.RangeFinderError error) {
-
-                }
-            });
 
             if (_CurrentActivity instanceof TtActivity) {
                 TtActivity act = (TtActivity) _CurrentActivity;
@@ -359,20 +308,17 @@ public class TwoTrailsApp extends Application {
                 if (isGpsServiceStarted()) {
                     if (act.requiresGpsService() && act instanceof GpsService.Listener) {
                         getGps().removeListener((GpsService.Listener)act);
+
+                        if (!(getDeviceSettings().isGpsAlwaysOn() || getGps().isLogging())) {
+                            getGps().stopGps();
+                        }
                     }
 
-                    if (!(getDeviceSettings().isGpsAlwaysOn() || getGps().isLogging())) {
-                        getGps().stopGps();
-                    }
                 }
 
                 if (isRFServiceStarted()) {
                     if (act.requiresRFService() && act instanceof RangeFinderService.Listener) {
                         getRF().removeListener((RangeFinderService.Listener)act);
-                    }
-
-                    if (!(getDeviceSettings().isRangeFinderAlwaysOn() || getRF().isLogging())) {
-                        getRF().stopRangeFinder();
                     }
                 }
             }
@@ -381,13 +327,11 @@ public class TwoTrailsApp extends Application {
                 if (isGpsServiceStarted()) {
                     getGps().stopService();
                     stopService(new Intent(TwoTrailsApp.this, GpsService.class));
-                    //gpsServiceBinder = null;
                 }
 
                 if (isRFServiceStarted()) {
                     getRF().stopService();
                     stopService(new Intent(TwoTrailsApp.this, RangeFinderService.class));
-                    //rfServiceBinder = null;
                 }
 
                 if (_Report != null) {
@@ -1161,7 +1105,7 @@ public class TwoTrailsApp extends Application {
 
 
     //region File / Folder Paths
-    private File _MediaDir;
+    private File _MediaDir, _ProjectMediaDir;
 
     public File getLogFile() {
         return new File(getFilesDir(), Consts.Files.LOG_FILE);
@@ -1171,9 +1115,13 @@ public class TwoTrailsApp extends Application {
         return new File(getCacheDir(), String.format("%s_%s.txt", Consts.Files.GPS_LOG_FILE_PREFIX, TtUtils.Date.nowToString()));
     }
 
+    public File getMediaDir() {
+        return _MediaDir != null ? _MediaDir : (_MediaDir = new File(getFilesDir(), Consts.FolderLayout.Internal.MediaDir));
+    }
+
     public File getProjectMediaDir() {
         if (!hasDAL()) throw new RuntimeException("Project not opened");
-        return _MediaDir != null ? _MediaDir : (_MediaDir = Paths.get(getFilesDir().getPath(), Consts.FolderLayout.Internal.MediaDir, FileUtils.getFileNameWoExt(getDAL().getFileName())).toFile());
+        return _ProjectMediaDir != null ? _ProjectMediaDir : (_ProjectMediaDir = Paths.get(getMediaDir().getPath(), FileUtils.getFileNameWoExt(getDAL().getFileName())).toFile());
     }
 
     public File getMediaFileByFileName(String fileName) {

@@ -1,7 +1,6 @@
 package com.usda.fmsc.twotrails.activities.contracts;
 
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;

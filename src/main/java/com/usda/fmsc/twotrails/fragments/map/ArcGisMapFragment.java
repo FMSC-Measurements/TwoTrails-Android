@@ -298,7 +298,8 @@ public class ArcGisMapFragment extends TtBaseFragment implements IMultiMapFragme
                         });
                     }
                 }
-            } catch (FileNotFoundException e) {
+            } catch (Exception e) {
+                getTtAppCtx().getReport().writeError(e.getMessage(), "ArcGisMapFragment:changeBasemap", e.getStackTrace());
                 Toast.makeText(getActivity(), "Unable to find offline map file.", Toast.LENGTH_LONG).show();
             }
         }

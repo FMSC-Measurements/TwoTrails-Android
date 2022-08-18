@@ -71,21 +71,4 @@ public class TtBluetoothManager {
 
         return socket;
     }
-
-
-    public interface BluetoothListener {
-        void receivedData();
-        void receivedValidNmea();
-        void error(BluetoothDeviceError error);
-    }
-
-    public enum BluetoothDeviceError {
-        Timeout,
-        ConnectionLost,
-        ConnectionClosed,
-        NoDevice,
-        BadSocket,
-        FailedToConnect,
-        Unknown
-    }
 }

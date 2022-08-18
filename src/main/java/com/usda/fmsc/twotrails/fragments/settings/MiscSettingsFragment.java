@@ -12,6 +12,7 @@ import androidx.preference.Preference;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.activities.base.TtCustomToolbarActivity;
 import com.usda.fmsc.twotrails.activities.base.TtActivity;
+import com.usda.fmsc.twotrails.activities.contracts.CreateZipDocument;
 import com.usda.fmsc.twotrails.fragments.TtBasePrefFragment;
 import com.usda.fmsc.twotrails.logic.SettingsLogic;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
@@ -20,13 +21,13 @@ import java.util.Locale;
 
 public class MiscSettingsFragment extends TtBasePrefFragment {
 
-    private final ActivityResultLauncher<String> exportReportFileOnResult = registerForActivityResult(new ActivityResultContracts.CreateDocument(), result -> {
+    private final ActivityResultLauncher<String> exportReportFileOnResult = registerForActivityResult(new CreateZipDocument(), result -> {
         if (result != null) {
             SettingsLogic.exportReport((TtActivity) getActivity(), result);
         }
     });
 
-    private final ActivityResultLauncher<String> exportProjectsOnResult = registerForActivityResult(new ActivityResultContracts.CreateDocument(), result -> {
+    private final ActivityResultLauncher<String> exportProjectsOnResult = registerForActivityResult(new CreateZipDocument(), result -> {
         if (result != null) {
             if (TtUtils.exportProjects(getTtAppCtx(), result)) {
                 Toast.makeText(getActivity(), "All Projects Exported.", Toast.LENGTH_LONG).show();
@@ -36,17 +37,15 @@ public class MiscSettingsFragment extends TtBasePrefFragment {
         }
     });
 
-    private final ActivityResultLauncher<String> dataDumpOnResult = registerForActivityResult(new ActivityResultContracts.CreateDocument(), result -> {
+    private final ActivityResultLauncher<String> dataDumpOnResult = registerForActivityResult(new CreateZipDocument(), result -> {
         if (result != null) {
             Toast.makeText(getActivity(), "Dumping.. This could take a while.", Toast.LENGTH_LONG).show();
 
-//            new Thread(() -> {
-                if (TtUtils.dataDump(getTtAppCtx(), result)) {
-                    getTtAppCtx().runOnCurrentUIThread(() -> Toast.makeText(getActivity(), "App Data Dumped.", Toast.LENGTH_LONG).show());
-                } else {
-                    getTtAppCtx().runOnCurrentUIThread(() -> Toast.makeText(getActivity(), "Error dumping app data.", Toast.LENGTH_LONG).show());
-                }
-//            }).start();
+            if (TtUtils.dataDump(getTtAppCtx(), result)) {
+                getTtAppCtx().runOnCurrentUIThread(() -> Toast.makeText(getActivity(), "App Data Dumped.", Toast.LENGTH_LONG).show());
+            } else {
+                getTtAppCtx().runOnCurrentUIThread(() -> Toast.makeText(getActivity(), "Error dumping app data.", Toast.LENGTH_LONG).show());
+            }
         }
     });
 
@@ -54,8 +53,6 @@ public class MiscSettingsFragment extends TtBasePrefFragment {
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.pref_other_settings, rootKey);
-
-        setHasOptionsMenu(true);
 
         Preference pref = findPreference(getString(R.string.set_RESET));
         if (pref != null) {
@@ -68,7 +65,7 @@ public class MiscSettingsFragment extends TtBasePrefFragment {
         pref = findPreference(getString(R.string.set_CLEAR_LOG));
         if (pref != null) {
             pref.setOnPreferenceClickListener(preference -> {
-                SettingsLogic.clearLog(getTtAppCtx());
+                SettingsLogic.clearLog(getActivity(), getTtAppCtx());
                 return false;
             });
         }

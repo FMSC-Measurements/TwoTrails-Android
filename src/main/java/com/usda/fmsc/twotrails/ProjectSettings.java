@@ -122,7 +122,7 @@ public class ProjectSettings extends Settings {
         ArrayList<TwoTrailsProject> projects = new ArrayList<>();
 
         for (TwoTrailsProject rp : (ArrayList<TwoTrailsProject>)gson.fromJson(json, new TypeToken<ArrayList<TwoTrailsProject>>() { }.getType())) {
-            if (DataAccessManager.localDALExists(getContext(), rp.TTXFile)) {
+            if (!StringEx.isEmpty(rp.TTXFile) && DataAccessManager.localDALExists(getContext(), rp.TTXFile)) {
                 projects.add(rp);
             }
         }

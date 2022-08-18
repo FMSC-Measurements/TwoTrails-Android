@@ -1,13 +1,12 @@
 package com.usda.fmsc.twotrails.devices;
 
 import android.bluetooth.BluetoothSocket;
+import android.text.TextUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-
-import com.usda.fmsc.utilities.StringEx;
 
 public class BluetoothConnection extends Thread {
     private BluetoothSocket btSocket;
@@ -41,18 +40,17 @@ public class BluetoothConnection extends Thread {
                 inputStreamReader = new InputStreamReader(btSocket.getInputStream());
                 bufferedReader = new BufferedReader(inputStreamReader);
 
-                String str = StringEx.Empty;
+                StringBuilder str = new StringBuilder();
 
                 while (!disconnect) {
                     try {
-                        str += bufferedReader.readLine();
+                        str.append(bufferedReader.readLine());
 
-                        if (!StringEx.isEmpty(str) && str.contains("*") && !disconnect) {
+                        if (!TextUtils.isEmpty(str) && str.indexOf("*") != -1 && !disconnect) {
                             for (Listener l : listeners) {
-                                l.receivedString(str);
+                                l.receivedString(str.toString());
                             }
-
-                            str = StringEx.Empty;
+                            str.setLength(0);
                         }
 
                         receiving = true;
@@ -98,6 +96,8 @@ public class BluetoothConnection extends Thread {
 
         if (btSocket != null) {
             try {
+                btSocket.close();
+
                 if (bufferedReader != null) {
                     bufferedReader.close();
                     bufferedReader = null;
@@ -108,7 +108,6 @@ public class BluetoothConnection extends Thread {
                     inputStreamReader = null;
                 }
 
-                btSocket.close();
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {

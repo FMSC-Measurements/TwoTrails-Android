@@ -1398,48 +1398,52 @@ public class TtUtils {
         }
 
         public static ArrayList<PointD> generateStaticPolyPoints(List<TtPoint> points, HashMap<String, TtMetadata> metadata, int zone, int canvasSize) {
-            ArrayList<PointD> pts = new ArrayList<>();
+            try {
+                ArrayList<PointD> pts = new ArrayList<>();
 
-            double minX = Double.POSITIVE_INFINITY, maxX = Double.NEGATIVE_INFINITY,
-                    minY = Double.POSITIVE_INFINITY, maxY = Double.NEGATIVE_INFINITY;
+                double minX = Double.POSITIVE_INFINITY, maxX = Double.NEGATIVE_INFINITY,
+                        minY = Double.POSITIVE_INFINITY, maxY = Double.NEGATIVE_INFINITY;
 
-            for (TtPoint point : points) {
-                UTMCoords coords = Points.forcePointZone(point, zone, metadata.get(point.getMetadataCN()).getZone(), true);
-                PointD pt = new PointD(coords.getX() + 500000, coords.getY() + 10000000);
+                for (TtPoint point : points) {
+                    UTMCoords coords = Points.forcePointZone(point, zone, metadata.get(point.getMetadataCN()).getZone(), true);
+                    PointD pt = new PointD(coords.getX() + 500000, coords.getY() + 10000000);
 
-                if (pt.X > maxX) {
-                    maxX = pt.X;
+                    if (pt.X > maxX) {
+                        maxX = pt.X;
+                    }
+
+                    if (pt.X < minX) {
+                        minX = pt.X;
+                    }
+
+                    if (pt.Y > maxY) {
+                        maxY = pt.Y;
+                    }
+
+                    if (pt.Y < minY) {
+                        minY = pt.Y;
+                    }
+
+                    pts.add(pt);
                 }
 
-                if (pt.X < minX) {
-                    minX = pt.X;
+                double width = maxX - minX;
+                double height = maxY - minY;
+
+                double adjustment = canvasSize / java.lang.Math.max(width, height);
+
+                double xOffset = (height > width ? (canvasSize - width * adjustment) / 2 : 0);
+                double yOffset = (width > height ? (canvasSize - height * adjustment) / 2 : 0);
+
+                for (PointD pt : pts) {
+                    pt.X = (pt.X - minX) * adjustment + xOffset;
+                    pt.Y = canvasSize - (pt.Y - minY) * adjustment - yOffset;
                 }
 
-                if (pt.Y > maxY) {
-                    maxY = pt.Y;
-                }
-
-                if (pt.Y < minY) {
-                    minY = pt.Y;
-                }
-
-                pts.add(pt);
+                return pts;
+            } catch (Exception e) {
+                return null;
             }
-
-            double width = maxX - minX;
-            double height = maxY - minY;
-
-            double adjustment = canvasSize / java.lang.Math.max(width, height);
-
-            double xOffset = (height > width ? (canvasSize - width * adjustment) / 2 : 0);
-            double yOffset = (width > height ? (canvasSize - height * adjustment) / 2 : 0);
-
-            for (PointD pt : pts) {
-                pt.X = (pt.X - minX) * adjustment + xOffset;
-                pt.Y = canvasSize - (pt.Y - minY) * adjustment - yOffset;
-            }
-
-            return pts;
         }
     }
 
@@ -1907,7 +1911,7 @@ public class TtUtils {
             }
         }
 
-        FileUtils.zipFiles(exportFile, files.toArray(new Tuple[0]));
+        FileUtils.zipFilesT(exportFile, files);
 
         return exportFile;
     }
@@ -1996,7 +2000,7 @@ public class TtUtils {
         }
 
         try {
-            FileUtils.zipFiles(exportFile, files.toArray(new Tuple[0]));
+            FileUtils.zipFilesT(exportFile, files);
 
             AndroidUtils.Files.copyFile(app, Uri.fromFile(exportFile), externalProjectFilesPath);
 
@@ -2022,7 +2026,10 @@ public class TtUtils {
         List<Tuple<File, File>> files = new ArrayList<>();
         files.add(new Tuple<>(app.getLogFile(), null));
         files.add(new Tuple<>(app.getOfflineMapsDir(), null));
-        files.add(new Tuple<>(app.getProjectMediaDir(), null));
+
+        if (app.getMediaDir().exists()) {
+            files.add(new Tuple<>(app.getMediaDir(), null));
+        }
 
         if (generateSettingsFile(app)) {
             files.add(new Tuple<>(app.getSettingsFile(), null));
@@ -2047,7 +2054,7 @@ public class TtUtils {
                     app.getCacheDir(),
                     fileName);
 
-            FileUtils.zipFiles(exportFile, files.toArray(new Tuple[0]));
+            FileUtils.zipFilesT(exportFile, files);
 
             AndroidUtils.Files.copyFile(app, Uri.fromFile(exportFile), externalDataDumpPath);
 
@@ -2134,7 +2141,7 @@ public class TtUtils {
     }
 
     public static String projectToFileNameTTX(String projectName) {
-        return projectToFileName(projectName) + Consts.FileExtensions.TWO_TRAILS;
+        return projectToFileName(projectName) + (projectName.toLowerCase().contains(Consts.FileExtensions.TWO_TRAILS) ? "" : Consts.FileExtensions.TWO_TRAILS);
     }
 
     public static String projectToFileNameTTMPX(String projectName) {

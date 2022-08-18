@@ -598,7 +598,7 @@ public class DeviceSettings extends Settings {
     }
 
     public boolean isAutoFillFromRangeFinderAsk() {
-        return getBool(AUTO_FILL_FROM_RANGE_FINDER_ASK);
+        return getBool(AUTO_FILL_FROM_RANGE_FINDER_ASK, DEFAULT_AUTO_FILL_FROM_RANGE_FINDER_ASK);
     }
     //endregion
 
@@ -1237,7 +1237,7 @@ public class DeviceSettings extends Settings {
 
 
     public boolean getAutoOverwriteExportAsk() {
-        return getBool(AUTO_OVERWRITE_EXPORT_ASK);
+        return getBool(AUTO_OVERWRITE_EXPORT_ASK, DEFAULT_AUTO_OVERWRITE_EXPORT_ASK);
     }
 
     public void setAutoOverwriteExportAsk(boolean value) {
@@ -1255,7 +1255,7 @@ public class DeviceSettings extends Settings {
 
 
     public boolean getAutoInternalizeExportAsk() {
-        return getBool(AUTO_INTERNALIZE_EXPORT_ASK);
+        return getBool(AUTO_INTERNALIZE_EXPORT_ASK, DEFAULT_AUTO_INTERNALIZE_EXPORT_ASK);
     }
 
     public void setAutoInternalizeExportAsk(boolean value) {
@@ -1280,7 +1280,7 @@ public class DeviceSettings extends Settings {
 
 
     public boolean getAutoOpenLastProject() {
-        return getBool(AUTO_OPEN_LAST_PROJECT);
+        return getBool(AUTO_OPEN_LAST_PROJECT, DEFAULT_AUTO_OPEN_LAST_PROJECT);
     }
 
     public void setAutoOpenLastProject(boolean value) {

@@ -10,17 +10,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AlertDialog;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.lifecycle.Lifecycle;
-import androidx.viewpager2.adapter.FragmentStateAdapter;
-import androidx.viewpager2.widget.ViewPager2;
-
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.usda.fmsc.android.AndroidUtils;
@@ -35,6 +24,7 @@ import com.usda.fmsc.twotrails.activities.base.ProjectAdjusterActivity;
 import com.usda.fmsc.twotrails.activities.contracts.CreateZipDocument;
 import com.usda.fmsc.twotrails.activities.contracts.OpenDocumentTreePersistent;
 import com.usda.fmsc.twotrails.adapters.RecentProjectAdapter;
+import com.usda.fmsc.twotrails.data.DataAccessLayer;
 import com.usda.fmsc.twotrails.data.DataAccessManager;
 import com.usda.fmsc.twotrails.data.MediaAccessManager;
 import com.usda.fmsc.twotrails.data.TwoTrailsSchema;
@@ -43,9 +33,11 @@ import com.usda.fmsc.twotrails.fragments.main.MainDataFragment;
 import com.usda.fmsc.twotrails.fragments.main.MainFileFragment;
 import com.usda.fmsc.twotrails.fragments.main.MainToolsFragment;
 import com.usda.fmsc.twotrails.logic.AdjustingException;
+import com.usda.fmsc.twotrails.logic.SettingsLogic;
 import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.objects.TwoTrailsProject;
 import com.usda.fmsc.twotrails.utilities.Export;
+import com.usda.fmsc.twotrails.utilities.TtReport;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 import com.usda.fmsc.utilities.FileUtils;
 import com.usda.fmsc.utilities.StringEx;
@@ -57,6 +49,17 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.function.Function;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.Lifecycle;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.widget.ViewPager2;
 
 
 public class MainActivity extends ProjectAdjusterActivity {
@@ -210,6 +213,15 @@ public class MainActivity extends ProjectAdjusterActivity {
     @Override
     public boolean onCreateOptionsMenuEx(Menu menu) {
         inflateMenu(R.menu.menu_main, menu);
+
+        if (BuildConfig.BUILD_TYPE.contains("preview") || BuildConfig.DEBUG) {
+            MenuItem miER = menu.findItem(R.id.miExportReport);
+
+            if (miER != null) {
+                miER.setVisible(true);
+            }
+        }
+
         return true;
     }
 
@@ -226,11 +238,13 @@ public class MainActivity extends ProjectAdjusterActivity {
                     putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.LASER_SETTINGS_PAGE));
         } else if (itemId == R.id.mainMenuPrivacyPolicy) {
             startActivity(new Intent(this, PrivacyPolicyActivity.class));
-        }else if (itemId == R.id.mainMenuAbout) {
+        } else if (itemId == R.id.mainMenuAbout) {
             new AlertDialog.Builder(MainActivity.this)
                     .setTitle(R.string.app_name)
                     .setMessage(String.format("App: %s\nData: %s", TtUtils.getAndroidApplicationVersion(getTtAppCtx()), TwoTrailsSchema.SchemaVersion))
                     .show();
+        } else if (itemId == R.id.miExportReport) {
+            exportReportFileOnResult.launch(String.format(Locale.getDefault(), "TwoTrailsReport_%s.zip", TtUtils.Date.nowToString()));
         }
 
         return super.onOptionsItemSelected(item);
@@ -383,9 +397,11 @@ public class MainActivity extends ProjectAdjusterActivity {
         if (hasPermissions) {
             startGps();
 
-            AndroidUtils.App.requestBackgroundLocationPermission(MainActivity.this,
-                    requestBackgroundLocationPermissionOnResult,
-                    getString(R.string.diag_back_loc));
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
+                AndroidUtils.App.requestBackgroundLocationPermission(MainActivity.this,
+                        requestBackgroundLocationPermissionOnResult,
+                        getString(R.string.diag_back_loc));
+            }
         } else {
             Toast.makeText(MainActivity.this, "Cannot use GPS without location permissions", Toast.LENGTH_LONG).show();
         }
@@ -647,13 +663,16 @@ public class MainActivity extends ProjectAdjusterActivity {
     private final ActivityResultLauncher<Intent> updateAppInfoOnResult = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> updateAppInfo());
     private void updateAppInfo() {
         boolean enable = false;
+        TwoTrailsApp app = getTtAppCtx();
 
-        if (getTtAppCtx() != null) {
-            if (getTtAppCtx().hasDAL()) {
-                getTtAppCtx().getProjectSettings().updateRecentProjects(
-                        new TwoTrailsProject(getTtAppCtx().getDAL().getProjectID(), getTtAppCtx().getDAL().getFileName()));
+        if (app != null) {
+            if (app.hasDAL()) {
+                DataAccessLayer dal = getTtAppCtx().getDAL();
+                String projectID = dal.getProjectID();
+                app.getProjectSettings().updateRecentProjects(
+                        new TwoTrailsProject(projectID, dal.getFileName()));
 
-                setTitle("TwoTrails - " + getTtAppCtx().getDAL().getProjectID());
+                setTitle("TwoTrails - " + projectID);
                 enable = true;
 
                 mFragFile.updateInfo();
@@ -690,15 +709,26 @@ public class MainActivity extends ProjectAdjusterActivity {
         if (fp == null)
             throw new RuntimeException("Invalid Filepath");
 
-        if (fp.toLowerCase().endsWith(Consts.FileExtensions.TWO_TRAILS)) {
-            importTTX(filePath);
-        } else if (fp.toLowerCase().endsWith(Consts.FileExtensions.TWO_TRAILS_MEDIA_PACKAGE)) {
-            importTTMPX(filePath);
-        } else if (fp.toLowerCase().endsWith(".zip")) {
-            importTtPackage(filePath);
-        } else {
-            getTtAppCtx().getReport().writeWarn(String.format(Locale.getDefault(), "Invalid import type: '%s'", fp), "MainActivity:importProject");
-            Toast.makeText(MainActivity.this, "Invalid File Type", Toast.LENGTH_LONG).show();
+        String ext = fp.contains(".") ? fp.toLowerCase().substring(fp.lastIndexOf('.')) : "";
+
+        switch (ext) {
+            case Consts.FileExtensions.TWO_TRAILS: importTTX(filePath); break;
+            case Consts.FileExtensions.TWO_TRAILS_MEDIA_PACKAGE: importTTMPX(filePath); break;
+            case ".zip": importTtPackage(filePath); break;
+            default: {
+                //check if in downloads, prompt for name or ask to select from another location
+                if (fp.toLowerCase().contains("msf:")) {
+                    new AlertDialog.Builder(MainActivity.this)
+                            .setMessage("Importing directly from a protected folder (such as Downloads) does not allow the app to see the filename. Would you like to set the filename or import from the another folder?")
+                            .setPositiveButton("Import from SD", (dialogInterface, i) -> importFileOnResult.launch("*/*"))
+                            .setNegativeButton("Set Filename", (dialogInterface, i) -> importFromProtectedFolderDialog(filePath))
+                            .setNeutralButton(R.string.str_cancel, null)
+                            .show();
+                } else {
+                    getTtAppCtx().getReport().writeWarn(String.format(Locale.getDefault(), "Invalid import type: '%s'", fp), "MainActivity:importProject");
+                    Toast.makeText(MainActivity.this, "Invalid File Type", Toast.LENGTH_LONG).show();
+                }
+            }
         }
     }
 
@@ -781,7 +811,7 @@ public class MainActivity extends ProjectAdjusterActivity {
             for (File file : tmpInternalZipDir.listFiles()) {
                 importFromFile(file);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             getTtAppCtx().getReport().writeError(e.getMessage(), "MainActivity:importTtPackage");
             Toast.makeText(MainActivity.this, "Error Importing Project. See Log for details.", Toast.LENGTH_LONG).show();
         }
@@ -808,15 +838,19 @@ public class MainActivity extends ProjectAdjusterActivity {
                 }
             });
     private void exportProject(Uri filePath) {
+        TwoTrailsApp context = getTtAppCtx();
+
         try {
             if (filePath != null) {
-                File pcPkgFile = Export.exportProjectPackage(getTtAppCtx(), getTtAppCtx().getDAL(), getTtAppCtx().getMAL());
+                File pcPkgFile = Export.exportProjectPackage(context);
 
                 if (pcPkgFile != null) {
                     AndroidUtils.Files.copyFile(getTtAppCtx(), Uri.fromFile(pcPkgFile), filePath);
                 } else {
                     throw new Exception("Unable to create export file");
                 }
+
+                pcPkgFile.deleteOnExit();
             } else {
                 throw new Exception("Unable to get file path from uri");
             }
@@ -825,6 +859,12 @@ public class MainActivity extends ProjectAdjusterActivity {
             Toast.makeText(MainActivity.this, "Error Exporting Project", Toast.LENGTH_LONG).show();
         }
     }
+
+    private final ActivityResultLauncher<String> exportReportFileOnResult = registerForActivityResult(new CreateZipDocument(), result -> {
+        if (result != null) {
+            SettingsLogic.exportReport(MainActivity.this, result);
+        }
+    });
     //endregion
 
 
@@ -966,10 +1006,9 @@ public class MainActivity extends ProjectAdjusterActivity {
 
     private void overwriteLocalProjectAndMediaPackageByImportDialog(String baseFileName, Uri ttxFilePath, Uri ttmpxFilePath) {
         AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
-        alert.setTitle("Project Exists");
-        alert.setMessage(String.format(Locale.getDefault(), "The project files '%s' already exist. Do you want to overwrite or rename the project?", baseFileName));
-
-        alert.setPositiveButton("Overwrite", (dialog, which) -> {
+        alert.setTitle("Project Exists")
+        .setMessage(String.format(Locale.getDefault(), "The project files '%s' already exist. Do you want to overwrite or rename the project?", baseFileName))
+        .setPositiveButton("Overwrite", (dialog, which) -> {
             try {
                 DataAccessManager dam = DataAccessManager.importDAL(getTtAppCtx(), ttxFilePath);
                 MediaAccessManager.importMAL(getTtAppCtx(), ttmpxFilePath).close();
@@ -983,13 +1022,11 @@ public class MainActivity extends ProjectAdjusterActivity {
                 getTtAppCtx().getReport().writeError(e.getMessage(), "MainActivity:overwriteLocalProjectAndMediaPackageByImportDialog:overwrite");
                 Toast.makeText(MainActivity.this, "Error Overwriting Project", Toast.LENGTH_LONG).show();
             }
-        });
-
-        alert.setNegativeButton("Rename", (dialog, which) -> {
+        })
+        .setNegativeButton("Rename", (dialog, which) -> {
             final InputDialog inputDialog = new InputDialog(MainActivity.this);
-            inputDialog.setTitle("New File Name");
-
-            inputDialog.setPositiveButton("Rename", (d2, wb2) -> {
+            inputDialog.setTitle("New File Name")
+            .setPositiveButton("Rename", (d2, wb2) -> {
                 try {
                     String newTtxFileName = inputDialog.getText(), newTtmpxFileName;
                     String newBaseFileName = newTtxFileName.substring(0, newTtxFileName.lastIndexOf("."));
@@ -1008,13 +1045,93 @@ public class MainActivity extends ProjectAdjusterActivity {
                 }
             });
 
-            inputDialog.setNegativeButton("Cancel", null);
-
-            inputDialog.show();
+            inputDialog
+                .setNegativeButton("Cancel", null)
+                .show();
         });
 
         alert.setNeutralButton(R.string.str_cancel, null);
         alert.show();
+    }
+
+
+    private void importFromProtectedFolderDialog(Uri filePath) {
+        final InputDialog inputDialog = new InputDialog(MainActivity.this);
+        inputDialog.setTitle("Filename");
+
+        inputDialog.setPositiveButton("Import TTX", (dialog, whichButton) -> {
+                    String filename = inputDialog.getText().trim();
+
+                    if (filename.length() > 0) {
+                        filename = TtUtils.projectToFileNameTTX(filename);
+                        if (DataAccessManager.localDALExists(getTtAppCtx(), filename)) {
+                            overwriteLocalProjectByImportFromProtectedFolderDialog(filename, filePath);
+                        } else {
+                            importFromProtectedFolder(filename, filePath);
+                        }
+                    } else {
+                        runOnUiThread(() -> Toast.makeText(MainActivity.this, "Invalid File Name", Toast.LENGTH_LONG).show());
+                    }
+                })
+                .setNegativeButton(R.string.str_cancel, null)
+                .show();
+    }
+
+    private void overwriteLocalProjectByImportFromProtectedFolderDialog(final String filename, Uri filePath) {
+        AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
+        alert.setTitle("Project Exists");
+        alert.setMessage(String.format("The file '%s' already exists. Do you want to overwrite the project?", filename));
+
+        alert.setPositiveButton("Yes", (dialog, whichButton) -> importFromProtectedFolder(filename, filePath));
+
+        alert.setNegativeButton("No",
+                (dialog, which) -> importFromProtectedFolderDialog(filePath));
+        alert.show();
+    }
+
+    private void importFromProtectedFolder(String filename, Uri filePath) {
+        TtReport report = getTtAppCtx().getReport();
+
+        String tempProjectFileName = String.format(Locale.getDefault(), "temp_%s", TtUtils.Date.nowToString());
+        File tempProjectFile = getDatabasePath(tempProjectFileName);
+
+        Uri tempProjectUri = Uri.fromFile(tempProjectFile);
+        if (tempProjectUri == null) {
+            report.writeWarn("tempProjectUri is NULL", "importProject");
+        } else {
+            try {
+                AndroidUtils.Files.copyFile(getTtAppCtx(), filePath, tempProjectUri);
+
+                try {
+                    DataAccessManager dam = DataAccessManager.openDAL(getTtAppCtx(), tempProjectFileName);
+                    try {
+                        String projectName = dam.getDAL().getProjectID();
+                        if (projectName == null) {
+                            throw new NullPointerException("Invalid File");
+                        } else {
+                            dam.close();
+                            try {
+                                DataAccessManager.importAndRenameDAL(getTtAppCtx(), tempProjectUri, filename).close();
+                                openProject(projectName, filename);
+                                tempProjectFile.deleteOnExit();
+                                return;
+                            } catch (IOException e) {
+                                report.writeError("Unable to rename." + e.getMessage(), "importProject", e.getStackTrace());
+                            }
+                        }
+                    } catch (Exception e) {
+                        report.writeError("Invalid Project File. " + e.getMessage(), "importProject", e.getStackTrace());
+                    }
+                } catch (Exception e) {
+                    report.writeError("Unable to open DAL. " + e.getMessage(), "importProject", e.getStackTrace());
+                }
+            } catch (IOException e) {
+                report.writeError("Unable to copy tempProjectUri. " + e.getMessage(), "importProject", e.getStackTrace());
+            }
+        }
+
+        tempProjectFile.deleteOnExit();
+        Toast.makeText(MainActivity.this, "Error Importing File: Please send Error Report.", Toast.LENGTH_LONG).show();
     }
 
     private void askToAdjust() {
@@ -1135,23 +1252,19 @@ public class MainActivity extends ProjectAdjusterActivity {
     }
 
     public void btnPolygonsClick(View view) {
-        //startActivityForResult(new Intent(this, PolygonsActivity.class), UPDATE_INFO);
         updateAppInfoOnResult.launch(new Intent(this, PolygonsActivity.class));
     }
 
     public void btnMetadataClick(View view) {
-        //startActivityForResult(new Intent(this, MetadataActivity.class), UPDATE_INFO);
         updateAppInfoOnResult.launch(new Intent(this, MetadataActivity.class));
     }
 
     public void btnProjectInfoClick(View view) {
-        //startActivityForResult(new Intent(this, ProjectActivity.class), UPDATE_INFO);
         updateAppInfoOnResult.launch(new Intent(this, ProjectActivity.class));
     }
 
     public void btnPointTableClick(View view) {
         if (getTtAppCtx().getDAL().getItemsCount(TwoTrailsSchema.PointSchema.TableName) > 0) {
-            //startActivityForResult(new Intent(this, TableViewActivity.class), UPDATE_INFO);
             updateAppInfoOnResult.launch(new Intent(this, TableViewActivity.class));
         } else {
             Toast.makeText(this, "No Points in Project", Toast.LENGTH_SHORT).show();
@@ -1292,7 +1405,6 @@ public class MainActivity extends ProjectAdjusterActivity {
 
     public void btnPlotGridClick(View view) {
         if(getTtAppCtx().getDAL().hasPolygons()) {
-            //startActivityForResult(new Intent(this, PlotGridActivity.class), UPDATE_INFO);
             updateAppInfoOnResult.launch(new Intent(this, PlotGridActivity.class));
         } else {
             Toast.makeText(this, "No Polygons in Project", Toast.LENGTH_SHORT).show();
@@ -1312,8 +1424,6 @@ public class MainActivity extends ProjectAdjusterActivity {
     }
 
     public void btnTest(View view) {
-
-        //throw  new RuntimeException("Crash on purpose");
         startActivity(new Intent(this, TestActivity.class));
     }
     //endregion

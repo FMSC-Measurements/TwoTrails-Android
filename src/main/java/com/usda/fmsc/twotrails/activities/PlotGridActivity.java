@@ -334,6 +334,13 @@ public class PlotGridActivity extends TtCustomToolbarActivity {
         List<TtPoint> points = polyPoints.get(selectedPoly.getCN());
 
         if (points != null) {
+            for (TtPoint point : points) {
+                if (!point.hasAdjustedValues()) {
+                    Toast.makeText(PlotGridActivity.this, "Some Points need to be adjusted before plots can be created.", Toast.LENGTH_LONG).show();
+                    return;
+                }
+            }
+
             PlotGenerator.PlotParams params = new PlotGenerator.PlotParams(
                     polyName,
                     startPoint != null ? startPoint : points.get(random.nextInt(points.size() - 1)),

@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.FragmentActivity;
@@ -277,7 +278,7 @@ public class DeviceSettingsFragment extends TtBasePrefFragment {
     //region GPSCheck
     private final Preference.OnPreferenceClickListener gpsCheckListener = new Preference.OnPreferenceClickListener() {
         @Override
-        public boolean onPreferenceClick(Preference preference) {
+        public boolean onPreferenceClick(@NonNull Preference preference) {
             if (StringEx.isEmpty(getTtAppCtx().getDeviceSettings().getGpsDeviceID())) {
                 Toast.makeText(getActivity(), "GPS must first be selected", Toast.LENGTH_LONG).show();
             } else {
@@ -505,12 +506,14 @@ public class DeviceSettingsFragment extends TtBasePrefFragment {
     //region RangeFinderCheck
     private final Preference.OnPreferenceClickListener rfCheckListener = new Preference.OnPreferenceClickListener() {
         @Override
-        public boolean onPreferenceClick(Preference preference) {
-            if (StringEx.isEmpty(getTtAppCtx().getDeviceSettings().getGpsDeviceID())) {
+        public boolean onPreferenceClick(@NonNull Preference preference) {
+            final DeviceSettings ds = getTtAppCtx().getDeviceSettings();
+
+            if (StringEx.isEmpty(ds.getRangeFinderDeviceID())) {
                 Toast.makeText(getActivity(), "RangeFinder must first be selected", Toast.LENGTH_LONG).show();
             } else {
                 try {
-                    getTtAppCtx().getDeviceSettings().setRangeFinderConfigured(false);
+                    ds.setRangeFinderConfigured(false);
 
                     final Activity activity = getActivity();
 
@@ -535,7 +538,7 @@ public class DeviceSettingsFragment extends TtBasePrefFragment {
                             try {
                                 rf.removeListener(this);
 
-                                getTtAppCtx().getDeviceSettings().setRangeFinderConfigured(true);
+                                ds.setRangeFinderConfigured(true);
 
                                 activity.runOnUiThread(() -> {
                                     pd.setMessage(activity.getString(R.string.ds_rf_connected));
@@ -615,7 +618,7 @@ public class DeviceSettingsFragment extends TtBasePrefFragment {
                     pd.setOnDismissListener(dialog -> rf.stopRangeFinder());
 
                     Runnable runRF = () -> {
-                        rf.setRangeFinderProvider(getTtAppCtx().getDeviceSettings().getRangeFinderDeviceID());
+                        rf.setRangeFinderProvider(ds.getRangeFinderDeviceID());
 
                         switch (rf.startRangeFinder()) {
                             case RangeFinderStarted:
@@ -665,7 +668,7 @@ public class DeviceSettingsFragment extends TtBasePrefFragment {
     //region External/Internal Switch & Listener
     private final Preference.OnPreferenceChangeListener useExternalListener = new Preference.OnPreferenceChangeListener() {
         @Override
-        public boolean onPreferenceChange(Preference preference, Object newValue) {
+        public boolean onPreferenceChange(@NonNull Preference preference, Object newValue) {
             boolean useExternal = (boolean)newValue;
 
             boolean success;
@@ -748,7 +751,7 @@ public class DeviceSettingsFragment extends TtBasePrefFragment {
 
     //region GPS Selection
     private final Preference.OnPreferenceChangeListener btnGPSList = new Preference.OnPreferenceChangeListener() {
-        public boolean onPreferenceChange(Preference preference, Object newValue) {
+        public boolean onPreferenceChange(@NonNull Preference preference, Object newValue) {
 
             try {
                 String[] values = newValue.toString().split(",");
@@ -771,8 +774,6 @@ public class DeviceSettingsFragment extends TtBasePrefFragment {
                     prefLstGpsDevice.setSummary(getString(R.string.ds_no_dev));
                     prefGpsCheck.setSummary(R.string.ds_dev_not_configured);
                     getTtAppCtx().getDeviceSettings().setGpsConfigured(false);
-
-
                 }
             } catch (Exception ex) {
                 getTtAppCtx().getReport().writeError(ex.getMessage(), "DeviceSettingsFragment:btnGPSList");
@@ -785,30 +786,31 @@ public class DeviceSettingsFragment extends TtBasePrefFragment {
 
     //region RangeFinder Selection
     private final Preference.OnPreferenceChangeListener btnRFList = new Preference.OnPreferenceChangeListener() {
-        public boolean onPreferenceChange(Preference preference, Object newValue) {
-
+        public boolean onPreferenceChange(@NonNull Preference preference, Object newValue) {
             try {
                 String[] values = newValue.toString().split(",");
 
+                final DeviceSettings ds = getTtAppCtx().getDeviceSettings();
+
                 if (values.length > 0) {
-                    if (!getTtAppCtx().getDeviceSettings().getRangeFinderDeviceID().equals(values[0])) {
-                        getTtAppCtx().getDeviceSettings().setRangeFinderDeviceId(values[0]);
-                        getTtAppCtx().getDeviceSettings().setRangeFinderDeviceName(values[1]);
+                    if (!ds.getRangeFinderDeviceID().equals(values[0])) {
+                        ds.setRangeFinderDeviceId(values[0]);
+                        ds.setRangeFinderDeviceName(values[1]);
 
                         prefLstRFDevice.setSummary(values[1]);
                         prefRFCheck.setSummary(R.string.ds_dev_not_configured);
-                        getTtAppCtx().getDeviceSettings().setRangeFinderConfigured(false);
+                        ds.setRangeFinderConfigured(false);
                     }
                 } else {
-                    getTtAppCtx().getDeviceSettings().setRangeFinderDeviceId(StringEx.Empty);
-                    getTtAppCtx().getDeviceSettings().setRangeFinderDeviceName(StringEx.Empty);
+                    ds.setRangeFinderDeviceId(StringEx.Empty);
+                    ds.setRangeFinderDeviceName(StringEx.Empty);
 
                     prefLstRFDevice.setSummary(getString(R.string.ds_no_dev));
                     prefRFCheck.setSummary(R.string.ds_dev_not_configured);
-                    getTtAppCtx().getDeviceSettings().setRangeFinderConfigured(false);
+                    ds.setRangeFinderConfigured(false);
                 }
-            } catch (Exception e) {
-                //
+            } catch (Exception ex) {
+                getTtAppCtx().getReport().writeError(ex.getMessage(), "DeviceSettingsFragment:btnRFList");
             }
 
             return true;

@@ -510,7 +510,15 @@ public class GpsService extends Service implements LocationListener, LocationSou
 
             if (parser.isSynced() || parser.sync(nmeaString)) {
                 try {
-                    parser.parse(nmeaString);
+                    if (nmeaString.indexOf("$", 1) > -1) {
+                        String[] nmeaStrings = nmeaString.split("\\$");
+
+                        for (String ns : nmeaStrings) {
+                            parser.parse("$" + ns);
+                        }
+                    } else {
+                        parser.parse(nmeaString);
+                    }
                 } catch (Exception e) {
                     parser.reset();
                     postNmeaBurstValidityChanged(false);

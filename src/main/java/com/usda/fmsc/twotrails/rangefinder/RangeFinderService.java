@@ -14,7 +14,6 @@ import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.twotrails.DeviceSettings;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.devices.BluetoothConnection;
-import com.usda.fmsc.twotrails.gps.GpsService;
 import com.usda.fmsc.twotrails.units.Dist;
 import com.usda.fmsc.twotrails.units.Slope;
 import com.usda.fmsc.utilities.ParseEx;

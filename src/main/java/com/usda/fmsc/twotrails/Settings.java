@@ -22,18 +22,18 @@ public abstract class Settings {
         return  prefs;
     }
 
-//    public SharedPreferences.Editor getEditor() {
-//        return editor;
-//    }
-
-
     protected int getInt(String settingName)
     {
         return getInt(settingName, -1);
     }
 
     protected int getInt(String settingName, int defaultValue) {
-        return prefs.getInt(settingName, defaultValue);
+        try {
+            return prefs.getInt(settingName, defaultValue);
+        } catch (IllegalStateException e) {
+            getContext().getReport().writeError(e.getMessage(), settingName);
+            return defaultValue;
+        }
     }
 
     protected void setInt(String settingName, int value) {
@@ -47,7 +47,12 @@ public abstract class Settings {
     }
 
     protected long getLong(String settingName, long defaultValue) {
-        return prefs.getLong(settingName, defaultValue);
+        try {
+            return prefs.getLong(settingName, defaultValue);
+        } catch (IllegalStateException e) {
+            getContext().getReport().writeError(e.getMessage(), settingName);
+            return defaultValue;
+        }
     }
 
     protected void setLong(String settingName, long value) {
@@ -60,7 +65,12 @@ public abstract class Settings {
     }
 
     protected String getString(String settingName, String defaultValue) {
-        return prefs.getString(settingName, defaultValue);
+        try {
+            return prefs.getString(settingName, defaultValue);
+        } catch (IllegalStateException e) {
+            getContext().getReport().writeError(e.getMessage(), settingName);
+            return defaultValue;
+        }
     }
 
     protected void setString(String settingName, String value) {
@@ -73,7 +83,12 @@ public abstract class Settings {
     }
 
     protected double getDouble(String settingName, double defaultValue) {
-        return  Double.longBitsToDouble(prefs.getLong(settingName, Double.doubleToRawLongBits(defaultValue)));
+        try {
+            return  Double.longBitsToDouble(prefs.getLong(settingName, Double.doubleToRawLongBits(defaultValue)));
+        } catch (IllegalStateException e) {
+            getContext().getReport().writeError(e.getMessage(), settingName);
+            return defaultValue;
+        }
     }
 
     protected void setDouble(String settingName, double value) {
@@ -87,7 +102,12 @@ public abstract class Settings {
     }
 
     protected float getFloat(String settingName, float defaultValue) {
-        return prefs.getFloat(settingName, defaultValue);
+        try {
+            return prefs.getFloat(settingName, defaultValue);
+        } catch (IllegalStateException e) {
+            getContext().getReport().writeError(e.getMessage(), settingName);
+            return defaultValue;
+        }
     }
 
     protected void setFloat(String settingName, float value) {
@@ -100,7 +120,12 @@ public abstract class Settings {
     }
 
     protected boolean getBool(String settingName, boolean defaultValue) {
-        return prefs.getBoolean(settingName, defaultValue);
+        try {
+            return prefs.getBoolean(settingName, defaultValue);
+        } catch (IllegalStateException e) {
+            getContext().getReport().writeError(e.getMessage(), settingName);
+            return defaultValue;
+        }
     }
 
     protected void setBool(String settingName, boolean value) {
