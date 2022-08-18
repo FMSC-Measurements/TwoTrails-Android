@@ -193,13 +193,11 @@ public class ExportActivity extends TtCustomToolbarActivity {
 
 
     private String getFileNameWPrefix(String prefix) {
-        return String.format(Locale.getDefault(), "%s%s_%s%s",
+        return String.format(Locale.getDefault(), "%s%s_(%s)",
                 prefix != null ?
-                        String.format(Locale.getDefault(), "%s_(", prefix) : "",
+                        String.format(Locale.getDefault(), "%s_", prefix) : "",
                 TtUtils.projectToFileName(getTtAppCtx().getDAL().getProjectID()),
-                TtUtils.Date.toStringDateMillis(new DateTime(getTtAppCtx().getDAM().getDBFile().lastModified())),
-                prefix != null ?
-                        ")" : ""
+                TtUtils.Date.toStringDateMillis(new DateTime(getTtAppCtx().getDAM().getDBFile().lastModified()))
         );
     }
 

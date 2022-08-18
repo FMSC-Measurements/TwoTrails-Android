@@ -397,9 +397,11 @@ public class MainActivity extends ProjectAdjusterActivity {
         if (hasPermissions) {
             startGps();
 
-            AndroidUtils.App.requestBackgroundLocationPermission(MainActivity.this,
-                    requestBackgroundLocationPermissionOnResult,
-                    getString(R.string.diag_back_loc));
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
+                AndroidUtils.App.requestBackgroundLocationPermission(MainActivity.this,
+                        requestBackgroundLocationPermissionOnResult,
+                        getString(R.string.diag_back_loc));
+            }
         } else {
             Toast.makeText(MainActivity.this, "Cannot use GPS without location permissions", Toast.LENGTH_LONG).show();
         }

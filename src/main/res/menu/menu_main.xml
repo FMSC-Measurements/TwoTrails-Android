@@ -13,7 +13,7 @@
         android:title="Export Report"
         app:showAsAction="always"
         android:icon="@drawable/ic_file_upload_white_36dp"
-        android:visible="true" />
+        android:visible="false" />
 
     <item
         android:id="@+id/overflowMenu"
