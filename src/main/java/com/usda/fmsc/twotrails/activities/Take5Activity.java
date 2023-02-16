@@ -341,7 +341,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                     if (intent.hasExtra(Consts.Codes.Data.POINT_PACKAGE)) {
                         Bundle bundle = intent.getBundleExtra(Consts.Codes.Data.POINT_PACKAGE);
 
-                        if (bundle.containsKey(Consts.Codes.Data.POINT_DATA)) {
+                        if (bundle != null && bundle.containsKey(Consts.Codes.Data.POINT_DATA)) {
                             _CurrentPoint = bundle.getParcelable(Consts.Codes.Data.POINT_DATA);
 
                             if (_CurrentPoint != null) {

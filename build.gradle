@@ -66,6 +66,7 @@ android {
             resValue "string", "maps_api_key", project.property("TwoTrails.release_maps_key")
 
             ndk {
+                debugSymbolLevel 'SYMBOL_TABLE'
                 abiFilters "arm64-v8a"
 //                abiFilters "armeabi-v7a", "arm64-v8a"
             }
