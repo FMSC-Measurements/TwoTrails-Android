@@ -2,14 +2,12 @@ package com.usda.fmsc.twotrails.data;
 
 public class TwoTrailsMediaSchema {
     //Old Schema Versions
-    public static final TtVersion MAL_2_0_0 = new TtVersion(2, 0, 0);
+    public static final TtVersion MAL_2_0_0 = new TtVersion(2, 0, 0, 1);
 
-    public static final TtVersion MAL_2_1_0 = new TtVersion(2, 1, 0);
-    public static final int MAL_2_1_0_INT = 2;
+    public static final TtVersion MAL_2_1_0 = new TtVersion(2, 1, 0, 2);
 
     //Schema Version
     public static final TtVersion SchemaVersion = MAL_2_1_0;
-    public static final int SchemaVersionInt = MAL_2_1_0_INT;
 
 
     public static class SharedSchema {

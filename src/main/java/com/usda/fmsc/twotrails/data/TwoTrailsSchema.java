@@ -3,16 +3,14 @@ package com.usda.fmsc.twotrails.data;
 @SuppressWarnings("WeakerAccess")
 public class TwoTrailsSchema {
     //Old Schema Versions
-    public static final TtVersion DAL_2_0_1 = new TtVersion(2, 0, 1);
-    public static final TtVersion DAL_2_0_2 = new TtVersion(2, 0, 2);
-    public static final TtVersion DAL_2_0_3 = new TtVersion(2, 0, 3);
+    public static final TtVersion DAL_2_0_1 = new TtVersion(2, 0, 1, 1);
+    public static final TtVersion DAL_2_0_2 = new TtVersion(2, 0, 2, 2);
+    public static final TtVersion DAL_2_0_3 = new TtVersion(2, 0, 3, 3);
 
-    public static final TtVersion DAL_2_1_0 = new TtVersion(2, 1, 0);
-    public static final int DAL_2_1_0_INT = 4;
+    public static final TtVersion DAL_2_1_0 = new TtVersion(2, 1, 0, 4);
 
     //Schema Version
     public static final TtVersion SchemaVersion = DAL_2_1_0;
-    public static final int SchemaVersionInt = DAL_2_1_0_INT;
 
 
     public static class SharedSchema {

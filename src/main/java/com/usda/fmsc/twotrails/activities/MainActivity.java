@@ -684,6 +684,7 @@ public class MainActivity extends ProjectAdjusterActivity {
         mFragFile.enableButtons(enable);
         mFragData.enableButtons(enable);
         mFragTools.enableButtons(enable);
+        //mFragDev.enableButtons(enable);
     }
 
 

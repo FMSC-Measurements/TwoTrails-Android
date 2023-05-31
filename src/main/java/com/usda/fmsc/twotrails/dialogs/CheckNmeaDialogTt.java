@@ -91,6 +91,20 @@ public class CheckNmeaDialogTt extends TtBaseDialogFragment implements GpsServic
 
     @Override
     public void nmeaStringReceived(final String nmeaString) {
+        if (nmeaString.indexOf("$", 1) > -1) {
+            String[] nmeaStrings = nmeaString.split("\\$");
+
+            for (String ns : nmeaStrings) {
+                if (!ns.isEmpty()) {
+                    parseString("$" + ns);
+                }
+            }
+        } else {
+            parseString(nmeaString);
+        }
+    }
+
+    private void parseString(String nmeaString) {
         final NmeaIDs.TalkerID tid = NmeaIDs.TalkerID.parse(nmeaString);
         final NmeaIDs.SentenceID sid = NmeaIDs.SentenceID.parse(nmeaString);
 

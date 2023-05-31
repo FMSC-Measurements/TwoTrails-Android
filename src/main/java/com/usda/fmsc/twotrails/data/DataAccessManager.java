@@ -14,7 +14,7 @@ public class DataAccessManager extends AccessManager<DataAccessLayer>  {
     private final String _ProjectName;
 
     public DataAccessManager(TwoTrailsApp context, String fileName, String projectName) {
-        super(context, fileName, null, TwoTrailsSchema.SchemaVersionInt);
+        super(context, fileName, null, TwoTrailsSchema.SchemaVersion.DbVersion);
         _ProjectName = projectName != null ? projectName : getDatabaseName();
     }
 
@@ -22,30 +22,31 @@ public class DataAccessManager extends AccessManager<DataAccessLayer>  {
     @Override
     public void onConfigure(SQLiteDatabase db) {
         super.onConfigure(db);
-        if (db.getVersion() == 0) {
-            Cursor cursor = db.rawQuery("SELECT name FROM sqlite_master WHERE type='table' AND name='" + TwoTrailsSchema.ProjectInfoSchema.TableName + "';", null);
-
-            if (cursor != null) {
-                if (cursor.getCount() == 1) {
-                    db.setVersion(1);
-                }
-
-                cursor.close();
-            }
-        }
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        _DAL = DataAccessLayer.createDAL(_Context, db, _ProjectName, getDatabaseName());
+        if (isDbTTX(db)) {
+            _DAL = new DataAccessLayer(_Context, db, getDatabaseName());
+
+            if (_DAL.getVersion().toIntVersion() < TwoTrailsSchema.SchemaVersion.toIntVersion()) {
+                onUpgrade(db, _DAL.getUserVersion(), TwoTrailsSchema.SchemaVersion.DbVersion);
+            }
+        } else {
+            _DAL = DataAccessLayer.createDAL(_Context, db, _ProjectName, getDatabaseName());
+        }
         super.onCreate(db);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        _DAL = new DataAccessLayer(_Context, db, getDatabaseName());
+        _DAL = _DAL != null ? _DAL : new DataAccessLayer(_Context, db, getDatabaseName());
 
-        if (oldVersion == 1) {
+        if (oldVersion < TwoTrailsSchema.DAL_2_1_0.DbVersion) {
+            if (!isDbTTX(db)) {
+                throw new RuntimeException("Invalid TwoTrails File");
+            }
+
             int ttVersion = _DAL.getVersion().toIntVersion();
 
             if (ttVersion < TwoTrailsSchema.DAL_2_0_2.toIntVersion()) {
@@ -59,13 +60,13 @@ public class DataAccessManager extends AccessManager<DataAccessLayer>  {
                     throw new UpgradeException(Upgrades.DAL_2_0_3.Version, ex.getMessage(), ex.getCause(), ex.getStackTrace());
                 }
             }
-        }
 
-        if (oldVersion < TwoTrailsSchema.DAL_2_1_0_INT) {
-            try {
-                _DAL.upgrade(Upgrades.DAL_2_1_0);
-            } catch (Exception ex) {
-                throw new UpgradeException(Upgrades.DAL_2_1_0.Version, ex.getMessage(), ex.getCause(), ex.getStackTrace());
+            if (ttVersion < TwoTrailsSchema.DAL_2_1_0.toIntVersion()) {
+                try {
+                    _DAL.upgrade(Upgrades.DAL_2_1_0);
+                } catch (Exception ex) {
+                    throw new UpgradeException(Upgrades.DAL_2_1_0.Version, ex.getMessage(), ex.getCause(), ex.getStackTrace());
+                }
             }
         }
 
@@ -78,6 +79,22 @@ public class DataAccessManager extends AccessManager<DataAccessLayer>  {
             _DAL = new DataAccessLayer(_Context, db, getDatabaseName());
         }
     }
+
+
+    private boolean isDbTTX(SQLiteDatabase db) {
+        Cursor cursor = db.rawQuery("SELECT name FROM sqlite_master WHERE type='table' AND name='" + TwoTrailsSchema.ProjectInfoSchema.TableName + "';", null);
+
+        if (cursor != null) {
+            if (cursor.getCount() != 1) {
+                return false;
+            }
+
+            cursor.close();
+        }
+
+        return true;
+    }
+
 
     @Override
     protected DataAccessLayer getDataLayer() {

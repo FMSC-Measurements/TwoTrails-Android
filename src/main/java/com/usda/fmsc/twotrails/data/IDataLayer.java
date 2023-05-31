@@ -262,6 +262,10 @@ public abstract class IDataLayer {
 
     public abstract TtVersion getVersion();
 
+    public int getUserVersion() {
+        return _db.getVersion();
+    }
+
 
     public abstract boolean hasErrors();
 

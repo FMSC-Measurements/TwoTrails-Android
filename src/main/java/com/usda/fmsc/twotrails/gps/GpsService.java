@@ -99,7 +99,11 @@ public class GpsService extends Service implements LocationListener, LocationSou
 
         TtAppCtx = (TwoTrailsApp) getApplicationContext();
 
-        parser = new NmeaParser(EnumSet.of(TalkerID.GP, TalkerID.GL, TalkerID.GA, TalkerID.GN));
+        if (TtAppCtx.getDeviceSettings().isGpsParsingByTime()) {
+            parser = new NmeaParser(EnumSet.of(TalkerID.GP, TalkerID.GL, TalkerID.GA, TalkerID.GN));
+        } else {
+            parser = new NmeaParser(EnumSet.of(TalkerID.GP, TalkerID.GL, TalkerID.GA, TalkerID.GN), TtAppCtx.getDeviceSettings().getGpsParseDelimiter());
+        }
         parser.addListener(this);
 
         nmeaReceived = new PostDelayHandler(NMEA_WAIT_TIMEOUT, () -> {
@@ -178,7 +182,15 @@ public class GpsService extends Service implements LocationListener, LocationSou
             }
             case DeviceSettings.GPS_LOG_BURST_DETAILS: {
                 logBurstDetails = sharedPreferences.getBoolean(DeviceSettings.GPS_LOG_BURST_DETAILS,
-                        TtAppCtx.getDeviceSettings().DEFAULT_GPS_LOG_BURST_DETAILS);
+                        DeviceSettings.DEFAULT_GPS_LOG_BURST_DETAILS);
+            }
+            case DeviceSettings.GPS_PARSE_METHOD: {
+                if (sharedPreferences.getBoolean(DeviceSettings.GPS_PARSE_METHOD, DeviceSettings.DEFAULT_GPS_PARSE_METHOD)) {
+                    parser.setParseMode(NmeaParser.ParseMode.Time);
+                } else {
+                    parser.setBurstDelimiter(sharedPreferences.getString(DeviceSettings.GPS_PARSE_DELIMITER, DeviceSettings.DEFAULT_GPS_PARSE_DELIMITER));
+                    parser.setParseMode(NmeaParser.ParseMode.Delimiter);
+                }
             }
         }
     }

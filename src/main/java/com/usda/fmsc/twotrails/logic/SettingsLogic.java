@@ -118,8 +118,10 @@ public class SettingsLogic {
         }
     }
 
-    public static void enterCode(final TwoTrailsApp context) {
-        final InputDialog idialog = new InputDialog(context);
+    public static void enterCode(final TtActivity activity) {
+        final InputDialog idialog = new InputDialog(activity);
+
+        TwoTrailsApp context = activity.getTtAppCtx();
 
         idialog.setPositiveButton(R.string.str_ok, (dialog, which) -> {
             switch (idialog.getText().toLowerCase()) {

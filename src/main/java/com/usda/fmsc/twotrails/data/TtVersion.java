@@ -8,15 +8,18 @@ public class TtVersion {
     public int Major;
     public int Minor;
     public int Update;
+    public final int DbVersion;
 
-    public TtVersion(int maj, int min, int up) {
+    public TtVersion(int maj, int min, int up, int dbVersion) {
         Major = maj;
         Minor = min;
         Update = up;
+        DbVersion = dbVersion;
     }
 
-    public TtVersion(String versionString) {
+    public TtVersion(String versionString, int dbVersion) {
         Major = Minor = Update = 0;
+        DbVersion = dbVersion;
 
         if (versionString == null)
             return;
