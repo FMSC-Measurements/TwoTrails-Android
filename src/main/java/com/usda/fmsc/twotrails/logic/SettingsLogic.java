@@ -96,23 +96,10 @@ public class SettingsLogic {
                 } catch (IOException e) {
                     activity.getTtAppCtx().getReport().writeError("Unable to copy report", "SettingsLogic:onExportReportComplete");
                     Toast.makeText(activity, "Unable to export Report", Toast.LENGTH_LONG).show();
-                    return;
                 } finally {
                     reportPath.delete();
                 }
             }
-
-            activity.runOnUiThread(() -> {
-                Toast.makeText(activity, "Report Exported", Toast.LENGTH_LONG).show();
-
-                if (AndroidUtils.Device.isInternetAvailable(activity)) {
-                    new AlertDialog.Builder(activity)
-                            .setMessage("Would you like to send the report to the developer team to help prevent future crashes?")
-                            .setPositiveButton("Send", (dialog, which) -> TtUtils.SendEmailToDev(activity, reportPath, true))
-                            .setNeutralButton("Don't Send", null)
-                            .show();
-                }
-            });
         } else {
             Toast.makeText(activity, "Report failed to export", Toast.LENGTH_LONG).show();
         }

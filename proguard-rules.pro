@@ -73,10 +73,16 @@
 -dontwarn jcifs.http**
 -dontwarn org.w3c.dom.bootstrap.**
 -dontwarn org.apache.http.**
--dontwarn android.net.http.AndroidHttpClient
+#-dontwarn android.net.http.AndroidHttpClient
 -dontwarn com.google.android.gms.**
 -dontwarn com.android.volley.toolbox.**
 -dontwarn org.joda.time.**
 -dontwarn com.esri.arcgisruntime.**
 
--keepattributes Exceptions, Signature, InnerClasses
+
+-dontwarn androidx.window.extensions.**
+-dontwarn androidx.window.sidecar.**
+-dontwarn com.google.ar.sceneform.assets.**
+-dontwarn com.google.devtools.**
+
+-keepattributes Exceptions, Signature, InnerClasses, EnclosingMethod
