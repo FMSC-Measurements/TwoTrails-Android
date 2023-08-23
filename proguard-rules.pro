@@ -85,4 +85,8 @@
 -dontwarn com.google.ar.sceneform.assets.**
 -dontwarn com.google.devtools.**
 
+-keep class com.google.gson.reflect.TypeToken
+-keep class * extends com.google.gson.reflect.TypeToken
+-keep public class * implements java.lang.reflect.Type
+
 -keepattributes Exceptions, Signature, InnerClasses, EnclosingMethod
