@@ -1,6 +1,5 @@
 package com.usda.fmsc.twotrails;
 
-import android.content.SharedPreferences;
 import android.util.JsonWriter;
 
 import androidx.annotation.ColorInt;
@@ -41,19 +40,22 @@ public class DeviceSettings extends Settings {
 
     public static final String GPS_EXTERNAL = "GpsExternal";
     public static final String GPS_ALWAYS_ON = "GpsAlwaysOn";
-    public static final String LOG_ALL_GPS = "LogAllGps";
+
+    public static final String GPS_DEVICE_ID = "GpsDeviceID";
+    public static final String GPS_DEVICE_NAME = "GpsDeviceName";
+    public static final String GPS_PARSE_METHOD = "GpsParseMethod";
+    public static final String GPS_PARSE_DELIMITER = "GpsParseDelimiter";
     public static final String GPS_CONFIGURED = "GPSConfigured";
+    public static final String LOG_ALL_GPS = "LogAllGps";
     public static final String GPS_LOG_BURST_DETAILS = "GPSLogBurstDetails";
 
+    public static final String RANGE_FINDER_DEVICE_ID = "RangeFinderDeviceID";
+    public static final String RANGE_FINDER_DEVICE_NAME = "RangeFinderDeviceName";
     public static final String RANGE_FINDER_ALWAYS_ON = "RangeFinderAlwaysOn";
     public static final String LOG_ALL_RANGE_FINDER = "LogAllRangeFinder";
     public static final String RANGE_FINDER_CONFIGURED = "RangeFinderConfigured";
     public static final String RANGE_FINDER_LOG_BURST_DETAILS = "RangeFinderLogBurstDetails";
 
-    public static final String GPS_DEVICE_ID = "GpsDeviceID";
-    public static final String GPS_DEVICE_NAME = "GpsDeviceName";
-    public static final String RANGE_FINDER_DEVICE_ID = "RangeFinderDeviceID";
-    public static final String RANGE_FINDER_DEVICE_NAME = "RangeFinderDeviceName";
 
     public static final String AUTO_FILL_FROM_RANGE_FINDER = "AutoFillFromRangeFinder";
     public static final String AUTO_FILL_FROM_RANGE_FINDER_ASK = "AutoFillFromRangeFinderAsk";
@@ -146,99 +148,102 @@ public class DeviceSettings extends Settings {
     //endregion
 
     //region Default Values
-    public final boolean DEFAULT_DROP_ZERO = true;
-    public final boolean DEFAULT_ROUND_POINTS = true;
+    public static final boolean DEFAULT_DROP_ZERO = true;
+    public static final boolean DEFAULT_ROUND_POINTS = true;
 
-    public final boolean DEFAULT_EXTERNAL_SYNC_ENABLED = false;
-    public final boolean DEFAULT_EXTERNAL_SYNC_ENABLED_ASK = false;
-    public final String DEFAULT_EXTERNAL_SYNC_DIR = StringEx.Empty;
+    public static final boolean DEFAULT_EXTERNAL_SYNC_ENABLED = false;
+    public static final boolean DEFAULT_EXTERNAL_SYNC_ENABLED_ASK = false;
+    public static final String DEFAULT_EXTERNAL_SYNC_DIR = StringEx.Empty;
 
-    public final DopType DEFAULT_GPS_DOP_TYPE = DopType.HDOP;
-    public final GGASentence.GpsFixType DEFAULT_GPS_FIX_TYPE = GGASentence.GpsFixType.GPS;
-    public final GSASentence.Fix DEFAULT_GPS_FIX = GSASentence.Fix._3D;
-    public final int DEFAULT_GPS_DOP_VALUE = 20;
-    public final boolean DEFAULT_GPS_FIX_USE = true;
+    public static final boolean DEFAULT_GPS_PARSE_METHOD = true;
+    public static final String DEFAULT_GPS_PARSE_DELIMITER = "$RD1";
 
-    public final DopType DEFAULT_TAKE5_DOP_TYPE = DopType.HDOP;
-    public final GGASentence.GpsFixType DEFAULT_TAKE5_FIX_TYPE = GGASentence.GpsFixType.GPS;
-    public final GSASentence.Fix DEFAULT_TAKE5_FIX = GSASentence.Fix._3D;
-    public final int DEFAULT_TAKE5_DOP_VALUE = 20;
-    public final int DEFAULT_TAKE5_INCREMENT = 5;
-    public final int DEFAULT_TAKE5_NMEA_AMOUNT = 5;
-    public final boolean DEFAULT_TAKE5_IGNORE = false;
-    public final int DEFAULT_TAKE5_IGNORE_AMOUNT = 2;
-    public final int DEFAULT_TAKE5_FAIL_AMOUNT = 10;
-    public final boolean DEFAULT_TAKE5_VIB_ON_CREATE = true;
-    public final boolean DEFAULT_TAKE5_RING_ON_CREATE = true;
+    public static final DopType DEFAULT_GPS_DOP_TYPE = DopType.HDOP;
+    public static final GGASentence.GpsFixType DEFAULT_GPS_FIX_TYPE = GGASentence.GpsFixType.GPS;
+    public static final GSASentence.Fix DEFAULT_GPS_FIX = GSASentence.Fix._3D;
+    public static final int DEFAULT_GPS_DOP_VALUE = 20;
+    public static final boolean DEFAULT_GPS_FIX_USE = true;
 
-    public final DopType DEFAULT_SAT_DOP_TYPE = DopType.HDOP;
-    public final GGASentence.GpsFixType DEFAULT_SAT_FIX_TYPE = GGASentence.GpsFixType.GPS;
-    public final GSASentence.Fix DEFAULT_SAT_FIX = GSASentence.Fix._3D;
-    public final int DEFAULT_SAT_DOP_VALUE = 20;
-    public final int DEFAULT_SAT_INCREMENT = 1;
-    public final int DEFAULT_SAT_NMEA_AMOUNT = 60;
-    public final boolean DEFAULT_SAT_IGNORE = false;
-    public final int DEFAULT_SAT_IGNORE_AMOUNT = 2;
-    public final int DEFAULT_SAT_FAIL_AMOUNT = 10;
-    public final boolean DEFAULT_SAT_VIB_ON_CREATE = true;
-    public final boolean DEFAULT_SAT_RING_ON_CREATE = true;
+    public static final DopType DEFAULT_TAKE5_DOP_TYPE = DopType.HDOP;
+    public static final GGASentence.GpsFixType DEFAULT_TAKE5_FIX_TYPE = GGASentence.GpsFixType.GPS;
+    public static final GSASentence.Fix DEFAULT_TAKE5_FIX = GSASentence.Fix._3D;
+    public static final int DEFAULT_TAKE5_DOP_VALUE = 20;
+    public static final int DEFAULT_TAKE5_INCREMENT = 5;
+    public static final int DEFAULT_TAKE5_NMEA_AMOUNT = 5;
+    public static final boolean DEFAULT_TAKE5_IGNORE = false;
+    public static final int DEFAULT_TAKE5_IGNORE_AMOUNT = 2;
+    public static final int DEFAULT_TAKE5_FAIL_AMOUNT = 10;
+    public static final boolean DEFAULT_TAKE5_VIB_ON_CREATE = true;
+    public static final boolean DEFAULT_TAKE5_RING_ON_CREATE = true;
+
+    public static final DopType DEFAULT_SAT_DOP_TYPE = DopType.HDOP;
+    public static final GGASentence.GpsFixType DEFAULT_SAT_FIX_TYPE = GGASentence.GpsFixType.GPS;
+    public static final GSASentence.Fix DEFAULT_SAT_FIX = GSASentence.Fix._3D;
+    public static final int DEFAULT_SAT_DOP_VALUE = 20;
+    public static final int DEFAULT_SAT_INCREMENT = 1;
+    public static final int DEFAULT_SAT_NMEA_AMOUNT = 60;
+    public static final boolean DEFAULT_SAT_IGNORE = false;
+    public static final int DEFAULT_SAT_IGNORE_AMOUNT = 2;
+    public static final int DEFAULT_SAT_FAIL_AMOUNT = 10;
+    public static final boolean DEFAULT_SAT_VIB_ON_CREATE = true;
+    public static final boolean DEFAULT_SAT_RING_ON_CREATE = true;
     
-    public final DopType DEFAULT_WALK_DOP_TYPE = DopType.HDOP;
-    public final GGASentence.GpsFixType DEFAULT_WALK_FIX_TYPE = GGASentence.GpsFixType.GPS;
-    public final GSASentence.Fix DEFAULT_WALK_FIX = GSASentence.Fix._3D;
-    public final int DEFAULT_WALK_DOP_VALUE = 20;
-    public final int DEFAULT_WALK_INCREMENT = 2;
-    public final int DEFAULT_WALK_ACCURACY = 0;
-    public final int DEFAULT_WALK_FREQUENCY = 10;
-    public final boolean DEFAULT_WALK_VIB_ON_CREATE = true;
-    public final boolean DEFAULT_WALK_RING_ON_CREATE = true;
-    public final boolean DEFAULT_WALK_SHOW_ALL_POINTS_ON_MAP = true;
+    public static final DopType DEFAULT_WALK_DOP_TYPE = DopType.HDOP;
+    public static final GGASentence.GpsFixType DEFAULT_WALK_FIX_TYPE = GGASentence.GpsFixType.GPS;
+    public static final GSASentence.Fix DEFAULT_WALK_FIX = GSASentence.Fix._3D;
+    public static final int DEFAULT_WALK_DOP_VALUE = 20;
+    public static final int DEFAULT_WALK_INCREMENT = 2;
+    public static final int DEFAULT_WALK_ACCURACY = 0;
+    public static final int DEFAULT_WALK_FREQUENCY = 10;
+    public static final boolean DEFAULT_WALK_VIB_ON_CREATE = true;
+    public static final boolean DEFAULT_WALK_RING_ON_CREATE = true;
+    public static final boolean DEFAULT_WALK_SHOW_ALL_POINTS_ON_MAP = true;
 
-    public final boolean DEFAULT_AUTO_OPEN_LAST_PROJECT = true;
-    public final String DEFAULT_LAST_OPENED_PROJECT_NAME = null;
-    public final String DEFAULT_LAST_OPENED_PROJECT_FILE_TTX = null;
-    public final String DEFAULT_LAST_OPENED_PROJECT_FILE_TTMPX = null;
+    public static final boolean DEFAULT_AUTO_OPEN_LAST_PROJECT = true;
+    public static final String DEFAULT_LAST_OPENED_PROJECT_NAME = null;
+    public static final String DEFAULT_LAST_OPENED_PROJECT_FILE_TTX = null;
+    public static final String DEFAULT_LAST_OPENED_PROJECT_FILE_TTMPX = null;
 
-    public final boolean DEFAULT_GPS_LOG_BURST_DETAILS = false;
+    public static final boolean DEFAULT_GPS_LOG_BURST_DETAILS = false;
 
 
-    public final int DEFAULT_AUTO_FILL_FROM_RANGE_FINDER = 1;
-    public final boolean DEFAULT_AUTO_FILL_FROM_RANGE_FINDER_ASK = true;
+    public static final int DEFAULT_AUTO_FILL_FROM_RANGE_FINDER = 1;
+    public static final boolean DEFAULT_AUTO_FILL_FROM_RANGE_FINDER_ASK = true;
 
-    public final int DEFAULT_AUTO_SET_GPS_NAME_TO_META = 0;
-    public final boolean DEFAULT_AUTO_SET_GPS_NAME_TO_META_ASK = true;
-    public final int DEFAULT_AUTO_UPDATE_WALK_ONBND = 0;
-    public final boolean DEFAULT_AUTO_UPDATE_WALK_ONBND_ASK = true;
-    public final int DEFAULT_AUTO_OVERWRITE_PLOTGRID = 0;
-    public final boolean DEFAULT_AUTO_OVERWRITE_PLOTGRID_ASK = true;
-    public final int DEFAULT_AUTO_OVERWRITE_EXPORT = 0;
-    public final boolean DEFAULT_AUTO_OVERWRITE_EXPORT_ASK = true;
-    public final int DEFAULT_AUTO_INTERNALIZE_EXPORT = 0;
-    public final boolean DEFAULT_AUTO_INTERNALIZE_EXPORT_ASK = true;
+    public static final int DEFAULT_AUTO_SET_GPS_NAME_TO_META = 0;
+    public static final boolean DEFAULT_AUTO_SET_GPS_NAME_TO_META_ASK = true;
+    public static final int DEFAULT_AUTO_UPDATE_WALK_ONBND = 0;
+    public static final boolean DEFAULT_AUTO_UPDATE_WALK_ONBND_ASK = true;
+    public static final int DEFAULT_AUTO_OVERWRITE_PLOTGRID = 0;
+    public static final boolean DEFAULT_AUTO_OVERWRITE_PLOTGRID_ASK = true;
+    public static final int DEFAULT_AUTO_OVERWRITE_EXPORT = 0;
+    public static final boolean DEFAULT_AUTO_OVERWRITE_EXPORT_ASK = true;
+    public static final int DEFAULT_AUTO_INTERNALIZE_EXPORT = 0;
+    public static final boolean DEFAULT_AUTO_INTERNALIZE_EXPORT_ASK = true;
 
-    public final MapTracking DEFAULT_MAP_TRACKING_OPTION = MapTracking.POLY_BOUNDS;
-    public final boolean DEFAULT_MAP_COMPASS_ENABLED = true;
-    public final boolean DEFAULT_MAP_MYPOS_BUTTON = true;
-    public final double DEFAULT_MAP_MIN_DIST = 50;
-    public final boolean DEFAULT_MAP_SHOW_MY_POS = true;
-    public final boolean DEFAULT_MAP_DISPLAY_GPS_LOCATION = true;
-    public final boolean DEFAULT_MAP_USE_UTM_NAV = true;
-    public final int DEFAULT_MAP_TYPE = 1;
-    public final int DEFAULT_MAP_ID = 1;
+    public static final MapTracking DEFAULT_MAP_TRACKING_OPTION = MapTracking.POLY_BOUNDS;
+    public static final boolean DEFAULT_MAP_COMPASS_ENABLED = true;
+    public static final boolean DEFAULT_MAP_MYPOS_BUTTON = true;
+    public static final double DEFAULT_MAP_MIN_DIST = 50;
+    public static final boolean DEFAULT_MAP_SHOW_MY_POS = true;
+    public static final boolean DEFAULT_MAP_DISPLAY_GPS_LOCATION = true;
+    public static final boolean DEFAULT_MAP_USE_UTM_NAV = true;
+    public static final int DEFAULT_MAP_TYPE = 1;
+    public static final int DEFAULT_MAP_ID = 1;
     public static final String DEFAULT_ARC_GIS_MAPS = StringEx.Empty;
-    public final int DEFAULT_ARC_GIS_MAP_ID_COUNTER = 0;
-    public final int DEFAULT_MAP_ADJ_LINE_WIDTH = 6;
-    public final int DEFAULT_MAP_UNADJ_LINE_WIDTH = 16;
-    public final int DEFAULT_MAP_DIST_TO_POLY_LINE_WIDTH = 10;
-    public final @ColorInt int DEFAULT_MAP_DIST_TO_POLY_LINE_COLOR = 0xFF000000;
-    public final float DEFAULT_MAP_DIST_TO_POLY_LINE_TOLERANCE = 10; //in meters
-    public final int DEFAULT_MAP_CHOOSE_OFFLINE = 0;
-    public final boolean DEFAULT_MAP_CHOOSE_OFFLINE_ASK = true;
+    public static final int DEFAULT_ARC_GIS_MAP_ID_COUNTER = 0;
+    public static final int DEFAULT_MAP_ADJ_LINE_WIDTH = 6;
+    public static final int DEFAULT_MAP_UNADJ_LINE_WIDTH = 16;
+    public static final int DEFAULT_MAP_DIST_TO_POLY_LINE_WIDTH = 10;
+    public static final @ColorInt int DEFAULT_MAP_DIST_TO_POLY_LINE_COLOR = 0xFF000000;
+    public static final float DEFAULT_MAP_DIST_TO_POLY_LINE_TOLERANCE = 10; //in meters
+    public static final int DEFAULT_MAP_CHOOSE_OFFLINE = 0;
+    public static final boolean DEFAULT_MAP_CHOOSE_OFFLINE_ASK = true;
 
     public static final int DEFAULT_EXPORT_MODE = 2;
     public static final boolean DEFAULT_EXPORT_MODE_ASK = true;
 
-    public final boolean DEFAULT_MEDIA_COPY_TO_PROJECT = true;
+    public static final boolean DEFAULT_MEDIA_COPY_TO_PROJECT = true;
     //endregion
 
 
@@ -257,6 +262,9 @@ public class DeviceSettings extends Settings {
         setBool(EXTERNAL_SYNC_ENABLED, DEFAULT_EXTERNAL_SYNC_ENABLED);
         setBool(EXTERNAL_SYNC_ENABLED_ASK, DEFAULT_EXTERNAL_SYNC_ENABLED_ASK);
         setString(EXTERNAL_SYNC_DIR, DEFAULT_EXTERNAL_SYNC_DIR);
+
+        setBool(GPS_PARSE_METHOD, DEFAULT_GPS_PARSE_METHOD);
+        setString(GPS_PARSE_DELIMITER, DEFAULT_GPS_PARSE_DELIMITER);
 
         setString(LAST_CRASH_TIME, StringEx.Empty);
 
@@ -520,6 +528,24 @@ public class DeviceSettings extends Settings {
 
     public void setGpsDeviceName(String value) {
         setString(GPS_DEVICE_NAME, value);
+    }
+
+
+    public boolean isGpsParsingByTime() {
+        return getBool(GPS_PARSE_METHOD, DEFAULT_GPS_PARSE_METHOD);
+    }
+
+    public void setGpsParsingByTime(boolean parseByTime) {
+        setBool(GPS_PARSE_METHOD, parseByTime);
+    }
+
+
+    public String getGpsParseDelimiter() {
+        return getString(GPS_PARSE_DELIMITER, DEFAULT_GPS_PARSE_DELIMITER);
+    }
+
+    public void setGpsParseDelimiter(String delimiter) {
+        setString(GPS_PARSE_DELIMITER, delimiter);
     }
 
 

@@ -45,14 +45,14 @@ import com.usda.fmsc.utilities.StringEx;
 
 @SuppressWarnings({"UnusedReturnValue", "unused", "WeakerAccess"})
 public class DataAccessLayer extends IDataLayer {
+    private TtVersion _DalVersion;
     public TtVersion getVersion() {
         if (_DalVersion == null)
-            _DalVersion = new TtVersion(getTtDbVersion());
+            _DalVersion = new TtVersion(getTtDbVersion(), getUserVersion());
 
         return _DalVersion;
     }
 
-    private TtVersion _DalVersion;
     private TtUserAction _Activity = null;
 
 
@@ -244,7 +244,7 @@ public class DataAccessLayer extends IDataLayer {
 
     @Override
     protected void onOpenDB(SQLiteDatabase db) {
-        if (_DalVersion == null) _DalVersion = new TtVersion(getTtDbVersion());
+        if (_DalVersion == null) _DalVersion = new TtVersion(getTtDbVersion(), db.getVersion());
         if (_Activity == null) _Activity = createUserAction();
     }
 

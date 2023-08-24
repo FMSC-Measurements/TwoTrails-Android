@@ -97,6 +97,7 @@
     <string name="str_settings">Settings</string>
     <string name="str_listen_recv">Listening to Receiver</string>
     <string name="str_satellites">Satellites</string>
+    <string name="str_satellites_vtu">Satellites (VTU)</string>
     <string name="str_mode">Mode</string>
     <string name="str_online_map">Online Map</string>
     <string name="str_offline_map">Offline Map</string>
@@ -145,6 +146,9 @@
     <string name="str_outside_poly">Outside Polygon</string>
     <string name="str_commit">Commit</string>
     <string name="str_commit_ss">Commit Sideshot</string>
+    <string name="str_gps_parse_time">Time Based</string>
+    <string name="str_gps_parse_delim">Delimiter Based</string>
+    <string name="str_delimiter">Delimiter</string>
 
     <string name="zero">0</string>
     <string name="str_x">X</string>
@@ -278,15 +282,18 @@
 
     <string name="set_GPS_EXTERNAL">GpsExternal</string>
     <string name="set_GPS_ALWAYS_ON">GpsAlwaysOn</string>
-    <string name="set_LOG_ALL_GPS">LogAllGps</string>
-    <string name="set_GPS_CONFIGURED">GPSConfigured</string>
-    <string name="set_RANGE_FINDER_ALWAYS_ON">RangeFinderAlwaysOn</string>
-    <string name="set_LOG_ALL_RANGE_FINDER">LogAllRangeFinder</string>
-    <string name="set_RANGE_FINDER_CONFIGURED">RangeFinderConfigured</string>
     <string name="set_GPS_DEVICE_ID">GpsDeviceID</string>
     <string name="set_GPS_DEVICE_NAME">GpsDeviceName</string>
+    <string name="set_GPS_CONFIGURED">GPSConfigured</string>
+    <string name="set_GPS_PARSE_METHOD">GpsParseMethod</string>
+    <string name="set_GPS_PARSE_DELIMITER">GpsParseDelimiter</string>
+    <string name="set_LOG_ALL_GPS">LogAllGps</string>
+
+    <string name="set_RANGE_FINDER_ALWAYS_ON">RangeFinderAlwaysOn</string>
+    <string name="set_RANGE_FINDER_CONFIGURED">RangeFinderConfigured</string>
     <string name="set_RANGE_FINDER_DEVICE_ID">RangeFinderDeviceID</string>
     <string name="set_RANGE_FINDER_DEVICE_NAME">RangeFinderDeviceName</string>
+    <string name="set_LOG_ALL_RANGE_FINDER">LogAllRangeFinder</string>
 
     <string name="set_GPS_FILTER_DOP_TYPE">GpsFilterDopType</string>
     <string name="set_GPS_FILTER_DOP_VALUE">GpsFilterDopValue</string>
@@ -466,7 +473,7 @@
     <string name="points_gps_utm_x">UTM X</string>
     <string name="points_gps_utm_y">UTM Y</string>
     <string name="points_gps_elev">Elevation</string>
-    <string name="points_gps_manacc">Mannual Accuracy</string>
+    <string name="points_gps_manacc">Manual Accuracy</string>
     <string name="point_trav_az_fwd">Fwd</string>
     <string name="points_trav_az_bk">Back</string>
     <string name="points_reset_diag">This will reset this point back to all its original values.</string>

@@ -79,7 +79,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content">
             <TextView
-                android:text="@string/str_satellites"/>
+                android:text="@string/str_satellites_vtu"/>
             <TextView
                 android:id="@+id/gpsInfoTvSats"
                 android:text="@string/str_null_value"/>

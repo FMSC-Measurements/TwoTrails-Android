@@ -31,7 +31,7 @@ import java.util.Locale;
 public class MediaAccessLayer extends IDataLayer implements BitmapManager.IBitmapProvider {
     public TtVersion getVersion() {
         if (_MalVersion == null)
-            _MalVersion = new TtVersion(getTtDbVersion());
+            _MalVersion = new TtVersion(getTtDbVersion(), getUserVersion());
 
         return _MalVersion;
     }
@@ -116,7 +116,7 @@ public class MediaAccessLayer extends IDataLayer implements BitmapManager.IBitma
 
     @Override
     protected void onOpenDB(SQLiteDatabase db) {
-        if (_MalVersion == null) _MalVersion = new TtVersion(getTtDbVersion());
+        if (_MalVersion == null) _MalVersion = new TtVersion(getTtDbVersion(), getUserVersion());
     }
     //endregion
 

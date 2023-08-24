@@ -29,6 +29,21 @@
                 android:title="Check NMEA"
                 android:summary="@string/ds_gps_check_nmea"/>
 
+            <SwitchPreferenceCompat
+                android:key="@string/set_GPS_PARSE_METHOD"
+                android:title="Parsing Method"
+                android:summary="@string/str_empty"
+                android:switchTextOff="@string/str_gps_parse_delim"
+                android:switchTextOn="@string/str_gps_parse_time"
+                android:textOff="@string/str_gps_parse_delim"
+                android:textOn="@string/str_gps_parse_time"/>
+
+            <Preference
+                android:key="@string/set_GPS_PARSE_DELIMITER"
+                android:title="@string/str_gps_parse_delim"
+                android:summary="@string/str_empty"
+                android:enabled="false"/>
+
             <PreferenceCategory
                 android:title="External GPS Settings"
                 android:key="@string/set_GPS_CAT">
@@ -37,7 +52,7 @@
                     android:id="@+id/prefLstGpsDevice"
                     android:key="@string/set_GPS_LIST_DEVICE"
                     android:title="External GPS Device"
-                    android:summary="Device: "
+                    android:summary="Device: ?"
                     app:entries="@array/arr_empty"
                     android:entryValues="@array/arr_empty"/>
 

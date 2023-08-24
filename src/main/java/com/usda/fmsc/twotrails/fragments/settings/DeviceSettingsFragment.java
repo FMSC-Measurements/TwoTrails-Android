@@ -1,6 +1,5 @@
 package com.usda.fmsc.twotrails.fragments.settings;
 
-import android.Manifest;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -23,10 +22,10 @@ import androidx.preference.SwitchPreferenceCompat;
 
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.dialogs.DontAskAgainDialog;
+import com.usda.fmsc.android.dialogs.InputDialog;
 import com.usda.fmsc.android.dialogs.ProgressDialogEx;
 import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
 import com.usda.fmsc.geospatial.nmea41.sentences.base.NmeaSentence;
-import com.usda.fmsc.twotrails.BuildConfig;
 import com.usda.fmsc.twotrails.DeviceSettings;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.activities.SettingsActivity;
@@ -49,8 +48,8 @@ import java.util.List;
 public class DeviceSettingsFragment extends TtBasePrefFragment {
     public static final String CURRENT_PAGE = "CurrentPage";
 
-    private Preference prefGpsCheck, prefRFCheck;
-    private SwitchPreferenceCompat swtUseExGpsDev;
+    private Preference prefGpsCheck, prefRFCheck, prefParseDelimiter;
+    private SwitchPreferenceCompat swtUseExGpsDev, swtParseMethod;
     private PreferenceCategory exGpsCat;
     private ListPreference prefLstGpsDevice, prefLstRFDevice;
 
@@ -112,6 +111,8 @@ public class DeviceSettingsFragment extends TtBasePrefFragment {
 
         swtUseExGpsDev = findPreference(getString(R.string.set_GPS_EXTERNAL));
         exGpsCat = findPreference(getString(R.string.set_GPS_CAT));
+        swtParseMethod = findPreference(getString(R.string.set_GPS_PARSE_METHOD));
+        prefParseDelimiter = findPreference(getString(R.string.set_GPS_PARSE_DELIMITER));
         prefLstGpsDevice = findPreference(getString(R.string.set_GPS_LIST_DEVICE));
         prefGpsCheck = findPreference(getString(R.string.set_GPS_CHECK));
         prefLstRFDevice = findPreference(getString(R.string.set_RF_LIST_DEVICE));
@@ -120,6 +121,19 @@ public class DeviceSettingsFragment extends TtBasePrefFragment {
 
         swtUseExGpsDev.setOnPreferenceChangeListener(useExternalListener);
         swtUseExGpsDev.setSummary(getString(swtUseExGpsDev.isChecked() ? R.string.ds_gps_use_external : R.string.ds_gps_use_internal));
+
+        swtParseMethod.setOnPreferenceChangeListener(parseMethodListener);
+        prefParseDelimiter.setOnPreferenceClickListener(parseDelimiterClickListener);
+
+        if (getTtAppCtx().getDeviceSettings().isGpsParsingByTime()) {
+            swtParseMethod.setSummary(getString(R.string.str_gps_parse_time));
+            prefParseDelimiter.setEnabled(false);
+        } else {
+            swtParseMethod.setSummary(getString(R.string.str_gps_parse_delim));
+            prefParseDelimiter.setEnabled(true);
+        }
+
+        prefParseDelimiter.setSummary(getTtAppCtx().getDeviceSettings().getGpsParseDelimiter());
 
         prefGpsCheck.setOnPreferenceClickListener(gpsCheckListener);
         prefRFCheck.setOnPreferenceClickListener(rfCheckListener);
@@ -595,12 +609,24 @@ public class DeviceSettingsFragment extends TtBasePrefFragment {
                             String message;
 
                             switch (error) {
-                                case LostDeviceConnection: message = "Lost connection to bluetooth device."; break;
-                                case DeviceConnectionEnded: message = "Bluetooth connection terminated."; break;
-                                case NoExternalRangeFinderSocket: message = "Failed to create bluetooth socket."; break;
-                                case FailedToConnect: message = "Failed to connect to bluetooth device."; break;
-                                case Unknown: message = error.toString(); break;
-                                default: message = "An unknown RangeFinder error as occurred"; break;
+                                case LostDeviceConnection:
+                                    message = "Lost connection to bluetooth device.";
+                                    break;
+                                case DeviceConnectionEnded:
+                                    message = "Bluetooth connection terminated.";
+                                    break;
+                                case NoExternalRangeFinderSocket:
+                                    message = "Failed to create bluetooth socket.";
+                                    break;
+                                case FailedToConnect:
+                                    message = "Failed to connect to bluetooth device.";
+                                    break;
+                                case Unknown:
+                                    message = error.toString();
+                                    break;
+                                default:
+                                    message = "An unknown RangeFinder error as occurred";
+                                    break;
                             }
 
                             activity.runOnUiThread(pd::dismiss);
@@ -632,7 +658,7 @@ public class DeviceSettingsFragment extends TtBasePrefFragment {
                             }
                             case RangeFinderError: {
                                 hideDialog.run();
-                                Toast.makeText(activity,"RangeFinder error.", Toast.LENGTH_LONG).show();
+                                Toast.makeText(activity, "RangeFinder error.", Toast.LENGTH_LONG).show();
                                 break;
                             }
                             case RangeFinderNotFound: {
@@ -640,7 +666,8 @@ public class DeviceSettingsFragment extends TtBasePrefFragment {
                                 Toast.makeText(activity, "The external bluetooth RangeFinder was not found.", Toast.LENGTH_LONG).show();
                                 break;
                             }
-                            default: hideDialog.run();
+                            default:
+                                hideDialog.run();
                                 break;
                         }
                     };
@@ -748,6 +775,44 @@ public class DeviceSettingsFragment extends TtBasePrefFragment {
     }
     //endregion
 
+    //region GPS Parse Method
+    private final Preference.OnPreferenceChangeListener parseMethodListener = new Preference.OnPreferenceChangeListener() {
+        @Override
+        public boolean onPreferenceChange(@NonNull Preference preference, Object newValue) {
+            boolean parseByTime = (boolean)newValue;
+
+            if (parseByTime) {
+                swtParseMethod.setSummary(getString(R.string.str_gps_parse_time));
+                prefParseDelimiter.setEnabled(false);
+            } else {
+                swtParseMethod.setSummary(getString(R.string.str_gps_parse_delim));
+                prefParseDelimiter.setEnabled(true);
+            }
+
+            return true;
+        }
+    };
+
+    private final Preference.OnPreferenceClickListener parseDelimiterClickListener = new Preference.OnPreferenceClickListener() {
+        @Override
+        public boolean onPreferenceClick(@NonNull Preference preference) {
+            final InputDialog idialog = new InputDialog(getActivity());
+
+            idialog
+                    .setInputText(DeviceSettings.DEFAULT_GPS_PARSE_DELIMITER)
+                    .setTitle("GPS Parse Delimiter")
+                    .setPositiveButton(R.string.str_ok, (dialog, which) -> {
+                        String delimiter = idialog.getText().trim();
+                        getTtAppCtx().getDeviceSettings().setGpsParseDelimiter(delimiter);
+                        prefParseDelimiter.setSummary(delimiter);
+                    })
+                    .setNeutralButton(R.string.str_cancel, null)
+                    .show();
+
+            return true;
+        }
+    };
+    //endregion
 
     //region GPS Selection
     private final Preference.OnPreferenceChangeListener btnGPSList = new Preference.OnPreferenceChangeListener() {

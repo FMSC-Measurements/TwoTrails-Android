@@ -13,40 +13,46 @@ public class MediaAccessManager extends AccessManager<MediaAccessLayer> {
     private MediaAccessLayer _MAL;
 
     public MediaAccessManager(TwoTrailsApp context, String fileName) {
-        super(context, fileName, null, TwoTrailsSchema.SchemaVersionInt);
+        super(context, fileName, null, TwoTrailsSchema.SchemaVersion.DbVersion);
     } 
 
 
     @Override
     public void onConfigure(SQLiteDatabase db) {
-        if (db.getVersion() == 0) {
-            Cursor cursor = db.rawQuery("SELECT name FROM sqlite_master WHERE type='table' AND name='" +  TwoTrailsMediaSchema.Info.TableName + "';", null);
-
-            if (cursor != null) {
-                if (cursor.getCount() == 1) {
-                    db.setVersion(1);
-                }
-
-                cursor.close();
-            }
-        }
+        super.onConfigure(db);
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        _MAL = new MediaAccessLayer(_Context, db, getDatabaseName(), true);
+        if (isDbTTMPX(db)) {
+            _MAL = new MediaAccessLayer(_Context, db, getDatabaseName());
+
+            if (_MAL.getVersion().toIntVersion() < TwoTrailsMediaSchema.SchemaVersion.toIntVersion()) {
+                onUpgrade(db, _MAL.getUserVersion(), TwoTrailsMediaSchema.SchemaVersion.DbVersion);
+            }
+        } else {
+            _MAL = new MediaAccessLayer(_Context, db, getDatabaseName(), true);
+        }
         super.onCreate(db);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        _MAL = new MediaAccessLayer(_Context, db, getDatabaseName());
+        _MAL = _MAL != null ? _MAL : new MediaAccessLayer(_Context, db, getDatabaseName());
 
-        if (oldVersion < TwoTrailsMediaSchema.MAL_2_1_0_INT) {
-            try {
-                _MAL.upgrade(Upgrades.MAL_2_1_0);
-            } catch (Exception ex) {
-                throw new UpgradeException(Upgrades.MAL_2_1_0.Version, ex.getMessage(), ex.getCause(), ex.getStackTrace());
+        if (oldVersion < TwoTrailsMediaSchema.MAL_2_1_0.DbVersion) {
+            if (!isDbTTMPX(db)) {
+                throw new RuntimeException("Invalid TwoTrails Media File");
+            }
+
+            int ttmVersion = _MAL.getVersion().toIntVersion();
+
+            if (ttmVersion < TwoTrailsMediaSchema.MAL_2_1_0.toIntVersion()) {
+                try {
+                    _MAL.upgrade(Upgrades.MAL_2_1_0);
+                } catch (Exception ex) {
+                    throw new UpgradeException(Upgrades.MAL_2_1_0.Version, ex.getMessage(), ex.getCause(), ex.getStackTrace());
+                }
             }
         }
 
@@ -58,6 +64,20 @@ public class MediaAccessManager extends AccessManager<MediaAccessLayer> {
         if (_MAL == null) {
             _MAL = new MediaAccessLayer(_Context, db, getDatabaseName());
         }
+    }
+
+    private boolean isDbTTMPX(SQLiteDatabase db) {
+        Cursor cursor = db.rawQuery("SELECT name FROM sqlite_master WHERE type='table' AND name='" + TwoTrailsMediaSchema.Media.TableName + "';", null);
+
+        if (cursor != null) {
+            if (cursor.getCount() != 1) {
+                return false;
+            }
+
+            cursor.close();
+        }
+
+        return true;
     }
 
 

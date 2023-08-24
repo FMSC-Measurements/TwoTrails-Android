@@ -81,7 +81,7 @@ public class MiscSettingsFragment extends TtBasePrefFragment {
         pref = findPreference(getString(R.string.set_CODE));
         if (pref != null) {
             pref.setOnPreferenceClickListener(preference -> {
-                SettingsLogic.enterCode(getTtAppCtx());
+                SettingsLogic.enterCode((TtActivity) getActivity());
                 return false;
             });
         }
