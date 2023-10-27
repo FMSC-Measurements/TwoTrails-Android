@@ -3,7 +3,7 @@ package com.usda.fmsc.twotrails.utilities;
 import android.net.Uri;
 
 import com.usda.fmsc.android.utilities.TaskRunner;
-import com.usda.fmsc.geospatial.UomElevation;
+import com.usda.fmsc.geospatial.codes.UomElevation;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.geospatial.utm.UTMTools;
 import com.usda.fmsc.twotrails.Consts;

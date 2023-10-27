@@ -9,14 +9,15 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
-import com.usda.fmsc.geospatial.nmea41.NmeaIDs;
+import com.usda.fmsc.geospatial.nmea.codes.SentenceID;
+import com.usda.fmsc.geospatial.nmea.codes.TalkerID;
 import com.usda.fmsc.twotrails.R;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class NmeaDetailsAdapter extends ArrayAdapter<NmeaDetailsAdapter.NmeaDetails> {
-    private final List<NmeaDetails> nmeaDetails;
+public class NmeaDetailsAdapter extends ArrayAdapter<NmeaDetailsAdapter.GnssNmeaDetails> {
+    private final List<GnssNmeaDetails> gnssNmeaDetails;
 
     private final LayoutInflater inflater;
 
@@ -25,9 +26,9 @@ public class NmeaDetailsAdapter extends ArrayAdapter<NmeaDetailsAdapter.NmeaDeta
         this(context, new ArrayList<>());
     }
 
-    public NmeaDetailsAdapter(Context context, List<NmeaDetails> nmeaDetails) {
+    public NmeaDetailsAdapter(Context context, List<GnssNmeaDetails> gnssNmeaDetails) {
         super(context, 0);
-        this.nmeaDetails = nmeaDetails;
+        this.gnssNmeaDetails = gnssNmeaDetails;
 
         inflater = LayoutInflater.from(context);
     }
@@ -37,7 +38,7 @@ public class NmeaDetailsAdapter extends ArrayAdapter<NmeaDetailsAdapter.NmeaDeta
     @Override
     public View getView(int position, View convertView,@NonNull ViewGroup parent) {
         ViewHolder holder;
-        NmeaDetails details = getItem(position);
+        GnssNmeaDetails details = getItem(position);
 
         if (convertView == null) {
             convertView = inflater.inflate(R.layout.list_row_nmea_info, parent, false);
@@ -49,7 +50,7 @@ public class NmeaDetailsAdapter extends ArrayAdapter<NmeaDetailsAdapter.NmeaDeta
 
         if (details != null) {
             holder.talkerID.setText(details.getTalkerIdStr());
-            holder.nmeaIDs.setText(details.getNmeaIdsStr());
+            holder.sentenceIDs.setText(details.getSentenceIdsStr());
         }
 
         return convertView;
@@ -57,39 +58,39 @@ public class NmeaDetailsAdapter extends ArrayAdapter<NmeaDetailsAdapter.NmeaDeta
 
 
     @Override
-    public NmeaDetails getItem(int position) {
-        return nmeaDetails.get(position);
+    public GnssNmeaDetails getItem(int position) {
+        return gnssNmeaDetails.get(position);
     }
 
     @Override
     public int getCount() {
-        return nmeaDetails.size();
+        return gnssNmeaDetails.size();
     }
 
-    public static class NmeaDetails {
+    public static class GnssNmeaDetails {
         private final String talkerIdStr;
-        private final List<String> ids = new ArrayList<>();
+        private final List<String> sentenceIds = new ArrayList<>();
 
-        public NmeaDetails(NmeaIDs.TalkerID talkerID) {
+        public GnssNmeaDetails(TalkerID talkerID) {
             this(talkerID.toStringCode());
         }
 
-        public NmeaDetails(String talkerIdStr) {
+        public GnssNmeaDetails(String talkerIdStr) {
             this.talkerIdStr = talkerIdStr;
         }
 
-        public boolean addId(NmeaIDs.SentenceID id) {
-            if (!ids.contains(id.toString())) {
-                ids.add(id.toString());
+        public boolean addSentenceId(SentenceID id) {
+            if (!sentenceIds.contains(id.toString())) {
+                sentenceIds.add(id.toString());
                 return true;
             }
 
             return false;
         }
 
-        public boolean addId(String id) {
-            if (!ids.contains(id)) {
-                ids.add(id);
+        public boolean addSentenceId(String id) {
+            if (!sentenceIds.contains(id)) {
+                sentenceIds.add(id);
                 return true;
             }
             return false;
@@ -99,15 +100,15 @@ public class NmeaDetailsAdapter extends ArrayAdapter<NmeaDetailsAdapter.NmeaDeta
             return talkerIdStr;
         }
 
-        public String getNmeaIdsStr(){
+        public String getSentenceIdsStr(){
             StringBuilder sb = new StringBuilder();
 
-            if (ids.size() > 0) {
-                for (int i = 0; i < ids.size() - 1; i++) {
-                    sb.append(String.format("%s, ", ids.get(i)));
+            if (sentenceIds.size() > 0) {
+                for (int i = 0; i < sentenceIds.size() - 1; i++) {
+                    sb.append(String.format("%s, ", sentenceIds.get(i)));
                 }
 
-                sb.append(ids.get(ids.size() - 1));
+                sb.append(sentenceIds.get(sentenceIds.size() - 1));
             } else {
                 sb.append("No NMEA IDs");
             }
@@ -119,12 +120,12 @@ public class NmeaDetailsAdapter extends ArrayAdapter<NmeaDetailsAdapter.NmeaDeta
 
     private static class ViewHolder {
         public final TextView talkerID;
-        public final TextView nmeaIDs;
+        public final TextView sentenceIDs;
 
         public ViewHolder(View view)
         {
             talkerID = view.findViewById(R.id.listRowTalkerId);
-            nmeaIDs = view.findViewById(R.id.listRowNmeaIds);
+            sentenceIDs = view.findViewById(R.id.listRowNmeaIds);
         }
     }
 }

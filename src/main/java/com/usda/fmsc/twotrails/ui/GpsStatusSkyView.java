@@ -16,7 +16,7 @@ import android.hardware.SensorManager;
 import android.util.AttributeSet;
 
 import com.usda.fmsc.android.AndroidUtils;
-import com.usda.fmsc.geospatial.nmea41.Satellite;
+import com.usda.fmsc.geospatial.gnss.nmea.Satellite;
 import com.usda.fmsc.twotrails.R;
 
 public class GpsStatusSkyView extends GpsStatusView implements SensorEventListener {

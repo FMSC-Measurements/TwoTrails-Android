@@ -10,8 +10,9 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.PatternItem;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.usda.fmsc.geospatial.Extent;
+import com.usda.fmsc.geospatial.gnss.Extent;
 import com.usda.fmsc.geospatial.Position;
+import com.usda.fmsc.geospatial.gnss.GeoTools;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -58,8 +59,8 @@ public class GoogleMapsLineGraphic implements ILineGraphic, LineGraphicOptions.L
         _LatLngs = new ArrayList<>();
         LatLngBounds.Builder llBuilder = new LatLngBounds.Builder();
 
-        _LatLngs.add(new LatLng(point1.getLatitudeSignedDecimal(), point1.getLongitudeSignedDecimal()));
-        _LatLngs.add(new LatLng(point2.getLatitudeSignedDecimal(), point2.getLongitudeSignedDecimal()));
+        _LatLngs.add(new LatLng(point1.getLatitude(), point1.getLongitude()));
+        _LatLngs.add(new LatLng(point2.getLatitude(), point2.getLongitude()));
 
         llBuilder.include(_LatLngs.get(0));
         llBuilder.include(_LatLngs.get(1));
@@ -79,7 +80,7 @@ public class GoogleMapsLineGraphic implements ILineGraphic, LineGraphicOptions.L
 
     @Override
     public Position getPosition() {
-        return lineBounds.getCenter();
+        return GeoTools.getMidPoint(lineBounds);
     }
 
 

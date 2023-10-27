@@ -24,8 +24,8 @@ import androidx.documentfile.provider.DocumentFile;
 
 import com.esri.arcgisruntime.ArcGISRuntimeEnvironment;
 import com.usda.fmsc.android.AndroidUtils;
-import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
-import com.usda.fmsc.geospatial.nmea41.sentences.base.NmeaSentence;
+import com.usda.fmsc.geospatial.gnss.nmea.GnssNmeaBurst;
+import com.usda.fmsc.geospatial.nmea.sentences.NmeaSentence;
 import com.usda.fmsc.twotrails.activities.MainActivity;
 import com.usda.fmsc.twotrails.activities.base.TtActivity;
 import com.usda.fmsc.twotrails.data.DataAccessLayer;
@@ -100,7 +100,7 @@ public class TwoTrailsApp extends Application {
 
             gpsServiceBinder.addListener(new GpsService.Listener() {
                 @Override
-                public void nmeaBurstReceived(NmeaBurst NmeaBurst) {
+                public void nmeaBurstReceived(GnssNmeaBurst GnssNmeaBurst) {
 
                 }
 

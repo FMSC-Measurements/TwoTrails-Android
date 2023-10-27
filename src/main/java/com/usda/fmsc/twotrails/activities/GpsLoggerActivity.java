@@ -18,7 +18,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.usda.fmsc.android.AndroidUtils;
-import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
+import com.usda.fmsc.geospatial.gnss.nmea.GnssNmeaBurst;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.activities.base.TtCustomToolbarActivity;
 import com.usda.fmsc.twotrails.activities.contracts.CreateZipDocument;
@@ -31,7 +31,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import com.usda.fmsc.geospatial.nmea41.sentences.base.NmeaSentence;
+import com.usda.fmsc.geospatial.nmea.sentences.NmeaSentence;
 import com.usda.fmsc.utilities.FileUtils;
 import com.usda.fmsc.utilities.MimeTypes;
 
@@ -319,7 +319,7 @@ public class GpsLoggerActivity extends TtCustomToolbarActivity implements GpsSer
     }
 
     @Override
-    public void nmeaBurstReceived(NmeaBurst nmeaBurst) {
+    public void nmeaBurstReceived(GnssNmeaBurst nmeaBurst) {
         if (logging) {
             strings.add(0, nmeaBurst.toString());//String.format("Burst Received- Valid: %s", Boolean.toString(nmeaBurst.isValid())));
             updateList();

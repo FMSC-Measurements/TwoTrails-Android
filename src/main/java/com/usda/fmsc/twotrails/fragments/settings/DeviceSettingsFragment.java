@@ -24,8 +24,8 @@ import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.dialogs.DontAskAgainDialog;
 import com.usda.fmsc.android.dialogs.InputDialog;
 import com.usda.fmsc.android.dialogs.ProgressDialogEx;
-import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
-import com.usda.fmsc.geospatial.nmea41.sentences.base.NmeaSentence;
+import com.usda.fmsc.geospatial.gnss.nmea.GnssNmeaBurst;
+import com.usda.fmsc.geospatial.nmea.sentences.NmeaSentence;
 import com.usda.fmsc.twotrails.DeviceSettings;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.activities.SettingsActivity;
@@ -321,7 +321,7 @@ public class DeviceSettingsFragment extends TtBasePrefFragment {
 
                     final GpsService.Listener listener = new GpsService.Listener() {
                         @Override
-                        public void nmeaBurstReceived(NmeaBurst nmeaBurst) {
+                        public void nmeaBurstReceived(GnssNmeaBurst nmeaBurst) {
 
                         }
 

@@ -2,7 +2,7 @@ package com.usda.fmsc.twotrails;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.usda.fmsc.geospatial.Extent;
+import com.usda.fmsc.geospatial.gnss.Extent;
 import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.twotrails.objects.TtGroup;
 

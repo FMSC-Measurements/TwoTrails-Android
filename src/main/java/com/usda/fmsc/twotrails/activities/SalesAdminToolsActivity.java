@@ -19,17 +19,16 @@ import androidx.cardview.widget.CardView;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.dialogs.DontAskAgainDialog;
 import com.usda.fmsc.android.dialogs.NumericInputDialog;
 import com.usda.fmsc.android.utilities.PostDelayHandler;
 import com.usda.fmsc.android.widget.SheetLayoutEx;
-import com.usda.fmsc.geospatial.Extent;
-import com.usda.fmsc.geospatial.GeoTools;
+import com.usda.fmsc.geospatial.gnss.Extent;
+import com.usda.fmsc.geospatial.gnss.GeoTools;
 import com.usda.fmsc.geospatial.Position;
-import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
+import com.usda.fmsc.geospatial.gnss.nmea.GnssNmeaBurst;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.geospatial.utm.UTMTools;
 import com.usda.fmsc.twotrails.Consts;
@@ -56,7 +55,6 @@ import com.usda.fmsc.utilities.StringEx;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Locale;
 
 public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
@@ -196,7 +194,7 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
         DeviceSettings ds = getTtAppCtx().getDeviceSettings();
 
         options.Fix = ds.getSATFilterFix();
-        options.FixType = ds.getSATFilterFixType();
+        options.FixType = ds.getSATFilterFixQuality();
         options.DopType = ds.getSATFilterDopType();
         options.DopValue = ds.getSATFilterDopValue();
         increment = ds.getSATIncrement();
@@ -653,7 +651,7 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
 
     //region GPS
     @Override
-    protected void onNmeaBurstReceived(NmeaBurst nmeaBurst) {
+    protected void onNmeaBurstReceived(GnssNmeaBurst nmeaBurst) {
         super.onNmeaBurstReceived(nmeaBurst);
 
         if (nmeaBurst.hasPosition()) {
@@ -695,10 +693,10 @@ public class SalesAdminToolsActivity extends AcquireGpsMapActivity {
                         dRMSEy = Math.sqrt(dRMSEy / count);
                         dRMSEr = Math.sqrt(Math.pow(dRMSEx, 2) + Math.pow(dRMSEy, 2)) * Consts.RMSEr95_Coeff;
 
-                        Position position = GeoTools.getMidPioint(positions);
+                        Position position = GeoTools.getMidPoint(positions);
 
-                        _ValidationPoint.setLatitude(position.getLatitudeSignedDecimal());
-                        _ValidationPoint.setLongitude(position.getLongitudeSignedDecimal());
+                        _ValidationPoint.setLatitude(position.getLatitude());
+                        _ValidationPoint.setLongitude(position.getLongitude());
                         _ValidationPoint.setElevation(position.getElevation());
                         _ValidationPoint.setRMSEr(dRMSEr);
                         _ValidationPoint.setAndCalc(x, y, position.getElevation(), _ValidationPolygon);

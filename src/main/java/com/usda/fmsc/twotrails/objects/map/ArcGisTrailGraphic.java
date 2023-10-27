@@ -10,13 +10,15 @@ import com.esri.arcgisruntime.mapping.view.GraphicsOverlay;
 import com.esri.arcgisruntime.mapping.view.MapView;
 import com.esri.arcgisruntime.symbology.SimpleLineSymbol;
 import com.esri.arcgisruntime.symbology.SimpleMarkerSymbol;
-import com.usda.fmsc.geospatial.Extent;
+import com.usda.fmsc.geospatial.gnss.Extent;
 import com.usda.fmsc.geospatial.Position;
+import com.usda.fmsc.geospatial.gnss.GeoTools;
 import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment.MarkerData;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -72,7 +74,7 @@ public class ArcGisTrailGraphic implements ITrailGraphic, IMarkerDataGraphic {
     public Position add(TtPoint point, boolean adjusted, HashMap<String, TtMetadata> meta) {
         Position position = addPoint(point, adjusted, meta);
 
-        if (eBuilder.numberOfPositions() > 0) {
+        if (eBuilder.getPositionCount() > 0) {
             polyBounds = eBuilder.build();
         }
 
@@ -83,7 +85,7 @@ public class ArcGisTrailGraphic implements ITrailGraphic, IMarkerDataGraphic {
         TtMetadata metadata = meta.get(point.getMetadataCN());
 
         Position pos = TtUtils.Points.getLatLonFromPoint(point, adjusted, metadata);
-        Point posLL = new Point(pos.getLongitudeSignedDecimal(), pos.getLatitudeSignedDecimal(), SpatialReferences.getWgs84());
+        Point posLL = new Point(pos.getLongitude(), pos.getLatitude(), SpatialReferences.getWgs84());
         Graphic mk = new Graphic(posLL, markerOpts);
         MarkerData md = new MarkerData(point, metadata, adjusted);
 
@@ -166,7 +168,7 @@ public class ArcGisTrailGraphic implements ITrailGraphic, IMarkerDataGraphic {
 
     @Override
     public Position getPosition() {
-        return polyBounds.getCenter();
+        return GeoTools.getMidPoint(polyBounds);
     }
 
     @Override

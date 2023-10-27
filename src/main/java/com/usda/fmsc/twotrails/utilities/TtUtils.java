@@ -30,8 +30,8 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.geospatial.Position;
-import com.usda.fmsc.geospatial.UomElevation;
-import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
+import com.usda.fmsc.geospatial.codes.UomElevation;
+import com.usda.fmsc.geospatial.gnss.nmea.GnssNmeaBurst;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.geospatial.utm.UTMTools;
 import com.usda.fmsc.twotrails.BuildConfig;
@@ -777,8 +777,8 @@ public class TtUtils {
 
                     Position position = UTMTools.convertUTMtoLatLonSignedDec(utmx, utmy, zone);
 
-                    location.setLatitude(position.getLatitudeSignedDecimal());
-                    location.setLongitude(position.getLongitudeSignedDecimal());
+                    location.setLatitude(position.getLatitude());
+                    location.setLongitude(position.getLongitude());
                     location.setAltitude(point.getAdjZ());
                 }
             }
@@ -818,8 +818,8 @@ public class TtUtils {
                 }
 
                 return UTMTools.convertLatLonSignedDecToUTM(
-                    position.getLatitudeSignedDecimal(),
-                    position.getLongitudeSignedDecimal(),
+                    position.getLatitude(),
+                    position.getLongitude(),
                     targetZone);
             }
         }
@@ -875,8 +875,8 @@ public class TtUtils {
                         ArrayList<PointD> points = new ArrayList<>(positions.size());
 
                         for (Position p : positions) {
-                            lat = p.getLatitudeSignedDecimal();
-                            lon = p.getLongitudeSignedDecimal();
+                            lat = p.getLatitude();
+                            lon = p.getLongitude();
 
                             x += java.lang.Math.cos(lat) * java.lang.Math.cos(lon);
                             y += java.lang.Math.cos(lat) * java.lang.Math.sin(lon);
@@ -971,8 +971,8 @@ public class TtUtils {
                     y = 0d;
 
                 Position position = UTMTools.convertUTMtoLatLonSignedDec(x, y, meta.getZone());
-                lat = position.getLatitudeSignedDecimal();
-                lon = position.getLongitudeSignedDecimal();
+                lat = position.getLatitude();
+                lon = position.getLongitude();
             }
 
             return new Position(lat, lon, z, meta.getElevation());
@@ -1127,7 +1127,7 @@ public class TtUtils {
     }
 
     public static class NMEA {
-        public static boolean isBurstUsable(NmeaBurst nmeaBurst, FilterOptions options) {
+        public static boolean isBurstUsable(GnssNmeaBurst nmeaBurst, FilterOptions options) {
             boolean valid = false;
 
             if (options == null) {
@@ -1487,8 +1487,8 @@ public class TtUtils {
                 lon = point.getLongitude();
             } else {
                 Position position = UTMTools.convertUTMtoLatLonSignedDec(x, y, meta.getZone());
-                lat = position.getLatitudeSignedDecimal();
-                lon = position.getLongitudeSignedDecimal();
+                lat = position.getLatitude();
+                lon = position.getLongitude();
             }
 
             String snippet = String.format(Locale.getDefault(), "UTM X: %.3f\nUTM Y: %.3f\nElev (%s): %.1f\n\nLat: %.4f\nLon: %.4f%s",
@@ -1541,7 +1541,7 @@ public class TtUtils {
             return new MarkerOptions()
                     .title(String.format(Locale.getDefault(), "%d (%s)", point.getPID(), adjusted ? "Adj" : "UnAdj"))
                     .snippet(String.format("%s\n\n%s", point.getOp(), snippet))
-                    .position(new LatLng(position.getLatitudeSignedDecimal(), position.getLongitudeSignedDecimal()));
+                    .position(new LatLng(position.getLatitude(), position.getLongitude()));
         }
 
         public static MarkerOptions createMarkerOptions(QuondamPoint point, boolean adjusted, HashMap<String, TtMetadata> meta) {
@@ -1560,8 +1560,8 @@ public class TtUtils {
             Position ne = UTMTools.convertUTMtoLatLonSignedDec(750000, 5420000, zone);
             Position sw = UTMTools.convertUTMtoLatLonSignedDec(200000, 3210000, zone);
 
-            return new LatLngBounds(new LatLng(sw.getLatitudeSignedDecimal(), sw.getLongitudeSignedDecimal()),
-                    new LatLng(ne.getLatitudeSignedDecimal(), ne.getLongitudeSignedDecimal()));
+            return new LatLngBounds(new LatLng(sw.getLatitude(), sw.getLongitude()),
+                    new LatLng(ne.getLatitude(), ne.getLongitude()));
         }
 
         public static ArrayList<Marker> createMarkersFromPointsInPoly(GoogleMap map, DataAccessLayer dal, String polyCN, boolean adjusted, boolean visible) {
@@ -1746,8 +1746,8 @@ public class TtUtils {
                 lon = point.getLongitude();
             } else {
                 Position position = UTMTools.convertUTMtoLatLonSignedDec(x, y, meta.getZone());
-                lat = position.getLatitudeSignedDecimal();
-                lon = position.getLongitudeSignedDecimal();
+                lat = position.getLatitude();
+                lon = position.getLongitude();
             }
 
             return String.format(Locale.getDefault(), "%s\n\nUTM X: %.3f\nUTM Y: %.3f\nElev (%s): %.1f\n\nLat: %.4f\nLon: %.4f%s",

@@ -3,7 +3,7 @@ package com.usda.fmsc.twotrails.fragments.map;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.usda.fmsc.geospatial.Extent;
+import com.usda.fmsc.geospatial.gnss.Extent;
 import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.twotrails.objects.map.LineGraphicManager;
 import com.usda.fmsc.twotrails.objects.map.PolygonDrawOptions;
@@ -123,19 +123,19 @@ public interface IMultiMapFragment {
         public MapOptions(int mapId, Position northEast, Position southWest, int padding) {
             this.MapId = mapId;
 
-            this.North = northEast.getLatitudeSignedDecimal();
-            this.East = northEast.getLongitudeSignedDecimal();
-            this.South = southWest.getLatitudeSignedDecimal();
-            this.West = southWest.getLongitudeSignedDecimal();
+            this.North = northEast.getLatitude();
+            this.East = northEast.getLongitude();
+            this.South = southWest.getLatitude();
+            this.West = southWest.getLongitude();
             this.Padding = padding;
         }
 
         public MapOptions(int mapId, Position position) {
-            this(mapId, position.getLatitudeSignedDecimal(), position.getLongitudeSignedDecimal(), null);
+            this(mapId, position.getLatitude(), position.getLongitude(), null);
         }
 
         public MapOptions(int mapId, Position position, Float zoomLevel) {
-            this(mapId, position.getLatitudeSignedDecimal(), position.getLongitudeSignedDecimal(), zoomLevel);
+            this(mapId, position.getLatitude(), position.getLongitude(), zoomLevel);
         }
 
         public MapOptions(int mapId, Double latitude, Double longitude) {

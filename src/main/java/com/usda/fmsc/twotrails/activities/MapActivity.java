@@ -8,7 +8,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
+import com.usda.fmsc.geospatial.gnss.nmea.GnssNmeaBurst;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.activities.base.BaseMapActivity;
 import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment;
@@ -156,7 +156,7 @@ public class MapActivity extends BaseMapActivity {
     }
 
     @Override
-    public void onNmeaBurstReceived(NmeaBurst nmeaBurst) {
+    public void onNmeaBurstReceived(GnssNmeaBurst nmeaBurst) {
         super.onNmeaBurstReceived(nmeaBurst);
 
         if (getLastPosition() != null) {
@@ -175,15 +175,15 @@ public class MapActivity extends BaseMapActivity {
         if (dispLoc && lastPosition != null) {
             if (locUtm) {
                 UTMCoords coords = UTMTools.convertLatLonSignedDecToUTM(
-                        lastPosition.getLatitudeSignedDecimal(),
-                        lastPosition.getLongitudeSignedDecimal(),
+                        lastPosition.getLatitude(),
+                        lastPosition.getLongitude(),
                         getZone());
 
                 tvLocX.setText(StringEx.toString(coords.getX(), 3));
                 tvLocY.setText(StringEx.toString(coords.getY(), 3));
             } else {
-                tvLocX.setText(StringEx.toString(lastPosition.getLatitudeSignedDecimal(), 6));
-                tvLocY.setText(StringEx.toString(lastPosition.getLongitudeSignedDecimal(), 6));
+                tvLocX.setText(StringEx.toString(lastPosition.getLatitude(), 6));
+                tvLocY.setText(StringEx.toString(lastPosition.getLongitude(), 6));
             }
         }
     }

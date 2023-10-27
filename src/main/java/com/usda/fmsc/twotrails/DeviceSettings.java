@@ -6,8 +6,8 @@ import androidx.annotation.ColorInt;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.usda.fmsc.geospatial.nmea41.sentences.GGASentence;
-import com.usda.fmsc.geospatial.nmea41.sentences.GSASentence;
+import com.usda.fmsc.geospatial.gnss.codes.GnssFix;
+import com.usda.fmsc.geospatial.gnss.codes.GnssFixQuality;
 import com.usda.fmsc.twotrails.objects.TwoTrailsProject;
 import com.usda.fmsc.twotrails.objects.map.ArcGisMapLayer;
 import com.usda.fmsc.twotrails.units.DopType;
@@ -62,13 +62,13 @@ public class DeviceSettings extends Settings {
 
     public static final String GPS_FILTER_DOP_TYPE = "GpsFilterDopType";
     public static final String GPS_FILTER_DOP_VALUE = "GpsFilterDopValue";
-    public static final String GPS_FILTER_FIX_TYPE = "GpsFilterFixType";
+    public static final String GPS_FILTER_FIX_QUALITY = "GpsFilterFixType";
     public static final String GPS_FILTER_FIX = "GpsFilterFix";
     public static final String GPS_FILTER_FIX_USE = "GpsFilterFixUse";
 
     public static final String TAKE5_FILTER_DOP_TYPE = "Take5FilterDopType";
     public static final String TAKE5_FILTER_DOP_VALUE = "Take5FilterDopValue";
-    public static final String TAKE5_FILTER_FIX_TYPE = "Take5FilterFixType";
+    public static final String TAKE5_FILTER_FIX_QUALITY = "Take5FilterFixType";
     public static final String TAKE5_FILTER_FIX = "Take5FilterFix";
     public static final String TAKE5_NMEA_AMOUNT = "Take5NmeaAmount";
     public static final String TAKE5_IGNORE_FIRST_NMEA = "Take5IgnoreNmea";
@@ -80,7 +80,7 @@ public class DeviceSettings extends Settings {
 
     public static final String SAT_FILTER_DOP_TYPE = "SATFilterDopType";
     public static final String SAT_FILTER_DOP_VALUE = "SATFilterDopValue";
-    public static final String SAT_FILTER_FIX_TYPE = "SATFilterFixType";
+    public static final String SAT_FILTER_FIX_QUALITY = "SATFilterFixType";
     public static final String SAT_FILTER_FIX = "SATFilterFix";
     public static final String SAT_NMEA_AMOUNT = "SATNmeaAmount";
     public static final String SAT_IGNORE_FIRST_NMEA = "SATIgnoreNmea";
@@ -92,7 +92,7 @@ public class DeviceSettings extends Settings {
 
     public static final String WALK_FILTER_DOP_TYPE = "WalkFilterDopType";
     public static final String WALK_FILTER_DOP_VALUE = "WalkFilterDopValue";
-    public static final String WALK_FILTER_FIX_TYPE = "WalkFilterFixType";
+    public static final String WALK_FILTER_FIX_QUALITY = "WalkFilterFixType";
     public static final String WALK_FILTER_FIX = "WalkFilterFix";
     public static final String WALK_FILTER_ACCURACY = "WalkFilterAccuracy";
     public static final String WALK_FILTER_FREQUENCY = "WalkFilterFrequency";
@@ -159,14 +159,14 @@ public class DeviceSettings extends Settings {
     public static final String DEFAULT_GPS_PARSE_DELIMITER = "$RD1";
 
     public static final DopType DEFAULT_GPS_DOP_TYPE = DopType.HDOP;
-    public static final GGASentence.GpsFixType DEFAULT_GPS_FIX_TYPE = GGASentence.GpsFixType.GPS;
-    public static final GSASentence.Fix DEFAULT_GPS_FIX = GSASentence.Fix._3D;
+    public static final GnssFixQuality DEFAULT_GPS_FIX_QUALITY = GnssFixQuality.GPS;
+    public static final GnssFix DEFAULT_GPS_FIX = GnssFix._3D;
     public static final int DEFAULT_GPS_DOP_VALUE = 20;
     public static final boolean DEFAULT_GPS_FIX_USE = true;
 
     public static final DopType DEFAULT_TAKE5_DOP_TYPE = DopType.HDOP;
-    public static final GGASentence.GpsFixType DEFAULT_TAKE5_FIX_TYPE = GGASentence.GpsFixType.GPS;
-    public static final GSASentence.Fix DEFAULT_TAKE5_FIX = GSASentence.Fix._3D;
+    public static final GnssFixQuality DEFAULT_TAKE5_FIX_QUALITY = GnssFixQuality.GPS;
+    public static final GnssFix DEFAULT_TAKE5_FIX = GnssFix._3D;
     public static final int DEFAULT_TAKE5_DOP_VALUE = 20;
     public static final int DEFAULT_TAKE5_INCREMENT = 5;
     public static final int DEFAULT_TAKE5_NMEA_AMOUNT = 5;
@@ -177,8 +177,8 @@ public class DeviceSettings extends Settings {
     public static final boolean DEFAULT_TAKE5_RING_ON_CREATE = true;
 
     public static final DopType DEFAULT_SAT_DOP_TYPE = DopType.HDOP;
-    public static final GGASentence.GpsFixType DEFAULT_SAT_FIX_TYPE = GGASentence.GpsFixType.GPS;
-    public static final GSASentence.Fix DEFAULT_SAT_FIX = GSASentence.Fix._3D;
+    public static final GnssFixQuality DEFAULT_SAT_FIX_QUALITY = GnssFixQuality.GPS;
+    public static final GnssFix DEFAULT_SAT_FIX = GnssFix._3D;
     public static final int DEFAULT_SAT_DOP_VALUE = 20;
     public static final int DEFAULT_SAT_INCREMENT = 1;
     public static final int DEFAULT_SAT_NMEA_AMOUNT = 60;
@@ -189,8 +189,8 @@ public class DeviceSettings extends Settings {
     public static final boolean DEFAULT_SAT_RING_ON_CREATE = true;
     
     public static final DopType DEFAULT_WALK_DOP_TYPE = DopType.HDOP;
-    public static final GGASentence.GpsFixType DEFAULT_WALK_FIX_TYPE = GGASentence.GpsFixType.GPS;
-    public static final GSASentence.Fix DEFAULT_WALK_FIX = GSASentence.Fix._3D;
+    public static final GnssFixQuality DEFAULT_WALK_FIX_QUALITY = GnssFixQuality.GPS;
+    public static final GnssFix DEFAULT_WALK_FIX = GnssFix._3D;
     public static final int DEFAULT_WALK_DOP_VALUE = 20;
     public static final int DEFAULT_WALK_INCREMENT = 2;
     public static final int DEFAULT_WALK_ACCURACY = 0;
@@ -276,7 +276,7 @@ public class DeviceSettings extends Settings {
 
         setInt(GPS_FILTER_DOP_TYPE, DEFAULT_GPS_DOP_TYPE.getValue());
         setInt(GPS_FILTER_DOP_VALUE, DEFAULT_GPS_DOP_VALUE);
-        setInt(GPS_FILTER_FIX_TYPE, DEFAULT_GPS_FIX_TYPE.getValue());
+        setInt(GPS_FILTER_FIX_QUALITY, DEFAULT_GPS_FIX_QUALITY.getValue());
         setInt(GPS_FILTER_FIX, DEFAULT_GPS_FIX.getValue());
         setBool(GPS_FILTER_FIX_USE, DEFAULT_GPS_FIX_USE);
 
@@ -285,7 +285,7 @@ public class DeviceSettings extends Settings {
 
         setInt(TAKE5_FILTER_DOP_TYPE, DEFAULT_TAKE5_DOP_TYPE.getValue());
         setInt(TAKE5_FILTER_DOP_VALUE, DEFAULT_TAKE5_DOP_VALUE);
-        setInt(TAKE5_FILTER_FIX_TYPE, DEFAULT_TAKE5_FIX_TYPE.getValue());
+        setInt(TAKE5_FILTER_FIX_QUALITY, DEFAULT_TAKE5_FIX_QUALITY.getValue());
         setInt(TAKE5_FILTER_FIX, DEFAULT_TAKE5_FIX.getValue());
         setInt(TAKE5_NMEA_AMOUNT, DEFAULT_TAKE5_NMEA_AMOUNT);
         setBool(TAKE5_IGNORE_FIRST_NMEA, DEFAULT_TAKE5_IGNORE);
@@ -297,7 +297,7 @@ public class DeviceSettings extends Settings {
 
         setInt(SAT_FILTER_DOP_TYPE, DEFAULT_SAT_DOP_TYPE.getValue());
         setInt(SAT_FILTER_DOP_VALUE, DEFAULT_SAT_DOP_VALUE);
-        setInt(SAT_FILTER_FIX_TYPE, DEFAULT_SAT_FIX_TYPE.getValue());
+        setInt(SAT_FILTER_FIX_QUALITY, DEFAULT_SAT_FIX_QUALITY.getValue());
         setInt(SAT_FILTER_FIX, DEFAULT_SAT_FIX.getValue());
         setInt(SAT_NMEA_AMOUNT, DEFAULT_SAT_NMEA_AMOUNT);
         setBool(SAT_IGNORE_FIRST_NMEA, DEFAULT_SAT_IGNORE);
@@ -309,7 +309,7 @@ public class DeviceSettings extends Settings {
 
         setInt(WALK_FILTER_DOP_TYPE, DEFAULT_WALK_DOP_TYPE.getValue());
         setInt(WALK_FILTER_DOP_VALUE, DEFAULT_WALK_DOP_VALUE);
-        setInt(WALK_FILTER_FIX_TYPE, DEFAULT_WALK_FIX_TYPE.getValue());
+        setInt(WALK_FILTER_FIX_QUALITY, DEFAULT_WALK_FIX_QUALITY.getValue());
         setInt(WALK_FILTER_FIX, DEFAULT_WALK_FIX.getValue());
         setInt(WALK_FILTER_ACCURACY, DEFAULT_WALK_ACCURACY);
         setInt(WALK_FILTER_FREQUENCY, DEFAULT_WALK_FREQUENCY);
@@ -401,13 +401,13 @@ public class DeviceSettings extends Settings {
 
         js.name(GPS_FILTER_DOP_TYPE).value(getGpsFilterDopType().toString());
         js.name(GPS_FILTER_DOP_VALUE).value(getGpsFilterDopValue());
-        js.name(GPS_FILTER_FIX_TYPE).value(getGpsFilterFixType().toString());
+        js.name(GPS_FILTER_FIX_QUALITY).value(getGpsFilterFixType().toString());
         js.name(GPS_FILTER_FIX).value(getGpsFilterFix().toString());
         js.name(GPS_FILTER_FIX_USE).value(getGpsFilterFixUse());
 
         js.name(TAKE5_FILTER_DOP_TYPE).value(getTake5FilterDopType().toString());
         js.name(TAKE5_FILTER_DOP_VALUE).value(getTake5FilterDopValue());
-        js.name(TAKE5_FILTER_FIX_TYPE).value(getTake5FilterFixType().toString());
+        js.name(TAKE5_FILTER_FIX_QUALITY).value(getTake5FilterFixQuality().toString());
         js.name(TAKE5_FILTER_FIX).value(getTake5FilterFix().toString());
         js.name(TAKE5_NMEA_AMOUNT).value(getTake5IngoreFirstNmeaAmount());
         js.name(TAKE5_IGNORE_FIRST_NMEA).value(getTake5IngoreFirstNmea());
@@ -419,7 +419,7 @@ public class DeviceSettings extends Settings {
 
         js.name(WALK_FILTER_DOP_TYPE).value(getWalkFilterDopType().toString());
         js.name(WALK_FILTER_DOP_VALUE).value(getWalkFilterDopValue());
-        js.name(WALK_FILTER_FIX_TYPE).value(getWalkFilterFixType().toString());
+        js.name(WALK_FILTER_FIX_QUALITY).value(getWalkFilterFixQuality().toString());
         js.name(WALK_FILTER_FIX).value(getWalkFilterFix().toString());
         js.name(WALK_FILTER_ACCURACY).value(getWalkFilterAccuracy());
         js.name(WALK_FILTER_FREQUENCY).value(getWalkFilterFrequency());
@@ -645,19 +645,19 @@ public class DeviceSettings extends Settings {
         setInt(GPS_FILTER_DOP_VALUE, value);
     }
 
-    public GGASentence.GpsFixType getGpsFilterFixType() {
-        return GGASentence.GpsFixType.parse(getInt(GPS_FILTER_FIX_TYPE, DEFAULT_GPS_FIX_TYPE.getValue()));
+    public GnssFixQuality getGpsFilterFixType() {
+        return GnssFixQuality.parse(getInt(GPS_FILTER_FIX_QUALITY, DEFAULT_GPS_FIX_QUALITY.getValue()));
     }
 
-    public void setGpsFilterFixType(GGASentence.GpsFixType value) {
-        setInt(GPS_FILTER_FIX_TYPE, value.getValue());
+    public void setGpsFilterFixQuality(GnssFixQuality value) {
+        setInt(GPS_FILTER_FIX_QUALITY, value.getValue());
     }
 
-    public GSASentence.Fix getGpsFilterFix() {
-        return GSASentence.Fix.parse(getInt(GPS_FILTER_FIX, DEFAULT_GPS_FIX.getValue()));
+    public GnssFix getGpsFilterFix() {
+        return GnssFix.parse(getInt(GPS_FILTER_FIX, DEFAULT_GPS_FIX.getValue()));
     }
 
-    public void setGpsFilterFix(GSASentence.Fix value) {
+    public void setGpsFilterFix(GnssFix value) {
         setInt(GPS_FILTER_FIX, value.getValue());
     }
 
@@ -686,19 +686,19 @@ public class DeviceSettings extends Settings {
         setInt(TAKE5_FILTER_DOP_VALUE, value);
     }
 
-    public GGASentence.GpsFixType getTake5FilterFixType() {
-        return GGASentence.GpsFixType.parse(getInt(TAKE5_FILTER_FIX_TYPE, DEFAULT_TAKE5_FIX_TYPE.getValue()));
+    public GnssFixQuality getTake5FilterFixQuality() {
+        return GnssFixQuality.parse(getInt(TAKE5_FILTER_FIX_QUALITY, DEFAULT_TAKE5_FIX_QUALITY.getValue()));
     }
 
-    public void setTake5FilterFixType(GGASentence.GpsFixType value) {
-        setInt(TAKE5_FILTER_FIX_TYPE, value.getValue());
+    public void setTake5FilterFixQuality(GnssFixQuality value) {
+        setInt(TAKE5_FILTER_FIX_QUALITY, value.getValue());
     }
 
-    public GSASentence.Fix getTake5FilterFix() {
-        return GSASentence.Fix.parse(getInt(TAKE5_FILTER_FIX, DEFAULT_TAKE5_FIX.getValue()));
+    public GnssFix getTake5FilterFix() {
+        return GnssFix.parse(getInt(TAKE5_FILTER_FIX, DEFAULT_TAKE5_FIX.getValue()));
     }
 
-    public void setTake5FilterFix(GSASentence.Fix value) {
+    public void setTake5FilterFix(GnssFix value) {
         setInt(TAKE5_FILTER_FIX, value.getValue());
     }
 
@@ -720,19 +720,19 @@ public class DeviceSettings extends Settings {
         setInt(SAT_FILTER_DOP_VALUE, value);
     }
 
-    public GGASentence.GpsFixType getSATFilterFixType() {
-        return GGASentence.GpsFixType.parse(getInt(SAT_FILTER_FIX_TYPE, DEFAULT_SAT_FIX_TYPE.getValue()));
+    public GnssFixQuality getSATFilterFixQuality() {
+        return GnssFixQuality.parse(getInt(SAT_FILTER_FIX_QUALITY, DEFAULT_SAT_FIX_QUALITY.getValue()));
     }
 
-    public void setSATFilterFixType(GGASentence.GpsFixType value) {
-        setInt(SAT_FILTER_FIX_TYPE, value.getValue());
+    public void setSATFilterFixQuality(GnssFixQuality value) {
+        setInt(SAT_FILTER_FIX_QUALITY, value.getValue());
     }
 
-    public GSASentence.Fix getSATFilterFix() {
-        return GSASentence.Fix.parse(getInt(SAT_FILTER_FIX, DEFAULT_SAT_FIX.getValue()));
+    public GnssFix getSATFilterFix() {
+        return GnssFix.parse(getInt(SAT_FILTER_FIX, DEFAULT_SAT_FIX.getValue()));
     }
 
-    public void setSATFilterFix(GSASentence.Fix value) {
+    public void setSATFilterFix(GnssFix value) {
         setInt(SAT_FILTER_FIX, value.getValue());
     }
     
@@ -754,19 +754,19 @@ public class DeviceSettings extends Settings {
         setInt(WALK_FILTER_DOP_VALUE, value);
     }
 
-    public GGASentence.GpsFixType getWalkFilterFixType() {
-        return GGASentence.GpsFixType.parse(getInt(WALK_FILTER_FIX_TYPE, DEFAULT_WALK_FIX_TYPE.getValue()));
+    public GnssFixQuality getWalkFilterFixQuality() {
+        return GnssFixQuality.parse(getInt(WALK_FILTER_FIX_QUALITY, DEFAULT_WALK_FIX_QUALITY.getValue()));
     }
 
-    public void setWalkFilterFixType(GGASentence.GpsFixType value) {
-        setInt(WALK_FILTER_FIX_TYPE, value.getValue());
+    public void setWalkFilterFixType(GnssFixQuality value) {
+        setInt(WALK_FILTER_FIX_QUALITY, value.getValue());
     }
 
-    public GSASentence.Fix getWalkFilterFix() {
-        return GSASentence.Fix.parse(getInt(WALK_FILTER_FIX, DEFAULT_WALK_FIX.getValue()));
+    public GnssFix getWalkFilterFix() {
+        return GnssFix.parse(getInt(WALK_FILTER_FIX, DEFAULT_WALK_FIX.getValue()));
     }
 
-    public void setWalkFilterFix(GSASentence.Fix value) {
+    public void setWalkFilterFix(GnssFixQuality value) {
         setInt(WALK_FILTER_FIX, value.getValue());
     }
 

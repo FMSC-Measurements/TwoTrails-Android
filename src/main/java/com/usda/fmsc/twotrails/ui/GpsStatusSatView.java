@@ -9,8 +9,8 @@ import android.graphics.Paint;
 import android.util.AttributeSet;
 
 import com.usda.fmsc.android.AndroidUtils;
-import com.usda.fmsc.geospatial.GnssType;
-import com.usda.fmsc.geospatial.nmea41.Satellite;
+import com.usda.fmsc.geospatial.gnss.codes.GnssSystem;
+import com.usda.fmsc.geospatial.gnss.nmea.Satellite;
 import com.usda.fmsc.twotrails.R;
 
 import java.util.HashMap;
@@ -20,8 +20,8 @@ public class GpsStatusSatView extends GpsStatusView {
 
     private final Paint paintVis, paintVisOld, paintUsed, paintUsedOld, paintWaas, paintWassOld, flagPaint, paintText;
 
-    private final HashMap<GnssType, Bitmap> flags;
-    private final HashMap<GnssType, Integer> flagsSize;
+    private final HashMap<GnssSystem, Bitmap> flags;
+    private final HashMap<GnssSystem, Integer> flagsSize;
 
     private int lastFlagWidth = 0;
 
@@ -88,7 +88,7 @@ public class GpsStatusSatView extends GpsStatusView {
         flags = new HashMap<>();
         flagsSize = new HashMap<>();
 
-        for (GnssType type : GnssType.values()) {
+        for (GnssSystem type : GnssSystem.values()) {
             flags.put(type, null);
             flagsSize.put(type, null);
         }
@@ -108,7 +108,7 @@ public class GpsStatusSatView extends GpsStatusView {
 
             int offset = 0;
             Bitmap flag = null;
-            GnssType lastGnss = null;
+            GnssSystem lastGnss = null;
 
             int txtX = width / 2 - 7;
             int txtY = vHeight / 2 + 7;
@@ -117,7 +117,7 @@ public class GpsStatusSatView extends GpsStatusView {
 
             for (Satellite sat : getSatellites().values()) {
                 if (getSatellitesSrnValid().containsKey(sat.getNmeaID()) && getSatellitesSrnValid().get(sat.getNmeaID())) {
-                    float height = ((sat.getSRN() != null ? Math.abs(sat.getSRN()) : 0) / 99f) * vHeight;
+                    float height = ((sat.getSNR() != null ? Math.abs(sat.getSNR()) : 0) / 99f) * vHeight;
 
                     Paint paint;
 
@@ -135,8 +135,8 @@ public class GpsStatusSatView extends GpsStatusView {
                             vHeight,
                             paint);
 
-                    if (lastGnss == null || lastFlagWidth != flagWidth || lastGnss != sat.getGnssType() ) {
-                        lastGnss = sat.getGnssType();
+                    if (lastGnss == null || lastFlagWidth != flagWidth || lastGnss != sat.getGnssSystem() ) {
+                        lastGnss = sat.getGnssSystem();
                         flag = getFlag(flagWidth, lastGnss);
                     }
 
@@ -156,36 +156,31 @@ public class GpsStatusSatView extends GpsStatusView {
     }
 
 
-    private Bitmap getFlag(int flagWidth, GnssType gnssType) {
+    private Bitmap getFlag(int flagWidth, GnssSystem gnssType) {
         if (flagsSize.get(gnssType) != null && flagsSize.get(gnssType) == flagWidth) {
             return flags.get(gnssType);
         } else {
             int res;
             switch (gnssType) {
                 case GPS:
-                case WAAS:
                     res = R.drawable.flag_usa;
                     break;
                 case GLONASS:
-                case SDCM:
                     res = R.drawable.flag_russia;
                     break;
                 case GALILEO:
-                case EGNOS:
                     res = R.drawable.flag_eu;
                     break;
                 case BEIDOU:
                     res = R.drawable.flag_china;
                     break;
                 case QZSS:
-                case MSAS:
                     res = R.drawable.flag_japan;
                     break;
-                case GAGAN:
-                    res = R.drawable.flag_india;
-                    break;
-                case Unknown:
-                case UnknownSBAS:
+//                case GAGAN:
+//                    res = R.drawable.flag_india;
+//                    break;
+                case UNKOWN:
                 default:
                     return null;
             }

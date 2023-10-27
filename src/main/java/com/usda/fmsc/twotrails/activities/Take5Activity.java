@@ -42,7 +42,7 @@ import com.usda.fmsc.android.widget.PopupMenuButton;
 import com.usda.fmsc.android.widget.SheetLayoutEx;
 import com.usda.fmsc.android.widget.layoutmanagers.LinearLayoutManagerWithSmoothScroller;
 import com.usda.fmsc.android.widget.RecyclerViewEx;
-import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
+import com.usda.fmsc.geospatial.gnss.nmea.GnssNmeaBurst;
 import com.usda.fmsc.twotrails.DeviceSettings;
 import com.usda.fmsc.twotrails.activities.base.AcquireGpsMapActivity;
 import com.usda.fmsc.twotrails.activities.base.PointMediaController;
@@ -80,7 +80,7 @@ import java.util.Locale;
 import java.util.concurrent.Semaphore;
 
 import com.usda.fmsc.geospatial.Position;
-import com.usda.fmsc.geospatial.GeoTools;
+import com.usda.fmsc.geospatial.gnss.GeoTools;
 
 import jp.wasabeef.recyclerview.animators.BaseItemAnimator;
 import jp.wasabeef.recyclerview.animators.FadeInAnimator;
@@ -545,7 +545,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
         super.updateActivitySettings();
 
         options.Fix = getTtAppCtx().getDeviceSettings().getTake5FilterFix();
-        options.FixType = getTtAppCtx().getDeviceSettings().getTake5FilterFixType();
+        options.FixType = getTtAppCtx().getDeviceSettings().getTake5FilterFixQuality();
         options.DopType = getTtAppCtx().getDeviceSettings().getTake5FilterDopType();
         options.DopValue = getTtAppCtx().getDeviceSettings().getTake5FilterDopValue();
         increment = getTtAppCtx().getDeviceSettings().getTake5Increment();
@@ -1200,7 +1200,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
 
     //region GPS
     @Override
-    protected void onNmeaBurstReceived(NmeaBurst nmeaBurst) {
+    protected void onNmeaBurstReceived(GnssNmeaBurst nmeaBurst) {
         super.onNmeaBurstReceived(nmeaBurst);
 
         if (isLogging() && nmeaBurst.isValid()) {
@@ -1242,10 +1242,10 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                     dRMSEy = Math.sqrt(dRMSEy / count);
                     dRMSEr = Math.sqrt(Math.pow(dRMSEx, 2) + Math.pow(dRMSEy, 2)) * Consts.RMSEr95_Coeff;
 
-                    Position position = GeoTools.getMidPioint(positions);
+                    Position position = GeoTools.getMidPoint(positions);
 
-                    _AddTake5.setLatitude(position.getLatitudeSignedDecimal());
-                    _AddTake5.setLongitude(position.getLongitudeSignedDecimal());
+                    _AddTake5.setLatitude(position.getLatitude());
+                    _AddTake5.setLongitude(position.getLongitude());
                     _AddTake5.setElevation(position.getElevation());
                     _AddTake5.setRMSEr(dRMSEr);
                     _AddTake5.setAndCalc(x, y, position.getElevation(), getPolygon());
@@ -1266,7 +1266,6 @@ public class Take5Activity extends AcquireGpsMapActivity implements PointMediaCo
                 //resetPoint();
                 break;
             case NoExternalGpsSocket:
-                break;
             case Unknown:
                 break;
         }

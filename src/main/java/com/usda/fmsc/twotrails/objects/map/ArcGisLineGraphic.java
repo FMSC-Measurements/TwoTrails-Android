@@ -9,8 +9,9 @@ import com.esri.arcgisruntime.mapping.view.Graphic;
 import com.esri.arcgisruntime.mapping.view.GraphicsOverlay;
 import com.esri.arcgisruntime.mapping.view.MapView;
 import com.esri.arcgisruntime.symbology.SimpleLineSymbol;
-import com.usda.fmsc.geospatial.Extent;
+import com.usda.fmsc.geospatial.gnss.Extent;
 import com.usda.fmsc.geospatial.Position;
+import com.usda.fmsc.geospatial.gnss.GeoTools;
 
 public class ArcGisLineGraphic implements ILineGraphic, LineGraphicOptions.Listener {
    private final MapView map;
@@ -51,10 +52,10 @@ public class ArcGisLineGraphic implements ILineGraphic, LineGraphicOptions.Liste
       Extent.Builder eBuilder = new Extent.Builder();
       PointCollection linePoints = new PointCollection(SpatialReferences.getWgs84());
 
-      Point posLL = new Point(point1.getLongitudeSignedDecimal(), point1.getLatitudeSignedDecimal(), SpatialReferences.getWgs84());
+      Point posLL = new Point(point1.getLongitude(), point1.getLatitude(), SpatialReferences.getWgs84());
       linePoints.add(posLL);
 
-      posLL = new Point(point2.getLongitudeSignedDecimal(), point2.getLatitudeSignedDecimal(), SpatialReferences.getWgs84());
+      posLL = new Point(point2.getLongitude(), point2.getLatitude(), SpatialReferences.getWgs84());
       linePoints.add(posLL);
 
       _Polyline = new Polyline(linePoints);
@@ -78,7 +79,7 @@ public class ArcGisLineGraphic implements ILineGraphic, LineGraphicOptions.Liste
 
    @Override
    public Position getPosition() {
-      return polyBounds.getCenter();
+      return GeoTools.getMidPoint(polyBounds);
    }
 
    @Override

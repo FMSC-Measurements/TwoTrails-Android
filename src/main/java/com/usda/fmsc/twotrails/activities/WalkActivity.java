@@ -23,7 +23,7 @@ import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.dialogs.InputDialog;
 import com.usda.fmsc.android.widget.SheetLayoutEx;
 import com.usda.fmsc.android.widget.drawables.AnimationDrawableEx;
-import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
+import com.usda.fmsc.geospatial.gnss.nmea.GnssNmeaBurst;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.activities.base.AcquireGpsMapActivity;
 import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
@@ -180,7 +180,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
         super.updateActivitySettings();
 
         options.Fix = getTtAppCtx().getDeviceSettings().getWalkFilterFix();
-        options.FixType = getTtAppCtx().getDeviceSettings().getWalkFilterFixType();
+        options.FixType = getTtAppCtx().getDeviceSettings().getWalkFilterFixQuality();
         options.DopType = getTtAppCtx().getDeviceSettings().getWalkFilterDopType();
         options.DopValue = getTtAppCtx().getDeviceSettings().getWalkFilterDopValue();
         increment = getTtAppCtx().getDeviceSettings().getWalkIncrement();
@@ -319,7 +319,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
     }
 
 
-    private void createPoint(NmeaBurst nmeaBurst, UTMCoords utmCoords) {
+    private void createPoint(GnssNmeaBurst nmeaBurst, UTMCoords utmCoords) {
         if (updated) {
             getTtAppCtx().getDAL().updatePoint(_CurrentPoint);
             updated = false;
@@ -347,8 +347,8 @@ public class WalkActivity extends AcquireGpsMapActivity {
         _CurrentPoint.setGroupName(_Group.getName());
         _CurrentPoint.setMetadataCN(getCurrentMetadata().getCN());
 
-        _CurrentPoint.setLatitude(nmeaBurst.getPosition().getLatitudeSignedDecimal());
-        _CurrentPoint.setLongitude(nmeaBurst.getPosition().getLongitudeSignedDecimal());
+        _CurrentPoint.setLatitude(nmeaBurst.getPosition().getLatitude());
+        _CurrentPoint.setLongitude(nmeaBurst.getPosition().getLongitude());
         _CurrentPoint.setElevation(nmeaBurst.getElevation());
 
         //saves the need to recalculate utm
@@ -513,7 +513,7 @@ public class WalkActivity extends AcquireGpsMapActivity {
     }
 
     @Override
-    protected void onNmeaBurstReceived(NmeaBurst nmeaBurst) {
+    protected void onNmeaBurstReceived(GnssNmeaBurst nmeaBurst) {
         super.onNmeaBurstReceived(nmeaBurst);
 
         if (walking) {

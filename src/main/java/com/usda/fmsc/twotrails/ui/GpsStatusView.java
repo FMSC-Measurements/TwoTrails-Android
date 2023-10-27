@@ -4,9 +4,9 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
 
-import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
-import com.usda.fmsc.geospatial.nmea41.NmeaIDs;
-import com.usda.fmsc.geospatial.nmea41.Satellite;
+import com.usda.fmsc.geospatial.gnss.nmea.GnssNmeaBurst;
+import com.usda.fmsc.geospatial.gnss.nmea.Satellite;
+import com.usda.fmsc.geospatial.nmea.codes.SentenceID;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,17 +49,17 @@ public class GpsStatusView extends View {
         satsUsedCount = satsVisCount = satsTrackedCount = satValidLocCount = 0;
     }
 
-    public void update(NmeaBurst burst) {
+    public void update(GnssNmeaBurst burst) {
         final long now = System.currentTimeMillis();
 
-        if (burst.isValid(NmeaIDs.SentenceID.GSV)) {
+        if (burst.isValid(SentenceID.GSV)) {
             satsVisCount = burst.getSatellitesInViewCount();
-            satsTrackedCount = burst.isValid(NmeaIDs.SentenceID.GGA) ? burst.getTrackedSatellitesCount() : 0;
+            satsTrackedCount = burst.isValid(SentenceID.GGA) ? burst.getTrackedSatellitesCount() : 0;
 
             satellitesUsed.clear();
             usedSats.clear();
 
-            if (burst.isValid(NmeaIDs.SentenceID.GSA)) {
+            if (burst.isValid(SentenceID.GSA)) {
                 usedSats = burst.getUsedSatelliteIDs();
                 satsUsedCount = burst.getUsedSatellitesCount();
             } else {
@@ -84,7 +84,7 @@ public class GpsStatusView extends View {
 
                     boolean locValid = sat.getAzimuth() != null && sat.getElevation() != null;
                     boolean locWasValid = satellitesLocValid.containsKey(nid) && satellitesLocValid.get(nid);
-                    boolean srnValid = sat.getSRN() != null;
+                    boolean srnValid = sat.getSNR() != null;
                     boolean srnWasValid = satellitesSrnValid.containsKey(nid) && satellitesSrnValid.get(nid);
 
                     if (!locWasValid && locValid)

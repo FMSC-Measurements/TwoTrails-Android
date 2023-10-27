@@ -1,6 +1,5 @@
 package com.usda.fmsc.twotrails.gps;
 
-import android.Manifest;
 import android.app.Service;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
@@ -22,10 +21,12 @@ import com.google.android.gms.maps.LocationSource;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.utilities.PostDelayHandler;
 import com.usda.fmsc.geospatial.Position;
-import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
-import com.usda.fmsc.geospatial.nmea41.NmeaIDs.*;
-import com.usda.fmsc.geospatial.nmea41.NmeaParser;
-import com.usda.fmsc.geospatial.nmea41.sentences.base.NmeaSentence;
+import com.usda.fmsc.geospatial.base.parsers.ParseMode;
+import com.usda.fmsc.geospatial.gnss.nmea.GnssNmeaBurst;
+import com.usda.fmsc.geospatial.gnss.nmea.GnssNmeaParser;
+import com.usda.fmsc.geospatial.nmea.INmeaParserListener;
+import com.usda.fmsc.geospatial.nmea.codes.TalkerID;
+import com.usda.fmsc.geospatial.nmea.sentences.NmeaSentence;
 import com.usda.fmsc.twotrails.DeviceSettings;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.devices.BluetoothConnection;
@@ -40,7 +41,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 
 public class GpsService extends Service implements LocationListener, LocationSource, OnNmeaMessageListener,
-        NmeaParser.Listener, BluetoothConnection.Listener, SharedPreferences.OnSharedPreferenceChangeListener {
+        INmeaParserListener<NmeaSentence, GnssNmeaBurst>, BluetoothConnection.Listener, SharedPreferences.OnSharedPreferenceChangeListener {
 
     public final int GPS_UPDATE_INTERVAL = 1000;    //in milliseconds
     public final int NMEA_WAIT_TIMEOUT = 5000;      //in milliseconds
@@ -63,7 +64,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
     private String _deviceUUID;
     private LocationManager locManager;
 
-    private NmeaParser parser;
+    private GnssNmeaParser parser;
     private PostDelayHandler nmeaReceived;
     private boolean receivingNmea;
 
@@ -100,9 +101,9 @@ public class GpsService extends Service implements LocationListener, LocationSou
         TtAppCtx = (TwoTrailsApp) getApplicationContext();
 
         if (TtAppCtx.getDeviceSettings().isGpsParsingByTime()) {
-            parser = new NmeaParser(EnumSet.of(TalkerID.GP, TalkerID.GL, TalkerID.GA, TalkerID.GN));
+            parser = new GnssNmeaParser(EnumSet.of(TalkerID.GP, TalkerID.GL, TalkerID.GA, TalkerID.GN));
         } else {
-            parser = new NmeaParser(EnumSet.of(TalkerID.GP, TalkerID.GL, TalkerID.GA, TalkerID.GN), TtAppCtx.getDeviceSettings().getGpsParseDelimiter());
+            parser = new GnssNmeaParser(EnumSet.of(TalkerID.GP, TalkerID.GL, TalkerID.GA, TalkerID.GN), TtAppCtx.getDeviceSettings().getGpsParseDelimiter());
         }
         parser.addListener(this);
 
@@ -186,10 +187,10 @@ public class GpsService extends Service implements LocationListener, LocationSou
             }
             case DeviceSettings.GPS_PARSE_METHOD: {
                 if (sharedPreferences.getBoolean(DeviceSettings.GPS_PARSE_METHOD, DeviceSettings.DEFAULT_GPS_PARSE_METHOD)) {
-                    parser.setParseMode(NmeaParser.ParseMode.Time);
+                    parser.setParseMode(ParseMode.Time);
                 } else {
-                    parser.setBurstDelimiter(sharedPreferences.getString(DeviceSettings.GPS_PARSE_DELIMITER, DeviceSettings.DEFAULT_GPS_PARSE_DELIMITER));
-                    parser.setParseMode(NmeaParser.ParseMode.Delimiter);
+                    parser.setDelimiter(sharedPreferences.getString(DeviceSettings.GPS_PARSE_DELIMITER, DeviceSettings.DEFAULT_GPS_PARSE_DELIMITER));
+                    parser.setParseMode(ParseMode.Delimiter);
                 }
             }
         }
@@ -558,7 +559,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
     }
 
     @Override
-    public void onBurstReceived(NmeaBurst burst) {
+    public void onBurstReceived(GnssNmeaBurst burst) {
         postNmeaBurst(burst);
 
         if (!receivingValidBursts) {
@@ -572,8 +573,8 @@ public class GpsService extends Service implements LocationListener, LocationSou
             if (gmapListener != null) {
                 Location location = new Location(StringEx.Empty);
 
-                location.setLatitude(lastPosition.getLatitudeSignedDecimal());
-                location.setLongitude(lastPosition.getLongitudeSignedDecimal());
+                location.setLatitude(lastPosition.getLatitude());
+                location.setLongitude(lastPosition.getLongitude());
                 location.setAltitude(lastPosition.hasElevation() ? lastPosition.getElevation() : 0);
 
                 try {
@@ -600,13 +601,23 @@ public class GpsService extends Service implements LocationListener, LocationSou
         postNmeaSentence(sentence);
     }
 
+    @Override
+    public void onMessageReceived(NmeaSentence sentence) {
+        //
+    }
+
+    @Override
+    public void onInvalidMessageReceived(String invalidMessageData) {
+        //
+    }
+
     public Position getLastPosition() {
         return lastPosition;
     }
 
 
     //region Post Events
-    private void postNmeaBurst(final NmeaBurst burst) {
+    private void postNmeaBurst(final GnssNmeaBurst burst) {
         for(final Listener listener : listeners) {
             try {
                 new Handler(Looper.getMainLooper()).post(() -> listener.nmeaBurstReceived(burst));
@@ -858,7 +869,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
 
 
     public interface Listener {
-        void nmeaBurstReceived(NmeaBurst NmeaBurst);
+        void nmeaBurstReceived(GnssNmeaBurst GnssNmeaBurst);
         void nmeaStringReceived(String nmeaString);
         void nmeaSentenceReceived(NmeaSentence nmeaSentence);
         void nmeaBurstValidityChanged(boolean burstsAreValid);

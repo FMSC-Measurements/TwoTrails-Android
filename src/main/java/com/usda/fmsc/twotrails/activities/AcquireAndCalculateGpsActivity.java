@@ -21,11 +21,11 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.listeners.SimpleTextWatcher;
 import com.usda.fmsc.android.widget.SheetLayoutEx;
-import com.usda.fmsc.geospatial.GeoTools;
+import com.usda.fmsc.geospatial.gnss.GeoTools;
 import com.usda.fmsc.geospatial.Position;
-import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
-import com.usda.fmsc.geospatial.nmea41.sentences.GGASentence;
-import com.usda.fmsc.geospatial.nmea41.sentences.GSASentence;
+import com.usda.fmsc.geospatial.gnss.codes.GnssFix;
+import com.usda.fmsc.geospatial.gnss.codes.GnssFixQuality;
+import com.usda.fmsc.geospatial.gnss.nmea.GnssNmeaBurst;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.DeviceSettings;
 import com.usda.fmsc.twotrails.R;
@@ -596,10 +596,10 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
                         dRMSEyf = Math.sqrt(dRMSEyf / countF);
                         dRMSErf = Math.sqrt(Math.pow(dRMSExf, 2) + Math.pow(dRMSEyf, 2)) * Consts.RMSEr95_Coeff;
 
-                        Position position = GeoTools.getMidPioint(positions);
+                        Position position = GeoTools.getMidPoint(positions);
 
-                        _Point.setLatitude(position.getLatitudeSignedDecimal());
-                        _Point.setLongitude(position.getLongitudeSignedDecimal());
+                        _Point.setLatitude(position.getLatitude());
+                        _Point.setLongitude(position.getLongitude());
                         _Point.setElevation(position.getElevation());
                         _Point.setUnAdjX(xF);
                         _Point.setUnAdjY(yF);
@@ -689,7 +689,7 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
     }
 
 
-    protected void onLoggedNmeaBurst(NmeaBurst burst) {
+    protected void onLoggedNmeaBurst(GnssNmeaBurst burst) {
         _Bursts.add(TtNmeaBurst.create(_Point.getCN(), false, burst));
 
         if (!btnCalc.isEnabled() && getLoggedCount() > 0) {
@@ -699,7 +699,7 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
     }
 
     @Override
-    public void onNmeaBurstReceived(final NmeaBurst nmeaBurst) {
+    public void onNmeaBurstReceived(final GnssNmeaBurst nmeaBurst) {
         super.onNmeaBurstReceived(nmeaBurst);
 
         if (isLogging() && nmeaBurst.isValid()) {
@@ -758,27 +758,27 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
             options.FilterFix = true;
 
             if (spinnerIndex < 3) {
-                options.Fix = GSASentence.Fix.parse(spinnerIndex);
+                options.Fix = GnssFix.parse(spinnerIndex);
 
-                options.FixType = spinnerIndex == 2 ? GGASentence.GpsFixType.GPS : GGASentence.GpsFixType.NoFix;
+                options.FixType = spinnerIndex == 2 ? GnssFixQuality.GPS : GnssFixQuality.NoFix;
             } else {
-                options.Fix = GSASentence.Fix._3D;
+                options.Fix = GnssFix._3D;
 
                 switch (spinnerIndex) {
                     case 3:
-                        options.FixType = GGASentence.GpsFixType.DGPS;
+                        options.FixType = GnssFixQuality.DGPS;
                         break;
                     case 4:
-                        options.FixType = GGASentence.GpsFixType.PPS;
+                        options.FixType = GnssFixQuality.PPS;
                         break;
                     case 5:
-                        options.FixType = GGASentence.GpsFixType.FloatRTK;
+                        options.FixType = GnssFixQuality.RTK_Float;
                         break;
                     case 6:
-                        options.FixType = GGASentence.GpsFixType.RTK;
+                        options.FixType = GnssFixQuality.RTK;
                         break;
                     default:
-                        options.FixType = GGASentence.GpsFixType.NoFix;
+                        options.FixType = GnssFixQuality.NoFix;
                         break;
                 }
             }
@@ -786,7 +786,7 @@ public class AcquireAndCalculateGpsActivity extends AcquireGpsMapActivity {
 
         getTtAppCtx().getDeviceSettings().setGpsFilterFixUse(options.FilterFix);
         getTtAppCtx().getDeviceSettings().setGpsFilterFix(options.Fix);
-        getTtAppCtx().getDeviceSettings().setGpsFilterFixType(options.FixType);
+        getTtAppCtx().getDeviceSettings().setGpsFilterFixQuality(options.FixType);
 
         calculate();
     }

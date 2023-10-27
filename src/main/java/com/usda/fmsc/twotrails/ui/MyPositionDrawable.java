@@ -9,7 +9,7 @@ import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 
 import com.usda.fmsc.android.AndroidUtils;
-import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
+import com.usda.fmsc.geospatial.gnss.nmea.GnssNmeaBurst;
 
 public class MyPositionDrawable extends Drawable {
     private static final int DEFAULT_RADIUS = 10;
@@ -77,7 +77,7 @@ public class MyPositionDrawable extends Drawable {
     }
 
 
-    public void update(NmeaBurst nmeaBurst) {
+    public void update(GnssNmeaBurst nmeaBurst) {
         int accuracyMultiplier = 1;
 
         outerRadius = radius + radius * accuracyMultiplier;

@@ -23,8 +23,8 @@ import com.usda.fmsc.android.dialogs.EnumSelectionDialog;
 import com.usda.fmsc.android.dialogs.InputDialog;
 import com.usda.fmsc.android.dialogs.NumericInputDialog;
 import com.usda.fmsc.android.listeners.ComplexOnPageChangeListener;
-import com.usda.fmsc.geospatial.UomElevation;
-import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
+import com.usda.fmsc.geospatial.codes.UomElevation;
+import com.usda.fmsc.geospatial.gnss.nmea.GnssNmeaBurst;
 import com.usda.fmsc.twotrails.activities.base.TtCustomToolbarActivity;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.data.TwoTrailsSchema;
@@ -46,7 +46,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
-import com.usda.fmsc.geospatial.nmea41.sentences.base.NmeaSentence;
+import com.usda.fmsc.geospatial.nmea.sentences.NmeaSentence;
 import com.usda.fmsc.utilities.StringEx;
 
 public class MetadataActivity extends TtCustomToolbarActivity {
@@ -554,7 +554,7 @@ public class MetadataActivity extends TtCustomToolbarActivity {
 
                         listener = new GpsService.Listener() {
                             @Override
-                            public void nmeaBurstReceived(NmeaBurst nmeaBurst) {
+                            public void nmeaBurstReceived(GnssNmeaBurst nmeaBurst) {
                                 inputDialog.getInput().setText(StringEx.toString(nmeaBurst.getTrueUTM().getZone()));
 
                                 gotNmea = true;

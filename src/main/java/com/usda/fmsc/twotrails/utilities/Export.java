@@ -591,10 +591,10 @@ public class Export {
 
                     if (adjpoint == null) {
                         Position pos = UTMTools.convertUTMtoLatLonSignedDec(point.getAdjX(), point.getAdjY(), tmpMeta.getZone());
-                        adjpoint = new GpxPoint(pos.getLatitudeSignedDecimal(), pos.getLongitudeSignedDecimal(), point.getAdjZ());
+                        adjpoint = new GpxPoint(pos.getLatitude(), pos.getLongitude(), point.getAdjZ());
 
                         pos = UTMTools.convertUTMtoLatLonSignedDec(point.getUnAdjX(), point.getUnAdjY(), tmpMeta.getZone());
-                        unAdjpoint = new GpxPoint(pos.getLatitudeSignedDecimal(), pos.getLongitudeSignedDecimal(), point.getUnAdjZ());
+                        unAdjpoint = new GpxPoint(pos.getLatitude(), pos.getLongitude(), point.getUnAdjZ());
                     }
 
                     adjpoint.setName(StringEx.toString(point.getPID()));
@@ -894,10 +894,10 @@ public class Export {
                 for (TtPoint point : points) {
                     Position coords = TtUtils.Points.getLatLonFromPoint(point, true, md.get(point.getMetadataCN()));
 
-                    Coordinates adjCoord = new Coordinates(coords.getLatitudeSignedDecimal(), coords.getLongitudeSignedDecimal(), coords.getElevation());
+                    Coordinates adjCoord = new Coordinates(coords.getLatitude(), coords.getLongitude(), coords.getElevation());
 
                     coords = TtUtils.Points.getLatLonFromPoint(point, false, md.get(point.getMetadataCN()));
-                    Coordinates unAdjCoord = new Coordinates(coords.getLatitudeSignedDecimal(), coords.getLongitudeSignedDecimal(), coords.getElevation());
+                    Coordinates unAdjCoord = new Coordinates(coords.getLatitude(), coords.getLongitude(), coords.getElevation());
 
                     String snippit = "Point Operation: " + point.getOp().toString();
 

@@ -39,7 +39,7 @@ import com.esri.arcgisruntime.symbology.SimpleMarkerSymbol;
 import com.esri.arcgisruntime.toolkit.compass.Compass;
 import com.esri.arcgisruntime.toolkit.scalebar.Scalebar;
 import com.usda.fmsc.android.AndroidUtils;
-import com.usda.fmsc.geospatial.Extent;
+import com.usda.fmsc.geospatial.gnss.Extent;
 import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
@@ -548,7 +548,7 @@ public class ArcGisMapFragment extends TtBaseFragment implements IMultiMapFragme
     //region GPS
     public void updateLocation(Position position) {
         if (showPosition && mapView != null) {
-            Point point = new Point(position.getLongitudeSignedDecimal(), position.getLatitudeSignedDecimal(), SpatialReferences.getWgs84());
+            Point point = new Point(position.getLongitude(), position.getLatitude(), SpatialReferences.getWgs84());
 
             if (_LocationLayer != null) {
                 if (mapView.getGraphicsOverlays().get(mapView.getGraphicsOverlays().size() - 1) != _LocationLayer) {

@@ -5,7 +5,7 @@ import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
 
-import com.usda.fmsc.geospatial.UomElevation;
+import com.usda.fmsc.geospatial.codes.UomElevation;
 import com.usda.fmsc.twotrails.units.DeclinationType;
 import com.usda.fmsc.twotrails.units.Dist;
 import com.usda.fmsc.twotrails.units.Datum;

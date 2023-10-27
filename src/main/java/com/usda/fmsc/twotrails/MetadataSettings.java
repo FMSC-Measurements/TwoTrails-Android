@@ -2,7 +2,7 @@ package com.usda.fmsc.twotrails;
 
 import android.util.JsonWriter;
 
-import com.usda.fmsc.geospatial.UomElevation;
+import com.usda.fmsc.geospatial.codes.UomElevation;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.units.Datum;
 import com.usda.fmsc.twotrails.units.DeclinationType;

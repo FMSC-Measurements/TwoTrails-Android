@@ -11,7 +11,7 @@ import android.widget.TextView;
 
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.listeners.SimpleTextWatcher;
-import com.usda.fmsc.geospatial.UomElevation;
+import com.usda.fmsc.geospatial.codes.UomElevation;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.objects.points.GpsPoint;

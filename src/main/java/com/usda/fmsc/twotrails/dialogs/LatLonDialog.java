@@ -19,7 +19,7 @@ import androidx.fragment.app.DialogFragment;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.animation.ViewAnimator;
 import com.usda.fmsc.android.listeners.SimpleTextWatcher;
-import com.usda.fmsc.geospatial.DMS;
+import com.usda.fmsc.geospatial.gnss.DMS;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.objects.points.GpsPoint;
 import com.usda.fmsc.twotrails.utilities.TtUtils;

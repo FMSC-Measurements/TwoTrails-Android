@@ -10,9 +10,10 @@ import android.view.View;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
-import com.usda.fmsc.geospatial.nmea41.NmeaIDs;
-import com.usda.fmsc.geospatial.nmea41.sentences.base.NmeaSentence;
+import com.usda.fmsc.geospatial.gnss.nmea.GnssNmeaBurst;
+import com.usda.fmsc.geospatial.nmea.codes.SentenceID;
+import com.usda.fmsc.geospatial.nmea.codes.TalkerID;
+import com.usda.fmsc.geospatial.nmea.sentences.NmeaSentence;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.adapters.NmeaDetailsAdapter;
 import com.usda.fmsc.twotrails.gps.GpsService;
@@ -26,8 +27,8 @@ public class CheckNmeaDialogTt extends TtBaseDialogFragment implements GpsServic
     private ListView lvNmea;
 
     private NmeaDetailsAdapter adapter;
-    private final List<NmeaDetailsAdapter.NmeaDetails> nmeaDetails;
-    private final HashMap<String, NmeaDetailsAdapter.NmeaDetails> nmeaDetailsMap;
+    private final List<NmeaDetailsAdapter.GnssNmeaDetails> gnssNmeaDetails;
+    private final HashMap<String, NmeaDetailsAdapter.GnssNmeaDetails> nmeaDetailsMap;
 
 
     public static CheckNmeaDialogTt newInstance() {
@@ -35,7 +36,7 @@ public class CheckNmeaDialogTt extends TtBaseDialogFragment implements GpsServic
     }
 
     public CheckNmeaDialogTt() {
-        nmeaDetails = new ArrayList<>();
+        gnssNmeaDetails = new ArrayList<>();
         nmeaDetailsMap = new HashMap<>();
     }
 
@@ -47,7 +48,7 @@ public class CheckNmeaDialogTt extends TtBaseDialogFragment implements GpsServic
         final View view = inflater.inflate(R.layout.diag_check_nmea, null);
 
         lvNmea = view.findViewById(R.id.diagCheckNmeaList);
-        adapter = new NmeaDetailsAdapter(getContext(), nmeaDetails);
+        adapter = new NmeaDetailsAdapter(getContext(), gnssNmeaDetails);
         lvNmea.setAdapter(adapter);
 
         return new AlertDialog.Builder(getActivity())
@@ -85,7 +86,7 @@ public class CheckNmeaDialogTt extends TtBaseDialogFragment implements GpsServic
     }
 
     @Override
-    public void nmeaBurstReceived(NmeaBurst nmeaBurst) {
+    public void nmeaBurstReceived(GnssNmeaBurst nmeaBurst) {
 
     }
 
@@ -105,33 +106,33 @@ public class CheckNmeaDialogTt extends TtBaseDialogFragment implements GpsServic
     }
 
     private void parseString(String nmeaString) {
-        final NmeaIDs.TalkerID tid = NmeaIDs.TalkerID.parse(nmeaString);
-        final NmeaIDs.SentenceID sid = NmeaIDs.SentenceID.parse(nmeaString);
+        final TalkerID tid = TalkerID.parse(nmeaString);
+        final SentenceID sid = SentenceID.parse(nmeaString);
 
         if (lvNmea != null && getActivity() != null) {
             getActivity().runOnUiThread(() -> {
                 try {
                     String tidStr, sidStr;
-                    if (tid == NmeaIDs.TalkerID.Unknown) {
+                    if (tid == TalkerID.UNKNOWN) {
                         tidStr = String.format("(%s) Unknown", nmeaString.substring(0, nmeaString.indexOf(',')));
                     } else {
                         tidStr = String.format("(%s) %s", tid.toStringCode(), tid.toString());
                     }
 
-                    if (sid == NmeaIDs.SentenceID.Unknown) {
+                    if (sid == SentenceID.Unknown) {
                         sidStr = nmeaString.substring(2, 5);
                     } else {
                         sidStr = sid.toString();
                     }
 
                     if (nmeaDetailsMap.containsKey(tidStr)) {
-                        if (nmeaDetailsMap.get(tidStr).addId(sidStr)) {
+                        if (nmeaDetailsMap.get(tidStr).addSentenceId(sidStr)) {
                             lvNmea.deferNotifyDataSetChanged();
                         }
                     } else {
-                        NmeaDetailsAdapter.NmeaDetails details = new NmeaDetailsAdapter.NmeaDetails(tidStr);
-                        details.addId(sidStr);
-                        nmeaDetails.add(details);
+                        NmeaDetailsAdapter.GnssNmeaDetails details = new NmeaDetailsAdapter.GnssNmeaDetails(tidStr);
+                        details.addSentenceId(sidStr);
+                        gnssNmeaDetails.add(details);
                         nmeaDetailsMap.put(tidStr, details);
                         adapter.notifyDataSetChanged();
                     }

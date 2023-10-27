@@ -9,8 +9,9 @@ import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.usda.fmsc.geospatial.Extent;
+import com.usda.fmsc.geospatial.gnss.Extent;
 import com.usda.fmsc.geospatial.Position;
+import com.usda.fmsc.geospatial.gnss.GeoTools;
 import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
@@ -167,7 +168,7 @@ public class GoogleMapsTrailGraphic implements ITrailGraphic, IMarkerDataGraphic
 
     @Override
     public Position getPosition() {
-        return polyBounds.getCenter();
+        return GeoTools.getMidPoint(polyBounds);
     }
 
     @Override

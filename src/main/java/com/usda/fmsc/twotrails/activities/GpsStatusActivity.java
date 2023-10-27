@@ -11,11 +11,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.usda.fmsc.android.AndroidUtils;
-import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
-import com.usda.fmsc.geospatial.nmea41.NmeaIDs;
-import com.usda.fmsc.geospatial.nmea41.sentences.GGASentence;
-import com.usda.fmsc.geospatial.nmea41.sentences.GSASentence;
-import com.usda.fmsc.geospatial.nmea41.sentences.base.NmeaSentence;
+import com.usda.fmsc.geospatial.gnss.codes.GnssFixQuality;
+import com.usda.fmsc.geospatial.gnss.nmea.GnssNmeaBurst;
+import com.usda.fmsc.geospatial.nmea.codes.SentenceID;
+import com.usda.fmsc.geospatial.nmea.sentences.NmeaSentence;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
@@ -78,7 +77,7 @@ public class GpsStatusActivity extends TtCustomToolbarActivity implements GpsSer
         tvHdop = findViewById(R.id.gpsInfoTvHdop);
         tvNmeaStats = findViewById(R.id.gpsInfoNmeaTvStats);
 
-        tvGpsFix.setText(GGASentence.GpsFixType.NoFix.toString());
+        tvGpsFix.setText(GnssFixQuality.NoFix.toString());
 
         skyView = findViewById(R.id.gpsInfoSatSky);
         statusView = findViewById(R.id.gpsInfoSatStatus);
@@ -107,14 +106,14 @@ public class GpsStatusActivity extends TtCustomToolbarActivity implements GpsSer
         return true;
     }
 
-    protected void setNmeaData(final NmeaBurst burst) {
+    protected void setNmeaData(final GnssNmeaBurst burst) {
         runOnUiThread(() -> {
             try {
                 if (burst.hasPosition()) {
                     UTMCoords coords = zone != null ? burst.getUTM(zone) : burst.getTrueUTM();
 
-                    tvLat.setText(String.format(Locale.getDefault(), "%.4f", burst.getLatitudeSD()));
-                    tvLon.setText(String.format(Locale.getDefault(), "%.4f", burst.getLongitudeSD()));
+                    tvLat.setText(String.format(Locale.getDefault(), "%.4f", burst.getLatitude()));
+                    tvLon.setText(String.format(Locale.getDefault(), "%.4f", burst.getLongitude()));
 
                     tvUtmX.setText(String.format(Locale.getDefault(), "%.3f", coords.getX()));
                     tvUtmY.setText(String.format(Locale.getDefault(), "%.3f", coords.getY()));
@@ -144,7 +143,7 @@ public class GpsStatusActivity extends TtCustomToolbarActivity implements GpsSer
                     }
                 }
 
-                boolean iivRMC = !burst.isValid(NmeaIDs.SentenceID.RMC), iivGGA = false, iivGSA = false, iivGSV = false;
+                boolean iivRMC = !burst.isValid(SentenceID.RMC), iivGGA = false, iivGSA = false, iivGSV = false;
 
                 if (!iivRMC && burst.getMagVar() != null) {
                     tvDec.setText(String.format(Locale.getDefault(), "%.2f %s", burst.getMagVar(), burst.getMagVarDir().toStringAbv()));
@@ -152,29 +151,29 @@ public class GpsStatusActivity extends TtCustomToolbarActivity implements GpsSer
                     tvDec.setText(nVal);
                 }
 
-                if (burst.isValid(NmeaIDs.SentenceID.GGA)) {
-                    tvGpsFix.setText(burst.getFixQuality().toStringX());
+                if (burst.isValid(SentenceID.GGA)) {
+                    tvGpsFix.setText(burst.getFixQuality().toString());
                 } else {
-                    tvGpsFix.setText(GGASentence.GpsFixType.NoFix.toString());
+                    tvGpsFix.setText(GnssFixQuality.NoFix.toString());
                     iivGGA = true;
                 }
 
-                if (burst.areAnyValid(NmeaIDs.SentenceID.GSA)) {
+                if (burst.areAnyValid(SentenceID.GSA)) {
                     tvGpsStatus.setText(burst.getFix().toString());
                     tvPdop.setText(burst.getPDOP() == null ? nVal : String.format(Locale.getDefault(), "%.2f", burst.getPDOP()));
                     tvHdop.setText(burst.getHDOP() == null ? nVal : String.format(Locale.getDefault(), "%.2f", burst.getHDOP()));
                 } else {
-                    tvGpsStatus.setText(GSASentence.Fix.NoFix.toString());
+                    tvGpsStatus.setText(GnssFixQuality.NoFix.toString());
                     tvHdop.setText(nVal);
                     tvPdop.setText(nVal);
                     iivGSA = true;
                 }
 
-                if (burst.areAnyValid(NmeaIDs.SentenceID.GSV)) {
+                if (burst.areAnyValid(SentenceID.GSV)) {
 
                     tvSat.setText(String.format(Locale.getDefault(), "%d/%d/%d",
                             burst.getSatellitesInViewCount(),
-                            burst.isValid(NmeaIDs.SentenceID.GGA) ? burst.getTrackedSatellitesCount() : 0,
+                            burst.isValid(SentenceID.GGA) ? burst.getTrackedSatellitesCount() : 0,
                             burst.getUsedSatellitesCount()));
                 } else {
                     tvSat.setText(nVal);
@@ -217,7 +216,7 @@ public class GpsStatusActivity extends TtCustomToolbarActivity implements GpsSer
     }
 
     @Override
-    public void nmeaBurstReceived(NmeaBurst burst) {
+    public void nmeaBurstReceived(GnssNmeaBurst burst) {
         setNmeaData(burst);
     }
 

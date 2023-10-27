@@ -13,8 +13,9 @@ import com.esri.arcgisruntime.mapping.view.MapView;
 import com.esri.arcgisruntime.symbology.SimpleLineSymbol;
 import com.esri.arcgisruntime.symbology.SimpleMarkerSymbol;
 import com.esri.arcgisruntime.symbology.Symbol;
-import com.usda.fmsc.geospatial.Extent;
+import com.usda.fmsc.geospatial.gnss.Extent;
 import com.usda.fmsc.geospatial.Position;
+import com.usda.fmsc.geospatial.gnss.GeoTools;
 import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment.MarkerData;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
@@ -99,10 +100,10 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
             metadata = meta.get(point.getMetadataCN());
 
             adjPos = TtUtils.Points.getLatLonFromPoint(point, true, metadata);
-            adjLL = new Point(adjPos.getLongitudeSignedDecimal(), adjPos.getLatitudeSignedDecimal(), SpatialReferences.getWgs84());
+            adjLL = new Point(adjPos.getLongitude(), adjPos.getLatitude(), SpatialReferences.getWgs84());
 
             unAdjPos = TtUtils.Points.getLatLonFromPoint(point, false, metadata);
-            unadjLL = new Point(unAdjPos.getLongitudeSignedDecimal(), unAdjPos.getLatitudeSignedDecimal(), SpatialReferences.getWgs84());
+            unadjLL = new Point(unAdjPos.getLongitude(), unAdjPos.getLatitude(), SpatialReferences.getWgs84());
 
             adjMd = new MarkerData(point, metadata, true);
             unadjMd = new MarkerData(point, metadata, false);
@@ -291,7 +292,7 @@ public class ArcGisPolygonGraphic implements IPolygonGraphic, IMarkerDataGraphic
 
     @Override
     public Position getPosition() {
-        return polyBounds.getCenter();
+        return GeoTools.getMidPoint(polyBounds);
     }
 
     @Override

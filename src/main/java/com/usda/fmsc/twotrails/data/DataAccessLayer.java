@@ -4,9 +4,12 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import com.usda.fmsc.geospatial.EastWest;
-import com.usda.fmsc.geospatial.NorthSouth;
-import com.usda.fmsc.geospatial.UomElevation;
+import com.usda.fmsc.geospatial.codes.EastWest;
+import com.usda.fmsc.geospatial.codes.Mode;
+import com.usda.fmsc.geospatial.codes.NorthSouth;
+import com.usda.fmsc.geospatial.codes.UomElevation;
+import com.usda.fmsc.geospatial.gnss.codes.GnssFix;
+import com.usda.fmsc.geospatial.gnss.codes.GnssFixQuality;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.MapSettings;
 import com.usda.fmsc.twotrails.ProjectSettings;
@@ -38,8 +41,6 @@ import java.util.List;
 import java.util.Locale;
 
 import com.usda.fmsc.geospatial.Position;
-import com.usda.fmsc.geospatial.nmea41.sentences.GGASentence;
-import com.usda.fmsc.geospatial.nmea41.sentences.GSASentence;
 import com.usda.fmsc.utilities.ParseEx;
 import com.usda.fmsc.utilities.StringEx;
 
@@ -1768,10 +1769,10 @@ public class DataAccessLayer extends IDataLayer {
                     DateTime fixTime;
                     double groundSpeed, trackAngle, magVar, pdop, hdop, vdop, horizDilution, geoidHeight;
                     EastWest magVarDir;
-                    GSASentence.Mode opMode;
-                    GSASentence.Fix fix;
+                    Mode opMode;
+                    GnssFix fix;
                     ArrayList<Integer> satsUsed;
-                    GGASentence.GpsFixType fixQuality;
+                    GnssFixQuality fixQuality;
                     int trackedSatellites, numberOfSatellitesInView;
                     UomElevation geoUom;
 
@@ -1849,17 +1850,17 @@ public class DataAccessLayer extends IDataLayer {
                         magVarDir = null;
 
                     if (!c.isNull(13))
-                        fix = GSASentence.Fix.parse(c.getInt(13));
+                        fix = GnssFix.parse(c.getInt(13));
                     else
                         continue;
 
                     if (!c.isNull(14))
-                        fixQuality = GGASentence.GpsFixType.parse(c.getInt(14));
+                        fixQuality = GnssFixQuality.parse(c.getInt(14));
                     else
                         continue;
 
                     if (!c.isNull(15))
-                        opMode = GSASentence.Mode.parse(c.getInt(15));
+                        opMode = Mode.parse(c.getInt(15));
                     else
                         continue;
 

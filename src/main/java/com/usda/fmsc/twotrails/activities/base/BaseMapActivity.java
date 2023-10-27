@@ -50,10 +50,10 @@ import com.usda.fmsc.android.utilities.PostDelayHandler;
 import com.usda.fmsc.android.widget.MultiStateTouchCheckBox;
 import com.usda.fmsc.android.widget.drawables.FadeBitmapProgressDrawable;
 import com.usda.fmsc.android.widget.drawables.PolygonProgressDrawable;
-import com.usda.fmsc.geospatial.Extent;
+import com.usda.fmsc.geospatial.gnss.Extent;
 import com.usda.fmsc.geospatial.Position;
-import com.usda.fmsc.geospatial.nmea41.NmeaBurst;
-import com.usda.fmsc.geospatial.nmea41.sentences.base.NmeaSentence;
+import com.usda.fmsc.geospatial.gnss.nmea.GnssNmeaBurst;
+import com.usda.fmsc.geospatial.nmea.sentences.NmeaSentence;
 import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.geospatial.utm.UTMTools;
 import com.usda.fmsc.twotrails.Consts;
@@ -734,7 +734,7 @@ public abstract class BaseMapActivity extends ProjectAdjusterActivity implements
 
     protected void moveToLocation(Position position, boolean animate) {
         if (position != null) {
-            moveToLocation((float) position.getLatitudeSignedDecimal(), (float) position.getLongitudeSignedDecimal(), animate);
+            moveToLocation((float) position.getLatitude(), (float) position.getLongitude(), animate);
         } else {
             getTtAppCtx().getReport().writeWarn("Null Position", "BaseMapActivity:moveToLocation(p,b)");
         }
@@ -742,7 +742,7 @@ public abstract class BaseMapActivity extends ProjectAdjusterActivity implements
 
     protected void moveToLocation(Position position, float zoomLevel, boolean animate) {
         if (position != null) {
-            moveToLocation((float) position.getLatitudeSignedDecimal(), (float) position.getLongitudeSignedDecimal(), zoomLevel, animate);
+            moveToLocation((float) position.getLatitude(), (float) position.getLongitude(), zoomLevel, animate);
         } else {
             getTtAppCtx().getReport().writeWarn("Null Position", "BaseMapActivity:moveToLocation(p,f,b)", Thread.currentThread().getStackTrace());
         }
@@ -1044,7 +1044,7 @@ public abstract class BaseMapActivity extends ProjectAdjusterActivity implements
 
     //region GPS
     @Override
-    public void nmeaBurstReceived(NmeaBurst nmeaBurst) {
+    public void nmeaBurstReceived(GnssNmeaBurst nmeaBurst) {
         if (nmeaBurst.hasPosition()) {
             Position position = nmeaBurst.getPosition();
 
@@ -1070,7 +1070,7 @@ public abstract class BaseMapActivity extends ProjectAdjusterActivity implements
         _ReceivingNmea = true;
     }
 
-    protected void onNmeaBurstReceived(NmeaBurst nmeaBurst) {
+    protected void onNmeaBurstReceived(GnssNmeaBurst nmeaBurst) {
         //
     }
 
@@ -1165,8 +1165,8 @@ public abstract class BaseMapActivity extends ProjectAdjusterActivity implements
 
 
                 android.location.Location position = new android.location.Location(StringEx.Empty);
-                position.setLatitude(lastPosition.getLatitudeSignedDecimal());
-                position.setLongitude(lastPosition.getLongitudeSignedDecimal());
+                position.setLatitude(lastPosition.getLatitude());
+                position.setLongitude(lastPosition.getLongitude());
                 position.setAltitude(lastPosition.hasElevation() ? lastPosition.getElevation() : 0);
 
                 GeomagneticField geoField = new GeomagneticField(
@@ -1725,7 +1725,7 @@ public abstract class BaseMapActivity extends ProjectAdjusterActivity implements
             UTMCoords currPos = null;
 
             if (_NavFromMyLoc && lastPosition != null) {
-                currPos = UTMTools.convertLatLonSignedDecToUTM(lastPosition.getLatitudeSignedDecimal(), lastPosition.getLongitudeSignedDecimal(), zone);
+                currPos = UTMTools.convertLatLonSignedDecToUTM(lastPosition.getLatitude(), lastPosition.getLongitude(), zone);
             } else if (!_NavFromMyLoc && _FromPoint != null){
                 currPos = new UTMCoords(_FromPoint.getUnAdjX(), _FromPoint.getUnAdjY(), zone);
             }
@@ -1762,8 +1762,8 @@ public abstract class BaseMapActivity extends ProjectAdjusterActivity implements
                         targetLocation = new Location("");
 
                         Position position = UTMTools.convertUTMtoLatLonSignedDec(toCoords);
-                        targetLocation.setLatitude(position.getLatitudeSignedDecimal());
-                        targetLocation.setLongitude(position.getLongitudeSignedDecimal());
+                        targetLocation.setLatitude(position.getLatitude());
+                        targetLocation.setLongitude(position.getLongitude());
                         targetLocation.setAltitude(_ToPoint.getAdjZ());
                     }
                 }
