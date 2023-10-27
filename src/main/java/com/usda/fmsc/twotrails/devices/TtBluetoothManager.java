@@ -9,6 +9,7 @@ import java.util.UUID;
 
 public class TtBluetoothManager {
     private final BluetoothAdapter adapter;
+    //00001101-0000-1000-8000-00805F9B34FB is the Bluetooth Serial UUID
     private static final UUID UUID_VALUE = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
 

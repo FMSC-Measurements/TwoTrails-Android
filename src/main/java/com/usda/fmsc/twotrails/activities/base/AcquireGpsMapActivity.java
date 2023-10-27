@@ -31,7 +31,6 @@ import com.usda.fmsc.geospatial.utm.UTMCoords;
 import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.activities.GetDirectionActivity;
-import com.usda.fmsc.twotrails.activities.TtCameraActivity;
 import com.usda.fmsc.twotrails.activities.contracts.CaptureTtImage;
 import com.usda.fmsc.twotrails.activities.contracts.GetImages;
 import com.usda.fmsc.twotrails.gps.GpsService;
