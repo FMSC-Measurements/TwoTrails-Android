@@ -21,7 +21,7 @@ import android.widget.Toast;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.animation.ViewAnimator;
 import com.usda.fmsc.android.utilities.DeviceOrientationEx;
-import com.usda.fmsc.geospatial.gnss.Extent;
+import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.geospatial.gnss.codes.GnssFixQuality;
 import com.usda.fmsc.geospatial.gnss.nmea.GnssNmeaBurst;

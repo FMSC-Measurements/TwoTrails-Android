@@ -10,7 +10,7 @@ import com.esri.arcgisruntime.mapping.view.GraphicsOverlay;
 import com.esri.arcgisruntime.mapping.view.MapView;
 import com.esri.arcgisruntime.symbology.SimpleLineSymbol;
 import com.esri.arcgisruntime.symbology.SimpleMarkerSymbol;
-import com.usda.fmsc.geospatial.gnss.Extent;
+import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.geospatial.gnss.GeoTools;
 import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment.MarkerData;
@@ -18,7 +18,6 @@ import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 

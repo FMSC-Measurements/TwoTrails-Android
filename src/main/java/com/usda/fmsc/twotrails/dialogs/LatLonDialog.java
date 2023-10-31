@@ -1,11 +1,9 @@
 package com.usda.fmsc.twotrails.dialogs;
 
 import android.app.Dialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.Editable;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.Window;
@@ -19,7 +17,7 @@ import androidx.fragment.app.DialogFragment;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.animation.ViewAnimator;
 import com.usda.fmsc.android.listeners.SimpleTextWatcher;
-import com.usda.fmsc.geospatial.gnss.DMS;
+import com.usda.fmsc.geospatial.DMS;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.objects.points.GpsPoint;
 import com.usda.fmsc.twotrails.utilities.TtUtils;

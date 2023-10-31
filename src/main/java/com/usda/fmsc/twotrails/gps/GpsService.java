@@ -442,6 +442,9 @@ public class GpsService extends Service implements LocationListener, LocationSou
     public GpsProvider getGpsProvider() {
         return _deviceUUID == null ? GpsProvider.Internal : GpsProvider.External;
     }
+    public Position getLastPosition() {
+        return lastPosition;
+    }
 
 
     //region External Device GPS
@@ -516,7 +519,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
     }
     //endregion
 
-
+    //region Parsing
     private void parseNmeaString(String nmeaString) {
         if (nmeaString != null) {
             nmeaString = nmeaString.trim();
@@ -610,11 +613,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
     public void onInvalidMessageReceived(String invalidMessageData) {
         //
     }
-
-    public Position getLastPosition() {
-        return lastPosition;
-    }
-
+    //endregion
 
     //region Post Events
     private void postNmeaBurst(final GnssNmeaBurst burst) {
@@ -725,7 +724,6 @@ public class GpsService extends Service implements LocationListener, LocationSou
         }
     }
     //endregion
-
 
     //region LocationSource for GMaps
     @Override

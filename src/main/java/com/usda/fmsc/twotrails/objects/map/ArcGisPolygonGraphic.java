@@ -13,7 +13,7 @@ import com.esri.arcgisruntime.mapping.view.MapView;
 import com.esri.arcgisruntime.symbology.SimpleLineSymbol;
 import com.esri.arcgisruntime.symbology.SimpleMarkerSymbol;
 import com.esri.arcgisruntime.symbology.Symbol;
-import com.usda.fmsc.geospatial.gnss.Extent;
+import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.geospatial.gnss.GeoTools;
 import com.usda.fmsc.twotrails.fragments.map.IMultiMapFragment.MarkerData;

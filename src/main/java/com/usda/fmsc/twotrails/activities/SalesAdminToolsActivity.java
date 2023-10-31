@@ -25,7 +25,7 @@ import com.usda.fmsc.android.dialogs.DontAskAgainDialog;
 import com.usda.fmsc.android.dialogs.NumericInputDialog;
 import com.usda.fmsc.android.utilities.PostDelayHandler;
 import com.usda.fmsc.android.widget.SheetLayoutEx;
-import com.usda.fmsc.geospatial.gnss.Extent;
+import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.geospatial.gnss.GeoTools;
 import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.geospatial.gnss.nmea.GnssNmeaBurst;

@@ -3,7 +3,7 @@ package com.usda.fmsc.twotrails.fragments.map;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.usda.fmsc.geospatial.gnss.Extent;
+import com.usda.fmsc.geospatial.Extent;
 import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.twotrails.objects.map.LineGraphicManager;
 import com.usda.fmsc.twotrails.objects.map.PolygonDrawOptions;
