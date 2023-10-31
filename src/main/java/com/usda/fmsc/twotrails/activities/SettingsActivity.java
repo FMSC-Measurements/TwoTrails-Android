@@ -31,6 +31,7 @@ public class SettingsActivity extends TtCustomToolbarActivity {
 
     public static final String GPS_SETTINGS_PAGE = "gpsSetup";
     public static final String LASER_SETTINGS_PAGE = "rfSetup";
+    public static final String VN_SETTINGS_PAGE = "vnSetup";
 
     public static final String POINT_GPS_SETTINGS_PAGE = "gpsPointSetup";
     public static final String POINT_WALK_SETTINGS_PAGE = "walkPointSetup";
@@ -78,7 +79,8 @@ public class SettingsActivity extends TtCustomToolbarActivity {
         switch (key) {
             case MISC_SETTINGS_PAGE: frag = new MiscSettingsFragment(); break;
             case GPS_SETTINGS_PAGE:
-            case LASER_SETTINGS_PAGE: frag = DeviceSettingsFragment.newInstance(key); break;
+            case LASER_SETTINGS_PAGE:
+            case VN_SETTINGS_PAGE: frag = DeviceSettingsFragment.newInstance(key); break;
             case MAIN_SETTINGS_PAGE:
             case DEVICE_SETUP_SETTINGS_PAGE:
             case POINT_SETTINGS_PAGE:

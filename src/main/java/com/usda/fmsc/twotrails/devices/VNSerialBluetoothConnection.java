@@ -14,8 +14,6 @@ import java.util.ArrayList;
 public class VNSerialBluetoothConnection extends Thread {
     private BluetoothSocket btSocket;
 
-    private VNDataReader vnDataReader;
-
     private boolean running, disconnect, receiving;
 
     private final ArrayList<Listener> listeners;
@@ -43,7 +41,7 @@ public class VNSerialBluetoothConnection extends Thread {
                     l.connectionStarted();
                 }
 
-                vnDataReader = new VNDataReader(btSocket.getInputStream(), vnDataReaderListener);
+                VNDataReader vnDataReader = new VNDataReader(btSocket.getInputStream(), vnDataReaderListener);
 
                 while (!disconnect) {
                     try {

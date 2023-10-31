@@ -86,6 +86,10 @@
             android:name=".rangefinder.RangeFinderService"
             android:enabled="true" />
 
+        <service
+            android:name=".ins.VNInsService"
+            android:enabled="true" />
+
         <activity
             android:name=".activities.MainActivity"
             android:screenOrientation="portrait"

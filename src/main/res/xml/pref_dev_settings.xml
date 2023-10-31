@@ -20,4 +20,14 @@
             <!--<extra android:name="@string/set_settings_page" android:value="rfSetup" />-->
         <!--</intent>-->
     </Preference>
+
+    <Preference
+        android:title="@string/menu_x_vn_settings"
+        android:key="vnSetup"
+        android:persistent="false">
+
+        <!--<intent android:action="openSettings" >-->
+        <!--<extra android:name="@string/set_settings_page" android:value="rfSetup" />-->
+        <!--</intent>-->
+    </Preference>
 </PreferenceScreen>

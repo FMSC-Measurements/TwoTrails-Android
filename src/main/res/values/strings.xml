@@ -178,6 +178,7 @@
     <string name="menu_main_privacy_policy">Privacy Policy</string>
     <string name="menu_x_gps_settings">GPS Setup</string>
     <string name="menu_x_range_finder_settings">Range Finder</string>
+    <string name="menu_x_vn_settings">VectorNav INS</string>
     <string name="menu_x_filter">Filter</string>
     <string name="menu_x_device_setup">Device Setup</string>
     <string name="menu_x_point_settings">Point Settings</string>
@@ -251,9 +252,14 @@
     <string name="ds_gps_check_nmea">See what NMEA strings are coming down from the GPS receiver</string>
     <string name="ds_gps_use_internal">Using Internal GPS</string>
     <string name="ds_gps_use_external">Using External GPS</string>
+
     <string name="ds_rf_connected">Range Finder Connected</string>
     <string name="ds_rf_not_connected">Range Finder Not Connected</string>
     <string name="ds_rf_connecting">Connecting to Range Finder..</string>
+
+    <string name="ds_vn_connected">VN100 Connected</string>
+    <string name="ds_vn_connecting">Connecting to VN100..</string>
+    <string name="ds_vn_not_connected">VN100 Not Connected</string>
 
 
     <!-- Device Settings Consts / Keys -->
@@ -266,6 +272,10 @@
     <string name="set_RF_SETUP">rfSetup</string>
     <string name="set_RF_LIST_DEVICE">prefLstRFDevice</string>
     <string name="set_RF_DEVICE">rfDevice</string>
+    <string name="set_VN_SETUP">vnSetup</string>
+    <string name="set_VN_LIST_DEVICE">prefLstVNDevice</string>
+    <string name="set_VN_DEVICE">vnDevice</string>
+    <string name="set_VN_CHECK">prefVNCheck</string>
 
     <string name="set_DROP">prefDropZero</string>
     <string name="set_CLEAR_LOG">prefClearLog</string>
@@ -294,6 +304,12 @@
     <string name="set_RANGE_FINDER_DEVICE_ID">RangeFinderDeviceID</string>
     <string name="set_RANGE_FINDER_DEVICE_NAME">RangeFinderDeviceName</string>
     <string name="set_LOG_ALL_RANGE_FINDER">LogAllRangeFinder</string>
+
+    <string name="set_VN100_ALWAYS_ON">VN100AlwaysOn</string>
+    <string name="set_VN100_CONFIGURED">VN100Configured</string>
+    <string name="set_VN100_DEVICE_ID">VN100DeviceID</string>
+    <string name="set_VN100_DEVICE_NAME">VN100DeviceName</string>
+    <string name="set_VN100_LOG_ALL">VN100LogAll</string>
 
     <string name="set_GPS_FILTER_DOP_TYPE">GpsFilterDopType</string>
     <string name="set_GPS_FILTER_DOP_VALUE">GpsFilterDopValue</string>

@@ -57,6 +57,13 @@ public class DeviceSettings extends Settings {
     public static final String RANGE_FINDER_LOG_BURST_DETAILS = "RangeFinderLogBurstDetails";
 
 
+    public static final String VN100_DEVICE_ID = "VN100DeviceID";
+    public static final String VN100_DEVICE_NAME = "VN100DeviceName";
+    public static final String VN100_ALWAYS_ON = "VN100AlwaysOn";
+    public static final String VN100_LOG_ALL = "VN100LogAll";
+    public static final String VN100_CONFIGURED = "VN100Configured";
+    
+
     public static final String AUTO_FILL_FROM_RANGE_FINDER = "AutoFillFromRangeFinder";
     public static final String AUTO_FILL_FROM_RANGE_FINDER_ASK = "AutoFillFromRangeFinderAsk";
 
@@ -272,6 +279,7 @@ public class DeviceSettings extends Settings {
         setBool(ROUND_POINTS, DEFAULT_ROUND_POINTS);
 
         setBool(GPS_ALWAYS_ON, true);
+        setBool(VN100_ALWAYS_ON, true);
         setBool(KEEP_SCREEN_ON, false);
 
         setInt(GPS_FILTER_DOP_TYPE, DEFAULT_GPS_DOP_TYPE.getValue());
@@ -625,6 +633,41 @@ public class DeviceSettings extends Settings {
 
     public boolean isAutoFillFromRangeFinderAsk() {
         return getBool(AUTO_FILL_FROM_RANGE_FINDER_ASK, DEFAULT_AUTO_FILL_FROM_RANGE_FINDER_ASK);
+    }
+    //endregion
+
+    //region VN100 Settings
+    public String getVN100DeviceID() {
+        return getString(VN100_DEVICE_ID);
+    }
+
+    public void setVN100DeviceId(String value) {
+        setString(VN100_DEVICE_ID, value);
+    }
+
+
+    public String getVN100DeviceName() {
+        return getString(VN100_DEVICE_NAME);
+    }
+
+    public void setVN100DeviceName(String value) {
+        setString(VN100_DEVICE_NAME, value);
+    }
+
+    public boolean isVN100AlwaysOn() {
+        return getBool(VN100_ALWAYS_ON);
+    }
+
+    public void setVN100AlwaysOn(boolean value) {
+        setBool(VN100_ALWAYS_ON, value);
+    }
+
+    public boolean isVN100Configured() {
+        return getBool(VN100_CONFIGURED);
+    }
+
+    public void setVN100Configured(boolean value) {
+        setBool(VN100_CONFIGURED, value);
     }
     //endregion
 

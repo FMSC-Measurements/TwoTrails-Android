@@ -2,6 +2,7 @@ package com.usda.fmsc.twotrails.ins;
 
 
 import android.app.Service;
+import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Binder;
@@ -11,14 +12,15 @@ import android.os.Looper;
 
 import androidx.annotation.Nullable;
 
+import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.utilities.PostDelayHandler;
 import com.usda.fmsc.geospatial.ins.IINSData;
-import com.usda.fmsc.geospatial.ins.vectornav.INSStatus;
 import com.usda.fmsc.geospatial.ins.vectornav.IVNMsgListener;
 import com.usda.fmsc.geospatial.ins.vectornav.VNDataReader;
 import com.usda.fmsc.geospatial.ins.vectornav.VNInsData;
 import com.usda.fmsc.geospatial.ins.vectornav.VNParser;
 import com.usda.fmsc.geospatial.ins.vectornav.binary.BinaryMsgConfig;
+import com.usda.fmsc.geospatial.ins.vectornav.binary.codes.CommonGroup;
 import com.usda.fmsc.geospatial.ins.vectornav.binary.messages.VNBinMessage;
 import com.usda.fmsc.geospatial.ins.vectornav.nmea.sentences.base.VNNmeaSentence;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
@@ -42,7 +44,7 @@ public class VNInsService extends Service implements
 
     private final Binder binder = new VNInsBinder();
 
-    private boolean logging, logDetails, receivingValidData;
+    private boolean logging, receivingValidData;
     private PrintWriter logPrintWriter;
 
     private VNSerialBluetoothConnection btConn;
@@ -107,6 +109,8 @@ public class VNInsService extends Service implements
 
         //settings
 
+        parser = new VNParser(new BinaryMsgConfig(CommonGroup.ALL_FIELDS_VN100));
+        parser.addListener(this);
 
         postServiceStart();
     }
@@ -137,32 +141,135 @@ public class VNInsService extends Service implements
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        //TODO watch for changing settings
+        //
     }
 
     public InsMode getInsMode() {
         return _mode;
     }
 
-    public void SetInsMode(InsMode mode) {
-        _mode = mode;
+    public boolean isInsRunning() {
+        return getInsMode() == InsMode.Serial ?
+                btConn != null && btConn.isConnected() && btConn.isReceiving() :
+                false;
+    }
 
-        //TODO CHANGE INS MODE
+    public void setInsMode(InsMode mode) {
+        if (_mode != mode) {
+            if (isInsRunning()) {
+                InsDeviceStatus status = stopIns();
+
+                if (status == InsDeviceStatus.InsAlreadyStopped || status == InsDeviceStatus.InsStopped) {
+                    startIns();
+                }
+            }
+
+            _mode = mode;
+
+            if (TtAppCtx.hasReport()) {
+                TtAppCtx.getReport().writeEvent(String.format("INS mode switched to %s", getInsMode()));
+            }
+        }
+    }
+
+    public void setDevice(String deviceUUID) {
+        if (isInsRunning())
+            throw new RuntimeException("INS must be stopped before changing devices.");
+        else {
+            _deviceUUID = deviceUUID;
+
+            if (TtAppCtx.hasReport()) {
+                TtAppCtx.getReport().writeEvent(String.format("INS changed to: (%s)", _deviceUUID));
+            }
+        }
     }
 
     //region Start / Stop
     private InsDeviceStatus startIns() {
-        return InsDeviceStatus.InsStarted;
+        InsDeviceStatus status;
+
+        if (!isInsRunning()) {
+            status = getInsMode() == InsMode.Serial ? startInsSerial() : startInsGatt();
+
+            if (status == InsDeviceStatus.InsStarted) {
+                if (logging) {
+                    writeStartLog();
+                }
+
+                receivingData = true;
+                dataReceived.post();
+            }
+        } else {
+            status = InsDeviceStatus.InsAlreadyStarted;
+            receivingData = true;
+            dataReceived.post();
+        }
+
+
+        return status;
     }
     private InsDeviceStatus stopIns() {
-        return InsDeviceStatus.InsStarted;
+        InsDeviceStatus status;
+
+        if (logging) {
+            writeEndLog();
+        }
+
+        logging = false;
+        receivingValidData = false;
+
+        if (logPrintWriter != null) {
+            logPrintWriter.flush();
+            logPrintWriter.close();
+        }
+
+        if (isInsRunning()) {
+            status = getInsMode() == InsMode.Serial ? stopInsSerial() : stopInsGatt();
+        } else {
+            status = InsDeviceStatus.InsAlreadyStopped;
+        }
+
+        return status;
     }
 
     private InsDeviceStatus startInsSerial() {
+        if (!AndroidUtils.App.checkBluetoothScanAndConnectPermission(getApplicationContext())) {
+            return InsDeviceStatus.InsRequiresPermissions;
+        }
+
+        try {
+            BluetoothSocket socket = TtAppCtx.getBluetoothManager().getSocket(_deviceUUID);
+
+            if (socket != null) {
+                if (btConn != null) {
+                    btConn.unregister(this);
+                    btConn.disconnect();
+                }
+
+                btConn = new VNSerialBluetoothConnection(socket, vnDataReaderListner);
+                btConn.register(this);
+                btConn.start();
+            } else {
+                return InsDeviceStatus.DeviceNotFound;
+            }
+        } catch (Exception e) {
+            TtAppCtx.getReport().writeError(e.getMessage(), "VNInsService:startInsSerial");
+            return InsDeviceStatus.InsError;
+        }
+
         return InsDeviceStatus.InsStarted;
     }
     private InsDeviceStatus stopInsSerial() {
-        return InsDeviceStatus.InsStarted;
+        if (btConn != null) {
+            btConn.unregister(this);
+            btConn.disconnect();
+            btConn = null;
+
+            postInsStop();
+            return InsDeviceStatus.InsStopped;
+        }
+
+        return InsDeviceStatus.InsAlreadyStopped;
     }
 
     private InsDeviceStatus startInsGatt() {
@@ -250,40 +357,41 @@ public class VNInsService extends Service implements
     //region Bluetooth
     @Override
     public void connectionStarted() {
-
+        postInsStart();
+        if (TtAppCtx.hasReport()) {
+            TtAppCtx.getReport().writeEvent("INS connection started");
+        }
     }
 
     @Override
     public void connectionLost() {
+        if (btConn != null) {
+        btConn.unregister(this);
+        btConn = null;
+    }
 
+        if (TtAppCtx.hasReport()) {
+            TtAppCtx.getReport().writeError("INS lost connection", "InsService:connectionLost");
+        }
+        postError(InsError.LostDeviceConnection);
     }
 
     @Override
     public void connectionEnded() {
-
+        //
     }
 
     @Override
     public void failedToConnect() {
-
+        postError(InsError.FailedToConnect);
     }
     //endregion
 
     //region Post Events
-    private void postInsData(final IINSData insData) {
+    private void postInsData(final VNInsData insData) {
         for (final VNInsService.Listener listener : listeners) {
             try {
                 new Handler(Looper.getMainLooper()).post(() -> listener.insDataReceived(insData));
-            } catch (Exception ex) {
-                //
-            }
-        }
-    }
-
-    private void postNmeaString(final String nmeaString) {
-        for (final VNInsService.Listener listener : listeners) {
-            try {
-                new Handler(Looper.getMainLooper()).post(() -> listener.nmeaStringReceived(nmeaString));
             } catch (Exception ex) {
                 //
             }
@@ -389,13 +497,11 @@ public class VNInsService extends Service implements
     public enum InsDeviceStatus {
         InsStarted,
         InsStopped,
-        InsNotEnabled,
         InsError,
         InsRequiresPermissions,
-        
-        GnsAlreadyStarted,
+        InsAlreadyStarted,
         InsAlreadyStopped,
-        InsServiceInUse,
+        DeviceNotFound,
         Unknown
     }
 
@@ -426,53 +532,62 @@ public class VNInsService extends Service implements
 
         @Override
         public InsDeviceStatus startIns() {
-            return null;
+            return VNInsService.this.startIns();
         }
 
         @Override
         public InsDeviceStatus stopIns() {
-            return null;
+            return VNInsService.this.stopIns();
         }
 
         @Override
         public void stopService() {
+            VNInsService.this.stopIns();
+            VNInsService.this.stopLogging();
+            VNInsService.this.stopSelf();
 
+            postServiceStop();
         }
 
         @Override
-        public void setInsMode(InsMode mode) throws Exception {
+        public void setDevice(String deviceUUID) throws Exception {
+            VNInsService.this.setDevice(deviceUUID);
+        }
 
+        @Override
+        public void setInsMode(InsMode mode) {
+            VNInsService.this.setInsMode(mode);
         }
 
         @Override
         public InsMode getInsMode() {
-            return null;
+            return VNInsService.this.getInsMode();
         }
 
         @Override
         public boolean isInsRunning() {
-            return false;
+            return VNInsService.this.isInsRunning();
         }
 
         @Override
         public void startLogging(File logFile) {
-
+            VNInsService.this.startLogging(logFile);
         }
 
         @Override
         public void stopLogging() {
-
+            VNInsService.this.stopLogging();
         }
 
         @Override
         public boolean isLogging() {
-            return false;
+            return VNInsService.this.isLogging();
         }
     }
 
 
     public interface Listener {
-        void insDataReceived(IINSData data);
+        void insDataReceived(VNInsData data);
         void nmeaStringReceived(String nmeaString);
         void nmeaSentenceReceived(VNNmeaSentence nmeaSentence);
         void receivingData(boolean receiving);
@@ -500,7 +615,9 @@ public class VNInsService extends Service implements
 
         void stopService();
 
-        void setInsMode(InsMode mode) throws Exception;
+        void setInsMode(InsMode mode);
+
+        void setDevice(String deviceUUID) throws Exception;
 
         InsMode getInsMode();
 

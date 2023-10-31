@@ -90,5 +90,23 @@
             <!--Create settings (if above check): auto apply as fwd az-->
             <!--Create settings (if 2 above check, disable 1 above and set 1 above true): auto create SS (data must include az. uses as fwd as only)-->
         </PreferenceScreen>
+
+        <PreferenceScreen
+            android:title="VN100"
+            android:key="@string/set_VN_SETUP"
+            android:enabled="true">
+
+            <ListPreference
+                android:id="@+id/prefLstVNDevice"
+                android:key="@string/set_VN_LIST_DEVICE"
+                android:title="VN100"
+                app:entries="@array/arr_empty"
+                android:entryValues="@array/arr_empty" />
+
+            <Preference
+                android:key="@string/set_VN_CHECK"
+                android:title="Check VN100 Connection"
+                android:summary="@string/ds_vn_not_connected"/>
+        </PreferenceScreen>
     </PreferenceScreen>
 </PreferenceScreen>

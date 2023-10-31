@@ -24,7 +24,10 @@ import androidx.documentfile.provider.DocumentFile;
 
 import com.esri.arcgisruntime.ArcGISRuntimeEnvironment;
 import com.usda.fmsc.android.AndroidUtils;
+import com.usda.fmsc.android.utilities.PostDelayHandler;
 import com.usda.fmsc.geospatial.gnss.nmea.GnssNmeaBurst;
+import com.usda.fmsc.geospatial.ins.vectornav.VNInsData;
+import com.usda.fmsc.geospatial.ins.vectornav.nmea.sentences.base.VNNmeaSentence;
 import com.usda.fmsc.geospatial.nmea.sentences.NmeaSentence;
 import com.usda.fmsc.twotrails.activities.MainActivity;
 import com.usda.fmsc.twotrails.activities.base.TtActivity;
@@ -35,6 +38,7 @@ import com.usda.fmsc.twotrails.data.MediaAccessManager;
 import com.usda.fmsc.twotrails.data.TwoTrailsSchema;
 import com.usda.fmsc.twotrails.devices.TtBluetoothManager;
 import com.usda.fmsc.twotrails.gps.GpsService;
+import com.usda.fmsc.twotrails.ins.VNInsService;
 import com.usda.fmsc.twotrails.logic.AdjustingException;
 import com.usda.fmsc.twotrails.logic.Segment;
 import com.usda.fmsc.twotrails.logic.SegmentFactory;
@@ -74,7 +78,9 @@ public class TwoTrailsApp extends Application {
 
     private DocumentFile _TwoTrailsExternalDir, _OfflineMapsDir, _ImportDir, _ImportedDir, _ExportDir;
 
-    private Boolean silentConnectToExternalGps = false, scanningForGps = false;
+    private Boolean silentConnectToExternalGps = false, scanForGps = false;
+    private Boolean silentConnectToINS = false, scanForIns = false;
+    private Boolean scanningForBT = false;
 
     private TtBluetoothManager _BluetoothManager;
 
@@ -89,6 +95,7 @@ public class TwoTrailsApp extends Application {
 
     private GpsService.GpsBinder gpsServiceBinder;
     private RangeFinderService.RangeFinderBinder rfServiceBinder;
+    private VNInsService.VNInsBinder vnInsBinder;
     private Activity _CurrentActivity;
     private ProjectAdjusterListener _CurrentListener;
 
@@ -157,7 +164,8 @@ public class TwoTrailsApp extends Application {
                             switch (error) {
                                 case LostDeviceConnection:
                                     msg = "Lost connection to external GPS";
-                                    delayAndSearchForGps.run();
+                                    scanForGps = true;
+                                    searchForBTDevices.run();
                                     break;
                                 case DeviceConnectionEnded:
                                     break;
@@ -166,7 +174,8 @@ public class TwoTrailsApp extends Application {
                                     break;
                                 case FailedToConnect:
                                     msg = "Failed to connect to external GPS.";
-                                    delayAndSearchForGps.run();
+                                    scanForGps = true;
+                                    searchForBTDevices.run();
                                     break;
                             }
 
@@ -216,6 +225,110 @@ public class TwoTrailsApp extends Application {
         @Override
         public void onServiceDisconnected(ComponentName name) {
             rfServiceBinder = null;
+        }
+    };
+
+    private final ServiceConnection vnServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            vnInsBinder = (VNInsService.VNInsBinder)service;
+
+            vnInsBinder.addListener(new VNInsService.Listener() {
+                @Override
+                public void insDataReceived(VNInsData data) {
+
+                }
+
+                @Override
+                public void nmeaStringReceived(String nmeaString) {
+
+                }
+
+                @Override
+                public void nmeaSentenceReceived(VNNmeaSentence nmeaSentence) {
+
+                }
+
+                @Override
+                public void receivingData(boolean receiving) {
+
+                }
+
+                @Override
+                public void receivingValidData(boolean receiving) {
+
+                }
+
+                @Override
+                public void insStarted() {
+                    if (silentConnectToINS && TwoTrailsApp.this.isVNInsServiceStarted()) {
+                        silentConnectToINS = false;
+                        _CurrentActivity.runOnUiThread(() -> Toast.makeText(_CurrentActivity, "VN100 Connected", Toast.LENGTH_LONG).show());
+                    }
+                }
+
+                @Override
+                public void insStopped() {
+
+                }
+
+                @Override
+                public void insServiceStarted() {
+                    if (getDeviceSettings().isVN100AlwaysOn() && TwoTrailsApp.this.isVNInsServiceStarted()) {
+                        getVnIns().startIns();
+                    }
+                }
+
+                @Override
+                public void insServiceStopped() {
+
+                }
+
+                @Override
+                public void insError(VNInsService.InsError error) {
+                    if (_CurrentActivity instanceof MainActivity) {
+                        if (!silentConnectToINS) {
+                            String msg = null;
+                            switch (error) {
+                                case LostDeviceConnection:
+                                    msg = "Lost connection to VN100";
+                                    scanForIns = true;
+                                    delayAndSearchForBTDevices.run();
+                                    break;
+                                case DeviceConnectionEnded:
+                                    break;
+                                case FailedToConnect:
+                                    msg = "Failed to connect to VN100.";
+                                    scanForIns = true;
+                                    delayAndSearchForBTDevices.run();
+                                    break;
+                            }
+
+                            if (msg != null) {
+                                Toast.makeText(_CurrentActivity, msg, Toast.LENGTH_LONG).show();
+                            }
+                        }
+
+                        silentConnectToINS = false;
+                    }
+                }
+            });
+
+            if (_CurrentActivity instanceof TtActivity) {
+                TtActivity act = (TtActivity) _CurrentActivity;
+                if (act.requiresInsService()) {
+                    getVnIns().startIns();
+                }
+
+                if (act instanceof VNInsService.Listener) {
+                    getVnIns().addListener((VNInsService.Listener) act);
+                }
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            vnInsBinder = null;
         }
     };
 
@@ -276,12 +389,18 @@ public class TwoTrailsApp extends Application {
             if (activity instanceof MainActivity) {
                 if (!AndroidUtils.App.isServiceRunning(TwoTrailsApp.this, GpsService.class) || !isGpsServiceStarted()) {
                     startGpsService();
-                } else if (getDeviceSettings().isGpsConfigured() && !scanningForGps) {
-                    gpsServiceBinder.startGps();
+                } else if (getDeviceSettings().isGpsConfigured() && !scanForGps) {
+                    getGps().startGps();
                 }
 
                 if (!AndroidUtils.App.isServiceRunning(TwoTrailsApp.this, RangeFinderService.class) || !isRFServiceStarted()) {
                     startRangefinderService();
+                }
+
+                if (!AndroidUtils.App.isServiceRunning(TwoTrailsApp.this, VNInsService.class) || !isVNInsServiceStarted()) {
+                    startVNService();
+                } else if (getDeviceSettings().isVN100Configured() && !scanForIns) {
+                    getVnIns().startIns();
                 }
 
                 if (getDeviceSettings().isExternalSyncEnabled()) {
@@ -452,18 +571,23 @@ public class TwoTrailsApp extends Application {
     };
     //endregion
 
-    //region SearchForGps
-    private final Runnable delayAndSearchForGps = new Runnable() {
+    //region Search BT GPS/INS
+    private PostDelayHandler searchHandler;
+    private final Runnable delayAndSearchForBTDevices = new Runnable() {
         @Override
         public void run() {
             if (Looper.getMainLooper() == null)
                 Looper.prepareMainLooper();
 
-            new Handler(Looper.getMainLooper()).postDelayed(searchForGps, 3000);
+            if (searchHandler == null) {
+                searchHandler = new PostDelayHandler(3000, new Handler(Looper.getMainLooper()), searchForBTDevices);
+            }
+
+            searchHandler.post();
         }
     };
 
-    private final Runnable searchForGps = new Runnable() {
+    private final Runnable searchForBTDevices = new Runnable() {
         @Override
         public void run() {
             if (!AndroidUtils.App.checkBluetoothScanAndConnectPermission(TwoTrailsApp.this)) {
@@ -471,11 +595,13 @@ public class TwoTrailsApp extends Application {
                 return;
             }
 
-            if (!scanningForGps && isGpsServiceStarted() && !getGps().isGpsRunning() && getDeviceSettings().isGpsConfigured()) {
+            if (!scanningForBT &&
+                    ((isGpsServiceStarted() && !getGps().isGpsRunning() && getDeviceSettings().isGpsConfigured()) ||
+                        isVNInsServiceStarted() && !getVnIns().isInsRunning() && getDeviceSettings().isVN100Configured() )) {
                 final BluetoothAdapter adapter = getBluetoothManager().getAdapter();
 
                 if (adapter != null) {
-                    scanningForGps = true;
+                    scanningForBT = true;
 
                     adapter.startDiscovery();
                     Log.d(Consts.LOG_TAG, "Scanning for BT devices.");
@@ -484,30 +610,54 @@ public class TwoTrailsApp extends Application {
                         adapter.cancelDiscovery();
                         Log.d(Consts.LOG_TAG, "Stopped scan for BT devices.");
 
+                        boolean keepScanningForBTDevs = false;
+
                         if (!silentConnectToExternalGps && isGpsServiceStarted() && !getGps().isGpsRunning() && getDeviceSettings().isGpsConfigured()) {
                             for (BluetoothDevice device : adapter.getBondedDevices()) {
                                 if (device.getAddress().equals(getDeviceSettings().getGpsDeviceID())) {
                                     silentConnectToExternalGps = true;
                                     Log.d(Consts.LOG_TAG, "GPS found, starting reconnect.");
                                     new Handler().postDelayed(() -> getGps().startGps(), 1000);
-
                                     break;
                                 }
                             }
 
                             if (!silentConnectToExternalGps) {
-                                new Handler().postDelayed(searchForGps, 15000);
+                                keepScanningForBTDevs = true;
+                            } else {
+                                scanForGps = false;
                             }
                         }
 
-                        scanningForGps = false;
+                        if (!silentConnectToINS && isVNInsServiceStarted() && !getVnIns().isInsRunning() && getDeviceSettings().isVN100Configured()) {
+                            for (BluetoothDevice device : adapter.getBondedDevices()) {
+                                if (device.getAddress().equals(getDeviceSettings().getVN100DeviceID())) {
+                                    silentConnectToINS = true;
+                                    Log.d(Consts.LOG_TAG, "VN100 found, starting reconnect.");
+                                    new Handler().postDelayed(() -> getVnIns().startIns(), 1000);
+                                    break;
+                                }
+                            }
+
+                            if (!silentConnectToINS) {
+                                keepScanningForBTDevs = true;
+                            } else {
+                                scanForIns = false;
+                            }
+                        }
+
+
+                        if (keepScanningForBTDevs) {
+                            new Handler().postDelayed(searchForBTDevices, 15000);
+                        }
+
+                        scanningForBT = false;
                     }, 4000);
                 }
             }
         }
     };
     //endregion
-
 
     @Override
     public void onCreate() {
@@ -798,7 +948,7 @@ public class TwoTrailsApp extends Application {
     //endregion
 
 
-    //region GPS / RangeFinder
+    //region GPS / RangeFinder / VN100
     public void startGpsService() {
         if (!isGpsServiceStarted()) {
             this.startService(new Intent(this, GpsService.class));
@@ -810,6 +960,13 @@ public class TwoTrailsApp extends Application {
         if (!isRFServiceStarted() && AndroidUtils.App.checkBluetoothPermission(this)) {
             this.startService(new Intent(this, RangeFinderService.class));
             this.bindService(new Intent(this, RangeFinderService.class), rfServiceConnection, Context.BIND_AUTO_CREATE);
+        }
+    }
+
+    public void startVNService() {
+        if (!isVNInsServiceStarted() && AndroidUtils.App.checkBluetoothPermission(this)) {
+            this.startService(new Intent(this, VNInsService.class));
+            this.bindService(new Intent(this, VNInsService.class), vnServiceConnection, Context.BIND_AUTO_CREATE);
         }
     }
 
@@ -836,6 +993,7 @@ public class TwoTrailsApp extends Application {
         return gpsServiceBinder;
     }
 
+
     public boolean isRFServiceStarted() {
         return rfServiceBinder != null;
     }
@@ -843,6 +1001,16 @@ public class TwoTrailsApp extends Application {
     public RangeFinderService.RangeFinderBinder getRF() {
         if (rfServiceBinder == null) throw new RuntimeException("Not bound to RfService");
         return rfServiceBinder;
+    }
+
+
+    public boolean isVNInsServiceStarted() {
+        return vnInsBinder != null;
+    }
+
+    public VNInsService.VNInsBinder getVnIns() {
+        if (vnInsBinder == null) throw new RuntimeException("Not bound to VNInsService");
+        return vnInsBinder;
     }
     //endregion
 

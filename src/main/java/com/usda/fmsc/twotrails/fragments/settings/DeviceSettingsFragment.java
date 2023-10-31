@@ -25,15 +25,19 @@ import com.usda.fmsc.android.dialogs.DontAskAgainDialog;
 import com.usda.fmsc.android.dialogs.InputDialog;
 import com.usda.fmsc.android.dialogs.ProgressDialogEx;
 import com.usda.fmsc.geospatial.gnss.nmea.GnssNmeaBurst;
+import com.usda.fmsc.geospatial.ins.vectornav.VNInsData;
+import com.usda.fmsc.geospatial.ins.vectornav.nmea.sentences.base.VNNmeaSentence;
 import com.usda.fmsc.geospatial.nmea.sentences.NmeaSentence;
 import com.usda.fmsc.twotrails.DeviceSettings;
 import com.usda.fmsc.twotrails.R;
+import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.activities.SettingsActivity;
 import com.usda.fmsc.twotrails.activities.base.TtCustomToolbarActivity;
 import com.usda.fmsc.twotrails.devices.TtBluetoothManager;
 import com.usda.fmsc.twotrails.dialogs.CheckNmeaDialogTt;
 import com.usda.fmsc.twotrails.fragments.TtBasePrefFragment;
 import com.usda.fmsc.twotrails.gps.GpsService;
+import com.usda.fmsc.twotrails.ins.VNInsService;
 import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.rangefinder.RangeFinderService;
 import com.usda.fmsc.twotrails.rangefinder.TtRangeFinderData;
@@ -48,10 +52,10 @@ import java.util.List;
 public class DeviceSettingsFragment extends TtBasePrefFragment {
     public static final String CURRENT_PAGE = "CurrentPage";
 
-    private Preference prefGpsCheck, prefRFCheck, prefParseDelimiter;
+    private Preference prefGpsCheck, prefRFCheck, prefVNCheck, prefParseDelimiter;
     private SwitchPreferenceCompat swtUseExGpsDev, swtParseMethod;
     private PreferenceCategory exGpsCat;
-    private ListPreference prefLstGpsDevice, prefLstRFDevice;
+    private ListPreference prefLstGpsDevice, prefLstRFDevice, prefLstVNDevice;
 
     private String moveToPage;
 
@@ -98,6 +102,9 @@ public class DeviceSettingsFragment extends TtBasePrefFragment {
                             case SettingsActivity.LASER_SETTINGS_PAGE:
                                 actionBar.setTitle("Range Finder Setup");
                                 break;
+                            case SettingsActivity.VN_SETTINGS_PAGE:
+                                actionBar.setTitle("VectorNav INS Setup");
+                                break;
                             default:
                                 actionBar.setTitle("Settings");
                                 break;
@@ -113,10 +120,16 @@ public class DeviceSettingsFragment extends TtBasePrefFragment {
         exGpsCat = findPreference(getString(R.string.set_GPS_CAT));
         swtParseMethod = findPreference(getString(R.string.set_GPS_PARSE_METHOD));
         prefParseDelimiter = findPreference(getString(R.string.set_GPS_PARSE_DELIMITER));
+
         prefLstGpsDevice = findPreference(getString(R.string.set_GPS_LIST_DEVICE));
         prefGpsCheck = findPreference(getString(R.string.set_GPS_CHECK));
+
         prefLstRFDevice = findPreference(getString(R.string.set_RF_LIST_DEVICE));
         prefRFCheck = findPreference(getString(R.string.set_RF_CHECK));
+
+        prefLstVNDevice = findPreference(getString(R.string.set_VN_LIST_DEVICE));
+        prefVNCheck = findPreference(getString(R.string.set_VN_CHECK));
+
         Preference prefCheckNmea = findPreference(getString(R.string.set_GPS_CHECK_NMEA));
 
         swtUseExGpsDev.setOnPreferenceChangeListener(useExternalListener);
@@ -137,9 +150,15 @@ public class DeviceSettingsFragment extends TtBasePrefFragment {
 
         prefGpsCheck.setOnPreferenceClickListener(gpsCheckListener);
         prefRFCheck.setOnPreferenceClickListener(rfCheckListener);
+        prefVNCheck.setOnPreferenceClickListener(vnCheckListener);
 
         prefLstGpsDevice.setOnPreferenceChangeListener(btnGPSList);
         prefLstRFDevice.setOnPreferenceChangeListener(btnRFList);
+        prefLstVNDevice.setOnPreferenceChangeListener(btnVNList);
+
+        prefLstGpsDevice.setOnPreferenceClickListener(checkForBTforList);
+        prefLstRFDevice.setOnPreferenceClickListener(checkForBTforList);
+        prefLstVNDevice.setOnPreferenceClickListener(checkForBTforList);
 
         if (prefCheckNmea != null)
             prefCheckNmea.setOnPreferenceClickListener(checkNmeaListener);
@@ -147,6 +166,7 @@ public class DeviceSettingsFragment extends TtBasePrefFragment {
         //get initial bluetooth devices
         setBTValues(prefLstGpsDevice);
         setBTValues(prefLstRFDevice);
+        setBTValues(prefLstVNDevice);
 
         exGpsCat.setEnabled(getTtAppCtx().getDeviceSettings().getGpsExternal());
 
@@ -161,11 +181,8 @@ public class DeviceSettingsFragment extends TtBasePrefFragment {
         }
 
         if (getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
-            if (getTtAppCtx().isGpsServiceStartedAndRunning()) {
-                prefGpsCheck.setSummary(R.string.ds_gps_connected);
-            } else {
-                prefGpsCheck.setSummary(R.string.ds_dev_configured);
-            }
+            prefGpsCheck.setSummary(getTtAppCtx().isGpsServiceStartedAndRunning() ? 
+                    R.string.ds_gps_connected : R.string.ds_dev_configured);
         } else {
             prefGpsCheck.setSummary(R.string.ds_dev_not_configured);
         }
@@ -179,16 +196,29 @@ public class DeviceSettingsFragment extends TtBasePrefFragment {
         }
 
         if (getTtAppCtx().getDeviceSettings().isRangeFinderConfigured()) {
-            if (getTtAppCtx().getRF().isRangeFinderRunning()) {
-                prefRFCheck.setSummary(R.string.ds_rf_connected);
-            } else {
-                prefRFCheck.setSummary(R.string.ds_dev_configured);
-            }
+            prefRFCheck.setSummary(getTtAppCtx().getRF().isRangeFinderRunning() ?
+                    R.string.ds_rf_connected : R.string.ds_dev_configured);
         } else {
             prefRFCheck.setSummary(R.string.ds_dev_not_configured);
         }
 
-        if (requireBluetooth) {
+
+        devName = getTtAppCtx().getDeviceSettings().getVN100DeviceName();
+        if (StringEx.isEmpty(devName)) {
+            prefLstVNDevice.setSummary(R.string.ds_no_dev);
+        } else {
+            prefLstVNDevice.setSummary(devName);
+            requireBluetooth = true;
+        }
+
+        if (getTtAppCtx().getDeviceSettings().isVN100Configured()) {
+            prefVNCheck.setSummary(getTtAppCtx().getVnIns().isInsRunning() ?
+                    R.string.ds_vn_connected : R.string.ds_dev_configured);
+        } else {
+            prefVNCheck.setSummary(R.string.ds_dev_not_configured);
+        }
+
+        if (requireBluetooth || moveToPage.equals(SettingsActivity.LASER_SETTINGS_PAGE) || moveToPage.equals(SettingsActivity.VN_SETTINGS_PAGE)) {
             if (!AndroidUtils.App.checkBluetoothScanAndConnectPermission(getActivity())) {
                 requestBluetoothPermission();
             }
@@ -208,6 +238,7 @@ public class DeviceSettingsFragment extends TtBasePrefFragment {
         if (TtUtils.Collections.areAllTrue(result.values())) {
             setBTValues(prefLstGpsDevice);
             setBTValues(prefLstRFDevice);
+            setBTValues(prefLstVNDevice);
             swtUseExGpsDev.setChecked(true);
             switchToExternal();
         } else {
@@ -230,7 +261,6 @@ public class DeviceSettingsFragment extends TtBasePrefFragment {
             onLocationRequestResult(TtUtils.Collections.areAllTrue(result.values())));
 
     private final ActivityResultLauncher<String> requestBackgroundLocationPermissionOnResult = registerForActivityResult(new ActivityResultContracts.RequestPermission(), this::onBackgroundLocationRequestResult);
-
 
 
     private void onLocationRequestResult(boolean hasPermissions) {
@@ -289,7 +319,15 @@ public class DeviceSettingsFragment extends TtBasePrefFragment {
         }
     }
 
-    //region GPSCheck
+    Preference.OnPreferenceClickListener checkForBTforList = preference -> {
+        if (!AndroidUtils.App.checkBluetoothScanAndConnectPermission(getActivity())) {
+            requestBluetoothPermission();
+        }
+        return false;
+    };
+
+
+    //region GPS
     private final Preference.OnPreferenceClickListener gpsCheckListener = new Preference.OnPreferenceClickListener() {
         @Override
         public boolean onPreferenceClick(@NonNull Preference preference) {
@@ -515,9 +553,183 @@ public class DeviceSettingsFragment extends TtBasePrefFragment {
             return false;
         }
     };
+
+    private final Preference.OnPreferenceChangeListener btnGPSList = new Preference.OnPreferenceChangeListener() {
+        public boolean onPreferenceChange(@NonNull Preference preference, Object newValue) {
+
+            try {
+                String[] values = newValue.toString().split(",");
+
+                if (values.length > 0) {
+                    if (!getTtAppCtx().getDeviceSettings().getGpsDeviceID().equals(values[0])) {
+                        getTtAppCtx().getDeviceSettings().setGpsDeviceId(values[0]);
+                        getTtAppCtx().getDeviceSettings().setGpsDeviceName(values[1]);
+
+                        prefLstGpsDevice.setSummary(values[1]);
+                        prefGpsCheck.setSummary(R.string.ds_dev_not_configured);
+                        getTtAppCtx().getDeviceSettings().setGpsConfigured(false);
+
+                        TtUtils.Misc.verifyGpsDevice(values[1], values[0], getActivity());
+                    }
+                } else {
+                    getTtAppCtx().getDeviceSettings().setGpsDeviceId(StringEx.Empty);
+                    getTtAppCtx().getDeviceSettings().setGpsDeviceName(StringEx.Empty);
+
+                    prefLstGpsDevice.setSummary(getString(R.string.ds_no_dev));
+                    prefGpsCheck.setSummary(R.string.ds_dev_not_configured);
+                    getTtAppCtx().getDeviceSettings().setGpsConfigured(false);
+                }
+            } catch (Exception ex) {
+                getTtAppCtx().getReport().writeError(ex.getMessage(), "DeviceSettingsFragment:btnGPSList");
+            }
+
+            return true;
+        }
+    };
+
+    //region External/Internal Switch & Listener
+    private final Preference.OnPreferenceChangeListener useExternalListener = new Preference.OnPreferenceChangeListener() {
+        @Override
+        public boolean onPreferenceChange(@NonNull Preference preference, Object newValue) {
+            boolean useExternal = (boolean)newValue;
+
+            boolean success;
+
+            if (useExternal) {
+                success = requestBluetoothPermission();
+
+                if (success) {
+                    switchToExternal();
+                }
+            } else {
+                success = requestInternalGpsPermission();
+
+                if (success) {
+                    switchToInternal();
+                }
+            }
+
+            if (success) {
+                swtUseExGpsDev.setSummary(getString(useExternal ? R.string.ds_gps_use_external : R.string.ds_gps_use_internal));
+            }
+
+            return success;
+        }
+    };
+
+
+    private void switchToExternal() {
+        if (AndroidUtils.App.checkBluetoothPermission(getContext())) {
+            TtBluetoothManager btm = getTtAppCtx().getBluetoothManager();
+            getTtAppCtx().getDeviceSettings().setGpsConfigured(false);
+            prefGpsCheck.setSummary(R.string.ds_gps_not_connected);
+
+            if (btm.isAvailable()) {
+                if (btm.isEnabled()) {
+                    setBTValues(prefLstGpsDevice);
+                    exGpsCat.setEnabled(true);
+                } else {
+                    //bluetooth isn't turned on, request that it should be
+                    Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                }
+            } else {
+                //no bluetooth option on device
+                Toast.makeText(getTtAppCtx(), R.string.ds_no_bt, Toast.LENGTH_LONG).show();
+            }
+        } else {
+            requestBluetoothPermission();
+        }
+    }
+
+    private void switchToInternal() {
+        if (!getTtAppCtx().isGpsServiceStarted()) {
+            getTtAppCtx().startGpsService();
+            Toast.makeText(getActivity(), "GPS Service not available. Please try again.", Toast.LENGTH_LONG).show();
+            getTtAppCtx().getReport().writeError("GPS Service Not Started", "DeviceSettingsFragment:switchToInternal");
+            return;
+        }
+
+        if (!getTtAppCtx().getGps().isInternalGpsEnabled()) {
+            requestInternalGpsPermission();
+        } else {
+            getTtAppCtx().getGps().stopGps();
+            getTtAppCtx().getGps().setGpsProvider(null);
+
+            getTtAppCtx().getDeviceSettings().setGpsConfigured(true);
+            exGpsCat.setEnabled(false);
+
+            getTtAppCtx().getDeviceSettings().setGpsDeviceId(StringEx.Empty);
+            getTtAppCtx().getDeviceSettings().setGpsDeviceName(StringEx.Empty);
+
+            if (getTtAppCtx().getDeviceSettings().isGpsAlwaysOn()) {
+                getTtAppCtx().getGps().startGps();
+            }
+        }
+    }
     //endregion
 
-    //region RangeFinderCheck
+    //region GPS Parse Method
+    private final Preference.OnPreferenceChangeListener parseMethodListener = new Preference.OnPreferenceChangeListener() {
+        @Override
+        public boolean onPreferenceChange(@NonNull Preference preference, Object newValue) {
+            boolean parseByTime = (boolean)newValue;
+
+            if (parseByTime) {
+                swtParseMethod.setSummary(getString(R.string.str_gps_parse_time));
+                prefParseDelimiter.setEnabled(false);
+            } else {
+                swtParseMethod.setSummary(getString(R.string.str_gps_parse_delim));
+                prefParseDelimiter.setEnabled(true);
+            }
+
+            return true;
+        }
+    };
+
+    private final Preference.OnPreferenceClickListener parseDelimiterClickListener = new Preference.OnPreferenceClickListener() {
+        @Override
+        public boolean onPreferenceClick(@NonNull Preference preference) {
+            final InputDialog idialog = new InputDialog(getActivity());
+
+            idialog
+                    .setInputText(DeviceSettings.DEFAULT_GPS_PARSE_DELIMITER)
+                    .setTitle("GPS Parse Delimiter")
+                    .setPositiveButton(R.string.str_ok, (dialog, which) -> {
+                        String delimiter = idialog.getText().trim();
+                        getTtAppCtx().getDeviceSettings().setGpsParseDelimiter(delimiter);
+                        prefParseDelimiter.setSummary(delimiter);
+                    })
+                    .setNeutralButton(R.string.str_cancel, null)
+                    .show();
+
+            return true;
+        }
+    };
+    //endregion
+
+    //region Check NMEA
+    private final Preference.OnPreferenceClickListener checkNmeaListener = preference -> {
+        FragmentActivity activity = getActivity();
+
+        if (activity != null) {
+            if (getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
+                CheckNmeaDialogTt.newInstance().show(activity.getSupportFragmentManager(), "CHECK_NMEA");
+            } else {
+                new AlertDialog.Builder(activity)
+                        .setMessage("GPS needs to be configured before checking for its NMEA configuration.")
+                        .setPositiveButton(R.string.str_ok, null)
+                        .show();
+            }
+        }
+
+        return false;
+    };
+    //endregion
+    //endregion
+
+    //region Range Finder
     private final Preference.OnPreferenceClickListener rfCheckListener = new Preference.OnPreferenceClickListener() {
         @Override
         public boolean onPreferenceClick(@NonNull Preference preference) {
@@ -689,167 +901,7 @@ public class DeviceSettingsFragment extends TtBasePrefFragment {
             return false;
         }
     };
-    //endregion
 
-
-    //region External/Internal Switch & Listener
-    private final Preference.OnPreferenceChangeListener useExternalListener = new Preference.OnPreferenceChangeListener() {
-        @Override
-        public boolean onPreferenceChange(@NonNull Preference preference, Object newValue) {
-            boolean useExternal = (boolean)newValue;
-
-            boolean success;
-
-            if (useExternal) {
-                success = requestBluetoothPermission();
-
-                if (success) {
-                    switchToExternal();
-                }
-            } else {
-                success = requestInternalGpsPermission();
-
-                if (success) {
-                    switchToInternal();
-                }
-            }
-
-            if (success) {
-                swtUseExGpsDev.setSummary(getString(useExternal ? R.string.ds_gps_use_external : R.string.ds_gps_use_internal));
-            }
-
-            return success;
-        }
-    };
-
-
-    private void switchToExternal() {
-        if (AndroidUtils.App.checkBluetoothPermission(getContext())) {
-            TtBluetoothManager btm = getTtAppCtx().getBluetoothManager();
-            getTtAppCtx().getDeviceSettings().setGpsConfigured(false);
-            prefGpsCheck.setSummary(R.string.ds_gps_not_connected);
-
-            if (btm.isAvailable()) {
-                if (btm.isEnabled()) {
-                    setBTValues(prefLstGpsDevice);
-                    exGpsCat.setEnabled(true);
-                } else {
-                    //bluetooth isn't turned on, request that it should be
-                    Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intent);
-                }
-            } else {
-                //no bluetooth option on device
-                Toast.makeText(getTtAppCtx(), R.string.ds_no_bt, Toast.LENGTH_LONG).show();
-            }
-        } else {
-            requestBluetoothPermission();
-        }
-    }
-
-    private void switchToInternal() {
-        if (!getTtAppCtx().isGpsServiceStarted()) {
-            getTtAppCtx().startGpsService();
-            Toast.makeText(getActivity(), "GPS Service not available. Please try again.", Toast.LENGTH_LONG).show();
-            getTtAppCtx().getReport().writeError("GPS Service Not Started", "DeviceSettingsFragment:switchToInternal");
-            return;
-        }
-
-        if (!getTtAppCtx().getGps().isInternalGpsEnabled()) {
-            requestInternalGpsPermission();
-        } else {
-            getTtAppCtx().getGps().stopGps();
-            getTtAppCtx().getGps().setGpsProvider(null);
-
-            getTtAppCtx().getDeviceSettings().setGpsConfigured(true);
-            exGpsCat.setEnabled(false);
-
-            getTtAppCtx().getDeviceSettings().setGpsDeviceId(StringEx.Empty);
-            getTtAppCtx().getDeviceSettings().setGpsDeviceName(StringEx.Empty);
-
-            if (getTtAppCtx().getDeviceSettings().isGpsAlwaysOn()) {
-                getTtAppCtx().getGps().startGps();
-            }
-        }
-    }
-    //endregion
-
-    //region GPS Parse Method
-    private final Preference.OnPreferenceChangeListener parseMethodListener = new Preference.OnPreferenceChangeListener() {
-        @Override
-        public boolean onPreferenceChange(@NonNull Preference preference, Object newValue) {
-            boolean parseByTime = (boolean)newValue;
-
-            if (parseByTime) {
-                swtParseMethod.setSummary(getString(R.string.str_gps_parse_time));
-                prefParseDelimiter.setEnabled(false);
-            } else {
-                swtParseMethod.setSummary(getString(R.string.str_gps_parse_delim));
-                prefParseDelimiter.setEnabled(true);
-            }
-
-            return true;
-        }
-    };
-
-    private final Preference.OnPreferenceClickListener parseDelimiterClickListener = new Preference.OnPreferenceClickListener() {
-        @Override
-        public boolean onPreferenceClick(@NonNull Preference preference) {
-            final InputDialog idialog = new InputDialog(getActivity());
-
-            idialog
-                    .setInputText(DeviceSettings.DEFAULT_GPS_PARSE_DELIMITER)
-                    .setTitle("GPS Parse Delimiter")
-                    .setPositiveButton(R.string.str_ok, (dialog, which) -> {
-                        String delimiter = idialog.getText().trim();
-                        getTtAppCtx().getDeviceSettings().setGpsParseDelimiter(delimiter);
-                        prefParseDelimiter.setSummary(delimiter);
-                    })
-                    .setNeutralButton(R.string.str_cancel, null)
-                    .show();
-
-            return true;
-        }
-    };
-    //endregion
-
-    //region GPS Selection
-    private final Preference.OnPreferenceChangeListener btnGPSList = new Preference.OnPreferenceChangeListener() {
-        public boolean onPreferenceChange(@NonNull Preference preference, Object newValue) {
-
-            try {
-                String[] values = newValue.toString().split(",");
-
-                if (values.length > 0) {
-                    if (!getTtAppCtx().getDeviceSettings().getGpsDeviceID().equals(values[0])) {
-                        getTtAppCtx().getDeviceSettings().setGpsDeviceId(values[0]);
-                        getTtAppCtx().getDeviceSettings().setGpsDeviceName(values[1]);
-
-                        prefLstGpsDevice.setSummary(values[1]);
-                        prefGpsCheck.setSummary(R.string.ds_dev_not_configured);
-                        getTtAppCtx().getDeviceSettings().setGpsConfigured(false);
-
-                        TtUtils.Misc.verifyGpsDevice(values[1], values[0], getActivity());
-                    }
-                } else {
-                    getTtAppCtx().getDeviceSettings().setGpsDeviceId(StringEx.Empty);
-                    getTtAppCtx().getDeviceSettings().setGpsDeviceName(StringEx.Empty);
-
-                    prefLstGpsDevice.setSummary(getString(R.string.ds_no_dev));
-                    prefGpsCheck.setSummary(R.string.ds_dev_not_configured);
-                    getTtAppCtx().getDeviceSettings().setGpsConfigured(false);
-                }
-            } catch (Exception ex) {
-                getTtAppCtx().getReport().writeError(ex.getMessage(), "DeviceSettingsFragment:btnGPSList");
-            }
-
-            return true;
-        }
-    };
-    //endregion
-
-    //region RangeFinder Selection
     private final Preference.OnPreferenceChangeListener btnRFList = new Preference.OnPreferenceChangeListener() {
         public boolean onPreferenceChange(@NonNull Preference preference, Object newValue) {
             try {
@@ -883,23 +935,246 @@ public class DeviceSettingsFragment extends TtBasePrefFragment {
     };
     //endregion
 
-
-    //region Check NMEA
-    private final Preference.OnPreferenceClickListener checkNmeaListener = preference -> {
-        FragmentActivity activity = getActivity();
-
-        if (activity != null) {
-            if (getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
-                CheckNmeaDialogTt.newInstance().show(activity.getSupportFragmentManager(), "CHECK_NMEA");
+    //region VN100
+    //vnCheckListener
+    private final Preference.OnPreferenceClickListener vnCheckListener = new Preference.OnPreferenceClickListener() {
+        @Override
+        public boolean onPreferenceClick(@NonNull Preference preference) {
+            TwoTrailsApp app = getTtAppCtx();
+            if (StringEx.isEmpty(app.getDeviceSettings().getVN100DeviceID())) {
+                Toast.makeText(getActivity(), "VN100 must first be selected", Toast.LENGTH_LONG).show();
             } else {
-                new AlertDialog.Builder(activity)
-                        .setMessage("GPS needs to be configured before checking for its NMEA configuration.")
-                        .setPositiveButton(R.string.str_ok, null)
-                        .show();
-            }
-        }
+                try {
+                    app.getDeviceSettings().setVN100Configured(false);
 
-        return false;
+                    final Activity activity = getActivity();
+
+                    if (activity == null) {
+                        Toast.makeText(getActivity(), "An error has occurred. Please see log for details.", Toast.LENGTH_LONG).show();
+                        app.getReport().writeError("Null Activity", "DeviceSettingsFragment:vnCheckListener");
+                        return false;
+                    }
+
+                    if (!app.isVNInsServiceStarted()) {
+                        app.startVNService();
+                        Toast.makeText(getActivity(), "INS Service not available. Please try again.", Toast.LENGTH_LONG).show();
+                        app.getReport().writeError("INS Service Not Started", "DeviceSettingsFragment:vnCheckListener");
+                        return false;
+                    }
+
+                    final ProgressDialogEx pd = new ProgressDialogEx(activity);
+                    final VNInsService.VNInsBinder vn = app.getVnIns();
+
+                    prefVNCheck.setSummary(R.string.ds_vn_not_connected);
+
+                    final VNInsService.Listener listener = new VNInsService.Listener() {
+                        @Override
+                        public void insDataReceived(VNInsData data) {
+                            vn.removeListener(this);
+
+                            app.getDeviceSettings().setVN100Configured(true);
+
+                            activity.runOnUiThread(() -> {
+                                pd.setMessage(activity.getString(R.string.ds_vn_connected));
+
+                                if (app.getDeviceSettings().isVN100AlwaysOn()) {
+                                    prefVNCheck.setSummary(R.string.ds_vn_connected);
+                                } else {
+                                    prefVNCheck.setSummary(R.string.ds_dev_configured);
+                                    vn.stopIns();
+                                }
+
+                                //TODO remove once production
+                                new Handler().postDelayed(pd::dismiss, 1000);
+
+                                //TODO uncomment once production
+//                                if (app.getDeviceSettings().getAutoSetInsNameToMetaAsk()) {
+//                                    if (lastMetaAsk.isBefore(DateTime.now().minusSeconds(10)) && app.hasDAL()) {
+//                                        DontAskAgainDialog dialog = new DontAskAgainDialog(getActivity(),
+//                                                DeviceSettings.AUTO_SET_INS_NAME_TO_META_ASK,
+//                                                DeviceSettings.AUTO_SET_INS_NAME_TO_META,
+//                                                app.getDeviceSettings().getPrefs());
+//
+//                                        dialog.setMessage("INS is connected. Do you want to update metadata with the current INS receiver?");
+//
+//                                        dialog.setPositiveButton("Default", setMetaListener, 1);
+//
+//                                        if (app.hasDAL())
+//                                            dialog.setNegativeButton("All", setMetaListener, 2);
+//
+//                                        dialog.setNeutralButton("No", null, 0);
+//
+//                                        dialog.show();
+//
+//                                        lastMetaAsk = DateTime.now();
+//
+//                                        pd.dismiss();
+//                                    } else {
+//                                        new Handler().postDelayed(pd::dismiss, 1000);
+//                                    }
+//                                } else {
+//                                    setMetaListener.onClick(null, 0, app.getDeviceSettings().getAutoSetInsNameToMeta());
+//                                    new Handler().postDelayed(pd::dismiss, 1000);
+//                                }
+                            });
+                        }
+
+                        @Override
+                        public void nmeaStringReceived(String nmeaString) {
+
+                        }
+
+                        @Override
+                        public void nmeaSentenceReceived(VNNmeaSentence nmeaSentence) {
+
+                        }
+
+                        @Override
+                        public void receivingData(boolean receiving) {
+
+                        }
+
+                        @Override
+                        public void receivingValidData(boolean receiving) {
+
+                        }
+
+                        @Override
+                        public void insStarted() {
+                            activity.runOnUiThread(() -> {
+                                pd.setMessage("VN100 Connected. Listening for data.");
+                            });
+                        }
+
+                        @Override
+                        public void insStopped() {
+
+                        }
+
+                        @Override
+                        public void insServiceStarted() {
+
+                        }
+
+                        @Override
+                        public void insServiceStopped() {
+
+                        }
+
+                        @Override
+                        public void insError(VNInsService.InsError error) {
+                            vn.removeListener(this);
+                            vn.stopIns();
+
+                            app.getDeviceSettings().setVN100Configured(false);
+
+                            String message;
+
+                            switch (error) {
+                                case LostDeviceConnection: message = "Lost connection to bluetooth device."; break;
+                                case DeviceConnectionEnded: message = "Bluetooth connection terminated."; break;
+                                case FailedToConnect: message = "Failed to connect to bluetooth device."; break;
+                                case Unknown: message = error.toString(); break;
+                                default: message = "An Unknown INS error as occurred"; break;
+                            }
+
+                            activity.runOnUiThread(pd::dismiss);
+
+                            Toast.makeText(activity, message, Toast.LENGTH_SHORT).show();
+                        }
+                    };
+
+                    vn.addListener(listener);
+
+                    final Runnable hideDialog = () -> activity.runOnUiThread(pd::dismiss);
+
+                    pd.setMessage(getString(R.string.ds_vn_connecting));
+
+                    pd.setOnDismissListener(dialog -> vn.startIns());
+
+                    Runnable runINS = () -> {
+                        vn.stopIns();
+
+                        try {
+                            vn.setDevice(app.getDeviceSettings().getVN100DeviceID());
+                        } catch (Exception e) {
+                            app.getReport().writeError("Unable to set INS device", "DeviceSettingsFragment:vnCheckListener");
+                            activity.runOnUiThread(() -> pd.setMessage("Unable to configured INS device"));
+                            return;
+                        }
+
+                        vn.setInsMode(VNInsService.InsMode.Serial);
+
+                        switch(vn.startIns()) {
+                            case InsStarted:
+                            case InsAlreadyStarted:
+                                activity.runOnUiThread(() -> pd.setMessage("VN100 started. Listening for data.."));
+                                break;
+                            case InsError:
+                                hideDialog.run();
+                                Toast.makeText(activity, "The was an error starting the VN100.", Toast.LENGTH_LONG).show();
+                                break;
+                            case InsRequiresPermissions:
+                                Toast.makeText(activity, "The VN100 service needs Bluetooth permissions to use the INS.", Toast.LENGTH_LONG).show();
+                                break;
+                            case DeviceNotFound:
+                                hideDialog.run();
+                                Toast.makeText(activity, "The VN100 was not found.", Toast.LENGTH_LONG).show();
+                                break;
+                            case Unknown:
+                                hideDialog.run();
+                                break;
+                        }
+
+                        activity.runOnUiThread(pd::show);
+                    };
+
+                    if (vn.isInsRunning()) {
+                        vn.stopIns();
+                        new Handler().postDelayed(runINS, 1000);
+                    } else {
+                        runINS.run();
+                    }
+                } catch (Exception ex) {
+                    app.getReport().writeError(ex.getMessage(), "DeviceSettingsFragment:checkVN");
+                    Toast.makeText(getActivity(), "Unknown Error. See log for details.", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            return false;
+        }
+    };
+
+    private final Preference.OnPreferenceChangeListener btnVNList = new Preference.OnPreferenceChangeListener() {
+        public boolean onPreferenceChange(@NonNull Preference preference, Object newValue) {
+
+            try {
+                String[] values = newValue.toString().split(",");
+                DeviceSettings ds = getTtAppCtx().getDeviceSettings();
+
+                if (values.length > 0) {
+                    if (!ds.getVN100DeviceID().equals(values[0])) {
+                        ds.setVN100DeviceId(values[0]);
+                        ds.setVN100DeviceName(values[1]);
+
+                        prefLstVNDevice.setSummary(values[1]);
+                        prefVNCheck.setSummary(R.string.ds_dev_not_configured);
+                        ds.setVN100Configured(false);
+                    }
+                } else {
+                    ds.setVN100DeviceId(StringEx.Empty);
+                    ds.setVN100DeviceName(StringEx.Empty);
+
+                    prefLstVNDevice.setSummary(getString(R.string.ds_no_dev));
+                    prefVNCheck.setSummary(R.string.ds_dev_not_configured);
+                    ds.setVN100Configured(false);
+                }
+            } catch (Exception ex) {
+                getTtAppCtx().getReport().writeError(ex.getMessage(), "DeviceSettingsFragment:btnVNList");
+            }
+
+            return true;
+        }
     };
     //endregion
 

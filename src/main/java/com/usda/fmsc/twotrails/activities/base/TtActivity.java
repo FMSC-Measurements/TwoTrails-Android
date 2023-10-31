@@ -21,4 +21,8 @@ public abstract class TtActivity extends AppCompatActivity {
     public boolean requiresRFService() {
         return false;
     }
+
+    public boolean requiresInsService() {
+        return false;
+    }
 }
