@@ -15,9 +15,12 @@ import com.usda.fmsc.twotrails.MapSettings;
 import com.usda.fmsc.twotrails.ProjectSettings;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
+import com.usda.fmsc.twotrails.ins.TtInsData;
 import com.usda.fmsc.twotrails.objects.DataActionType;
 import com.usda.fmsc.twotrails.objects.TtUserAction;
 import com.usda.fmsc.twotrails.objects.points.GpsPoint;
+import com.usda.fmsc.twotrails.objects.points.InertialPoint;
+import com.usda.fmsc.twotrails.objects.points.InertialStartPoint;
 import com.usda.fmsc.twotrails.objects.points.QuondamPoint;
 import com.usda.fmsc.twotrails.objects.points.TravPoint;
 import com.usda.fmsc.twotrails.objects.TtGroup;
@@ -88,8 +91,11 @@ public class DataAccessLayer extends IDataLayer {
         createGpsPointDataTable(db);
         createTravPointDataTable(db);
         createQuondamPointDataTable(db);
+        createInertialStartPointDataTable(db);
+        createInertialPointDataTable(db);
         createProjectInfoDataTable(db);
         createTtNmeaTable(db);
+        createTtInsTable(db);
         createGroupTable(db);
         createPolygonAttrTable(db);
         CreateActivityTable(db);
@@ -182,6 +188,30 @@ public class DataAccessLayer extends IDataLayer {
         }
     }
 
+    private void createInertialStartPointDataTable(SQLiteDatabase db) {
+        try
+        {
+            db.execSQL(TwoTrailsSchema.InertialStartPointSchema.CreateTable);
+        }
+        catch (Exception ex)
+        {
+            logError(ex.getMessage(), "DataAccessLayer:createInertialPointStartDataTable");
+            throw new RuntimeException("DAL:createInertialStartInertialDataTable");
+        }
+    }
+
+    private void createInertialPointDataTable(SQLiteDatabase db) {
+        try
+        {
+            db.execSQL(TwoTrailsSchema.InertialPointSchema.CreateTable);
+        }
+        catch (Exception ex)
+        {
+            logError(ex.getMessage(), "DataAccessLayer:createInertialPointDataTable");
+            throw new RuntimeException("DAL:createInertialPointDataTable");
+        }
+    }
+
     private void createProjectInfoDataTable(SQLiteDatabase db) {
         try
         {
@@ -203,6 +233,18 @@ public class DataAccessLayer extends IDataLayer {
         {
             logError(ex.getMessage(), "DataAccessLayer:createTtnmeaTable");
             throw new RuntimeException("DAL:createTtnmeaTable");
+        }
+    }
+
+    private void createTtInsTable(SQLiteDatabase db) {
+        try
+        {
+            db.execSQL(TwoTrailsSchema.TtInsSchema.CreateTable);
+        }
+        catch (Exception ex)
+        {
+            logError(ex.getMessage(), "DataAccessLayer:createTtInsTable");
+            throw new RuntimeException("DAL:createTtInsTable");
         }
     }
 
@@ -532,6 +574,7 @@ public class DataAccessLayer extends IDataLayer {
         return getPoints(where, 0);
     }
 
+    //TODO merge to single query
     private ArrayList<TtPoint> getPoints(String where, int limit) {
         ArrayList<TtPoint> points = new ArrayList<>();
 
@@ -618,12 +661,26 @@ public class DataAccessLayer extends IDataLayer {
                         point.setGroupCN(c.getString(19));
 
 
-                    if (point.isGpsType())
-                        getGpsPointData(point);
-                    else if (point.isTravType())
-                        getTravPointData(point);
-                    else if (point.getOp() == OpType.Quondam)
-                        getQuondamPointData(point);
+                    switch (point.getOp()) {
+                        case InertialStart:
+                            getInertialStartPointData(point);
+                        case GPS:
+                        case Take5:
+                        case Walk:
+                        case WayPoint:
+                            getGpsPointData(point);
+                            break;
+                        case Traverse:
+                        case SideShot:
+                            getTravPointData(point);
+                            break;
+                        case Quondam:
+                            getQuondamPointData(point);
+                            break;
+                        case Inertial:
+                            getInertialPointData(point);
+                            break;
+                    }
 
                     points.add(point);
 
@@ -744,6 +801,65 @@ public class DataAccessLayer extends IDataLayer {
             throw new RuntimeException("DAL:getQuondamPointData");
         }
     }
+
+    private void getInertialStartPointData(TtPoint point) {
+        InertialStartPoint isp = (InertialStartPoint) point;
+
+        try {
+            String query = String.format("select %s from %s where %s = '%s'",
+                    TwoTrailsSchema.InertialStartPointSchema.SelectItems,
+                    TwoTrailsSchema.InertialStartPointSchema.TableName,
+                    TwoTrailsSchema.SharedSchema.CN,
+                    isp.getCN());
+
+            Cursor c = getDB().rawQuery(query, null);
+
+            if (c.moveToFirst()) {
+                if (!c.isNull(1))
+                    isp.setFwdAz(c.getDouble(1));
+                if (!c.isNull(2))
+                    isp.setBkAz(c.getDouble(2));
+                if (!c.isNull(3))
+                    isp.setAzOffset(c.getDouble(3));
+            }
+
+            c.close();
+        } catch (Exception ex) {
+            logError(ex.getMessage(), "DAL:getInertialStartPointData");
+            throw new RuntimeException("DAL:getInertialStartPointData");
+        }
+    }
+
+    private void getInertialPointData(TtPoint point) {
+        InertialPoint ip = (InertialPoint) point;
+
+        try {
+            String query = String.format("select %s from %s where %s = '%s'",
+                    TwoTrailsSchema.InertialPointSchema.SelectItems,
+                    TwoTrailsSchema.InertialPointSchema.TableName,
+                    TwoTrailsSchema.SharedSchema.CN,
+                    ip.getCN());
+
+            Cursor c = getDB().rawQuery(query, null);
+
+            if (c.moveToFirst()) {
+                ip.setInertialValues(
+                        c.getDouble(1),
+                        ParseEx.parseBoolean(c.getString(2)),
+                        c.getDouble(3),
+                        c.getDouble(4),
+                        c.getDouble(5),
+                        c.getDouble(6)
+                );
+            }
+
+            c.close();
+        } catch (Exception ex) {
+            logError(ex.getMessage(), "DAL:getInertialPointData");
+            throw new RuntimeException("DAL:getInertialPointData");
+        }
+    }
+
     //endregion
     //endregion
 
@@ -846,6 +962,8 @@ public class DataAccessLayer extends IDataLayer {
             getDB().insert(TwoTrailsSchema.PointSchema.TableName, null, cvs);
 
             switch (point.getOp()) {
+                case InertialStart:
+                    insertInertialStartData((InertialStartPoint) point);
                 case GPS:
                 case Take5:
                 case Walk:
@@ -858,6 +976,9 @@ public class DataAccessLayer extends IDataLayer {
                     break;
                 case Quondam:
                     insertQuondamData((QuondamPoint) point);
+                    break;
+                case Inertial:
+                    insertInertialData((InertialPoint) point);
                     break;
             }
         } catch (Exception ex) {
@@ -920,6 +1041,44 @@ public class DataAccessLayer extends IDataLayer {
         } catch (Exception ex) {
             logError(ex.getMessage(), "DAL:insertQuondamData");
             throw new RuntimeException("DAL:insertQuondamData");
+        }
+    }
+
+
+    private void insertInertialStartData(InertialStartPoint point) {
+        try {
+            ContentValues cvs = new ContentValues();
+
+            cvs.put(TwoTrailsSchema.SharedSchema.CN, point.getCN());
+            cvs.put(TwoTrailsSchema.InertialStartPointSchema.BackAz, point.getBkAz());
+            cvs.put(TwoTrailsSchema.InertialStartPointSchema.ForwadAz, point.getFwdAz());
+            cvs.put(TwoTrailsSchema.InertialStartPointSchema.AzimuthOffset, point.getAzOffset());
+
+            getDB().insert(TwoTrailsSchema.InertialStartPointSchema.TableName, null, cvs);
+
+        } catch (Exception ex) {
+            logError(ex.getMessage(), "DAL:insertInertialStartData");
+            throw new RuntimeException("DAL:insertInertialStartData");
+        }
+    }
+
+    private void insertInertialData(InertialPoint point) {
+        try {
+            ContentValues cvs = new ContentValues();
+
+            cvs.put(TwoTrailsSchema.SharedSchema.CN, point.getCN());
+            cvs.put(TwoTrailsSchema.InertialPointSchema.AllSegmentsValid, point.areAllSegmentsValid());
+            cvs.put(TwoTrailsSchema.InertialPointSchema.TimeSpan, point.getTimeSpan());
+            cvs.put(TwoTrailsSchema.InertialPointSchema.Azimuth, point.getAzimuth());
+            cvs.put(TwoTrailsSchema.InertialPointSchema.DistanceX, point.getDistX());
+            cvs.put(TwoTrailsSchema.InertialPointSchema.DistanceY, point.getDistY());
+            cvs.put(TwoTrailsSchema.InertialPointSchema.DistanceZ, point.getDistZ());
+
+            getDB().insert(TwoTrailsSchema.InertialPointSchema.TableName, null, cvs);
+
+        } catch (Exception ex) {
+            logError(ex.getMessage(), "DAL:insertInertialData");
+            throw new RuntimeException("DAL:insertInertialData");
         }
     }
     //endregion
@@ -1073,7 +1232,7 @@ public class DataAccessLayer extends IDataLayer {
                 }
 
 
-                int rows =getDB().update(TwoTrailsSchema.PointSchema.TableName, cvs,
+                int rows = getDB().update(TwoTrailsSchema.PointSchema.TableName, cvs,
                         TwoTrailsSchema.SharedSchema.CN + "=?", new String[] { updatedPoint.getCN() });
 
                 if (rows < 1)
@@ -1083,6 +1242,8 @@ public class DataAccessLayer extends IDataLayer {
                     changeOperation(updatedPoint, oldPoint);
                 } else {
                     switch (updatedPoint.getOp()) {
+                        case InertialStart:
+                            updateInertialStartData((InertialStartPoint)updatedPoint);
                         case GPS:
                         case Take5:
                         case Walk:
@@ -1095,6 +1256,9 @@ public class DataAccessLayer extends IDataLayer {
                             break;
                         case Quondam:
                             updateQuondamData((QuondamPoint)updatedPoint, (QuondamPoint)oldPoint);
+                            break;
+                        case Inertial:
+                            updateInertialData((InertialPoint)updatedPoint);
                             break;
                     }
                 }
@@ -1110,6 +1274,8 @@ public class DataAccessLayer extends IDataLayer {
 
     private void changeOperation(TtPoint updatedPoint, TtPoint oldPoint) {
         switch (oldPoint.getOp()) {
+            case InertialStart:
+                removeGpsData((InertialStartPoint)oldPoint);
             case GPS:
             case Take5:
             case Walk:
@@ -1126,6 +1292,8 @@ public class DataAccessLayer extends IDataLayer {
         }
 
         switch (updatedPoint.getOp()) {
+            case InertialStart:
+                insertInertialStartData((InertialStartPoint)updatedPoint);
             case GPS:
             case Take5:
             case Walk:
@@ -1138,6 +1306,9 @@ public class DataAccessLayer extends IDataLayer {
                 break;
             case Quondam:
                 insertQuondamData((QuondamPoint)updatedPoint);
+                break;
+            case Inertial:
+                insertInertialData((InertialPoint)updatedPoint);
                 break;
         }
     }
@@ -1187,7 +1358,6 @@ public class DataAccessLayer extends IDataLayer {
                 TwoTrailsSchema.SharedSchema.CN + "=?", new String[]{updatedPoint.getCN()});
     }
 
-
     private void updateQuondamLink(QuondamPoint point) {
         if (point.hasParent()) {
             TtPoint linkedPoint = getPointByCN(point.getParentCN());
@@ -1211,6 +1381,33 @@ public class DataAccessLayer extends IDataLayer {
             }
         }
     }
+
+    private void updateInertialStartData(InertialStartPoint updatedPoint) {
+        ContentValues cvs = new ContentValues();
+
+        cvs.put(TwoTrailsSchema.SharedSchema.CN, updatedPoint.getCN());
+        cvs.put(TwoTrailsSchema.InertialStartPointSchema.BackAz, updatedPoint.getBkAz());
+        cvs.put(TwoTrailsSchema.InertialStartPointSchema.ForwadAz, updatedPoint.getFwdAz());
+        cvs.put(TwoTrailsSchema.InertialStartPointSchema.AzimuthOffset, updatedPoint.getAzOffset());
+
+        getDB().update(TwoTrailsSchema.InertialStartPointSchema.TableName, cvs,
+                TwoTrailsSchema.SharedSchema.CN + "=?", new String[]{ updatedPoint.getCN() });
+    }
+
+    private void updateInertialData(InertialPoint updatedPoint) {
+        ContentValues cvs = new ContentValues();
+
+        cvs.put(TwoTrailsSchema.SharedSchema.CN, updatedPoint.getCN());
+        cvs.put(TwoTrailsSchema.InertialPointSchema.AllSegmentsValid, updatedPoint.areAllSegmentsValid());
+        cvs.put(TwoTrailsSchema.InertialPointSchema.TimeSpan, updatedPoint.getTimeSpan());
+        cvs.put(TwoTrailsSchema.InertialPointSchema.Azimuth, updatedPoint.getAzimuth());
+        cvs.put(TwoTrailsSchema.InertialPointSchema.DistanceX, updatedPoint.getDistX());
+        cvs.put(TwoTrailsSchema.InertialPointSchema.DistanceY, updatedPoint.getDistY());
+        cvs.put(TwoTrailsSchema.InertialPointSchema.DistanceZ, updatedPoint.getDistZ());
+
+        getDB().update(TwoTrailsSchema.InertialPointSchema.TableName, cvs,
+                TwoTrailsSchema.SharedSchema.CN + "=?", new String[]{ updatedPoint.getCN() });
+    }
     //endregion
 
     //region Delete
@@ -1225,19 +1422,23 @@ public class DataAccessLayer extends IDataLayer {
 
             if (success) {
                 switch (point.getOp()) {
+                    case InertialStart:
+                        removeInertialStartData(point);
                     case GPS:
                     case Take5:
                     case Walk:
                     case WayPoint:
-                        removeGpsData((GpsPoint)point);
+                        removeGpsData(point);
                         break;
                     case Traverse:
                     case SideShot:
-                        removeTravData((TravPoint)point);
+                        removeTravData(point);
                         break;
                     case Quondam:
-                        removeQuondamData((QuondamPoint)point);
+                        removeQuondamData((QuondamPoint) point);
                         break;
+                    case Inertial:
+                        removeInertialData(point);
                 }
 
                 updateUserActivity(DataActionType.DeletedPoints);
@@ -1307,7 +1508,7 @@ public class DataAccessLayer extends IDataLayer {
     }
 
 
-    private void removeGpsData(GpsPoint point) {
+    private void removeGpsData(TtPoint point) {
         try {
             getDB().delete(TwoTrailsSchema.GpsPointSchema.TableName,
                     TwoTrailsSchema.SharedSchema.CN + "=?",
@@ -1320,7 +1521,7 @@ public class DataAccessLayer extends IDataLayer {
         }
     }
 
-    private void removeTravData(TravPoint point) {
+    private void removeTravData(TtPoint point) {
         try {
             getDB().delete(TwoTrailsSchema.TravPointSchema.TableName,
                     TwoTrailsSchema.SharedSchema.CN + "=?",
@@ -1341,6 +1542,28 @@ public class DataAccessLayer extends IDataLayer {
         } catch (Exception ex) {
             logError(ex.getMessage(), "DAL:removeQuondamData");
             throw new RuntimeException("DAL:removeQuondamData");
+        }
+    }
+
+    private void removeInertialStartData(TtPoint point) {
+        try {
+            getDB().delete(TwoTrailsSchema.InertialStartPointSchema.TableName,
+                    TwoTrailsSchema.SharedSchema.CN + "=?",
+                    new String[] { point.getCN() });
+        } catch (Exception ex) {
+            logError(ex.getMessage(), "DAL:removeInertialStartData");
+            throw new RuntimeException("DAL:removeInertialStartData");
+        }
+    }
+
+    private void removeInertialData(TtPoint point) {
+        try {
+            getDB().delete(TwoTrailsSchema.InertialPointSchema.TableName,
+                    TwoTrailsSchema.SharedSchema.CN + "=?",
+                    new String[] { point.getCN() });
+        } catch (Exception ex) {
+            logError(ex.getMessage(), "DAL:removeInertialData");
+            throw new RuntimeException("DAL:removeInertialData");
         }
     }
     //endregion
@@ -2040,7 +2263,7 @@ public class DataAccessLayer extends IDataLayer {
 
             updateUserActivity(DataActionType.InsertedNmea);
         } catch (Exception ex) {
-            logError(ex.getMessage(), "DAL:insertGroup");
+            logError(ex.getMessage(), "DAL:insertNmea");
         }
 
         return success;
@@ -2167,6 +2390,208 @@ public class DataAccessLayer extends IDataLayer {
     //endregion
     //endregion
 
+    //region INS
+    //region Get
+    public ArrayList<TtInsData> getInsData() {
+        return getInsData(null);
+    }
+
+    public TtInsData getInsDataByCN(String cn) {
+        ArrayList<TtInsData> data =
+                getInsData(String.format("%s = '%s'",
+                        TwoTrailsSchema.SharedSchema.CN, cn));
+
+        if (data.size() > 0)
+            return data.get(0);
+        else
+            return null;
+    }
+
+    public ArrayList<TtInsData> getInsDataByPointCN(String pointCN) {
+        return getInsData(String.format("%s = '%s'",
+                TwoTrailsSchema.TtInsSchema.PointCN,
+                pointCN));
+    }
+
+    public ArrayList<TtInsData> getInsData(String where) {
+        ArrayList<TtInsData> data = new ArrayList<>();
+
+        try {
+            String query = createSelectQuery(
+                    TwoTrailsSchema.TtInsSchema.TableName,
+                    TwoTrailsSchema.TtInsSchema.SelectItems,
+                    where);
+
+            Cursor c = getDB().rawQuery(query, null);
+
+            if (c.moveToFirst()) {
+                do {
+                    String cn, pointCN;
+                    DateTime timeCreated;
+                    boolean isConsecutive;
+                    long timeSinceStart;
+
+                    double timespan;
+                    double distX, distY, distZ;
+                    double rotX, rotY, rotZ;
+                    double velX, velY, velZ;
+                    double yaw, pitch, roll;
+
+                    cn = c.getString(0);
+                    pointCN = c.getString(1);
+                    timeCreated = parseDateTime(c.getString(2));
+                    
+                    isConsecutive = ParseEx.parseBoolean(c.getString(3));
+                    timeSinceStart = c.getLong(4);
+                    timespan = c.getDouble(5);
+                    
+                    distX = c.getDouble(6);
+                    distY = c.getDouble(7);
+                    distZ = c.getDouble(8);
+                    
+                    rotX = c.getDouble(9);
+                    rotY = c.getDouble(10);
+                    rotZ = c.getDouble(11);
+
+                    velX = c.getDouble(12);
+                    velY = c.getDouble(13);
+                    velZ = c.getDouble(14);
+                    
+                    yaw = c.getDouble(15);
+                    pitch = c.getDouble(16);
+                    roll = c.getDouble(17);
+                    
+                    data.add(new TtInsData(
+                            cn, pointCN, timeCreated,
+                            isConsecutive, timeSinceStart, timespan,
+                            distX, distY, distZ,
+                            rotX, rotY, rotZ,
+                            velX, velY, velZ,
+                            yaw, pitch, roll));
+                } while (c.moveToNext());
+            }
+
+            c.close();
+        } catch (Exception ex) {
+            logError(ex.getMessage(), "DAL:getInsData");
+            throw new RuntimeException("DAL:getInsData");
+        }
+
+        return data;
+    }
+    //endregion
+
+    //region Insert
+    public boolean insertInsData(Collection<TtInsData> data) {
+        try {
+            getDB().beginTransaction();
+
+            for (TtInsData burst : data) {
+                if (!insertInsDataNoTrans(burst)) {
+                    return false;
+                }
+            }
+
+            getDB().setTransactionSuccessful();
+        } catch (Exception ex) {
+            logError(ex.getMessage(), "DAL:insertInsData");
+            throw new RuntimeException("DAL:insertInsData");
+        } finally {
+            getDB().endTransaction();
+        }
+
+        return true;
+    }
+
+    public boolean insertInsData(TtInsData data) {
+        boolean success;
+
+        try {
+            getDB().beginTransaction();
+
+            success = insertInsDataNoTrans(data);
+
+            if (success) {
+                getDB().setTransactionSuccessful();
+            }
+        } catch (Exception ex) {
+            logError(ex.getMessage(), "DAL:insertInsData");
+            throw new RuntimeException("DAL:insertInsData");
+        } finally {
+            getDB().endTransaction();
+        }
+
+        return success;
+    }
+
+    private boolean insertInsDataNoTrans(TtInsData data) {
+        boolean success = false;
+
+        try {
+            ContentValues cvs = new ContentValues();
+            cvs.put(TwoTrailsSchema.SharedSchema.CN, data.getCN());
+            cvs.put(TwoTrailsSchema.TtInsSchema.PointCN, data.getPointCN());
+            cvs.put(TwoTrailsSchema.TtInsSchema.TimeCreated, dtf.print(data.getTimeCreated()));
+
+            cvs.put(TwoTrailsSchema.TtInsSchema.IsConsecutive, data.isConsecutive());
+            cvs.put(TwoTrailsSchema.TtInsSchema.TimeSinceStart, data.getTimeSinceStart());
+            cvs.put(TwoTrailsSchema.TtInsSchema.TimeSpan, data.getTimeSpan());
+
+            cvs.put(TwoTrailsSchema.TtInsSchema.DistanceX, data.getDistanceX());
+            cvs.put(TwoTrailsSchema.TtInsSchema.DistanceY, data.getDistanceY());
+            cvs.put(TwoTrailsSchema.TtInsSchema.DistanceZ, data.getDistanceZ());
+
+            cvs.put(TwoTrailsSchema.TtInsSchema.RotationX, data.getRotationX());
+            cvs.put(TwoTrailsSchema.TtInsSchema.RotationY, data.getRotationY());
+            cvs.put(TwoTrailsSchema.TtInsSchema.RotationZ, data.getRotationZ());
+
+            cvs.put(TwoTrailsSchema.TtInsSchema.VelocityX, data.getVelocityX());
+            cvs.put(TwoTrailsSchema.TtInsSchema.VelocityY, data.getVelocityY());
+            cvs.put(TwoTrailsSchema.TtInsSchema.VelocityZ, data.getVelocityZ());
+
+            cvs.put(TwoTrailsSchema.TtInsSchema.Yaw, data.getYaw());
+            cvs.put(TwoTrailsSchema.TtInsSchema.Pitch, data.getPitch());
+            cvs.put(TwoTrailsSchema.TtInsSchema.Roll, data.getRoll());
+
+            getDB().insert(TwoTrailsSchema.TtInsSchema.TableName, null, cvs);
+
+            success = true;
+
+            updateUserActivity(DataActionType.InsertedIns);
+        } catch (Exception ex) {
+            logError(ex.getMessage(), "DAL:insertInsData");
+        }
+
+        return success;
+    }
+    //endregion
+
+    //region Delete
+    public void deleteInsDataByCN(String cn) {
+        try {
+            getDB().delete(TwoTrailsSchema.TtInsSchema.TableName,
+                    TwoTrailsSchema.SharedSchema.CN + "=?", new String[] { cn });
+
+            updateUserActivity(DataActionType.DeletedIns);
+        } catch (Exception ex) {
+            logError(ex.getMessage(), "DAL:deleteInsData");
+            throw new RuntimeException("DAL:deleteInsData");
+        }
+    }
+
+    public void deleteInsDataByPointCN(String pointCN) {
+        try {
+            getDB().delete(TwoTrailsSchema.TtInsSchema.TableName,
+                    TwoTrailsSchema.TtInsSchema.PointCN + "=?", new String[] { pointCN });
+
+            updateUserActivity(DataActionType.DeletedIns);
+        } catch (Exception ex) {
+            logError(ex.getMessage(), "DAL:deleteInsData");
+            throw new RuntimeException("DAL:deleteInsData");
+        }
+    }
+    //endregion
+    //endregion
 
     //region Project Info
     //region Get

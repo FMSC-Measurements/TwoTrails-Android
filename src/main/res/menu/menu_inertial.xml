@@ -1,13 +1,20 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".activities.SalesAdminToolsActivity">
+    tools:context=".activities.Take5Activity">
 
     <item
-        android:id="@+id/satMenuMode"
+        android:id="@+id/inertialMenuMode"
         android:title="@string/menu_map_mode"
         app:showAsAction="always"
         android:icon="@drawable/ic_map_white_24dp"
+        android:visible="true"/>
+
+    <item
+        android:id="@+id/inertialMenuAddMedia"
+        android:title="@string/menu_add_media"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_camera_alt_white_36dp"
         android:visible="false"/>
 
     <item
@@ -18,11 +25,6 @@
 
         <menu>
             <item
-                android:id="@+id/satMenuSatSettings"
-                android:title="@string/menu_sat_settings"
-                app:showAsAction="never"/>
-
-            <item
                 android:id="@+id/mmMenuSelectMap"
                 android:title="@string/menu_map_select_type"
                 app:showAsAction="never"/>
@@ -32,22 +34,36 @@
                 android:title="@string/menu_map_settings"
                 app:showAsAction="never"/>
 
-            <item android:id="@+id/satMenuColor"
-                android:title="@string/menu_sat_color"
-                app:showAsAction="never"
-                android:visible="true"/>
-
             <item
-                android:id="@+id/satMenuGps"
+                android:id="@+id/inertialMenuGps"
                 android:title="@string/menu_x_gps_settings"
                 app:showAsAction="never"
                 android:visible="true"/>
 
             <item
-                android:id="@+id/satMenuGpsInfoToggle"
+                android:id="@+id/inertialMenuGpsInfoToggle"
                 android:title="@string/menu_x_hide_gps_info"
                 app:showAsAction="never"
                 android:visible="true"/>
+
+            <item
+                android:id="@+id/inertialMenuCenterPositionToggle"
+                android:title="@string/menu_x_center_position"
+                app:showAsAction="never"
+                android:visible="true"
+                android:checkable="true"
+                android:checked="false"/>
+
+            <item
+                android:id="@+id/inertialMenuInertialSettings"
+                android:title="@string/menu_inertial_settings"
+                app:showAsAction="never"
+                android:visible="true"/>
+
+            <item
+                android:id="@+id/inertialMenuRenameGroup"
+                android:title="@string/menu_rename_group"
+                app:showAsAction="never"/>
 
             <item
                 android:id="@+id/mapMenuZoomToPoly"
@@ -55,17 +71,6 @@
                 app:showAsAction="never"
                 android:visible="false"/>
 
-            <item
-                android:id="@+id/satMenuValidationPoly"
-                android:title="@string/menu_sat_validation_poly"
-                app:showAsAction="never"
-                android:visible="false"/>
-
-            <item
-                android:id="@+id/satMenuTolerance"
-                android:title="@string/menu_sat_unit_tolerance"
-                app:showAsAction="never"
-                android:visible="true"/>
         </menu>
     </item>
 </menu>

@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.usda.fmsc.twotrails.activities.TestActivity">
@@ -9,17 +10,100 @@
     <RelativeLayout
         android:id="@+id/toolbarLayout"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:visibility="visible">
 
         <include layout="@layout/toolbar_default"/>
+        
+        <TableLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/toolbar">
+
+            <View  android:layout_height="4dp"/>
+
+            <TableRow>
+                <TextView android:text="Time Since Last Msg (Millis):" />
+                <TextView android:id="@+id/tvTimeSinceLastMsg" />
+            </TableRow>
+
+            <TableRow>
+                <TextView android:text="Consecutive:" />
+                <TextView android:id="@+id/tvConsecutive" />
+            </TableRow>
+            <TableRow>
+                <TextView android:text="Timespan:" />
+                <TextView android:id="@+id/tvTimespan" />
+            </TableRow>
+
+            <View  android:layout_height="10dp"/>
+
+            <TableRow>
+                <TextView android:text="Dist X:" />
+                <TextView android:id="@+id/tvDistX" />
+            </TableRow>
+            <TableRow>
+                <TextView android:text="Dist Y:" />
+                <TextView android:id="@+id/tvDistY" />
+            </TableRow>
+            <TableRow>
+                <TextView android:text="Dist Z:" />
+                <TextView android:id="@+id/tvDistZ" />
+            </TableRow>
+
+            <View  android:layout_height="10dp"/>
+
+            <TableRow>
+                <TextView android:text="Vel X:" />
+                <TextView android:id="@+id/tvVelX" />
+            </TableRow>
+            <TableRow>
+                <TextView android:text="Vel Y:" />
+                <TextView android:id="@+id/tvVelY" />
+            </TableRow>
+            <TableRow>
+                <TextView android:text="Vel Z:" />
+                <TextView android:id="@+id/tvVelZ" />
+            </TableRow>
+            
+            <View  android:layout_height="10dp"/>
+
+            <TableRow>
+                <TextView android:text="Rot X:" />
+                <TextView android:id="@+id/tvRotX" />
+            </TableRow>
+            <TableRow>
+                <TextView android:text="Rot Y:" />
+                <TextView android:id="@+id/tvRotY" />
+            </TableRow>
+            <TableRow>
+                <TextView android:text="Rot Z:" />
+                <TextView android:id="@+id/tvRotZ" />
+            </TableRow>
+
+            <View  android:layout_height="10dp"/>
+
+            <TableRow>
+                <TextView android:text="Yaw:" />
+                <TextView android:id="@+id/tvYaw" />
+            </TableRow>
+            <TableRow>
+                <TextView android:text="Pitch:" />
+                <TextView android:id="@+id/tvPitch" />
+            </TableRow>
+            <TableRow>
+                <TextView android:text="Roll:" />
+                <TextView android:id="@+id/tvRoll" />
+            </TableRow>
+        </TableLayout>
     </RelativeLayout>
 
-    <FrameLayout
-        android:id="@+id/mapContainer"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/toolbarLayout"
-        android:layout_alignParentBottom="true"/>
 
-</RelativeLayout>
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/testFab"
+        style="@style/fabStyle"
+        android:src="@drawable/ic_ttpoint_gps_white"
+        app:layout_anchorGravity="bottom|right|end"
+        android:contentDescription="@string/op_inertialStart"
+        android:onClick="btnTestClick"/>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

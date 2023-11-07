@@ -64,7 +64,7 @@ public class ManagedSupportMapFragment extends SupportMapFragment implements IMu
     private Runnable attachGpsService = new Runnable() {
         @Override
         public void run() {
-            if (getTtAppCtx().getDeviceSettings().isGpsConfigured() && getTtAppCtx().getDeviceSettings().getGpsExternal()) {
+            if (getTtAppCtx().getDeviceSettings().isGpsConfigured() && getTtAppCtx().getDeviceSettings().isGpsExternal()) {
                 if (getTtAppCtx().isGpsServiceStarted()) {
                     map.setLocationSource(getTtAppCtx().getGps().getService());
                 } else {

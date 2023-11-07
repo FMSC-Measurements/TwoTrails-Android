@@ -8,18 +8,14 @@ import android.widget.Toast;
 
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.dialogs.InputDialog;
-import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.activities.base.TtActivity;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 import com.usda.fmsc.utilities.FileUtils;
-import com.usda.fmsc.utilities.Tuple;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class SettingsLogic {
     public static void reset(final TtActivity context) {
@@ -114,14 +110,14 @@ public class SettingsLogic {
             switch (idialog.getText().toLowerCase()) {
                 case "dev":
                 case "developer": {
-                    context.getDeviceSettings().enabledDevelopterOptions(true);
+                    context.getDeviceSettings().enabledDeveloperOptions(true);
                     Toast.makeText(context, "Developer Mode Enabled", Toast.LENGTH_LONG).show();
                     context.getReport().writeDebug("Developer Mode: Enabled", "SettingsLogic:enterCode");
                     break;
                 }
                 case "disable dev":
                 case "disable developer": {
-                    context.getDeviceSettings().enabledDevelopterOptions(false);
+                    context.getDeviceSettings().enabledDeveloperOptions(false);
                     Toast.makeText(context, "Developer Mode Disabled", Toast.LENGTH_LONG).show();
                     context.getReport().writeDebug("Developer Mode: Disabled", "SettingsLogic:enterCode");
                     break;

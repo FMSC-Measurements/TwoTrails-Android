@@ -47,7 +47,7 @@ public class TtNmeaBurst extends TtObject implements Parcelable {
     private Double _X, _Y;
     private Integer _Zone;
 
-    //region GnssNmeaBurst Values
+    //region NmeaBurst Values
     private final Position position;
 
     //rmc
@@ -161,11 +161,11 @@ public class TtNmeaBurst extends TtObject implements Parcelable {
     }
 
     public TtNmeaBurst(String cn, DateTime timeCreated, String pointCN, boolean used,
-                       Position position, DateTime fixTime, Double groundSpeed, Double trackAngle,
-                       Double magVar, EastWest magVarDir, Mode mode, GnssFix fix,
-                       ArrayList<Integer> satsUsed, double pdop, double hdop, double vdop, GnssFixQuality fixQuality,
-                       int trackedSatellites, double horizDilution, double geoidHeight, UomElevation geoUom,
-                       int numberOfSatellitesInView, String satellitesInView) {
+               Position position, DateTime fixTime, Double groundSpeed, Double trackAngle,
+               Double magVar, EastWest magVarDir, Mode mode, GnssFix fix,
+               ArrayList<Integer> satsUsed, double pdop, double hdop, double vdop, GnssFixQuality fixQuality,
+               int trackedSatellites, double horizDilution, double geoidHeight, UomElevation geoUom,
+               int numberOfSatellitesInView, String satellitesInView) {
 
         this(cn, timeCreated, pointCN, used, position, fixTime, groundSpeed, trackAngle, magVar, magVarDir, mode,
                 fix, satsUsed, pdop, hdop, vdop, fixQuality, trackedSatellites, horizDilution, geoidHeight, geoUom,

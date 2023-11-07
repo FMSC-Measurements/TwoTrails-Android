@@ -27,6 +27,7 @@ import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.utilities.PostDelayHandler;
 import com.usda.fmsc.geospatial.gnss.nmea.GnssNmeaBurst;
 import com.usda.fmsc.geospatial.ins.vectornav.VNInsData;
+import com.usda.fmsc.geospatial.ins.vectornav.commands.VNCommand;
 import com.usda.fmsc.geospatial.ins.vectornav.nmea.sentences.base.VNNmeaSentence;
 import com.usda.fmsc.geospatial.nmea.sentences.NmeaSentence;
 import com.usda.fmsc.twotrails.activities.MainActivity;
@@ -55,6 +56,7 @@ import com.usda.fmsc.twotrails.utilities.TtNotifyManager;
 import com.usda.fmsc.twotrails.utilities.TtReport;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 import com.usda.fmsc.utilities.FileUtils;
+import com.usda.fmsc.utilities.ParseEx;
 
 import org.joda.time.DateTime;
 
@@ -250,12 +252,17 @@ public class TwoTrailsApp extends Application {
                 }
 
                 @Override
+                public void commandRespone(VNCommand command) {
+
+                }
+
+                @Override
                 public void receivingData(boolean receiving) {
 
                 }
 
                 @Override
-                public void receivingValidData(boolean receiving) {
+                public void receivingValidData(boolean valid) {
 
                 }
 
@@ -291,14 +298,9 @@ public class TwoTrailsApp extends Application {
                             String msg = null;
                             switch (error) {
                                 case LostDeviceConnection:
-                                    msg = "Lost connection to VN100";
-                                    scanForIns = true;
-                                    delayAndSearchForBTDevices.run();
-                                    break;
                                 case DeviceConnectionEnded:
-                                    break;
                                 case FailedToConnect:
-                                    msg = "Failed to connect to VN100.";
+                                    msg = "Lost connection to VN100";
                                     scanForIns = true;
                                     delayAndSearchForBTDevices.run();
                                     break;
@@ -373,6 +375,16 @@ public class TwoTrailsApp extends Application {
                         getRF().addListener((RangeFinderService.Listener)act);
                     }
                 }
+
+                if (isVNInsServiceStarted()) {
+                    if (act.requiresInsService()) {
+                        getVnIns().startIns();
+                    }
+
+                    if (act instanceof VNInsService.Listener) {
+                        getVnIns().addListener((VNInsService.Listener)act);
+                    }
+                }
             }
         }
 
@@ -389,7 +401,7 @@ public class TwoTrailsApp extends Application {
             if (activity instanceof MainActivity) {
                 if (!AndroidUtils.App.isServiceRunning(TwoTrailsApp.this, GpsService.class) || !isGpsServiceStarted()) {
                     startGpsService();
-                } else if (getDeviceSettings().isGpsConfigured() && !scanForGps) {
+                } else if (getDeviceSettings().isGpsConfigured() && !getGps().isGpsRunning() && !scanForGps) {
                     getGps().startGps();
                 }
 
@@ -399,7 +411,7 @@ public class TwoTrailsApp extends Application {
 
                 if (!AndroidUtils.App.isServiceRunning(TwoTrailsApp.this, VNInsService.class) || !isVNInsServiceStarted()) {
                     startVNService();
-                } else if (getDeviceSettings().isVN100Configured() && !scanForIns) {
+                } else if (getDeviceSettings().isVN100Configured() && !getVnIns().isInsRunning() && !scanForIns) {
                     getVnIns().startIns();
                 }
 
@@ -440,6 +452,8 @@ public class TwoTrailsApp extends Application {
                         getRF().removeListener((RangeFinderService.Listener)act);
                     }
                 }
+
+                //TODO INS
             }
 
             if (activity instanceof MainActivity) {
@@ -452,6 +466,8 @@ public class TwoTrailsApp extends Application {
                     getRF().stopService();
                     stopService(new Intent(TwoTrailsApp.this, RangeFinderService.class));
                 }
+
+                //TODO INS
 
                 if (_Report != null) {
                     _Report.writeEvent("TwoTrails Stopped");

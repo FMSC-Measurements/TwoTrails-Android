@@ -84,7 +84,7 @@ public abstract class Settings {
 
     protected double getDouble(String settingName, double defaultValue) {
         try {
-            return  Double.longBitsToDouble(prefs.getLong(settingName, Double.doubleToRawLongBits(defaultValue)));
+            return Double.longBitsToDouble(prefs.getLong(settingName, Double.doubleToRawLongBits(defaultValue)));
         } catch (IllegalStateException e) {
             getContext().getReport().writeError(e.getMessage(), settingName);
             return defaultValue;

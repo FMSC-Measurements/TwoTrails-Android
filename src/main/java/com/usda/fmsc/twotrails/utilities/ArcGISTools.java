@@ -39,8 +39,6 @@ import java.util.HashMap;
 import java.util.List;
 
 public class ArcGISTools {
-    private static ArcGISTools _ArcGISTools;
-
     private final TwoTrailsApp _TtAppCtx;
 
     private final SpatialReference LatLonSpatialReference = SpatialReferences.getWgs84();
@@ -53,9 +51,6 @@ public class ArcGISTools {
 
     private final List<IArcToolsListener> listeners = new ArrayList<>();
 
-    //private HashMap<Integer, DownloadOfflineArcGISMapTask> tasks = new HashMap<>();
-    private final long lastUpdate = System.currentTimeMillis();
-
     private WebRequest webRequest;
 
 
@@ -64,12 +59,17 @@ public class ArcGISTools {
         _TtAppCtx = context;
         
         mapLayers = new HashMap<>();
-        for (ArcGisMapLayer layer : getTtAppCtx().getDeviceSettings().getArcGisMayLayers()) {
-            mapLayers.put(layer.getId(), layer);
-        }
 
-        if (mapLayers.size() < 1) {
-            createDefaultMaps();
+        try {
+            for (ArcGisMapLayer layer : getTtAppCtx().getDeviceSettings().getArcGisMayLayers()) {
+                mapLayers.put(layer.getId(), layer);
+            }
+
+            if (mapLayers.size() < 1) {
+                createDefaultMaps();
+            }
+        } catch (Exception e) {
+            context.getReport().writeError(e.getMessage(), "ArcGISTools:Constructor", e.getStackTrace());
         }
     }
 

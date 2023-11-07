@@ -237,6 +237,7 @@ public class Segment {
             case WayPoint:
             case Take5:
             case Walk:
+            case InertialStart:
             case Quondam: {
                 if (!success)
                     success = firstPoint.calculatePoint(polys.get(firstPoint.getPolyCN()));
@@ -248,6 +249,11 @@ public class Segment {
                     return false;
                 break;
             }
+            case Inertial:
+                //Must be an Inertial. Must already be calculated.
+                if (!success)
+                    return false;
+                break;
             default: {
                 throw new RuntimeException("SideShots can not come first");
             }

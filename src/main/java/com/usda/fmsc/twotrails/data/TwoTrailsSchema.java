@@ -8,9 +8,10 @@ public class TwoTrailsSchema {
     public static final TtVersion DAL_2_0_3 = new TtVersion(2, 0, 3, 3);
 
     public static final TtVersion DAL_2_1_0 = new TtVersion(2, 1, 0, 4);
+    public static final TtVersion DAL_2_2_0 = new TtVersion(2, 2, 0, 5);
 
     //Schema Version
-    public static final TtVersion SchemaVersion = DAL_2_1_0;
+    public static final TtVersion SchemaVersion = DAL_2_2_0;
 
 
     public static class SharedSchema {
@@ -178,6 +179,67 @@ public class TwoTrailsSchema {
     }
     //endregion
 
+    //region Point Info Inertial Start
+    public static class InertialStartPointSchema {
+        public static final String TableName = "InertialPointStartData";
+
+        public static final String ForwadAz = "FwdAz";
+        public static final String BackAz = "BkAz";
+        public static final String AzimuthOffset = "AzOffset";
+
+        public static final String CreateTable =
+                "CREATE TABLE " + TableName + " (" +
+                        SharedSchema.CN     + " TEXT REFERENCES " +
+                        PointSchema.TableName + ", " +
+                        ForwadAz + " REAL, " +
+                        BackAz + " REAL, " +
+                        AzimuthOffset + " REAL NOT NULL, " +
+                        "PRIMARY KEY (" + SharedSchema.CN + "));";
+
+
+        public static final String SelectItems =
+                SharedSchema.CN + ", " +
+                        ForwadAz + ", " +
+                        BackAz + ", " +
+                        AzimuthOffset;
+    }
+    //endregion
+
+    //region Point Info Inertial
+    public static class InertialPointSchema {
+        public static final String TableName = "InertialPointData";
+
+        public static final String AllSegmentsValid = "AllSegsValid";
+        public static final String TimeSpan = "TimeSpan";
+        public static final String Azimuth = "Azimuth";
+        public static final String DistanceX = "DistX";
+        public static final String DistanceY = "DistY";
+        public static final String DistanceZ = "DistZ";
+
+        public static final String CreateTable =
+                "CREATE TABLE " + TableName + " (" +
+                    SharedSchema.CN     + " TEXT REFERENCES " +
+                    PointSchema.TableName + ", " +
+                    Azimuth + " REAL NOT NULL, " +
+                    AllSegmentsValid + " BOOLEAN, " +
+                    TimeSpan + " REAL NOT NULL, " +
+                    DistanceX + " REAL NOT NULL, " +
+                    DistanceY + " REAL NOT NULL, " +
+                    DistanceZ + " REAL NOT NULL, " +
+                    "PRIMARY KEY (" + SharedSchema.CN + "));";
+
+
+        public static final String SelectItems =
+                SharedSchema.CN + ", " +
+                AllSegmentsValid + ", " +
+                TimeSpan + ", " +
+                Azimuth + ", " +
+                DistanceX + ", " +
+                DistanceY + ", " +
+                DistanceZ;
+    }
+    //endregion
+
     //region Polygon Table
     public static class PolygonSchema {
         public static final String TableName = "Polygons";
@@ -252,7 +314,7 @@ public class TwoTrailsSchema {
     }
     //endregion
 
-    //region TTNMEA table
+    //region TTNMEA Table
     public static class TtNmeaSchema {
         public static final String TableName = "TTNMEA";
 
@@ -268,6 +330,7 @@ public class TwoTrailsSchema {
         public static final String ElevUom = "ElevUom";
         public static final String MagVar = "MagVar";
         public static final String MagDir = "MagDir";
+
         public static final String Fix = "Fix";
         public static final String FixQuality = "FixQuality";
         public static final String Mode = "Mode";
@@ -348,6 +411,77 @@ public class TwoTrailsSchema {
             SatellitesInViewCount + ", " +
             UsedSatPRNS + ", " +
             SatellitesInView;
+    }
+    //endregion
+
+    //region TTINS Table
+    public static class TtInsSchema {
+        public static final String TableName = "TTINS";
+
+        public static final String PointCN = "PointCN";
+        public static final String TimeCreated = "TimeCreated";
+
+        public static final String IsConsecutive = "ISConsecutive";
+        public static final String TimeSinceStart = "TimeSinceStart";
+        public static final String TimeSpan = "TimeSpan";
+
+        public static final String DistanceX = "DistX";
+        public static final String DistanceY = "DistY";
+        public static final String DistanceZ = "DistZ";
+
+        public static final String RotationX = "RotX";
+        public static final String RotationY = "RotY";
+        public static final String RotationZ = "RotZ";
+
+        public static final String VelocityX = "VelX";
+        public static final String VelocityY = "VelY";
+        public static final String VelocityZ = "VelZ";
+
+        public static final String Yaw = "yaw";
+        public static final String Pitch = "pitch";
+        public static final String Roll = "roll";
+
+        public static final String CreateTable =
+                "CREATE TABLE " + TableName + " (" +
+                        SharedSchema.CN + " TEXT, " +
+                        PointCN         + " TEXT, " +
+                        IsConsecutive + " BOOLEAN, " +
+                        TimeCreated     + " TEXT, " +
+                        TimeSinceStart + " TEXT, " +
+                        TimeSpan + " TEXT, " +
+                        DistanceX + " REAL, " +
+                        DistanceY + " REAL, " +
+                        DistanceZ + " REAL, " +
+                        RotationX + " REAL, " +
+                        RotationY + " REAL, " +
+                        RotationZ + " REAL, " +
+                        VelocityX + " REAL, " +
+                        VelocityY + " REAL, " +
+                        VelocityZ + " REAL, " +
+                        Yaw + " REAL, " +
+                        Pitch + " REAL, " +
+                        Roll + " REAL, " +
+                        "PRIMARY KEY (" + SharedSchema.CN + "));";
+
+        public static final String SelectItems =
+                SharedSchema.CN + ", " +
+                        PointCN + ", " +
+                        IsConsecutive + ", " +
+                        TimeCreated + ", " +
+                        TimeSinceStart + ", " +
+                        TimeSpan + ", " +
+                        DistanceX + ", " +
+                        DistanceY + ", " +
+                        DistanceZ + ", " +
+                        RotationX + ", " +
+                        RotationY + ", " +
+                        RotationZ + ", " +
+                        VelocityX + ", " +
+                        VelocityY + ", " +
+                        VelocityZ + ", " +
+                        Yaw + ", " +
+                        Pitch + ", " +
+                        Roll;
     }
     //endregion
 
@@ -559,5 +693,12 @@ public class TwoTrailsSchema {
             "ALTER TABLE " + PolygonSchema.TableName + " ADD COLUMN " + PolygonSchema.UnitType + " INTEGER; ",
             "ALTER TABLE " + ActivitySchema.TableName + " ADD COLUMN " + ActivitySchema.AppVersion + " TEXT; ",
             "UPDATE " + ProjectInfoSchema.TableName + " SET " + ProjectInfoSchema.TtDbSchemaVersion + " = '" + DAL_2_1_0 + "';"
+    };
+
+    public static final String[] UPGRADE_DAL_2_2_0 = new String[] {
+            TtInsSchema.CreateTable +
+            InertialStartPointSchema.CreateTable +
+            InertialPointSchema.CreateTable +
+            "UPDATE " + ProjectInfoSchema.TableName + " SET " + ProjectInfoSchema.TtDbSchemaVersion + " = '" + DAL_2_2_0 + "';"
     };
 }

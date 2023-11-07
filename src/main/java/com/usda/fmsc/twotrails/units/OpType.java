@@ -7,7 +7,9 @@ public enum OpType {
     SideShot(4),
     Quondam(3),
     Walk(5),
-    WayPoint(2);
+    WayPoint(2),
+    InertialStart(7),
+    Inertial(8);
 
     private final int value;
 
@@ -48,6 +50,11 @@ public enum OpType {
             case "walk": return Walk;
             case "take5":
             case "take 5": return Take5;
+            case "inertialstart":
+            case "inertial start":
+            case "inss": return InertialStart;
+            case "inertial":
+            case "ins": return Inertial;
             default: throw new IllegalArgumentException();
         }
     }
@@ -62,15 +69,26 @@ public enum OpType {
             case SideShot: return "SideShot";
             case Walk: return "Walk";
             case Take5: return "Take 5";
+            case InertialStart: return "Inertial Start";
+            case Inertial: return "Inertial";
             default: throw new IllegalArgumentException();
         }
     }
 
     public boolean isGpsType() {
-        return this == GPS || this == Take5 || this == Walk || this == WayPoint;
+        return this == GPS || this == Take5 || this == Walk || this == WayPoint || this == InertialStart;
     }
 
     public boolean isTravType() {
         return this == Traverse || this == SideShot;
+    }
+
+    public boolean isNavType() {
+        return this == OpType.GPS || this == OpType.Take5 ||
+                this == OpType.Walk || this == OpType.Traverse;
+    }
+
+    public boolean isInertialType() {
+        return this == InertialStart || this == Inertial;
     }
 }

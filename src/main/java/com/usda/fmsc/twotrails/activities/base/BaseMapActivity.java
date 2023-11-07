@@ -593,7 +593,7 @@ public abstract class BaseMapActivity extends ProjectAdjusterActivity implements
             }
         }
 
-        if (getTtAppCtx().getDeviceSettings().getGpsExternal()) {
+        if (getTtAppCtx().getDeviceSettings().isGpsExternal()) {
             if (getTtAppCtx().getDeviceSettings().isGpsConfigured())
             {
                 if (!getTtAppCtx().getGps().isGpsRunning()) {

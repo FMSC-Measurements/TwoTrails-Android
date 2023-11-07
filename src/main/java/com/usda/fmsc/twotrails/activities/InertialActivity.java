@@ -5,19 +5,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
-
-import androidx.annotation.NonNull;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import androidx.core.view.GravityCompat;
-import androidx.viewpager.widget.ViewPager;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AlertDialog;
-import androidx.cardview.widget.CardView;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.appcompat.widget.PopupMenu;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.appcompat.widget.Toolbar;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -31,6 +18,19 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.PopupMenu;
+import androidx.appcompat.widget.Toolbar;
+import androidx.cardview.widget.CardView;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager.widget.ViewPager;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.adapters.SelectableAdapterEx;
 import com.usda.fmsc.android.dialogs.DontAskAgainDialog;
@@ -39,40 +39,47 @@ import com.usda.fmsc.android.utilities.BitmapManager;
 import com.usda.fmsc.android.utilities.PostDelayHandler;
 import com.usda.fmsc.android.utilities.ResourceBitmapProvider;
 import com.usda.fmsc.android.widget.PopupMenuButton;
+import com.usda.fmsc.android.widget.RecyclerViewEx;
 import com.usda.fmsc.android.widget.SheetLayoutEx;
 import com.usda.fmsc.android.widget.layoutmanagers.LinearLayoutManagerWithSmoothScroller;
-import com.usda.fmsc.android.widget.RecyclerViewEx;
+import com.usda.fmsc.geospatial.Position;
+import com.usda.fmsc.geospatial.gnss.GeoTools;
 import com.usda.fmsc.geospatial.gnss.nmea.GnssNmeaBurst;
+import com.usda.fmsc.geospatial.ins.vectornav.VNInsData;
+import com.usda.fmsc.geospatial.ins.vectornav.codes.MessageID;
+import com.usda.fmsc.geospatial.ins.vectornav.commands.VNCommand;
+import com.usda.fmsc.geospatial.ins.vectornav.nmea.sentences.base.VNNmeaSentence;
+import com.usda.fmsc.twotrails.Consts;
 import com.usda.fmsc.twotrails.DeviceSettings;
+import com.usda.fmsc.twotrails.R;
 import com.usda.fmsc.twotrails.activities.base.AcquireGpsMapActivity;
+import com.usda.fmsc.twotrails.activities.base.IUpdatePointActivity;
 import com.usda.fmsc.twotrails.activities.base.PointMediaController;
 import com.usda.fmsc.twotrails.activities.base.PointMediaListener;
-import com.usda.fmsc.twotrails.activities.base.IUpdatePointActivity;
 import com.usda.fmsc.twotrails.adapters.MediaPagerAdapter;
 import com.usda.fmsc.twotrails.adapters.MediaRvAdapter;
+import com.usda.fmsc.twotrails.adapters.PointsEditRvAdapter;
 import com.usda.fmsc.twotrails.data.TwoTrailsMediaSchema;
+import com.usda.fmsc.twotrails.gps.GpsService;
+import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
+import com.usda.fmsc.twotrails.ins.TtInsData;
+import com.usda.fmsc.twotrails.ins.VNInsService;
+import com.usda.fmsc.twotrails.logic.PointNamer;
+import com.usda.fmsc.twotrails.objects.FilterOptions;
+import com.usda.fmsc.twotrails.objects.TtGroup;
+import com.usda.fmsc.twotrails.objects.TtMetadata;
 import com.usda.fmsc.twotrails.objects.media.TtImage;
 import com.usda.fmsc.twotrails.objects.media.TtMedia;
-import com.usda.fmsc.twotrails.rangefinder.RangeFinderService;
-import com.usda.fmsc.twotrails.rangefinder.TtRangeFinderData;
+import com.usda.fmsc.twotrails.objects.points.InertialPoint;
+import com.usda.fmsc.twotrails.objects.points.InertialStartPoint;
+import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.units.MapTracking;
 import com.usda.fmsc.twotrails.units.MediaType;
 import com.usda.fmsc.twotrails.units.OpType;
-import com.usda.fmsc.utilities.StringEx;
-import com.usda.fmsc.twotrails.adapters.PointsEditRvAdapter;
-import com.usda.fmsc.twotrails.Consts;
-import com.usda.fmsc.twotrails.gps.GpsService;
-import com.usda.fmsc.twotrails.gps.TtNmeaBurst;
-import com.usda.fmsc.twotrails.R;
-import com.usda.fmsc.twotrails.logic.PointNamer;
-import com.usda.fmsc.twotrails.objects.FilterOptions;
-import com.usda.fmsc.twotrails.objects.points.SideShotPoint;
-import com.usda.fmsc.twotrails.objects.points.Take5Point;
-import com.usda.fmsc.twotrails.objects.TtGroup;
-import com.usda.fmsc.twotrails.objects.TtMetadata;
-import com.usda.fmsc.twotrails.objects.points.TtPoint;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
+import com.usda.fmsc.utilities.StringEx;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -80,39 +87,38 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Semaphore;
 
-import com.usda.fmsc.geospatial.Position;
-import com.usda.fmsc.geospatial.gnss.GeoTools;
-
 import jp.wasabeef.recyclerview.animators.BaseItemAnimator;
 import jp.wasabeef.recyclerview.animators.FadeInAnimator;
 
-public class Take5Activity extends AcquireGpsMapActivity implements IUpdatePointActivity, PointMediaController, RangeFinderService.Listener {
+public class InertialActivity extends AcquireGpsMapActivity implements IUpdatePointActivity, VNInsService.Listener, PointMediaController {
     private static final boolean enableCardFading = true;
 
     private final HashMap<String, PointMediaListener> listeners = new HashMap<>();
 
-    private RecyclerViewEx<PointsEditRvAdapter<Take5Activity>.PointViewHolderEx> rvPoints;
-    private PointsEditRvAdapter<Take5Activity> pointEditRvAdapter;
+    private RecyclerViewEx<PointsEditRvAdapter<InertialActivity>.PointViewHolderEx> rvPoints;
+    private PointsEditRvAdapter<InertialActivity> pointEditRvAdapter;
     private LinearLayoutManagerWithSmoothScroller linearLayoutManager;
-    private FloatingActionButton fabT5, fabSS, fabCancel, fabSSCommit;
+    private FloatingActionButton fab, fabStopCancel;
     private LinearLayout layCardInfo;
     private CardView cvGpsInfo;
 
     private RelativeLayout progLay;
     private TextView tvProg;
-    private MenuItem miMode, miMoveToEnd, miHideGpsInfo, miCenterPosition;
+    private MenuItem miMode, miHideGpsInfo, miCenterPosition;
 
     private List<TtPoint> _Points;
     private ArrayList<TtNmeaBurst> _Bursts, _UsedBursts;
+    private ArrayList<TtInsData> _InsData;
     private TtPoint _PrevPoint, _CurrentPoint;
-    private Take5Point _AddTake5;
+    private InertialStartPoint _InertialStartPoint;
     private TtGroup _Group;
 
     private int increment, takeAmount, nmeaCount = 0;
-    private boolean saved = true, updated, onBnd = true, createSSVisible, cancelVisible, commitSSVisible,
+    private boolean saved = true, updated, onBnd = true, stopCancelVisible,
             ignoreScroll, mapViewMode, killAcquire, cameraSupported, gpsInfoHidden,
-            centerPosition = false, _Locked, pointsCreated = false;
-    private int numOfPointsCreated = 0;
+            centerPosition = false, _Locked,
+            pointsCreated = false, _StartInertial = false, _InertialStarted = false;
+    int numOfPointsCreated = 0;
 
     boolean invisible = false, handling;
 
@@ -153,7 +159,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements IUpdatePoint
             ignoreMediaChange = false;
         }
     };
-    
+
     private final SelectableAdapterEx.Listener<TtMedia> mediaListener = new SelectableAdapterEx.Listener<TtMedia>() {
         @Override
         public void onItemSelected(TtMedia media, int adapterPosition, int layoutPosition) {
@@ -165,7 +171,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements IUpdatePoint
                 saveMedia();
 
                 setCurrentMedia(media);
-                
+
                 mediaViewPager.setCurrentItem(adapterPosition, true);
             }
         }
@@ -178,14 +184,14 @@ public class Take5Activity extends AcquireGpsMapActivity implements IUpdatePoint
             if (itemId == R.id.ctx_menu_add) {
                 pickImages();
             } else if (itemId == R.id.ctx_menu_capture) {
-                if (AndroidUtils.Device.isFullOrientationAvailable(Take5Activity.this)) {
+                if (AndroidUtils.Device.isFullOrientationAvailable(InertialActivity.this)) {
                     if (getTtAppCtx().getDeviceSettings().getUseTtCameraAsk()) {
-                        DontAskAgainDialog dialog = new DontAskAgainDialog(Take5Activity.this,
+                        DontAskAgainDialog dialog = new DontAskAgainDialog(InertialActivity.this,
                                 DeviceSettings.USE_TTCAMERA_ASK,
                                 DeviceSettings.USE_TTCAMERA,
                                 getTtAppCtx().getDeviceSettings().getPrefs());
 
-                        dialog.setMessage(Take5Activity.this.getString(R.string.points_camera_diag))
+                        dialog.setMessage(InertialActivity.this.getString(R.string.points_camera_diag))
                                 .setPositiveButton("TwoTrails", (dialogInterface, i, value) -> captureImage(true, _CurrentPoint), 2)
                                 .setNegativeButton("Android", (dialogInterface, i, value) -> captureImage(false, _CurrentPoint), 1)
                                 .setNeutralButton(getString(R.string.str_cancel), null, 0)
@@ -204,13 +210,13 @@ public class Take5Activity extends AcquireGpsMapActivity implements IUpdatePoint
                 resetMedia();
             } else if (itemId == R.id.ctx_menu_delete) {
                 if (_CurrentMedia != null) {
-                    new AlertDialog.Builder(Take5Activity.this)
+                    new AlertDialog.Builder(InertialActivity.this)
                             .setMessage(String.format(
                                     "Would you like to delete %s '%s' from storage or only remove its association with the point?",
                                     _CurrentMedia.getMediaType().toString().toLowerCase(),
                                     _CurrentMedia.getName()))
                             .setPositiveButton(R.string.str_remove, (dialog, which) -> removeMedia(_CurrentMedia, false))
-                            .setNegativeButton(R.string.str_delete, (dialog, which) -> new AlertDialog.Builder(Take5Activity.this)
+                            .setNegativeButton(R.string.str_delete, (dialog, which) -> new AlertDialog.Builder(InertialActivity.this)
                                     .setMessage(String.format("You are about to delete file '%s'.", _CurrentMedia.getFileName()))
                                     .setPositiveButton(R.string.str_delete, (dialog1, which1) -> removeMedia(_CurrentMedia, true))
                                     .setNeutralButton(R.string.str_cancel, null)
@@ -321,7 +327,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements IUpdatePoint
     //region Activity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_take5);
+        setContentView(R.layout.activity_inertial);
 
         setUseExitWarning(true);
         setUseLostConnectionWarning(true);
@@ -379,7 +385,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements IUpdatePoint
                     }
                 } catch (Exception e) {
                     cancelResult = Consts.Codes.Results.ERROR;
-                    getTtAppCtx().getReport().writeError("Take5Activity:onCreate", e.getMessage(), e.getStackTrace());
+                    getTtAppCtx().getReport().writeError("InertialActivity:onCreate", e.getMessage(), e.getStackTrace());
                 }
             } else {
                 cancelResult = Consts.Codes.Results.NO_POINT_DATA;
@@ -407,32 +413,31 @@ public class Take5Activity extends AcquireGpsMapActivity implements IUpdatePoint
                 actionBar.setTitle(getPolygon().getName());
                 actionBar.setDisplayShowTitleEnabled(true);
 
-                AndroidUtils.UI.createToastForToolbarTitle(Take5Activity.this, getToolbar());
+                AndroidUtils.UI.createToastForToolbarTitle(InertialActivity.this, getToolbar());
             }
 
-            _Group = new TtGroup(TtGroup.GroupType.Take5);
+            _Group = new TtGroup(TtGroup.GroupType.Inertial);
             getTtAppCtx().getDAL().insertGroup(_Group);
 
-            fabT5 = findViewById(R.id.take5FabT5);
-            fabSS = findViewById(R.id.take5FabSideShot);
-            fabCancel = findViewById(R.id.take5FabCancel);
-            fabSSCommit = findViewById(R.id.take5FabSideShotCommit);
+            fab = findViewById(R.id.inertialFab);
+            fabStopCancel = findViewById(R.id.inertialFabStopCancel);
 
-            layCardInfo = findViewById(R.id.take5LayInfo);
+            layCardInfo = findViewById(R.id.inertialLayInfo);
 
             pointEditRvAdapter = new PointsEditRvAdapter<>(this, _Points, getCurrentMetadata());
             linearLayoutManager = new LinearLayoutManagerWithSmoothScroller(this);
 
-            cvGpsInfo = findViewById(R.id.take5CardGpsInfo);
+            cvGpsInfo = findViewById(R.id.inertialCardGpsInfo);
 
-            rvPoints = findViewById(R.id.take5RvPoints);
+            rvPoints = findViewById(R.id.inertialRvPoints);
             if (rvPoints != null) {
                 rvPoints.setViewHasFooter(true);
                 rvPoints.setLayoutManager(linearLayoutManager);
                 rvPoints.setHasFixedSize(true);
 
                 rvPoints.setItemAnimator(new BaseItemAnimator() {
-                    @Override protected void animateRemoveImpl(@NonNull final RecyclerView.ViewHolder holder) {
+                    @Override
+                    protected void animateRemoveImpl(@NonNull final RecyclerView.ViewHolder holder) {
                         holder.itemView.animate()
                                 .translationY(holder.itemView.getHeight())
                                 .alpha(0)
@@ -443,7 +448,8 @@ public class Take5Activity extends AcquireGpsMapActivity implements IUpdatePoint
                                 .start();
                     }
 
-                    @Override protected void preAnimateAddImpl(@NonNull RecyclerView.ViewHolder holder) {
+                    @Override
+                    protected void preAnimateAddImpl(@NonNull RecyclerView.ViewHolder holder) {
                         holder.itemView.setTranslationY(holder.itemView.getHeight());
                         holder.itemView.setAlpha(0);
                     }
@@ -466,12 +472,12 @@ public class Take5Activity extends AcquireGpsMapActivity implements IUpdatePoint
             }
 
             progLay = findViewById(R.id.progressLayout);
-            tvProg = findViewById(R.id.take5ProgressText);
+            tvProg = findViewById(R.id.inertialProgressText);
 
 
             //region Media Layout
             toolbarMedia = findViewById(R.id.toolbarMedia);
-            toolbarMedia.setNavigationIcon(AndroidUtils.UI.getDrawable(Take5Activity.this, R.drawable.ic_arrow_back_white_24dp));
+            toolbarMedia.setNavigationIcon(AndroidUtils.UI.getDrawable(InertialActivity.this, R.drawable.ic_arrow_back_white_24dp));
             toolbarMedia.setNavigationOnClickListener(v -> {
                 setMapDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, GravityCompat.END);
                 closeMapDrawer(GravityCompat.END);
@@ -479,7 +485,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements IUpdatePoint
 
             pmbMedia = findViewById(R.id.pmdMenu);
             if (pmbMedia != null) {
-                cameraSupported = AndroidUtils.Device.isCameraAvailable(Take5Activity.this);
+                cameraSupported = AndroidUtils.Device.isCameraAvailable(InertialActivity.this);
 
                 pmbMedia.setListener(menuPopupListener);
 
@@ -488,7 +494,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements IUpdatePoint
                 pmbMedia.setItemEnabled(R.id.ctx_menu_capture, false);
                 pmbMedia.setItemEnabled(R.id.ctx_menu_add, false);
             }
-            
+
             rvMedia = findViewById(R.id.pmdRvMedia);
             if (rvMedia != null) {
                 rvMedia.setViewHasFooter(true);
@@ -499,8 +505,8 @@ public class Take5Activity extends AcquireGpsMapActivity implements IUpdatePoint
 
             mediaViewPager = findViewById(R.id.pmdViewPager);
             if (mediaViewPager != null) {
-                rvMediaAdapter = new MediaRvAdapter(Take5Activity.this, Collections.synchronizedList(new ArrayList<>()), mediaListener,
-                        AndroidUtils.Convert.dpToPx(Take5Activity.this, 90), bitmapManager);
+                rvMediaAdapter = new MediaRvAdapter(InertialActivity.this, Collections.synchronizedList(new ArrayList<>()), mediaListener,
+                        AndroidUtils.Convert.dpToPx(InertialActivity.this, 90), bitmapManager);
 
                 rvMedia.setAdapter(rvMediaAdapter);
 
@@ -546,6 +552,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements IUpdatePoint
     protected void updateActivitySettings() {
         super.updateActivitySettings();
 
+        //TODO update for inertial
         options.Fix = getTtAppCtx().getDeviceSettings().getTake5FilterFix();
         options.FixType = getTtAppCtx().getDeviceSettings().getTake5FilterFixQuality();
         options.DopType = getTtAppCtx().getDeviceSettings().getTake5FilterDopType();
@@ -556,12 +563,11 @@ public class Take5Activity extends AcquireGpsMapActivity implements IUpdatePoint
 
     @Override
     public boolean onCreateOptionsMenuEx(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_take5, menu);
+        getMenuInflater().inflate(R.menu.menu_inertial, menu);
 
-        miMoveToEnd = menu.findItem(R.id.take5MenuToBottom);
-        miMode = menu.findItem(R.id.take5MenuMode);
-        miHideGpsInfo = menu.findItem(R.id.take5MenuGpsInfoToggle);
-        miCenterPosition = menu.findItem(R.id.take5MenuCenterPositionToggle);
+        miMode = menu.findItem(R.id.inertialMenuMode);
+        miHideGpsInfo = menu.findItem(R.id.inertialMenuGpsInfoToggle);
+        miCenterPosition = menu.findItem(R.id.inertialMenuCenterPositionToggle);
 
         return super.onCreateOptionsMenuEx(menu);
     }
@@ -576,50 +582,30 @@ public class Take5Activity extends AcquireGpsMapActivity implements IUpdatePoint
                 dialog.setMessage("The you are currently acquiring a point. Do you want to exit anyway?");
 
                 dialog.setPositiveButton(R.string.str_yes, (dialog1, which) -> {
-                    stopLogging();
-                    finish();
-                })
+                            stopLogging();
+                            finish();
+                        })
                         .setNeutralButton(R.string.str_cancel, null);
 
                 dialog.show();
             } else {
                 finish();
             }
-        } else if (itemId == R.id.take5MenuToBottom) {
-            if (_Points.size() > 0) {
-                //ignoreScroll = true;
-                onStartCardMovement(enableCardFading);
-
-                rvPoints.smoothScrollToPosition(_Points.size() - 1);
-
-                moveToMapPoint(getPositionsCount() - 1);
-            }
-        } else if (itemId == R.id.take5MenuAddMedia) {
+        } else if (itemId == R.id.inertialMenuAddMedia) {
             openMapDrawer(GravityCompat.END);
-        } else if (itemId == R.id.take5MenuGps) {
+        } else if (itemId == R.id.inertialMenuGps) {
             openSettings(SettingsActivity.GPS_SETTINGS_PAGE);
-        } else if (itemId == R.id.take5MenuTake5Settings) {
-            openSettings(SettingsActivity.POINT_TAKE5_SETTINGS_PAGE);
-        } else if (itemId == R.id.take5MenuMode) {
-            if (!mapViewMode && _Points.size() > 0 && _CurrentPoint.getOp() == OpType.SideShot && !saved) {
-                btnCancelClick(null);
-            }
-
+//        } else if (itemId == R.id.inertialMenuInertialSettings) {
+//            openSettings(SettingsActivity.POINT_INERTIAL_SETTINGS_PAGE);
+        } else if (itemId == R.id.inertialMenuMode) {
             mapViewMode = !mapViewMode;
-            miMoveToEnd.setVisible(!mapViewMode);
             setMapGesturesEnabled(mapViewMode);
             layCardInfo.setEnabled(!mapViewMode);
             layCardInfo.setVisibility(mapViewMode ? View.GONE : View.VISIBLE);
             miCenterPosition.setVisible(mapViewMode);
 
-            if (mapViewMode) {
-                hideCreateSS();
-            } else {
-                showCreateSS();
-            }
-
             miMode.setIcon(mapViewMode ? R.drawable.ic_add_location_white_36dp : R.drawable.ic_map_white_36dp);
-        } else if (itemId == R.id.take5MenuGpsInfoToggle) {
+        } else if (itemId == R.id.inertialMenuGpsInfoToggle) {
             if (gpsInfoHidden) {
                 gpsInfoHidden = false;
                 cvGpsInfo.setVisibility(View.VISIBLE);
@@ -629,7 +615,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements IUpdatePoint
                 cvGpsInfo.setVisibility(View.GONE);
                 miHideGpsInfo.setTitle(R.string.menu_x_show_gps_info);
             }
-        } else if (itemId == R.id.take5MenuCenterPositionToggle) {
+        } else if (itemId == R.id.inertialMenuCenterPositionToggle) {
             centerPosition = !centerPosition;
             miCenterPosition.setChecked(centerPosition);
         }
@@ -667,11 +653,6 @@ public class Take5Activity extends AcquireGpsMapActivity implements IUpdatePoint
         } else {
             rvPoints.setVisibility(View.VISIBLE);
         }
-
-        if (_PrevPoint != null && !createSSVisible) {
-            fabSS.setVisibility(View.VISIBLE);
-            createSSVisible = true;
-        }
     }
 
     @Override
@@ -682,30 +663,30 @@ public class Take5Activity extends AcquireGpsMapActivity implements IUpdatePoint
 
     @Override
     public void finish() {
-        if (validateSideShot()) {
-            if (pointsCreated) {
-                if (!saved || updated) {
-                    savePoint(_CurrentPoint);
-                }
-
-                setResult(Consts.Codes.Results.POINT_CREATED, new Intent().putExtra(Consts.Codes.Data.NUMBER_OF_CREATED_POINTS, numOfPointsCreated));
-            } else {
-                if (_Group != null) {
-                    getTtAppCtx().getDAL().deleteGroup(_Group.getCN());
-                }
-
-                setResult(RESULT_CANCELED);
+        if (pointsCreated) {
+            if (!saved || updated) {
+                savePoint(_CurrentPoint);
             }
 
-            super.finish();
+            setResult(Consts.Codes.Results.POINT_CREATED, new Intent().putExtra(Consts.Codes.Data.NUMBER_OF_CREATED_POINTS, numOfPointsCreated));
+        } else {
+            if (_Group != null) {
+                getTtAppCtx().getDAL().deleteGroup(_Group.getCN());
+            }
+
+            setResult(RESULT_CANCELED);
         }
+
+        super.finish();
     }
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN){
-            if (validateSideShot()) {
-                setupTake5();
+        if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
+            if (_CurrentPoint == null || (_CurrentPoint.getOp() != OpType.InertialStart || _CurrentPoint.getOp() != OpType.Inertial)) {
+                setupInertialStartPoint();
+            } else if (_CurrentPoint.getOp() == OpType.Inertial) {
+                addInertialPoint();
             }
             return true;
         } else if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
@@ -729,11 +710,15 @@ public class Take5Activity extends AcquireGpsMapActivity implements IUpdatePoint
         return _CurrentPoint != null ? (_CurrentPoint.getOp() == OpType.Take5 ? 250 : 0) : 0;
     }
 
+    @Override
+    public boolean requiresInsService() {
+        return true;
+    }
+
     //endregion
 
 
     //region Update/Save/Validate/Setup Points
-    @Override
     public void updatePoint(TtPoint point) {
         if (_CurrentPoint.getCN().equals(point.getCN())) {
             _CurrentPoint = point;
@@ -753,12 +738,17 @@ public class Take5Activity extends AcquireGpsMapActivity implements IUpdatePoint
             if (sPoint == _CurrentPoint) {
                 if (!saved) {
                     getTtAppCtx().getDAL().insertPoint(sPoint);
-                    getTtAppCtx().getDAL().insertNmeaBursts(_Bursts);
+                    if (sPoint.getOp() == OpType.Inertial) {
+                        getTtAppCtx().getDAL().insertInsData(_InsData);
+                    } else if (sPoint.getOp() == OpType.InertialStart) {
+                        getTtAppCtx().getDAL().insertNmeaBursts(_Bursts);
+                    }
+
                     pointsCreated = true;
                     numOfPointsCreated++;
 
                     if (sPoint.getIndex() < _Points.size()) { //update all the points after inserted point
-                        for (int i = sPoint.getIndex() + 1; i <_Points.size(); i++) {
+                        for (int i = sPoint.getIndex() + 1; i < _Points.size(); i++) {
                             TtPoint point = TtUtils.Points.clonePoint(_Points.get(i));
                             point.setIndex(i);
                             getTtAppCtx().getDAL().updatePoint(point, _Points.get(i));
@@ -784,14 +774,14 @@ public class Take5Activity extends AcquireGpsMapActivity implements IUpdatePoint
     }
 
 
-    private void setupTake5() {
+    private void setupInertialStartPoint() {
         if (!saved || updated) {
             savePoint(_CurrentPoint);
         }
 
         _PrevPoint = _CurrentPoint;
-        _AddTake5 = new Take5Point();
-        setupPoint(_AddTake5);
+        _InertialStartPoint = new InertialStartPoint();
+        setupPoint(_InertialStartPoint);
 
         _Bursts = new ArrayList<>();
         _UsedBursts = new ArrayList<>();
@@ -800,36 +790,9 @@ public class Take5Activity extends AcquireGpsMapActivity implements IUpdatePoint
 
         startLogging();
 
-        fabT5.setEnabled(false);
-        fabSS.setEnabled(false);
+        fab.setEnabled(false);
 
-        showCancel();
-        hideCommitSS();
-    }
-
-    private void setupSideShot() {
-        if (!saved || updated) {
-            savePoint(_CurrentPoint);
-        }
-
-        lockLastPoint(true);
-
-        _PrevPoint = _CurrentPoint;
-        _CurrentPoint = new SideShotPoint();
-        setupPoint(_CurrentPoint);
-
-        _Points.add(_CurrentPoint);
-
-        ignoreScroll = true;
-
-        onStartCardMovement(false);
-        pointEditRvAdapter.notifyItemInserted(_Points.size() - 1);
-        rvPoints.smoothScrollToPosition(_Points.size() - 1);
-
-        AndroidUtils.UI.hideKeyboard(this);
-
-        showCancel();
-        showCommitSS();
+        showStopCancel();
     }
 
     private void setupPoint(TtPoint point) {
@@ -852,53 +815,19 @@ public class Take5Activity extends AcquireGpsMapActivity implements IUpdatePoint
         updated = true;
     }
 
-
-    private boolean validateSideShot() {
-        if (_CurrentPoint != null && _CurrentPoint.getOp() == OpType.SideShot) {
-            SideShotPoint ssp = (SideShotPoint)_CurrentPoint;
-
-            if (ssp.getFwdAz() != null || ssp.getBkAz() != null) {
-                if (ssp.getSlopeDistance() > 0) {
-
-                    //temp adjust for map
-                    TtPoint tmp;
-                    for (int i = _Points.size() - 2; i > -1; i--) {
-                        tmp =_Points.get(i);
-
-                        if (tmp.getOp().isGpsType()) {
-                            ssp.calculatePoint(getPolygon(), tmp);
-                            addPosition(ssp);
-                            break;
-                        }
-                    }
-
-                    return true;
-                } else {
-                    Toast.makeText(Take5Activity.this, "SideShot requires a distance of greater than zero", Toast.LENGTH_SHORT).show();
-                }
-            } else {
-                Toast.makeText(Take5Activity.this, "SideShot requires a forward or back azimuth", Toast.LENGTH_SHORT).show();
-            }
-            return false;
-        }
-
-        return true;
-    }
-
-    private void addTake5(Take5Point t5point) {
+    private void addInertialStartPoint(InertialStartPoint point) {
         TtPoint prevPoint = _CurrentPoint;
-        _CurrentPoint = t5point;
+        _CurrentPoint = point;
 
-        if (savePoint(t5point)) {
-            t5point.adjustPoint(); //temp for map
+        if (savePoint(point)) {
+            point.adjustPoint(); //temp for map
 
-            hideCancel();
-            hideCommitSS();
+            hideStopCancel();
 
             lockLastPoint(true);
 
             _PrevPoint = prevPoint;
-            _Points.add(t5point.getIndex(), t5point);
+            _Points.add(point.getIndex(), point);
 
             ignoreScroll = true;
 
@@ -908,13 +837,11 @@ public class Take5Activity extends AcquireGpsMapActivity implements IUpdatePoint
             onStartCardMovement(false);
             rvPoints.smoothScrollToPosition(_Points.size() - 1);
 
-            fabT5.setEnabled(true);
-            fabSS.setEnabled(true);
 
             if (isTrailModeEnabled()) {
-                addPosition(t5point);
+                addPosition(point);
             } else {
-                getTtAppCtx().getReport().writeWarn("TrailMode is disabled.", "Take5Activity:addTake5");
+                getTtAppCtx().getReport().writeWarn("TrailMode is disabled.", "InertialActivity:addInertialStartPoint");
             }
 
             if (getTtAppCtx().getDeviceSettings().getTake5VibrateOnCreate()) {
@@ -925,12 +852,64 @@ public class Take5Activity extends AcquireGpsMapActivity implements IUpdatePoint
                 AndroidUtils.Device.playSound(this, R.raw.ring);
             }
 
-            if (!createSSVisible) {
-                showCreateSS();
-            }
+            fab.setEnabled(true);
+            //TODO update to start inertial system
+            fab.setImageResource(R.drawable.ic_ttpoint_sideshot_white);
         } else {
             _CurrentPoint = prevPoint;
             Toast.makeText(this, "Point failed to save", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void setupInertialPoint() {
+        if (!saved || updated) {
+            savePoint(_CurrentPoint);
+        }
+
+        lockLastPoint(true);
+
+        _PrevPoint = _CurrentPoint;
+        _CurrentPoint = new InertialPoint();
+        setupPoint(_CurrentPoint);
+
+        _Points.add(_CurrentPoint);
+
+        ignoreScroll = true;
+
+        onStartCardMovement(false);
+        pointEditRvAdapter.notifyItemInserted(_Points.size() - 1);
+        rvPoints.smoothScrollToPosition(_Points.size() - 1);
+
+        AndroidUtils.UI.hideKeyboard(this);
+    }
+
+    private void addInertialPoint() {
+        if (_InertialStarted) {
+            if (_PrevPoint == null || !_PrevPoint.getOp().isInertialType()) {
+                getTtAppCtx().getReport().writeWarn("Previous point is not an Inertial type.", "InertialActivity:addInertialPoint");
+            }
+
+            double azimuth = _PrevPoint.getOp() == OpType.InertialStart ?
+                    ((InertialStartPoint)_PrevPoint).getTotalAzimuth() :
+                    ((InertialPoint)_PrevPoint).getAzimuth();
+
+            double x = 0, y = 0, z = 0, timespan = 0;
+            boolean isConsecutive = true;
+
+            for (TtInsData data : _InsData) {
+                x += data.getDistanceX();
+                y += data.getDistanceY();
+                z += data.getDistanceZ();
+
+                timespan += data.getTimeSpan();
+                isConsecutive &= data.isConsecutive();
+            }
+
+            ((InertialPoint)_CurrentPoint).setInertialValues(azimuth, isConsecutive, timespan, x, y, z);
+
+            setupInertialPoint();
+        } else {
+            getTtAppCtx().getReport().writeWarn("Inertial not started.", "InertialActivity:addInertialPoint");
         }
     }
     //endregion
@@ -955,7 +934,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements IUpdatePoint
             killAcquire = false;
         } else {
             pdhHideProgress.post(() -> runOnUiThread(() -> {
-                Animation a = AnimationUtils.loadAnimation(Take5Activity.this, R.anim.push_down_out);
+                Animation a = AnimationUtils.loadAnimation(InertialActivity.this, R.anim.push_down_out);
 
                 a.setAnimationListener(new Animation.AnimationListener() {
                     @Override
@@ -984,20 +963,20 @@ public class Take5Activity extends AcquireGpsMapActivity implements IUpdatePoint
             RecyclerView.ViewHolder holder = rvPoints.findViewHolderForAdapterPosition(_Points.size() - 1);
 
             if (holder instanceof PointsEditRvAdapter.PointViewHolderEx) {
-                ((PointsEditRvAdapter.PointViewHolderEx)holder).setLocked(lock);
+                ((PointsEditRvAdapter.PointViewHolderEx) holder).setLocked(lock);
             }
         }
     }
 
     //region UI
-    private void showCancel() {
-        if (!cancelVisible) {
+    private void showStopCancel() {
+        if (!stopCancelVisible) {
             Animation a = AnimationUtils.loadAnimation(this, R.anim.push_right_in);
 
             a.setAnimationListener(new Animation.AnimationListener() {
                 @Override
                 public void onAnimationStart(Animation animation) {
-                    fabCancel.setVisibility(View.VISIBLE);
+                    fabStopCancel.setVisibility(View.VISIBLE);
                 }
 
                 @Override
@@ -1011,15 +990,15 @@ public class Take5Activity extends AcquireGpsMapActivity implements IUpdatePoint
                 }
             });
 
-            fabCancel.startAnimation(a);
-            cancelVisible = true;
+            fabStopCancel.startAnimation(a);
+            stopCancelVisible = true;
         }
     }
 
-    private void hideCancel() {
+    private void hideStopCancel() {
         AndroidUtils.UI.hideKeyboard(this);
 
-        if (cancelVisible) {
+        if (stopCancelVisible) {
             final Animation a = AnimationUtils.loadAnimation(this, R.anim.push_left_out);
 
             a.setAnimationListener(new Animation.AnimationListener() {
@@ -1029,7 +1008,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements IUpdatePoint
 
                 @Override
                 public void onAnimationEnd(Animation animation) {
-                    fabCancel.setVisibility(View.GONE);
+                    fabStopCancel.setVisibility(View.GONE);
                 }
 
                 @Override
@@ -1038,134 +1017,10 @@ public class Take5Activity extends AcquireGpsMapActivity implements IUpdatePoint
                 }
             });
 
-            final Animation ac = AnimationUtils.loadAnimation(this, R.anim.push_right_out);
-
-            ac.setAnimationListener(new Animation.AnimationListener() {
-                @Override
-                public void onAnimationStart(Animation animation) {
-                }
-
-                @Override
-                public void onAnimationEnd(Animation animation) {
-                    fabSSCommit.setVisibility(View.GONE);
-                }
-
-                @Override
-                public void onAnimationRepeat(Animation animation) {
-
-                }
-            });
-
-            fabCancel.startAnimation(a);
-            fabSSCommit.startAnimation(ac);
-            cancelVisible = false;
+            fabStopCancel.startAnimation(a);
+            stopCancelVisible = false;
         }
     }
-
-
-    private void showCommitSS() {
-        if (!commitSSVisible) {
-            Animation ac = AnimationUtils.loadAnimation(this, R.anim.push_left_in);
-
-            ac.setAnimationListener(new Animation.AnimationListener() {
-                @Override
-                public void onAnimationStart(Animation animation) {
-                    fabSSCommit.setVisibility(View.VISIBLE);
-                }
-
-                @Override
-                public void onAnimationEnd(Animation animation) {
-
-                }
-
-                @Override
-                public void onAnimationRepeat(Animation animation) {
-
-                }
-            });
-
-            fabSSCommit.startAnimation(ac);
-            commitSSVisible = true;
-        }
-    }
-
-    private void hideCommitSS() {
-        if (commitSSVisible) {
-            final Animation ac = AnimationUtils.loadAnimation(this, R.anim.push_right_out);
-
-            ac.setAnimationListener(new Animation.AnimationListener() {
-                @Override
-                public void onAnimationStart(Animation animation) {
-                }
-
-                @Override
-                public void onAnimationEnd(Animation animation) {
-                    fabSSCommit.setVisibility(View.GONE);
-                }
-
-                @Override
-                public void onAnimationRepeat(Animation animation) {
-
-                }
-            });
-
-            fabSSCommit.startAnimation(ac);
-            commitSSVisible = false;
-        }
-    }
-
-
-    private void showCreateSS() {
-        if (!createSSVisible) {
-            Animation ac = AnimationUtils.loadAnimation(this, R.anim.push_left_in);
-
-            ac.setAnimationListener(new Animation.AnimationListener() {
-                @Override
-                public void onAnimationStart(Animation animation) {
-                    fabSS.setVisibility(View.VISIBLE);
-                }
-
-                @Override
-                public void onAnimationEnd(Animation animation) {
-
-                }
-
-                @Override
-                public void onAnimationRepeat(Animation animation) {
-
-                }
-            });
-
-            fabSS.startAnimation(ac);
-            createSSVisible = true;
-        }
-    }
-
-    private void hideCreateSS() {
-        if (createSSVisible) {
-            final Animation ac = AnimationUtils.loadAnimation(this, R.anim.push_right_out);
-
-            ac.setAnimationListener(new Animation.AnimationListener() {
-                @Override
-                public void onAnimationStart(Animation animation) {
-                }
-
-                @Override
-                public void onAnimationEnd(Animation animation) {
-                    fabSS.setVisibility(View.GONE);
-                }
-
-                @Override
-                public void onAnimationRepeat(Animation animation) {
-
-                }
-            });
-
-            fabSS.startAnimation(ac);
-            createSSVisible = false;
-        }
-    }
-
 
     private void onStartCardMovement(boolean animateOpacity) {
         linearLayoutManager.setScrollingEnabled(true);
@@ -1192,7 +1047,6 @@ public class Take5Activity extends AcquireGpsMapActivity implements IUpdatePoint
     protected void onEndHideExtraGpsStatus() {
         rvPoints.setVisibility(View.VISIBLE);
         linearLayoutManager.scrollToPositionWithOffset(_Points.size() - 1, 0);
-        //rvPoints.scrollToPosition(_Points.size() - 1);
         onStopCardMovement();
     }
 
@@ -1209,7 +1063,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements IUpdatePoint
         super.onNmeaBurstReceived(nmeaBurst);
 
         if (isLogging() && nmeaBurst.isValid()) {
-            TtNmeaBurst burst = TtNmeaBurst.create(_AddTake5.getCN(), false, nmeaBurst);
+            TtNmeaBurst burst = TtNmeaBurst.create(_InertialStartPoint.getCN(), false, nmeaBurst);
 
             _Bursts.add(burst);
 
@@ -1249,13 +1103,13 @@ public class Take5Activity extends AcquireGpsMapActivity implements IUpdatePoint
 
                     Position position = GeoTools.getMidPoint(positions);
 
-                    _AddTake5.setLatitude(position.getLatitude());
-                    _AddTake5.setLongitude(position.getLongitude());
-                    _AddTake5.setElevation(position.getElevation());
-                    _AddTake5.setRMSEr(dRMSEr);
-                    _AddTake5.setAndCalc(x, y, position.getElevation(), getPolygon());
+                    _InertialStartPoint.setLatitude(position.getLatitude());
+                    _InertialStartPoint.setLongitude(position.getLongitude());
+                    _InertialStartPoint.setElevation(position.getElevation());
+                    _InertialStartPoint.setRMSEr(dRMSEr);
+                    _InertialStartPoint.setAndCalc(x, y, position.getElevation(), getPolygon());
 
-                    addTake5(_AddTake5);
+                    addInertialStartPoint(_InertialStartPoint);
                 }
             }
         }
@@ -1281,16 +1135,134 @@ public class Take5Activity extends AcquireGpsMapActivity implements IUpdatePoint
         super.nmeaBurstValidityChanged(burstsValid);
 
         String message = isReceivingNmea() ? "Now receiving NMEA data." : "No longer receiving NMEA data.";
-        Toast.makeText(Take5Activity.this, message, Toast.LENGTH_SHORT).show();
+        Toast.makeText(InertialActivity.this, message, Toast.LENGTH_SHORT).show();
     }
 
+    //endregion
+
+    //region INS
+    private final PostDelayHandler waitForTareHandler = new PostDelayHandler(10000);
+    private final Runnable waitForTare = () -> {
+        if (!_InertialStarted) {
+            _StartInertial = false;
+            Toast.makeText(InertialActivity.this, "Zero INS Timeout", Toast.LENGTH_SHORT).show();
+        }
+    };
+
+    private void startInertial() {
+        if (!getTtAppCtx().isVNInsServiceStarted() || !getTtAppCtx().getVnIns().isInsRunning()) {
+            Toast.makeText(InertialActivity.this, "INS is not running. Please configure the device.", Toast.LENGTH_SHORT).show();
+        } else {
+            try {
+                _StartInertial = true;
+                waitForTareHandler.post(waitForTare);
+                getTtAppCtx().getVnIns().tare();
+            } catch (IOException e) {
+                _StartInertial = false;
+                Toast.makeText(InertialActivity.this, "Unable to Zero INS", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private void stopInertial() {
+        _InertialStarted = false;
+        _InsData.clear();
+
+        //TODO set Inertial Icon to Create Inertial Start and Stop Icon to Cancel
+        fab.setImageResource(R.drawable.ic_ttpoint_gps_white); //to inertial start point
+        fabStopCancel.setImageResource(R.drawable.ic_clear_white_36dp);
+    }
+
+    @Override
+    public void insDataReceived(VNInsData data) {
+        if (_InertialStarted) {
+            _InsData.add(TtInsData.create(_CurrentPoint.getCN(), data));
+        }
+    }
+
+    @Override
+    public void nmeaSentenceReceived(VNNmeaSentence nmeaSentence) {
+        //
+    }
+
+    @Override
+    public void commandRespone(VNCommand command) {
+        if (command.getMessageID() == MessageID.TAR) {
+            waitForTareHandler.cancel();
+
+            if (_StartInertial) {
+                _InsData = new ArrayList<>();
+                _InertialStarted = true;
+                _StartInertial = false;
+
+                //TODO set Inertial Icon and Stop Icon
+                showStopCancel();
+                fab.setImageResource(R.drawable.ic_ttpoint_traverse_white); //to ins point
+                fabStopCancel.setImageResource(R.drawable.ic_clear_white_36dp); //to stop
+                setupInertialPoint();
+
+                Toast.makeText(InertialActivity.this, "Start Traversing", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(InertialActivity.this, "INS Zeroed", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    @Override
+    public void receivingData(boolean receiving) {
+        Toast.makeText(InertialActivity.this, receiving ? "Now receiving INS data" : "No longer receiving INS data", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void receivingValidData(boolean valid) {
+        if (!valid) {
+            Toast.makeText(InertialActivity.this, "Received Invalid Data", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void insStarted() {
+        //
+    }
+
+    @Override
+    public void insStopped() {
+        //
+    }
+
+    @Override
+    public void insServiceStarted() {
+        //
+    }
+
+    @Override
+    public void insServiceStopped() {
+        //
+    }
+
+    @Override
+    public void insError(VNInsService.InsError error) {
+        switch (error) {
+            case LostDeviceConnection:
+            case DeviceConnectionEnded:
+                stopInertial();
+                Toast.makeText(InertialActivity.this, "INS connected stopped", Toast.LENGTH_LONG).show();
+                break;
+            case FailedToConnect:
+                break;
+            case Unknown:
+            default:
+                Toast.makeText(InertialActivity.this, "An unknown INS has occurred", Toast.LENGTH_LONG).show();
+                break;
+        }
+    }
     //endregion
 
     //region Media
     private void saveMedia() {
         if (_MediaUpdated && _CurrentMedia != null) {
             if (!getTtAppCtx().getMAL().updateMedia(_CurrentMedia)) {
-                Toast.makeText(Take5Activity.this,
+                Toast.makeText(InertialActivity.this,
                         String.format("Unable to save %s", _CurrentMedia.getMediaType().toString()),
                         Toast.LENGTH_LONG
                 ).show();
@@ -1343,7 +1315,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements IUpdatePoint
 //                    getTtAppCtx().getMAL().internalizeImages(null);
 //                }).start();
             } else {
-                Toast.makeText(Take5Activity.this, "Error saving picture", Toast.LENGTH_LONG).show();
+                Toast.makeText(InertialActivity.this, "Error saving picture", Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -1354,7 +1326,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements IUpdatePoint
 
             pictures.sort(TtUtils.Media.PictureTimeComparator);
 
-            for (int i = 0; i <pictures.size(); i++) {
+            for (int i = 0; i < pictures.size(); i++) {
                 if (!getTtAppCtx().getMAL().insertImage(pictures.get(i))) {
                     pictures.remove(i--);
                     error++;
@@ -1368,7 +1340,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements IUpdatePoint
             }
 
             if (error > 0) {
-                Toast.makeText(Take5Activity.this, String.format(Locale.getDefault(), "Error saving %d pictures", pictures.size()), Toast.LENGTH_LONG).show();
+                Toast.makeText(InertialActivity.this, String.format(Locale.getDefault(), "Error saving %d pictures", pictures.size()), Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -1437,7 +1409,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements IUpdatePoint
 
             addImageToList(picture, true, bmp);
         } catch (Exception e) {
-            getTtAppCtx().getReport().writeError(e.getMessage(), "Take5Activity:loadImageToList", e.getStackTrace());
+            getTtAppCtx().getReport().writeError(e.getMessage(), "InertialActivity:loadImageToList", e.getStackTrace());
             addInvalidImagesToList(picture);
         }
 
@@ -1455,7 +1427,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements IUpdatePoint
     }
 
     private void addInvalidImagesToList(final TtImage picture) {
-        Bitmap bitmap = BitmapFactory.decodeResource(Take5Activity.this.getResources(), R.drawable.ic_error_outline_black_48dp);
+        Bitmap bitmap = BitmapFactory.decodeResource(InertialActivity.this.getResources(), R.drawable.ic_error_outline_black_48dp);
         if (bitmap != null) {
             addImageToList(picture, false, bitmap);
         }
@@ -1474,7 +1446,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements IUpdatePoint
 
                 final int order = TtUtils.Media.getMediaIndex(picture, rvMediaAdapter.getItems());
 
-                Take5Activity.this.runOnUiThread(() -> {
+                InertialActivity.this.runOnUiThread(() -> {
                     rvMediaAdapter.add(order, picture);
 
                     //don't bombard the adapter with lots of changes
@@ -1502,7 +1474,7 @@ public class Take5Activity extends AcquireGpsMapActivity implements IUpdatePoint
     private final Runnable onMediaChanged = new Runnable() {
         @Override
         public void run() {
-            Take5Activity.this.runOnUiThread(() -> {
+            InertialActivity.this.runOnUiThread(() -> {
                 if (mediaSelectionIndex > INVALID_INDEX && mediaSelectionIndex < rvMediaAdapter.getItemCountEx()) {
                     setCurrentMedia(rvMediaAdapter.getItem(mediaSelectionIndex));
                     rvMediaAdapter.selectItem(mediaSelectionIndex);
@@ -1590,63 +1562,32 @@ public class Take5Activity extends AcquireGpsMapActivity implements IUpdatePoint
     //endregion
 
     //region Controls
-    public void btnTake5Click(View view) {
-        if (isReceivingNmea()) {
-            if (validateSideShot()) {
-                setupTake5();
+    public void btnInertialClick(View view) {
+        if (_CurrentPoint == null || (!_CurrentPoint.getOp().isInertialType() || (_CurrentPoint.getOp() == OpType.Inertial && !_InertialStarted))) {
+            if (isReceivingNmea()) {
+                setupInertialStartPoint();
+            } else {
+                Toast.makeText(InertialActivity.this, "Currently not receiving NMEA data.", Toast.LENGTH_SHORT).show();
             }
         } else {
-            Toast.makeText(Take5Activity.this, "Currently not receiving NMEA data.", Toast.LENGTH_SHORT).show();
+            if (_InertialStarted) {
+                setupInertialPoint();
+            } else if (!_StartInertial && _CurrentPoint.getOp() == OpType.InertialStart) {
+                startInertial();
+            }
         }
     }
 
-    public void btnSideShotClick(View view) {
-        if (validateSideShot()) {
-            if (isGpsExtraInfoVisible())
-                hideExtraGpsStatus();
-
-            setupSideShot();
-        }
-    }
-
-    public void btnCommitSideShotClick(View view) {
-        if (validateSideShot()) {
-            savePoint(_CurrentPoint);
-            lockLastPoint(true);
-            hideCancel();
-            hideCommitSS();
-        }
-    }
-
-    public void btnCancelClick(View view) {
-        hideCancel();
-        hideCommitSS();
-
+    public void btnStopCancelClick(View view) {
         if (isLogging()) {
             killAcquire = true;
             stopLogging();
             _Bursts = new ArrayList<>();
             _UsedBursts = new ArrayList<>();
 
-            fabT5.setEnabled(true);
-            fabSS.setEnabled(true);
-        } else if (_Points.size() > 0 && _CurrentPoint.getOp() == OpType.SideShot) {
-            _Points.remove(_Points.size() - 1);
-
-            ignoreScroll = true;
-
-            pointEditRvAdapter.notifyItemRemoved(_Points.size());
-
-            if (_Points.size() > 0) {
-                onStartCardMovement(false);
-                rvPoints.smoothScrollToPosition(_Points.size() - 1);
-            }
-
-            if (_Points.size() < 1) {
-                _CurrentPoint = null;
-            } else {
-                _CurrentPoint = _Points.get(_Points.size() - 1);
-            }
+            fab.setEnabled(true);
+        } else if (_InertialStarted) {
+            stopInertial();
         }
 
         saved = true;
@@ -1656,13 +1597,16 @@ public class Take5Activity extends AcquireGpsMapActivity implements IUpdatePoint
     public void btnPointInfo(View view) {
 
     }
+
+    public void btnInertialInfoClick(View view) {
+        //inertial info control
+    }
     //endregion
 
     @Override
     protected MapTracking getMapTracking() {
         return !mapViewMode || centerPosition ? MapTracking.FOLLOW : MapTracking.NONE;
     }
-
 
     //region Fragment Interaction
     private void onLockChange() {
@@ -1735,58 +1679,6 @@ public class Take5Activity extends AcquireGpsMapActivity implements IUpdatePoint
 
     public void unregister(String pmlCN) {
         listeners.remove(pmlCN);
-    }
-    //endregion
-
-    //region RangeFinder
-    @Override
-    protected TtMedia getCurrentMedia() {
-        return _CurrentMedia;
-    }
-
-    @Override
-    public void rfDataReceived(TtRangeFinderData rfData) {
-
-    }
-
-    @Override
-    public void rfStringReceived(String rfString) {
-
-    }
-
-    @Override
-    public void rfInvalidStringReceived(String rfString) {
-
-    }
-
-    @Override
-    public void rangeFinderStarted() {
-
-    }
-
-    @Override
-    public void rangeFinderStopped() {
-
-    }
-
-    @Override
-    public void rangeFinderConnecting() {
-
-    }
-
-    @Override
-    public void rangeFinderServiceStarted() {
-
-    }
-
-    @Override
-    public void rangeFinderServiceStopped() {
-
-    }
-
-    @Override
-    public void rangeFinderError(RangeFinderService.RangeFinderError error) {
-
     }
     //endregion
 }

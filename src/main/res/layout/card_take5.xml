@@ -7,9 +7,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@android:color/white"
-        android:layout_margin="8dp"
+        style="@style/margin8088"
         android:id="@+id/parent">
 
-        <include layout="@layout/content_point_trav"/>
+        <include layout="@layout/content_point_gps_basic"/>
     </androidx.cardview.widget.CardView>
 </FrameLayout>

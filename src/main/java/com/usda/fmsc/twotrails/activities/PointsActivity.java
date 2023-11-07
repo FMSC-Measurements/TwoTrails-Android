@@ -487,10 +487,10 @@ public class PointsActivity extends PointCollectionActivity implements PointMedi
             @Override
             public void onSheetHidden() {
                 if (createOpType != null) {
-
                     switch (createOpType) {
                         case Take5:
                         case Walk:
+                        case InertialStart:
                             slexCreate.expandFab();
                             break;
                         default:
@@ -572,9 +572,11 @@ public class PointsActivity extends PointCollectionActivity implements PointMedi
                 }
 
                 if (createOpType == OpType.Take5) {
-                    acquireT5Points(point);
+                    startTake5Activity(point);
                 } else if (createOpType == OpType.Walk) {
-                    acquireWalkPoints(point);
+                    startWalkActivity(point);
+                } else if (createOpType == OpType.InertialStart) {
+                    startInertialActivity(point);
                 }
 
                 createOpType = null;
@@ -2015,6 +2017,18 @@ public class PointsActivity extends PointCollectionActivity implements PointMedi
 
         dialog.show();
     }
+
+    private void configIns() {
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+
+        dialog.setMessage("The INS is currently not configured. Would you like to configure it now?");
+
+        dialog.setPositiveButton("Configure", (dialog1, which) -> startActivity(new Intent(getBaseContext(), SettingsActivity.class).putExtra(SettingsActivity.SETTINGS_PAGE, SettingsActivity.VN_SETTINGS_PAGE)));
+
+        dialog.setNeutralButton(R.string.str_cancel, null);
+
+        dialog.show();
+    }
     //endregion
 
 
@@ -2056,7 +2070,7 @@ public class PointsActivity extends PointCollectionActivity implements PointMedi
     }
 
 
-    private void acquireT5Points(final TtPoint point) {
+    private void startTake5Activity(final TtPoint point) {
         if (!getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
             configGps();
         } else if (getTtAppCtx().getDAL().needsAdjusting()) {
@@ -2068,40 +2082,18 @@ public class PointsActivity extends PointCollectionActivity implements PointMedi
             handleStartAdjustingResult(getTtAppCtx().adjustProject());
 
         } else {
-            startTake5Activity(point);
-        }
-    }
-
-    private void startTake5Activity(TtPoint currentPoint) {
-        if (!getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
-            configGps();
-        } else {
             Intent intent = new Intent(this, Take5Activity.class);
 
-            Bundle bundle = new Bundle();
-
-            if (currentPoint != null) {
-                bundle.putParcelable(Consts.Codes.Data.POINT_DATA, TtUtils.Points.clonePoint(currentPoint));
-            }
-
-            if (_CurrentMetadata != null) {
-                bundle.putParcelable(Consts.Codes.Data.METADATA_DATA, _CurrentMetadata);
-            } else {
-                bundle.putParcelable(Consts.Codes.Data.METADATA_DATA, getMetadata().get(Consts.EmptyGuid));
-            }
-
-            bundle.putParcelable(Consts.Codes.Data.POLYGON_DATA, _CurrentPolygon);
-
-            intent.putExtra(Consts.Codes.Data.POINT_PACKAGE, bundle);
+            intent.putExtra(Consts.Codes.Data.POINT_PACKAGE, createPointDataBundle());
 
             addOrInsertPoints(intent);
         }
     }
 
-
-    private void acquireWalkPoints(final TtPoint point) {
+    private void startWalkActivity(final TtPoint point) {
         if (!getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
             configGps();
+            slexCreate.contractFab();
         } else if (getTtAppCtx().getDAL().needsAdjusting()) {
 
             startActivityAfterAdjustment = GpsTypeActivity.Walk;
@@ -2111,34 +2103,51 @@ public class PointsActivity extends PointCollectionActivity implements PointMedi
             handleStartAdjustingResult(getTtAppCtx().adjustProject());
 
         } else {
-            startWalkActivity(point);
-        }
-    }
-
-    private void startWalkActivity(TtPoint currentPoint) {
-        if (!getTtAppCtx().getDeviceSettings().isGpsConfigured()) {
-            configGps();
-        } else {
             Intent intent = new Intent(this, WalkActivity.class);
 
-            Bundle bundle = new Bundle();
-
-            if (currentPoint != null) {
-                bundle.putParcelable(Consts.Codes.Data.POINT_DATA, TtUtils.Points.clonePoint(currentPoint));
-            }
-
-            if (_CurrentMetadata != null) {
-                bundle.putParcelable(Consts.Codes.Data.METADATA_DATA, _CurrentMetadata);
-            } else {
-                bundle.putParcelable(Consts.Codes.Data.METADATA_DATA, getMetadata().get(Consts.EmptyGuid));
-            }
-
-            bundle.putParcelable(Consts.Codes.Data.POLYGON_DATA, _CurrentPolygon);
-
-            intent.putExtra(Consts.Codes.Data.POINT_PACKAGE, bundle);
+            intent.putExtra(Consts.Codes.Data.POINT_PACKAGE, createPointDataBundle());
 
             addOrInsertPoints(intent);
         }
+    }
+
+    private void startInertialActivity(final TtPoint point) {
+        TwoTrailsApp app = getTtAppCtx();
+        if (!app.getDeviceSettings().isGpsConfigured()) {
+            configGps();
+            slexCreate.contractFab();
+        } else if (!app.getDeviceSettings().isVN100Configured()) {
+            configIns();
+            slexCreate.contractFab();
+        } else if (getTtAppCtx().getDAL().needsAdjusting()) {
+            startActivityAfterAdjustment = GpsTypeActivity.Inertial;
+            startPoint = point;
+            handleStartAdjustingResult(getTtAppCtx().adjustProject());
+        } else {
+            Intent intent = new Intent(this, InertialActivity.class);
+
+            intent.putExtra(Consts.Codes.Data.POINT_PACKAGE, createPointDataBundle());
+
+            addOrInsertPoints(intent);
+        }
+    }
+
+    private Bundle createPointDataBundle() {
+        Bundle bundle = new Bundle();
+
+        if (_CurrentPoint != null) {
+            bundle.putParcelable(Consts.Codes.Data.POINT_DATA, TtUtils.Points.clonePoint(_CurrentPoint));
+        }
+
+        if (_CurrentMetadata != null) {
+            bundle.putParcelable(Consts.Codes.Data.METADATA_DATA, _CurrentMetadata);
+        } else {
+            bundle.putParcelable(Consts.Codes.Data.METADATA_DATA, getMetadata().get(Consts.EmptyGuid));
+        }
+
+        bundle.putParcelable(Consts.Codes.Data.POLYGON_DATA, _CurrentPolygon);
+
+        return bundle;
     }
 
 
@@ -2276,6 +2285,11 @@ public class PointsActivity extends PointCollectionActivity implements PointMedi
 
     public void btnPointNewTake5Click(View view) {
         createOpType = OpType.Take5;
+        fabSheet.hideSheet();
+    }
+
+    public void btnPointNewInertialClick(View view) {
+        createOpType = OpType.InertialStart;
         fabSheet.hideSheet();
     }
 
@@ -2465,6 +2479,7 @@ public class PointsActivity extends PointCollectionActivity implements PointMedi
                     case Gps: startAcquireGpsActivity(startPoint, startBursts); break;
                     case Take5: startTake5Activity(startPoint); break;
                     case Walk: startWalkActivity(startPoint); break;
+                    case Inertial: startInertialActivity(startPoint); break;
                 }
             }
 
@@ -2490,7 +2505,8 @@ public class PointsActivity extends PointCollectionActivity implements PointMedi
         None,
         Gps,
         Take5,
-        Walk
+        Walk,
+        Inertial
     }
     //endregion
 

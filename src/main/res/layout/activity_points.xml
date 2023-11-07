@@ -138,6 +138,13 @@
                     style="@style/pointsTvOptionStyle"/>
 
                 <TextView
+                    android:text="@string/op_inertial"
+                    android:layout_width="match_parent"
+                    android:drawableStart="@drawable/ic_ttpoint_gps_primary"
+                    android:onClick="btnPointNewInertialClick"
+                    style="@style/pointsTvOptionStyle"/>
+
+                <TextView
                     android:text="@string/op_trav"
                     android:layout_width="match_parent"
                     android:drawableStart="@drawable/ic_ttpoint_traverse_primary"

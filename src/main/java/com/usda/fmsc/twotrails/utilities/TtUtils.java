@@ -51,6 +51,8 @@ import com.usda.fmsc.twotrails.objects.media.TtPanorama;
 import com.usda.fmsc.twotrails.objects.media.TtPhotoSphere;
 import com.usda.fmsc.twotrails.objects.media.TtVideo;
 import com.usda.fmsc.twotrails.objects.points.GpsPoint;
+import com.usda.fmsc.twotrails.objects.points.InertialPoint;
+import com.usda.fmsc.twotrails.objects.points.InertialStartPoint;
 import com.usda.fmsc.twotrails.objects.points.QuondamPoint;
 import com.usda.fmsc.twotrails.objects.points.SideShotPoint;
 import com.usda.fmsc.twotrails.objects.points.Take5Point;
@@ -538,6 +540,8 @@ public class TtUtils {
                 case SideShot:  return new SideShotPoint(point);
                 case Walk:      return new WalkPoint(point);
                 case Take5:     return new Take5Point(point);
+                case InertialStart: return new InertialStartPoint(point);
+                case Inertial:  return new InertialPoint(point);
                 default: throw new RuntimeException("Op Type does not exist");
             }
         }
@@ -551,6 +555,8 @@ public class TtUtils {
                 case SideShot:  return new SideShotPoint();
                 case Walk:      return new WalkPoint();
                 case Take5:     return new Take5Point();
+                case InertialStart: return new InertialStartPoint();
+                case Inertial:  return new InertialPoint();
                 default: throw new RuntimeException("Op Type does not exist");
             }
         }
@@ -1449,8 +1455,11 @@ public class TtUtils {
 
     public static class GMap {
 
+        //TODO update with inertial
         public static MarkerOptions createMarkerOptions(TtPoint point, boolean adjusted, HashMap<String, TtMetadata> meta) {
             switch (point.getOp()) {
+                case InertialStart:
+                    //inertial state
                 case GPS:
                 case Take5:
                 case Walk:
@@ -1461,13 +1470,14 @@ public class TtUtils {
                     return createMarkerOptions((TravPoint) point, adjusted, meta.get(point.getMetadataCN()));
                 case Quondam:
                     return createMarkerOptions((QuondamPoint)point, adjusted, meta);
+                case Inertial:
+                    return null;//Inertial
             }
 
             return null;
         }
 
         public static MarkerOptions createMarkerOptions(GpsPoint point, boolean adjusted, TtMetadata meta) {
-
             Double x = adjusted ? point.getAdjX() : point.getUnAdjX();
             Double y = adjusted ? point.getAdjY() : point.getUnAdjY();
             Double z = adjusted ? point.getAdjZ() : point.getUnAdjZ();

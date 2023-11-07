@@ -162,6 +162,8 @@
     <string name="op_trav">Traverse</string>
     <string name="op_ss">Sideshot</string>
     <string name="op_qndm">Quondam</string>
+    <string name="op_inertialStart">Inertial Start</string>
+    <string name="op_inertial">Inertial</string>
 
 
     <!-- Requests -->
@@ -171,6 +173,8 @@
     <!-- Measurements -->
     <string name="meas_feet">Feet</string>
     <string name="meas_meters">Meters</string>
+    <string name="meas_seconds">Seconds</string>
+    <string name="meas_millis">Milliseconds</string>
 
 
     <!-- Settings -->
@@ -203,19 +207,15 @@
     <string name="menu_points_reset">Reset Point</string>
     <string name="menu_points_delete">Delete Point</string>
     <string name="menu_take5_cmt">Comment</string>
-    <string name="menu_take5_bnc">On Bnd</string>
     <string name="menu_take5_settings">Take 5 Settings</string>
-    <string name="menu_take5_map_mode">Map Mode</string>
-    <string name="menu_take5_add_media">Add Media</string>
-    <string name="menu_take5_goto_bottom">Go To Last Point</string>
     <string name="menu_walk_settings">Walk Settings</string>
     <string name="menu_walk_walking">Walking</string>
-    <string name="menu_walk_map_mode">Map Mode</string>
     <string name="menu_rename_group">Rename Group</string>
     <string name="menu_map_select_type">Select Map</string>
     <string name="menu_map_settings">Map Settings</string>
     <string name="menu_map_reset_bnds">Reset Bounds</string>
     <string name="menu_map_move_to_max_extents">Move To Map Bounds</string>
+    <string name="menu_map_mode">Map Mode</string>
     <string name="menu_map_where_is">Where Is</string>
     <string name="menu_map_show_my_pos">Show My Position</string>
     <string name="menu_map_zoom_to_poly">Zoom To Polygon</string>
@@ -233,6 +233,10 @@
     <string name="menu_sat_unit_tolerance">Unit Tolerance</string>
     <string name="menu_sat_color">Distance Color</string>
     <string name="menu_sat_capture">Capture</string>
+    <string name="menu_goto_bottom">Go To Last Point</string>
+    <string name="menu_bnc">On Bnd</string>
+    <string name="menu_add_media">Add Media</string>
+    <string name="menu_inertial_settings">Inertial Settings</string>
 
 
     <!-- Transitions -->
@@ -494,6 +498,16 @@
     <string name="points_trav_az_bk">Back</string>
     <string name="points_reset_diag">This will reset this point back to all its original values.</string>
     <string name="points_camera_diag">This device can use the built in TwoTrails camera that can capture the direction of the camera when a photo is taken. Would you like to use it or another camera app?</string>
+    <string name="point_inertial_start_az_fwd">Forward Azimuth</string>
+    <string name="point_inertial_start_az_bk">Backward Azimuth</string>
+    <string name="point_inertial_start_az_offset">Azimuth Offset</string>
+    <string name="point_inertial_dist_x">Distance X</string>
+    <string name="point_inertial_dist_y">Distance Y</string>
+    <string name="point_inertial_dist_z">Distance Z</string>
+    <string name="point_inertial_timespan">TimeSpan</string>
+    <string name="point_inertial_azimuth">Distance Z</string>
+    <string name="point_inertial_all_segs_valid">All Segs Valid</string>
+
 
     <!-- Points Media -->
     <string name="pmd_pitch">Pitch</string>

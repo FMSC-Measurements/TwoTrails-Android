@@ -1,0 +1,15 @@
+<FrameLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/white"
+        style="@style/margin8088"
+        android:id="@+id/parent">
+
+        <include layout="@layout/content_point_inertial_start"/>
+    </androidx.cardview.widget.CardView>
+</FrameLayout>

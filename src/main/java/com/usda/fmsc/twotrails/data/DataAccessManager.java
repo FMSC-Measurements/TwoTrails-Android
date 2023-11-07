@@ -68,6 +68,14 @@ public class DataAccessManager extends AccessManager<DataAccessLayer>  {
                     throw new UpgradeException(Upgrades.DAL_2_1_0.Version, ex.getMessage(), ex.getCause(), ex.getStackTrace());
                 }
             }
+
+            if (ttVersion < TwoTrailsSchema.DAL_2_2_0.toIntVersion()) {
+                try {
+                    _DAL.upgrade(Upgrades.DAL_2_2_0);
+                } catch (Exception ex) {
+                    throw new UpgradeException(Upgrades.DAL_2_2_0.Version, ex.getMessage(), ex.getCause(), ex.getStackTrace());
+                }
+            }
         }
 
         super.onUpgrade(db, oldVersion, newVersion);

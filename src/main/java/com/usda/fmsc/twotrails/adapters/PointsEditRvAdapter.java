@@ -16,8 +16,12 @@ import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.listeners.SimpleTextWatcher;
 import com.usda.fmsc.android.widget.RecyclerViewEx;
 import com.usda.fmsc.android.widget.RecyclerViewEx.ViewHolderEx;
-import com.usda.fmsc.twotrails.activities.Take5Activity;
 import com.usda.fmsc.twotrails.R;
+import com.usda.fmsc.twotrails.activities.base.IUpdatePointActivity;
+import com.usda.fmsc.twotrails.activities.base.TtActivity;
+import com.usda.fmsc.twotrails.objects.points.GpsPoint;
+import com.usda.fmsc.twotrails.objects.points.InertialPoint;
+import com.usda.fmsc.twotrails.objects.points.InertialStartPoint;
 import com.usda.fmsc.twotrails.objects.points.SideShotPoint;
 import com.usda.fmsc.twotrails.objects.points.Take5Point;
 import com.usda.fmsc.twotrails.objects.points.TravPoint;
@@ -34,13 +38,13 @@ import java.util.List;
 import com.usda.fmsc.utilities.ParseEx;
 import com.usda.fmsc.utilities.StringEx;
 
-public class Take5PointsEditRvAdapter extends RecyclerViewEx.BaseAdapterEx {
-    private final Take5Activity activity;
+public class PointsEditRvAdapter<T extends TtActivity & IUpdatePointActivity> extends RecyclerViewEx.BaseAdapterEx {
+    private final T activity;
     private final List<TtPoint> points;
     private final Drawable dOnBnd, dOffBnd;
     private final TtMetadata metadata;
 
-    public Take5PointsEditRvAdapter(Take5Activity activity, List<TtPoint> points, TtMetadata metadata) {
+    public PointsEditRvAdapter(T activity, List<TtPoint> points, TtMetadata metadata) {
         super(activity);
 
         this.points = points;
@@ -61,23 +65,25 @@ public class Take5PointsEditRvAdapter extends RecyclerViewEx.BaseAdapterEx {
     public ViewHolderEx onCreateViewHolderEx(ViewGroup parent, int viewType) {
         switch (viewType) {
             case 4:
-                return new SideShotViewHolderEx(inflater.inflate(R.layout.card_take5_sideshot, parent, false));
+                return new SideShotViewHolderEx(inflater.inflate(R.layout.card_sideshot, parent, false));
             case 6:
-                return new Take5ViewHolderEx(inflater.inflate(R.layout.card_take5_take5, parent, false));
+                return new Take5GpsViewHolderEx(inflater.inflate(R.layout.card_take5, parent, false));
+            case 7:
+                return new InertialStartViewHolderEx(inflater.inflate(R.layout.card_inertial_start, parent, false));
+            case 8:
+                return new InertialViewHolderEx(inflater.inflate(R.layout.card_inertial, parent, false));
             default:
                 return new EmptyViewHolder(inflater.inflate(R.layout.content_empty_match_width, parent, false));
         }
-
-        //return null;
     }
 
     @Override
     public void onBindViewHolderEx(ViewHolderEx holder, int position) {
         final TtPoint point = points.get(position);
 
-        if (point.getOp() == OpType.Take5 || point.getOp() == OpType.SideShot) {
-            final PointViewHolderEx pvh = (PointViewHolderEx)holder;
+        final PointViewHolderEx pvh = (PointViewHolderEx)holder;
 
+        if (pvh != null) {
             pvh.tvPID.setText(StringEx.toString(point.getPID()));
             pvh.txtCmt.addTextChangedListener(new SimpleTextWatcher() {
                 @Override
@@ -97,13 +103,21 @@ public class Take5PointsEditRvAdapter extends RecyclerViewEx.BaseAdapterEx {
             });
 
             switch (point.getOp()) {
-                case Take5: {
-                    Take5ViewHolderEx t5Holder = (Take5ViewHolderEx)holder;
-                    Take5Point t5 = (Take5Point)point;
+                case InertialStart:{
+                    InertialStartViewHolderEx isHolder = (InertialStartViewHolderEx)holder;
+                    InertialStartPoint isp = (InertialStartPoint) point;
 
-                    t5Holder.tvX.setText(StringEx.toString(t5.getUnAdjX(), 3));
-                    t5Holder.tvY.setText(StringEx.toString(t5.getUnAdjY(), 3));
-                    t5Holder.tvElev.setText(StringEx.toString(t5.getUnAdjZ(), 3));
+                    isHolder.txtFwdAz.setText(StringEx.toString(isp.getFwdAz(), 3));
+                    isHolder.txtBkAz.setText(StringEx.toString(isp.getBkAz(), 3));
+                    isHolder.txtAzOffset.setText(StringEx.toString(isp.getAzOffset(), 3));
+                }
+                case Take5: {
+                    BasicGpsViewHolderEx t5Holder = (BasicGpsViewHolderEx)holder;
+                    GpsPoint gps = (GpsPoint) point;
+
+                    t5Holder.tvX.setText(StringEx.toString(gps.getUnAdjX(), 3));
+                    t5Holder.tvY.setText(StringEx.toString(gps.getUnAdjY(), 3));
+                    t5Holder.tvElev.setText(StringEx.toString(gps.getUnAdjZ(), 3));
                     t5Holder.tvElevType.setText(metadata.getElevation().toString());
                     break;
                 }
@@ -191,6 +205,19 @@ public class Take5PointsEditRvAdapter extends RecyclerViewEx.BaseAdapterEx {
                     });
                     break;
                 }
+                case Inertial: {
+                    final InertialViewHolderEx intHolder = (InertialViewHolderEx)holder;
+                    final InertialPoint ip = (InertialPoint)point;
+
+                    intHolder.tvTimespan.setText(StringEx.toString(ip.getTimeSpan() / 1000d, 3));
+                    intHolder.tvX.setText(String.format("%s%s", ip.getAdjX() >= 0 ? "+" : "", StringEx.toString(ip.getDistX(), 3)));
+                    intHolder.tvY.setText(String.format("%s%s", ip.getAdjY() >= 0 ? "+" : "", StringEx.toString(ip.getDistY(), 3)));
+                    intHolder.tvZ.setText(String.format("%s%s", ip.getAdjZ() >= 0 ? "+" : "", StringEx.toString(ip.getDistZ(), 3)));
+                    intHolder.tvAz.setText(StringEx.toString(ip.getAzimuth(), 2));
+                    intHolder.tvAllSegsValid.setText(ip.areAllSegmentsValid() ? "True" : "False");
+
+                    break;
+                }
             }
 
             pvh.setLocked(position < points.size() - 1);
@@ -207,6 +234,12 @@ public class Take5PointsEditRvAdapter extends RecyclerViewEx.BaseAdapterEx {
         return points.size();
     }
 
+
+    public class EmptyViewHolder extends ViewHolderEx {
+        public EmptyViewHolder(View itemView) {
+            super(itemView);
+        }
+    }
 
     public class PointViewHolderEx extends ViewHolderEx {
         public boolean hidden;
@@ -233,24 +266,24 @@ public class Take5PointsEditRvAdapter extends RecyclerViewEx.BaseAdapterEx {
         }
     }
 
-    public class EmptyViewHolder extends ViewHolderEx {
-        public EmptyViewHolder(View itemView) {
-            super(itemView);
-        }
-    }
-
-    public class Take5ViewHolderEx extends PointViewHolderEx {
+    public class BasicGpsViewHolderEx extends PointViewHolderEx {
         public final TextView tvX, tvY, tvElev, tvElevType;
 
-        public Take5ViewHolderEx(View itemView) {
+        public BasicGpsViewHolderEx(View itemView) {
             super(itemView);
-
-            ivOp.setImageDrawable(TtUtils.UI.getTtOpDrawable(OpType.Take5, AppUnits.IconColor.Dark, activity));
 
             tvX = itemView.findViewById(R.id.pointCardTvX);
             tvY = itemView.findViewById(R.id.pointCardTvY);
             tvElev = itemView.findViewById(R.id.pointCardTvElev);
             tvElevType = itemView.findViewById(R.id.pointCardTvElevType);
+        }
+    }
+
+    public class Take5GpsViewHolderEx extends BasicGpsViewHolderEx {
+        public Take5GpsViewHolderEx(View itemView) {
+            super(itemView);
+
+            ivOp.setImageDrawable(TtUtils.UI.getTtOpDrawable(OpType.Take5, AppUnits.IconColor.Dark, activity));
         }
     }
 
@@ -296,4 +329,65 @@ public class Take5PointsEditRvAdapter extends RecyclerViewEx.BaseAdapterEx {
             tvDiff.setVisibility(View.GONE);
         }
     }
+
+
+    public class InertialStartViewHolderEx extends BasicGpsViewHolderEx {
+        public final EditText txtFwdAz, txtBkAz, txtAzOffset;
+        public final TextView tvDiff;
+
+        public InertialStartViewHolderEx(View itemView) {
+            super(itemView);
+
+            //TODO set inertial start icon
+            ivOp.setImageDrawable(TtUtils.UI.getTtOpDrawable(OpType.GPS, AppUnits.IconColor.Dark, activity));
+
+            txtFwdAz = itemView.findViewById(R.id.pointInertialStartTxtAzFwd);
+            txtBkAz = itemView.findViewById(R.id.pointInertialStartTxtAzBk);
+            txtAzOffset = itemView.findViewById(R.id.pointInertialStartTxtAzOffset);
+
+            tvDiff = itemView.findViewById(R.id.pointInertialStartAzDiff);
+        }
+
+        @Override
+        public void setLocked(boolean lock) {
+            super.setLocked(lock);
+
+            txtFwdAz.setEnabled(!lock);
+            txtBkAz.setEnabled(!lock);
+            txtAzOffset.setEnabled(!lock);
+        }
+
+        private void calcAzError(TravPoint point) {
+            if (point.getFwdAz() != null && point.getBkAz() != null) {
+                double diff = TtUtils.Math.azimuthDiff(point.getFwdAz(), point.getBkAz());
+
+                if (diff >= 0.01) {
+                    tvDiff.setText(StringEx.toStringRound(diff, 2));
+                    tvDiff.setVisibility(View.VISIBLE);
+                    return;
+                }
+            }
+
+            tvDiff.setVisibility(View.GONE);
+        }
+    }
+
+    public class InertialViewHolderEx extends PointViewHolderEx {
+        public final TextView tvTimespan, tvX, tvY, tvZ, tvAz, tvAllSegsValid;
+
+        public InertialViewHolderEx(View itemView) {
+            super(itemView);
+
+            //TODO set inertial icon
+            ivOp.setImageDrawable(TtUtils.UI.getTtOpDrawable(OpType.Traverse, AppUnits.IconColor.Dark, activity));
+
+            tvTimespan = itemView.findViewById(R.id.pointInertialTvTimespan);
+            tvX = itemView.findViewById(R.id.pointInertialTvDistX);
+            tvY = itemView.findViewById(R.id.pointInertialTvDistY);
+            tvZ = itemView.findViewById(R.id.pointInertialTvDistZ);
+            tvAz = itemView.findViewById(R.id.pointInertialTvAz);
+            tvAllSegsValid = itemView.findViewById(R.id.pointInertialTvAllSegsValid);
+        }
+    }
+
 }

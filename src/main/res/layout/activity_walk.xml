@@ -32,7 +32,7 @@
         </androidx.cardview.widget.CardView>
 
         <include android:id="@+id/walkCardWalk"
-                 layout="@layout/card_walk_walk"
+                 layout="@layout/card_walk"
                  android:layout_width="match_parent"
                  android:layout_height="wrap_content"
                  android:layout_below="@id/cardView"

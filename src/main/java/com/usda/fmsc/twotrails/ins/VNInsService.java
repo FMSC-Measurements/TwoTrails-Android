@@ -14,7 +14,6 @@ import androidx.annotation.Nullable;
 
 import com.usda.fmsc.android.AndroidUtils;
 import com.usda.fmsc.android.utilities.PostDelayHandler;
-import com.usda.fmsc.geospatial.ins.IINSData;
 import com.usda.fmsc.geospatial.ins.vectornav.IVNMsgListener;
 import com.usda.fmsc.geospatial.ins.vectornav.VNDataReader;
 import com.usda.fmsc.geospatial.ins.vectornav.VNInsData;
@@ -22,6 +21,8 @@ import com.usda.fmsc.geospatial.ins.vectornav.VNParser;
 import com.usda.fmsc.geospatial.ins.vectornav.binary.BinaryMsgConfig;
 import com.usda.fmsc.geospatial.ins.vectornav.binary.codes.CommonGroup;
 import com.usda.fmsc.geospatial.ins.vectornav.binary.messages.VNBinMessage;
+import com.usda.fmsc.geospatial.ins.vectornav.commands.VNCommand;
+import com.usda.fmsc.geospatial.ins.vectornav.commands.attitude.TareCommand;
 import com.usda.fmsc.geospatial.ins.vectornav.nmea.sentences.base.VNNmeaSentence;
 import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.devices.VNSerialBluetoothConnection;
@@ -30,14 +31,18 @@ import org.joda.time.DateTime;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+
+import kotlin.NotImplementedError;
 
 public class VNInsService extends Service implements
         IVNMsgListener,
         VNSerialBluetoothConnection.Listener,
         SharedPreferences.OnSharedPreferenceChangeListener {
     public final int DATA_WAIT_TIMEOUT = 5000;      //in milliseconds
+    public final byte[] TARE = new TareCommand().toBytes();
     private final ArrayList<VNInsService.Listener> listeners = new ArrayList<>();
 
     private TwoTrailsApp TtAppCtx;
@@ -71,7 +76,7 @@ public class VNInsService extends Service implements
         @Override
         public void onInvalidDataRecieved(byte[] data) {
             onValidDataReceived(false);
-            parser.onInvalidData(data);
+            parser.postInvalidData(data);
         }
 
         private void onValidDataReceived(boolean valid) {
@@ -108,6 +113,9 @@ public class VNInsService extends Service implements
 
 
         //settings
+        TtAppCtx.getDeviceSettings().getPrefs().registerOnSharedPreferenceChangeListener(this);
+
+        setDevice(TtAppCtx.getDeviceSettings().getVN100DeviceID());
 
         parser = new VNParser(new BinaryMsgConfig(CommonGroup.ALL_FIELDS_VN100));
         parser.addListener(this);
@@ -145,7 +153,8 @@ public class VNInsService extends Service implements
     }
 
     public InsMode getInsMode() {
-        return _mode;
+        //TODO update with GATT
+        return InsMode.Serial;
     }
 
     public boolean isInsRunning() {
@@ -247,6 +256,7 @@ public class VNInsService extends Service implements
                 }
 
                 btConn = new VNSerialBluetoothConnection(socket, vnDataReaderListner);
+                receivingData = true;
                 btConn.register(this);
                 btConn.start();
             } else {
@@ -349,6 +359,11 @@ public class VNInsService extends Service implements
     }
 
     @Override
+    public void onCommandResponseReceived(VNCommand command) {
+        postCommandResponse(command);
+    }
+
+    @Override
     public void onInvalidDataRecieved(byte[] data) {
         //
     }
@@ -366,9 +381,9 @@ public class VNInsService extends Service implements
     @Override
     public void connectionLost() {
         if (btConn != null) {
-        btConn.unregister(this);
-        btConn = null;
-    }
+            btConn.unregister(this);
+            btConn = null;
+        }
 
         if (TtAppCtx.hasReport()) {
             TtAppCtx.getReport().writeError("INS lost connection", "InsService:connectionLost");
@@ -402,6 +417,16 @@ public class VNInsService extends Service implements
         for (final VNInsService.Listener listener : listeners) {
             try {
                 new Handler(Looper.getMainLooper()).post(() -> listener.nmeaSentenceReceived(sentence));
+            } catch (Exception ex) {
+                //
+            }
+        }
+    }
+
+    private void postCommandResponse(final VNCommand command) {
+        for (final VNInsService.Listener listener : listeners) {
+            try {
+                new Handler(Looper.getMainLooper()).post(() -> listener.commandRespone(command));
             } catch (Exception ex) {
                 //
             }
@@ -483,8 +508,28 @@ public class VNInsService extends Service implements
             }
         }
     }
+    //endregion
 
+    //region Commands
+    public void sendData(byte[] data) throws IOException {
+        if (isInsRunning()) {
+            if (getInsMode() == InsMode.Serial) {
+                btConn.sendData(data);
+            } else {
+                throw new NotImplementedError("Send Command via GATT");
+            }
+        } else {
+            throw new RuntimeException("VN is not running");
+        }
+    }
 
+    public void sendCommand(VNCommand command) throws IOException {
+        sendData(command.toBytes());
+    }
+
+    public void tare() throws IOException {
+        sendData(TARE);
+    }
     //endregion
 
     public enum InsError {
@@ -583,6 +628,16 @@ public class VNInsService extends Service implements
         public boolean isLogging() {
             return VNInsService.this.isLogging();
         }
+
+        @Override
+        public void sendCommand(VNCommand command) throws IOException {
+            VNInsService.this.sendCommand(command);
+        }
+
+        @Override
+        public void tare() throws IOException {
+            VNInsService.this.tare();
+        }
     }
 
 
@@ -590,8 +645,9 @@ public class VNInsService extends Service implements
         void insDataReceived(VNInsData data);
         void nmeaStringReceived(String nmeaString);
         void nmeaSentenceReceived(VNNmeaSentence nmeaSentence);
+        void commandRespone(VNCommand command);
         void receivingData(boolean receiving);
-        void receivingValidData(boolean receiving);
+        void receivingValidData(boolean valid);
 
 
 
@@ -628,5 +684,8 @@ public class VNInsService extends Service implements
         void stopLogging();
 
         boolean isLogging();
+
+        void sendCommand(VNCommand command) throws IOException;
+        void tare() throws IOException;
     }
 }

@@ -388,7 +388,7 @@ public class DeviceSettings extends Settings {
         js.name(ROUND_POINTS).value(getRoundPoints());
         js.name(KEEP_SCREEN_ON).value(getKeepScreenOn());
 
-        js.name(GPS_EXTERNAL).value(getGpsExternal());
+        js.name(GPS_EXTERNAL).value(isGpsExternal());
         js.name(GPS_ALWAYS_ON).value(isGpsAlwaysOn());
         js.name(LOG_ALL_GPS).value(getLogAllGPS());
         js.name(GPS_CONFIGURED).value(isGpsConfigured());
@@ -453,7 +453,7 @@ public class DeviceSettings extends Settings {
 
         js.name(AUTO_OPEN_LAST_PROJECT).value(getAutoOpenLastProject());
 
-        TwoTrailsProject rp =getLastOpenedProject();
+        TwoTrailsProject rp = getLastOpenedProject();
         js.name(LAST_OPENED_PROJECT_NAME).value(rp.Name);
         js.name(LAST_OPENED_PROJECT_FILE_TTX).value(rp.TTXFile);
 
@@ -472,36 +472,38 @@ public class DeviceSettings extends Settings {
         js.name(MAP_CHOOSE_OFFLINE).value(getAutoMapChooseOffline());
         js.name(MAP_CHOOSE_OFFLINE_ASK).value(getAutoMapChooseOfflineAsk());
 
-        js.name(ARC_GIS_MAPS);
-        js.beginArray();
-        for (ArcGisMapLayer layer : getArcGisMayLayers()) {
-            js.beginObject();
-            js.name("ID").value(layer.getId());
-            js.name("Name").value(layer.getName());
-            js.name("Description").value(layer.getDescription());
-            js.name("Location").value(layer.getLocation());
-            js.name("URL").value(layer.getUrl());
-            js.name("FilePath").value(layer.getFileName());
-            js.name("HasValidFile").value(layer.hasValidFile());
-            js.name("Online").value(layer.isOnline());
-            js.name("MinScale").value(layer.getMinScale());
-            js.name("MaxScale").value(layer.getMaxScale());
+        js.name(ARC_GIS_MAPS).value(getString(ARC_GIS_MAPS));
 
-            js.name("DetailLevels");
-            js.beginArray();
-            if (layer.hasDetailLevels()) {
-                for (ArcGisMapLayer.DetailLevel dl : layer.getLevelsOfDetail()) {
-                    js.name("Resolution").value(dl.getResolution());
-                    js.name("Level").value(dl.getLevel());
-                    js.name("Scale").value(dl.getScale());
-                    js.name("DescribeContents").value(dl.describeContents());
-                }
-            }
-            js.endArray();
-
-            js.endObject();
-        }
-        js.endArray();
+//        js.name(ARC_GIS_MAPS);
+//        js.beginArray();
+//        for (ArcGisMapLayer layer : getArcGisMayLayers()) {
+//            js.beginObject();
+//            js.name("ID").value(layer.getId());
+//            js.name("Name").value(layer.getName());
+//            js.name("Description").value(layer.getDescription());
+//            js.name("Location").value(layer.getLocation());
+//            js.name("URL").value(layer.getUrl());
+//            js.name("FilePath").value(layer.getFileName());
+//            js.name("HasValidFile").value(layer.hasValidFile());
+//            js.name("Online").value(layer.isOnline());
+//            js.name("MinScale").value(layer.getMinScale());
+//            js.name("MaxScale").value(layer.getMaxScale());
+//
+//            js.name("DetailLevels");
+//            js.beginArray();
+//            if (layer.hasDetailLevels()) {
+//                for (ArcGisMapLayer.DetailLevel dl : layer.getLevelsOfDetail()) {
+//                    js.name("Resolution").value(dl.getResolution());
+//                    js.name("Level").value(dl.getLevel());
+//                    js.name("Scale").value(dl.getScale());
+//                    js.name("DescribeContents").value(dl.describeContents());
+//                }
+//            }
+//            js.endArray();
+//
+//            js.endObject();
+//        }
+//        js.endArray();
 
         js.name(ARC_GIS_MAP_ID_COUNTER).value(getArcGisIdCounter());
 
@@ -512,7 +514,7 @@ public class DeviceSettings extends Settings {
 
 
     //region GPS Settings
-    public boolean getGpsExternal() {
+    public boolean isGpsExternal() {
         return getBool(GPS_EXTERNAL, false);
     }
 
@@ -1192,7 +1194,7 @@ public class DeviceSettings extends Settings {
         return getBool(DEVELOPER_OPTIONS, false);
     }
 
-    public void enabledDevelopterOptions(boolean value) {
+    public void enabledDeveloperOptions(boolean value) {
         setBool(DEVELOPER_OPTIONS, value);
 
         if (value) {

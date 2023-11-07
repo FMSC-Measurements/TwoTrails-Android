@@ -8,7 +8,7 @@ import com.usda.fmsc.twotrails.objects.TtPolygon;
 import com.usda.fmsc.twotrails.units.OpType;
 import com.usda.fmsc.twotrails.utilities.TtUtils;
 
-public class TravPoint extends TtPoint {
+public class TravPoint extends TtPoint implements TtPoint.IAzimuth {
     public static final Parcelable.Creator<TravPoint> CREATOR = new Parcelable.Creator<TravPoint>() {
         @Override
         public TravPoint createFromParcel(Parcel source) {
@@ -91,25 +91,19 @@ public class TravPoint extends TtPoint {
         return _FwdAz;
     }
 
-    public void setFwdAz(Double FwdAz) {
-        if(FwdAz == null)
-            this._FwdAz = null;
-        else
-            this._FwdAz = TtUtils.Math.azimuthModulo(FwdAz);
+    public void setFwdAz(Double fwdAz) {
+        this._FwdAz = (fwdAz == null) ? null : TtUtils.Math.azimuthModulo(fwdAz);
     }
 
     public Double getBkAz() {
         return _BkAz;
     }
 
-    public void setBkAz(Double BkAz) {
-        if(BkAz == null)
-            this._BkAz = null;
-        else
-            this._BkAz = TtUtils.Math.azimuthModulo(BkAz);
+    public void setBkAz(Double bkAz) {
+        this._BkAz = (bkAz == null) ? null : TtUtils.Math.azimuthModulo(bkAz);
     }
 
-    public Double getAzimuth() {
+    public double getAzimuth() {
         double adjustedBackAz;
 
         if (_FwdAz != null && _FwdAz >= 0 && _BkAz != null && _BkAz >= 0) {
@@ -122,7 +116,7 @@ public class TravPoint extends TtPoint {
                 return _FwdAz;
             else if (_BkAz != null && _BkAz >= 0)
                 return TtUtils.Math.azimuthModulo(_BkAz + 180);
-            return null;
+            return 0;
         }
 
         double aaz = (_FwdAz + adjustedBackAz) / 2;
@@ -194,10 +188,10 @@ public class TravPoint extends TtPoint {
 
 
     private boolean calcTravLocation(double startingX, double startingY, double startingZ, boolean isAdjusted) {
-        Double azimuth = getAzimuth();
+        double azimuth = getAzimuth();
 
         //Must have a valid azimuth to proceed
-        if (azimuth == null || azimuth < 0) {
+        if (azimuth < 0) {
             _calculated = false;
             throw new RuntimeException("Null Azimuth");
         }

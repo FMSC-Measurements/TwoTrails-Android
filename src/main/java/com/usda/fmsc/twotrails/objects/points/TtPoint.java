@@ -332,12 +332,11 @@ public abstract class TtPoint extends TtObject implements Comparable<TtPoint>, C
 
     //region Point Types
     public boolean isGpsType() {
-        return (getOp() == OpType.GPS || getOp() == OpType.Take5 ||
-                getOp() == OpType.Walk || getOp() == OpType.WayPoint);
+        return getOp().isGpsType();
     }
 
     public boolean isTravType() {
-        return (getOp() == OpType.Traverse || getOp() == OpType.SideShot);
+        return getOp().isTravType();
     }
 
     public boolean isBndPoint() {
@@ -345,8 +344,7 @@ public abstract class TtPoint extends TtObject implements Comparable<TtPoint>, C
     }
 
     public boolean isNavPoint() {
-        return  (getOp() == OpType.GPS || getOp() == OpType.Take5 ||
-                getOp() == OpType.Walk || getOp() == OpType.Traverse);
+        return getOp().isNavType();
     }
 
     public boolean isMiscPoint() {
@@ -468,5 +466,9 @@ public abstract class TtPoint extends TtObject implements Comparable<TtPoint>, C
     public interface IManualAccuracy {
         Double getManualAccuracy();
         void setManualAccuracy(Double value);
+    }
+
+    public interface IAzimuth {
+        double getAzimuth();
     }
 }

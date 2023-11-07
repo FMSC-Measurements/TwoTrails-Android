@@ -1,0 +1,138 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingBottom="8dp">
+
+    <include layout="@layout/content_point_card_header" />
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:stretchColumns="*"
+        android:layout_margin="8dp">
+
+        <TableRow
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:paddingBottom="4dp"
+            android:paddingTop="4dp">
+
+            <TextView
+                android:text="@string/point_inertial_timespan"
+                android:textSize="20sp"/>
+
+            <TextView
+                android:textSize="20sp"
+                android:id="@+id/pointInertialTvTimespan"/>
+
+            <TextView android:text="@string/meas_seconds" />
+        </TableRow>
+
+        <TableRow
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:paddingBottom="4dp"
+            android:paddingTop="4dp">
+
+            <TextView
+                android:text="@string/point_inertial_dist_x"
+                android:textSize="20sp"/>
+
+            <TextView
+                android:textSize="20sp"
+                android:id="@+id/pointInertialTvDistX"/>
+
+            <TextView android:text="@string/meas_meters" />
+        </TableRow>
+
+        <TableRow
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:paddingBottom="4dp"
+            android:paddingTop="4dp">
+
+            <TextView
+                android:text="@string/point_inertial_dist_y"
+                android:textSize="20sp"/>
+
+            <TextView
+                android:textSize="20sp"
+                android:id="@+id/pointInertialTvDistY"/>
+
+            <TextView android:text="@string/meas_meters" />
+        </TableRow>
+
+        <TableRow
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:paddingBottom="4dp"
+            android:paddingTop="4dp">
+
+            <TextView
+                android:text="@string/point_inertial_dist_z"
+                android:textSize="20sp"/>
+
+            <TextView
+                android:textSize="20sp"
+                android:id="@+id/pointInertialTvDistZ"/>
+
+            <TextView android:text="@string/meas_meters" />
+        </TableRow>
+
+
+
+
+
+        <TableRow
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:paddingBottom="4dp"
+            android:paddingTop="4dp">
+
+            <TextView
+                android:text="@string/str_az"
+                android:textSize="20sp"/>
+
+            <TextView
+                android:textSize="20sp"
+                android:id="@+id/pointInertialTvAz" />
+        </TableRow>
+
+        <TableRow
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:paddingBottom="4dp"
+            android:paddingTop="4dp">
+
+            <TextView
+                android:text="@string/point_inertial_all_segs_valid"
+                android:textSize="20sp" />
+
+            <TextView
+                android:textSize="20sp"
+                android:id="@+id/pointCardTvElev" />
+
+            <TextView android:id="@+id/pointInertialTvAllSegsValid" />
+        </TableRow>
+    </TableLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="5dp"
+        android:paddingLeft="8dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:paddingRight="8dp">
+
+        <EditText
+            android:id="@+id/pointTxtCmt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textMultiLine"
+            android:hint="@string/str_cmt"
+            android:maxLines="6" />
+    </com.google.android.material.textfield.TextInputLayout>
+</LinearLayout>

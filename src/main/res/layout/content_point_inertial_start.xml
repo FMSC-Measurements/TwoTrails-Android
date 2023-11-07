@@ -1,0 +1,141 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingBottom="8dp">
+
+    <include layout="@layout/content_point_card_header" />
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:stretchColumns="*"
+        android:layout_margin="8dp">
+
+
+        <TableRow
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:paddingBottom="4dp"
+            android:paddingTop="4dp">
+
+            <TextView
+                android:text="@string/points_gps_utm_x"
+                android:textSize="20sp"/>
+
+            <TextView
+                android:textSize="20sp"
+                android:id="@+id/pointCardTvX"/>
+
+            <TextView android:text="@string/meas_meters" />
+        </TableRow>
+
+        <TableRow
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:paddingBottom="4dp"
+            android:paddingTop="4dp">
+
+            <TextView
+                android:text="@string/points_gps_utm_y"
+                android:textSize="20sp"/>
+
+            <TextView
+                android:textSize="20sp"
+                android:id="@+id/pointCardTvY" />
+        </TableRow>
+
+        <TableRow
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:paddingBottom="4dp"
+            android:paddingTop="4dp">
+
+            <TextView
+                android:text="@string/points_gps_elev"
+                android:textSize="20sp" />
+
+            <TextView
+                android:textSize="20sp"
+                android:id="@+id/pointCardTvElev" />
+
+            <TextView android:id="@+id/pointCardTvElevType" />
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:text="@string/point_inertial_start_az_fwd"
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:textSize="20sp" />
+
+            <EditText
+                android:id="@+id/pointInertialStartTxtAzFwd"
+                style="@style/NumDecValueTextStyle"
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:nextFocusForward="@id/pointInertialStartTxtAzBk"/>
+
+
+            <TextView
+                android:id="@+id/pointInertialStartAzDiff"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:textColor="@android:color/holo_red_dark"
+                android:textSize="20sp"
+                android:visibility="gone"/>
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:text="@string/point_inertial_start_az_bk"
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:textSize="20sp" />
+
+            <EditText
+                android:id="@+id/pointInertialStartTxtAzBk"
+                style="@style/NumDecValueTextStyle"
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:nextFocusForward="@id/pointInertialStartTxtAzOffset"/>
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:text="@string/point_inertial_start_az_offset"
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:textSize="20sp" />
+
+            <EditText
+                android:id="@+id/pointInertialStartTxtAzOffset"
+                style="@style/NumDecValueTextStyle"
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:nextFocusForward="@id/pointTxtCmt"/>
+        </TableRow>
+    </TableLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="5dp"
+        android:paddingLeft="8dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:paddingRight="8dp">
+
+        <EditText
+            android:id="@+id/pointTxtCmt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textMultiLine"
+            android:hint="@string/str_cmt"
+            android:maxLines="6" />
+    </com.google.android.material.textfield.TextInputLayout>
+</LinearLayout>

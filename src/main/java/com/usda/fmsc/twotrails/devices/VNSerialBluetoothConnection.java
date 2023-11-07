@@ -1,14 +1,11 @@
 package com.usda.fmsc.twotrails.devices;
 
 import android.bluetooth.BluetoothSocket;
-import android.text.TextUtils;
 
 import com.usda.fmsc.geospatial.ins.vectornav.VNDataReader;
-import com.usda.fmsc.geospatial.ins.vectornav.binary.BinaryMsgConfig;
+import com.usda.fmsc.geospatial.ins.vectornav.commands.attitude.TareCommand;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 public class VNSerialBluetoothConnection extends Thread {
@@ -17,8 +14,8 @@ public class VNSerialBluetoothConnection extends Thread {
     private boolean running, disconnect, receiving;
 
     private final ArrayList<Listener> listeners;
-
     private final VNDataReader.Listener vnDataReaderListener;
+
 
     public VNSerialBluetoothConnection(BluetoothSocket socket, VNDataReader.Listener listener) {
         listeners = new ArrayList<>();
@@ -108,6 +105,14 @@ public class VNSerialBluetoothConnection extends Thread {
 
     public boolean isReceiving() {
         return receiving;
+    }
+
+    public void sendData(byte[] data) throws IOException {
+        if (btSocket != null && isConnected()) {
+            btSocket.getOutputStream().write(data);
+        } else {
+            throw new RuntimeException("VN Not Connected");
+        }
     }
 
 

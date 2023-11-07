@@ -5,14 +5,14 @@
 
     <item
         android:id="@+id/take5MenuMode"
-        android:title="@string/menu_take5_map_mode"
+        android:title="@string/menu_map_mode"
         app:showAsAction="always"
         android:icon="@drawable/ic_map_white_24dp"
         android:visible="true"/>
 
     <item
         android:id="@+id/take5MenuAddMedia"
-        android:title="@string/menu_take5_add_media"
+        android:title="@string/menu_add_media"
         app:showAsAction="always"
         android:icon="@drawable/ic_camera_alt_white_36dp"
         android:visible="true"/>
@@ -26,7 +26,7 @@
         <menu>
             <item
                 android:id="@+id/take5MenuToBottom"
-                android:title="@string/menu_take5_goto_bottom"
+                android:title="@string/menu_goto_bottom"
                 app:showAsAction="never"
                 android:visible="true"/>
             <!--android:icon="@drawable/ic_file_download_white_36dp"-->

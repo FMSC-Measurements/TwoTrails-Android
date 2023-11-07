@@ -26,6 +26,7 @@ import com.usda.fmsc.android.dialogs.InputDialog;
 import com.usda.fmsc.android.dialogs.ProgressDialogEx;
 import com.usda.fmsc.geospatial.gnss.nmea.GnssNmeaBurst;
 import com.usda.fmsc.geospatial.ins.vectornav.VNInsData;
+import com.usda.fmsc.geospatial.ins.vectornav.commands.VNCommand;
 import com.usda.fmsc.geospatial.ins.vectornav.nmea.sentences.base.VNNmeaSentence;
 import com.usda.fmsc.geospatial.nmea.sentences.NmeaSentence;
 import com.usda.fmsc.twotrails.DeviceSettings;
@@ -168,7 +169,7 @@ public class DeviceSettingsFragment extends TtBasePrefFragment {
         setBTValues(prefLstRFDevice);
         setBTValues(prefLstVNDevice);
 
-        exGpsCat.setEnabled(getTtAppCtx().getDeviceSettings().getGpsExternal());
+        exGpsCat.setEnabled(getTtAppCtx().getDeviceSettings().isGpsExternal());
 
         boolean requireBluetooth = false;
 
@@ -1030,12 +1031,17 @@ public class DeviceSettingsFragment extends TtBasePrefFragment {
                         }
 
                         @Override
+                        public void commandRespone(VNCommand command) {
+
+                        }
+
+                        @Override
                         public void receivingData(boolean receiving) {
 
                         }
 
                         @Override
-                        public void receivingValidData(boolean receiving) {
+                        public void receivingValidData(boolean valid) {
 
                         }
 

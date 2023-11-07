@@ -24,7 +24,7 @@ import com.usda.fmsc.geospatial.Position;
 import com.usda.fmsc.geospatial.base.parsers.ParseMode;
 import com.usda.fmsc.geospatial.gnss.nmea.GnssNmeaBurst;
 import com.usda.fmsc.geospatial.gnss.nmea.GnssNmeaParser;
-import com.usda.fmsc.geospatial.nmea.INmeaParserListener;
+import com.usda.fmsc.geospatial.nmea.INmeaBurstParserListener;
 import com.usda.fmsc.geospatial.nmea.codes.TalkerID;
 import com.usda.fmsc.geospatial.nmea.sentences.NmeaSentence;
 import com.usda.fmsc.twotrails.DeviceSettings;
@@ -41,7 +41,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 
 public class GpsService extends Service implements LocationListener, LocationSource, OnNmeaMessageListener,
-        INmeaParserListener<NmeaSentence, GnssNmeaBurst>, BluetoothConnection.Listener, SharedPreferences.OnSharedPreferenceChangeListener {
+        INmeaBurstParserListener<NmeaSentence, GnssNmeaBurst>, BluetoothConnection.Listener, SharedPreferences.OnSharedPreferenceChangeListener {
 
     public final int GPS_UPDATE_INTERVAL = 1000;    //in milliseconds
     public final int NMEA_WAIT_TIMEOUT = 5000;      //in milliseconds
@@ -122,7 +122,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
         if (prefs != null) {
             prefs.registerOnSharedPreferenceChangeListener(this);
 
-            if (TtAppCtx.getDeviceSettings().getGpsExternal()) {
+            if (TtAppCtx.getDeviceSettings().isGpsExternal()) {
                 _deviceUUID = TtAppCtx.getDeviceSettings().getGpsDeviceID();
             }
 
@@ -189,7 +189,7 @@ public class GpsService extends Service implements LocationListener, LocationSou
                 if (sharedPreferences.getBoolean(DeviceSettings.GPS_PARSE_METHOD, DeviceSettings.DEFAULT_GPS_PARSE_METHOD)) {
                     parser.setParseMode(ParseMode.Time);
                 } else {
-                    parser.setDelimiter(sharedPreferences.getString(DeviceSettings.GPS_PARSE_DELIMITER, DeviceSettings.DEFAULT_GPS_PARSE_DELIMITER));
+                    parser.setBurstDelimiter(sharedPreferences.getString(DeviceSettings.GPS_PARSE_DELIMITER, DeviceSettings.DEFAULT_GPS_PARSE_DELIMITER));
                     parser.setParseMode(ParseMode.Delimiter);
                 }
             }
@@ -591,17 +591,12 @@ public class GpsService extends Service implements LocationListener, LocationSou
 
         if (logBurstDetails) {
             try {
-                logPrintWriter.println(burst.toString());
+                logPrintWriter.println(burst);
                 logPrintWriter.flush();
             } catch (Exception e) {
                 TtAppCtx.getReport().writeError(e.getMessage(), "GpsService:parseNmeaString:logToFile");
             }
         }
-    }
-
-    @Override
-    public void onNmeaReceived(NmeaSentence sentence) {
-        postNmeaSentence(sentence);
     }
 
     @Override

@@ -23,7 +23,8 @@ public class TtGroup extends TtObject {
     public enum GroupType {
         General(0),
         Walk(1),
-        Take5(2);
+        Take5(2),
+        Inertial(3);
 
         private final int value;
 
@@ -48,6 +49,7 @@ public class TtGroup extends TtObject {
                 case General: return "General";
                 case Walk: return "Walk";
                 case Take5: return "Take5";
+                case Inertial: return "Inertial";
                 default: throw new IllegalArgumentException();
             }
         }
