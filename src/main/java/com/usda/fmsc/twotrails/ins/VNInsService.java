@@ -103,11 +103,10 @@ public class VNInsService extends Service implements
 
         dataReceived = new PostDelayHandler(DATA_WAIT_TIMEOUT, () -> {
             if (receivingData) {
-                if (btConn != null && btConn.isConnected() && btConn.isReceiving()) {
+                if (btConn == null || !btConn.isConnected() || !btConn.isReceiving()) {
                     postReceivingData(false);
+                    receivingData = false;
                 }
-
-                receivingData = false;
             }
         });
 
@@ -370,6 +369,10 @@ public class VNInsService extends Service implements
     //endregion
 
     //region Bluetooth
+    @Override
+    public void onDataReceived(byte[] data) {
+        dataReceived.post();
+    }
     @Override
     public void connectionStarted() {
         postInsStart();

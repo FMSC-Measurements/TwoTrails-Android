@@ -43,7 +43,13 @@ public class VNSerialBluetoothConnection extends Thread {
                 while (!disconnect) {
                     try {
 
-                        vnDataReader.readBytes();
+                        final byte[] data = vnDataReader.readBytes();
+
+                        if (data.length > 0) {
+                            for (Listener l : listeners) {
+                                l.onDataReceived(data);
+                            }
+                        }
 
                         receiving = true;
                     } catch (Exception e) {
@@ -128,6 +134,7 @@ public class VNSerialBluetoothConnection extends Thread {
 
 
     public interface Listener {
+        void onDataReceived(byte[] data);
         void connectionStarted();
         void connectionLost();
         void connectionEnded();
