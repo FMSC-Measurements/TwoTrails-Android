@@ -12,6 +12,7 @@ import com.usda.fmsc.twotrails.TwoTrailsApp;
 import com.usda.fmsc.twotrails.data.DataAccessManager;
 import com.usda.fmsc.twotrails.data.MediaAccessLayer;
 import com.usda.fmsc.twotrails.data.MediaAccessManager;
+import com.usda.fmsc.twotrails.ins.TtInsData;
 import com.usda.fmsc.twotrails.objects.media.TtImage;
 import com.usda.fmsc.twotrails.units.Dist;
 import com.usda.fmsc.twotrails.units.Slope;
@@ -536,6 +537,92 @@ public class Export {
         } catch (Exception ex) {
             context.getReport().writeError(ex.getMessage(), "Export:nmea", ex.getStackTrace());
             throw new RuntimeException("Error Exporting Nmea");
+        }
+    }
+
+    public static File ins(TwoTrailsApp context, DataAccessLayer dal, File dir) {
+        File ttInsFile = new File(dir != null ? dir : context.getCacheDir(), "TtIns.csv");
+
+        try {
+            //region NMEA Headers
+            CSVPrinter writer = new CSVPrinter(new FileWriter(ttInsFile), CSVFormat.DEFAULT);
+
+            writer.printRecord(
+                    "Point CN",
+                    "Time Created",
+
+                    "IC",
+                    "TSS",
+                    "TimeSpan",
+
+                    "DistX",
+                    "DistY",
+                    "DistZ",
+
+                    "LAX",
+                    "LAY",
+                    "LAZ",
+
+                    "VelX",
+                    "VelY",
+                    "VelZ",
+
+                    "RotX",
+                    "RotY",
+                    "RotZ",
+
+                    "Yaw",
+                    "Pitch",
+                    "Roll",
+
+                    "CN"
+            );
+            //endregion
+
+            //region NMEA Values
+            ArrayList<String> values = new ArrayList<>(23);
+
+            for (TtInsData data : dal.getInsData()) {
+                values.add(data.getPointCN());
+                values.add(data.getTimeCreated() == null ? StringEx.Empty : Consts.DateTimeFormatter.print(data.getTimeCreated()));
+
+                values.add(Boolean.toString(data.isConsecutive()));
+                values.add(Long.toString(data.getTimeSinceStart()));
+                values.add(StringEx.toString(data.getTimeSpan()));
+
+                values.add(StringEx.toString(data.getDistanceX()));
+                values.add(StringEx.toString(data.getDistanceY()));
+                values.add(StringEx.toString(data.getDistanceZ()));
+
+                values.add(StringEx.toString(data.getLinearAccelX()));
+                values.add(StringEx.toString(data.getLinearAccelY()));
+                values.add(StringEx.toString(data.getLinearAccelZ()));
+
+                values.add(StringEx.toString(data.getVelocityX()));
+                values.add(StringEx.toString(data.getVelocityY()));
+                values.add(StringEx.toString(data.getVelocityZ()));
+
+                values.add(StringEx.toString(data.getRotationX()));
+                values.add(StringEx.toString(data.getRotationY()));
+                values.add(StringEx.toString(data.getRotationZ()));
+
+                values.add(StringEx.toString(data.getYaw()));
+                values.add(StringEx.toString(data.getPitch()));
+                values.add(StringEx.toString(data.getRoll()));
+
+                values.add(data.getCN());
+
+                writer.printRecord(values);
+                values.clear();
+            }
+
+            writer.close();
+            //endregion
+
+            return ttInsFile;
+        } catch (Exception ex) {
+            context.getReport().writeError(ex.getMessage(), "Export:ins", ex.getStackTrace());
+            throw new RuntimeException("Error Exporting Ins");
         }
     }
 

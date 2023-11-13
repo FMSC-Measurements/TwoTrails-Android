@@ -11,9 +11,9 @@
 
             <menu>
                 <item
-                    android:id="@+id/mmMenuSelectMap"
-                    android:title="@string/menu_map_select_type"
-                    app:showAsAction="never"/>
+                    android:id="@+id/mmMenuTestExport"
+                    android:title="@string/main_btn_export"
+                    app:showAsAction="always"/>
             </menu>
     </item>
 </menu>

@@ -2390,6 +2390,7 @@ public class DataAccessLayer extends IDataLayer {
     //endregion
     //endregion
 
+
     //region INS
     //region Get
     public ArrayList<TtInsData> getInsData() {
@@ -2433,6 +2434,7 @@ public class DataAccessLayer extends IDataLayer {
 
                     double timespan;
                     double distX, distY, distZ;
+                    double linX, linY, linZ;
                     double rotX, rotY, rotZ;
                     double velX, velY, velZ;
                     double yaw, pitch, roll;
@@ -2448,25 +2450,30 @@ public class DataAccessLayer extends IDataLayer {
                     distX = c.getDouble(6);
                     distY = c.getDouble(7);
                     distZ = c.getDouble(8);
-                    
-                    rotX = c.getDouble(9);
-                    rotY = c.getDouble(10);
-                    rotZ = c.getDouble(11);
+
+                    linX = c.getDouble(9);
+                    linY = c.getDouble(10);
+                    linZ = c.getDouble(11);
 
                     velX = c.getDouble(12);
                     velY = c.getDouble(13);
                     velZ = c.getDouble(14);
                     
-                    yaw = c.getDouble(15);
-                    pitch = c.getDouble(16);
-                    roll = c.getDouble(17);
+                    rotX = c.getDouble(15);
+                    rotY = c.getDouble(16);
+                    rotZ = c.getDouble(17);
+                    
+                    yaw = c.getDouble(18);
+                    pitch = c.getDouble(19);
+                    roll = c.getDouble(20);
                     
                     data.add(new TtInsData(
                             cn, pointCN, timeCreated,
                             isConsecutive, timeSinceStart, timespan,
                             distX, distY, distZ,
-                            rotX, rotY, rotZ,
+                            linX, linY, linZ,
                             velX, velY, velZ,
+                            rotX, rotY, rotZ,
                             yaw, pitch, roll));
                 } while (c.moveToNext());
             }
@@ -2541,13 +2548,17 @@ public class DataAccessLayer extends IDataLayer {
             cvs.put(TwoTrailsSchema.TtInsSchema.DistanceY, data.getDistanceY());
             cvs.put(TwoTrailsSchema.TtInsSchema.DistanceZ, data.getDistanceZ());
 
-            cvs.put(TwoTrailsSchema.TtInsSchema.RotationX, data.getRotationX());
-            cvs.put(TwoTrailsSchema.TtInsSchema.RotationY, data.getRotationY());
-            cvs.put(TwoTrailsSchema.TtInsSchema.RotationZ, data.getRotationZ());
+            cvs.put(TwoTrailsSchema.TtInsSchema.LinearAcellX, data.getLinearAccelX());
+            cvs.put(TwoTrailsSchema.TtInsSchema.LinearAcellY, data.getLinearAccelY());
+            cvs.put(TwoTrailsSchema.TtInsSchema.LinearAcellZ, data.getLinearAccelZ());
 
             cvs.put(TwoTrailsSchema.TtInsSchema.VelocityX, data.getVelocityX());
             cvs.put(TwoTrailsSchema.TtInsSchema.VelocityY, data.getVelocityY());
             cvs.put(TwoTrailsSchema.TtInsSchema.VelocityZ, data.getVelocityZ());
+
+            cvs.put(TwoTrailsSchema.TtInsSchema.RotationX, data.getRotationX());
+            cvs.put(TwoTrailsSchema.TtInsSchema.RotationY, data.getRotationY());
+            cvs.put(TwoTrailsSchema.TtInsSchema.RotationZ, data.getRotationZ());
 
             cvs.put(TwoTrailsSchema.TtInsSchema.Yaw, data.getYaw());
             cvs.put(TwoTrailsSchema.TtInsSchema.Pitch, data.getPitch());
@@ -2592,6 +2603,7 @@ public class DataAccessLayer extends IDataLayer {
     }
     //endregion
     //endregion
+
 
     //region Project Info
     //region Get

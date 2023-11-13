@@ -30,8 +30,9 @@ public class TtInsData extends TtObject implements IINSData, Parcelable {
    private final long timeSinceStart;
    private final double timeSpan;
    private final double distX, distY, distZ;
-   private final double rotX, rotY, rotZ;
+   private final double linAccelX, linAccelY, linAccelZ;
    private final double velX, velY, velZ;
+   private final double rotX, rotY, rotZ;
    private final double yaw, pitch, roll;
 
 
@@ -41,14 +42,16 @@ public class TtInsData extends TtObject implements IINSData, Parcelable {
            source.readDouble(), source.readDouble(), source.readDouble(),
            source.readDouble(), source.readDouble(), source.readDouble(),
            source.readDouble(), source.readDouble(), source.readDouble(),
+           source.readDouble(), source.readDouble(), source.readDouble(),
            source.readDouble(), source.readDouble(), source.readDouble());
    }
 
    public TtInsData(String cn, String pointCN, DateTime timeCreated,
                     boolean isConsecutive, long timeSinceStart, double timeSpan,
                     double distX, double distY, double distZ,
-                    double rotX, double rotY, double rotZ,
+                    double linAccelX, double linAccelY, double linAccelZ,
                     double velX, double velY, double velZ,
+                    double rotX, double rotY, double rotZ,
                     double yaw, double pitch, double roll) {
       setCN(cn);
       this.pointCN = pointCN;
@@ -57,18 +60,26 @@ public class TtInsData extends TtObject implements IINSData, Parcelable {
       this.timeSinceStart = timeSinceStart;
       this.isConsecutive = isConsecutive;
       this.timeSpan = timeSpan;
-      this.yaw = yaw;
-      this.pitch = pitch;
-      this.roll = roll;
+
       this.distX = distX;
       this.distY = distY;
       this.distZ = distZ;
-      this.rotX = rotX;
-      this.rotY = rotY;
-      this.rotZ = rotZ;
+
+      this.linAccelX = linAccelX;
+      this.linAccelY = linAccelY;
+      this.linAccelZ = linAccelZ;
+
       this.velX = velX;
       this.velY = velY;
       this.velZ = velZ;
+
+      this.rotX = rotX;
+      this.rotY = rotY;
+      this.rotZ = rotZ;
+
+      this.yaw = yaw;
+      this.pitch = pitch;
+      this.roll = roll;
    }
 
    public static TtInsData create(String pointCN, IINSData data) {
@@ -76,8 +87,9 @@ public class TtInsData extends TtObject implements IINSData, Parcelable {
               java.util.UUID.randomUUID().toString(), pointCN, DateTime.now(),
               data.isConsecutive(), data.getTimeSinceStart(), data.getTimeSpan(),
               data.getDistanceX(), data.getDistanceY(), data.getDistanceZ(),
-              data.getRotationX(), data.getRotationY(), data.getRotationZ(),
+              data.getLinearAccelX(), data.getLinearAccelY(), data.getLinearAccelZ(),
               data.getVelocityX(), data.getVelocityY(), data.getVelocityZ(),
+              data.getRotationX(), data.getRotationY(), data.getRotationZ(),
               data.getYaw(), data.getPitch(), data.getRoll());
    }
 
@@ -96,18 +108,26 @@ public class TtInsData extends TtObject implements IINSData, Parcelable {
       dest.writeBoolean(isConsecutive);
       dest.writeLong(timeSinceStart);
       dest.writeDouble(timeSpan);
-      dest.writeDouble(yaw);
-      dest.writeDouble(pitch);
-      dest.writeDouble(roll);
+
       dest.writeDouble(distX);
       dest.writeDouble(distY);
       dest.writeDouble(distZ);
-      dest.writeDouble(rotX);
-      dest.writeDouble(rotY);
-      dest.writeDouble(rotZ);
+
+      dest.writeDouble(linAccelX);
+      dest.writeDouble(linAccelY);
+      dest.writeDouble(linAccelZ);
+
       dest.writeDouble(velX);
       dest.writeDouble(velY);
       dest.writeDouble(velZ);
+
+      dest.writeDouble(rotX);
+      dest.writeDouble(rotY);
+      dest.writeDouble(rotZ);
+
+      dest.writeDouble(yaw);
+      dest.writeDouble(pitch);
+      dest.writeDouble(roll);
    }
 
 
@@ -134,20 +154,6 @@ public class TtInsData extends TtObject implements IINSData, Parcelable {
       return timeSpan;
    }
 
-   @Override
-   public double getYaw() {
-      return yaw;
-   }
-
-   @Override
-   public double getPitch() {
-      return pitch;
-   }
-
-   @Override
-   public double getRoll() {
-      return roll;
-   }
 
    @Override
    public double getDistanceX() {
@@ -164,20 +170,22 @@ public class TtInsData extends TtObject implements IINSData, Parcelable {
       return distZ;
    }
 
+
    @Override
-   public double getRotationX() {
-      return rotX;
+   public double getLinearAccelX() {
+      return linAccelX;
    }
 
    @Override
-   public double getRotationY() {
-      return rotY;
+   public double getLinearAccelY() {
+      return linAccelY;
    }
 
    @Override
-   public double getRotationZ() {
-      return rotZ;
+   public double getLinearAccelZ() {
+      return linAccelZ;
    }
+
 
    @Override
    public double getVelocityX() {
@@ -194,4 +202,35 @@ public class TtInsData extends TtObject implements IINSData, Parcelable {
       return velZ;
    }
 
+
+   @Override
+   public double getRotationX() {
+      return rotX;
+   }
+
+   @Override
+   public double getRotationY() {
+      return rotY;
+   }
+
+   @Override
+   public double getRotationZ() {
+      return rotZ;
+   }
+
+
+   @Override
+   public double getYaw() {
+      return yaw;
+   }
+
+   @Override
+   public double getPitch() {
+      return pitch;
+   }
+
+   @Override
+   public double getRoll() {
+      return roll;
+   }
 }

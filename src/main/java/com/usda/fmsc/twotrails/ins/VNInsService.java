@@ -19,7 +19,10 @@ import com.usda.fmsc.geospatial.ins.vectornav.VNDataReader;
 import com.usda.fmsc.geospatial.ins.vectornav.VNInsData;
 import com.usda.fmsc.geospatial.ins.vectornav.VNParser;
 import com.usda.fmsc.geospatial.ins.vectornav.binary.BinaryMsgConfig;
+import com.usda.fmsc.geospatial.ins.vectornav.binary.codes.AttitudeGroup;
 import com.usda.fmsc.geospatial.ins.vectornav.binary.codes.CommonGroup;
+import com.usda.fmsc.geospatial.ins.vectornav.binary.codes.IMUGroup;
+import com.usda.fmsc.geospatial.ins.vectornav.binary.codes.TimeGroup;
 import com.usda.fmsc.geospatial.ins.vectornav.binary.messages.VNBinMessage;
 import com.usda.fmsc.geospatial.ins.vectornav.commands.VNCommand;
 import com.usda.fmsc.geospatial.ins.vectornav.commands.attitude.TareCommand;
@@ -41,8 +44,13 @@ public class VNInsService extends Service implements
         IVNMsgListener,
         VNSerialBluetoothConnection.Listener,
         SharedPreferences.OnSharedPreferenceChangeListener {
-    public final int DATA_WAIT_TIMEOUT = 5000;      //in milliseconds
-    public final byte[] TARE = new TareCommand().toBytes();
+    private final int DATA_WAIT_TIMEOUT = 5000;      //in milliseconds
+    private final BinaryMsgConfig BINARY_MSG_CONFIG = new BinaryMsgConfig(
+            CommonGroup.ALL_FIELDS_VN100,
+            TimeGroup.None,
+            IMUGroup.None,
+            AttitudeGroup.LinearAccelBody | AttitudeGroup.LinearAccelNed);
+    private final byte[] TARE = new TareCommand().toBytes();
     private final ArrayList<VNInsService.Listener> listeners = new ArrayList<>();
 
     private TwoTrailsApp TtAppCtx;
@@ -116,7 +124,7 @@ public class VNInsService extends Service implements
 
         setDevice(TtAppCtx.getDeviceSettings().getVN100DeviceID());
 
-        parser = new VNParser(new BinaryMsgConfig(CommonGroup.ALL_FIELDS_VN100));
+        parser = new VNParser(BINARY_MSG_CONFIG);
         parser.addListener(this);
 
         postServiceStart();

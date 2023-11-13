@@ -429,13 +429,17 @@ public class TwoTrailsSchema {
         public static final String DistanceY = "DistY";
         public static final String DistanceZ = "DistZ";
 
-        public static final String RotationX = "RotX";
-        public static final String RotationY = "RotY";
-        public static final String RotationZ = "RotZ";
+        public static final String LinearAcellX = "LinAccelX";
+        public static final String LinearAcellY = "LinAccelY";
+        public static final String LinearAcellZ = "LinAccelZ";
 
         public static final String VelocityX = "VelX";
         public static final String VelocityY = "VelY";
         public static final String VelocityZ = "VelZ";
+
+        public static final String RotationX = "RotX";
+        public static final String RotationY = "RotY";
+        public static final String RotationZ = "RotZ";
 
         public static final String Yaw = "yaw";
         public static final String Pitch = "pitch";
@@ -445,19 +449,22 @@ public class TwoTrailsSchema {
                 "CREATE TABLE " + TableName + " (" +
                         SharedSchema.CN + " TEXT, " +
                         PointCN         + " TEXT, " +
-                        IsConsecutive + " BOOLEAN, " +
                         TimeCreated     + " TEXT, " +
+                        IsConsecutive + " BOOLEAN, " +
                         TimeSinceStart + " TEXT, " +
                         TimeSpan + " TEXT, " +
                         DistanceX + " REAL, " +
                         DistanceY + " REAL, " +
                         DistanceZ + " REAL, " +
-                        RotationX + " REAL, " +
-                        RotationY + " REAL, " +
-                        RotationZ + " REAL, " +
+                        LinearAcellX + " REAL, " +
+                        LinearAcellY + " REAL, " +
+                        LinearAcellZ + " REAL, " +
                         VelocityX + " REAL, " +
                         VelocityY + " REAL, " +
                         VelocityZ + " REAL, " +
+                        RotationX + " REAL, " +
+                        RotationY + " REAL, " +
+                        RotationZ + " REAL, " +
                         Yaw + " REAL, " +
                         Pitch + " REAL, " +
                         Roll + " REAL, " +
@@ -466,19 +473,22 @@ public class TwoTrailsSchema {
         public static final String SelectItems =
                 SharedSchema.CN + ", " +
                         PointCN + ", " +
-                        IsConsecutive + ", " +
                         TimeCreated + ", " +
+                        IsConsecutive + ", " +
                         TimeSinceStart + ", " +
                         TimeSpan + ", " +
                         DistanceX + ", " +
                         DistanceY + ", " +
                         DistanceZ + ", " +
-                        RotationX + ", " +
-                        RotationY + ", " +
-                        RotationZ + ", " +
+                        LinearAcellX + ", " +
+                        LinearAcellY + ", " +
+                        LinearAcellZ + ", " +
                         VelocityX + ", " +
                         VelocityY + ", " +
                         VelocityZ + ", " +
+                        RotationX + ", " +
+                        RotationY + ", " +
+                        RotationZ + ", " +
                         Yaw + ", " +
                         Pitch + ", " +
                         Roll;
